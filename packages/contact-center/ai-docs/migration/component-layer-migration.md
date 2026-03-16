@@ -36,12 +36,12 @@ export interface ControlVisibility {
   switchToMainCall: Visibility;
   switchToConsult: Visibility;
   isConferenceInProgress: boolean;  // → derive from controls.exitConference.isVisible
-  isConsultInitiated: boolean;      // → derive from controls.endConsult.isVisible
+  isConsultInitiated: boolean;      // → Do NOT use endConsult.isVisible as "initiated only"; it covers both initiated and accepted. Use task/participant state if you need that distinction.
   isConsultInitiatedAndAccepted: boolean; // → REMOVE
   isConsultReceived: boolean;       // → REMOVE
   isConsultInitiatedOrAccepted: boolean; // → REMOVE
   isHeld: boolean;                  // → derive from findHoldStatus(task, 'mainCall', agentId)
-  consultCallHeld: boolean;         // → derive from controls.switchToConsult.isVisible
+  consultCallHeld: boolean;         // → derive from findHoldStatus(task, 'consult', agentId). Do NOT use controls.switchToConsult.isVisible (that is button visibility, not hold state).
 }
 
 // NEW — import from SDK
@@ -72,15 +72,16 @@ import type { TaskUIControls } from '@webex/contact-center';
 | `isConsultInitiatedAndAccepted` | — | **Remove** |
 | `isConsultReceived` | — | **Remove** |
 | `isConsultInitiatedOrAccepted` | — | **Remove** |
-| `isHeld` | — | **Remove** (derive from controls) |
-| `consultCallHeld` | — | **Remove** |
+| `isHeld` | `isHeld` | **Retain** — parent derives via `findHoldStatus(task, 'mainCall', agentId)` and passes to component. Do NOT derive from `controls.hold.isEnabled`. |
+| `consultCallHeld` | — | **Remove** (derive from `findHoldStatus(task, 'consult', agentId)` in parent if needed for display) |
 
 #### Proposed New Interface
 
 ```typescript
 interface CallControlComponentProps {
   controls: TaskUIControls;  // All 17 controls from SDK
-  // Widget-layer state (not from SDK)
+  // Widget-layer state (not from SDK). isHeld must be derived by parent via findHoldStatus(task, 'mainCall', agentId).
+  isHeld: boolean;
   isMuted: boolean;
   isRecording: boolean;
   holdTime: number;
@@ -192,6 +193,7 @@ const CallControlComponent = ({
 // call-control.tsx — new approach
 const CallControlComponent = ({
   controls,         // TaskUIControls — all 17 controls from SDK
+  isHeld,           // From parent: findHoldStatus(task, 'mainCall', agentId)
   isMuted, isRecording, holdTime,
   onToggleHold, onToggleMute, onEndCall, onEndConsult,
   onConsultTransfer, onConsultConference, onExitConference,
@@ -201,11 +203,12 @@ const CallControlComponent = ({
   const isConsulting = controls.endConsult.isVisible;
   const isConferencing = controls.exitConference.isVisible;
 
+  // isHeld must be passed from parent, derived via findHoldStatus(task, 'mainCall', agentId). Do NOT use controls.hold.isEnabled for toggle — hold can be disabled in consult/conference without the call being held.
   return (
     <div className="call-control">
       {controls.hold.isVisible && (
-        <Button onClick={() => onToggleHold(!controls.hold.isEnabled)} disabled={!controls.hold.isEnabled}>
-          Hold/Resume
+        <Button onClick={() => onToggleHold(!isHeld)} disabled={!controls.hold.isEnabled}>
+          {isHeld ? 'Resume' : 'Hold'}
         </Button>
       )}
       {controls.mute.isVisible && (
@@ -298,7 +301,7 @@ This function builds the main call control button array. It references 12 old co
 | `controlVisibility.consult.isEnabled` | `controls.consult.isEnabled` |
 | `controlVisibility.consult.isVisible` | `controls.consult.isVisible` |
 | `controlVisibility.isConferenceInProgress` | Derive: `controls.exitConference.isVisible` |
-| `controlVisibility.consultTransfer.isEnabled` | `controls.consultTransfer.isEnabled` |
+| `controlVisibility.consultTransfer.isEnabled` / `.isVisible` | Use **`controls.transfer`** or **`controls.transferConference`** (consult vs conference). Do NOT use `controls.consultTransfer` — always hidden in new SDK. |
 | `controlVisibility.mergeConference.isEnabled` | `controls.mergeToConference.isEnabled` |
 | `controlVisibility.transfer.isEnabled` | `controls.transfer.isEnabled` |
 | `controlVisibility.pauseResumeRecording.isEnabled` | `controls.recording.isEnabled` |
@@ -355,7 +358,7 @@ This function builds the main call control button array. It references 12 old co
 - `agentId: string` → RETAIN (needed for timer participant lookup)
 
 ### `CallControlCAD` Widget — task/src/CallControlCAD/index.tsx
-Remove `deviceType`, `featureFlags`, `conferenceEnabled` from `useCallControl` call. Retain `agentId` for timer participant lookup.
+Retain `deviceType`, `featureFlags`, `conferenceEnabled` in `useCallControl` for the feature-flag overlay (`applyFeatureGates`). Retain `agentId` for timer participant lookup and for deriving `isHeld` via `findHoldStatus(task, 'mainCall', agentId)` to pass to CallControl component.
 
 ### Files NOT Impacted (Confirmed)
 

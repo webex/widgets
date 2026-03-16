@@ -31,8 +31,9 @@ The TaskList widget displays all active tasks and allows accept/decline/select. 
 
 ### Minimal Changes Required
 - If `getTaskStatus()` is used for display, consider using SDK task state info
-- Accept/decline button visibility per task can use `task.uiControls.accept`
+- Accept/decline button visibility per task: use `task.uiControls?.accept` and `task.uiControls?.decline` (each has `isVisible`, `isEnabled`)
 - Task selection logic unchanged
+- Optional: if the list must react to control updates without task replacement, subscribe to `'task:ui-controls-updated'` per task (event name; enum `TASK_UI_CONTROLS_UPDATED` may not exist in store yet — use literal)
 
 ---
 
