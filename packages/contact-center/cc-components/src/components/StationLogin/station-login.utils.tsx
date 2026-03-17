@@ -109,14 +109,9 @@ const updateDialNumberLabel = (
  * @param {string} input
  * @returns {boolean} whether or not to show a validation error
  */
-const validateDialNumber = (
-  input: string,
-  dialNumberRegex: null | string,
-  setDNErrorText: (error: string) => void,
-  logger
-): boolean => {
+const validateDialNumber = (input: string, setDNErrorText: (error: string) => void, logger): boolean => {
   try {
-    const regexForDn = new RegExp(dialNumberRegex ?? '1[0-9]{3}[2-9][0-9]{6}([,]{1,10}[0-9]+){0,1}');
+    const regexForDn = new RegExp('^\\+?[0-9]{7,15}([,]{1,10}[0-9]+)?$');
     if (regexForDn.test(input)) {
       return false;
     }
@@ -271,7 +266,7 @@ const handleDNInputChanged = (
       setDNErrorText(`${LoginOptions[selectedDeviceType]} ${StationLoginLabels.IS_REQUIRED}`);
       setShowDNError(true);
     } else if (selectedDeviceType === DIAL_NUMBER) {
-      setShowDNError(validateDialNumber(input, dialNumberRegex, setDNErrorText, logger));
+      setShowDNError(validateDialNumber(input, setDNErrorText, logger));
     } else {
       setShowDNError(false);
     }
