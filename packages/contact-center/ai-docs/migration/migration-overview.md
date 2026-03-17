@@ -70,7 +70,9 @@ Follow these docs in order. Each doc has old vs new code, before/after examples,
 
 ## SDK Pending Exports (Prerequisites)
 
-> **Status:** This section will be updated once the SDK team adds these exports. Migration can begin on items that don't depend on these, but full completion requires them.
+**What the SDK does not export today** (from the package entry point `src/index.ts`): the items in the table below. They exist in SDK source but are not re-exported from the public package, so widget code cannot import them until they are added to the package.
+
+**Before implementing:** Identify whether each required export is available from the SDK — i.e. whether you can import it from the package. If an item is not yet exported, either delay the work that depends on it or implement only the parts that do not need it. Full completion of the migration requires these exports to be available.
 
 These items are exported from SDK source files but not yet from the package entry point (`src/index.ts`):
 
@@ -92,7 +94,7 @@ These items are exported from SDK source files but not yet from the package entr
 | `getDefaultUIControls()` | Fallback when no task: `task?.uiControls ?? getDefaultUIControls()` |
 | `TASK_EVENTS` | Import from SDK — delete local enum in `store.types.ts` |
 
-> Constants to delete/keep, event name mappings, and migration gotchas are documented in each migration doc above (PRs 2 and 3).
+> Constants to delete/keep, event name mappings, and **migration gotchas** (non-obvious pitfalls or ordering constraints — e.g. “do not delete constant X until helper Y is rewritten”) are documented in each of the migration docs listed in the [Execution Order](#execution-order) table above (e.g. [store-event-wiring-migration.md](./store-event-wiring-migration.md), [store-task-utils-migration.md](./store-task-utils-migration.md), [call-control-hook-migration.md](./call-control-hook-migration.md), and the rest).
 
 ---
 
