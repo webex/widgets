@@ -119,7 +119,7 @@
 
 | Old Flag | New Approach |
 |----------|-------------|
-| `isConferenceInProgress` | `controls.exitConference.isVisible` |
+| `isConferenceInProgress` | **Use the direct field when the SDK provides it:** `task.data.isConferenceInProgress`. **Old SDK:** TaskManager sets it via `getIsConferenceInProgress(payload)` on TaskData. **Task-refactor SDK:** The same logic is reused — `uiControlsComputer.ts` (state-machine) uses `getIsConferenceInProgress(taskData)` (e.g. `conferenceFromBackend = taskData ? getIsConferenceInProgress(taskData) : false`), so conference-in-progress is already computed inside the SDK and reflected in task data and/or in `uiControls` (e.g. `exitConference.isVisible`). Widgets do not need to call `getIsConferenceInProgress`; use `task.data.isConferenceInProgress` or, for visibility-only, `controls.exitConference.isVisible`. |
 | `isConsultInitiated` | **Do NOT use `controls.endConsult.isVisible` as "initiated only"** — that control is visible for both initiated and accepted consult. Use task/participant state if you need to distinguish "consult requested" vs "consult active". |
 | `isConsultInitiatedAndAccepted` | Removed — SDK handles |
 | `isConsultReceived` | Removed — SDK handles |
@@ -310,7 +310,7 @@ if (currentTask.data.isConferenceInProgress) {
 }
 ```
 
-**Migration:** Can replace with `controls.transferConference.isVisible` to decide. But since SDK action methods are unchanged, keeping `data.isConferenceInProgress` is also fine.
+**Migration:** Prefer **`currentTask.data.isConferenceInProgress`** (direct variable from SDK task data; see State Flags table). Alternatively use `controls.transferConference.isVisible` to decide. SDK action methods are unchanged.
 
 ### 6. `extractConsultingAgent` — Complex Display Logic (KEEP)
 
