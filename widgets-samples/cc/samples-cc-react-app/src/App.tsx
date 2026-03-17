@@ -84,6 +84,10 @@ function App() {
     const savedHideDesktopLogin = window.localStorage.getItem('hideDesktopLogin');
     return savedHideDesktopLogin === 'true';
   });
+  const [allowInternationalDn, setAllowInternationalDn] = useState(() => {
+    const savedAllowInternationalDn = window.localStorage.getItem('allowInternationalDn');
+    return savedAllowInternationalDn === 'true';
+  });
 
   const handleSaveStart = () => {
     setShowLoader(true);
@@ -767,6 +771,19 @@ function App() {
                               setDoStationLogout(!doStationLogout);
                             }}
                           />
+                          <Checkbox
+                            data-testid="samples:allow-international-dn-checkbox"
+                            checked={allowInternationalDn}
+                            aria-label="allow international dial numbers checkbox"
+                            id="allow-international-dn-checkbox"
+                            label="Allow International Dial Numbers"
+                            // @ts-expect-error: TODO: https://github.com/momentum-design/momentum-design/pull/1118
+                            onchange={() => {
+                              const newValue = !allowInternationalDn;
+                              setAllowInternationalDn(newValue);
+                              window.localStorage.setItem('allowInternationalDn', String(newValue));
+                            }}
+                          />
                         </div>
                         <div className="station-login">
                           <StationLogin
@@ -776,6 +793,7 @@ function App() {
                             profileMode={false}
                             doStationLogout={doStationLogout}
                             hideDesktopLogin={hideDesktopLogin}
+                            allowInternationalDn={allowInternationalDn}
                           />
                         </div>
                       </fieldset>
@@ -799,6 +817,19 @@ function App() {
                               setHideDesktopLogin(!hideDesktopLogin);
                             }}
                           />
+                          <Checkbox
+                            data-testid="samples:allow-international-dn-profile-checkbox"
+                            checked={allowInternationalDn}
+                            aria-label="allow international dial numbers checkbox"
+                            id="allow-international-dn-profile-checkbox"
+                            label="Allow International Dial Numbers"
+                            // @ts-expect-error: TODO: https://github.com/momentum-design/momentum-design/pull/1118
+                            onchange={() => {
+                              const newValue = !allowInternationalDn;
+                              setAllowInternationalDn(newValue);
+                              window.localStorage.setItem('allowInternationalDn', String(newValue));
+                            }}
+                          />
                         </div>
                         <div className="station-login">
                           <StationLogin
@@ -806,6 +837,7 @@ function App() {
                             onSaveStart={handleSaveStart}
                             onSaveEnd={handleSaveEnd}
                             hideDesktopLogin={hideDesktopLogin}
+                            allowInternationalDn={allowInternationalDn}
                           />
                         </div>
                       </fieldset>
