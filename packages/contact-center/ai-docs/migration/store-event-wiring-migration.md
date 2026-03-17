@@ -29,6 +29,8 @@ The widget's local `TASK_EVENTS` enum (in `store/src/store.types.ts`) uses CC-le
 | `TASK_PAUSE` | `'task:pause'` | No SDK equivalent; SDK uses `TASK_HOLD` |
 | `AGENT_CONTACT_ASSIGNED` | `'AgentContactAssigned'` | SDK uses `TASK_ASSIGNED` (`'task:assigned'`) |
 
+**Docs to update when migrating event names:** CallControl widget spec references `TASK_CONSULT` (and related consult flow) in its sequence diagram — see `packages/contact-center/task/ai-docs/widgets/CallControl/ARCHITECTURE.md` (consult sequence around line 169). Update that doc to use SDK event names and remove references to store-only enum members (`TASK_CONSULT`, `TASK_UNHOLD`) once the migration is applied.
+
 ### New SDK Events (not in current widget enum)
 
 | SDK Event | Value | Widget Action Needed |
@@ -43,11 +45,11 @@ The widget's local `TASK_EVENTS` enum (in `store/src/store.types.ts`) uses CC-le
 | `TASK_TRANSFER_CONFERENCE` | `'task:transferConference'` | Evaluate for conference flow |
 | `TASK_CLEANUP` | `'task:cleanup'` | SDK internal — likely no widget action |
 
-**Action:** Delete the local `TASK_EVENTS` enum from `store/src/store.types.ts` and import from SDK instead. SDK's `TASK_EVENTS` already includes all needed events including `TASK_UI_CONTROLS_UPDATED`.
+**Action:** Delete the local `TASK_EVENTS` enum from `store/src/store.types.ts` and import from SDK once the SDK exports it. **As of this migration, the SDK does not yet export `TASK_EVENTS` from its package entry point** (or status is TBD). For current status and the plan to replace the local enum once the SDK exports it, see [migration-overview.md](./migration-overview.md) → "SDK Pending Exports" (or equivalent section). Until then, keep the local enum and align event string values with the SDK where needed.
 
 ### Pre-existing Bug: Event Name Mismatches
 
-The 5 renamed events above are currently hardcoded in `store.types.ts` with a TODO comment: `// TODO: remove this once cc sdk exports this enum`. During migration, replace the entire local enum with SDK's exported `TASK_EVENTS` enum.
+The 5 renamed events above are currently hardcoded in `store.types.ts` with a TODO comment: `// TODO: remove this once cc sdk exports this enum`. During migration, **when the SDK exports `TASK_EVENTS`**, replace the entire local enum with the SDK's exported enum. Until then, update local enum values to match SDK event strings so wiring is correct.
 
 ---
 
@@ -114,8 +116,12 @@ These live in `store/src/store.ts` and are mutated via setters in `storeEventsWr
 **Bug 1: `handleConsultEnd` is dead code.**
 A `handleConsultEnd` method exists (resets `isQueueConsultInProgress`, `currentConsultQueueId`, `consultStartTimeStamp`) but `TASK_CONSULT_END` is wired to `refreshTaskList()` instead. The method's consult state cleanup never runs.
 
+**Migration / test plan for Bug 1:** When wiring `TASK_CONSULT_END` to `handleConsultEnd`, update store unit tests (e.g. `store/tests/storeEventsWrapper.ts` or equivalent) that reference `handleConsultEnd`: assert that `TASK_CONSULT_END` triggers the handler and that consult state is reset. Remove or rewrite tests that only covered the old dead path (e.g. tests that assumed `TASK_CONSULT_END` only triggered `refreshTaskList`).
+
 **Bug 2: `handleTaskRemove` listener mismatch.**
 `registerTaskEventListeners` wires `TASK_CONFERENCE_TRANSFERRED → this.refreshTaskList`. But `handleTaskRemove` calls `taskToRemove.off(TASK_EVENTS.TASK_CONFERENCE_TRANSFERRED, this.handleConferenceEnded)` — wrong handler reference. This listener is **never actually removed**, causing a listener leak.
+
+**Test gap:** `TASK_CONFERENCE_TRANSFERRED` currently has **no unit test** (registration and cleanup). This gap is tracked by a dedicated Jira ticket. The ticket covers: adding UTs that assert this event is registered in `registerTaskEventListeners` and correctly unregistered in `handleTaskRemove`. When implementing the store migration or the ticket, add tests so this gap is closed. *(Jira: [CAI-7758](https://jira-eng-sjc12.cisco.com/jira/browse/CAI-7758))*
 
 ---
 
@@ -172,6 +178,23 @@ Many events that currently trigger `refreshTaskList()` will no longer need it be
 - Initial load / hydration
 - Full page refresh recovery
 - `TASK_WRAPPEDUP` (task must be removed from list — may be replaceable with explicit list removal)
+
+#### Why we can remove most `refreshTaskList()`
+
+1. **SDK keeps the same task reference up to date.** The state machine updates `task.data` (and `task.uiControls`) on the **same** `ITask` reference already held in the store's `taskList`. No re-fetch is needed for in-place updates.
+2. **Widget re-renders are driven by callbacks.** Widgets that registered via `setTaskCallback(event, cb, taskId)` are notified when the store calls `fireTaskCallbacks(event, interactionId, payload)`. Those callbacks cause the widget to re-run and re-render with the updated task from the store.
+3. **Re-fetch is only needed when the list itself changes.** We keep `refreshTaskList()` only where the **list** must change: e.g. initial load, full refresh, or `TASK_WRAPPEDUP` (task removed from the list). For all other events, the existing task reference is already updated by the SDK, and `fireTaskCallbacks` triggers UI updates.
+
+---
+
+### fireTaskCallbacks — Definition
+
+**Purpose:** Invoke all callbacks that were registered for a given task event via `setTaskCallback(event, cb, taskId)` (or equivalent), so widgets can re-render or react when that event occurs.
+
+**Signature (conceptual):**  
+`fireTaskCallbacks(event: TASK_EVENTS, interactionId: string, payload?: unknown): void`
+
+**Where it lives:** In the store-events layer — `packages/contact-center/store/src/storeEventsWrapper.ts`. After the migration, "After" handlers call `fireTaskCallbacks(...)` instead of (or in addition to) `refreshTaskList()` for events that only need to notify widgets. Implementation pattern: look up callbacks by event and optional `taskId`/`interactionId`, then invoke each with the payload.
 
 ---
 
