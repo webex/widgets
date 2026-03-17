@@ -113,7 +113,7 @@ Two different `findHoldTimestamp` functions exist with different signatures:
 | # | Function | Reason | SDK Replacement | Impact on Other Functions |
 |---|----------|--------|-----------------|--------------------------|
 | 1 | `getConsultStatus(task, agentId)` | Primary consumer `getControlsVisibility` is deleted | `task.uiControls` encodes all consult control states | `getConsultStatus()` **calls** `getTaskStatus()` (not the reverse). When we delete `getConsultStatus`, update `getTaskStatus` to use `task.uiControls` (see After code below). |
-| 2 | `getIsConferenceInProgress(task)` | `task-util.ts` already uses `task?.data?.isConferenceInProgress` directly; function only used in tests | `task.uiControls.exitConference.isVisible` | None |
+| 2 | `getIsConferenceInProgress(task)` | `task-util.ts` already uses `task?.data?.isConferenceInProgress` directly; function only used in tests | **State-based:** `task?.data?.isConferenceInProgress`. Do **not** use `task.uiControls.exitConference.isVisible` — that is control visibility and can be false when `conferenceEnabled` hides the button while the task is still in conference, causing false negatives. | None |
 | 3 | `getConferenceParticipantsCount(task)` | Used only in `getControlsVisibility` | SDK computes max participant check internally | None |
 | 4 | `getIsCustomerInCall(task)` | Used only in `getControlsVisibility` | SDK computes internally | None |
 | 5 | `getIsConsultInProgress(task)` | Used only in `getControlsVisibility` | SDK computes internally | None |
