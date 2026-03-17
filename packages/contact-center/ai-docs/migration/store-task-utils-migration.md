@@ -196,6 +196,10 @@ const controls = currentTask?.uiControls ?? getDefaultUIControls();
 // All 17 controls come pre-computed from SDK. Zero store util calls needed.
 ```
 
+> **CRITICAL: Migrate derived state consumers before removing getControlsVisibility**
+>
+> Many consumers still depend on **derived booleans** that are not part of SDK `uiControls` (e.g. `controlVisibility.consultCallHeld`, `isConsultInitiated` in `task/src/Utils/timer-utils.ts`; `isHeld`, `isConferenceInProgress` in `cc-components/.../CallControl*`). Do **not** follow the replacement above literally without migrating those consumers in the same step: either pass derived values from parent (e.g. `findHoldStatus(task, 'mainCall', agentId)` for `isHeld`) or move derivation to the hook/layer that owns the control. Otherwise removing `getControlsVisibility` / `ControlVisibility` will break timers and button behavior.
+
 > **CRITICAL: Feature-Flag Gating Overlay**
 >
 > The old `getControlsVisibility` applied integrator-provided widget props (`featureFlags`
@@ -205,7 +209,7 @@ const controls = currentTask?.uiControls ?? getDefaultUIControls();
 >
 > | Widget Prop | Controls Affected | Gate Logic |
 > |-------------|-------------------|------------|
-> | `featureFlags.webRtcEnabled` | accept, decline, muteUnmute, conference, muteUnmuteConsult, **transfer** (browser: `isTransferVisibility`), + telephony support (holdResume, endConsult) | Hide control when `webRtcEnabled` is `false` and channel is voice in browser |
+> | `featureFlags.webRtcEnabled` | accept, decline, muteUnmute, conference, muteUnmuteConsult, **transfer** (browser: `isTransferVisibility`), **consult**, **recording** (pause/resume), + telephony support (holdResume, endConsult). (Old logic: `telephonySupported` from `webRtcEnabled` drives `getConsultButtonVisibility`, `getPauseResumeRecordingButtonVisibility` in task-util.) | Hide control when `webRtcEnabled` is `false` and channel is voice in browser |
 > | `featureFlags.isEndCallEnabled` | end | Hide end button when `isEndCallEnabled` is `false` (phone device only) |
 > | `featureFlags.isEndConsultEnabled` | endConsult | Hide end-consult when `isEndConsultEnabled` is `false` |
 > | `conferenceEnabled` (widget prop) | conference, exitConference, mergeConference, **mergeConferenceConsult**, consultTransferConsult | Hide all conference-related controls when `conferenceEnabled` is `false` |
