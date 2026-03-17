@@ -104,14 +104,28 @@ const updateDialNumberLabel = (
   }
 };
 
+// Default US dial number regex fallback
+const DEFAULT_US_DIAL_NUMBER_REGEX = '1[0-9]{3}[2-9][0-9]{6}([,]{1,10}[0-9]+){0,1}';
+// International dial number regex
+const INTERNATIONAL_DIAL_NUMBER_REGEX = '^\\+?[0-9]{7,15}([,]{1,10}[0-9]+)?$';
+
 /**
  * Runs validation tests on a string given as a Dial Number
- * @param {string} input
+ * @param {string} input - The dial number to validate
+ * @param {string | null} dialNumberRegex - Optional regex pattern for validation. If null, falls back to default US regex.
+ * @param {function} setDNErrorText - Callback to set error text
+ * @param {object} logger - Logger instance
  * @returns {boolean} whether or not to show a validation error
  */
-const validateDialNumber = (input: string, setDNErrorText: (error: string) => void, logger): boolean => {
+const validateDialNumber = (
+  input: string,
+  dialNumberRegex: string | null,
+  setDNErrorText: (error: string) => void,
+  logger
+): boolean => {
   try {
-    const regexForDn = new RegExp('^\\+?[0-9]{7,15}([,]{1,10}[0-9]+)?$');
+    const regexPattern = dialNumberRegex ?? DEFAULT_US_DIAL_NUMBER_REGEX;
+    const regexForDn = new RegExp(regexPattern);
     if (regexForDn.test(input)) {
       return false;
     }
@@ -266,7 +280,7 @@ const handleDNInputChanged = (
       setDNErrorText(`${LoginOptions[selectedDeviceType]} ${StationLoginLabels.IS_REQUIRED}`);
       setShowDNError(true);
     } else if (selectedDeviceType === DIAL_NUMBER) {
-      setShowDNError(validateDialNumber(input, setDNErrorText, logger));
+      setShowDNError(validateDialNumber(input, dialNumberRegex, setDNErrorText, logger));
     } else {
       setShowDNError(false);
     }
@@ -355,4 +369,6 @@ export {
   handleTeamSelectChanged,
   handleOnCCSignOut,
   handleCCSignoutKeyDown,
+  DEFAULT_US_DIAL_NUMBER_REGEX,
+  INTERNATIONAL_DIAL_NUMBER_REGEX,
 };
