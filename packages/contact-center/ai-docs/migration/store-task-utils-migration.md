@@ -14,8 +14,8 @@ The store's `task-utils.ts` contains 16 exported utility functions that inspect 
 |--------|------|--------|
 | Local `TASK_EVENTS` enum | `store/src/store.types.ts` | SDK exports this — delete local copy (covered in detail in [store-event-wiring-migration.md](./store-event-wiring-migration.md)) |
 | `ConsultStatus` enum | `store/src/store.types.ts` | All consumers (`getConsultStatus`, `getControlsVisibility`) are being removed |
-| `TASK_STATE_CONSULT` | `store/src/constants.ts` | SDK `TaskState.CONSULT_INITIATING` — **delete ONLY AFTER rewriting `findHoldStatus`** (see ordering note below) |
-| `TASK_STATE_CONSULTING` | `store/src/constants.ts` | SDK `TaskState.CONSULTING` — **same ordering constraint** |
+| `TASK_STATE_CONSULT` | `store/src/constants.ts` | **Dual use:** (1) Task state → SDK `TaskState.CONSULT_INITIATING`. (2) **Media-type sentinel** in `findHoldStatus(task, mType, agentId)` — line 328 uses `mType === TASK_STATE_CONSULT` to identify the consult *leg*, not task state. **Delete ONLY AFTER rewriting `findHoldStatus`**; when rewriting, preserve a media-type constant (or use media-type enums) for the consult leg — do **not** replace that branch with `TaskState`. See ordering note below. |
+| `TASK_STATE_CONSULTING` | `store/src/constants.ts` | SDK `TaskState.CONSULTING` — **same ordering constraint** (used only as task state, not as mType) |
 | `TASK_STATE_CONSULT_COMPLETED` | `store/src/constants.ts` | SDK handles via context — **same ordering constraint** |
 | `INTERACTION_STATE_WRAPUP` | `store/src/constants.ts` | SDK `TaskState.WRAPPING_UP` — **delete ONLY AFTER rewriting `getTaskStatus`** (see ordering note below) |
 | `INTERACTION_STATE_POST_CALL` | `store/src/constants.ts` | SDK `TaskState.POST_CALL` — **same ordering constraint** |
@@ -44,7 +44,7 @@ The store's `task-utils.ts` contains 16 exported utility functions that inspect 
 - **Via `isConsultOnHoldMPC`:** Line 303 — `[TASK_STATE_CONSULT, TASK_STATE_CONSULTING].includes(getConsultMPCState(...))`
 - **Via `getConsultMPCState`:** Line 321 — `[TASK_STATE_CONSULT_COMPLETED].includes(getConsultMPCState(...))`
 
-**Do NOT delete these 3 constants until `findHoldStatus` and `isConsultOnHoldMPC` are rewritten** to use SDK `TaskState` equivalents. Deleting them first will break compilation.
+**Do NOT delete these 3 constants until `findHoldStatus` and `isConsultOnHoldMPC` are rewritten** to use SDK `TaskState` equivalents. Deleting them first will break compilation. When rewriting `findHoldStatus`, note that `TASK_STATE_CONSULT` is used there as a **media-type** sentinel (`mType === TASK_STATE_CONSULT`); preserve a media-type constant or media-type enum for the consult leg — do not replace that comparison with `TaskState`.
 
 ## Ordering Constraint: Interaction State Constants
 
