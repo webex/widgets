@@ -212,7 +212,7 @@ const controls = currentTask?.uiControls ?? getDefaultUIControls();
 > | `featureFlags.webRtcEnabled` | accept, decline, muteUnmute, conference, muteUnmuteConsult, **transfer** (browser: `isTransferVisibility`), **consult**, **recording** (pause/resume), + telephony support (holdResume, endConsult). (Old logic: `telephonySupported` from `webRtcEnabled` drives `getConsultButtonVisibility`, `getPauseResumeRecordingButtonVisibility` in task-util.) | Hide control when `webRtcEnabled` is `false` and channel is voice in browser |
 > | `featureFlags.isEndCallEnabled` | end | Hide end button when `isEndCallEnabled` is `false` (phone device only) |
 > | `featureFlags.isEndConsultEnabled` | endConsult | Hide end-consult when `isEndConsultEnabled` is `false` |
-> | `conferenceEnabled` (widget prop) | conference, exitConference, mergeConference, **mergeConferenceConsult**, consultTransferConsult | Hide all conference-related controls when `conferenceEnabled` is `false` |
+> | `conferenceEnabled` (widget prop) | conference, exitConference, mergeConference, **mergeConferenceConsult** | Hide all conference-related controls when `conferenceEnabled` is `false`. **Do not** gate `consultTransferConsult` on `conferenceEnabled` — current code does not; gating it would regress consult-transfer-consult in tenants with conference disabled. |
 >
 > **Implementation pattern — apply after reading SDK controls:**
 > ```typescript
