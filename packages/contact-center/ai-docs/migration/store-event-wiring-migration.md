@@ -210,6 +210,8 @@ As an enhancement, `refreshTaskList()` could be extended to accept an optional t
 **Implementation note — task data flow (no write-back):**  
 `fireTaskCallbacks` **does not** write or update task data back into the store. The flow is: (1) The SDK mutates the **same** `ITask` reference already held in the store's `taskList` (updates `task.data` and `task.uiControls` in place). (2) The store calls `fireTaskCallbacks(event, interactionId, payload)`, which only **invokes** the registered widget callbacks. (3) Widgets then **read** from the store (e.g. `store.taskList[interactionId]` or `store.currentTask`) and re-render with the updated task. So widgets get the latest data by re-reading that same reference after the callback; there is no separate "update task data back into the store" step.
 
+**How widgets see updates when the store does not observe the `cc` object:** The store marks the `cc` object (and task internals) as not observed in the constructor, so **MobX does not trigger re-renders when the SDK mutates the task in place**. Widgets do not rely on observation of task data for updates. Instead, **re-renders are callback-driven**: when `fireTaskCallbacks` runs, the widget's registered callback executes (e.g. updates component state or triggers a re-read). The widget then reads `store.currentTask` or `store.taskList[interactionId]` — the same task reference the SDK has already mutated — and renders with the latest `task.data` and `task.uiControls`. So the callback is what causes the widget to re-render and read the updated task; there is no separate observable on task internals.
+
 ---
 
 ## Refactor Patterns (Before/After)
