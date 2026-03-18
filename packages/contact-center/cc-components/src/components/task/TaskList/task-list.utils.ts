@@ -17,6 +17,7 @@ export const extractTaskListItemData = (
     //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
     const callAssociationDetails = task?.data?.interaction?.callAssociatedDetails;
     const ani = callAssociationDetails?.ani;
+    const dn = callAssociationDetails?.dn;
     const customerName = callAssociationDetails?.customerName;
     const virtualTeamName = callAssociationDetails?.virtualTeamName;
 
@@ -29,6 +30,9 @@ export const extractTaskListItemData = (
     const mediaType = task.data.interaction.mediaType;
     const mediaChannel = task.data.interaction.mediaChannel;
 
+    // Check if this is an outdial call
+    const isOutdial = !!task?.data?.interaction?.outboundType;
+
     // Compute media type flags
     const isTelephony = mediaType === MEDIA_CHANNEL.TELEPHONY;
     const isSocial = mediaType === MEDIA_CHANNEL.SOCIAL;
@@ -39,7 +43,8 @@ export const extractTaskListItemData = (
     const declineText = isTaskIncoming && isTelephony && isBrowser ? 'Decline' : undefined;
 
     // Compute title based on media type
-    const title = isSocial ? customerName : ani;
+    // For outdial calls, show the dialed number (dn) instead of the entrypoint number (ani)
+    const title = isSocial ? customerName : isOutdial ? dn || ani : ani;
 
     const isAutoAnswering = task.data.isAutoAnswering || false;
 

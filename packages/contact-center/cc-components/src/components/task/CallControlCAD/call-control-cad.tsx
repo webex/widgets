@@ -65,9 +65,14 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
   const customerName = currentTask?.data?.interaction?.callAssociatedDetails?.customerName;
 
   //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
-  const ani = currentTask?.data?.interaction?.callAssociatedDetails?.ani;
+  const rawAni = currentTask?.data?.interaction?.callAssociatedDetails?.ani;
   //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
-  const dn = currentTask?.data?.interaction?.callAssociatedDetails?.dn;
+  const rawDn = currentTask?.data?.interaction?.callAssociatedDetails?.dn;
+
+  // For outdial calls, swap ani and dn so the dialed number is shown as the primary identifier
+  const isOutdial = !!currentTask?.data?.interaction?.outboundType;
+  const ani = isOutdial ? rawDn || rawAni : rawAni;
+  const dn = isOutdial ? rawAni || rawDn : rawDn;
 
   // Create unique IDs for tooltips
   const customerNameTriggerId = `customer-name-trigger-${currentTask.data.interaction.interactionId}`;
