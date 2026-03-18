@@ -361,8 +361,9 @@ This function builds the main call control button array. It references 12 old co
 - `conferenceEnabled: boolean` → REMOVE (SDK handles)
 - `agentId: string` → RETAIN (needed for timer participant lookup)
 
-### `CallControlCAD` Widget — task/src/CallControlCAD/index.tsx
-Retain `deviceType`, `featureFlags`, `conferenceEnabled` in `useCallControl` for the feature-flag overlay (`applyFeatureGates`). Retain `agentId` for timer participant lookup and for deriving `isHeld` via `findHoldStatus(task, 'mainCall', agentId)` to pass to CallControl component.
+### `CallControlCAD` — task package and cc-components view
+- **task/src/CallControlCAD/index.tsx:** Retain `deviceType`, `featureFlags`, `conferenceEnabled` in `useCallControl` for the feature-flag overlay (`applyFeatureGates`). Retain `agentId` for timer participant lookup and for deriving `isHeld` via `findHoldStatus(task, 'mainCall', agentId)` to pass to CallControl component.
+- **cc-components/.../CallControlCAD/call-control-cad.tsx:** This view consumes `controlVisibility` (and related state flags such as `isConferenceInProgress`, `isHeld`, `isConsultReceived`, `recordingIndicator`, `isConsultInitiatedOrAccepted`). It must be updated to use `TaskUIControls` and the new prop shape when replacing `ControlVisibility`; otherwise migration will leave stale references and break at compile or runtime.
 
 ### Files NOT Impacted (Confirmed)
 
@@ -381,16 +382,22 @@ Retain `deviceType`, `featureFlags`, `conferenceEnabled` in `useCallControl` for
 
 ## Files to Modify
 
+**Utils and Web Component layer:** Accept/decline and task-display logic live in **task-list.utils.ts** and **incoming-task.utils.tsx** (they today take `isBrowser` and/or `isDeclineButtonEnabled`). These must be updated when moving to per-task `task.uiControls`. The **wc.ts** file defines r2wc props for the Web Component build; when React props drop `isBrowser`, the WC layer must drop the attribute so consumers stay in sync.
+
 | File | Action | Impact |
 |------|--------|--------|
-| `cc-components/.../task/task.types.ts` | Replace `ControlVisibility` with `TaskUIControls`; update `ControlProps`, `CallControlComponentProps`, etc. | **HIGH** |
+| `cc-components/.../task/task.types.ts` | Replace `ControlVisibility` with `TaskUIControls`; update `ControlProps`, `CallControlComponentProps`; remove `isBrowser` / `isDeclineButtonEnabled` from `IncomingTaskComponentProps` and TaskList-related prop types when using per-task uiControls | **HIGH** |
 | `cc-components/.../CallControl/call-control.tsx` | Update to use `controls` prop | **HIGH** |
 | `cc-components/.../CallControl/call-control.utils.ts` | Update `buildCallControlButtons()` and `filterButtonsForConsultation()` | **HIGH** |
 | `cc-components/.../CallControlCustom/call-control-custom.utils.ts` | Update `createConsultButtons()` and `getConsultStatusText()` | **HIGH** |
 | `cc-components/.../CallControlCustom/call-control-consult.tsx` | Update consult control props | **MEDIUM** |
 | `cc-components/.../CallControlCustom/consult-transfer-popover.tsx` | Update `isConferenceInProgress` prop | **LOW** |
-| `cc-components/.../IncomingTask/incoming-task.tsx` | Minor prop updates | **LOW** |
-| `cc-components/.../TaskList/task-list.tsx` | Minor prop updates | **LOW** |
+| `cc-components/.../IncomingTask/incoming-task.tsx` | Minor prop updates (remove `isBrowser`, `isDeclineButtonEnabled` when using uiControls) | **LOW** |
+| `cc-components/.../IncomingTask/incoming-task.utils.tsx` | Update `extractIncomingTaskData()`: remove `isBrowser` and `isDeclineButtonEnabled` params; derive accept/decline text and disable state from task or passed visibility (e.g. `task.uiControls` or caller-provided flags) | **MEDIUM** |
+| `cc-components/.../TaskList/task-list.tsx` | Minor prop updates (remove `isBrowser`; pass task or controls for accept/decline) | **LOW** |
+| `cc-components/.../TaskList/task-list.utils.ts` | Update `extractTaskListItemData()`: remove `isBrowser` param and `store.isDeclineButtonEnabled` usage; use `task.uiControls?.accept` / `task.uiControls?.decline` for button text and disable state | **MEDIUM** |
+| `cc-components/.../CallControlCAD/call-control-cad.tsx` | Replace `ControlVisibility` / legacy control-shape usage with `TaskUIControls`; update props (`controlVisibility.isConferenceInProgress`, `isHeld`, `isConsultReceived`, `recordingIndicator`, `isConsultInitiatedOrAccepted`, etc.) | **MEDIUM** |
+| `cc-components/src/wc.ts` | Update Web Component prop definitions: remove `isBrowser` from `WebIncomingTask` and `WebTaskList` r2wc props when migrating to per-task uiControls; align with React prop changes so WC consumers do not pass obsolete attributes | **LOW** |
 | `task/src/CallControlCAD/index.tsx` | **Retain** `deviceType`, `featureFlags`, `conferenceEnabled` for `applyFeatureGates` overlay; retain `agentId` | **MEDIUM** |
 | All test files for above | Update mocks and assertions | **HIGH** |
 
