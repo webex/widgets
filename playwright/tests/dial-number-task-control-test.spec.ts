@@ -1,4 +1,4 @@
-import {test, expect} from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import {
   cancelConsult,
   consultOrTransfer,
@@ -8,7 +8,7 @@ import {
   verifyTransferSuccessLogs,
   verifyConsultEndSuccessLogs,
 } from '../Utils/advancedTaskControlUtils';
-import {changeUserState, verifyCurrentState} from '../Utils/userStateUtils';
+import { changeUserState, verifyCurrentState } from '../Utils/userStateUtils';
 import {
   createCallTask,
   acceptIncomingTask,
@@ -16,17 +16,17 @@ import {
   endCallTask,
   declineExtensionCall,
 } from '../Utils/incomingTaskUtils';
-import {submitWrapup} from '../Utils/wrapupUtils';
-import {USER_STATES, TASK_TYPES, WRAPUP_REASONS} from '../constants';
-import {waitForState, clearPendingCallAndWrapup, handleStrayTasks} from '../Utils/helperUtils';
-import {endTask, holdCallToggle, verifyHoldButtonIcon, verifyTaskControls} from '../Utils/taskControlUtils';
-import {TestManager} from '../test-manager';
+import { submitWrapup } from '../Utils/wrapupUtils';
+import { USER_STATES, TASK_TYPES, WRAPUP_REASONS } from '../constants';
+import { waitForState, clearPendingCallAndWrapup, handleStrayTasks } from '../Utils/helperUtils';
+import { endTask, holdCallToggle, verifyHoldButtonIcon, verifyTaskControls } from '../Utils/taskControlUtils';
+import { TestManager } from '../test-manager';
 
 export default function createDialNumberTaskControlTests() {
   test.describe('Dial Number Task Control Tests ', () => {
     let testManager: TestManager;
 
-    test.beforeAll(async ({browser}, testInfo) => {
+    test.beforeAll(async ({ browser }, testInfo) => {
       const projectName = testInfo.project.name;
       testManager = new TestManager(projectName);
       await testManager.setupForDialNumber(browser);
@@ -36,6 +36,13 @@ export default function createDialNumberTaskControlTests() {
       await handleStrayTasks(testManager.agent1Page);
       await handleStrayTasks(testManager.agent2Page);
     });
+
+    test.afterAll(async () => {
+      if (testManager) {
+        await testManager.cleanup();
+      }
+    });
+
     test.describe('Dial Number Tests', () => {
       test.beforeAll(async () => {
         test.skip(!process.env.PW_DIAL_NUMBER_NAME, 'PW_DIAL_NUMBER_NAME not set');
@@ -104,7 +111,7 @@ export default function createDialNumberTaskControlTests() {
         await testManager.agent1Page.waitForTimeout(2000);
         await cancelConsult(testManager.agent1Page); // still needs to cancel even if declined
         await verifyTaskControls(testManager.agent1Page, TASK_TYPES.CALL);
-        await verifyHoldButtonIcon(testManager.agent1Page, {expectedIsHeld: true});
+        await verifyHoldButtonIcon(testManager.agent1Page, { expectedIsHeld: true });
         await holdCallToggle(testManager.agent1Page);
         await testManager.agent1Page.waitForTimeout(2000);
         await expect(testManager.agent1Page.getByTestId('cancel-consult-btn')).not.toBeVisible();
@@ -121,7 +128,7 @@ export default function createDialNumberTaskControlTests() {
         await verifyTaskControls(testManager.agent1Page, TASK_TYPES.CALL);
         await testManager.agent1Page.waitForTimeout(2000);
         verifyConsultEndSuccessLogs();
-        await verifyHoldButtonIcon(testManager.agent1Page, {expectedIsHeld: true});
+        await verifyHoldButtonIcon(testManager.agent1Page, { expectedIsHeld: true });
         await holdCallToggle(testManager.agent1Page);
 
         // 4. Consult transfer
@@ -155,11 +162,11 @@ export default function createDialNumberTaskControlTests() {
 
         // Open consult popover and switch to Dial Number
         const consultButton = testManager.agent1Page.getByTestId('call-control:consult').first();
-        await consultButton.waitFor({state: 'visible', timeout: 10000});
+        await consultButton.waitFor({ state: 'visible', timeout: 10000 });
         await consultButton.click();
         const popover = testManager.agent1Page.locator('.agent-popover-content');
-        await expect(popover).toBeVisible({timeout: 10000});
-        await popover.getByRole('button', {name: 'Dial Number'}).click();
+        await expect(popover).toBeVisible({ timeout: 10000 });
+        await popover.getByRole('button', { name: 'Dial Number' }).click();
 
         // Perform search and wait for local filtering to reflect
         await popover.locator('#consult-search').fill(searchTerm);
@@ -176,8 +183,8 @@ export default function createDialNumberTaskControlTests() {
         await testManager.agent1Page.keyboard.press('Escape');
         await testManager.agent1Page
           .locator('.md-popover-backdrop')
-          .waitFor({state: 'hidden', timeout: 3000})
-          .catch(() => {});
+          .waitFor({ state: 'hidden', timeout: 3000 })
+          .catch(() => { });
 
         // End call and complete wrapup to clean up for next tests
         await endTask(testManager.agent1Page);
