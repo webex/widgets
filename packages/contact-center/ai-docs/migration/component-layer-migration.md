@@ -35,7 +35,7 @@ export interface ControlVisibility {
   consultTransferConsult: Visibility; // → REMOVE (use transfer)
   switchToMainCall: Visibility;
   switchToConsult: Visibility;
-  isConferenceInProgress: boolean;  // → derive from controls.exitConference.isVisible
+  isConferenceInProgress: boolean;  // → derive from task/participant state (e.g. conference in progress); do NOT use controls.exitConference.isVisible as sole source — it can be false when consult is active even if conference is in progress
   isConsultInitiated: boolean;      // → Do NOT use endConsult.isVisible as "initiated only"; it covers both initiated and accepted. Use task/participant state if you need that distinction.
   isConsultInitiatedAndAccepted: boolean; // → REMOVE
   isConsultReceived: boolean;       // → REMOVE
@@ -67,8 +67,8 @@ import type { TaskUIControls } from '@webex/cc-store';
 | `consultTransferConsult` | `transfer` / `transferConference` | **Split** — use `transfer` for consult transfer, `transferConference` for conference transfer |
 | `mergeConferenceConsult` | — | **Remove** (use `mergeToConference`) |
 | `muteUnmuteConsult` | — | **Remove** (use `mute`) |
-| `isConferenceInProgress` | — | **Remove** (derive from controls) |
-| `isConsultInitiated` | — | **Remove** (derive from controls) |
+| `isConferenceInProgress` | — | **Remove** (derive from task/participant state, not controls.exitConference.isVisible) |
+| `isConsultInitiated` | — | **Remove** (derive from controls or task state) |
 | `isConsultInitiatedAndAccepted` | — | **Remove** |
 | `isConsultReceived` | — | **Remove** |
 | `isConsultInitiatedOrAccepted` | — | **Remove** |
@@ -86,7 +86,7 @@ interface CallControlComponentProps {
   isRecording: boolean;
   holdTime: number;
   secondsUntilAutoWrapup: number;
-  buddyAgents: Agent[];
+  buddyAgents: BuddyDetails[];  // Use exported type from @webex/cc-store or task.types (not a generic Agent type)
   consultAgentName: string;
   // Actions. onToggleHold(hold) — pass intended hold state (true = hold, false = resume); matches toggleHold(hold: boolean) in task.types.
   onToggleHold: (hold: boolean) => void;
@@ -202,7 +202,8 @@ const CallControlComponent = ({
   // Implement openTransferPopover / openConsultPopover / openWrapupPopover (e.g. set state to show popover); popover on submit calls onTransferCall(payload) / onConsultCall(payload) / onWrapupCall(reason, auxCodeId).
   // Derive display-only flags from controls (replaces old state flag props)
   const isConsulting = controls.endConsult.isVisible;
-  const isConferencing = controls.exitConference.isVisible;
+  // Derive from task/participant state; do not use controls.exitConference.isVisible as sole source
+  const isConferencing = /* task/participant conference state */;
 
   // isHeld must be passed from parent, derived via findHoldStatus(task, 'mainCall', agentId). Do NOT use controls.hold.isEnabled for toggle — hold can be disabled in consult/conference without the call being held.
   return (
@@ -270,8 +271,9 @@ Components that previously relied on state flags can derive them:
 
 ```typescript
 // Old: isConferenceInProgress (boolean prop)
-// New: derive from controls
-const isConferenceInProgress = controls.exitConference.isVisible;
+// New: derive from task/participant state (e.g. conference-in-progress), NOT from controls.exitConference.isVisible —
+// exitConference.isVisible can be forced false when consult is active even if conference is in progress.
+const isConferenceInProgress = /* derive from task.data or participants */;
 
 // Old: isConsultInitiatedOrAccepted (boolean prop)
 // New: derive from controls
@@ -301,7 +303,7 @@ This function builds the main call control button array. It references 12 old co
 | `controlVisibility.holdResume.isVisible` | `controls.hold.isVisible` |
 | `controlVisibility.consult.isEnabled` | `controls.consult.isEnabled` |
 | `controlVisibility.consult.isVisible` | `controls.consult.isVisible` |
-| `controlVisibility.isConferenceInProgress` | Derive: `controls.exitConference.isVisible` |
+| `controlVisibility.isConferenceInProgress` | Derive from task/participant state (not `controls.exitConference.isVisible` — that is an action flag and can be false when consult is active) |
 | `controlVisibility.consultTransfer.isEnabled` / `.isVisible` | Use **`controls.transfer`** or **`controls.transferConference`** (consult vs conference). Do NOT use `controls.consultTransfer` — always hidden in new SDK. |
 | `controlVisibility.mergeConference.isEnabled` | `controls.mergeToConference.isEnabled` |
 | `controlVisibility.transfer.isEnabled` | `controls.transfer.isEnabled` |
@@ -315,7 +317,7 @@ This function builds the main call control button array. It references 12 old co
 |--------------|---------------|
 | `controlVisibility.muteUnmuteConsult` | `controls.mute` |
 | `controlVisibility.switchToMainCall` | `controls.switchToMainCall` |
-| `controlVisibility.isConferenceInProgress` | Derive: `controls.exitConference.isVisible` |
+| `controlVisibility.isConferenceInProgress` | Derive from task/participant state (not `controls.exitConference.isVisible`) |
 | `controlVisibility.consultTransferConsult` | `controls.transfer` / `controls.transferConference` |
 | `controlVisibility.mergeConferenceConsult` | `controls.mergeToConference` |
 | `controlVisibility.endConsult` | `controls.endConsult` |
@@ -350,7 +352,7 @@ This function builds the main call control button array. It references 12 old co
 ### `ConsultTransferPopoverComponentProps` — task.types.ts
 ```typescript
 // OLD: isConferenceInProgress?: boolean
-// NEW: derive from controls.exitConference.isVisible
+// NEW: derive from task/participant state (not controls.exitConference.isVisible)
 ```
 
 ### `ControlProps` — task.types.ts (Master Interface)
@@ -484,15 +486,16 @@ export const extractTaskListItemData = (
 <CallControlComponent controlVisibility={controlVisibility} ... />
 ```
 
-**After:** Component receives `controls: TaskUIControls` (and `isHeld` from parent if retained). Replace all `controlVisibility.*` with the new shape: use `controls.wrapup.isVisible`, `controls.recording.isVisible`, etc.; derive conference/consult display from controls or task state as documented in CallControlComponent section; pass `controls` to CallControlComponent.
+**After:** Component receives `controls: TaskUIControls`, `isHeld` from parent, and **consult-state flags** (`isConsultReceived`, `consultCallHeld`) from parent — do NOT use `controls.consult.isVisible` for hold-chip gating, as that is an action-availability flag, not consult state. Derive conference display from task/participant state (not solely `controls.exitConference.isVisible`). Pass `controls` to CallControlComponent.
 
 ```tsx
 // call-control-cad.tsx
-{controls.exitConference?.isVisible && !controls.wrapup.isVisible && (
+// Conference: derive from task/participant state (e.g. isConferenceInProgress from parent), not controls.exitConference.isVisible
+{isConferenceInProgress && !controls.wrapup.isVisible && (
   // ...
 )}
-{isHeld && !controls.consult?.isVisible && (
-  // consultCallHeld derived by parent via findHoldStatus(task, 'consult', agentId) if needed
+// Hold chip: keep consult-state gating; parent passes isConsultReceived and consultCallHeld (or derives via findHoldStatus(task, 'consult', agentId))
+{isHeld && !isConsultReceived && !consultCallHeld && (
   // ...
 )}
 {controls.recording?.isVisible && (
