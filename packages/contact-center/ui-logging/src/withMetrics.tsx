@@ -1,9 +1,15 @@
 import React, {useEffect, useRef} from 'react';
-import {havePropsChanged, logMetrics} from './metricsLogger';
+import {getChangedWatchedProps, havePropsChanged, logMetrics} from './metricsLogger';
 
-export default function withMetrics<P extends object>(Component: any, widgetName: string) {
+export default function withMetrics<P extends object>(
+  Component: any,
+  widgetName: string,
+  propsToWatch: (keyof P & string)[] = []
+) {
   return React.memo(
     (props: P) => {
+      const prevPropsRef = useRef<P | null>(null);
+
       useEffect(() => {
         logMetrics({
           widgetName,
@@ -20,7 +26,24 @@ export default function withMetrics<P extends object>(Component: any, widgetName
         };
       }, []);
 
-      // TODO: https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6890 PROPS_UPDATED event
+      useEffect(() => {
+        if (prevPropsRef.current && propsToWatch.length > 0) {
+          const changes = getChangedWatchedProps(
+            prevPropsRef.current as Record<string, any>,
+            props as Record<string, any>,
+            propsToWatch
+          );
+          if (changes) {
+            logMetrics({
+              widgetName,
+              event: 'PROPS_UPDATED',
+              props: changes,
+              timestamp: Date.now(),
+            });
+          }
+        }
+        prevPropsRef.current = props;
+      });
 
       return <Component {...props} />;
     },

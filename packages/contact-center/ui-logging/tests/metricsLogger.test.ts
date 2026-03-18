@@ -1,5 +1,5 @@
 import store from '@webex/cc-store';
-import {logMetrics, havePropsChanged, WidgetMetrics} from '../src/metricsLogger';
+import {logMetrics, havePropsChanged, getChangedWatchedProps, WidgetMetrics} from '../src/metricsLogger';
 
 describe('metricsLogger', () => {
   store.store.logger = {
@@ -81,6 +81,45 @@ describe('metricsLogger', () => {
       expect(havePropsChanged(null, null)).toBe(false);
       expect(havePropsChanged(undefined, undefined)).toBe(false);
       expect(havePropsChanged(null, undefined)).toBe(true);
+    });
+  });
+
+  describe('getChangedWatchedProps', () => {
+    it('should return null when propsToWatch is empty', () => {
+      expect(getChangedWatchedProps({a: 1}, {a: 2}, [])).toBeNull();
+    });
+
+    it('should return null when prev or next is null/undefined', () => {
+      expect(getChangedWatchedProps(null, {a: 1}, ['a'])).toBeNull();
+      expect(getChangedWatchedProps({a: 1}, null, ['a'])).toBeNull();
+    });
+
+    it('should return null when watched props have not changed', () => {
+      const prev = {name: 'John', timer: 10, age: 30};
+      const next = {name: 'John', timer: 20, age: 30};
+      expect(getChangedWatchedProps(prev, next, ['name', 'age'])).toBeNull();
+    });
+
+    it('should return changes for watched props that changed', () => {
+      const prev = {name: 'John', timer: 10, age: 30};
+      const next = {name: 'Jane', timer: 20, age: 31};
+      const result = getChangedWatchedProps(prev, next, ['name', 'age']);
+      expect(result).toEqual({
+        name: {oldValue: 'John', newValue: 'Jane'},
+        age: {oldValue: 30, newValue: 31},
+      });
+    });
+
+    it('should only report changes for watched props, ignoring unwatched', () => {
+      const prev = {name: 'John', timer: 10};
+      const next = {name: 'John', timer: 20};
+      expect(getChangedWatchedProps(prev, next, ['name'])).toBeNull();
+    });
+
+    it('should handle watched props that do not exist on objects', () => {
+      const prev = {name: 'John'};
+      const next = {name: 'John'};
+      expect(getChangedWatchedProps(prev, next, ['name', 'missing'])).toBeNull();
     });
   });
 });

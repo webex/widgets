@@ -102,4 +102,58 @@ describe('withMetrics HOC', () => {
     rerender(<WrappedSpy name="different" />);
     expect(renderSpy).toHaveBeenCalledTimes(2);
   });
+
+  it('should log PROPS_UPDATED when watched props change', () => {
+    const mockTime = 1234567890;
+    jest.setSystemTime(mockTime);
+
+    const SpyComponent: React.FC<TestComponentProps> = (props) => <div>Test {props.name}</div>;
+    const WrappedSpy = withMetrics<TestComponentProps>(SpyComponent, 'TestWidget', ['name']);
+
+    const {rerender} = render(<WrappedSpy name="old" />);
+    logMetricsSpy.mockClear();
+
+    rerender(<WrappedSpy name="new" />);
+
+    expect(logMetricsSpy).toHaveBeenCalledWith({
+      widgetName: 'TestWidget',
+      event: 'PROPS_UPDATED',
+      props: {name: {oldValue: 'old', newValue: 'new'}},
+      timestamp: mockTime,
+    });
+  });
+
+  it('should not log PROPS_UPDATED when unwatched props change', () => {
+    const mockTime = 1234567890;
+    jest.setSystemTime(mockTime);
+
+    const SpyComponent: React.FC<TestComponentProps> = (props) => <div>Test {props.name}</div>;
+    const WrappedSpy = withMetrics<TestComponentProps>(SpyComponent, 'TestWidget', ['name']);
+
+    const {rerender} = render(<WrappedSpy name="same" timer={1} />);
+    logMetricsSpy.mockClear();
+
+    rerender(<WrappedSpy name="same" timer={2} />);
+
+    expect(logMetricsSpy).not.toHaveBeenCalledWith(
+      expect.objectContaining({event: 'PROPS_UPDATED'})
+    );
+  });
+
+  it('should not log PROPS_UPDATED when propsToWatch is empty', () => {
+    const mockTime = 1234567890;
+    jest.setSystemTime(mockTime);
+
+    const SpyComponent: React.FC<TestComponentProps> = (props) => <div>Test {props.name}</div>;
+    const WrappedSpy = withMetrics<TestComponentProps>(SpyComponent, 'TestWidget');
+
+    const {rerender} = render(<WrappedSpy name="old" />);
+    logMetricsSpy.mockClear();
+
+    rerender(<WrappedSpy name="new" />);
+
+    expect(logMetricsSpy).not.toHaveBeenCalledWith(
+      expect.objectContaining({event: 'PROPS_UPDATED'})
+    );
+  });
 });

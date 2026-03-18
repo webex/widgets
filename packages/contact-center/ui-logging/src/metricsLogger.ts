@@ -45,6 +45,34 @@ export const logMetrics = (metric: WidgetMetrics) => {
 };
 
 /**
+ * Identifies which watched props have changed between two objects.
+ * Only checks the keys specified in propsToWatch to avoid logging noise
+ * from frequently-changing props like timers.
+ *
+ * @param prev - The previous props object
+ * @param next - The next props object
+ * @param propsToWatch - Array of prop keys to monitor for changes
+ * @returns Record of changed prop keys with their old and new values, or null if no watched props changed
+ */
+export function getChangedWatchedProps(
+  prev: Record<string, any>,
+  next: Record<string, any>,
+  propsToWatch: string[]
+): Record<string, {oldValue: any; newValue: any}> | null {
+  if (!propsToWatch.length || !prev || !next) return null;
+
+  const changes: Record<string, {oldValue: any; newValue: any}> = {};
+
+  for (const key of propsToWatch) {
+    if (prev[key] !== next[key]) {
+      changes[key] = {oldValue: prev[key], newValue: next[key]};
+    }
+  }
+
+  return Object.keys(changes).length > 0 ? changes : null;
+}
+
+/**
  * Determines if props have changed between two objects using shallow comparison.
  *
  * This function performs a shallow comparison between two objects to detect changes.
