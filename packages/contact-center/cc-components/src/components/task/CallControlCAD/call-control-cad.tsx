@@ -69,6 +69,9 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
   //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
   const dn = currentTask?.data?.interaction?.callAssociatedDetails?.dn;
 
+  // Check if this is an outdial call - for outdial, show dialed number instead of entrypoint
+  const isOutdial = currentTask?.data?.interaction?.outboundType === 'OUTDIAL';
+
   // Create unique IDs for tooltips
   const customerNameTriggerId = `customer-name-trigger-${currentTask.data.interaction.interactionId}`;
   const customerNameTooltipId = `customer-name-tooltip-${currentTask.data.interaction.interactionId}`;
@@ -76,7 +79,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
   const phoneNumberTooltipId = `phone-number-tooltip-${currentTask.data.interaction.interactionId}`;
 
   const renderCustomerName = () => {
-    const customerText = isSocial ? customerName || NO_CUSTOMER_NAME : ani || NO_CALLER_ID;
+    const customerText = isSocial ? customerName || NO_CUSTOMER_NAME : isOutdial ? (dn || ani || NO_CALLER_ID) : (ani || NO_CALLER_ID);
 
     const textComponent = (
       <Text

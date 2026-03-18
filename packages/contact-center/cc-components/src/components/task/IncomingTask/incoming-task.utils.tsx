@@ -35,6 +35,7 @@ export const extractIncomingTaskData = (
     //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
     const callAssociationDetails = incomingTask?.data?.interaction?.callAssociatedDetails;
     const ani = callAssociationDetails?.ani;
+    const dn = callAssociationDetails?.dn;
     const customerName = callAssociationDetails?.customerName;
     const virtualTeamName = callAssociationDetails?.virtualTeamName;
     const ronaTimeout = callAssociationDetails?.ronaTimeout ? Number(callAssociationDetails?.ronaTimeout) : null;
@@ -46,6 +47,9 @@ export const extractIncomingTaskData = (
     const isTelephony = mediaType === MEDIA_CHANNEL.TELEPHONY;
     const isSocial = mediaType === MEDIA_CHANNEL.SOCIAL;
 
+    // Check if this is an outdial call
+    const isOutdial = incomingTask?.data?.interaction?.outboundType === 'OUTDIAL';
+
     // Compute button text based on conditions
     const acceptText = !incomingTask.data.wrapUpRequired
       ? isTelephony && !isBrowser
@@ -56,7 +60,8 @@ export const extractIncomingTaskData = (
     const declineText = !incomingTask.data.wrapUpRequired && isTelephony && isBrowser ? 'Decline' : undefined;
 
     // Compute title based on media type
-    const title = isSocial ? customerName : ani;
+    // For outdial calls, show the dialed number (dn) instead of the entrypoint (ani)
+    const title = isSocial ? customerName : isOutdial ? (dn || ani) : ani;
 
     // Compute disable state for accept button when auto-answering
     const isAutoAnswering = incomingTask.data.isAutoAnswering || false;
