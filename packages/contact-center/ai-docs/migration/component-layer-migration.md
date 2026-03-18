@@ -384,6 +384,175 @@ This function builds the main call control button array. It references 12 old co
 
 **Utils and Web Component layer:** Accept/decline and task-display logic live in **task-list.utils.ts** and **incoming-task.utils.tsx** (they today take `isBrowser` and/or `isDeclineButtonEnabled`). These must be updated when moving to per-task `task.uiControls`. The **wc.ts** file defines r2wc props for the Web Component build; when React props drop `isBrowser`, the WC layer must drop the attribute so consumers stay in sync.
 
+### Before/After: Utils (accept/decline and task list data)
+
+#### `extractIncomingTaskData` (incoming-task.utils.tsx)
+
+**Before:** Signature and logic use `isBrowser` and `isDeclineButtonEnabled`; accept/decline text and disable state are gated by device type and store flag.
+
+```typescript
+export const extractIncomingTaskData = (
+  incomingTask: ITask,
+  isBrowser: boolean,
+  logger?,
+  isDeclineButtonEnabled?: boolean
+): IncomingTaskData => {
+  // ...
+  const acceptText = !incomingTask.data.wrapUpRequired
+    ? isTelephony && !isBrowser ? 'Ringing...' : 'Accept'
+    : undefined;
+  const declineText = !incomingTask.data.wrapUpRequired && isTelephony && isBrowser ? 'Decline' : undefined;
+  const disableAccept = (isTelephony && !isBrowser) || isAutoAnswering;
+  const disableDecline = (isTelephony && !isBrowser) || (isAutoAnswering && !isDeclineButtonEnabled);
+  // ...
+};
+```
+
+**After:** Remove `isBrowser` and `isDeclineButtonEnabled` from the signature. Derive accept/decline text and disable state from `task.uiControls?.accept` / `task.uiControls?.decline` (or caller-passed visibility) so the util no longer depends on device type or store flag.
+
+```typescript
+export const extractIncomingTaskData = (
+  incomingTask: ITask,
+  logger?
+): IncomingTaskData => {
+  // Use task.uiControls for button visibility and enablement when available
+  const accept = incomingTask.uiControls?.accept ?? { isVisible: false, isEnabled: false };
+  const decline = incomingTask.uiControls?.decline ?? { isVisible: false, isEnabled: false };
+  // acceptText: 'Accept' when accept.isVisible, 'Ringing...' for extension telephony if needed from task state
+  // declineText: 'Decline' when decline.isVisible
+  // disableAccept: !accept.isEnabled or isAutoAnswering
+  // disableDecline: !decline.isEnabled or (isAutoAnswering && !decline.isEnabled)
+  // ...
+};
+```
+
+#### `extractTaskListItemData` (task-list.utils.ts)
+
+**Before:** Signature takes `isBrowser`; uses `store.isDeclineButtonEnabled` for disable state; accept/decline text gated by `isBrowser`.
+
+```typescript
+export const extractTaskListItemData = (
+  task: ITask,
+  isBrowser: boolean,
+  agentId: string,
+  logger?: ILogger
+): TaskListItemData => {
+  // ...
+  const acceptText = isTaskIncoming ? (isTelephony && !isBrowser ? 'Ringing...' : 'Accept') : undefined;
+  const declineText = isTaskIncoming && isTelephony && isBrowser ? 'Decline' : undefined;
+  const disableDecline =
+    (isTaskIncoming && isTelephony && !isBrowser) || (isAutoAnswering && !store.isDeclineButtonEnabled);
+  // ...
+};
+```
+
+**After:** Remove `isBrowser` param and `store.isDeclineButtonEnabled` usage. Use `task.uiControls?.accept` and `task.uiControls?.decline` for button text and disable state.
+
+```typescript
+export const extractTaskListItemData = (
+  task: ITask,
+  agentId: string,
+  logger?: ILogger
+): TaskListItemData => {
+  const accept = task.uiControls?.accept ?? { isVisible: false, isEnabled: false };
+  const decline = task.uiControls?.decline ?? { isVisible: false, isEnabled: false };
+  // acceptText from accept.isVisible / task state; declineText from decline.isVisible
+  // disableAccept: !accept.isEnabled or isAutoAnswering
+  // disableDecline: !decline.isEnabled or (isAutoAnswering && !decline.isEnabled)
+  // ...
+};
+```
+
+### Before/After: CallControlCAD view (call-control-cad.tsx)
+
+**Before:** Component receives `controlVisibility: ControlVisibility` and reads legacy state flags and control shapes.
+
+```tsx
+// call-control-cad.tsx
+{controlVisibility.isConferenceInProgress && !controlVisibility.wrapup.isVisible && (
+  // ...
+)}
+{controlVisibility.isHeld && !controlVisibility.isConsultReceived && !controlVisibility.consultCallHeld && (
+  // ...
+)}
+{controlVisibility.recordingIndicator.isVisible && (
+  // ...
+)}
+{controlVisibility.isConsultInitiatedOrAccepted && (
+  // ...
+)}
+<CallControlComponent controlVisibility={controlVisibility} ... />
+```
+
+**After:** Component receives `controls: TaskUIControls` (and `isHeld` from parent if retained). Replace all `controlVisibility.*` with the new shape: use `controls.wrapup.isVisible`, `controls.recording.isVisible`, etc.; derive conference/consult display from controls or task state as documented in CallControlComponent section; pass `controls` to CallControlComponent.
+
+```tsx
+// call-control-cad.tsx
+{controls.exitConference?.isVisible && !controls.wrapup.isVisible && (
+  // ...
+)}
+{isHeld && !controls.consult?.isVisible && (
+  // consultCallHeld derived by parent via findHoldStatus(task, 'consult', agentId) if needed
+  // ...
+)}
+{controls.recording?.isVisible && (
+  // ...
+)}
+{controls.endConsult?.isVisible && (
+  // isConsultInitiatedOrAccepted replaced by control visibility or task state
+  // ...
+)}
+<CallControlComponent controls={controls} isHeld={isHeld} ... />
+```
+
+### Before/After: Web Component layer (wc.ts)
+
+**Before:** IncomingTask and TaskList Web Components expose `isBrowser` as a boolean prop.
+
+```typescript
+const WebIncomingTask = r2wc(IncomingTaskComponent, {
+  props: {
+    incomingTask: 'json',
+    isBrowser: 'boolean',
+    accept: 'function',
+    reject: 'function',
+  },
+});
+const WebTaskList = r2wc(TaskListComponent, {
+  props: {
+    currentTask: 'json',
+    taskList: 'json',
+    isBrowser: 'boolean',
+    acceptTask: 'function',
+    declineTask: 'function',
+    logger: 'function',
+  },
+});
+```
+
+**After:** Remove `isBrowser` from both r2wc prop definitions so WC consumers do not pass it; accept/decline visibility comes from per-task `task.uiControls` supplied by the widget layer.
+
+```typescript
+const WebIncomingTask = r2wc(IncomingTaskComponent, {
+  props: {
+    incomingTask: 'json',
+    accept: 'function',
+    reject: 'function',
+  },
+});
+const WebTaskList = r2wc(TaskListComponent, {
+  props: {
+    currentTask: 'json',
+    taskList: 'json',
+    acceptTask: 'function',
+    declineTask: 'function',
+    logger: 'function',
+  },
+});
+```
+
+---
+
 | File | Action | Impact |
 |------|--------|--------|
 | `cc-components/.../task/task.types.ts` | Replace `ControlVisibility` with `TaskUIControls`; update `ControlProps`, `CallControlComponentProps`; remove `isBrowser` / `isDeclineButtonEnabled` from `IncomingTaskComponentProps` and TaskList-related prop types when using per-task uiControls | **HIGH** |
