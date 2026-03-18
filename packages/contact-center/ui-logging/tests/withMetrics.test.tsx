@@ -156,4 +156,121 @@ describe('withMetrics HOC', () => {
       expect.objectContaining({event: 'PROPS_UPDATED'})
     );
   });
+
+  it('should log PROPS_UPDATED for multiple watched props that change simultaneously', () => {
+    const mockTime = 1234567890;
+    jest.setSystemTime(mockTime);
+
+    interface MultiPropComponentProps {
+      name?: string;
+      status?: string;
+      count?: number;
+      [key: string]: any;
+    }
+
+    const SpyComponent: React.FC<MultiPropComponentProps> = (props) => (
+      <div>
+        {props.name} {props.status} {props.count}
+      </div>
+    );
+    const WrappedSpy = withMetrics<MultiPropComponentProps>(SpyComponent, 'TestWidget', ['name', 'status']);
+
+    const {rerender} = render(<WrappedSpy name="old" status="active" count={1} />);
+    logMetricsSpy.mockClear();
+
+    rerender(<WrappedSpy name="new" status="inactive" count={2} />);
+
+    expect(logMetricsSpy).toHaveBeenCalledWith({
+      widgetName: 'TestWidget',
+      event: 'PROPS_UPDATED',
+      props: {
+        name: {oldValue: 'old', newValue: 'new'},
+        status: {oldValue: 'active', newValue: 'inactive'},
+      },
+      timestamp: mockTime,
+    });
+  });
+
+  it('should only log changed watched props when some watched props stay the same', () => {
+    const mockTime = 1234567890;
+    jest.setSystemTime(mockTime);
+
+    const SpyComponent: React.FC<TestComponentProps> = (props) => <div>Test {props.name}</div>;
+    const WrappedSpy = withMetrics<TestComponentProps>(SpyComponent, 'TestWidget', ['name']);
+
+    const {rerender} = render(<WrappedSpy name="same" />);
+    logMetricsSpy.mockClear();
+
+    rerender(<WrappedSpy name="same" />);
+
+    expect(logMetricsSpy).not.toHaveBeenCalled();
+  });
+
+  it('should not log PROPS_UPDATED on first render', () => {
+    const mockTime = 1234567890;
+    jest.setSystemTime(mockTime);
+
+    const SpyComponent: React.FC<TestComponentProps> = (props) => <div>Test {props.name}</div>;
+    const WrappedSpy = withMetrics<TestComponentProps>(SpyComponent, 'TestWidget', ['name']);
+
+    render(<WrappedSpy name="initial" />);
+
+    expect(logMetricsSpy).toHaveBeenCalledTimes(1);
+    expect(logMetricsSpy).toHaveBeenCalledWith(
+      expect.objectContaining({event: 'WIDGET_MOUNTED'})
+    );
+    expect(logMetricsSpy).not.toHaveBeenCalledWith(
+      expect.objectContaining({event: 'PROPS_UPDATED'})
+    );
+  });
+
+  it('should log correct widget name for different wrapped components', () => {
+    const mockTime = 1234567890;
+    jest.setSystemTime(mockTime);
+
+    const ComponentA: React.FC<TestComponentProps> = () => <div>A</div>;
+    const ComponentB: React.FC<TestComponentProps> = () => <div>B</div>;
+
+    const WrappedA = withMetrics<TestComponentProps>(ComponentA, 'WidgetA');
+    const WrappedB = withMetrics<TestComponentProps>(ComponentB, 'WidgetB');
+
+    render(<WrappedA />);
+    expect(logMetricsSpy).toHaveBeenCalledWith(
+      expect.objectContaining({widgetName: 'WidgetA', event: 'WIDGET_MOUNTED'})
+    );
+
+    logMetricsSpy.mockClear();
+    render(<WrappedB />);
+    expect(logMetricsSpy).toHaveBeenCalledWith(
+      expect.objectContaining({widgetName: 'WidgetB', event: 'WIDGET_MOUNTED'})
+    );
+  });
+
+  it('should track prop changes across multiple re-renders', () => {
+    const mockTime = 1234567890;
+    jest.setSystemTime(mockTime);
+
+    const SpyComponent: React.FC<TestComponentProps> = (props) => <div>Test {props.name}</div>;
+    const WrappedSpy = withMetrics<TestComponentProps>(SpyComponent, 'TestWidget', ['name']);
+
+    const {rerender} = render(<WrappedSpy name="first" />);
+    logMetricsSpy.mockClear();
+
+    rerender(<WrappedSpy name="second" />);
+    expect(logMetricsSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        event: 'PROPS_UPDATED',
+        props: {name: {oldValue: 'first', newValue: 'second'}},
+      })
+    );
+
+    logMetricsSpy.mockClear();
+    rerender(<WrappedSpy name="third" />);
+    expect(logMetricsSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        event: 'PROPS_UPDATED',
+        props: {name: {oldValue: 'second', newValue: 'third'}},
+      })
+    );
+  });
 });
