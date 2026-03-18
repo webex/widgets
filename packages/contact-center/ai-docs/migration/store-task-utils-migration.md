@@ -6,6 +6,10 @@ The store's `task-utils.ts` contains 16 exported utility functions that inspect 
 
 **Barrel export:** `store/src/index.ts` has `export * from './task-utils'` — all 16 functions are publicly exported via `@webex/cc-store`. Removing functions will cause compile errors in any downstream consumer still importing them.
 
+**Pre-migration: confirm downstream usage.** Exported does not mean used. The only known downstream consumer today is Epic. Before removing store task-utils or changing exports, confirm in the space (or with Epic) that these utils are unused. If they are not used, removal is safe and external compile impact can be ignored; if they are used, coordinate the migration or provide an alternative.
+
+**Migration end state:** The task object (and `task.data` / `task.uiControls`) is the source of truth. The goal is to remove these legacy constants and derived-state helpers once the migration is complete. This document defines the **safe ordering** to remove them (e.g. rewrite `findHoldStatus` before deleting consult-state constants). Helpers such as `findHoldStatus` and `findHoldTimestamp` are kept for now because hold state must be derived from task/participants (SDK `uiControls.hold.isEnabled` is an action-availability flag, not the current held state); they can be removed when the SDK or task layer exposes equivalent hold state.
+
 ---
 
 ## Constants and Types to Delete
@@ -27,15 +31,19 @@ The store's `task-utils.ts` contains 16 exported utility functions that inspect 
 
 ## Constants to Keep
 
+**All entries in this table are kept** (no deletions). Use them until the corresponding helpers are rewritten or removed per the ordering constraints below.
+
 | Keep | File | Reason |
 |------|------|--------|
-| `RELATIONSHIP_TYPE_CONSULT` | `store/src/constants.ts` | Still used by `findMediaResourceId` (KEEP) |
-| `MEDIA_TYPE_CONSULT` | `store/src/constants.ts` | Still used by `findMediaResourceId` (KEEP) |
-| `AGENT` | `store/src/constants.ts` | Used by `getConferenceParticipants` (KEEP) for participant filtering |
+| `RELATIONSHIP_TYPE_CONSULT` | `store/src/constants.ts` | Used by `findMediaResourceId` |
+| `MEDIA_TYPE_CONSULT` | `store/src/constants.ts` | Used by `findMediaResourceId` |
+| `AGENT` | `store/src/constants.ts` | Used by `getConferenceParticipants` for participant filtering |
 | `CUSTOMER` | `store/src/constants.ts` | Used by `EXCLUDED_PARTICIPANT_TYPES` |
 | `SUPERVISOR` | `store/src/constants.ts` | Used by `EXCLUDED_PARTICIPANT_TYPES` |
 | `VVA` | `store/src/constants.ts` | Used by `EXCLUDED_PARTICIPANT_TYPES` |
-| `EXCLUDED_PARTICIPANT_TYPES` | `store/src/constants.ts` | Used by `getConferenceParticipants` (KEEP) for participant filtering |
+| `EXCLUDED_PARTICIPANT_TYPES` | `store/src/constants.ts` | Used by `getConferenceParticipants` for participant filtering |
+
+**Consult string alias:** `TASK_STATE_CONSULT`, `RELATIONSHIP_TYPE_CONSULT`, and `MEDIA_TYPE_CONSULT` all resolve to the same string `'consult'`. When rewriting `findHoldStatus` or consolidating constants, consider using a single constant (e.g. one media-type constant for the consult leg) or document the alias explicitly to avoid drift. Do not rely on three separate names for the same value long term.
 
 ## Ordering Constraint: Consult State Constants
 
@@ -70,6 +78,10 @@ The store's `task-utils.ts` contains 16 exported utility functions that inspect 
 ## Gotcha: `TaskState.CONSULT_INITIATING` vs `CONSULTING`
 
 The SDK has `CONSULT_INITIATING` (consult requested, async in-progress) and `CONSULTING` (consult accepted, actively consulting) as distinct states. The old widget constant `TASK_STATE_CONSULT` ('consult') maps to `CONSULT_INITIATING`, NOT `CONSULTING`. Do not collapse these when updating `getTaskStatus()` or any consult timer logic.
+
+## Decision: `findHoldStatus` and `findHoldTimestamp` retained for now
+
+Reviewers may suggest removing these because "task is source of truth." They are **kept** in this migration because: (1) SDK `task.uiControls.hold.isEnabled` indicates whether the hold *action* is available, not whether a given leg is *currently held* (e.g. during consult, main call can be held while consult is active). (2) Timers and UI need per-leg hold state and hold timestamp, which are read from `task.data.interaction.media`; the store helpers centralize that derivation. Once the SDK or task layer exposes equivalent hold state (or widgets derive it in a single place from `task.data` only), these helpers can be removed and the "task as source of truth" end state is fully achieved.
 
 ---
 

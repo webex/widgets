@@ -45,11 +45,11 @@ The widget's local `TASK_EVENTS` enum (in `store/src/store.types.ts`) uses CC-le
 | `TASK_TRANSFER_CONFERENCE` | `'task:transferConference'` | Evaluate for conference flow |
 | `TASK_CLEANUP` | `'task:cleanup'` | SDK internal — likely no widget action |
 
-**Action:** Delete the local `TASK_EVENTS` enum from `store/src/store.types.ts` and import from SDK once the SDK exports it. **As of this migration, the SDK does not yet export `TASK_EVENTS` from its package entry point** (or status is TBD). For current status and the plan to replace the local enum once the SDK exports it, see [migration-overview.md](./migration-overview.md) → "SDK Pending Exports" (or equivalent section). Until then, keep the local enum and align event string values with the SDK where needed.
+**Action:** The SDK **exports `TASK_EVENTS`** from its package entry point (`packages/@webex/contact-center/src/index.ts`): `export {TASK_EVENTS} from './services/task/types';` and `export type {TASK_EVENTS as TaskEvents} from './services/task/types';`. Delete the local `TASK_EVENTS` enum from `store/src/store.types.ts` and import from the SDK: `import { TASK_EVENTS } from '@webex/contact-center';`. If the widgets repo currently depends on an older SDK version that does not re-export `TASK_EVENTS` from the package index, keep the local enum and align event string values with the SDK until the dependency is updated.
 
 ### Pre-existing Bug: Event Name Mismatches
 
-The 5 renamed events above are currently hardcoded in `store.types.ts` with a TODO comment: `// TODO: remove this once cc sdk exports this enum`. During migration, **when the SDK exports `TASK_EVENTS`**, replace the entire local enum with the SDK's exported enum. Until then, update local enum values to match SDK event strings so wiring is correct.
+The 5 renamed events above are currently hardcoded in `store.types.ts` with a TODO comment: `// TODO: remove this once cc sdk exports this enum`. The SDK now exports `TASK_EVENTS`; replace the entire local enum with the SDK import and use SDK event names (e.g. `TASK_WRAPPEDUP`, `TASK_RECORDING_PAUSED`, `TASK_RECORDING_RESUMED`) everywhere.
 
 ---
 
@@ -135,7 +135,7 @@ A `handleConsultEnd` method exists (resets `isQueueConsultInProgress`, `currentC
 
 ### Definitive New Event Registration
 
-Many events that currently trigger `refreshTaskList()` will no longer need it because `task.data` is kept in sync by the SDK. Below is the single authoritative table for all event handler changes:
+Many events that currently trigger `refreshTaskList()` will no longer need it because `task.data` is kept in sync by the SDK. For rows marked **Simplify**, we **remove the call to `refreshTaskList()`** from the handler; the **handler is not removed** — it is kept and only fires callbacks so widgets re-render. Below is the single authoritative table for all event handler changes:
 
 | # | Event | New Handler | Change | Detail |
 |---|-------|-------------|--------|--------|
@@ -158,10 +158,10 @@ Many events that currently trigger `refreshTaskList()` will no longer need it be
 | 17 | `TASK_CONFERENCE_STARTED` | `handleConferenceStarted` | **Simplify** | Same as #16 |
 | 18 | `TASK_CONFERENCE_ENDED` | `handleConferenceEnded` | **Simplify** | Remove `refreshTaskList()`. Fire callback. |
 | 19 | `TASK_PARTICIPANT_LEFT` | `handleConferenceEnded` | **Simplify** | Same as #18 |
-| 20 | `TASK_HOLD` | Fire callback only | **Simplify** | Remove `refreshTaskList()`. |
-| 21 | `TASK_RESUME` | Fire callback only | **Simplify** | Remove `refreshTaskList()`. |
-| 22 | `TASK_RECORDING_PAUSED` | Fire callback only | **Simplify + rename** | Was `CONTACT_RECORDING_PAUSED`. |
-| 23 | `TASK_RECORDING_RESUMED` | Fire callback only | **Simplify + rename** | Was `CONTACT_RECORDING_RESUMED`. |
+| 20 | `TASK_HOLD` | Fire callback only (e.g. `bound.hold`) | **Simplify** | **Remove only `refreshTaskList()`** from the handler; keep the handler and fire callbacks. |
+| 21 | `TASK_RESUME` | Fire callback only (e.g. `bound.resume`) | **Simplify** | **Remove only `refreshTaskList()`** from the handler; keep the handler and fire callbacks. |
+| 22 | `TASK_RECORDING_PAUSED` | Fire callback only | **Simplify + rename** | Was `CONTACT_RECORDING_PAUSED`. Remove `refreshTaskList()`; keep handler, fire callback. |
+| 23 | `TASK_RECORDING_RESUMED` | Fire callback only | **Simplify + rename** | Was `CONTACT_RECORDING_RESUMED`. Remove `refreshTaskList()`; keep handler, fire callback. |
 | 24 | `TASK_POST_CALL_ACTIVITY` | Fire callback only | **Simplify** | Remove `refreshTaskList()`. |
 | 25 | `TASK_CONFERENCE_ESTABLISHING` | Fire callback only | **Simplify** | Remove `refreshTaskList()`. |
 | 26 | `TASK_CONFERENCE_FAILED` | Fire callback only | **Simplify** | Remove `refreshTaskList()`. |
@@ -174,16 +174,27 @@ Many events that currently trigger `refreshTaskList()` will no longer need it be
 
 **Old:** 15+ events trigger `refreshTaskList()` → `cc.taskManager.getAllTasks()` → update store observables.
 
-**New:** SDK keeps `task.data` updated via state machine actions. The store can read `task.data` directly instead of re-fetching. `refreshTaskList()` should only be called for:
-- Initial load / hydration
-- Full page refresh recovery
-- `TASK_WRAPPEDUP` (task must be removed from list — may be replaceable with explicit list removal)
+**New:** SDK keeps `task.data` updated via state machine actions. The store can read `task.data` directly instead of re-fetching. For most events we **remove only the call to `refreshTaskList()`** from the handler; the **handler itself is kept** and becomes "fire callback only" (e.g. bound hold/resume handlers).
 
-#### Why we can remove most `refreshTaskList()`
+#### When `refreshTaskList()` is still required
+
+**`refreshTaskList()` remains required** for these cases only:
+
+1. **Initial load / hydration** — populate the store's task list when the app or CC session loads.
+2. **Full page refresh recovery** — re-sync the list after a full page reload.
+3. **`TASK_WRAPPEDUP`** — the task must be removed from the list after wrap-up completion; today that is done by calling `refreshTaskList()` (or may be replaced later with explicit list removal).
+
+For all other events (e.g. `TASK_HOLD`, `TASK_RESUME`, `TASK_RECORDING_PAUSED`, consult/conference lifecycle), **do not** call `refreshTaskList()`. The handler stays; it only fires callbacks so widgets re-render.
+
+#### Why we can remove most `refreshTaskList()` calls
 
 1. **SDK keeps the same task reference up to date.** The state machine updates `task.data` (and `task.uiControls`) on the **same** `ITask` reference already held in the store's `taskList`. No re-fetch is needed for in-place updates.
-2. **Widget re-renders are driven by callbacks.** Widgets that registered via `setTaskCallback(event, cb, taskId)` are notified when the store calls `fireTaskCallbacks(event, interactionId, payload)`. Those callbacks cause the widget to re-run and re-render with the updated task from the store.
-3. **Re-fetch is only needed when the list itself changes.** We keep `refreshTaskList()` only where the **list** must change: e.g. initial load, full refresh, or `TASK_WRAPPEDUP` (task removed from the list). For all other events, the existing task reference is already updated by the SDK, and `fireTaskCallbacks` triggers UI updates.
+2. **Widgets get the latest data by re-reading from the store.** When the store calls `fireTaskCallbacks(event, interactionId, payload)`, widgets that registered via `setTaskCallback(event, cb, taskId)` are notified. Those callbacks cause the widget to re-run and **re-read the same task from the store** (e.g. `store.taskList[interactionId]` or `store.currentTask`). The task reference has already been updated in place by the SDK, so **no write-back of task data into the store is needed** — and `fireTaskCallbacks` does not write task data; it only invokes callbacks.
+3. **Re-fetch is only needed when the list itself changes.** We keep `refreshTaskList()` only where the **list** must change: initial load, full refresh, or `TASK_WRAPPEDUP` (task removed from the list). For all other events, the existing task reference is already updated by the SDK, and `fireTaskCallbacks` triggers UI updates.
+
+#### Future consideration: optional single-task refresh
+
+As an enhancement, `refreshTaskList()` could be extended to accept an optional task (or `interactionId`) and update only that task in the store instead of re-fetching the full list (e.g. for wrap-up or other single-task updates). This is not required for the current migration.
 
 ---
 
@@ -195,6 +206,9 @@ Many events that currently trigger `refreshTaskList()` will no longer need it be
 `fireTaskCallbacks(event: TASK_EVENTS, interactionId: string, payload?: unknown): void`
 
 **Where it lives:** In the store-events layer — `packages/contact-center/store/src/storeEventsWrapper.ts`. After the migration, "After" handlers call `fireTaskCallbacks(...)` instead of (or in addition to) `refreshTaskList()` for events that only need to notify widgets. Implementation pattern: look up callbacks by event and optional `taskId`/`interactionId`, then invoke each with the payload.
+
+**Implementation note — task data flow (no write-back):**  
+`fireTaskCallbacks` **does not** write or update task data back into the store. The flow is: (1) The SDK mutates the **same** `ITask` reference already held in the store's `taskList` (updates `task.data` and `task.uiControls` in place). (2) The store calls `fireTaskCallbacks(event, interactionId, payload)`, which only **invokes** the registered widget callbacks. (3) Widgets then **read** from the store (e.g. `store.taskList[interactionId]` or `store.currentTask`) and re-render with the updated task. So widgets get the latest data by re-reading that same reference after the callback; there is no separate "update task data back into the store" step.
 
 ---
 
@@ -483,7 +497,7 @@ handleTaskRemove = (taskToRemove: ITask) => {
 |------|--------|
 | `store/src/storeEventsWrapper.ts` | Refactor `registerTaskEventListeners` (see definitive table), update `handleTaskRemove` (fix listener mismatches + add `TASK_UI_CONTROLS_UPDATED`), simplify handlers (remove `refreshTaskList()` from all except `TASK_WRAPPEDUP`), wire `handleConsultEnd` to `TASK_CONSULT_END` |
 | `store/src/store.ts` | No changes expected (observables stay) |
-| `store/src/store.types.ts` | Delete local `TASK_EVENTS` enum; import from SDK (which includes `TASK_UI_CONTROLS_UPDATED`) |
+| `store/src/store.types.ts` | Delete the local `TASK_EVENTS` enum and import from SDK: `import { TASK_EVENTS } from '@webex/contact-center';` (SDK exports it from package index, e.g. `export {TASK_EVENTS} from './services/task/types'`). If the widgets dependency is an older SDK that does not re-export `TASK_EVENTS`, keep the local enum until the dependency is updated. |
 | **Task-layer consumers of `TASK_EVENTS`** | **Must be updated in the same step** so that removing the store’s local enum does not break the build. `task/src/helper.ts` imports `TASK_EVENTS` from `@webex/cc-store` and uses legacy names: `AGENT_WRAPPEDUP`, `CONTACT_RECORDING_PAUSED`, `CONTACT_RECORDING_RESUMED` (and `TASK_RECORDING_PAUSED` / `TASK_RECORDING_RESUMED` in setTaskCallback). Replace with SDK event names: `TASK_WRAPPEDUP`, `TASK_RECORDING_PAUSED`, `TASK_RECORDING_RESUMED` in both `setTaskCallback` and `removeTaskCallback`. Either update `task/src/helper.ts` (and any other task files using `TASK_EVENTS`) in this PR or sequence the migration so store switches to SDK enum only after task package is updated. |
 | `store/tests/*` | Update tests for renamed events, new `TASK_UI_CONTROLS_UPDATED` handler, simplified handlers |
 
