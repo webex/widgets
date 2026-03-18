@@ -79,7 +79,11 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
   const phoneNumberTooltipId = `phone-number-tooltip-${currentTask.data.interaction.interactionId}`;
 
   const renderCustomerName = () => {
-    const customerText = isSocial ? customerName || NO_CUSTOMER_NAME : isOutdial ? (dn || ani || NO_CALLER_ID) : (ani || NO_CALLER_ID);
+    const customerText = isSocial
+      ? customerName || NO_CUSTOMER_NAME
+      : isOutdial
+        ? dn || ani || NO_CALLER_ID
+        : ani || NO_CALLER_ID;
 
     const textComponent = (
       <Text

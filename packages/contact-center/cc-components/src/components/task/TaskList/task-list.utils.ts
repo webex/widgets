@@ -44,7 +44,7 @@ export const extractTaskListItemData = (
 
     // Compute title based on media type
     // For outdial calls, show the dialed number (dn) instead of the entrypoint (ani)
-    const title = isSocial ? customerName : isOutdial ? (dn || ani) : ani;
+    const title = isSocial ? customerName : isOutdial ? dn || ani : ani;
 
     const isAutoAnswering = task.data.isAutoAnswering || false;
 
