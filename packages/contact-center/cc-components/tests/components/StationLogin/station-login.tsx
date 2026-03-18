@@ -906,7 +906,7 @@ describe('Station Login Component', () => {
       }) as unknown as typeof RegExp;
 
       const mockSetError = jest.fn();
-      const result = stationLoginUtils.validateDialNumber('invalid', mockSetError, loggerMock);
+      const result = stationLoginUtils.validateDialNumber('invalid', null, mockSetError, loggerMock);
 
       expect(loggerMock.error).toHaveBeenCalledWith('CC-Widgets: StationLogin: Error in validateDialNumber', {
         module: 'cc-components#station-login.utils.tsx',
