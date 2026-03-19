@@ -8,7 +8,7 @@ The store's `task-utils.ts` contains 16 exported utility functions that inspect 
 
 **Pre-migration: confirm downstream usage.** Exported does not mean used. The only known downstream consumer today is Epic. Before removing store task-utils or changing exports, confirm in the space (or with Epic) that these utils are unused. If they are not used, removal is safe and external compile impact can be ignored; if they are used, coordinate the migration or provide an alternative.
 
-**Migration end state:** The task object (and `task.data` / `task.uiControls`) is the source of truth. The goal is to remove these legacy constants and derived-state helpers once the migration is complete. This document defines the **safe ordering** to remove them (e.g. rewrite `findHoldStatus` before deleting consult-state constants). Helpers such as `findHoldStatus` and `findHoldTimestamp` are kept for now because hold state must be derived from task/participants (SDK `uiControls.hold.isEnabled` is an action-availability flag, not the current held state); they can be removed when the SDK or task layer exposes equivalent hold state.
+**Migration end state:** The task object (and `task.data` / `task.uiControls`) is the source of truth. `task.uiControls` is recomputed by the SDK whenever `task.data` changes and should be considered the source for anything and everything in the UI. The goal is to remove these legacy constants and derived-state helpers once the migration is complete. This document defines the **safe ordering** to remove them (e.g. rewrite `findHoldStatus` before deleting consult-state constants). Helpers `findHoldStatus` and `findHoldTimestamp` are kept for now only because per-leg hold state and hold timestamps must be derived from `task.data.interaction.media`; they can be removed when the SDK or task layer exposes equivalent per-leg hold state.
 
 ---
 
@@ -81,7 +81,7 @@ The SDK has `CONSULT_INITIATING` (consult requested, async in-progress) and `CON
 
 ## Decision: `findHoldStatus` and `findHoldTimestamp` retained for now
 
-Reviewers may suggest removing these because "task is source of truth." They are **kept** in this migration because: (1) SDK `task.uiControls.hold.isEnabled` indicates whether the hold *action* is available, not whether a given leg is *currently held* (e.g. during consult, main call can be held while consult is active). (2) Timers and UI need per-leg hold state and hold timestamp, which are read from `task.data.interaction.media`; the store helpers centralize that derivation. Once the SDK or task layer exposes equivalent hold state (or widgets derive it in a single place from `task.data` only), these helpers can be removed and the "task as source of truth" end state is fully achieved.
+Reviewers may suggest removing these because "task is source of truth." The SDK `task.uiControls` is recomputed every time `task.data` changes and should be considered the source for anything and everything in the UI. These helpers are **kept** in this migration only because timers and UI need **per-leg hold state** and **hold timestamp**, which are derived from `task.data.interaction.media`; the store helpers centralize that derivation. Once the SDK or task layer exposes equivalent per-leg hold state (or widgets derive it in a single place from `task.data` only), these helpers can be removed and the "task as source of truth" end state is fully achieved.
 
 ---
 
@@ -140,7 +140,7 @@ Two different `findHoldTimestamp` functions exist with different signatures:
 | 4 | `isInteractionOnHold(task)` | Timer logic needs this |
 | 5 | `findMediaResourceId(task, mType)` | Switch-call actions need media resource IDs. Uses `RELATIONSHIP_TYPE_CONSULT`, `MEDIA_TYPE_CONSULT` from constants. |
 | 6 | `findHoldTimestamp(task, mType)` | Hold timer needs timestamp. Note: store version takes `ITask`, task-util version takes `Interaction` (see dual-signature note above). |
-| 7 | `findHoldStatus(task, mType, agentId)` | Needed for `getTaskStatus()` held-state derivation and component layer `isHeld` — cannot derive from `controls.hold.isEnabled` |
+| 7 | `findHoldStatus(task, mType, agentId)` | Needed for per-leg hold state and hold timers (from `task.data.interaction.media`); `getTaskStatus()` and component layer `isHeld` use this until SDK/task exposes equivalent |
 
 ### Review — 4 Functions (may simplify or remove)
 
@@ -260,8 +260,8 @@ const consultCallHeld = findHoldStatus(task, 'consult', agentId);
 #### After
 ```typescript
 // KEPT in store/task-utils.ts — still needed for:
-// 1. getTaskStatus() held-state derivation (cannot derive from controls.hold.isEnabled)
-// 2. Component layer isHeld prop
+// Per-leg hold state and hold timers (from task.data.interaction.media);
+// getTaskStatus() and component layer isHeld use this until SDK/task exposes equivalent.
 // Implementation unchanged — reads from task.data.interaction.participants
 export const findHoldStatus = (task: ITask, mType: string, agentId: string): boolean => {
   // ...unchanged...
@@ -361,7 +361,7 @@ export function getTaskStatus(task: ITask, agentId: string): string {
 |------|--------|
 | `store/src/task-utils.ts` | Remove 5 functions, keep 7 (update `getTaskStatus` to use `task.uiControls`), review 4 |
 | `store/src/store.types.ts` | Delete `ConsultStatus` enum (all consumers removed) |
-| `store/src/constants.ts` | Delete 9 task/interaction/consult state constants; keep 7 participant/media constants |
+| `store/src/constants.ts` | **Phased deletion:** Delete 9 task/interaction/consult state constants **only after** dependent functions (`getTaskStatus`, `findHoldStatus`, `getConsultMPCState`) are rewritten to use SDK `TaskState`. The "After" `getTaskStatus` code still returns these constants as values — they must remain until a follow-up step rewrites return values to SDK `TaskState`. Keep 7 participant/media constants. See ordering constraints above. |
 | `task/src/Utils/task-util.ts` | Delete `getControlsVisibility` + all 22 `get*ButtonVisibility` functions; keep `findHoldTimestamp(interaction, mType)` |
 | `store/tests/task-utils.ts` | Update tests: remove tests for 5 deleted functions, update `getTaskStatus` tests |
 | `task/tests/utils/task-util.ts` | Remove tests for deleted visibility functions |
