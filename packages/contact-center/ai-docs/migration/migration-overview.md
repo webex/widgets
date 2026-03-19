@@ -12,7 +12,7 @@ Guide for migrating CC Widgets from ad-hoc task state management to the new SDK 
 ┌─────────────────────────────────────────────────────────────────────────────────┐
 │  OLD (Current Widgets)                 │  NEW (After Migration)                 │
 │                                        │                                        │
-│  SDK emits 30+ task events             │  SDK state machine transitions         │
+│  SDK emits 27 task events              │  SDK state machine transitions         │
 │         │                              │         │                              │
 │         ▼                              │         ▼                              │
 │  Store: refreshTaskList()              │  SDK: computes TaskUIControls          │
@@ -35,21 +35,27 @@ Guide for migrating CC Widgets from ad-hoc task state management to the new SDK 
 └─────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### `TaskUIControls` Structure
+> The events themselves have not changed — they are the same events, now emitted via the SDK state machine. The key difference is that task state updates (including UI control computation) are handled by the SDK, not by widgets.
 
-```typescript
-type TaskUIControlState = { isVisible: boolean; isEnabled: boolean };
+---
 
-type TaskUIControls = {
-  accept, decline, hold, transfer, consult, end, recording, mute,
-  consultTransfer, endConsult, conference, exitConference,
-  transferConference, mergeToConference, wrapup,
-  switchToMainCall, switchToConsult
-  // each: TaskUIControlState
-};
-```
+## CC Widgets Files Affected
 
-Widgets no longer compute control visibility — `task.uiControls` is the single source of truth.
+| Area | Path |
+|------|------|
+| Store event wrapper | `packages/contact-center/store/src/storeEventsWrapper.ts` |
+| Store task utils | `packages/contact-center/store/src/task-utils.ts` |
+| Store constants | `packages/contact-center/store/src/constants.ts` |
+| Store types | `packages/contact-center/store/src/store.types.ts` |
+| Task hooks | `packages/contact-center/task/src/helper.ts` |
+| Task UI utils (to be removed) | `packages/contact-center/task/src/Utils/task-util.ts` |
+| Task types | `packages/contact-center/task/src/task.types.ts` |
+| CC Components — CallControl | `packages/contact-center/cc-components/src/components/task/CallControl/` |
+| CC Components — CallControlCAD | `packages/contact-center/cc-components/src/components/task/CallControlCAD/` |
+| CC Components types | `packages/contact-center/cc-components/src/components/task/task.types.ts` |
+| CC Components — WC wrapper | `packages/contact-center/cc-components/src/wc.ts` |
+
+> **Not listed:** `timer-utils.ts` and `useHoldTimer.ts` are not directly affected by the task-refactor SDK changes. Timer signature updates (if any) are tracked separately in the hook migration doc.
 
 ---
 
@@ -59,7 +65,7 @@ Follow these docs in order. Each doc has old vs new code, before/after examples,
 
 | Order | Document | What to Do |
 |-------|----------|------------|
-| 1 | [store-event-wiring-migration.md](./store-event-wiring-migration.md) | Simplify 30+ event handlers — remove `refreshTaskList()`, add `TASK_UI_CONTROLS_UPDATED` subscription |
+| 1 | [store-event-wiring-migration.md](./store-event-wiring-migration.md) | Update 27 event handlers — switch to SDK `TASK_EVENTS` enum, keep `refreshTaskList()`, add `TASK_UI_CONTROLS_UPDATED` subscription, fix `handleConsultEnd` wiring, replace `isDeclineButtonEnabled` with `task.uiControls.decline.isEnabled` |
 | 2 | [store-task-utils-migration.md](./store-task-utils-migration.md) | Remove redundant utils (SDK handles), keep display/timer utils |
 | 3 | [call-control-hook-migration.md](./call-control-hook-migration.md) | Replace `getControlsVisibility()` with `task.uiControls` in `useCallControl` + update timer utils |
 | 4 | [incoming-task-migration.md](./incoming-task-migration.md) | Use `task.uiControls.accept/decline` instead of visibility functions |
@@ -72,9 +78,7 @@ Follow these docs in order. Each doc has old vs new code, before/after examples,
 
 **What the SDK does not export today** (from the package entry point `src/index.ts`): the items in the table below. They exist in SDK source but are not re-exported from the public package, so widget code cannot import them until they are added to the package.
 
-**Before implementing:** Identify whether each required export is available from the SDK — i.e. whether you can import it from the package. If an item is not yet exported, either delay the work that depends on it or implement only the parts that do not need it. Full completion of the migration requires these exports to be available.
-
-These items are exported from SDK source files but not yet from the package entry point (`src/index.ts`):
+**Before implementing:** Check whether each required export is available from the SDK — i.e. whether you can import it from the package. If an item is not yet exported, delay the work that depends on it or implement only the parts that do not need it. Full completion of the migration requires these exports.
 
 | Item | SDK Change Needed |
 |------|---|
@@ -90,36 +94,57 @@ These items are exported from SDK source files but not yet from the package entr
 
 | Type | Purpose |
 |------|---------|
-| `TaskUIControls` | Pre-computed control states (17 controls) |
+| `TaskUIControls` | Pre-computed control states (17 controls, each `{ isVisible, isEnabled }`) |
+| `TaskUIControlState` | Shape: `{ isVisible: boolean; isEnabled: boolean }` |
 | `getDefaultUIControls()` | Fallback when no task: `task?.uiControls ?? getDefaultUIControls()` |
 | `TASK_EVENTS` | Import from SDK — delete local enum in `store.types.ts` |
+| `TaskState` | SDK state machine states — needed for consult timer labeling |
 
-> Constants to delete/keep, event name mappings, and **migration gotchas** (non-obvious pitfalls or ordering constraints — e.g. “do not delete constant X until helper Y is rewritten”) are documented in each of the migration docs listed in the [Execution Order](#execution-order) table above (e.g. [store-event-wiring-migration.md](./store-event-wiring-migration.md), [store-task-utils-migration.md](./store-task-utils-migration.md), [call-control-hook-migration.md](./call-control-hook-migration.md), and the rest).
+### `TaskUIControls` Structure
+
+```typescript
+type TaskUIControlState = { isVisible: boolean; isEnabled: boolean };
+
+type TaskUIControls = {
+  accept: TaskUIControlState;
+  decline: TaskUIControlState;
+  hold: TaskUIControlState;
+  transfer: TaskUIControlState;
+  consult: TaskUIControlState;
+  end: TaskUIControlState;
+  recording: TaskUIControlState;
+  mute: TaskUIControlState;
+  consultTransfer: TaskUIControlState;
+  endConsult: TaskUIControlState;
+  conference: TaskUIControlState;
+  exitConference: TaskUIControlState;
+  transferConference: TaskUIControlState;
+  mergeToConference: TaskUIControlState;
+  wrapup: TaskUIControlState;
+  switchToMainCall: TaskUIControlState;
+  switchToConsult: TaskUIControlState;
+};
+```
+
+Widgets no longer compute control visibility — `task.uiControls` is the single source of truth.
+
+> Specific constants to delete/keep, event name mappings, and ordering constraints (e.g. "do not delete constant X until helper Y is rewritten") are documented in each migration doc listed in the [Execution Order](#execution-order) table.
 
 ---
 
-## CC Widgets Files Affected
+## SDK Public Method Changes
 
-| Area | Path |
-|------|------|
-| Task hooks | `packages/contact-center/task/src/helper.ts` |
-| Task UI utils (OLD — to be removed) | `packages/contact-center/task/src/Utils/task-util.ts` |
-| Task timer utils | `packages/contact-center/task/src/Utils/timer-utils.ts` |
-| Hold timer hook | `packages/contact-center/task/src/Utils/useHoldTimer.ts` |
-| Task types | `packages/contact-center/task/src/task.types.ts` |
-| Store event wrapper | `packages/contact-center/store/src/storeEventsWrapper.ts` |
-| Store task utils | `packages/contact-center/store/src/task-utils.ts` |
-| Store constants | `packages/contact-center/store/src/constants.ts` |
-| CC Components — CallControl | `packages/contact-center/cc-components/src/components/task/CallControl/` |
-| CC Components — CallControlCAD | `packages/contact-center/cc-components/src/components/task/CallControlCAD/` |
-| CC Components types | `packages/contact-center/cc-components/src/components/task/task.types.ts` |
+| Old | New | Notes |
+|-----|-----|-------|
+| `task.consultTransfer()` | `task.transfer()` | `consultTransfer` is no longer a separate public method; a single `.transfer()` is used for all transfer types |
 
 ---
 
 ## CC SDK Reference
 
 > **Repo:** [webex/webex-js-sdk (task-refactor)](https://github.com/webex/webex-js-sdk/tree/task-refactor)
-> **Local path:** `/Users/akulakum/Documents/CC_SDK/webex-js-sdk` (branch: `task-refactor`)
+
+<!-- TODO: Provide local SDK cross-repo reference approach once finalized (Rankush is investigating). Do not use hardcoded local paths. -->
 
 | File | Purpose |
 |------|---------|
@@ -130,4 +155,4 @@ These items are exported from SDK source files but not yet from the package entr
 ---
 
 _Created: 2026-03-09_
-_Updated: 2026-03-12 (consolidated and reordered per reviewer feedback)_
+_Updated: 2026-03-19 (addressed Kesari3008/mkesavan feedback, aligned with PR #646 decisions)_
