@@ -231,7 +231,7 @@ class StoreWrapper implements IStoreWrapper {
     if (isIncomingTask(task, this.agentId)) return;
 
     runInAction(() => {
-      // Determine if the new task is the same as the current task
+      // Determine if the new task is the same as the current task.
       let isSameTask = false;
       if (task && this.currentTask) {
         isSameTask = task.data.interactionId === this.currentTask.data.interactionId;
