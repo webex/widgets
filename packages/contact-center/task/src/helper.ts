@@ -648,8 +648,8 @@ export const useCallControl = (props: useCallControlProps) => {
       store.removeTaskCallback(TASK_EVENTS.TASK_RESUME, resumeCallback, interactionId);
       store.removeTaskCallback(TASK_EVENTS.TASK_END, endCallCallback, interactionId);
       store.removeTaskCallback(TASK_EVENTS.AGENT_WRAPPEDUP, wrapupCallCallback, interactionId);
-      store.removeTaskCallback(TASK_EVENTS.TASK_RECORDING_PAUSED, pauseRecordingCallback, interactionId);
-      store.removeTaskCallback(TASK_EVENTS.TASK_RECORDING_RESUMED, resumeRecordingCallback, interactionId);
+      store.removeTaskCallback(TASK_EVENTS.CONTACT_RECORDING_PAUSED, pauseRecordingCallback, interactionId);
+      store.removeTaskCallback(TASK_EVENTS.CONTACT_RECORDING_RESUMED, resumeRecordingCallback, interactionId);
     };
   }, [currentTask]);
 
@@ -701,6 +701,7 @@ export const useCallControl = (props: useCallControlProps) => {
 
   const toggleMute = async () => {
     try {
+      console.log('Mute control not available', controlVisibility);
       if (!controlVisibility?.muteUnmute) {
         logger.warn('Mute control not available', {module: 'useCallControl', method: 'toggleMute'});
         return;

@@ -1177,7 +1177,7 @@ describe('useCallControl', () => {
 
     await act(async () => {
       await result.current.toggleRecording();
-      mockCurrentTask.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_RECORDING_PAUSED)?.[1]();
+      mockCurrentTask.on.mock.calls.find((call) => call[0] === TASK_EVENTS.CONTACT_RECORDING_PAUSED)?.[1]();
     });
 
     expect(mockLogger.error).toHaveBeenCalledWith('Error pausing recording: Error: Pause error', expect.any(Object));
@@ -1205,7 +1205,7 @@ describe('useCallControl', () => {
 
     await act(async () => {
       await result.current.toggleRecording();
-      mockCurrentTask.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_RECORDING_RESUMED)?.[1]();
+      mockCurrentTask.on.mock.calls.find((call) => call[0] === TASK_EVENTS.CONTACT_RECORDING_RESUMED)?.[1]();
     });
 
     expect(mockCurrentTask.resumeRecording).toHaveBeenCalledWith({autoResumed: false});
