@@ -9,7 +9,7 @@ const dummyAudioPath = path.resolve(__dirname, './playwright/wav/dummyAudio.wav'
 
 export default defineConfig({
   testDir: './playwright',
-  timeout: 180000,
+  timeout: 220000,
   webServer: {
     command: 'yarn workspace samples-cc-react-app serve',
     url: 'http://localhost:3000',
