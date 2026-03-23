@@ -122,8 +122,8 @@ During an active meeting, users can switch cameras, microphones, or speakers thr
 
 **Key Points:**
 
-- `SettingsControl.action()` opens the `WebexSettings` modal
-- `SwitchCameraControl.action(meetingID, cameraId)` calls `switchCamera(meetingID, cameraId)` on the adapter
+- `SettingsControl.action({ meetingID })` opens the `WebexSettings` modal
+- `SwitchCameraControl.action({ meetingID, cameraId })` calls `switchCamera(meetingID, cameraId)` on the adapter
 - The adapter acquires a new media stream with the selected device and emits an updated `localVideo.stream`
 
 #### 4. Screen Sharing
@@ -189,23 +189,23 @@ graph LR
 ### Runtime Dependencies
 
 
-| Package                            | Purpose                                               |
-| ---------------------------------- | ----------------------------------------------------- |
-| `webex`                            | Core Webex JavaScript SDK for backend communication   |
-| `@webex/sdk-component-adapter`     | Reactive adapter that wraps SDK into RxJS observables |
-| `@webex/components`                | React UI components for meeting views and controls    |
-| `@webex/component-adapter-interfaces` | Interface definitions for component adapters       |
+| Package                               | Purpose                                               |
+| ------------------------------------- | ----------------------------------------------------- |
+| `webex`                               | Core Webex JavaScript SDK for backend communication   |
+| `@webex/sdk-component-adapter`        | Reactive adapter that wraps SDK into RxJS observables |
+| `@webex/components`                   | React UI components for meeting views and controls    |
+| `@webex/component-adapter-interfaces` | Interface definitions for component adapters          |
 
 
 ### Peer Dependencies
 
 
-| Package       | Purpose                    |
-| ------------- | -------------------------- |
-| `react`       | React framework            |
-| `react-dom`   | React DOM rendering        |
-| `prop-types`  | React prop type checking   |
-| `webex`       | Core Webex SDK (peer)      |
+| Package      | Purpose                  |
+| ------------ | ------------------------ |
+| `react`      | React framework          |
+| `react-dom`  | React DOM rendering      |
+| `prop-types` | React prop type checking |
+| `webex`      | Core Webex SDK (peer)    |
 
 
 ---
@@ -217,19 +217,19 @@ graph LR
 These are the props consumers pass when using the widget. The widget handles SDK/adapter setup internally.
 
 
-| Prop                        | Type       | Required | Default     | Description                                                    |
-| --------------------------- | ---------- | -------- | ----------- | -------------------------------------------------------------- |
-| `accessToken`               | `string`   | **Yes**  | —           | Webex access token for authentication                          |
-| `meetingDestination`        | `string`   | **Yes**  | —           | Meeting URL, SIP address, email, or Personal Meeting Room link |
-| `meetingPasswordOrPin`      | `string`   | No       | `''`        | Password or host pin for protected meetings                    |
-| `participantName`           | `string`   | No       | `''`        | Display name for guest participants                            |
-| `fedramp`                   | `bool`     | No       | `false`     | Enable FedRAMP-compliant environment                           |
-| `layout`                    | `string`   | No       | `'Grid'`    | Remote video layout (`Grid`, `Stack`, `Overlay`, `Prominent`, `Focus`) |
-| `controls`                  | `Function` | No       | `undefined` | Function returning control IDs to render                       |
-| `controlsCollapseRangeStart`| `number`   | No       | `undefined` | Zero-based index of the first collapsible control              |
-| `controlsCollapseRangeEnd`  | `number`   | No       | `undefined` | Zero-based index before the last collapsible control           |
-| `className`                 | `string`   | No       | `''`        | Custom CSS class for the root element                          |
-| `style`                     | `object`   | No       | `{}`        | Inline styles for the root element                             |
+| Prop                         | Type       | Required | Default     | Description                                                            |
+| ---------------------------- | ---------- | -------- | ----------- | ---------------------------------------------------------------------- |
+| `accessToken`                | `string`   | **Yes**  | —           | Webex access token for authentication                                  |
+| `meetingDestination`         | `string`   | **Yes**  | —           | Meeting URL, SIP address, email, or Personal Meeting Room link         |
+| `meetingPasswordOrPin`       | `string`   | No       | `''`        | Password or host pin for protected meetings                            |
+| `participantName`            | `string`   | No       | `''`        | Display name for guest participants                                    |
+| `fedramp`                    | `bool`     | No       | `false`     | Enable FedRAMP-compliant environment                                   |
+| `layout`                     | `string`   | No       | `'Grid'`    | Remote video layout (`Grid`, `Stack`, `Overlay`, `Prominent`, `Focus`) |
+| `controls`                   | `Function` | No       | `undefined` | Function returning control IDs to render                               |
+| `controlsCollapseRangeStart` | `number`   | No       | `undefined` | Zero-based index of the first collapsible control                      |
+| `controlsCollapseRangeEnd`   | `number`   | No       | `undefined` | Zero-based index before the last collapsible control                   |
+| `className`                  | `string`   | No       | `''`        | Custom CSS class for the root element                                  |
+| `style`                      | `object`   | No       | `{}`        | Inline styles for the root element                                     |
 
 
 **Source:** `src/widgets/WebexMeetings/WebexMeetings.jsx` (see `WebexMeetingsWidget.propTypes` and `WebexMeetingsWidget.defaultProps`)
@@ -239,19 +239,22 @@ These are the props consumers pass when using the widget. The widget handles SDK
 These are passed internally by `WebexMeetingsWidget` to the `WebexMeeting` component from `@webex/components`. Consumers do not interact with these directly.
 
 
-| Prop                   | Type          | Description                                                    |
-| ---------------------- | ------------- | -------------------------------------------------------------- |
-| `meetingID`            | `string`      | Injected by `withMeeting` HOC from `meetingDestination`        |
-| `meetingPasswordOrPin` | `string`      | Forwarded from widget prop                                     |
-| `participantName`      | `string`      | Forwarded from widget prop                                     |
-| `controls`             | `Function`    | Forwarded from widget prop                                     |
-| `layout`               | `string`      | Forwarded from widget prop                                     |
-| `logo`                 | `JSX.Element` | Hard-coded `<WebexLogo />` SVG                                 |
-| `className`            | `string`      | Always `'webex-meetings-widget__content'`                      |
+| Prop                   | Type          | Description                                             |
+| ---------------------- | ------------- | ------------------------------------------------------- |
+| `meetingID`            | `string`      | Injected by `withMeeting` HOC from `meetingDestination` |
+| `meetingPasswordOrPin` | `string`      | Forwarded from widget prop                              |
+| `participantName`      | `string`      | Forwarded from widget prop                              |
+| `controls`             | `Function`    | Forwarded from widget prop                              |
+| `layout`               | `string`      | Forwarded from widget prop                              |
+| `logo`                 | `JSX.Element` | Hard-coded `<WebexLogo />` SVG                          |
+| `className`            | `string`      | Always `'webex-meetings-widget__content'`               |
+
 
 The `WebexMeeting` component receives its adapter via `AdapterContext.Provider`, which is set up by the `withAdapter` HOC wrapping the widget.
 
-### Hooks (from `components`)
+### Hooks
+
+**Source:** [`@webex/components`](https://github.com/webex/components) → [`src/components/hooks/`](https://github.com/webex/components/tree/master/src/components/hooks)
 
 
 | Hook                                        | Parameters                        | Returns                                        | Description                                                         |
@@ -263,6 +266,8 @@ The `WebexMeeting` component receives its adapter via `AdapterContext.Provider`,
 
 ### WebexSDKAdapter Methods (top-level adapter)
 
+**Source:** [`@webex/sdk-component-adapter`](https://github.com/webex/sdk-component-adapter) → [`src/WebexSDKAdapter.js`](https://github.com/webex/sdk-component-adapter/blob/master/src/WebexSDKAdapter.js)
+
 
 | Method         | Returns         | Description                                                                                                     |
 | -------------- | --------------- | --------------------------------------------------------------------------------------------------------------- |
@@ -271,6 +276,8 @@ The `WebexMeeting` component receives its adapter via `AdapterContext.Provider`,
 
 
 ### MeetingsSDKAdapter Methods
+
+**Source:** [`@webex/sdk-component-adapter`](https://github.com/webex/sdk-component-adapter) → [`src/MeetingsSDKAdapter.js`](https://github.com/webex/sdk-component-adapter/blob/master/src/MeetingsSDKAdapter.js)
 
 
 | Method                               | Parameters                                             | Returns               | Description                                             |
@@ -292,22 +299,27 @@ The `WebexMeeting` component receives its adapter via `AdapterContext.Provider`,
 
 ### Control Action Parameters
 
-| Control                   | Adapter Method Called                        |
-| ------------------------- | -------------------------------------------- |
-| `AudioControl`            | `handleLocalAudio(meetingID)`                |
-| `VideoControl`            | `handleLocalVideo(meetingID)`                |
-| `ShareControl`            | `handleLocalShare(meetingID)`                |
-| `JoinControl`             | `joinMeeting(meetingID, { password, name })` |
-| `ExitControl`             | `leaveMeeting(meetingID)`                    |
-| `RosterControl`           | `toggleRoster(meetingID)`                    |
-| `SettingsControl`         | `toggleSettings(meetingID)`                  |
-| `SwitchCameraControl`     | `switchCamera(meetingID, cameraId)`          |
-| `SwitchMicrophoneControl` | `switchMicrophone(meetingID, microphoneId)`  |
-| `SwitchSpeakerControl`    | `switchSpeaker(meetingID, speakerId)`        |
+**Source:** [`@webex/sdk-component-adapter`](https://github.com/webex/sdk-component-adapter) → [`src/MeetingsSDKAdapter/controls/`](https://github.com/webex/sdk-component-adapter/tree/master/src/MeetingsSDKAdapter/controls)
+
+Each control's `action()` receives a destructured object from the [`useMeetingControl`](https://github.com/webex/components/blob/master/src/components/hooks/useMeetingControl.js) hook and calls the corresponding adapter method internally.
+
+| Control                   | File                         | Adapter Method Called                        |
+| ------------------------- | ---------------------------- | -------------------------------------------- |
+| `AudioControl`            | `AudioControl.js`            | `handleLocalAudio(meetingID)`                |
+| `VideoControl`            | `VideoControl.js`            | `handleLocalVideo(meetingID)`                |
+| `ShareControl`            | `ShareControl.js`            | `handleLocalShare(meetingID)`                |
+| `JoinControl`             | `JoinControl.js`             | `joinMeeting(meetingID, { password, name })` |
+| `ExitControl`             | `ExitControl.js`             | `leaveMeeting(meetingID)`                    |
+| `RosterControl`           | `RosterControl.js`           | `toggleRoster(meetingID)`                    |
+| `SettingsControl`         | `SettingsControl.js`         | `toggleSettings(meetingID)`                  |
+| `SwitchCameraControl`     | `SwitchCameraControl.js`     | `switchCamera(meetingID, cameraId)`          |
+| `SwitchMicrophoneControl` | `SwitchMicrophoneControl.js` | `switchMicrophone(meetingID, microphoneId)`  |
+| `SwitchSpeakerControl`    | `SwitchSpeakerControl.js`    | `switchSpeaker(meetingID, speakerId)`        |
 
 
 ### Control IDs for WebexMeetingControlBar
 
+**Source:** Control IDs are registered in [`@webex/sdk-component-adapter`](https://github.com/webex/sdk-component-adapter) → [`src/MeetingsSDKAdapter.js`](https://github.com/webex/sdk-component-adapter/blob/master/src/MeetingsSDKAdapter.js) and rendered by [`WebexMeetingControlBar`](https://github.com/webex/components/tree/master/src/components/WebexMeetingControlBar) from `@webex/components`. The widget passes them via the `controls` prop.
 
 | Control ID          | Class                     | Type        | Available             |
 | ------------------- | ------------------------- | ----------- | --------------------- |
@@ -341,5 +353,4 @@ For detailed architecture, event flows, data structures, and troubleshooting, se
 
 ---
 
-_Last Updated: 2026-03-12_
-
+*Last Updated: 2026-03-12*

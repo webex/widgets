@@ -90,26 +90,30 @@ packages/@webex/widgets/
 
 ### Component Table
 
+**Source:** All components below are from [`@webex/components`](https://github.com/webex/components) → [`src/components/`](https://github.com/webex/components/tree/master/src/components)
 
-| Component                         | Source                                                       | Purpose                                                           | Data Source                                |
-| --------------------------------- | ------------------------------------------------------------ | ----------------------------------------------------------------- | ------------------------------------------ |
-| `WebexMeeting`                    | `components/src/components/WebexMeeting/`                    | Master orchestrator — renders correct view based on meeting state | `useMeeting(meetingID)`                    |
-| `WebexInterstitialMeeting`        | `components/src/components/WebexInterstitialMeeting/`        | Pre-join lobby with local media preview                           | state=NOT_JOINED                           |
-| `WebexInMeeting`                  | `components/src/components/WebexInMeeting/`                  | Active meeting view with remote + local media                     | state=JOINED                               |
-| `WebexWaitingForHost`             | `components/src/components/WebexWaitingForHost/`             | Waiting room when host hasn't started                             | state is else (not JOINED/NOT_JOINED/LEFT) |
-| `WebexMeetingControlBar`          | `components/src/components/WebexMeetingControlBar/`          | Renders meeting control buttons                                   | Maps control IDs to Control classes        |
-| `WebexMeetingControl`             | `components/src/components/WebexMeetingControl/`             | Individual control button                                         | `useMeetingControl(controlID)`             |
-| `WebexLocalMedia`                 | `components/src/components/WebexLocalMedia/`                 | Local camera preview                                              | `localVideo.stream`                        |
-| `WebexRemoteMedia`                | `components/src/components/WebexRemoteMedia/`                | Remote participant video                                          | `remoteVideo` / `remoteShare`              |
-| `WebexMemberRoster`               | `components/src/components/WebexMemberRoster/`               | Participant list panel                                            | `showRoster` flag                          |
-| `WebexSettings`                   | `components/src/components/WebexSettings/`                   | Audio/video device settings modal                                 | `settings.visible` flag                    |
-| `WebexMeetingGuestAuthentication` | `components/src/components/WebexMeetingGuestAuthentication/` | Guest password entry                                              | `passwordRequired` flag                    |
-| `WebexMeetingHostAuthentication`  | `components/src/components/WebexMeetingHostAuthentication/`  | Host pin entry                                                    | `passwordRequired` flag                    |
+
+| Component                         | Folder                            | Purpose                                                           | Data Source                                |
+| --------------------------------- | --------------------------------- | ----------------------------------------------------------------- | ------------------------------------------ |
+| `WebexMeeting`                    | `WebexMeeting/`                   | Master orchestrator — renders correct view based on meeting state | `useMeeting(meetingID)`                    |
+| `WebexInterstitialMeeting`        | `WebexInterstitialMeeting/`       | Pre-join lobby with local media preview                           | state=NOT_JOINED                           |
+| `WebexInMeeting`                  | `WebexInMeeting/`                 | Active meeting view with remote + local media                     | state=JOINED                               |
+| `WebexWaitingForHost`             | `WebexWaitingForHost/`            | Waiting room when host hasn't started                             | state is else (not JOINED/NOT_JOINED/LEFT) |
+| `WebexMeetingControlBar`          | `WebexMeetingControlBar/`         | Renders meeting control buttons                                   | Maps control IDs to Control classes        |
+| `WebexMeetingControl`             | `WebexMeetingControl/`            | Individual control button                                         | `useMeetingControl(controlID)`             |
+| `WebexLocalMedia`                 | `WebexLocalMedia/`                | Local camera preview                                              | `localVideo.stream`                        |
+| `WebexRemoteMedia`                | `WebexRemoteMedia/`               | Remote participant video                                          | `remoteVideo` / `remoteShare`              |
+| `WebexMemberRoster`               | `WebexMemberRoster/`              | Participant list panel                                            | `showRoster` flag                          |
+| `WebexSettings`                   | `WebexSettings/`                  | Audio/video device settings modal                                 | `settings.visible` flag                    |
+| `WebexMeetingGuestAuthentication` | `WebexMeetingGuestAuthentication/`| Guest password entry                                              | `passwordRequired` flag                    |
+| `WebexMeetingHostAuthentication`  | `WebexMeetingHostAuthentication/` | Host pin entry                                                    | `passwordRequired` flag                    |
 
 
 ---
 
 ## SDK Integration
+
+**Repos:** [webex-js-sdk](https://github.com/webex/webex-js-sdk) · [`@webex/sdk-component-adapter`](https://github.com/webex/sdk-component-adapter) → [`src/MeetingsSDKAdapter.js`](https://github.com/webex/sdk-component-adapter/blob/master/src/MeetingsSDKAdapter.js), [`src/MeetingsSDKAdapter/controls/`](https://github.com/webex/sdk-component-adapter/tree/master/src/MeetingsSDKAdapter/controls)
 
 
 | Area              | SDK Methods                                                                  | Adapter Methods                                                                   | Control Class             |
@@ -141,7 +145,7 @@ packages/@webex/widgets/
 User clicks control button
   → Component (WebexMeetingControl)
     → useMeetingControl hook
-      → Control.action(meetingID)
+      → Control.action({ meetingID })
         → sdk-component-adapter method
           → webex-js-sdk meeting method
             → Backend (REST/WebSocket)
@@ -287,7 +291,7 @@ sequenceDiagram
     participant Backend
 
     User->>Component: Click "Join Meeting" button
-    Component->>Adapter: action(meetingID)
+    Component->>Adapter: action({ meetingID })
     Adapter->>Adapter: joinMeeting(ID, { password, name })
 
     alt Password Required
@@ -329,7 +333,7 @@ sequenceDiagram
     Note over User: Audio is currently UNMUTED
 
     User->>Component: Click microphone button
-    Component->>Adapter: action(meetingID)
+    Component->>Adapter: action({ meetingID })
     Adapter->>Adapter: handleLocalAudio(ID)
     Adapter->>Adapter: Set localAudio.muting = true
     Adapter->>SDK: sdkMeeting.muteAudio()
@@ -343,7 +347,7 @@ sequenceDiagram
     Note over User: Audio is now MUTED — click again to unmute
 
     User->>Component: Click microphone button
-    Component->>Adapter: action(meetingID)
+    Component->>Adapter: action({ meetingID })
     Adapter->>Adapter: handleLocalAudio(ID)
     Adapter->>Adapter: Set localAudio.muting = false
     Adapter->>SDK: sdkMeeting.unmuteAudio()
@@ -372,7 +376,7 @@ sequenceDiagram
     Note over User: Video is currently ON
 
     User->>Component: Click camera button
-    Component->>Adapter: action(meetingID)
+    Component->>Adapter: action({ meetingID })
     Adapter->>Adapter: handleLocalVideo(ID)
     Adapter->>Adapter: Set localVideo.muting = true
     Adapter->>SDK: sdkMeeting.muteVideo()
@@ -385,7 +389,7 @@ sequenceDiagram
     Note over User: Video is now OFF — click again to start
 
     User->>Component: Click camera button
-    Component->>Adapter: action(meetingID)
+    Component->>Adapter: action({ meetingID })
     Adapter->>Adapter: handleLocalVideo(ID)
     Adapter->>Adapter: Set localVideo.muting = false
     Adapter->>SDK: sdkMeeting.unmuteVideo()
@@ -411,7 +415,7 @@ sequenceDiagram
     participant Backend
 
     User->>Component: Click share screen button
-    Component->>Adapter: action(meetingID)
+    Component->>Adapter: action({ meetingID })
     Adapter->>Adapter: handleLocalShare(ID)
     Adapter->>SDK: sdkMeeting.getMediaStreams({ sendShare: true })
     SDK->>User: Browser screen picker dialog (getDisplayMedia)
@@ -427,7 +431,7 @@ sequenceDiagram
     Note over User: Sharing active — click again to stop
 
     User->>Component: Click stop sharing
-    Component->>Adapter: action(meetingID)
+    Component->>Adapter: action({ meetingID })
     Adapter->>Adapter: handleLocalShare(ID)
     Adapter->>Adapter: stopStream(localShare.stream)
     Adapter->>SDK: sdkMeeting.updateShare({ sendShare: false, receiveShare: true })
@@ -453,7 +457,7 @@ sequenceDiagram
     Note over Adapter: Client-side only — no Backend call
 
     User->>Component: Click roster button
-    Component->>Adapter: action(meetingID)
+    Component->>Adapter: action({ meetingID })
     Adapter->>Adapter: toggleRoster(ID)
     Adapter->>Adapter: meeting.showRoster = !meeting.showRoster
     Adapter->>Adapter: Emit observable { showRoster: true }
@@ -461,7 +465,7 @@ sequenceDiagram
     Component->>Component: Render WebexMemberRoster panel
 
     User->>Component: Click roster button (close)
-    Component->>Adapter: action(meetingID)
+    Component->>Adapter: action({ meetingID })
     Adapter->>Adapter: toggleRoster(ID)
     Adapter->>Adapter: Emit { showRoster: false }
     Adapter-->>Component: Observable emits
@@ -482,7 +486,7 @@ sequenceDiagram
     participant SDK as webex-js-sdk
 
     User->>Component: Click settings button
-    Component->>Adapter: SettingsControl.action(meetingID)
+    Component->>Adapter: SettingsControl.action({ meetingID })
     Adapter->>Adapter: toggleSettings(ID)
     Adapter->>Adapter: Clone current streams to settings.preview
     Adapter->>Adapter: Emit { settings.visible: true }
@@ -492,7 +496,7 @@ sequenceDiagram
     Note over User: User selects a different camera
 
     User->>Component: Select new camera from dropdown
-    Component->>Adapter: SwitchCameraControl.action(meetingID, cameraId)
+    Component->>Adapter: SwitchCameraControl.action({ meetingID, cameraId })
     Adapter->>Adapter: switchCamera(ID, cameraId)
     Adapter->>SDK: sdkMeeting.getMediaStreams({ sendVideo: true }, { video: { deviceId } })
     SDK->>SDK: getUserMedia with new deviceId
@@ -501,7 +505,7 @@ sequenceDiagram
     Adapter-->>Component: Settings preview re-renders with new camera
 
     User->>Component: Close settings modal
-    Component->>Adapter: SettingsControl.action(meetingID)
+    Component->>Adapter: SettingsControl.action({ meetingID })
     Adapter->>Adapter: toggleSettings(ID)
     Adapter->>Adapter: Replace meeting streams with preview streams
 
@@ -529,7 +533,7 @@ sequenceDiagram
     participant Backend
 
     User->>Component: Click leave meeting button
-    Component->>Adapter: action(meetingID)
+    Component->>Adapter: action({ meetingID })
     Adapter->>Adapter: leaveMeeting(ID)
     Adapter->>Adapter: removeMedia(ID) — stop all local streams
     Adapter->>SDK: sdkMeeting.leave()
@@ -563,7 +567,7 @@ sequenceDiagram
     Component->>Component: Open WebexMeetingGuestAuthentication modal
 
     User->>Component: Enter password, click "Join as Guest"
-    Component->>Adapter: action(meetingID)
+    Component->>Adapter: action({ meetingID })
     Adapter->>SDK: joinMeeting(ID, { password })
     SDK->>Backend: Verify password and join
     Backend-->>SDK: Result
@@ -583,7 +587,7 @@ sequenceDiagram
     User->>Component: Click "I'm the host"
     Component->>Component: Switch to WebexMeetingHostAuthentication modal
     User->>Component: Enter host pin, click "Start Meeting"
-    Component->>Adapter: action(meetingID)
+    Component->>Adapter: action({ meetingID })
     Adapter->>SDK: joinMeeting(ID, { hostKey: hostPin })
 ```
 
@@ -640,7 +644,7 @@ stateDiagram-v2
 
 ---
 
-## Control Display States (from actual source)
+## Control Display States 
 
 ### AudioControl
 
@@ -768,16 +772,18 @@ Renders as a CANCEL type button.
 
 **Symptoms:** Widget creates duplicate meetings
 
+**Note:** `WebexMeetingsWidget` is a class component. The causes and solutions below are specific to this widget's lifecycle methods.
+
 **Possible Causes:**
 
 - React strict mode causing double initialization
 - Missing cleanup on prop changes
-- `componentWillUnmount` not disconnecting adapter or cleaning up observers
+- `componentWillUnmount` not disconnecting adapter or cleaning up observers (e.g., `MutationObserver`)
 
 **Solutions:**
 
-- Use an instance property to track initialization state
-- Implement proper cleanup in `componentWillUnmount`
+- Use an instance property (e.g., `this._initialized`) to track initialization state
+- Implement proper cleanup in `componentWillUnmount` (disconnect observers, remove event listeners)
 - Guard against re-initialization in `componentDidMount`
 
 ---
@@ -803,7 +809,6 @@ Renders as a CANCEL type button.
 - [Agent Documentation](./AGENTS.md) - Widget usage and API reference
 - [React Patterns](../../../ai-docs/patterns/react-patterns.md) - Component patterns
 - [TypeScript Patterns](../../../ai-docs/patterns/typescript-patterns.md) - Type safety and naming conventions
-- [Web Component Patterns](../../../ai-docs/patterns/web-component-patterns.md) - r2wc patterns
 - [Testing Patterns](../../../ai-docs/patterns/testing-patterns.md) - Jest, RTL, Playwright guidelines
 
 ---
