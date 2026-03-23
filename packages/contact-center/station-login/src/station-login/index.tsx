@@ -8,7 +8,17 @@ import {useStationLogin} from '../helper';
 import {StationLoginProps} from './station-login.types';
 
 const StationLoginInternal: React.FunctionComponent<StationLoginProps> = observer(
-  ({onLogin, onLogout, onCCSignOut, profileMode, onSaveStart, onSaveEnd, doStationLogout, hideDesktopLogin}) => {
+  ({
+    onLogin,
+    onLogout,
+    onCCSignOut,
+    profileMode,
+    onSaveStart,
+    onSaveEnd,
+    doStationLogout,
+    hideDesktopLogin,
+    allowInternationalDn,
+  }) => {
     const {
       cc,
       teams,
@@ -54,6 +64,7 @@ const StationLoginInternal: React.FunctionComponent<StationLoginProps> = observe
       logger,
       profileMode,
       hideDesktopLogin,
+      allowInternationalDn,
     };
 
     return <StationLoginComponent {...props} />;
