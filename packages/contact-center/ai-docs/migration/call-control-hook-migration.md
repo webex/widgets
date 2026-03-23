@@ -21,7 +21,7 @@
 6. **Wrapup**: `wrapupCall()` → `task.wrapup()`
 7. **Transfer**: `transferCall()` → `task.transfer()`
 8. **Consult**: `consultCall()` → `task.consult()`, `endConsultCall()` → `task.endConsult()`
-9. **Consult transfer**: `consultTransfer()` → `task.consultTransfer()` / `task.transferConference()`
+9. **Consult transfer**: `consultTransfer()` → `task.transfer()` (consult) / `task.transferConference()` (conference) — SDK no longer has `consultTransfer()`, use `.transfer()` for consult
 10. **Conference**: `consultConference()` → `task.consultConference()`, `exitConference()` → `task.exitConference()`
 11. **Switch calls**: `switchToConsult()` → `task.hold(mainMediaId)` (single call), `switchToMainCall()` → `task.resume(consultMediaId)` (single call)
 12. **Auto-wrapup timer**: `cancelAutoWrapup()` → `task.cancelAutoWrapupTimer()`
@@ -139,7 +139,7 @@
 | `transferCall` | `task.transfer()` | None |
 | `consultCall` | `task.consult()` | None |
 | `endConsultCall` | `task.endConsult()` | None |
-| `consultTransfer` | `task.consultTransfer()` / `task.transferConference()` | None |
+| `consultTransfer` | `task.transfer()` (consult) / `task.transferConference()` (conference) | `consultTransfer()` no longer exists — use `.transfer()` for all non-conference transfer |
 | `consultConference` | `task.consultConference()` | None |
 | `exitConference` | `task.exitConference()` | None |
 | `switchToConsult` | `task.hold(mainMediaId)` | Single SDK call — holds main call; SDK auto-switches to consult leg |
@@ -302,15 +302,15 @@ if (!controlVisibility?.muteUnmute) {
 ### 5. `consultTransfer` Uses `currentTask.data.isConferenceInProgress`
 
 ```typescript
-// Line 898: Decides between consultTransfer vs transferConference
+// Line 898: Decides between transfer (consult) vs transferConference
 if (currentTask.data.isConferenceInProgress) {
   await currentTask.transferConference();
 } else {
-  await currentTask.consultTransfer();
+  await currentTask.transfer();  // consultTransfer() no longer exists — use .transfer()
 }
 ```
 
-**Migration:** Prefer **`currentTask.data.isConferenceInProgress`** (direct variable from SDK task data; see State Flags table). Alternatively use `controls.transferConference.isVisible` to decide. SDK action methods are unchanged.
+**Migration:** Prefer **`currentTask.data.isConferenceInProgress`** (direct variable from SDK task data; see State Flags table). Alternatively use `controls.transferConference.isVisible` to decide. **Note:** `task.consultTransfer()` is no longer a public method; use `task.transfer()` for consult transfer.
 
 ### 6. `extractConsultingAgent` — Complex Display Logic (KEEP)
 
