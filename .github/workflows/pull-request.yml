@@ -281,3 +281,6 @@ jobs:
 
       - name: Test CC Widgets
         run: yarn run test:cc-widgets
+
+      - name: Test Meetings Widget
+        run: yarn run test:meetings-widget
