@@ -339,10 +339,14 @@ Each control's `action()` receives a destructured object from the [`useMeetingCo
 
 ## Installation
 
+The widget declares `react`, `react-dom`, `prop-types`, and `webex` as **peer dependencies**. Consumers must install them alongside the widget:
+
 ```bash
-# Install as a standalone package
-yarn add @webex/widgets
-npm install @webex/widgets
+# yarn
+yarn add @webex/widgets react react-dom prop-types webex
+
+# npm
+npm install @webex/widgets react react-dom prop-types webex
 ```
 
 ---
