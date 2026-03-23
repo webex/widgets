@@ -29,20 +29,6 @@ The store's `task-utils.ts` contains 16 exported utility functions that inspect 
 | `CONSULT_STATE_COMPLETED` | `store/src/constants.ts` | SDK handles via context — **same ordering constraint** |
 | `CONSULT_STATE_CONFERENCING` | `store/src/constants.ts` | SDK handles via context — **same ordering constraint** |
 
-## Constants to Keep
-
-**All entries in this table are kept** (no deletions). Use them until the corresponding helpers are rewritten or removed per the ordering constraints below.
-
-| Keep | File | Reason |
-|------|------|--------|
-| `RELATIONSHIP_TYPE_CONSULT` | `store/src/constants.ts` | Used by `findMediaResourceId` |
-| `MEDIA_TYPE_CONSULT` | `store/src/constants.ts` | Used by `findMediaResourceId` |
-| `AGENT` | `store/src/constants.ts` | Used by `getConferenceParticipants` for participant filtering |
-| `CUSTOMER` | `store/src/constants.ts` | Used by `EXCLUDED_PARTICIPANT_TYPES` |
-| `SUPERVISOR` | `store/src/constants.ts` | Used by `EXCLUDED_PARTICIPANT_TYPES` |
-| `VVA` | `store/src/constants.ts` | Used by `EXCLUDED_PARTICIPANT_TYPES` |
-| `EXCLUDED_PARTICIPANT_TYPES` | `store/src/constants.ts` | Used by `getConferenceParticipants` for participant filtering |
-
 **Consult string alias:** `TASK_STATE_CONSULT`, `RELATIONSHIP_TYPE_CONSULT`, and `MEDIA_TYPE_CONSULT` all resolve to the same string `'consult'`. When rewriting `findHoldStatus` or consolidating constants, consider using a single constant (e.g. one media-type constant for the consult leg) or document the alias explicitly to avoid drift. Do not rely on three separate names for the same value long term.
 
 ## Ordering Constraint: Consult State Constants
