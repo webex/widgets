@@ -16,9 +16,16 @@ graph TB
         WM[WebexMeeting]
         WIM[WebexInterstitialMeeting]
         WIN[WebexInMeeting]
+        WFH[WebexWaitingForHost]
         MCB[WebexMeetingControlBar]
         WLM[WebexLocalMedia]
         WRM[WebexRemoteMedia]
+        WMR[WebexMemberRoster]
+        WS[WebexSettings]
+        WGA[WebexMeetingGuestAuthentication]
+        WHA[WebexMeetingHostAuthentication]
+        WMI[WebexMeetingInfo]
+        WMA[WebexMediaAccess]
     end
 
     subgraph "Adapter Layer (sdk-component-adapter)"
@@ -28,6 +35,11 @@ graph TB
         SC[ShareControl]
         JC[JoinControl]
         EC[ExitControl]
+        RC[RosterControl]
+        STC[SettingsControl]
+        SCC[SwitchCameraControl]
+        SMC[SwitchMicrophoneControl]
+        SSC[SwitchSpeakerControl]
     end
 
     subgraph "SDK Layer (webex-js-sdk)"
@@ -41,13 +53,25 @@ graph TB
     W -->|creates| SDK
     W -->|creates| ADAPT
     W -->|AdapterContext| WM
+    W --> WMA
     WM --> WIM
     WM --> WIN
+    WM --> WFH
     WM --> MCB
+    WM --> WMR
+    WM --> WS
+    WM --> WGA
+    WM --> WHA
     WIN --> WLM
     WIN --> WRM
-    MCB --> AC & VC & SC & JC & EC
-    AC & VC & SC & JC & EC --> ADAPT
+    WIN --> WMI
+    WIN --> WGA
+    WIN --> WHA
+    WIM --> WMI
+    WFH --> WMI
+    MCB --> AC & VC & SC & JC & EC & RC & STC
+    STC --> SCC & SMC & SSC
+    AC & VC & SC & JC & EC & RC & STC & SCC & SMC & SSC --> ADAPT
     ADAPT --> SDK
     SDK --> BE
 
@@ -90,30 +114,32 @@ packages/@webex/widgets/
 
 ### Component Table
 
-**Source:** All components below are from [`@webex/components`](https://github.com/webex/components) → [`src/components/`](https://github.com/webex/components/tree/master/src/components)
+**Source:** All components below are from `[@webex/components](https://github.com/webex/components)` → `[src/components/](https://github.com/webex/components/tree/master/src/components)`
 
 
-| Component                         | Folder                            | Purpose                                                           | Data Source                                |
-| --------------------------------- | --------------------------------- | ----------------------------------------------------------------- | ------------------------------------------ |
-| `WebexMeeting`                    | `WebexMeeting/`                   | Master orchestrator — renders correct view based on meeting state | `useMeeting(meetingID)`                    |
-| `WebexInterstitialMeeting`        | `WebexInterstitialMeeting/`       | Pre-join lobby with local media preview                           | state=NOT_JOINED                           |
-| `WebexInMeeting`                  | `WebexInMeeting/`                 | Active meeting view with remote + local media                     | state=JOINED                               |
-| `WebexWaitingForHost`             | `WebexWaitingForHost/`            | Waiting room when host hasn't started                             | state is else (not JOINED/NOT_JOINED/LEFT) |
-| `WebexMeetingControlBar`          | `WebexMeetingControlBar/`         | Renders meeting control buttons                                   | Maps control IDs to Control classes        |
-| `WebexMeetingControl`             | `WebexMeetingControl/`            | Individual control button                                         | `useMeetingControl(controlID)`             |
-| `WebexLocalMedia`                 | `WebexLocalMedia/`                | Local camera preview                                              | `localVideo.stream`                        |
-| `WebexRemoteMedia`                | `WebexRemoteMedia/`               | Remote participant video                                          | `remoteVideo` / `remoteShare`              |
-| `WebexMemberRoster`               | `WebexMemberRoster/`              | Participant list panel                                            | `showRoster` flag                          |
-| `WebexSettings`                   | `WebexSettings/`                  | Audio/video device settings modal                                 | `settings.visible` flag                    |
-| `WebexMeetingGuestAuthentication` | `WebexMeetingGuestAuthentication/`| Guest password entry                                              | `passwordRequired` flag                    |
-| `WebexMeetingHostAuthentication`  | `WebexMeetingHostAuthentication/` | Host pin entry                                                    | `passwordRequired` flag                    |
+| Component                         | Folder                             | Purpose                                                                     | Render Condition (parent decides)                                                        | Internal Data Source (own hooks)                                                                                                                                           |
+| --------------------------------- | ---------------------------------- | --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `WebexMeeting`                    | `WebexMeeting/`                    | Master orchestrator — renders correct view based on meeting state           | Always (top-level)                                                                       | `useMeeting(meetingID)` → `ID`, `localAudio`, `localVideo`, `state`, `showRoster`, `settings`, `passwordRequired`                                                          |
+| `WebexInterstitialMeeting`        | `WebexInterstitialMeeting/`        | Pre-join lobby with local media preview                                     | `state === NOT_JOINED`                                                                   | `useMeeting(meetingID)` → `localVideo`                                                                                                                                     |
+| `WebexInMeeting`                  | `WebexInMeeting/`                  | Active meeting view with remote + local media                               | `state === JOINED`                                                                       | `useMeeting(meetingID)` → `remoteShare`, `localShare`, `passwordRequired`, `state`                                                                                         |
+| `WebexWaitingForHost`             | `WebexWaitingForHost/`             | Waiting room when host hasn't started                                       | `else` (not JOINED/NOT_JOINED/LEFT)                                                      | `useMeeting(meetingID)` → `ID`; uses `AdapterContext` → `leaveMeeting(ID)`                                                                                                 |
+| `WebexMeetingControlBar`          | `WebexMeetingControlBar/`          | Renders meeting control buttons                                             | Always (when state is truthy and not LEFT)                                               | `useMeeting(meetingID)` → `state`; computes `isActive = state === JOINED` to select controls                                                                               |
+| `WebexMeetingControl`             | `WebexMeetingControl/`             | Individual control button                                                   | Rendered by `WebexMeetingControlBar`                                                     | `useMeetingControl(type, meetingID)` → `[action, display]`                                                                                                                 |
+| `WebexMeetingInfo`                | `WebexMeetingInfo/`                | Meeting title and time overlay                                              | Rendered inside `WebexInMeeting`, `WebexInterstitialMeeting`, `WebexWaitingForHost`      | `useMeeting(meetingID)` → `ID`, `startTime`, `endTime`, `title`                                                                                                            |
+| `WebexMediaAccess`                | `WebexMediaAccess/`                | Browser media permission prompt (camera/microphone)                         | `localAudio.permission === 'ASKING'` or `localVideo.permission === 'ASKING'` (in widget) | `useMeeting(meetingID)` → `ID`; uses `AdapterContext` → `ignoreVideoAccessPrompt` / `ignoreAudioAccessPrompt`                                                              |
+| `WebexLocalMedia`                 | `WebexLocalMedia/`                 | Local camera/screen/preview video                                           | Rendered inside `WebexInMeeting`, `WebexInterstitialMeeting`, `WebexWaitingForHost`      | `useMeeting(meetingID)` → `localVideo`, `localShare`, `settings`; also `useMe()` → `ID`                                                                                    |
+| `WebexRemoteMedia`                | `WebexRemoteMedia/`                | Remote participant video, audio, and share                                  | Rendered inside `WebexInMeeting`                                                         | `useMeeting(meetingID)` → `remoteAudio`, `remoteVideo`, `remoteShare`, `error`, `speakerID`; also `useMembers()`                                                           |
+| `WebexMemberRoster`               | `WebexMemberRoster/`               | Participant list panel                                                      | `showRoster === true` (in `WebexMeeting`)                                                | `useMembers(destinationID, destinationType)`; `useMe()` → `orgID`. Does NOT use `useMeeting`                                                                               |
+| `WebexSettings`                   | `WebexSettings/`                   | Audio/video device settings modal (tabs)                                    | `settings.visible === true` (in `WebexMeeting`)                                          | None — delegates to `WebexAudioSettings` + `WebexVideoSettings` children                                                                                                   |
+| `WebexMeetingGuestAuthentication` | `WebexMeetingGuestAuthentication/` | Guest password entry (rendered in both `WebexMeeting` and `WebexInMeeting`) | `passwordRequired && !meetingPasswordOrPin && state === NOT_JOINED`                      | `useMeeting(meetingID)` → `ID`, `failureReason`, `invalidPassword`, `requiredCaptcha`; uses `AdapterContext` → `joinMeeting`, `clearInvalidPasswordFlag`, `refreshCaptcha` |
+| `WebexMeetingHostAuthentication`  | `WebexMeetingHostAuthentication/`  | Host pin entry (rendered in both `WebexMeeting` and `WebexInMeeting`)       | User clicks "I'm the host" in guest modal                                                | `useMeeting(meetingID)` → `ID`, `invalidHostKey`; uses `AdapterContext` → `joinMeeting`, `clearInvalidHostKeyFlag`                                                         |
 
 
 ---
 
 ## SDK Integration
 
-**Repos:** [webex-js-sdk](https://github.com/webex/webex-js-sdk) · [`@webex/sdk-component-adapter`](https://github.com/webex/sdk-component-adapter) → [`src/MeetingsSDKAdapter.js`](https://github.com/webex/sdk-component-adapter/blob/master/src/MeetingsSDKAdapter.js), [`src/MeetingsSDKAdapter/controls/`](https://github.com/webex/sdk-component-adapter/tree/master/src/MeetingsSDKAdapter/controls)
+**Repos:** [webex-js-sdk](https://github.com/webex/webex-js-sdk) · `[@webex/sdk-component-adapter](https://github.com/webex/sdk-component-adapter)` → `[src/MeetingsSDKAdapter.js](https://github.com/webex/sdk-component-adapter/blob/master/src/MeetingsSDKAdapter.js)`, `[src/MeetingsSDKAdapter/controls/](https://github.com/webex/sdk-component-adapter/tree/master/src/MeetingsSDKAdapter/controls)`
 
 
 | Area              | SDK Methods                                                                  | Adapter Methods                                                                   | Control Class             |
@@ -176,14 +202,16 @@ This is the real shape emitted by `adapter.meetingsAdapter.getMeeting(ID)`:
 
   localAudio: {
     stream:            MediaStream | null
-    permission:        string | null          // 'ASKING' | 'ALLOWED' | 'ERROR' | null
+    permission:        string | null          // 'ASKING' | 'ALLOWED' | 'DISMISSED' | 'DENIED' | 'DISABLED' | 'IGNORED' | 'ERROR' | null
     muting:            boolean | undefined    // true = muting in progress, false = unmuting, undefined = idle
+    ignoreMediaAccessPrompt: Function | undefined  // callback to dismiss the media access prompt and proceed without audio
   }
   localVideo: {
     stream:            MediaStream | null
-    permission:        string | null          // 'ASKING' | 'ALLOWED' | 'ERROR' | null
+    permission:        string | null          // 'ASKING' | 'ALLOWED' | 'DISMISSED' | 'DENIED' | 'DISABLED' | 'IGNORED' | 'ERROR' | null
     muting:            boolean | undefined
     error:             string | null          // e.g. 'Video not supported on iOS 15.1'
+    ignoreMediaAccessPrompt: Function | undefined  // callback to dismiss the media access prompt and proceed without video
   }
   localShare: {
     stream:            MediaStream | null
@@ -207,9 +235,16 @@ This is the real shape emitted by `adapter.meetingsAdapter.getMeeting(ID)`:
 
   passwordRequired:    boolean
   requiredCaptcha:     object
+  remoteShareStream:   MediaStream | null     // raw remote share stream (may differ from remoteShare timing)
+  remoteSharing:       boolean                // true when remote participant is sharing
+
+  invalidPassword:     boolean                // true when entered password was wrong
+  invalidHostKey:      boolean                // true when entered host key was wrong
+  failureReason:       string | undefined     // reason from server when password verification fails
+
   cameraID:            string | null
   microphoneID:        string | null
-  speakerID:           string
+  speakerID:           string | null          // '' on creation, null after removeMedia
 }
 ```
 
@@ -644,7 +679,9 @@ stateDiagram-v2
 
 ---
 
-## Control Display States 
+## Control Display States
+
+**Source:** [`@webex/sdk-component-adapter`](https://github.com/webex/sdk-component-adapter) → [`src/MeetingsSDKAdapter/controls/`](https://github.com/webex/sdk-component-adapter/tree/master/src/MeetingsSDKAdapter/controls)
 
 ### AudioControl
 
@@ -661,14 +698,16 @@ stateDiagram-v2
 ### VideoControl
 
 
-| State    | Icon           | Text        | Tooltip             | Control State |
-| -------- | -------------- | ----------- | ------------------- | ------------- |
-| unmuted  | `camera`       | Stop video  | Stop video          | INACTIVE      |
-| muted    | `camera-muted` | Start video | Start video         | ACTIVE        |
-| muting   | `camera`       | Stopping... | Stopping video      | DISABLED      |
-| unmuting | `camera-muted` | Starting... | Starting video      | DISABLED      |
-| noCamera | `camera-muted` | No camera   | No camera available | DISABLED      |
+| State    | Icon           | Text        | Tooltip               | Control State |
+| -------- | -------------- | ----------- | --------------------- | ------------- |
+| unmuted  | `camera`       | Stop video  | Stop video            | INACTIVE      |
+| muted    | `camera-muted` | Start video | Start video           | ACTIVE        |
+| muting   | `camera`       | Stopping... | Stopping video        | DISABLED      |
+| unmuting | `camera-muted` | Starting... | Starting video        | DISABLED      |
+| noCamera | `camera-muted` | No camera   | No camera available * | DISABLED      |
 
+
+ *If `localVideo.error` is set (e.g. `'Video not supported on iOS 15.1'`), the tooltip shows the error string instead of "No camera available".*
 
 ### ShareControl
 
@@ -789,7 +828,19 @@ Renders as a CANCEL type button.
 
 ---
 
-### 6. AdapterContext Not Provided
+### 6. SettingsControl Display State Never Toggles
+
+**Symptoms:** Settings button always shows INACTIVE state even after opening settings
+
+**Root Cause:** This is a known inconsistency in `sdk-component-adapter`. `SettingsControl.display()` reads `showSettings` from the meeting object, but `MeetingsSDKAdapter.toggleSettings()` writes to `settings.visible`. The `showSettings` property is never set by the adapter, so `display()` always sees `undefined` (falsy) and emits INACTIVE.
+
+**Impact:** The settings button icon/text never toggles visually, but the settings modal still opens/closes because `WebexSettings` in `@webex/components` reads `settings.visible` directly.
+
+**Workaround:** None needed for functionality — the modal works. The display state is cosmetic only.
+
+---
+
+### 7. AdapterContext Not Provided
 
 **Symptoms:** Components crash with "Cannot read property of undefined"
 
@@ -814,5 +865,4 @@ Renders as a CANCEL type button.
 
 ---
 
-_Last Updated: 2026-03-12_
-
+*Last Updated: 2026-03-09*

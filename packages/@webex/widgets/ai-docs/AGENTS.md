@@ -290,7 +290,7 @@ The `WebexMeeting` component receives its adapter via `AdapterContext.Provider`,
 | `handleLocalAudio(ID)`               | `ID: string`                                           | `Promise<void>`       | Toggles audio mute/unmute                               |
 | `handleLocalVideo(ID)`               | `ID: string`                                           | `Promise<void>`       | Toggles video on/off                                    |
 | `handleLocalShare(ID)`               | `ID: string`                                           | `Promise<void>`       | Toggles screen share on/off                             |
-| `toggleRoster(ID)`                   | `ID: string`                                           | `void`                | Toggles member roster panel (client-side only)          |
+| `toggleRoster(ID)`                   | `ID: string`                                           | `Promise<void>`       | Toggles member roster panel (client-side only)          |
 | `toggleSettings(ID)`                 | `ID: string`                                           | `Promise<void>`       | Toggles settings modal; applies device changes on close |
 | `switchCamera(ID, cameraID)`         | `ID, cameraID: string`                                 | `Promise<void>`       | Switches to a different camera device                   |
 | `switchMicrophone(ID, microphoneID)` | `ID, microphoneID: string`                             | `Promise<void>`       | Switches to a different microphone                      |
@@ -323,13 +323,13 @@ Each control's `action()` receives a destructured object from the [`useMeetingCo
 
 | Control ID          | Class                     | Type        | Available             |
 | ------------------- | ------------------------- | ----------- | --------------------- |
-| `mute-audio`        | `AudioControl`            | TOGGLE      | Pre-join + In-meeting |
-| `mute-video`        | `VideoControl`            | TOGGLE      | Pre-join + In-meeting |
+| `mute-audio`        | `AudioControl`            | BUTTON      | Pre-join + In-meeting |
+| `mute-video`        | `VideoControl`            | BUTTON      | Pre-join + In-meeting |
 | `share-screen`      | `ShareControl`            | TOGGLE      | In-meeting only       |
 | `join-meeting`      | `JoinControl`             | JOIN        | Pre-join only         |
 | `leave-meeting`     | `ExitControl`             | CANCEL      | In-meeting only       |
 | `member-roster`     | `RosterControl`           | TOGGLE      | In-meeting only       |
-| `settings`          | `SettingsControl`         | TOGGLE      | Pre-join + In-meeting |
+| `settings`          | `SettingsControl`         | BUTTON      | Pre-join + In-meeting |
 | `switch-camera`     | `SwitchCameraControl`     | MULTISELECT | Settings panel        |
 | `switch-microphone` | `SwitchMicrophoneControl` | MULTISELECT | Settings panel        |
 | `switch-speaker`    | `SwitchSpeakerControl`    | MULTISELECT | Settings panel        |
@@ -357,4 +357,4 @@ For detailed architecture, event flows, data structures, and troubleshooting, se
 
 ---
 
-*Last Updated: 2026-03-12*
+*Last Updated: 2026-03-09*
