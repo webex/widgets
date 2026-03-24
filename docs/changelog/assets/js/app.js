@@ -677,19 +677,9 @@ window.onhashchange = () => {
 
 populateVersions();
 
-let comparisonMode = false;
 /* ============================================
    UI HELPER FUNCTIONS
    ============================================ */
-
-/**
- * Show loading state for comparison
- */
-const showComparisonLoading = () => {
-  if (!comparisonResults) return;
-  comparisonResults.innerHTML = '<p style="text-align: center; padding: 20px;">Loading comparison...</p>';
-  comparisonResults.classList.remove('hide');
-};
 
 /**
  * Show error state for comparison
@@ -718,9 +708,6 @@ const showComparisonError = (error) => {
  * @param {string} versionB - Target version (optional)
  */
 const switchToComparisonMode = (versionA = null, versionB = null) => {
-  // Update mode
-  comparisonMode = true;
-
   // Update button states
   if (comparisonViewBtn && singleViewBtn) {
     comparisonViewBtn.classList.add('active', 'btn-primary');
@@ -972,18 +959,6 @@ const handleEnhancedComparisonURL = async () => {
 
   return {shouldCompare: false};
 };
-
-/**
- * Populate version dropdowns for comparison mode
- */
-const populateComparisonVersions = () => {
-  if (versionSelectDropdown && versionSelectDropdown.innerHTML) {
-    const options = versionSelectDropdown.innerHTML;
-    if (versionASelect) versionASelect.innerHTML = options;
-    if (versionBSelect) versionBSelect.innerHTML = options;
-  }
-};
-
 /**
  * Reset comparison form selections
  */
@@ -1067,7 +1042,6 @@ const updatePrereleaseLabels = () => {
  * Handle stable version changes - fetch changelogs and populate packages
  */
 const handleStableVersionChange = async () => {
-  console.log('🟢 handleStableVersionChange FIRED');
   const stableA = versionASelect.value;
   const stableB = versionBSelect.value;
 
@@ -1095,7 +1069,6 @@ const handleStableVersionChange = async () => {
  * Handle package selection - populate pre-release versions
  */
 const handlePackageChange = () => {
-  console.log('🟢 handlePackageChange FIRED');
   const selectedPackage = comparisonPackageSelect.value;
 
   if (versionAPrereleaseSelect) versionAPrereleaseSelect.value = '';
@@ -1130,8 +1103,6 @@ const handlePackageChange = () => {
  * Switch to single view mode
  */
 const switchToSingleViewMode = () => {
-  console.log('🔵 Switching to SINGLE VIEW mode');
-  comparisonMode = false;
 
   // Update button styles
   singleViewBtn.classList.add('active', 'btn-primary');
@@ -1143,25 +1114,6 @@ const switchToSingleViewMode = () => {
   updateUIVisibility('search');
 
   clearComparisonURLParams();
-};
-
-/**
- * Switch to comparison view mode
- */
-const switchToComparisonViewMode = () => {
-  console.log('🔵 Switching to COMPARISON VIEW mode');
-  comparisonMode = true;
-
-  // Update button styles
-  comparisonViewBtn.classList.add('active', 'btn-primary');
-  comparisonViewBtn.classList.remove('btn-default');
-  singleViewBtn.classList.remove('active', 'btn-primary');
-  singleViewBtn.classList.add('btn-default');
-
-  // Toggle visibility (centralized view state)
-  updateUIVisibility('comparison');
-
-  populateComparisonVersions();
 };
 
 /**
@@ -1357,10 +1309,8 @@ const handleClearClick = () => {
  */
 const setupComparisonEventListeners = () => {
   if (comparisonListenersInitialized) {
-    console.log('🔴 Comparison listeners already initialized,skipping......');
     return;
   }
-  console.log('🟢 Setting up comparison event listeners first time......');
   comparisonListenersInitialized = true;
   // Mode toggle buttons
   if (singleViewBtn) singleViewBtn.addEventListener('click', switchToSingleViewMode);
@@ -1450,12 +1400,6 @@ const initializeComparisonMode = async () => {
   if (enhancedParams.shouldCompare) {
     await loadEnhancedComparisonFromURL(enhancedParams);
     return;
-  }
-
-  // Check for standard comparison URL
-  const urlParams = await handleComparisonURLParams();
-  if (urlParams.shouldCompare) {
-    await loadStandardComparisonFromURL(urlParams);
   }
 };
 

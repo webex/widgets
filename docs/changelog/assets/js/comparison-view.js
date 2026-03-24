@@ -294,8 +294,6 @@ const collectCommitsFromStable = (packageData, stableVersion, versionA, versionB
 const generatePackageComparisonData = (packageName, versionASpecific, versionBSpecific, changelogA, changelogB) => {
   const effectiveVersionA = getEffectiveVersion(changelogA, packageName, versionASpecific);
   const effectiveVersionB = getEffectiveVersion(changelogB, packageName, versionBSpecific);
-  console.log('effectiveVersionA', effectiveVersionA);
-  console.log('effectiveVersionB', effectiveVersionB);
   // Get package data from changelogs
   const pkgDataA = changelogA[packageName]?.[effectiveVersionA];
   const pkgDataB = changelogB[packageName]?.[effectiveVersionB];
@@ -334,18 +332,7 @@ const generatePackageComparisonData = (packageName, versionASpecific, versionBSp
 //Export All the functions
 export {
   comparisonState,
-  findLatestPackageVersion,
-  getEffectiveVersion,
-  getPackageVersion,
-  determinePackageStatus,
-  createPackageComparisonRow,
-  calculateComparisonStats,
-  buildPackagesList,
   generatePackageComparisonData,
   sortStableVersions,
-  isPreRelease,
-  isExactStable,
-  getPreReleaseNum,
-  getPreReleaseTag,
   collectCommitsFromStable,
 };
