@@ -37,6 +37,25 @@ Guide for migrating CC Widgets from ad-hoc task state management to the new SDK 
 
 > The events themselves have not changed — they are the same events, now emitted via the SDK state machine. The key difference is that task state updates (including UI control computation) are handled by the SDK, not by widgets.
 
+### What Gets Removed (Dead Code)
+
+The following widget-side logic is entirely replaced by `task.uiControls` and `task.data`:
+
+- **`getControlsVisibility()`** (task-util.ts) + all 22 `get*ButtonVisibility` helper functions — replaced by `task.uiControls`
+- **`getConsultStatus()`, `getTaskStatus()`, `getConsultMPCState()`** (store/task-utils.ts) — dead code. These are only called inside `getControlsVisibility()`. Once it is removed, the entire chain is unused and should be deleted. If consult status is needed for display, use `task.data.consultStatus` (SDK provides directly).
+- **`findHoldStatus()`** (store/task-utils.ts) — removed. The SDK state machine tracks hold state internally; widgets get hold state from the task object. Do NOT derive from `controls.hold.isEnabled` (that is an action flag — disabled during conference/consulting even when call is held).
+
+### Task Object as Source of Truth for State Flags
+
+After migration, state flags come from the task object (`ITask`), not from widget-side helper functions:
+
+| State | Source | Do NOT use |
+|-------|--------|------------|
+| Control visibility/enablement | `task.uiControls` (17 controls, each `{ isVisible, isEnabled }`) | `getControlsVisibility()`, `deviceType`, `featureFlags` |
+| Hold state (`isHeld`) | Task object (SDK tracks internally) | `findHoldStatus()`, `controls.hold.isEnabled` |
+| Conference in progress | `task.data.isConferenceInProgress` | `controls.exitConference.isVisible` (can be false during consult even if conference is active) |
+| Consult status (display) | `task.data.consultStatus` (e.g. `consultInitiated`, `consultAccepted`) | `getConsultStatus()`, `getTaskStatus()` |
+
 ---
 
 ## CC Widgets Files Affected
@@ -66,7 +85,7 @@ Follow these docs in order. Each doc has old vs new code, before/after examples,
 | Order | Document | What to Do |
 |-------|----------|------------|
 | 1 | [store-event-wiring-migration.md](./store-event-wiring-migration.md) | Update 27 event handlers — switch to SDK `TASK_EVENTS` enum, keep `refreshTaskList()`, add `TASK_UI_CONTROLS_UPDATED` subscription, fix `handleConsultEnd` wiring, replace `isDeclineButtonEnabled` with `task.uiControls.decline.isEnabled` |
-| 2 | [store-task-utils-migration.md](./store-task-utils-migration.md) | Remove redundant utils (SDK handles), keep display/timer utils |
+| 2 | [store-task-utils-migration.md](./store-task-utils-migration.md) | Remove dead code (`getControlsVisibility` chain, `findHoldStatus`), delete associated constants; keep `findHoldTimestamp` (timers) and `isIncomingTask` |
 | 3 | [call-control-hook-migration.md](./call-control-hook-migration.md) | Replace `getControlsVisibility()` with `task.uiControls` in `useCallControl` + update timer utils |
 | 4 | [incoming-task-migration.md](./incoming-task-migration.md) | Use `task.uiControls.accept/decline` instead of visibility functions |
 | 5 | [task-list-migration.md](./task-list-migration.md) | Per-task `uiControls` for accept/decline |
@@ -155,4 +174,4 @@ Widgets no longer compute control visibility — `task.uiControls` is the single
 ---
 
 _Created: 2026-03-09_
-_Updated: 2026-03-19 (addressed Kesari3008/mkesavan feedback, aligned with PR #646 decisions)_
+_Updated: 2026-03-24 (added dead code removal and task-object source of truth sections; aligned with PR #648 decisions)_
