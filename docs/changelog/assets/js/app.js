@@ -5,17 +5,9 @@ let comparisonListenersInitialized = false;
 const githubBaseUrl = 'https://github.com/webex/widgets/';
 import {
   comparisonState,
-  extractPackagesFromVersion,
-  findLatestPackageVersion,
-  getEffectiveVersion,
-  getPackageVersion,
-  determinePackageStatus,
-  createPackageComparisonRow,
-  calculateComparisonStats,
-  buildPackagesList,
-  comparePackages,
-  fetchAndCompareVersions,
   generatePackageComparisonData,
+  sortStableVersions,
+  collectCommitsFromStable,
 } from './comparison-view.js';
 
 // DOM elements
@@ -133,6 +125,12 @@ Handlebars.registerHelper('convertDate', function (timestamp) {
   return `${new Date(timestamp).toDateString()} ${new Date(timestamp).toTimeString()}`;
 });
 
+
+
+Handlebars.registerHelper('math', function (index, offset) {
+  return index + offset;//
+});
+
 // Util Methods
 const populateFormFieldsFromURL = async () => {
   const queryParams = new URLSearchParams(window.location.search);
@@ -140,10 +138,9 @@ const populateFormFieldsFromURL = async () => {
   // Skip single-view URL handling if comparison parameters are present
   if (
     queryParams.has('compare') ||
-    queryParams.has('compareStableA') ||
-    (queryParams.has('versionA') && queryParams.has('versionB'))
-  ) {
-    return; // Comparison mode will handle these parameters
+    queryParams.has('compareStableA'))
+   {
+    return;
   }
 
   const searchParams = {
@@ -714,145 +711,6 @@ const showComparisonError = (error) => {
    DATA LAYER FUNCTIONS
    ============================================ */
 
-/**
- * UI LAYER: Handle version comparison UI updates
- * @param {string} versionA - Base version
- * @param {string} versionB - Target version
- */
-const performVersionComparison = async (versionA, versionB) => {
-  // Show loading state
-  showComparisonLoading();
-
-  try {
-    // Fetch and compare data (pure data logic)
-    const result = await fetchAndCompareVersions(versionA, versionB, versionPaths);
-
-    // Display results (UI logic)
-    displayComparison(result.versionA, result.versionB, result.comparisonData);
-  } catch (error) {
-    // Handle error display (UI logic)
-    showComparisonError(error);
-  }
-};
-
-/**
- * Display comparison results
- * @param {string} versionA - Base version
- * @param {string} versionB - Target version
- * @param {Object} comparisonData - Comparison results
- */
-const displayComparison = (versionA, versionB, comparisonData) => {
-  if (!comparisonResults) {
-    console.error('comparison-results element not found!');
-    return;
-  }
-
-  if (!comparisonTemplateElement) {
-    console.error('comparison-template element not found!');
-    return;
-  }
-
-  const comparisonTemplate = Handlebars.compile(comparisonTemplateElement.innerHTML);
-
-  const templateData = {
-    versionA,
-    versionB,
-    ...comparisonData,
-  };
-
-  console.log('Template data:', templateData);
-
-  try {
-    const html = comparisonTemplate(templateData);
-    console.log('Generated HTML length:', html.length);
-
-    comparisonResults.innerHTML = html;
-    comparisonResults.classList.remove('hide');
-
-    // Update URL with comparison parameters for permalinks
-    updateComparisonURL(versionA, versionB);
-
-    // Show the copy link button and helper text
-    if (copyComparisonLinkBtn) {
-      copyComparisonLinkBtn.classList.remove('hide');
-      console.log('Copy link button shown');
-    } else {
-      console.warn('Copy link button not found in DOM');
-    }
-    if (comparisonHelper) {
-      comparisonHelper.classList.remove('hide');
-    }
-
-    // Scroll to results smoothly
-    setTimeout(() => {
-      comparisonResults.scrollIntoView({behavior: 'smooth', block: 'start'});
-    }, 100);
-
-    console.log('Comparison displayed successfully');
-  } catch (error) {
-    console.error('Error rendering template:', error);
-    comparisonResults.innerHTML = `<div style="color: var(--color-error-text); padding: 20px; background: var(--color-error-bg); border-radius: 5px;">Error rendering comparison: ${error.message}</div>`;
-  }
-};
-
-/**
- * Update URL with comparison parameters for sharing/bookmarking
- * @param {string} versionA - Base version
- * @param {string} versionB - Target version
- */
-const updateComparisonURL = (versionA, versionB) => {
-  const url = new URL(window.location);
-
-  // Clear any single-view parameters
-  url.searchParams.delete('stable_version');
-  url.searchParams.delete('package');
-  url.searchParams.delete('version');
-  url.searchParams.delete('commitMessage');
-  url.searchParams.delete('commitHash');
-  // Clear enhanced (package-level) comparison params so full comparison link is not stale
-  url.searchParams.delete('compareStableA');
-  url.searchParams.delete('compareStableB');
-  url.searchParams.delete('comparePackage');
-  url.searchParams.delete('compareVersionA');
-  url.searchParams.delete('compareVersionB');
-
-
-  // Set comparison parameters
-  url.searchParams.set('compare', `${versionA}vs${versionB}`);
-
-  // Update URL without reloading the page
-  window.history.pushState({}, '', url);
-};
-
-/**
- * Parse and handle comparison URL parameters
- * Supports formats: ?compare=3.9.0vs3.10.0 or ?versionA=3.9.0&versionB=3.10.0
- */
-const handleComparisonURLParams = async () => {
-  const urlParams = new URLSearchParams(window.location.search);
-
-  let versionA = null;
-  let versionB = null;
-
-  // Check for ?compare=AvB format
-  const compareParam = urlParams.get('compare');
-  if (compareParam && compareParam.includes('vs')) {
-    const versions = compareParam.split('vs');
-    versionA = versions[0]?.trim();
-    versionB = versions[1]?.trim();
-  }
-
-  // Also support ?versionA=X&versionB=Y format
-  if (!versionA) versionA = urlParams.get('versionA');
-  if (!versionB) versionB = urlParams.get('versionB');
-
-  // If comparison parameters are found, switch to comparison mode
-  if (versionA && versionB && versionA !== versionB) {
-    return {versionA, versionB, shouldCompare: true};
-  }
-
-  return {shouldCompare: false};
-};
 
 /**
  * Switch to comparison mode programmatically
@@ -920,9 +778,8 @@ const getUnionPackages = (changelogA, changelogB) => {
  * @param {Object} changelogA - Changelog A
  * @param {Object} changelogB - Changelog B
  */
-const compareAndRenderPackageVersions = (packageName, versionASpecific, versionBSpecific, changelogA, changelogB) => {
+const compareAndRenderPackageVersions = (packageName, versionASpecific, versionBSpecific, changelogA, changelogB, totalCommits = 0) => {
   try {
-    // Generate comparison data (pure data logic from comparison-view.js)
     const comparisonData = generatePackageComparisonData(
       packageName,
       versionASpecific,
@@ -931,9 +788,8 @@ const compareAndRenderPackageVersions = (packageName, versionASpecific, versionB
       changelogB
     );
 
-    console.log('comparisonData', comparisonData);
+    comparisonData.totalCommits = totalCommits;
 
-    // Validate DOM elements
     if (!comparisonResults) {
       console.error('comparison-results element not found');
       return;
@@ -944,12 +800,11 @@ const compareAndRenderPackageVersions = (packageName, versionASpecific, versionB
       return;
     }
 
-    // Render template
     const template = Handlebars.compile(comparisonTemplateElement.innerHTML);
     const html = template(comparisonData);
 
     // Update DOM
-    comparisonResults.innerHTML = html;
+    comparisonResults.innerHTML += html;
     comparisonResults.classList.remove('hide');
 
     // Update URL for sharing
@@ -996,7 +851,7 @@ const populateUnionPackages = (changelogA, changelogB) => {
     return;
   }
 
-  let optionsHtml = '<option value="">Select a package (optional)</option>';
+  let optionsHtml = '<option value="">Select a package</option>';
   allPackages.forEach((pkg) => {
     optionsHtml += `<option value="${pkg}">${pkg}</option>`;
   });
@@ -1162,9 +1017,6 @@ const clearComparisonForm = () => {
 const clearComparisonURLParams = () => {
   const url = new URL(window.location);
   [
-    'compare',
-    'versionA',
-    'versionB',
     'compareStableA',
     'compareStableB',
     'comparePackage',
@@ -1195,8 +1047,7 @@ const updateCompareButtonState = () => {
       compareButton.disabled = false;
     }
   } else {
-    // No package selected - enable for full version comparison
-    compareButton.disabled = false;
+    compareButton.disabled = true;
   }
 };
 
@@ -1327,13 +1178,122 @@ const validateComparisonInputs = (stableA, stableB, selectedPackage, versionASpe
     return false;
   }
 
+  // Base stable version must be older than or equal to target
+  const allStables = sortStableVersions(Object.keys(versionPaths));
+  const idxA = allStables.indexOf(stableA);
+  const idxB = allStables.indexOf(stableB);
+
+  if (idxA > idxB) {
+    alert('Base version must be older than or equal to target version');
+    return false;
+  }
+
+  // If same stable and both pre-releases selected, base must be older
+  if (stableA === stableB && versionASpecific && versionBSpecific) {
+    const numA = parseInt(versionASpecific.match(/\.(\d+)$/)?.[1] || '0', 10);
+    const numB = parseInt(versionBSpecific.match(/\.(\d+)$/)?.[1] || '0', 10);
+    if (numA > numB) {
+      alert('Base pre-release version must be older than target pre-release version');
+      return false;
+    }
+  }
+
   return true;
+};
+
+/* ============================================
+   CROSS-STABLE COMMIT AGGREGATION (app-level)
+   These functions interact with versionPaths and
+   the DOM, so they live here instead of comparison-view.js
+   ============================================ */
+
+/**
+ * Return the ordered list of stable versions between stableA and stableB (inclusive).
+ */
+const getStableVersionsBetween = (stableA, stableB) => {
+  const allStables = sortStableVersions(Object.keys(versionPaths));
+  const idxA = allStables.indexOf(stableA);
+  const idxB = allStables.indexOf(stableB);
+  if (idxA === -1 || idxB === -1) return [];
+  const lo = Math.min(idxA, idxB);
+  const hi = Math.max(idxA, idxB);
+  return allStables.slice(lo, hi + 1);
+};
+
+/**
+ * Walk every stable between stableA..stableB,
+ * fetch each log file, and collect deduplicated commits.
+ */
+const collectCommitsAcrossStables = async (packageName, stableA, stableB, versionA, versionB) => {
+  const stables = getStableVersionsBetween(stableA, stableB);
+  if (stables.length === 0) return [];
+
+  const allCommits = [];
+  for (let i = 0; i < stables.length; i++) {
+    const stable = stables[i];
+    const path = versionPaths[stable];
+    if (!path) continue;
+
+    let changelog;
+    try {
+      const res = await fetch(path);
+      changelog = await res.json();
+    } catch {
+      continue;
+    }
+
+    const packageData = changelog[packageName];
+    if (!packageData) continue;
+
+    let position;
+    if (stables.length === 1) position = 'only';
+    else if (i === 0) position = 'start';
+    else if (i === stables.length - 1) position = 'end';
+    else position = 'middle';
+
+    const commits = collectCommitsFromStable(packageData, stable, versionA, versionB, position);
+    allCommits.push(...commits);
+  }
+
+  // Final dedup by hash
+  const seen = new Map();
+  allCommits.forEach((c) => {
+    if (!seen.has(c.hash)) seen.set(c.hash, c);
+  });
+  return Array.from(seen.values());
+};
+
+/**
+ * Render the commit history using the Handlebars template in index.html
+ */
+const renderCommitHistory = (packageName, versionA, versionB, commits) => {
+  const templateEl = document.getElementById('commit-history-template');
+  if (!templateEl) {
+    console.error('commit-history-template not found in DOM');
+    return;
+  }
+
+  const template = Handlebars.compile(templateEl.innerHTML);
+  const html = template({
+    packageName,
+    versionA,
+    versionB,
+    commits,
+    totalCommits: commits.length,
+    githubBaseUrl,
+  });
+
+  comparisonResults.innerHTML = html;
+  comparisonResults.classList.remove('hide');
+
+  if (copyComparisonLinkBtn) copyComparisonLinkBtn.classList.remove('hide');
+  if (comparisonHelper) comparisonHelper.classList.remove('hide');
 };
 
 /**
  * Handle comparison form submission
  */
-const handleComparisonSubmit = (event) => {
+const handleComparisonSubmit = async (event) => {
   event.preventDefault();
 
   const stableA = versionASelect.value;
@@ -1347,21 +1307,38 @@ const handleComparisonSubmit = (event) => {
   }
 
   if (selectedPackage && (versionASpecific || versionBSpecific)) {
-    // Package-level comparison
     const finalVersionA = versionASpecific || stableA;
     const finalVersionB = versionBSpecific || stableB;
-    console.log('Comparing:', finalVersionA, 'vs', finalVersionB);
 
-    compareAndRenderPackageVersions(
-      selectedPackage,
-      finalVersionA,
-      finalVersionB,
-      comparisonState.cachedChangelogA,
-      comparisonState.cachedChangelogB
-    );
+    try {
+      const commits = await collectCommitsAcrossStables(
+        selectedPackage,
+        stableA,
+        stableB,
+        finalVersionA,
+        finalVersionB
+      );
+
+      // Commit history table first
+      renderCommitHistory(selectedPackage, finalVersionA, finalVersionB, commits);
+
+      // Package-level comparison table (appended below)
+      compareAndRenderPackageVersions(
+        selectedPackage,
+        finalVersionA,
+        finalVersionB,
+        comparisonState.cachedChangelogA,
+        comparisonState.cachedChangelogB,
+        commits.length
+      );
+
+      updateEnhancedComparisonURL(stableA, stableB, selectedPackage, finalVersionA, finalVersionB);
+    } catch (error) {
+      showComparisonError(error);
+    }
   } else {
-    // Full version comparison
-    performVersionComparison(stableA, stableB);
+    alert('Please select a package and at least one pre-release version to compare.');
+    return;
   }
 
   if (compareButton) compareButton.disabled = false;
@@ -1432,25 +1409,45 @@ const loadEnhancedComparisonFromURL = async (enhancedParams) => {
   versionAPrereleaseSelect.value = enhancedParams.versionA;
   versionBPrereleaseSelect.value = enhancedParams.versionB;
 
-  compareAndRenderPackageVersions(
-    enhancedParams.packageName,
-    enhancedParams.versionA,
-    enhancedParams.versionB,
-    comparisonState.cachedChangelogA,
-    comparisonState.cachedChangelogB
-  );
+  try {
+    const commits = await collectCommitsAcrossStables(
+      enhancedParams.packageName,
+      enhancedParams.stableA,
+      enhancedParams.stableB,
+      enhancedParams.versionA,
+      enhancedParams.versionB
+    );
+
+    renderCommitHistory(
+      enhancedParams.packageName,
+      enhancedParams.versionA,
+      enhancedParams.versionB,
+      commits
+    );
+
+    compareAndRenderPackageVersions(
+      enhancedParams.packageName,
+      enhancedParams.versionA,
+      enhancedParams.versionB,
+      comparisonState.cachedChangelogA,
+      comparisonState.cachedChangelogB,
+      commits.length
+    );
+  } catch (error) {
+    console.error('Error loading commit history from URL:', error);
+  }
 };
 
 /**
  * Handle standard comparison URL parameters on page load
  */
-const loadStandardComparisonFromURL = async (urlParams) => {
-  switchToComparisonMode(urlParams.versionA, urlParams.versionB);
+// const loadStandardComparisonFromURL = async (urlParams) => {
+//   switchToComparisonMode(urlParams.versionA, urlParams.versionB);
 
-  await new Promise((resolve) => setTimeout(resolve, 300));
+//   await new Promise((resolve) => setTimeout(resolve, 300));
 
-  performVersionComparison(urlParams.versionA, urlParams.versionB);
-};
+//   performVersionComparison(urlParams.versionA, urlParams.versionB);
+// };
 
 /**
  * Initialize comparison mode functionality (Refactored)
@@ -1467,10 +1464,10 @@ const initializeComparisonMode = async () => {
   }
 
   // Check for standard comparison URL
-  const urlParams = await handleComparisonURLParams();
-  if (urlParams.shouldCompare) {
-    await loadStandardComparisonFromURL(urlParams);
-  }
+  // const urlParams = await handleComparisonURLParams();
+  // if (urlParams.shouldCompare) {
+  //   await loadStandardComparisonFromURL(urlParams);
+  // }
 };
 
 /**
