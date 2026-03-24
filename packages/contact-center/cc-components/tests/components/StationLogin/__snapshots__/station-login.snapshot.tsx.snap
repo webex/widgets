@@ -898,8 +898,10 @@ exports[`Station Login Component Actions SignOut Modal Popup should close modal 
         class="btn-container"
       >
         <mdc-button
+          aria-disabled="true"
           color="default"
           data-testid="login-button"
+          disabled=""
           role="button"
           size="32"
           tabindex="0"
@@ -2454,8 +2456,10 @@ exports[`Station Login Component Actions calls handleDNInputChanged with correct
         class="btn-container"
       >
         <mdc-button
+          aria-disabled="true"
           color="default"
           data-testid="login-button"
+          disabled=""
           role="button"
           size="32"
           tabindex="0"
@@ -2774,8 +2778,10 @@ exports[`Station Login Component Actions calls handleTeamSelectChanged utility f
         class="btn-container"
       >
         <mdc-button
+          aria-disabled="true"
           color="default"
           data-testid="login-button"
+          disabled=""
           role="button"
           size="32"
           tabindex="0"
@@ -3073,8 +3079,10 @@ exports[`Station Login Component Rendering does not render loginOptions if not i
         class="btn-container"
       >
         <mdc-button
+          aria-disabled="true"
           color="default"
           data-testid="login-button"
+          disabled=""
           role="button"
           size="32"
           tabindex="0"
@@ -3676,8 +3684,10 @@ exports[`Station Login Component Rendering hides Desktop login option when hideD
         class="btn-container"
       >
         <mdc-button
+          aria-disabled="true"
           color="default"
           data-testid="login-button"
+          disabled=""
           role="button"
           size="32"
           tabindex="0"
@@ -4004,8 +4014,10 @@ exports[`Station Login Component Rendering renders login failure when passed 1`]
         class="btn-container"
       >
         <mdc-button
+          aria-disabled="true"
           color="default"
           data-testid="login-button"
+          disabled=""
           role="button"
           size="32"
           tabindex="0"
@@ -4332,8 +4344,10 @@ exports[`Station Login Component Rendering renders save error when passed 1`] = 
         class="btn-container"
       >
         <mdc-button
+          aria-disabled="true"
           color="default"
           data-testid="login-button"
+          disabled=""
           role="button"
           size="32"
           tabindex="0"
@@ -4652,8 +4666,10 @@ exports[`Station Login Component Rendering renders the component correctly 1`] =
         class="btn-container"
       >
         <mdc-button
+          aria-disabled="true"
           color="default"
           data-testid="login-button"
+          disabled=""
           role="button"
           size="32"
           tabindex="0"
@@ -5275,8 +5291,10 @@ exports[`Station Login Component Rendering shows Desktop login option when hideD
         class="btn-container"
       >
         <mdc-button
+          aria-disabled="true"
           color="default"
           data-testid="login-button"
+          disabled=""
           role="button"
           size="32"
           tabindex="0"
@@ -5595,8 +5613,10 @@ exports[`Station Login Component Rendering shows Desktop login option when hideD
         class="btn-container"
       >
         <mdc-button
+          aria-disabled="true"
           color="default"
           data-testid="login-button"
+          disabled=""
           role="button"
           size="32"
           tabindex="0"

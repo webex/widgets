@@ -15,6 +15,8 @@ import {
   handleTeamSelectChanged,
   handleOnCCSignOut,
   handleCCSignoutKeyDown,
+  DEFAULT_US_DIAL_NUMBER_REGEX,
+  INTERNATIONAL_DIAL_NUMBER_REGEX,
 } from '../../../src/components/StationLogin/station-login.utils';
 import {StationLoginLabels} from '../../../src/components/StationLogin/constants';
 
@@ -224,41 +226,90 @@ describe('Station Login Utils', () => {
       mockSetDNErrorText.mockClear();
     });
 
-    it('should return false for valid dial number with default regex', () => {
-      const validNumber = '15552234567'; // Changed 4th digit from 1 to 2 to match [2-9] pattern
-      const result = validateDialNumber(validNumber, null, mockSetDNErrorText, loggerMock);
-      expect(result).toBe(false);
-      expect(mockSetDNErrorText).not.toHaveBeenCalled();
+    describe('with international regex', () => {
+      it('should return false for valid international dial number with + prefix', () => {
+        const validNumber = '+442071234567'; // UK number
+        const result = validateDialNumber(validNumber, INTERNATIONAL_DIAL_NUMBER_REGEX, mockSetDNErrorText, loggerMock);
+        expect(result).toBe(false);
+        expect(mockSetDNErrorText).not.toHaveBeenCalled();
+      });
+
+      it('should return false for valid international dial number without + prefix', () => {
+        const validNumber = '442071234567'; // UK number without +
+        const result = validateDialNumber(validNumber, INTERNATIONAL_DIAL_NUMBER_REGEX, mockSetDNErrorText, loggerMock);
+        expect(result).toBe(false);
+        expect(mockSetDNErrorText).not.toHaveBeenCalled();
+      });
+
+      it('should return false for valid short international dial number (7 digits)', () => {
+        const validNumber = '1234567'; // 7 digit minimum
+        const result = validateDialNumber(validNumber, INTERNATIONAL_DIAL_NUMBER_REGEX, mockSetDNErrorText, loggerMock);
+        expect(result).toBe(false);
+        expect(mockSetDNErrorText).not.toHaveBeenCalled();
+      });
+
+      it('should return true for invalid dial number (too short) and set error text', () => {
+        const invalidNumber = '911'; // Too short (less than 7 digits)
+        const result = validateDialNumber(
+          invalidNumber,
+          INTERNATIONAL_DIAL_NUMBER_REGEX,
+          mockSetDNErrorText,
+          loggerMock
+        );
+        expect(result).toBe(true);
+        expect(mockSetDNErrorText).toHaveBeenCalledWith(StationLoginLabels.DN_FORMAT_ERROR);
+      });
+
+      it('should return true for invalid dial number (too long) and set error text', () => {
+        const invalidNumber = '1234567890123456'; // Too long (more than 15 digits)
+        const result = validateDialNumber(
+          invalidNumber,
+          INTERNATIONAL_DIAL_NUMBER_REGEX,
+          mockSetDNErrorText,
+          loggerMock
+        );
+        expect(result).toBe(true);
+        expect(mockSetDNErrorText).toHaveBeenCalledWith(StationLoginLabels.DN_FORMAT_ERROR);
+      });
     });
 
-    it('should return true for invalid dial number and set error text', () => {
-      const invalidNumber = '911'; // This should be invalid for the default regex (too short and doesn't match pattern)
-      const result = validateDialNumber(invalidNumber, null, mockSetDNErrorText, loggerMock);
-      expect(result).toBe(true);
-      expect(mockSetDNErrorText).toHaveBeenCalledWith(StationLoginLabels.DN_FORMAT_ERROR);
+    describe('with US regex (null fallback)', () => {
+      it('should return false for valid US dial number with null regex (uses default US)', () => {
+        const validNumber = '15552234567';
+        const result = validateDialNumber(validNumber, null, mockSetDNErrorText, loggerMock);
+        expect(result).toBe(false);
+        expect(mockSetDNErrorText).not.toHaveBeenCalled();
+      });
+
+      it('should return true for international number when using US regex fallback', () => {
+        const internationalNumber = '+442071234567'; // UK number - invalid for US regex
+        const result = validateDialNumber(internationalNumber, null, mockSetDNErrorText, loggerMock);
+        expect(result).toBe(true);
+        expect(mockSetDNErrorText).toHaveBeenCalledWith(StationLoginLabels.DN_FORMAT_ERROR);
+      });
+
+      it('should return true for short number when using US regex fallback', () => {
+        const shortNumber = '1234567'; // Too short for US format
+        const result = validateDialNumber(shortNumber, null, mockSetDNErrorText, loggerMock);
+        expect(result).toBe(true);
+        expect(mockSetDNErrorText).toHaveBeenCalledWith(StationLoginLabels.DN_FORMAT_ERROR);
+      });
     });
 
-    it('should accept any input when empty string regex is provided', () => {
-      const anyNumber = '911'; // With empty string regex, this becomes /(?:)/ which matches everything
-      const result = validateDialNumber(anyNumber, '', mockSetDNErrorText, loggerMock);
-      expect(result).toBe(false); // Should return false (no error) because empty regex matches everything
-      expect(mockSetDNErrorText).not.toHaveBeenCalled();
-    });
+    describe('with custom regex from agentConfig', () => {
+      it('should return false for valid number matching custom regex', () => {
+        const validNumber = '15552234567';
+        const result = validateDialNumber(validNumber, DEFAULT_US_DIAL_NUMBER_REGEX, mockSetDNErrorText, loggerMock);
+        expect(result).toBe(false);
+        expect(mockSetDNErrorText).not.toHaveBeenCalled();
+      });
 
-    it('should use custom regex when provided', () => {
-      const customRegex = '^\\d{10}$';
-      const validNumber = '1234567890';
-      const result = validateDialNumber(validNumber, customRegex, mockSetDNErrorText, loggerMock);
-      expect(result).toBe(false);
-      expect(mockSetDNErrorText).not.toHaveBeenCalled();
-    });
-
-    it('should return true for invalid number with custom regex', () => {
-      const customRegex = '^\\d{10}$';
-      const invalidNumber = '123';
-      const result = validateDialNumber(invalidNumber, customRegex, mockSetDNErrorText, loggerMock);
-      expect(result).toBe(true);
-      expect(mockSetDNErrorText).toHaveBeenCalledWith(StationLoginLabels.DN_FORMAT_ERROR);
+      it('should return true for invalid number not matching custom regex', () => {
+        const invalidNumber = '911';
+        const result = validateDialNumber(invalidNumber, DEFAULT_US_DIAL_NUMBER_REGEX, mockSetDNErrorText, loggerMock);
+        expect(result).toBe(true);
+        expect(mockSetDNErrorText).toHaveBeenCalledWith(StationLoginLabels.DN_FORMAT_ERROR);
+      });
     });
   });
 

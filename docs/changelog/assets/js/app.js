@@ -1439,17 +1439,6 @@ const loadEnhancedComparisonFromURL = async (enhancedParams) => {
 };
 
 /**
- * Handle standard comparison URL parameters on page load
- */
-// const loadStandardComparisonFromURL = async (urlParams) => {
-//   switchToComparisonMode(urlParams.versionA, urlParams.versionB);
-
-//   await new Promise((resolve) => setTimeout(resolve, 300));
-
-//   performVersionComparison(urlParams.versionA, urlParams.versionB);
-// };
-
-/**
  * Initialize comparison mode functionality (Refactored)
  */
 const initializeComparisonMode = async () => {
@@ -1464,10 +1453,10 @@ const initializeComparisonMode = async () => {
   }
 
   // Check for standard comparison URL
-  // const urlParams = await handleComparisonURLParams();
-  // if (urlParams.shouldCompare) {
-  //   await loadStandardComparisonFromURL(urlParams);
-  // }
+  const urlParams = await handleComparisonURLParams();
+  if (urlParams.shouldCompare) {
+    await loadStandardComparisonFromURL(urlParams);
+  }
 };
 
 /**

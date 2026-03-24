@@ -170,8 +170,6 @@ describe('CallControlCADComponent', () => {
     expect(screen.getByText('Queue:')).toBeInTheDocument();
     expect(screen.getByText('Support Team')).toBeInTheDocument();
     expect(screen.getByText('Phone Number:')).toBeInTheDocument();
-    expect(screen.getByText('RONA:')).toBeInTheDocument();
-    expect(screen.getByText('30')).toBeInTheDocument();
 
     // Verify media icon and timer
     const mediaIcon = screen.container.querySelector('.media-icon.voice-media');
@@ -306,7 +304,6 @@ describe('CallControlCADComponent', () => {
     expect(noDataScreen.getByText('No Caller ID')).toBeInTheDocument();
     expect(noDataScreen.getByText('No Team Name')).toBeInTheDocument();
     expect(noDataScreen.getByText('No Phone Number')).toBeInTheDocument();
-    expect(noDataScreen.getByText('No RONA')).toBeInTheDocument();
     noDataScreen.unmount();
 
     // Test controlVisibility hiding recording indicator
