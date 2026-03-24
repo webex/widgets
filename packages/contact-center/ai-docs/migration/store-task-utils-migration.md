@@ -136,8 +136,12 @@ Used by retained functions — do not delete.
 ### What replaces it
 
 ```typescript
+import { getDefaultUIControls } from '@webex/contact-center';
+
 const controls = currentTask?.uiControls ?? getDefaultUIControls();
 ```
+
+`getDefaultUIControls()` is exported by the SDK from `uiControlsComputer.ts` — it returns a `TaskUIControls` object with all 17 controls set to `{ isVisible: false, isEnabled: false }`. Used as a safe fallback when `currentTask` is null.
 
 ### Feature-flag gating — handled by SDK
 
@@ -155,8 +159,6 @@ Since `task.uiControls` already reflects these gates, the widget layer can **rem
 ```typescript
 const controls = currentTask?.uiControls ?? getDefaultUIControls();
 ```
-
-> **Note:** There is no `applyFeatureGates` function in the SDK or widgets codebase. The old feature-flag logic was inlined in `getControlsVisibility` (lines 421–525 of `task-util.ts`). It is deleted along with `getControlsVisibility`.
 
 ---
 
