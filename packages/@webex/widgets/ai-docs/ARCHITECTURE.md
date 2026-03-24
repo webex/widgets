@@ -770,21 +770,22 @@ Renders as a CANCEL type button.
 
 ### 5. Multiple Meeting Instances Created
 
-**Symptoms:** Widget creates duplicate meetings
+**Symptoms:** Widget creates duplicate meetings or SDK instances
 
-**Note:** `WebexMeetingsWidget` is a class component. The causes and solutions below are specific to this widget's lifecycle methods.
+**Important:** SDK initialization (`new Webex()`, `new WebexSDKAdapter()`) and meeting creation do **not** happen in `WebexMeetingsWidget`'s lifecycle methods. They happen in the `withAdapter` and `withMeeting` HOC wrappers from `@webex/components` (see `src/widgets/WebexMeetings/WebexMeetings.jsx:259-278`). The widget class's own `componentDidMount`/`componentWillUnmount` only manages focus and accessibility wiring — patching those will not fix duplicate initialization.
 
 **Possible Causes:**
 
-- React strict mode causing double initialization
-- Missing cleanup on prop changes
-- `componentWillUnmount` not disconnecting adapter or cleaning up observers (e.g., `MutationObserver`)
+- React strict mode causing `withAdapter`/`withMeeting` HOCs to mount twice
+- Consumer re-rendering the widget with a new `accessToken` or `meetingDestination` prop, triggering the adapter factory again
+- Missing cleanup in the HOC layer on unmount
 
 **Solutions:**
 
-- Use an instance property (e.g., `this._initialized`) to track initialization state
-- Implement proper cleanup in `componentWillUnmount` (disconnect observers, remove event listeners)
-- Guard against re-initialization in `componentDidMount`
+- Investigate the `withAdapter` HOC in `@webex/components` — that is where `adapter.connect()`/`adapter.disconnect()` is managed
+- Investigate the `withMeeting` HOC — that is where `createMeeting(destination)` is called
+- Ensure the consumer does not remount `WebexMeetingsWidget` unnecessarily (e.g., by changing a React `key` prop)
+- For React strict mode issues, the fix must be in the HOC layer (in `@webex/components`), not in this widget class
 
 ---
 
@@ -807,9 +808,9 @@ Renders as a CANCEL type button.
 ## Related Documentation
 
 - [Agent Documentation](./AGENTS.md) - Widget usage and API reference
-- [React Patterns](../../../ai-docs/patterns/react-patterns.md) - Component patterns
-- [TypeScript Patterns](../../../ai-docs/patterns/typescript-patterns.md) - Type safety and naming conventions
-- [Testing Patterns](../../../ai-docs/patterns/testing-patterns.md) - Jest, RTL, Playwright guidelines
+- [React Patterns](../../../../ai-docs/patterns/react-patterns.md) - Component patterns
+- [TypeScript Patterns](../../../../ai-docs/patterns/typescript-patterns.md) - Type safety and naming conventions
+- [Testing Patterns](../../../../ai-docs/patterns/testing-patterns.md) - Jest, RTL, Playwright guidelines
 
 ---
 
