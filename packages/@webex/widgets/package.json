@@ -17,6 +17,7 @@
     "release:debug": "semantic-release --debug",
     "release:dry-run": "semantic-release --dry-run",
     "start": "npm run demo:serve",
+    "test:unit": "jest --config jest.config.js --coverage",
     "test:e2e": "npm run demo:build && wdio wdio.conf.js",
     "test:eslint": "echo 'Broken eslint tests'",
     "test:eslint:broken": "eslint src/"
@@ -57,6 +58,9 @@
     "@momentum-ui/react": "^23.21.4",
     "@semantic-release/changelog": "^6.0.0",
     "@semantic-release/git": "^10.0.0",
+    "@testing-library/dom": "10.4.0",
+    "@testing-library/jest-dom": "6.6.2",
+    "@testing-library/react": "16.0.1",
     "@wdio/cli": "^7.3.1",
     "@wdio/jasmine-framework": "^7.4.6",
     "@wdio/junit-reporter": "^7.4.2",
