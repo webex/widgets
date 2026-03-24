@@ -23,26 +23,26 @@ The old `ControlVisibility` interface (22 controls + 7 state flags) must be repl
 ```typescript
 // OLD — DELETE this interface
 export interface ControlVisibility {
-  accept: Visibility;
-  decline: Visibility;
-  end: Visibility;
-  muteUnmute: Visibility;           // → mute
-  muteUnmuteConsult: Visibility;    // → REMOVE (use mute)
-  holdResume: Visibility;           // → hold
-  consult: Visibility;
-  transfer: Visibility;
-  conference: Visibility;          // → SDK has both conference and mergeToConference; use mergeToConference for Merge action
-  wrapup: Visibility;
-  pauseResumeRecording: Visibility; // → recording
-  endConsult: Visibility;
-  recordingIndicator: Visibility;   // → REMOVE (merged into recording)
-  exitConference: Visibility;
-  mergeConference: Visibility;      // → mergeToConference
-  consultTransfer: Visibility;
-  mergeConferenceConsult: Visibility; // → REMOVE (use mergeToConference)
-  consultTransferConsult: Visibility; // → REMOVE (use transfer)
-  switchToMainCall: Visibility;
-  switchToConsult: Visibility;
+  accept: Visibility;               // → task.uiControls.accept (same name)
+  decline: Visibility;              // → task.uiControls.decline (same name)
+  end: Visibility;                  // → task.uiControls.end (same name)
+  muteUnmute: Visibility;           // → task.uiControls.mute (renamed)
+  muteUnmuteConsult: Visibility;    // → REMOVE — use task.uiControls.mute (single mute control covers both main and consult)
+  holdResume: Visibility;           // → task.uiControls.hold (renamed)
+  consult: Visibility;              // → task.uiControls.consult (same name)
+  transfer: Visibility;             // → task.uiControls.transfer (same name)
+  conference: Visibility;           // → task.uiControls.conference; SDK also has task.uiControls.mergeToConference — use mergeToConference for Merge action
+  wrapup: Visibility;               // → task.uiControls.wrapup (same name)
+  pauseResumeRecording: Visibility; // → task.uiControls.recording (renamed)
+  endConsult: Visibility;           // → task.uiControls.endConsult (same name)
+  recordingIndicator: Visibility;   // → REMOVE — merged into task.uiControls.recording (use recording.isVisible for badge, recording.isEnabled for toggle)
+  exitConference: Visibility;       // → task.uiControls.exitConference (same name)
+  mergeConference: Visibility;      // → task.uiControls.mergeToConference (renamed)
+  consultTransfer: Visibility;      // → task.uiControls.consultTransfer — NOTE: always hidden in new SDK; use task.uiControls.transfer or task.uiControls.transferConference instead
+  mergeConferenceConsult: Visibility; // → REMOVE — use task.uiControls.mergeToConference (single control covers both main and consult merge)
+  consultTransferConsult: Visibility; // → REMOVE — use task.uiControls.transfer for consult transfer, task.uiControls.transferConference for conference transfer
+  switchToMainCall: Visibility;     // → task.uiControls.switchToMainCall (same name)
+  switchToConsult: Visibility;      // → task.uiControls.switchToConsult (same name)
   isConferenceInProgress: boolean;  // → use `task.data.isConferenceInProgress` (SDK provides this directly); do NOT use controls.exitConference.isVisible as sole source — it can be false when consult is active even if conference is in progress
   isConsultInitiated: boolean;      // → Do NOT use endConsult.isVisible as "initiated only"; it covers both initiated and accepted. Use `task.data.consultStatus` if you need that distinction (e.g. `consultInitiated` vs `consultAccepted`).
   isConsultInitiatedAndAccepted: boolean; // → REMOVE
