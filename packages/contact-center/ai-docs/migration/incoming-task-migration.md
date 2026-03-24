@@ -34,7 +34,7 @@ The IncomingTask widget handles task offer/accept/reject flows. The state machin
 ### Minimal Changes Required
 - Replace `getAcceptButtonVisibility()` / `getDeclineButtonVisibility()` with `task.uiControls.accept` / `task.uiControls.decline`
 - Optionally subscribe to `task:ui-controls-updated` for reactive updates
-- Keep all callback registration as-is (accept/reject lifecycle callbacks)
+- Fix callback registration to use **named callbacks** so `removeTaskCallback` (which calls `task.off`) gets the same function reference (see After example below)
 
 ---
 
@@ -204,8 +204,8 @@ const IncomingTaskComponent = ({ isBrowser, isDeclineButtonEnabled, onAccept, on
 #### After (IncomingTaskComponent)
 ```tsx
 // incoming-task.tsx — new approach
+// acceptControl/declineControl come from task.uiControls.accept / task.uiControls.decline
 const IncomingTaskComponent = ({ acceptControl, declineControl, onAccept, onReject, ... }) => {
-  // SDK provides exact visibility and enabled state
   return (
     <div>
       {acceptControl.isVisible && (

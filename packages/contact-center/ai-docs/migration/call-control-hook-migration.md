@@ -4,6 +4,30 @@
 
 `useCallControl` is the largest and most complex hook in CC Widgets. It orchestrates hold, mute, recording, consult, transfer, conference, wrapup, and auto-wrapup flows. This migration replaces widget-side control computation with `task.uiControls` and simplifies event-driven state updates.
 
+### Dead code removed by this migration
+
+The following functions are deleted — their only consumer (`getControlsVisibility`) is being removed:
+
+| Function | Why dead |
+|----------|----------|
+| `getControlsVisibility` + 22 `get*ButtonVisibility` functions | Replaced by `task.uiControls` |
+| `findHoldStatus(task, mType, agentId)` | SDK tracks hold state internally in `TaskContext`. Get from task object. |
+| `getConsultStatus` / `getTaskStatus` / `getConsultMPCState` | Entire chain consumed only by `getControlsVisibility` (see [store-task-utils-migration.md](./store-task-utils-migration.md)) |
+
+### Props removed
+
+| Old prop | Why removed |
+|----------|-------------|
+| `deviceType` | SDK handles via `UIControlConfig` |
+| `featureFlags` | SDK handles via `config.isEndTaskEnabled`, `config.isEndConsultEnabled`, `config.isRecordingEnabled` |
+| `conferenceEnabled` | SDK computes conference/mergeToConference/exitConference visibility based on task state and config |
+
+### Props retained
+
+| Prop | Why kept |
+|------|----------|
+| `agentId` | Timer utils need it for participant lookup |
+
 ---
 
 ## Old Approach
@@ -119,13 +143,13 @@
 
 | Old Flag | New Approach |
 |----------|-------------|
-| `isConferenceInProgress` | **Use the direct field when the SDK provides it:** `task.data.isConferenceInProgress`. **Old SDK:** TaskManager sets it via `getIsConferenceInProgress(payload)` on TaskData. **Task-refactor SDK:** The same logic is reused — `uiControlsComputer.ts` (state-machine) uses `getIsConferenceInProgress(taskData)` (e.g. `conferenceFromBackend = taskData ? getIsConferenceInProgress(taskData) : false`), so conference-in-progress is already computed inside the SDK and reflected in task data and/or in `uiControls` (e.g. `exitConference.isVisible`). Widgets do not need to call `getIsConferenceInProgress`; use `task.data.isConferenceInProgress` or, for visibility-only, `controls.exitConference.isVisible`. |
-| `isConsultInitiated` | **Do NOT use `controls.endConsult.isVisible` as "initiated only"** — that control is visible for both initiated and accepted consult. Use task/participant state if you need to distinguish "consult requested" vs "consult active". |
+| `isConferenceInProgress` | Use `task.data.isConferenceInProgress` (SDK computes and provides directly). For visibility-only gating, `controls.exitConference.isVisible` also works. Do NOT call the store helper `getIsConferenceInProgress` — it is dead code. |
+| `isConsultInitiated` | **Do NOT use `controls.endConsult.isVisible` as "initiated only"** — that control is visible for both initiated and accepted consult. Use `task.data.consultStatus` to distinguish phases (e.g. `consultInitiated` vs `consultAccepted`). |
 | `isConsultInitiatedAndAccepted` | Removed — SDK handles |
 | `isConsultReceived` | Removed — SDK handles |
 | `isConsultInitiatedOrAccepted` | `controls.endConsult.isVisible` |
-| `isHeld` | **Do NOT derive from `controls.hold.isEnabled`** — use `findHoldStatus(task, 'mainCall', agentId)` from task data |
-| `consultCallHeld` | **Do NOT use `controls.switchToConsult.isVisible`** — that reflects button visibility, not actual hold state. Use `findHoldStatus(task, 'consult', agentId)` from task/participant data |
+| `isHeld` | **Do NOT derive from `controls.hold.isEnabled`** — get from the task object (SDK state machine tracks hold state internally). `controls.hold.isEnabled` is an action flag (whether the hold button is clickable), not the actual hold state — it can be `false` during consult/conference even when the call is not held. `findHoldStatus()` is dead code and will be removed (see [store-task-utils-migration.md](./store-task-utils-migration.md)). |
+| `consultCallHeld` | **Do NOT use `controls.switchToConsult.isVisible`** — that reflects button visibility, not actual hold state. Get from the task object. `findHoldStatus()` is dead code and will be removed. |
 
 ### Actions (Unchanged)
 
@@ -153,16 +177,16 @@
 ### Before
 ```typescript
 export function useCallControl(props: useCallControlProps) {
-  const task = store.currentTask;
+  const task = props.currentTask;
   
   // OLD: Widget computes controls
   const controls = getControlsVisibility(
-    store.deviceType,
-    store.featureFlags,
+    props.deviceType,
+    props.featureFlags,
     task,
-    store.agentId,
+    props.agentId,
     conferenceEnabled,
-    store.logger
+    props.logger
   );
 
   // Event callbacks for hold, resume, end, wrapup, recording
@@ -184,7 +208,7 @@ export function useCallControl(props: useCallControlProps) {
 ### After
 ```typescript
 export function useCallControl(props: useCallControlProps) {
-  const task = store.currentTask;
+  const task = props.currentTask;
   
   // NEW: Read SDK-computed controls directly
   const [controls, setControls] = useState<TaskUIControls>(
@@ -330,14 +354,7 @@ const isTelephonyTaskActive = useMemo(() => {
 
 ### 8. UIControlConfig — SDK Builds It Internally
 
-Widgets do NOT need to provide UIControlConfig. The SDK builds it from:
-- Agent profile → `isEndTaskEnabled`, `isEndConsultEnabled`
-- `callProcessingDetails.pauseResumeEnabled` → `isRecordingEnabled`
-- `interaction.mediaType` → `channelType` (voice/digital)
-- Voice/WebRTC layer → `voiceVariant` (pstn/webrtc)
-- `taskManager.setAgentId()` → `agentId`
-
-**Retain** `deviceType`, `featureFlags`, and `conferenceEnabled` for the feature-flag overlay (`applyFeatureGates`) applied on top of SDK controls. **Retain** `agentId` — required by `calculateStateTimerData()` and `calculateConsultTimerData()` to look up the agent's participant record from `interaction.participants`.
+Widgets do NOT need to provide UIControlConfig. The SDK builds it from agent profile, `callProcessingDetails`, `interaction.mediaType`, and voice/WebRTC layer config. See "Props removed" table in Summary and Migration Gotcha #1 for details. **Retain `agentId`** — required by timer utils for participant lookup.
 
 ### 9. `task:wrapup` Race Condition
 
@@ -376,7 +393,8 @@ export function calculateStateTimerData(
     return { label: 'Wrap Up', timestamp: task.data.wrapUpTimestamp };
   }
   const isConsulting = controls.endConsult.isVisible;
-  // Use controls.hold, controls.endConsult, etc.
+  const isConferencing = task.data.isConferenceInProgress;
+  // Get hold state from task object — do NOT use controls.hold.isEnabled
 }
 ```
 
@@ -387,7 +405,7 @@ export function calculateStateTimerData(
 | Area | Lines | What to change |
 |------|-------|----------------|
 | Event registration/cleanup | 634-653 | Use same event names in set and remove (e.g. TASK_RECORDING_* in both). |
-| controlVisibility useMemo | 930-933 | Replace with `controls` from `currentTask.uiControls` + `applyFeatureGates(..., deviceType, featureFlags, conferenceEnabled)`. |
+| controlVisibility useMemo | 930-933 | Replace with `controls` from `currentTask.uiControls` (SDK handles feature-flag gating internally). |
 | toggleMute guard | 704-705 | Change `controlVisibility?.muteUnmute` to `controls?.mute?.isVisible`. |
 | Auto-wrapup effect | 935-968 | Depend on `controls?.wrapup` instead of `controlVisibility?.wrapup`. |
 | State/consult timer effects | 970-984 | Pass `controls` into `calculateStateTimerData` / `calculateConsultTimerData`; update timer-utils to accept `TaskUIControls`. |
@@ -397,11 +415,11 @@ export function calculateStateTimerData(
 
 ## Migration Gotchas
 
-1. **`UIControlConfig` is built by SDK:** Widgets do NOT provide it. **Retain** `deviceType`, `featureFlags`, and `conferenceEnabled` in `useCallControlProps` for the feature-flag overlay (`applyFeatureGates`). **Retain `agentId`** — timer utils need it for participant lookup.
+1. **`UIControlConfig` is built by SDK:** Widgets do NOT provide it. The SDK handles feature-flag gating internally via `config.isEndTaskEnabled`, `config.isEndConsultEnabled`, `config.isRecordingEnabled`. Widget props `deviceType`, `featureFlags`, and `conferenceEnabled` can be **removed**. There is no `applyFeatureGates` function. **Retain `agentId`** — timer utils need it for participant lookup.
 
-2. **`isHeld` derivation:** Hold control can be `VISIBLE_DISABLED` in conference/consulting states without meaning the call is held. Do NOT derive from `controls.hold.isEnabled`. Use `findHoldStatus(task, 'mainCall', agentId)` from task data.
+2. **`isHeld` derivation:** Hold control can be `VISIBLE_DISABLED` in conference/consulting states without meaning the call is held. Do NOT derive from `controls.hold.isEnabled` — it is an action flag (button clickability), not hold state. Get hold state from the task object (SDK tracks hold state internally). `findHoldStatus()` is dead code and will be removed (see [store-task-utils-migration.md](./store-task-utils-migration.md)).
 
-3. **Recording control semantics:** `recording.isEnabled = true` means recording is active (button clickable to pause). `recording.isEnabled = false` means not active (visible but disabled).
+3. **Recording control semantics:** `recording.isEnabled` means the toggle button is **actionable** (clickable), not that recording is active. Active/paused state should come from recording events (`TASK_RECORDING_PAUSED`/`TASK_RECORDING_RESUMED`) or task state — not from `isEnabled`. Use `recording.isVisible` for the recording badge/indicator.
 
 4. **`exitConference` visibility change:** In the new SDK, `exitConference` is `VISIBLE_DISABLED` (not hidden) during consulting-from-conference. Old widget logic hid it.
 
@@ -412,7 +430,7 @@ export function calculateStateTimerData(
 | File | Action |
 |------|--------|
 | `task/src/helper.ts` | Refactor `useCallControl` as described above |
-| `task/src/Utils/task-util.ts` | Remove or reduce (only keep `findHoldTimestamp`) |
+| `task/src/Utils/task-util.ts` | Delete `getControlsVisibility` + all 22 `get*ButtonVisibility` functions (dead code). Keep `findHoldTimestamp(interaction, mType)` for hold timer. `findHoldStatus` is dead code — remove it. |
 | `task/src/Utils/timer-utils.ts` | Update to accept `TaskUIControls` instead of `controlVisibility` |
 | `task/src/task.types.ts` | Update `useCallControlProps` return type |
 | `task/tests/helper.ts` | Update all `useCallControl` tests |
