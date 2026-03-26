@@ -30,14 +30,14 @@ You will receive these variables in your prompt:
 
 ## Workflow
 
-### 1. Gather Context and Verify
+### 1. Gather Context and Determine Metadata
 
 **Read the PR template:**
 ```
 Read {WORKTREE_PATH}/.github/PULL_REQUEST_TEMPLATE.md
 ```
 
-**Inspect and verify staged changes:**
+**Inspect staged changes:**
 ```bash
 cd {WORKTREE_PATH}
 
@@ -47,20 +47,22 @@ git diff --cached
 
 # Check for unstaged changes that might be missed
 git status
-
-# Verify tests pass before proceeding
-yarn workspace @webex/{SCOPE} test:unit
 ```
 
-**STOP if verification fails.** Do not commit code with failing tests. Return a failed result.
-
-### 2. Determine Commit Metadata
-
-If not provided via CHANGE_TYPE/SCOPE/SUMMARY, derive from the ticket info and diff:
+**Determine commit metadata** (if not provided via CHANGE_TYPE/SCOPE/SUMMARY, derive from the ticket info and diff):
 
 - **type**: `fix` for Bug, `feat` for Story/Feature, `chore` for Task
 - **scope**: the package name affected (e.g., `task`, `store`, `cc-components`)
 - **description**: concise summary from the ticket title
+
+### 2. Verify Tests
+
+```bash
+cd {WORKTREE_PATH}
+yarn workspace @webex/{SCOPE} test:unit
+```
+
+**STOP if verification fails.** Do not commit code with failing tests. Return a failed result.
 
 ### 3. Create Commit
 

@@ -37,7 +37,7 @@ Implement bug fixes, create PRs, and handle review feedback. The final stage of 
 
 For each ticket, check if a PR already exists:
 ```bash
-gh pr list --head {TICKET_ID} --repo webex/widgets --json number,title,state,reviews,reviewRequests
+gh pr list --head {TICKET_ID} --repo webex/widgets --state all --json number,title,state,reviews,reviewRequests
 ```
 
 - **If PR exists and is open:** Enter review-polling mode (Step 7)
@@ -244,18 +244,23 @@ mcp__jira__add_labels(issue_key="{TICKET_ID}", labels=["fixing"])
 When `/fix` is called on a ticket that already has an open PR:
 
 ```bash
-cd /tmp/claude-widgets/{TICKET_ID}
-gh pr view {PR_NUMBER} --json reviews,reviewRequests,state
+gh pr view {PR_NUMBER} --repo webex/widgets --json reviews,reviewRequests,state
 ```
 
 **If changes requested:**
-1. Read review comments:
+1. Ensure worktree exists (recreate if cleaned up):
+   ```bash
+   if [ ! -d /tmp/claude-widgets/{TICKET_ID} ]; then
+     git worktree add /tmp/claude-widgets/{TICKET_ID} {TICKET_ID}
+   fi
+   ```
+2. Read review comments:
    ```bash
    gh api repos/webex/widgets/pulls/{PR_NUMBER}/reviews
    gh api repos/webex/widgets/pulls/{PR_NUMBER}/comments
    ```
-2. Address each review comment (edit code in worktree, run tests)
-3. Commit and push:
+3. Address each review comment (edit code in worktree, run tests)
+4. Commit and push:
    ```bash
    cd /tmp/claude-widgets/{TICKET_ID}
    git add {changed files}

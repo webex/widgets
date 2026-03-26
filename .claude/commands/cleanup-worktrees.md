@@ -64,7 +64,7 @@ For each selected worktree:
 
 **Remove:**
 ```bash
-git worktree remove /tmp/claude-widgets/{TICKET_ID}
+git worktree remove --force /tmp/claude-widgets/{TICKET_ID}
 git branch -d {TICKET_ID} 2>/dev/null  # delete branch if fully merged
 ```
 
