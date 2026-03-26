@@ -1176,7 +1176,7 @@ const getStableVersionsBetween = (stableA, stableB) => {
  * Walk every stable between stableA..stableB,
  * fetch each log file, and collect deduplicated commits.
  */
-const collectCommitsAcrossStables = async (packageName, stableA, stableB, versionA, versionB) => {
+const collectCommitsAcrossStables = async (packageName, stableA, stableB, versionA, versionB,cachedChangelogA,cachedChangelogB) => {
   const stables = getStableVersionsBetween(stableA, stableB);
   if (stables.length === 0) return [];
 
@@ -1187,12 +1187,21 @@ const collectCommitsAcrossStables = async (packageName, stableA, stableB, versio
     if (!path) continue;
 
     let changelog;
-    try {
-      const res = await fetch(path);
-      changelog = await res.json();
-    } catch {
+    // if (stable === stableA && comparisonState.cachedChangelogA ) {
+    //   changelog = comparisonState.cachedChangelogA;
+    // } else if (stable === stableB && comparisonState.cachedChangelogB) {
+    //   changelog = comparisonState.cachedChangelogB;
+    // } else {
+     try {
+       const res = await fetch(path);
+       if (!res.ok) {
+        throw new Error(`Failed to fetch changelog for stable ${stable}`);
+      }
+       changelog = await res.json();
+     } catch {
       continue;
     }
+  //}
 
     const packageData = changelog[packageName];
     if (!packageData) continue;
@@ -1315,7 +1324,7 @@ const setupComparisonEventListeners = () => {
   // Mode toggle buttons
   if (singleViewBtn) singleViewBtn.addEventListener('click', switchToSingleViewMode);
 
-  if (comparisonViewBtn) comparisonViewBtn.addEventListener('click', switchToComparisonViewMode);
+  if (comparisonViewBtn) comparisonViewBtn.addEventListener('click', () => switchToComparisonMode());
 
   // Version and package selectors
   if (versionASelect) versionASelect.addEventListener('change', handleStableVersionChange);

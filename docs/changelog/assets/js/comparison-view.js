@@ -267,8 +267,8 @@ const collectCommitsFromStable = (packageData, stableVersion, versionA, versionB
         if (!isPreRelease(v, stableVersion)) return false;
         const tag = getPreReleaseTag(v, stableVersion);
         const num = getPreReleaseNum(v);
-        const afterStart = tag === tagA ? num >= numA : false;
-        const beforeEnd = tag === tagB ? num <= numB : false;
+        const afterStart = tag === tagA ? num >= numA : true;
+        const beforeEnd = tag === tagB ? num <= numB : true;
         return afterStart && beforeEnd;
       });
     }
@@ -297,9 +297,6 @@ const generatePackageComparisonData = (packageName, versionASpecific, versionBSp
   // Get package data from changelogs
   const pkgDataA = changelogA[packageName]?.[effectiveVersionA];
   const pkgDataB = changelogB[packageName]?.[effectiveVersionB];
-  console.log('pkgDataA', pkgDataA);
-  console.log('pkgDataB', pkgDataB);
-
   // Validate versions exist
   if (!pkgDataA && !pkgDataB) {
     throw new Error(`Could not find version data for ${packageName}`);
