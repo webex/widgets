@@ -1,9 +1,9 @@
-generated_at: "2026-03-24T12:26:12.244Z"
+generated_at: "2026-03-26T09:05:57.957Z"
 generator: generate-sdk-deps.ts v1.0
 dependencies:
   "@webex/contact-center":
     version: workspace
-    manifest_hash: 2cee4d4a
+    manifest_hash: 977fc0b8
     methods:
       default.init:
         usages:

@@ -16,14 +16,26 @@ import * as path from 'path';
 const REPO_ROOT = path.resolve(__dirname, '..');
 const OUTPUT_FILE = path.join(REPO_ROOT, 'sdk-dependencies.yaml');
 
-// SDK packages to track — add more as needed
-const TRACKED_SDKS = [
-  '@webex/contact-center',
-];
+// SDK dependency configuration — single source of truth.
+// To track a new SDK, add one entry here. No other changes needed.
+interface SDKConfigEntry {
+  package: string;
+  scanDirs: string[];
+  localManifestPath: string;
+}
 
-// Directories to scan (relative to repo root)
-const SCAN_DIRS = [
-  'packages/contact-center',
+const SDK_CONFIG: SDKConfigEntry[] = [
+  {
+    package: '@webex/contact-center',
+    scanDirs: ['packages/contact-center'],
+    localManifestPath: '../ccSDK/webex-js-sdk/packages/@webex/contact-center/sdk-manifest.yaml',
+  },
+  // To add a new SDK:
+  // {
+  //   package: '@webex/calling',
+  //   scanDirs: ['packages/calling'],
+  //   localManifestPath: '../ccSDK/webex-js-sdk/packages/calling/sdk-manifest.yaml',
+  // },
 ];
 
 // Skip test files, fixtures, ai-docs, and dist/build output
@@ -97,19 +109,16 @@ function getLineContext(sourceFile: SourceFile, line: number): string {
 }
 
 /**
- * Find the SDK manifest — checks node_modules first, then known local paths.
+ * Find the SDK manifest — checks node_modules first, then local path from config.
  */
-function findManifestPath(sdkPackage: string): string | null {
+function findManifestPath(config: SDKConfigEntry): string | null {
   // 1. Check node_modules (works for both symlinked and npm-installed)
-  const nmPath = path.join(REPO_ROOT, 'node_modules', sdkPackage, 'sdk-manifest.yaml');
+  const nmPath = path.join(REPO_ROOT, 'node_modules', config.package, 'sdk-manifest.yaml');
   if (fs.existsSync(nmPath)) return nmPath;
 
-  // 2. Check known local SDK paths (for development when symlink is broken)
-  const localPaths: Record<string, string> = {
-    '@webex/contact-center': path.resolve(REPO_ROOT, '../ccSDK/webex-js-sdk/packages/@webex/contact-center/sdk-manifest.yaml'),
-  };
-  const localPath = localPaths[sdkPackage];
-  if (localPath && fs.existsSync(localPath)) return localPath;
+  // 2. Check local path from config (for development when symlink is broken)
+  const localPath = path.resolve(REPO_ROOT, config.localManifestPath);
+  if (fs.existsSync(localPath)) return localPath;
 
   return null;
 }
@@ -117,8 +126,8 @@ function findManifestPath(sdkPackage: string): string | null {
 /**
  * Read the SDK manifest to get the version and compute a simple hash for staleness detection.
  */
-function getManifestInfo(sdkPackage: string): {version: string; hash: string} {
-  const manifestPath = findManifestPath(sdkPackage);
+function getManifestInfo(config: SDKConfigEntry): {version: string; hash: string} {
+  const manifestPath = findManifestPath(config);
   if (manifestPath) {
     const content = fs.readFileSync(manifestPath, 'utf8');
     const manifest = yaml.load(content) as Record<string, unknown>;
@@ -136,8 +145,8 @@ function getManifestInfo(sdkPackage: string): {version: string; hash: string} {
 /**
  * Load the SDK manifest to know which exports are methods vs types vs events.
  */
-function loadManifest(sdkPackage: string): {methods: Set<string>; types: Set<string>; events: Set<string>} | null {
-  const manifestPath = findManifestPath(sdkPackage);
+function loadManifest(config: SDKConfigEntry): {methods: Set<string>; types: Set<string>; events: Set<string>} | null {
+  const manifestPath = findManifestPath(config);
   if (!manifestPath) return null;
 
   const content = fs.readFileSync(manifestPath, 'utf8');
@@ -185,8 +194,14 @@ function generate(): void {
     skipAddingFilesFromTsConfig: true,
   });
 
-  // Add source files from scan directories
-  for (const dir of SCAN_DIRS) {
+  // Add source files from all configured scan directories
+  const allScanDirs = new Set<string>();
+  for (const config of SDK_CONFIG) {
+    for (const dir of config.scanDirs) {
+      allScanDirs.add(dir);
+    }
+  }
+  for (const dir of allScanDirs) {
     const absDir = path.join(REPO_ROOT, dir);
     project.addSourceFilesAtPaths([
       `${absDir}/**/*.ts`,
@@ -204,9 +219,9 @@ function generate(): void {
   };
 
   // Initialize dependency entries for each tracked SDK
-  for (const sdk of TRACKED_SDKS) {
-    const manifestInfo = getManifestInfo(sdk);
-    depMap.dependencies[sdk] = {
+  for (const config of SDK_CONFIG) {
+    const manifestInfo = getManifestInfo(config);
+    depMap.dependencies[config.package] = {
       version: manifestInfo.version,
       manifest_hash: manifestInfo.hash,
       methods: {},
@@ -217,9 +232,12 @@ function generate(): void {
 
   // Load manifest for classification
   const manifests: Record<string, ReturnType<typeof loadManifest>> = {};
-  for (const sdk of TRACKED_SDKS) {
-    manifests[sdk] = loadManifest(sdk);
+  for (const config of SDK_CONFIG) {
+    manifests[config.package] = loadManifest(config);
   }
+
+  // Build lookup: package name -> set of all tracked packages
+  const trackedPackages = new Set(SDK_CONFIG.map(c => c.package));
 
   for (const sourceFile of sourceFiles) {
     const filePath = sourceFile.getFilePath();
@@ -232,7 +250,7 @@ function generate(): void {
       const moduleSpecifier = imp.getModuleSpecifierValue();
 
       // Check if this import is from a tracked SDK
-      const matchedSdk = TRACKED_SDKS.find((sdk) =>
+      const matchedSdk = [...trackedPackages].find((sdk) =>
         moduleSpecifier === sdk || moduleSpecifier.startsWith(sdk + '/')
       );
       if (!matchedSdk) continue;
@@ -373,8 +391,8 @@ function generate(): void {
   }
 
   // Clean up empty entries
-  for (const sdk of TRACKED_SDKS) {
-    const dep = depMap.dependencies[sdk];
+  for (const config of SDK_CONFIG) {
+    const dep = depMap.dependencies[config.package];
     for (const [key, val] of Object.entries(dep.methods)) {
       if (val.usages.length === 0) delete dep.methods[key];
     }
