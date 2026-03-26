@@ -1176,7 +1176,7 @@ const getStableVersionsBetween = (stableA, stableB) => {
  * Walk every stable between stableA..stableB,
  * fetch each log file, and collect deduplicated commits.
  */
-const collectCommitsAcrossStables = async (packageName, stableA, stableB, versionA, versionB,cachedChangelogA,cachedChangelogB) => {
+const collectCommitsAcrossStables = async (packageName, stableA, stableB, versionA, versionB) => {
   const stables = getStableVersionsBetween(stableA, stableB);
   if (stables.length === 0) return [];
 
@@ -1187,11 +1187,11 @@ const collectCommitsAcrossStables = async (packageName, stableA, stableB, versio
     if (!path) continue;
 
     let changelog;
-    // if (stable === stableA && comparisonState.cachedChangelogA ) {
-    //   changelog = comparisonState.cachedChangelogA;
-    // } else if (stable === stableB && comparisonState.cachedChangelogB) {
-    //   changelog = comparisonState.cachedChangelogB;
-    // } else {
+    if (stable === stableA && comparisonState.cachedChangelogA ) {
+      changelog = comparisonState.cachedChangelogA;
+    } else if (stable === stableB && comparisonState.cachedChangelogB) {
+      changelog = comparisonState.cachedChangelogB;
+    } else {
      try {
        const res = await fetch(path);
        if (!res.ok) {
@@ -1201,7 +1201,7 @@ const collectCommitsAcrossStables = async (packageName, stableA, stableB, versio
      } catch {
       continue;
     }
-  //}
+  }
 
     const packageData = changelog[packageName];
     if (!packageData) continue;
