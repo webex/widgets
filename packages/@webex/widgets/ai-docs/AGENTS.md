@@ -341,7 +341,7 @@ The widget declares `react`, `react-dom`, `prop-types`, and `webex` as **peer de
 yarn add @webex/widgets react@<version> react-dom@<version> prop-types@<version> webex@<version>
 # npm
 npm install @webex/widgets react@<version> react-dom@<version> prop-types@<version> webex@<version>
----
+```
 
 ## Additional Resources
 
