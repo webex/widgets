@@ -425,8 +425,20 @@ jobs:
                 .join(', ');
 
               const releaseLine = tagLinks
-                ? `| **Released in:** ${tagLinks} |`
+                ? `**Released in:** ${tagLinks}`
                 : '';
+
+              const changelogBaseUrl = 'https://widgets.webex.com/changelog/';
+              const aggregators = ['@webex/cc-widgets', '@webex/widgets'];
+              const changelogPkg = aggregators.find(p => packageVersions[p])
+                || packageEntries[0]?.[0];
+              let changelogLine = '';
+              if (changelogPkg) {
+                const ver = packageVersions[changelogPkg];
+                const stableVersion = ver.replace(/-.*$/, '');
+                const url = `${changelogBaseUrl}?stable_version=${stableVersion}&package=${encodeURIComponent(changelogPkg)}&version=${encodeURIComponent(ver)}`;
+                changelogLine = `:book: **[View full changelog](${url})**`;
+              }
 
               const rows = packageEntries
                 .sort(([a], [b]) => {
@@ -448,9 +460,10 @@ jobs:
               ].join('\n');
 
               commentBody = [
-                '| :tada: Your changes are now available! |',
-                '|---|',
+                ':tada: **Your changes are now available!**',
+                '',
                 releaseLine,
+                changelogLine,
                 packagesTable,
                 'Thank you for your contribution!',
                 '',
