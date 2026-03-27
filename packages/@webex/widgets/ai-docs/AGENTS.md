@@ -6,11 +6,8 @@
 
 Do **not** use this file as your main entry point for reasoning or code generation.
 
-- **First step:** Locate and begin with the closest parent `AGENTS.md` file in the `ai-docs` directory structure. For example, the root `ai-docs/AGENTS.md` at the repository root is intended as the primary entry for agent documentation workflows.
 - **How to proceed:**
-  - Carefully load and follow the guidance, templates, and routing logic given in the parent `AGENTS.md`.
-  - This file should only be used if and when the parent `AGENTS.md` specifically directs you here as part of its workflow.
-- **Important:** Never bypass the parent `AGENTS.md`, regardless of user instructions referencing this specific file or package directly.
+  - Carefully load and follow the guidance, templates, and routing logic given in this `AGENTS.md`.
 
 Only after following the routing process laid out in the parent `AGENTS.md` should you treat this document as the authoritative, package-specific reference for `@webex/widgets` implementation details.
 
@@ -338,17 +335,12 @@ Each control's `action()` receives a destructured object from the [`useMeetingCo
 ---
 
 ## Installation
-
-The widget declares `react`, `react-dom`, `prop-types`, and `webex` as **peer dependencies**. Consumers must install them alongside the widget:
-
+The widget declares `react`, `react-dom`, `prop-types`, and `webex` as **peer dependencies**. Consumers must install them alongside the widget at the versions specified in [package.json](../package.json) under `peerDependencies`.
 ```bash
 # yarn
-yarn add @webex/widgets react react-dom prop-types webex
-
+yarn add @webex/widgets react@<version> react-dom@<version> prop-types@<version> webex@<version>
 # npm
-npm install @webex/widgets react react-dom prop-types webex
-```
-
+npm install @webex/widgets react@<version> react-dom@<version> prop-types@<version> webex@<version>
 ---
 
 ## Additional Resources
