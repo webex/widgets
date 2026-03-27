@@ -520,6 +520,38 @@ export class TestManager {
     });
   }
 
+  async setupForOutdialDesktop(browser: Browser): Promise<void> {
+    await this.setup(browser, {
+      needsAgent1: true,
+      agent1LoginMode: LOGIN_MODE.DESKTOP,
+    });
+    await this.setupOutdialCustomer(browser);
+  }
+
+  async setupForOutdialExtension(browser: Browser): Promise<void> {
+    await this.setup(browser, {
+      needsAgent1: true,
+      needsExtension: true,
+      agent1LoginMode: LOGIN_MODE.EXTENSION,
+    });
+    await this.setupOutdialCustomer(browser);
+  }
+
+  private async setupOutdialCustomer(browser: Browser): Promise<void> {
+    const envTokens = this.getEnvTokens();
+    const customerToken = envTokens.dialNumberLoginAccessToken;
+    if (!customerToken) {
+      throw new Error('Environment variable DIAL_NUMBER_LOGIN_ACCESS_TOKEN is missing or empty');
+    }
+    const result = await this.createContextWithPage(browser, PAGE_TYPES.CALLER);
+    this.callerExtensionContext = result.context;
+    this.callerPage = result.page;
+    await this.retryOperation(
+      () => loginExtension(this.callerPage, customerToken),
+      'outdial customer login'
+    );
+  }
+
   async setupForMultipartyConference(browser: Browser) {
     await this.setup(browser, {
       needsAgent1: true,

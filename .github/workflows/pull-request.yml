@@ -3,9 +3,6 @@ run-name: ${{ github.actor }} is running Pull Request CI
 
 on:
   pull_request_target:
-    branches:
-      - next
-
     types: [opened, labeled, reopened, synchronize]
   workflow_dispatch:
 
@@ -281,3 +278,6 @@ jobs:
 
       - name: Test CC Widgets
         run: yarn run test:cc-widgets
+
+      - name: Test Meetings Widget
+        run: yarn run test:meetings-widget
