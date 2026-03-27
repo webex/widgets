@@ -125,19 +125,15 @@ Handlebars.registerHelper('convertDate', function (timestamp) {
   return `${new Date(timestamp).toDateString()} ${new Date(timestamp).toTimeString()}`;
 });
 
-
-
 Handlebars.registerHelper('math', function (index, offset) {
-  return index + offset;//
+  return index + offset;
 });
 
 // Util Methods
 const populateFormFieldsFromURL = async () => {
   const queryParams = new URLSearchParams(window.location.search);
 
-  // Skip single-view URL handling if comparison parameters are present
   if (
-    queryParams.has('compare') ||
     queryParams.has('compareStableA'))
    {
     return;
@@ -677,10 +673,6 @@ window.onhashchange = () => {
 
 populateVersions();
 
-/* ============================================
-   UI HELPER FUNCTIONS
-   ============================================ */
-
 /**
  * Show error state for comparison
  * @param {Error} error - The error object
@@ -790,7 +782,8 @@ const compareAndRenderPackageVersions = (packageName, versionASpecific, versionB
     const template = Handlebars.compile(comparisonTemplateElement.innerHTML);
     const html = template(comparisonData);
 
-    // Update DOM
+    // NOTE: renderCommitHistory must be called first — it resets this container via `=`.
+    // This `+=` appends the package comparison table below the commit history.
     comparisonResults.innerHTML += html;
     comparisonResults.classList.remove('hide');
 
@@ -1198,7 +1191,8 @@ const collectCommitsAcrossStables = async (packageName, stableA, stableB, versio
         throw new Error(`Failed to fetch changelog for stable ${stable}`);
       }
        changelog = await res.json();
-     } catch {
+     } catch (error) {
+
       continue;
     }
   }
@@ -1280,7 +1274,7 @@ const handleComparisonSubmit = async (event) => {
         finalVersionB
       );
 
-      // Commit history table first
+      // Order matters: renderCommitHistory resets the container; compareAndRender appends to it.
       renderCommitHistory(selectedPackage, finalVersionA, finalVersionB, commits);
 
       // Package-level comparison table (appended below)

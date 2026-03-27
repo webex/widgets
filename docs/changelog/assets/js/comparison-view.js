@@ -208,7 +208,7 @@ const collectCommitsFromStable = (packageData, stableVersion, versionA, versionB
 
   if (position === 'start') {
     if (versionA === stableVersion) {
-      versionsToUse = isExactStable(versionB) ? [] : [stableVersion];
+      versionsToUse = all.filter((v)=>isPreRelease(v,stableVersion));
     } else {
       const tagA = getPreReleaseTag(versionA, stableVersion);
       const numA = getPreReleaseNum(versionA);
