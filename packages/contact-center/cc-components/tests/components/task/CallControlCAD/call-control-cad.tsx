@@ -55,6 +55,7 @@ describe('CallControlCADComponent', () => {
         callAssociatedDetails: {
           customerName: 'John Doe',
           ani: '555-123-4567',
+          dn: '555-999-0000',
           virtualTeamName: 'Support Team',
           ronaTimeout: '30',
         },
@@ -263,6 +264,40 @@ describe('CallControlCADComponent', () => {
     const chatConsultContainer = chatConsultScreen.container.querySelector('.call-control-consult-container');
     expect(chatConsultContainer).not.toBeInTheDocument();
     chatConsultScreen.unmount();
+  });
+
+  it('should display correct phone number for inbound vs outdial calls', () => {
+    // Inbound call: caller ID = ani, phone number = ani
+    const inboundScreen = render(<CallControlCADComponent {...defaultProps} />);
+    // ani (555-123-4567) should appear as both caller ID and phone number
+    const aniElements = inboundScreen.getAllByText('555-123-4567');
+    expect(aniElements.length).toBe(2); // caller ID + phone number
+    // dn (555-999-0000) should NOT appear anywhere
+    expect(inboundScreen.queryByText('555-999-0000')).not.toBeInTheDocument();
+    inboundScreen.unmount();
+
+    // Outdial call: caller ID = dn, phone number = ani
+    const outdialProps = {
+      ...defaultProps,
+      currentTask: {
+        ...defaultProps.currentTask,
+        data: {
+          ...defaultProps.currentTask.data,
+          interaction: {
+            ...defaultProps.currentTask.data.interaction,
+            outboundType: 'OUTDIAL',
+          },
+        },
+      },
+    };
+    const outdialScreen = render(<CallControlCADComponent {...outdialProps} />);
+    // Caller ID should show dn (555-999-0000)
+    expect(outdialScreen.getByText('555-999-0000')).toBeInTheDocument();
+    // Phone number should show ani (555-123-4567)
+    const phoneLabel = outdialScreen.getByText('Phone Number:');
+    const phoneValue = phoneLabel.nextElementSibling;
+    expect(phoneValue?.textContent).toBe('555-123-4567');
+    outdialScreen.unmount();
   });
 
   it('should handle wrapup mode and edge cases', () => {

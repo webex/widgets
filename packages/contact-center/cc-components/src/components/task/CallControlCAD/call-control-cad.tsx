@@ -78,12 +78,13 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
   const phoneNumberTriggerId = `phone-number-trigger-${currentTask.data.interaction.interactionId}`;
   const phoneNumberTooltipId = `phone-number-tooltip-${currentTask.data.interaction.interactionId}`;
 
+  // For telephony calls, ani is the phone number and dn is the entry point/DNIS.
+  // Inbound: ani = caller's number, dn = entry point dialed by caller
+  // Outdial: ani = customer's number dialed by agent, dn = agent's entry point
+  const callerNumber = isOutdial ? dn || ani : ani;
+
   const renderCustomerName = () => {
-    const customerText = isSocial
-      ? customerName || NO_CUSTOMER_NAME
-      : isOutdial
-        ? dn || ani || NO_CALLER_ID
-        : ani || NO_CALLER_ID;
+    const customerText = isSocial ? customerName || NO_CUSTOMER_NAME : callerNumber || NO_CALLER_ID;
 
     const textComponent = (
       <Text
@@ -120,7 +121,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
   };
 
   const renderPhoneNumber = () => {
-    const phoneText = isSocial ? customerName || NO_CUSTOMER_NAME : dn || NO_PHONE_NUMBER;
+    const phoneText = isSocial ? customerName || NO_CUSTOMER_NAME : ani || NO_PHONE_NUMBER;
     const labelText = isSocial ? CUSTOMER_NAME : PHONE_NUMBER;
 
     const textComponent = (
