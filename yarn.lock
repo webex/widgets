@@ -12020,6 +12020,7 @@ __metadata:
     "@babel/plugin-transform-runtime": "npm:^7.16.0"
     "@babel/preset-env": "npm:^7.8.4"
     "@babel/preset-react": "npm:^7.8.3"
+    "@babel/register": "npm:^7.25.9"
     "@commitlint/cli": "npm:^8.3.5"
     "@commitlint/config-conventional": "npm:^8.3.4"
     "@momentum-ui/react": "npm:^23.21.4"
@@ -12087,7 +12088,7 @@ __metadata:
     prop-types: ^15.7.2
     react: 18.3.1
     react-dom: 18.3.1
-    webex: 2.60.2
+    webex: 2.60.4
   languageName: unknown
   linkType: soft
 
