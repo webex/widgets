@@ -13,7 +13,6 @@ const RealTimeTranscriptComponent: React.FC<RealtimeTranscriptComponentProps> = 
   onTabChange,
   className,
 }) => {
-  console.log('pkesari_from component liveTranscriptEntries', liveTranscriptEntries);
   const sortedEntries = useMemo(
     () =>
       [...liveTranscriptEntries].sort((a, b) => {

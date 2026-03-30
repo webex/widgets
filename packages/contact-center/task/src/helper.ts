@@ -15,7 +15,6 @@ import store, {
   BuddyDetails,
   DestinationType,
   PaginatedListParams,
-  RealtimeTranscriptionEventPayload,
   getConferenceParticipants,
   Participant,
   findMediaResourceId,
