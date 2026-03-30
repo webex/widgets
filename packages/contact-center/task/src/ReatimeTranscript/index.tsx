@@ -9,13 +9,11 @@ import {RealtimeTranscriptProps} from '../task.types';
 
 const RealtimeTranscriptInternal: React.FunctionComponent<RealtimeTranscriptProps> = observer((props) => {
   const {currentTask, realtimeTranscriptLines} = store;
-  console.log('pkesari_from component realtimeTranscriptLines', realtimeTranscriptLines);
   const result = useRealtimeTranscript({
     ...props,
     currentTaskId: currentTask?.data?.interactionId,
     realtimeTranscriptLines,
   });
-  console.log('pkesari_from component result', result);
   return <RealtimeTranscriptComponent {...result} />;
 });
 

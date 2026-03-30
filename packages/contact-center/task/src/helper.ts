@@ -190,9 +190,7 @@ export const useRealtimeTranscript = (props: UseRealtimeTranscriptInternalProps)
       return liveTranscriptEntries;
     }
 
-    console.log('pkesari_from helper transcriptLines', transcriptLines);
     return transcriptLines.map((line, index) => {
-      console.log('pkesari_from helper transcript line', line);
       const payload: RealtimeTranscriptionData = {
         messageId: line.messageId,
         conversationId: line.conversationId,
@@ -216,7 +214,6 @@ export const useRealtimeTranscript = (props: UseRealtimeTranscriptInternalProps)
     });
   }, [currentTaskId, realtimeTranscriptLines, liveTranscriptEntries]);
 
-  console.log('pkesari_from helper mappedRealtimeEntries', mappedRealtimeEntries);
   return {
     ivrTranscript,
     liveTranscriptEntries: mappedRealtimeEntries,
