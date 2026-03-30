@@ -75,6 +75,8 @@ module.exports = function(env, argv) {
           include: [
             resolveMonorepoRoot('node_modules/@momentum-ui'),
             resolveMonorepoRoot('node_modules/@webex/components'),
+            path.resolve(__dirname, 'node_modules/@momentum-ui'),
+            path.resolve(__dirname, 'node_modules/@webex/components'),
             path.resolve(__dirname, 'packages'),
           ],
         },

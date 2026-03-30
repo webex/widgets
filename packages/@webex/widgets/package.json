@@ -4,6 +4,9 @@
   "engines": {
     "node": ">=20.13.1"
   },
+  "installConfig": {
+    "hoistingLimits": "dependencies"
+  },
   "main": "dist/webexWidgets.mjs",
   "module": "dist/webexWidgets.mjs",
   "scripts": {

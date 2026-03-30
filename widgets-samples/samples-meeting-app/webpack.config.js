@@ -18,6 +18,13 @@ module.exports = function(env, argv) {
     devtool: argv.mode === 'production' ? 'source-map' : 'inline-source-map',
     resolve: {
       extensions: ['.js', '.jsx'],
+      alias: {
+        react: path.dirname(require.resolve('react/package.json')),
+        'react-dom': path.dirname(require.resolve('react-dom/package.json')),
+        'prop-types': path.dirname(require.resolve('prop-types/package.json')),
+        webex: path.resolve(path.dirname(require.resolve('webex')), '..'),
+        '@webex/common': path.dirname(require.resolve('@webex/common/package.json')),
+      },
       fallback: {
         "buffer": require.resolve("buffer/"),
         "crypto": require.resolve("crypto-browserify"),
