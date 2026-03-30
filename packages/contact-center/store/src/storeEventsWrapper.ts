@@ -22,6 +22,7 @@ import {
   Profile,
   AgentLoginProfile,
   ERROR_TRIGGERING_IDLE_CODES,
+  RealtimeTranscriptionEventPayload,
 } from './store.types';
 import Store from './store';
 import {
@@ -41,6 +42,10 @@ class StoreWrapper implements IStoreWrapper {
   onTaskAssigned?: (task: ITask) => void;
   onTaskSelected?: (task: ITask, isClicked: boolean) => void;
   onErrorCallback?: (widgetName: string, error: Error) => void;
+  private realtimeTranscriptionListeners: Record<
+    string,
+    (payload: NonNullable<RealtimeTranscriptionEventPayload['data']>) => void
+  > = {};
 
   constructor() {
     this.store = Store.getInstance();
@@ -142,6 +147,14 @@ class StoreWrapper implements IStoreWrapper {
 
   get dataCenter() {
     return this.store.dataCenter;
+  }
+
+  get realtimeTranscriptionData() {
+    return this.store.realtimeTranscriptionData;
+  }
+
+  get realtimeTranscriptLines() {
+    return this.store.realtimeTranscriptLines;
   }
 
   setDataCenter = (value: string): void => {
@@ -419,6 +432,11 @@ class StoreWrapper implements IStoreWrapper {
 
   handleTaskRemove = (taskToRemove: ITask) => {
     if (taskToRemove) {
+      const taskId = taskToRemove.data?.interactionId;
+      if (taskId && this.realtimeTranscriptionListeners[taskId]) {
+        taskToRemove.off(TASK_EVENTS.REAL_TIME_TRANSCRIPTION, this.realtimeTranscriptionListeners[taskId]);
+        delete this.realtimeTranscriptionListeners[taskId];
+      }
       taskToRemove.off(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
       taskToRemove.off(TASK_EVENTS.TASK_END, this.handleTaskEnd);
       taskToRemove.off(TASK_EVENTS.TASK_REJECT, (reason) => this.handleTaskReject(taskToRemove, reason));
@@ -452,6 +470,13 @@ class StoreWrapper implements IStoreWrapper {
     }
 
     runInAction(() => {
+      if (taskToRemove) {
+        const removedTaskId = taskToRemove.data?.interactionId;
+        if (removedTaskId && this.store.currentTask?.data?.interactionId === removedTaskId) {
+          this.store.realtimeTranscriptionData = {};
+          this.store.realtimeTranscriptLines = [];
+        }
+      }
       if (taskToRemove && this.store.currentTask?.data.interactionId === taskToRemove.data.interactionId) {
         this.setCurrentTask(null);
       }
@@ -599,6 +624,14 @@ class StoreWrapper implements IStoreWrapper {
     task.on(TASK_EVENTS.TASK_CONFERENCE_TRANSFERRED, this.refreshTaskList);
     task.on(TASK_EVENTS.TASK_CONFERENCE_TRANSFER_FAILED, this.refreshTaskList);
     task.on(TASK_EVENTS.TASK_POST_CALL_ACTIVITY, this.refreshTaskList);
+    const taskId = task.data?.interactionId;
+    if (taskId && !this.realtimeTranscriptionListeners[taskId]) {
+      this.realtimeTranscriptionListeners[taskId] = (payload: NonNullable<RealtimeTranscriptionEventPayload['data']>) =>
+        this.handleRealtimeTranscription(payload);
+    }
+    if (taskId && this.realtimeTranscriptionListeners[taskId]) {
+      task.on(TASK_EVENTS.REAL_TIME_TRANSCRIPTION, this.realtimeTranscriptionListeners[taskId]);
+    }
 
     // Register media event listener for browser devices
     if (this.deviceType === DEVICE_TYPE_BROWSER) {
@@ -705,6 +738,86 @@ class StoreWrapper implements IStoreWrapper {
     }
   };
 
+  private findTranscriptPosition = (messageId: string, timestamp: number) => {
+    let existingIndex = -1;
+    let insertPosition = -1;
+
+    for (let i = this.store.realtimeTranscriptLines.length - 1; i >= 0; i -= 1) {
+      const line = this.store.realtimeTranscriptLines[i];
+      if (line.messageId === messageId) {
+        existingIndex = i;
+        break;
+      }
+      if (insertPosition === -1 && line.publishTimestamp <= timestamp) {
+        insertPosition = i;
+      }
+    }
+
+    return {existingIndex, insertPosition};
+  };
+
+  handleRealtimeTranscription = (payload: NonNullable<RealtimeTranscriptionEventPayload['data']>) => {
+    // SDK emits task events with the unwrapped inner data: task.emit(eventType, websocketPayload.data)
+    // So `payload` here is RealtimeTranscriptionEventPayload['data'], and `payload.data` is RealtimeTranscriptionData
+    const data = payload?.data;
+    if (!data?.messageId) return;
+
+    const role = (payload?.role || data.role || 'CALLER').toUpperCase();
+    const caller = role === 'CALLER' || role === 'CUSTOMER' ? 'Customer' : 'Agent';
+    const publishTimestampRaw = payload?.publishTimestamp || data.publishTimestamp;
+    const publishTimestamp =
+      typeof publishTimestampRaw === 'number'
+        ? publishTimestampRaw
+        : Number.parseInt(`${publishTimestampRaw || Date.now()}`, 10);
+
+    const normalizedRealtimeData = {
+      ...data,
+      role,
+      caller,
+      content: (payload?.content || data.content || '').trim(),
+      publishTimestamp: Number.isNaN(publishTimestamp) ? Date.now() : publishTimestamp,
+    };
+    if (!normalizedRealtimeData.content) return;
+
+    runInAction(() => {
+      this.store.realtimeTranscriptionData = normalizedRealtimeData;
+
+      const {existingIndex, insertPosition} = this.findTranscriptPosition(
+        data.messageId,
+        normalizedRealtimeData.publishTimestamp
+      );
+
+      if (existingIndex >= 0) {
+        const currentLine = this.store.realtimeTranscriptLines[existingIndex];
+        if ((currentLine.content || '') === (normalizedRealtimeData.content || '')) {
+          return;
+        }
+        const updatedLines = [...this.store.realtimeTranscriptLines];
+        updatedLines[existingIndex] = {
+          ...currentLine,
+          caller,
+          content: normalizedRealtimeData.content || '',
+          publishTimestamp: normalizedRealtimeData.publishTimestamp,
+          conversationId: normalizedRealtimeData.conversationId,
+        };
+        this.store.realtimeTranscriptLines = updatedLines;
+        return;
+      }
+
+      const newLine = {
+        messageId: data.messageId,
+        role,
+        caller,
+        content: normalizedRealtimeData.content || '',
+        publishTimestamp: normalizedRealtimeData.publishTimestamp,
+        conversationId: normalizedRealtimeData.conversationId,
+      };
+      const updatedLines = [...this.store.realtimeTranscriptLines];
+      updatedLines.splice(insertPosition + 1, 0, newLine);
+      this.store.realtimeTranscriptLines = updatedLines;
+    });
+  };
+
   getBuddyAgents = async (
     mediaType: string = this.currentTask.data.interaction.mediaType
   ): Promise<Array<BuddyDetails>> => {
@@ -801,6 +914,9 @@ class StoreWrapper implements IStoreWrapper {
       this.setConsultStartTimeStamp(undefined);
       this.setTeamId('');
       this.setDigitalChannelsInitialized(false);
+      this.store.realtimeTranscriptionData = {};
+      this.store.realtimeTranscriptLines = [];
+      this.realtimeTranscriptionListeners = {};
     });
   };
 

@@ -153,6 +153,28 @@ export type TaskListComponentProps = Pick<
 > &
   Partial<Pick<TaskProps, 'currentTask' | 'taskList'>>;
 
+export type TranscriptTab = 'ivr' | 'live';
+
+export interface RealtimeTranscriptEntry {
+  id: string;
+  speaker: string;
+  message: string;
+  timestamp: number;
+  displayTime?: string;
+  event?: string;
+  isCustomer?: boolean;
+  avatarUrl?: string;
+  initials?: string;
+}
+
+export interface RealtimeTranscriptComponentProps {
+  ivrTranscript?: string;
+  liveTranscriptEntries?: RealtimeTranscriptEntry[];
+  activeTab?: TranscriptTab;
+  onTabChange?: (tab: TranscriptTab) => void;
+  className?: string;
+}
+
 /**
  * Interface representing the properties for control actions on a task.
  */
