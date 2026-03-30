@@ -4,7 +4,8 @@ import {
   useCallControlProps,
   UseTaskListProps,
   UseTaskProps,
-  UseTaskTranscriptProps,
+  UseRealtimeTranscriptInternalProps,
+  RealtimeTranscriptEntry,
   useOutdialCallProps,
   TargetType,
   TARGET_TYPE,
@@ -14,10 +15,12 @@ import store, {
   BuddyDetails,
   DestinationType,
   PaginatedListParams,
+  RealtimeTranscriptionEventPayload,
   getConferenceParticipants,
   Participant,
   findMediaResourceId,
   MEDIA_TYPE_TELEPHONY_LOWER,
+  RealtimeTranscriptionData,
 } from '@webex/cc-store';
 import {getControlsVisibility} from './Utils/task-util';
 import {TIMER_LABEL_CONSULTING} from './Utils/constants';
@@ -27,6 +30,28 @@ import {OutdialAniEntriesResponse} from '@webex/contact-center/dist/types/servic
 
 const ENGAGED_LABEL = 'ENGAGED';
 const ENGAGED_USERNAME = 'Engaged';
+
+const getTranscriptSpeaker = (payload: RealtimeTranscriptionData): string => {
+  const role = payload.role?.toUpperCase();
+  if (role === 'AGENT') return 'Agent';
+  if (role === 'CUSTOMER') return 'Customer';
+
+  return role;
+};
+
+const getTranscriptTimestamp = (payload: RealtimeTranscriptionData): number => {
+  const rawTimestamp = payload.publishTimestamp;
+  const parsedTimestamp =
+    typeof rawTimestamp === 'number' ? rawTimestamp : Number.parseInt(`${rawTimestamp || ''}`, 10);
+  return Number.isNaN(parsedTimestamp) ? Date.now() : parsedTimestamp;
+};
+
+const isCustomerSpeaker = (payload: RealtimeTranscriptionData, speaker: string): boolean => {
+  const role = (payload.role || '').toUpperCase();
+  if (role) return role === 'CUSTOMER' || role === 'CALLER';
+  const normalizedSpeaker = speaker.toLowerCase();
+  return normalizedSpeaker.includes('customer') || normalizedSpeaker.includes('caller');
+};
 
 // Hook for managing the task list
 export const useTaskList = (props: UseTaskListProps) => {
@@ -147,12 +172,54 @@ export const useTaskList = (props: UseTaskListProps) => {
   return {taskList, acceptTask, declineTask, onTaskSelect, isBrowser};
 };
 
-export const useTaskTranscript = (props: UseTaskTranscriptProps) => {
-  const {ivrTranscript = '', liveTranscriptEntries = [], activeTab = 'live', onTabChange, className} = props;
+export const useRealtimeTranscript = (props: UseRealtimeTranscriptInternalProps) => {
+  const {
+    ivrTranscript = '',
+    liveTranscriptEntries = [],
+    activeTab = 'live',
+    onTabChange,
+    className,
+    currentTaskId,
+    realtimeTranscriptLines = [],
+  } = props;
+  const mappedRealtimeEntries = useMemo<RealtimeTranscriptEntry[]>(() => {
+    if (!currentTaskId) return liveTranscriptEntries;
 
+    const transcriptLines = realtimeTranscriptLines;
+    if (!transcriptLines.length) {
+      return liveTranscriptEntries;
+    }
+
+    console.log('pkesari_from helper transcriptLines', transcriptLines);
+    return transcriptLines.map((line, index) => {
+      console.log('pkesari_from helper transcript line', line);
+      const payload: RealtimeTranscriptionData = {
+        messageId: line.messageId,
+        conversationId: line.conversationId,
+        role: line.role,
+        content: line.content,
+        publishTimestamp: line.publishTimestamp,
+      };
+
+      const timestamp = getTranscriptTimestamp(payload);
+      const speaker = getTranscriptSpeaker(payload);
+
+      return {
+        id: `${currentTaskId}-${line.messageId}-${index}`,
+        speaker,
+        message: line.content,
+        timestamp,
+        displayTime: new Date(timestamp).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}),
+        event: 'REAL_TIME_TRANSCRIPTION',
+        isCustomer: isCustomerSpeaker(payload, speaker),
+      };
+    });
+  }, [currentTaskId, realtimeTranscriptLines, liveTranscriptEntries]);
+
+  console.log('pkesari_from helper mappedRealtimeEntries', mappedRealtimeEntries);
   return {
     ivrTranscript,
-    liveTranscriptEntries,
+    liveTranscriptEntries: mappedRealtimeEntries,
     activeTab,
     onTabChange,
     className,
@@ -1074,7 +1141,7 @@ export const useOutdialCall = (props: useOutdialCallProps) => {
       // Only pass origin if it's defined and not empty
       const outdialArgs = origin ? [destination, origin] : [destination];
 
-      //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+      // @ts-expect-error To be fixed in SDK typings - CAI-6762
       cc.startOutdial(...outdialArgs)
         .then((response) => {
           logger.info('Outdial call started', response);

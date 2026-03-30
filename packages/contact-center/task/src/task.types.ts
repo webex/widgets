@@ -2,10 +2,11 @@ import {
   TaskProps,
   ControlProps,
   OutdialCallProps,
-  TaskTranscriptComponentProps,
-  TaskTranscriptEntry,
+  RealtimeTranscriptComponentProps,
+  RealtimeTranscriptEntry,
   TranscriptTab,
 } from '@webex/cc-components';
+import {RealtimeTranscriptLine} from '@webex/cc-store';
 
 export type UseTaskProps = Pick<TaskProps, 'incomingTask' | 'deviceType' | 'logger'> &
   Partial<Pick<TaskProps, 'onAccepted' | 'onRejected'>>;
@@ -17,10 +18,17 @@ export type IncomingTaskProps = Pick<TaskProps, 'incomingTask'> & Partial<Pick<T
 
 export type TaskListProps = Partial<Pick<TaskProps, 'onTaskAccepted' | 'onTaskDeclined' | 'onTaskSelected'>>;
 
-export type TaskTranscriptProps = Pick<TaskTranscriptComponentProps, 'ivrTranscript' | 'liveTranscriptEntries'> &
-  Partial<Pick<TaskTranscriptComponentProps, 'activeTab' | 'onTabChange' | 'className'>>;
+export type RealtimeTranscriptProps = Pick<
+  RealtimeTranscriptComponentProps,
+  'ivrTranscript' | 'liveTranscriptEntries'
+> &
+  Partial<Pick<RealtimeTranscriptComponentProps, 'activeTab' | 'onTabChange' | 'className'>>;
 
-export type UseTaskTranscriptProps = TaskTranscriptProps;
+export type UseRealtimeTranscriptProps = RealtimeTranscriptProps;
+export type UseRealtimeTranscriptInternalProps = UseRealtimeTranscriptProps & {
+  currentTaskId?: string;
+  realtimeTranscriptLines?: RealtimeTranscriptLine[];
+};
 
 export type CallControlProps = Partial<
   Pick<
@@ -45,7 +53,7 @@ export type useCallControlProps = Pick<
 
 export type useOutdialCallProps = Pick<OutdialCallProps, 'cc' | 'logger'>;
 
-export type {TaskTranscriptEntry, TranscriptTab};
+export type {RealtimeTranscriptEntry, TranscriptTab};
 export interface OutdialProps {
   /**
    * Flag to determine if the address book is enabled.

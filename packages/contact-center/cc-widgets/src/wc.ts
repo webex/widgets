@@ -2,7 +2,7 @@ import r2wc from '@r2wc/react-to-web-component';
 import {StationLogin} from '@webex/cc-station-login';
 import {UserState} from '@webex/cc-user-state';
 import store from '@webex/cc-store';
-import {TaskList, IncomingTask, CallControl, CallControlCAD, OutdialCall, TaskTranscript} from '@webex/cc-task';
+import {TaskList, IncomingTask, CallControl, CallControlCAD, OutdialCall, RealtimeTranscript} from '@webex/cc-task';
 import {DigitalChannels} from '@webex/cc-digital-channels';
 
 const WebUserState = r2wc(UserState, {
@@ -53,7 +53,7 @@ const WebCallControlCAD = r2wc(CallControlCAD, {
 });
 
 const WebOutdialCall = r2wc(OutdialCall, {});
-const WebTaskTranscript = r2wc(TaskTranscript, {
+const WebRealtimeTranscript = r2wc(RealtimeTranscript, {
   props: {
     ivrTranscript: 'string',
     liveTranscriptEntries: 'json',
@@ -75,7 +75,7 @@ const components = [
   {name: 'widget-cc-call-control', component: WebCallControl},
   {name: 'widget-cc-outdial-call', component: WebOutdialCall},
   {name: 'widget-cc-call-control-cad', component: WebCallControlCAD},
-  {name: 'widget-cc-task-transcript', component: WebTaskTranscript},
+  {name: 'widget-cc-realtime-transcript', component: WebRealtimeTranscript},
   {name: 'widget-cc-digital-channels', component: WebDigitalChannels},
 ];
 

@@ -155,7 +155,7 @@ export type TaskListComponentProps = Pick<
 
 export type TranscriptTab = 'ivr' | 'live';
 
-export interface TaskTranscriptEntry {
+export interface RealtimeTranscriptEntry {
   id: string;
   speaker: string;
   message: string;
@@ -167,9 +167,9 @@ export interface TaskTranscriptEntry {
   initials?: string;
 }
 
-export interface TaskTranscriptComponentProps {
+export interface RealtimeTranscriptComponentProps {
   ivrTranscript?: string;
-  liveTranscriptEntries?: TaskTranscriptEntry[];
+  liveTranscriptEntries?: RealtimeTranscriptEntry[];
   activeTab?: TranscriptTab;
   onTabChange?: (tab: TranscriptTab) => void;
   className?: string;

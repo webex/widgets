@@ -95,6 +95,46 @@ type IdleCode = {
   isDefault: boolean;
 };
 
+type RealtimeTranscriptionData = {
+  content?: string;
+  conversationId?: string;
+  isFinal?: boolean;
+  languageCode?: string;
+  messageId?: string;
+  orgId?: string;
+  publishTimestamp?: number | string;
+  role?: string;
+  trackingId?: string;
+  utteranceId?: string;
+};
+
+type RealtimeTranscriptionEventPayload = {
+  data?: {
+    agentId?: string;
+    content?: string;
+    publishTimestamp?: number | string;
+    role?: string;
+    data?: RealtimeTranscriptionData;
+    notifDetails?: {
+      actionEvent?: string;
+    };
+    notifType?: string;
+    orgId?: string;
+  };
+  orgId?: string;
+  trackingId?: string;
+  type?: string;
+};
+
+type RealtimeTranscriptLine = {
+  messageId: string;
+  role: string;
+  caller: string;
+  content: string;
+  publishTimestamp: number;
+  conversationId?: string;
+};
+
 interface IStore {
   featureFlags: {[key: string]: boolean};
   teams: Team[];
@@ -128,6 +168,8 @@ interface IStore {
   isAddressBookEnabled: boolean;
   isDigitalChannelsInitialized: boolean;
   dataCenter: string;
+  realtimeTranscriptionData: RealtimeTranscriptionData;
+  realtimeTranscriptLines: RealtimeTranscriptLine[];
   init(params: InitParams, callback: (ccSDK: IContactCenter) => void): Promise<void>;
   registerCC(webex?: WithWebex['webex']): Promise<void>;
 }
@@ -207,6 +249,7 @@ enum TASK_EVENTS {
   TASK_MERGED = 'task:merged',
   TASK_POST_CALL_ACTIVITY = 'task:postCallActivity',
   TASK_OUTDIAL_FAILED = 'task:outdialFailed',
+  REAL_TIME_TRANSCRIPTION = 'REAL_TIME_TRANSCRIPTION',
 } // TODO: remove this once cc sdk exports this enum
 
 // Events that are received on the contact center SDK
@@ -319,6 +362,9 @@ export type {
   PaginatedListParams,
   FetchPaginatedList,
   TransformPaginatedData,
+  RealtimeTranscriptionData,
+  RealtimeTranscriptionEventPayload,
+  RealtimeTranscriptLine,
 };
 
 export {
