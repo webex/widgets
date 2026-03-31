@@ -335,13 +335,18 @@ Each control's `action()` receives a destructured object from the [`useMeetingCo
 ---
 
 ## Installation
-The widget declares `react`, `react-dom`, `prop-types`, and `webex` as **peer dependencies**. Consumers must install them alongside the widget at the versions specified in [package.json](../package.json) under `peerDependencies`.
+
+The widget declares `react`, `react-dom`, `prop-types`, and `webex` as **peer dependencies**. Consumers must install them alongside the widget at the versions specified in [`package.json`](../package.json) under `peerDependencies`.
+
 ```bash
 # yarn
 yarn add @webex/widgets react@<version> react-dom@<version> prop-types@<version> webex@<version>
+
 # npm
 npm install @webex/widgets react@<version> react-dom@<version> prop-types@<version> webex@<version>
 ```
+
+> **Important:** Some peer dependencies require **exact versions** (no caret/tilde). Check [`package.json`](../package.json) for the precise version constraints before installing. Running these commands without version specifiers will install the latest versions, which may not satisfy the peer dependency requirements.
 
 ## Additional Resources
 
@@ -349,4 +354,4 @@ For detailed architecture, event flows, data structures, and troubleshooting, se
 
 ---
 
-*Last Updated: 2026-03-09*
+*Last Updated: 2026-03-27*

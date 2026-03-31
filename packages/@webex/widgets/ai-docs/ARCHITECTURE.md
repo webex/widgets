@@ -122,7 +122,7 @@ packages/@webex/widgets/
 | `WebexMeeting`                    | `WebexMeeting/`                    | Master orchestrator — renders correct view based on meeting state           | Always (top-level)                                                                       | `useMeeting(meetingID)` → `ID`, `localAudio`, `localVideo`, `state`, `showRoster`, `settings`, `passwordRequired`                                                          |
 | `WebexInterstitialMeeting`        | `WebexInterstitialMeeting/`        | Pre-join lobby with local media preview                                     | `state === NOT_JOINED`                                                                   | `useMeeting(meetingID)` → `localVideo`                                                                                                                                     |
 | `WebexInMeeting`                  | `WebexInMeeting/`                  | Active meeting view with remote + local media                               | `state === JOINED`                                                                       | `useMeeting(meetingID)` → `remoteShare`, `localShare`, `passwordRequired`, `state`                                                                                         |
-| `WebexWaitingForHost`             | `WebexWaitingForHost/`             | Waiting room when host hasn't started                                       | `else` (not JOINED/NOT_JOINED/LEFT)                                                      | `useMeeting(meetingID)` → `ID`; uses `AdapterContext` → `leaveMeeting(ID)`                                                                                                 |
+| `WebexWaitingForHost`             | `WebexWaitingForHost/`             | Waiting room when host hasn't started (renders for `LOBBY` state)           | `else` (not JOINED/NOT_JOINED/LEFT — typically `LOBBY`)                                  | `useMeeting(meetingID)` → `ID`; uses `AdapterContext` → `leaveMeeting(ID)`                                                                                                 |
 | `WebexMeetingControlBar`          | `WebexMeetingControlBar/`          | Renders meeting control buttons                                             | Always (when state is truthy and not LEFT)                                               | `useMeeting(meetingID)` → `state`; computes `isActive = state === JOINED` to select controls                                                                               |
 | `WebexMeetingControl`             | `WebexMeetingControl/`             | Individual control button                                                   | Rendered by `WebexMeetingControlBar`                                                     | `useMeetingControl(type, meetingID)` → `[action, display]`                                                                                                                 |
 | `WebexMeetingInfo`                | `WebexMeetingInfo/`                | Meeting title and time overlay                                              | Rendered inside `WebexInMeeting`, `WebexInterstitialMeeting`, `WebexWaitingForHost`      | `useMeeting(meetingID)` → `ID`, `startTime`, `endTime`, `title`                                                                                                            |
@@ -198,7 +198,7 @@ This is the real shape emitted by `adapter.meetingsAdapter.getMeeting(ID)`:
 {
   ID:                  string
   title:               string
-  state:               'NOT_JOINED' | 'JOINED' | 'LEFT'
+  state:               'NOT_JOINED' | 'LOBBY' | 'JOINED' | 'LEFT'
 
   localAudio: {
     stream:            MediaStream | null
@@ -630,7 +630,7 @@ sequenceDiagram
 
 ---
 
-### 11. Waiting for Host
+### 11. Waiting for Host (LOBBY State)
 
 ```mermaid
 sequenceDiagram
@@ -640,21 +640,23 @@ sequenceDiagram
     participant SDK as webex-js-sdk
     participant Backend
 
-    Note over Component: Meeting joined but host not yet present
+    Note over Component: Meeting joined but host not yet present — state is LOBBY
 
-    Component->>Component: state is not JOINED, NOT_JOINED, or LEFT
+    Component->>Component: state is LOBBY (falls into else catch-all)
     Component->>Component: Render WebexWaitingForHost
     Component->>User: Show "Waiting for the host to start the meeting"
 
     Note over Backend: Host joins the meeting
 
     Backend-->>SDK: WebSocket event — host joined, meeting started
-    SDK-->>Adapter: Meeting state updated
+    SDK-->>Adapter: members:update event, self.state changes to JOINED
     Adapter->>Adapter: Emit { state: JOINED }
     Adapter-->>Component: Observable emits
 
     Component->>Component: Transition: WebexWaitingForHost → WebexInMeeting
 ```
+
+*The `LOBBY` state is defined in `MeetingState` from `@webex/component-adapter-interfaces`. The adapter propagates `sdkMeeting.joinedWith.state` directly from SDK member updates, so when the SDK reports `LOBBY` (e.g., in waiting-room flows), it reaches the UI unfiltered. The `WebexMeeting` component renders `WebexWaitingForHost` for any state that is not `NOT_JOINED`, `JOINED`, or `LEFT` — which is where `LOBBY` lands.*
 
 
 
@@ -667,6 +669,9 @@ stateDiagram-v2
     [*] --> NOT_JOINED: SDK + Adapter ready, meeting created
 
     NOT_JOINED --> JOINED: User joins (JoinControl)
+    NOT_JOINED --> LOBBY: User joins but waiting for host admission
+
+    LOBBY --> JOINED: Host admits user / host starts meeting
 
     JOINED --> LEFT: User leaves (ExitControl)
 
@@ -675,7 +680,7 @@ stateDiagram-v2
 
 
 
-*These are the three states emitted by the adapter's meeting observable. The `WebexMeeting` component also handles a falsy state (loading) and an else catch-all (WebexWaitingForHost).*
+*These are the four states defined by the `MeetingState` enum in `@webex/component-adapter-interfaces` and emitted by the adapter's meeting observable. The adapter propagates `self.state` from SDK member updates without filtering, so all four values (`NOT_JOINED`, `LOBBY`, `JOINED`, `LEFT`) can appear. The `WebexMeeting` component also handles a falsy state (loading) and uses an `else` catch-all that renders `WebexWaitingForHost` — this is where the `LOBBY` state lands.*
 
 ---
 
@@ -865,4 +870,4 @@ Renders as a CANCEL type button.
 
 ---
 
-*Last Updated: 2026-03-09*
+*Last Updated: 2026-03-27*
