@@ -288,7 +288,7 @@ const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> =
               iconName="contact-card-bold"
               tabId={TABS.ADDRESS_BOOK}
               aria-controls={TABS.ADDRESS_BOOK}
-              variant="glass"
+              variant="pill"
               onClick={handleAddressBookTabClick}
               text={OutdialStrings.TAB_ADDRESS_BOOK}
             ></Tab>
@@ -297,7 +297,7 @@ const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> =
               iconName="dialpad-bold"
               tabId={TABS.DIAL_PAD}
               aria-controls={TABS.DIAL_PAD}
-              variant="glass"
+              variant="pill"
               onClick={handleDialpadTabClick}
               text={OutdialStrings.TAB_DIALPAD}
             ></Tab>

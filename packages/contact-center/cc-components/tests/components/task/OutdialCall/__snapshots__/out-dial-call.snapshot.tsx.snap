@@ -20,7 +20,7 @@ exports[`Outdial Call Component Address Book functionality displays address book
         tab-id="address_book"
         tabindex="-1"
         text="Address Book"
-        variant="glass"
+        variant="pill"
       />
       <mdc-tab
         aria-controls="dial_pad"
@@ -31,7 +31,7 @@ exports[`Outdial Call Component Address Book functionality displays address book
         tab-id="dial_pad"
         tabindex="0"
         text="Dialpad"
-        variant="glass"
+        variant="pill"
       />
     </mdc-tablist>
     <section
@@ -187,7 +187,7 @@ exports[`Outdial Call Component Address Book functionality renders address book 
         tab-id="address_book"
         tabindex="-1"
         text="Address Book"
-        variant="glass"
+        variant="pill"
       />
       <mdc-tab
         aria-controls="dial_pad"
@@ -198,7 +198,7 @@ exports[`Outdial Call Component Address Book functionality renders address book 
         tab-id="dial_pad"
         tabindex="0"
         text="Dialpad"
-        variant="glass"
+        variant="pill"
       />
     </mdc-tablist>
     <section
@@ -354,7 +354,7 @@ exports[`Outdial Call Component Address Book functionality renders address book 
         tab-id="address_book"
         tabindex="-1"
         text="Address Book"
-        variant="glass"
+        variant="pill"
       />
       <mdc-tab
         aria-controls="dial_pad"
@@ -365,7 +365,7 @@ exports[`Outdial Call Component Address Book functionality renders address book 
         tab-id="dial_pad"
         tabindex="0"
         text="Dialpad"
-        variant="glass"
+        variant="pill"
       />
     </mdc-tablist>
     <section
@@ -961,7 +961,7 @@ exports[`Outdial Call Component Address Book functionality renders address book 
         tab-id="address_book"
         tabindex="-1"
         text="Address Book"
-        variant="glass"
+        variant="pill"
       />
       <mdc-tab
         aria-controls="dial_pad"
@@ -972,7 +972,7 @@ exports[`Outdial Call Component Address Book functionality renders address book 
         tab-id="dial_pad"
         tabindex="0"
         text="Dialpad"
-        variant="glass"
+        variant="pill"
       />
     </mdc-tablist>
     <section
@@ -1280,7 +1280,7 @@ exports[`Outdial Call Component Address Book functionality renders loading spinn
         tab-id="address_book"
         tabindex="-1"
         text="Address Book"
-        variant="glass"
+        variant="pill"
       />
       <mdc-tab
         aria-controls="dial_pad"
@@ -1291,7 +1291,7 @@ exports[`Outdial Call Component Address Book functionality renders loading spinn
         tab-id="dial_pad"
         tabindex="0"
         text="Dialpad"
-        variant="glass"
+        variant="pill"
       />
     </mdc-tablist>
     <section
@@ -1895,7 +1895,7 @@ exports[`Outdial Call Component Address Book functionality renders with address 
         tab-id="address_book"
         tabindex="0"
         text="Address Book"
-        variant="glass"
+        variant="pill"
       />
       <mdc-tab
         active=""
@@ -1907,7 +1907,7 @@ exports[`Outdial Call Component Address Book functionality renders with address 
         tab-id="dial_pad"
         tabindex="-1"
         text="Dialpad"
-        variant="glass"
+        variant="pill"
       />
     </mdc-tablist>
     <section
@@ -2189,7 +2189,7 @@ exports[`Outdial Call Component Address Book functionality renders with address 
         tab-id="address_book"
         tabindex="0"
         text="Address Book"
-        variant="glass"
+        variant="pill"
       />
       <mdc-tab
         active=""
@@ -2201,7 +2201,7 @@ exports[`Outdial Call Component Address Book functionality renders with address 
         tab-id="dial_pad"
         tabindex="-1"
         text="Dialpad"
-        variant="glass"
+        variant="pill"
       />
     </mdc-tablist>
     <section
@@ -2462,7 +2462,7 @@ exports[`Outdial Call Component Address Book functionality selects an address bo
         tab-id="address_book"
         tabindex="-1"
         text="Address Book"
-        variant="glass"
+        variant="pill"
       />
       <mdc-tab
         aria-controls="dial_pad"
@@ -2473,7 +2473,7 @@ exports[`Outdial Call Component Address Book functionality selects an address bo
         tab-id="dial_pad"
         tabindex="0"
         text="Dialpad"
-        variant="glass"
+        variant="pill"
       />
     </mdc-tablist>
     <section
@@ -2629,7 +2629,7 @@ exports[`Outdial Call Component Address Book functionality shows empty state whe
         tab-id="address_book"
         tabindex="-1"
         text="Address Book"
-        variant="glass"
+        variant="pill"
       />
       <mdc-tab
         aria-controls="dial_pad"
@@ -2640,7 +2640,7 @@ exports[`Outdial Call Component Address Book functionality shows empty state whe
         tab-id="dial_pad"
         tabindex="0"
         text="Dialpad"
-        variant="glass"
+        variant="pill"
       />
     </mdc-tablist>
     <section
@@ -2760,7 +2760,7 @@ exports[`Outdial Call Component Address Book functionality switches back to dial
         tab-id="address_book"
         tabindex="-1"
         text="Address Book"
-        variant="glass"
+        variant="pill"
       />
       <mdc-tab
         active=""
@@ -2772,7 +2772,7 @@ exports[`Outdial Call Component Address Book functionality switches back to dial
         tab-id="dial_pad"
         tabindex="0"
         text="Dialpad"
-        variant="glass"
+        variant="pill"
       />
     </mdc-tablist>
     <section
@@ -3055,7 +3055,7 @@ exports[`Outdial Call Component Address Book functionality switches to address b
         tab-id="address_book"
         tabindex="-1"
         text="Address Book"
-        variant="glass"
+        variant="pill"
       />
       <mdc-tab
         aria-controls="dial_pad"
@@ -3066,7 +3066,7 @@ exports[`Outdial Call Component Address Book functionality switches to address b
         tab-id="dial_pad"
         tabindex="0"
         text="Dialpad"
-        variant="glass"
+        variant="pill"
       />
     </mdc-tablist>
     <section
