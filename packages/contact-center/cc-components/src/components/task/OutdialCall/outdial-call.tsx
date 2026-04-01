@@ -343,13 +343,14 @@ const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> =
             setSelectedANI(newANI);
           }}
         >
-          <Option value="none" data-testid="outdial-ani-option-none">
+          <Option value="none" label={OutdialStrings.ANI_SELECT_PLACEHOLDER} data-testid="outdial-ani-option-none">
             {OutdialStrings.ANI_SELECT_PLACEHOLDER}
           </Option>
           {outdialANIList.map((ani) => (
             <Option
               key={ani.number}
               value={ani.number}
+              label={ani.name}
               selected={ani.number === selectedANI}
               data-testid={`outdial-ani-option-${ani.number}`}
             >

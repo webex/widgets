@@ -244,6 +244,7 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
                         selected={option === selectedDeviceType}
                         key={index}
                         value={option}
+                        label={LoginOptions[option]}
                         data-testid={`login-option-${LoginOptions[option]}`}
                       >
                         {LoginOptions[option]}
@@ -297,6 +298,7 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
                     selected={team.id === selectedTeamId}
                     key={index}
                     value={team.id}
+                    label={team.name}
                     data-testid={`teams-dropdown-${team.name}`}
                   >
                     {team.name}

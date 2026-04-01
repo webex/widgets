@@ -340,6 +340,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                   <Option
                     key={code.id}
                     value={code.id}
+                    label={code.name}
                     data-testid={`call-control:wrapup-reason-${code.name.toLowerCase()}`}
                   >
                     {code.name}
