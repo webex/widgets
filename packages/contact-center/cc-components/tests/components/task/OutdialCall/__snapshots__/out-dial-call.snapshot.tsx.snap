@@ -94,97 +94,48 @@ exports[`Outdial Call Component Address Book functionality displays address book
     <div
       class="outdial-ani-select-container"
     >
-      <mdc-icon
-        class="outdial-select-arrow-icon"
-        data-testid="select-arrow-icon"
-        name="arrow-down-bold"
-        title=""
-      />
-      <div
-        class="outdial-input md-select-wrapper"
-        id="outdial-ani-option-select"
-        style="--local-width: 100%;"
+      <mdc-select
+        class="outdial-input"
+        data-testid="outdial-ani-option-select"
+        help-text-type="default"
+        label="Outdial ANI"
+        name="outdial-ani-option-select"
+        value=""
       >
-        <label
-          id="react-aria-:r2u:"
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-none"
+          label="Enter Outdial ANI"
+          tabindex="0"
+          value="none"
+          variant="inset-rectangle"
         >
-          <mdc-text
-            class="md-text-wrapper"
-            tagname="p"
-            type="body-large-regular"
-          >
-            Outdial ANI
-          </mdc-text>
-        </label>
-        <div
-          aria-hidden="true"
-          style="border: 0px; clip-path: inset(50%); height: 1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; width: 1px; white-space: nowrap;"
+          Enter Outdial ANI
+        </mdc-option>
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-1"
+          label="name 1"
+          tabindex="0"
+          value="1"
+          variant="inset-rectangle"
         >
-          <input
-            style="font-size: 16px;"
-            tabindex="0"
-            type="text"
-          />
-          <label>
-            Outdial ANI
-            <select
-              size="3"
-              tabindex="-1"
-            >
-              <option />
-              <option
-                value="none"
-              >
-                Enter Outdial ANI
-              </option>
-              <option
-                value="1"
-              >
-                name 1
-              </option>
-              <option
-                value="2"
-              >
-                name 2
-              </option>
-            </select>
-          </label>
-        </div>
-        <button
-          aria-controls="outdial-ani-option-select"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-labelledby="react-aria-:r2u: react-aria-:r30:"
-          class="md-select-dropdown-input"
-          data-testid="outdial-ani-option-select"
-          id="outdial-ani-option-select"
-          role="combobox"
-          type="button"
+          name 1
+        </mdc-option>
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-2"
+          label="name 2"
+          tabindex="0"
+          value="2"
+          variant="inset-rectangle"
         >
-          <span
-            class="md-select-selected-item-wrapper"
-            id="react-aria-:r30:"
-          >
-            Enter Outdial ANI
-          </span>
-          <span
-            aria-hidden="true"
-            class="md-select-icon-wrapper"
-          >
-            <div
-              class="md-icon-wrapper"
-            >
-              <div
-                class="md-icon-not-found"
-                data-autoscale="false"
-                data-scale="16"
-              >
-                ⃞
-              </div>
-            </div>
-          </span>
-        </button>
-      </div>
+          name 2
+        </mdc-option>
+      </mdc-select>
     </div>
     <mdc-button
       aria-disabled="true"
@@ -297,97 +248,48 @@ exports[`Outdial Call Component Address Book functionality renders address book 
     <div
       class="outdial-ani-select-container"
     >
-      <mdc-icon
-        class="outdial-select-arrow-icon"
-        data-testid="select-arrow-icon"
-        name="arrow-down-bold"
-        title=""
-      />
-      <div
-        class="outdial-input md-select-wrapper"
-        id="outdial-ani-option-select"
-        style="--local-width: 100%;"
+      <mdc-select
+        class="outdial-input"
+        data-testid="outdial-ani-option-select"
+        help-text-type="default"
+        label="Outdial ANI"
+        name="outdial-ani-option-select"
+        value=""
       >
-        <label
-          id="react-aria-:r3a:"
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-none"
+          label="Enter Outdial ANI"
+          tabindex="0"
+          value="none"
+          variant="inset-rectangle"
         >
-          <mdc-text
-            class="md-text-wrapper"
-            tagname="p"
-            type="body-large-regular"
-          >
-            Outdial ANI
-          </mdc-text>
-        </label>
-        <div
-          aria-hidden="true"
-          style="border: 0px; clip-path: inset(50%); height: 1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; width: 1px; white-space: nowrap;"
+          Enter Outdial ANI
+        </mdc-option>
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-1"
+          label="name 1"
+          tabindex="0"
+          value="1"
+          variant="inset-rectangle"
         >
-          <input
-            style="font-size: 16px;"
-            tabindex="0"
-            type="text"
-          />
-          <label>
-            Outdial ANI
-            <select
-              size="3"
-              tabindex="-1"
-            >
-              <option />
-              <option
-                value="none"
-              >
-                Enter Outdial ANI
-              </option>
-              <option
-                value="1"
-              >
-                name 1
-              </option>
-              <option
-                value="2"
-              >
-                name 2
-              </option>
-            </select>
-          </label>
-        </div>
-        <button
-          aria-controls="outdial-ani-option-select"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-labelledby="react-aria-:r3a: react-aria-:r3c:"
-          class="md-select-dropdown-input"
-          data-testid="outdial-ani-option-select"
-          id="outdial-ani-option-select"
-          role="combobox"
-          type="button"
+          name 1
+        </mdc-option>
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-2"
+          label="name 2"
+          tabindex="0"
+          value="2"
+          variant="inset-rectangle"
         >
-          <span
-            class="md-select-selected-item-wrapper"
-            id="react-aria-:r3c:"
-          >
-            Enter Outdial ANI
-          </span>
-          <span
-            aria-hidden="true"
-            class="md-select-icon-wrapper"
-          >
-            <div
-              class="md-icon-wrapper"
-            >
-              <div
-                class="md-icon-not-found"
-                data-autoscale="false"
-                data-scale="16"
-              >
-                ⃞
-              </div>
-            </div>
-          </span>
-        </button>
-      </div>
+          name 2
+        </mdc-option>
+      </mdc-select>
     </div>
     <mdc-button
       aria-disabled="true"
@@ -917,97 +819,48 @@ exports[`Outdial Call Component Address Book functionality renders address book 
     <div
       class="outdial-ani-select-container"
     >
-      <mdc-icon
-        class="outdial-select-arrow-icon"
-        data-testid="select-arrow-icon"
-        name="arrow-down-bold"
-        title=""
-      />
-      <div
-        class="outdial-input md-select-wrapper"
-        id="outdial-ani-option-select"
-        style="--local-width: 100%;"
+      <mdc-select
+        class="outdial-input"
+        data-testid="outdial-ani-option-select"
+        help-text-type="default"
+        label="Outdial ANI"
+        name="outdial-ani-option-select"
+        value=""
       >
-        <label
-          id="react-aria-:r3s:"
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-none"
+          label="Enter Outdial ANI"
+          tabindex="0"
+          value="none"
+          variant="inset-rectangle"
         >
-          <mdc-text
-            class="md-text-wrapper"
-            tagname="p"
-            type="body-large-regular"
-          >
-            Outdial ANI
-          </mdc-text>
-        </label>
-        <div
-          aria-hidden="true"
-          style="border: 0px; clip-path: inset(50%); height: 1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; width: 1px; white-space: nowrap;"
+          Enter Outdial ANI
+        </mdc-option>
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-1"
+          label="name 1"
+          tabindex="0"
+          value="1"
+          variant="inset-rectangle"
         >
-          <input
-            style="font-size: 16px;"
-            tabindex="0"
-            type="text"
-          />
-          <label>
-            Outdial ANI
-            <select
-              size="3"
-              tabindex="-1"
-            >
-              <option />
-              <option
-                value="none"
-              >
-                Enter Outdial ANI
-              </option>
-              <option
-                value="1"
-              >
-                name 1
-              </option>
-              <option
-                value="2"
-              >
-                name 2
-              </option>
-            </select>
-          </label>
-        </div>
-        <button
-          aria-controls="outdial-ani-option-select"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-labelledby="react-aria-:r3s: react-aria-:r3u:"
-          class="md-select-dropdown-input"
-          data-testid="outdial-ani-option-select"
-          id="outdial-ani-option-select"
-          role="combobox"
-          type="button"
+          name 1
+        </mdc-option>
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-2"
+          label="name 2"
+          tabindex="0"
+          value="2"
+          variant="inset-rectangle"
         >
-          <span
-            class="md-select-selected-item-wrapper"
-            id="react-aria-:r3u:"
-          >
-            Enter Outdial ANI
-          </span>
-          <span
-            aria-hidden="true"
-            class="md-select-icon-wrapper"
-          >
-            <div
-              class="md-icon-wrapper"
-            >
-              <div
-                class="md-icon-not-found"
-                data-autoscale="false"
-                data-scale="16"
-              >
-                ⃞
-              </div>
-            </div>
-          </span>
-        </button>
-      </div>
+          name 2
+        </mdc-option>
+      </mdc-select>
     </div>
     <mdc-button
       aria-disabled="true"
@@ -1264,97 +1117,48 @@ exports[`Outdial Call Component Address Book functionality renders address book 
     <div
       class="outdial-ani-select-container"
     >
-      <mdc-icon
-        class="outdial-select-arrow-icon"
-        data-testid="select-arrow-icon"
-        name="arrow-down-bold"
-        title=""
-      />
-      <div
-        class="outdial-input md-select-wrapper"
-        id="outdial-ani-option-select"
-        style="--local-width: 100%;"
+      <mdc-select
+        class="outdial-input"
+        data-testid="outdial-ani-option-select"
+        help-text-type="default"
+        label="Outdial ANI"
+        name="outdial-ani-option-select"
+        value=""
       >
-        <label
-          id="react-aria-:r48:"
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-none"
+          label="Enter Outdial ANI"
+          tabindex="0"
+          value="none"
+          variant="inset-rectangle"
         >
-          <mdc-text
-            class="md-text-wrapper"
-            tagname="p"
-            type="body-large-regular"
-          >
-            Outdial ANI
-          </mdc-text>
-        </label>
-        <div
-          aria-hidden="true"
-          style="border: 0px; clip-path: inset(50%); height: 1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; width: 1px; white-space: nowrap;"
+          Enter Outdial ANI
+        </mdc-option>
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-1"
+          label="name 1"
+          tabindex="0"
+          value="1"
+          variant="inset-rectangle"
         >
-          <input
-            style="font-size: 16px;"
-            tabindex="0"
-            type="text"
-          />
-          <label>
-            Outdial ANI
-            <select
-              size="3"
-              tabindex="-1"
-            >
-              <option />
-              <option
-                value="none"
-              >
-                Enter Outdial ANI
-              </option>
-              <option
-                value="1"
-              >
-                name 1
-              </option>
-              <option
-                value="2"
-              >
-                name 2
-              </option>
-            </select>
-          </label>
-        </div>
-        <button
-          aria-controls="outdial-ani-option-select"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-labelledby="react-aria-:r48: react-aria-:r4a:"
-          class="md-select-dropdown-input"
-          data-testid="outdial-ani-option-select"
-          id="outdial-ani-option-select"
-          role="combobox"
-          type="button"
+          name 1
+        </mdc-option>
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-2"
+          label="name 2"
+          tabindex="0"
+          value="2"
+          variant="inset-rectangle"
         >
-          <span
-            class="md-select-selected-item-wrapper"
-            id="react-aria-:r4a:"
-          >
-            Enter Outdial ANI
-          </span>
-          <span
-            aria-hidden="true"
-            class="md-select-icon-wrapper"
-          >
-            <div
-              class="md-icon-wrapper"
-            >
-              <div
-                class="md-icon-not-found"
-                data-autoscale="false"
-                data-scale="16"
-              >
-                ⃞
-              </div>
-            </div>
-          </span>
-        </button>
-      </div>
+          name 2
+        </mdc-option>
+      </mdc-select>
     </div>
     <mdc-button
       aria-disabled="true"
@@ -1893,97 +1697,48 @@ exports[`Outdial Call Component Address Book functionality renders loading spinn
     <div
       class="outdial-ani-select-container"
     >
-      <mdc-icon
-        class="outdial-select-arrow-icon"
-        data-testid="select-arrow-icon"
-        name="arrow-down-bold"
-        title=""
-      />
-      <div
-        class="outdial-input md-select-wrapper"
-        id="outdial-ani-option-select"
-        style="--local-width: 100%;"
+      <mdc-select
+        class="outdial-input"
+        data-testid="outdial-ani-option-select"
+        help-text-type="default"
+        label="Outdial ANI"
+        name="outdial-ani-option-select"
+        value=""
       >
-        <label
-          id="react-aria-:r42:"
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-none"
+          label="Enter Outdial ANI"
+          tabindex="0"
+          value="none"
+          variant="inset-rectangle"
         >
-          <mdc-text
-            class="md-text-wrapper"
-            tagname="p"
-            type="body-large-regular"
-          >
-            Outdial ANI
-          </mdc-text>
-        </label>
-        <div
-          aria-hidden="true"
-          style="border: 0px; clip-path: inset(50%); height: 1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; width: 1px; white-space: nowrap;"
+          Enter Outdial ANI
+        </mdc-option>
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-1"
+          label="name 1"
+          tabindex="0"
+          value="1"
+          variant="inset-rectangle"
         >
-          <input
-            style="font-size: 16px;"
-            tabindex="0"
-            type="text"
-          />
-          <label>
-            Outdial ANI
-            <select
-              size="3"
-              tabindex="-1"
-            >
-              <option />
-              <option
-                value="none"
-              >
-                Enter Outdial ANI
-              </option>
-              <option
-                value="1"
-              >
-                name 1
-              </option>
-              <option
-                value="2"
-              >
-                name 2
-              </option>
-            </select>
-          </label>
-        </div>
-        <button
-          aria-controls="outdial-ani-option-select"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-labelledby="react-aria-:r42: react-aria-:r44:"
-          class="md-select-dropdown-input"
-          data-testid="outdial-ani-option-select"
-          id="outdial-ani-option-select"
-          role="combobox"
-          type="button"
+          name 1
+        </mdc-option>
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-2"
+          label="name 2"
+          tabindex="0"
+          value="2"
+          variant="inset-rectangle"
         >
-          <span
-            class="md-select-selected-item-wrapper"
-            id="react-aria-:r44:"
-          >
-            Enter Outdial ANI
-          </span>
-          <span
-            aria-hidden="true"
-            class="md-select-icon-wrapper"
-          >
-            <div
-              class="md-icon-wrapper"
-            >
-              <div
-                class="md-icon-not-found"
-                data-autoscale="false"
-                data-scale="16"
-              >
-                ⃞
-              </div>
-            </div>
-          </span>
-        </button>
-      </div>
+          name 2
+        </mdc-option>
+      </mdc-select>
     </div>
     <mdc-button
       aria-disabled="true"
@@ -2225,97 +1980,48 @@ exports[`Outdial Call Component Address Book functionality renders with address 
     <div
       class="outdial-ani-select-container"
     >
-      <mdc-icon
-        class="outdial-select-arrow-icon"
-        data-testid="select-arrow-icon"
-        name="arrow-down-bold"
-        title=""
-      />
-      <div
-        class="outdial-input md-select-wrapper"
-        id="outdial-ani-option-select"
-        style="--local-width: 100%;"
+      <mdc-select
+        class="outdial-input"
+        data-testid="outdial-ani-option-select"
+        help-text-type="default"
+        label="Outdial ANI"
+        name="outdial-ani-option-select"
+        value=""
       >
-        <label
-          id="react-aria-:r2i:"
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-none"
+          label="Enter Outdial ANI"
+          tabindex="0"
+          value="none"
+          variant="inset-rectangle"
         >
-          <mdc-text
-            class="md-text-wrapper"
-            tagname="p"
-            type="body-large-regular"
-          >
-            Outdial ANI
-          </mdc-text>
-        </label>
-        <div
-          aria-hidden="true"
-          style="border: 0px; clip-path: inset(50%); height: 1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; width: 1px; white-space: nowrap;"
+          Enter Outdial ANI
+        </mdc-option>
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-1"
+          label="name 1"
+          tabindex="0"
+          value="1"
+          variant="inset-rectangle"
         >
-          <input
-            style="font-size: 16px;"
-            tabindex="0"
-            type="text"
-          />
-          <label>
-            Outdial ANI
-            <select
-              size="3"
-              tabindex="-1"
-            >
-              <option />
-              <option
-                value="none"
-              >
-                Enter Outdial ANI
-              </option>
-              <option
-                value="1"
-              >
-                name 1
-              </option>
-              <option
-                value="2"
-              >
-                name 2
-              </option>
-            </select>
-          </label>
-        </div>
-        <button
-          aria-controls="outdial-ani-option-select"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-labelledby="react-aria-:r2i: react-aria-:r2k:"
-          class="md-select-dropdown-input"
-          data-testid="outdial-ani-option-select"
-          id="outdial-ani-option-select"
-          role="combobox"
-          type="button"
+          name 1
+        </mdc-option>
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-2"
+          label="name 2"
+          tabindex="0"
+          value="2"
+          variant="inset-rectangle"
         >
-          <span
-            class="md-select-selected-item-wrapper"
-            id="react-aria-:r2k:"
-          >
-            Enter Outdial ANI
-          </span>
-          <span
-            aria-hidden="true"
-            class="md-select-icon-wrapper"
-          >
-            <div
-              class="md-icon-wrapper"
-            >
-              <div
-                class="md-icon-not-found"
-                data-autoscale="false"
-                data-scale="16"
-              >
-                ⃞
-              </div>
-            </div>
-          </span>
-        </button>
-      </div>
+          name 2
+        </mdc-option>
+      </mdc-select>
     </div>
     <mdc-button
       aria-disabled="true"
@@ -2557,87 +2263,26 @@ exports[`Outdial Call Component Address Book functionality renders with address 
     <div
       class="outdial-ani-select-container"
     >
-      <mdc-icon
-        class="outdial-select-arrow-icon"
-        data-testid="select-arrow-icon"
-        name="arrow-down-bold"
-        title=""
-      />
-      <div
-        class="outdial-input md-select-wrapper"
-        id="outdial-ani-option-select"
-        style="--local-width: 100%;"
+      <mdc-select
+        class="outdial-input"
+        data-testid="outdial-ani-option-select"
+        help-text-type="default"
+        label="Outdial ANI"
+        name="outdial-ani-option-select"
+        value=""
       >
-        <label
-          id="react-aria-:r2c:"
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-none"
+          label="Enter Outdial ANI"
+          tabindex="0"
+          value="none"
+          variant="inset-rectangle"
         >
-          <mdc-text
-            class="md-text-wrapper"
-            tagname="p"
-            type="body-large-regular"
-          >
-            Outdial ANI
-          </mdc-text>
-        </label>
-        <div
-          aria-hidden="true"
-          style="border: 0px; clip-path: inset(50%); height: 1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; width: 1px; white-space: nowrap;"
-        >
-          <input
-            style="font-size: 16px;"
-            tabindex="0"
-            type="text"
-          />
-          <label>
-            Outdial ANI
-            <select
-              size="1"
-              tabindex="-1"
-            >
-              <option />
-              <option
-                value="none"
-              >
-                Enter Outdial ANI
-              </option>
-            </select>
-          </label>
-        </div>
-        <button
-          aria-controls="outdial-ani-option-select"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-labelledby="react-aria-:r2c: react-aria-:r2e:"
-          class="md-select-dropdown-input"
-          data-testid="outdial-ani-option-select"
-          id="outdial-ani-option-select"
-          role="combobox"
-          type="button"
-        >
-          <span
-            class="md-select-selected-item-wrapper"
-            id="react-aria-:r2e:"
-          >
-            Enter Outdial ANI
-          </span>
-          <span
-            aria-hidden="true"
-            class="md-select-icon-wrapper"
-          >
-            <div
-              class="md-icon-wrapper"
-            >
-              <div
-                class="md-icon-not-found"
-                data-autoscale="false"
-                data-scale="16"
-              >
-                ⃞
-              </div>
-            </div>
-          </span>
-        </button>
-      </div>
+          Enter Outdial ANI
+        </mdc-option>
+      </mdc-select>
     </div>
     <mdc-button
       aria-disabled="true"
@@ -2750,97 +2395,48 @@ exports[`Outdial Call Component Address Book functionality selects an address bo
     <div
       class="outdial-ani-select-container"
     >
-      <mdc-icon
-        class="outdial-select-arrow-icon"
-        data-testid="select-arrow-icon"
-        name="arrow-down-bold"
-        title=""
-      />
-      <div
-        class="outdial-input md-select-wrapper"
-        id="outdial-ani-option-select"
-        style="--local-width: 100%;"
+      <mdc-select
+        class="outdial-input"
+        data-testid="outdial-ani-option-select"
+        help-text-type="default"
+        label="Outdial ANI"
+        name="outdial-ani-option-select"
+        value=""
       >
-        <label
-          id="react-aria-:r34:"
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-none"
+          label="Enter Outdial ANI"
+          tabindex="0"
+          value="none"
+          variant="inset-rectangle"
         >
-          <mdc-text
-            class="md-text-wrapper"
-            tagname="p"
-            type="body-large-regular"
-          >
-            Outdial ANI
-          </mdc-text>
-        </label>
-        <div
-          aria-hidden="true"
-          style="border: 0px; clip-path: inset(50%); height: 1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; width: 1px; white-space: nowrap;"
+          Enter Outdial ANI
+        </mdc-option>
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-1"
+          label="name 1"
+          tabindex="0"
+          value="1"
+          variant="inset-rectangle"
         >
-          <input
-            style="font-size: 16px;"
-            tabindex="0"
-            type="text"
-          />
-          <label>
-            Outdial ANI
-            <select
-              size="3"
-              tabindex="-1"
-            >
-              <option />
-              <option
-                value="none"
-              >
-                Enter Outdial ANI
-              </option>
-              <option
-                value="1"
-              >
-                name 1
-              </option>
-              <option
-                value="2"
-              >
-                name 2
-              </option>
-            </select>
-          </label>
-        </div>
-        <button
-          aria-controls="outdial-ani-option-select"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-labelledby="react-aria-:r34: react-aria-:r36:"
-          class="md-select-dropdown-input"
-          data-testid="outdial-ani-option-select"
-          id="outdial-ani-option-select"
-          role="combobox"
-          type="button"
+          name 1
+        </mdc-option>
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-2"
+          label="name 2"
+          tabindex="0"
+          value="2"
+          variant="inset-rectangle"
         >
-          <span
-            class="md-select-selected-item-wrapper"
-            id="react-aria-:r36:"
-          >
-            Enter Outdial ANI
-          </span>
-          <span
-            aria-hidden="true"
-            class="md-select-icon-wrapper"
-          >
-            <div
-              class="md-icon-wrapper"
-            >
-              <div
-                class="md-icon-not-found"
-                data-autoscale="false"
-                data-scale="16"
-              >
-                ⃞
-              </div>
-            </div>
-          </span>
-        </button>
-      </div>
+          name 2
+        </mdc-option>
+      </mdc-select>
     </div>
     <mdc-button
       aria-disabled="true"
@@ -2920,97 +2516,48 @@ exports[`Outdial Call Component Address Book functionality shows empty state whe
     <div
       class="outdial-ani-select-container"
     >
-      <mdc-icon
-        class="outdial-select-arrow-icon"
-        data-testid="select-arrow-icon"
-        name="arrow-down-bold"
-        title=""
-      />
-      <div
-        class="outdial-input md-select-wrapper"
-        id="outdial-ani-option-select"
-        style="--local-width: 100%;"
+      <mdc-select
+        class="outdial-input"
+        data-testid="outdial-ani-option-select"
+        help-text-type="default"
+        label="Outdial ANI"
+        name="outdial-ani-option-select"
+        value=""
       >
-        <label
-          id="react-aria-:r3g:"
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-none"
+          label="Enter Outdial ANI"
+          tabindex="0"
+          value="none"
+          variant="inset-rectangle"
         >
-          <mdc-text
-            class="md-text-wrapper"
-            tagname="p"
-            type="body-large-regular"
-          >
-            Outdial ANI
-          </mdc-text>
-        </label>
-        <div
-          aria-hidden="true"
-          style="border: 0px; clip-path: inset(50%); height: 1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; width: 1px; white-space: nowrap;"
+          Enter Outdial ANI
+        </mdc-option>
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-1"
+          label="name 1"
+          tabindex="0"
+          value="1"
+          variant="inset-rectangle"
         >
-          <input
-            style="font-size: 16px;"
-            tabindex="0"
-            type="text"
-          />
-          <label>
-            Outdial ANI
-            <select
-              size="3"
-              tabindex="-1"
-            >
-              <option />
-              <option
-                value="none"
-              >
-                Enter Outdial ANI
-              </option>
-              <option
-                value="1"
-              >
-                name 1
-              </option>
-              <option
-                value="2"
-              >
-                name 2
-              </option>
-            </select>
-          </label>
-        </div>
-        <button
-          aria-controls="outdial-ani-option-select"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-labelledby="react-aria-:r3g: react-aria-:r3i:"
-          class="md-select-dropdown-input"
-          data-testid="outdial-ani-option-select"
-          id="outdial-ani-option-select"
-          role="combobox"
-          type="button"
+          name 1
+        </mdc-option>
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-2"
+          label="name 2"
+          tabindex="0"
+          value="2"
+          variant="inset-rectangle"
         >
-          <span
-            class="md-select-selected-item-wrapper"
-            id="react-aria-:r3i:"
-          >
-            Enter Outdial ANI
-          </span>
-          <span
-            aria-hidden="true"
-            class="md-select-icon-wrapper"
-          >
-            <div
-              class="md-icon-wrapper"
-            >
-              <div
-                class="md-icon-not-found"
-                data-autoscale="false"
-                data-scale="16"
-              >
-                ⃞
-              </div>
-            </div>
-          </span>
-        </button>
-      </div>
+          name 2
+        </mdc-option>
+      </mdc-select>
     </div>
     <mdc-button
       aria-disabled="true"
@@ -3252,97 +2799,48 @@ exports[`Outdial Call Component Address Book functionality switches back to dial
     <div
       class="outdial-ani-select-container"
     >
-      <mdc-icon
-        class="outdial-select-arrow-icon"
-        data-testid="select-arrow-icon"
-        name="arrow-down-bold"
-        title=""
-      />
-      <div
-        class="outdial-input md-select-wrapper"
-        id="outdial-ani-option-select"
-        style="--local-width: 100%;"
+      <mdc-select
+        class="outdial-input"
+        data-testid="outdial-ani-option-select"
+        help-text-type="default"
+        label="Outdial ANI"
+        name="outdial-ani-option-select"
+        value=""
       >
-        <label
-          id="react-aria-:r3m:"
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-none"
+          label="Enter Outdial ANI"
+          tabindex="0"
+          value="none"
+          variant="inset-rectangle"
         >
-          <mdc-text
-            class="md-text-wrapper"
-            tagname="p"
-            type="body-large-regular"
-          >
-            Outdial ANI
-          </mdc-text>
-        </label>
-        <div
-          aria-hidden="true"
-          style="border: 0px; clip-path: inset(50%); height: 1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; width: 1px; white-space: nowrap;"
+          Enter Outdial ANI
+        </mdc-option>
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-1"
+          label="name 1"
+          tabindex="0"
+          value="1"
+          variant="inset-rectangle"
         >
-          <input
-            style="font-size: 16px;"
-            tabindex="0"
-            type="text"
-          />
-          <label>
-            Outdial ANI
-            <select
-              size="3"
-              tabindex="-1"
-            >
-              <option />
-              <option
-                value="none"
-              >
-                Enter Outdial ANI
-              </option>
-              <option
-                value="1"
-              >
-                name 1
-              </option>
-              <option
-                value="2"
-              >
-                name 2
-              </option>
-            </select>
-          </label>
-        </div>
-        <button
-          aria-controls="outdial-ani-option-select"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-labelledby="react-aria-:r3m: react-aria-:r3o:"
-          class="md-select-dropdown-input"
-          data-testid="outdial-ani-option-select"
-          id="outdial-ani-option-select"
-          role="combobox"
-          type="button"
+          name 1
+        </mdc-option>
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-2"
+          label="name 2"
+          tabindex="0"
+          value="2"
+          variant="inset-rectangle"
         >
-          <span
-            class="md-select-selected-item-wrapper"
-            id="react-aria-:r3o:"
-          >
-            Enter Outdial ANI
-          </span>
-          <span
-            aria-hidden="true"
-            class="md-select-icon-wrapper"
-          >
-            <div
-              class="md-icon-wrapper"
-            >
-              <div
-                class="md-icon-not-found"
-                data-autoscale="false"
-                data-scale="16"
-              >
-                ⃞
-              </div>
-            </div>
-          </span>
-        </button>
-      </div>
+          name 2
+        </mdc-option>
+      </mdc-select>
     </div>
     <mdc-button
       aria-disabled="true"
@@ -3455,97 +2953,48 @@ exports[`Outdial Call Component Address Book functionality switches to address b
     <div
       class="outdial-ani-select-container"
     >
-      <mdc-icon
-        class="outdial-select-arrow-icon"
-        data-testid="select-arrow-icon"
-        name="arrow-down-bold"
-        title=""
-      />
-      <div
-        class="outdial-input md-select-wrapper"
-        id="outdial-ani-option-select"
-        style="--local-width: 100%;"
+      <mdc-select
+        class="outdial-input"
+        data-testid="outdial-ani-option-select"
+        help-text-type="default"
+        label="Outdial ANI"
+        name="outdial-ani-option-select"
+        value=""
       >
-        <label
-          id="react-aria-:r2o:"
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-none"
+          label="Enter Outdial ANI"
+          tabindex="0"
+          value="none"
+          variant="inset-rectangle"
         >
-          <mdc-text
-            class="md-text-wrapper"
-            tagname="p"
-            type="body-large-regular"
-          >
-            Outdial ANI
-          </mdc-text>
-        </label>
-        <div
-          aria-hidden="true"
-          style="border: 0px; clip-path: inset(50%); height: 1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; width: 1px; white-space: nowrap;"
+          Enter Outdial ANI
+        </mdc-option>
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-1"
+          label="name 1"
+          tabindex="0"
+          value="1"
+          variant="inset-rectangle"
         >
-          <input
-            style="font-size: 16px;"
-            tabindex="0"
-            type="text"
-          />
-          <label>
-            Outdial ANI
-            <select
-              size="3"
-              tabindex="-1"
-            >
-              <option />
-              <option
-                value="none"
-              >
-                Enter Outdial ANI
-              </option>
-              <option
-                value="1"
-              >
-                name 1
-              </option>
-              <option
-                value="2"
-              >
-                name 2
-              </option>
-            </select>
-          </label>
-        </div>
-        <button
-          aria-controls="outdial-ani-option-select"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-labelledby="react-aria-:r2o: react-aria-:r2q:"
-          class="md-select-dropdown-input"
-          data-testid="outdial-ani-option-select"
-          id="outdial-ani-option-select"
-          role="combobox"
-          type="button"
+          name 1
+        </mdc-option>
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-2"
+          label="name 2"
+          tabindex="0"
+          value="2"
+          variant="inset-rectangle"
         >
-          <span
-            class="md-select-selected-item-wrapper"
-            id="react-aria-:r2q:"
-          >
-            Enter Outdial ANI
-          </span>
-          <span
-            aria-hidden="true"
-            class="md-select-icon-wrapper"
-          >
-            <div
-              class="md-icon-wrapper"
-            >
-              <div
-                class="md-icon-not-found"
-                data-autoscale="false"
-                data-scale="16"
-              >
-                ⃞
-              </div>
-            </div>
-          </span>
-        </button>
-      </div>
+          name 2
+        </mdc-option>
+      </mdc-select>
     </div>
     <mdc-button
       aria-disabled="true"
@@ -3754,97 +3203,48 @@ exports[`Outdial Call Component Rendering renders the component correctly 1`] = 
     <div
       class="outdial-ani-select-container"
     >
-      <mdc-icon
-        class="outdial-select-arrow-icon"
-        data-testid="select-arrow-icon"
-        name="arrow-down-bold"
-        title=""
-      />
-      <div
-        class="outdial-input md-select-wrapper"
-        id="outdial-ani-option-select"
-        style="--local-width: 100%;"
+      <mdc-select
+        class="outdial-input"
+        data-testid="outdial-ani-option-select"
+        help-text-type="default"
+        label="Outdial ANI"
+        name="outdial-ani-option-select"
+        value=""
       >
-        <label
-          id="react-aria-:r3:"
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-none"
+          label="Enter Outdial ANI"
+          tabindex="0"
+          value="none"
+          variant="inset-rectangle"
         >
-          <mdc-text
-            class="md-text-wrapper"
-            tagname="p"
-            type="body-large-regular"
-          >
-            Outdial ANI
-          </mdc-text>
-        </label>
-        <div
-          aria-hidden="true"
-          style="border: 0px; clip-path: inset(50%); height: 1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; width: 1px; white-space: nowrap;"
+          Enter Outdial ANI
+        </mdc-option>
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-1"
+          label="name 1"
+          tabindex="0"
+          value="1"
+          variant="inset-rectangle"
         >
-          <input
-            style="font-size: 16px;"
-            tabindex="-1"
-            type="text"
-          />
-          <label>
-            Outdial ANI
-            <select
-              size="3"
-              tabindex="-1"
-            >
-              <option />
-              <option
-                value="none"
-              >
-                Enter Outdial ANI
-              </option>
-              <option
-                value="1"
-              >
-                name 1
-              </option>
-              <option
-                value="2"
-              >
-                name 2
-              </option>
-            </select>
-          </label>
-        </div>
-        <button
-          aria-controls="outdial-ani-option-select"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-labelledby="react-aria-:r3: react-aria-:r5:"
-          class="md-select-dropdown-input"
-          data-testid="outdial-ani-option-select"
-          id="outdial-ani-option-select"
-          role="combobox"
-          type="button"
+          name 1
+        </mdc-option>
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-2"
+          label="name 2"
+          tabindex="0"
+          value="2"
+          variant="inset-rectangle"
         >
-          <span
-            class="md-select-selected-item-wrapper"
-            id="react-aria-:r5:"
-          >
-            Enter Outdial ANI
-          </span>
-          <span
-            aria-hidden="true"
-            class="md-select-icon-wrapper"
-          >
-            <div
-              class="md-icon-wrapper"
-            >
-              <div
-                class="md-icon-not-found"
-                data-autoscale="false"
-                data-scale="16"
-              >
-                ⃞
-              </div>
-            </div>
-          </span>
-        </button>
-      </div>
+          name 2
+        </mdc-option>
+      </mdc-select>
     </div>
     <mdc-button
       aria-disabled="true"
@@ -4053,97 +3453,48 @@ exports[`Outdial Call Component allows special characters (* # +) from keypad 1`
     <div
       class="outdial-ani-select-container"
     >
-      <mdc-icon
-        class="outdial-select-arrow-icon"
-        data-testid="select-arrow-icon"
-        name="arrow-down-bold"
-        title=""
-      />
-      <div
-        class="outdial-input md-select-wrapper"
-        id="outdial-ani-option-select"
-        style="--local-width: 100%;"
+      <mdc-select
+        class="outdial-input"
+        data-testid="outdial-ani-option-select"
+        help-text-type="default"
+        label="Outdial ANI"
+        name="outdial-ani-option-select"
+        value=""
       >
-        <label
-          id="react-aria-:rr:"
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-none"
+          label="Enter Outdial ANI"
+          tabindex="0"
+          value="none"
+          variant="inset-rectangle"
         >
-          <mdc-text
-            class="md-text-wrapper"
-            tagname="p"
-            type="body-large-regular"
-          >
-            Outdial ANI
-          </mdc-text>
-        </label>
-        <div
-          aria-hidden="true"
-          style="border: 0px; clip-path: inset(50%); height: 1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; width: 1px; white-space: nowrap;"
+          Enter Outdial ANI
+        </mdc-option>
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-1"
+          label="name 1"
+          tabindex="0"
+          value="1"
+          variant="inset-rectangle"
         >
-          <input
-            style="font-size: 16px;"
-            tabindex="0"
-            type="text"
-          />
-          <label>
-            Outdial ANI
-            <select
-              size="3"
-              tabindex="-1"
-            >
-              <option />
-              <option
-                value="none"
-              >
-                Enter Outdial ANI
-              </option>
-              <option
-                value="1"
-              >
-                name 1
-              </option>
-              <option
-                value="2"
-              >
-                name 2
-              </option>
-            </select>
-          </label>
-        </div>
-        <button
-          aria-controls="outdial-ani-option-select"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-labelledby="react-aria-:rr: react-aria-:rt:"
-          class="md-select-dropdown-input"
-          data-testid="outdial-ani-option-select"
-          id="outdial-ani-option-select"
-          role="combobox"
-          type="button"
+          name 1
+        </mdc-option>
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-2"
+          label="name 2"
+          tabindex="0"
+          value="2"
+          variant="inset-rectangle"
         >
-          <span
-            class="md-select-selected-item-wrapper"
-            id="react-aria-:rt:"
-          >
-            Enter Outdial ANI
-          </span>
-          <span
-            aria-hidden="true"
-            class="md-select-icon-wrapper"
-          >
-            <div
-              class="md-icon-wrapper"
-            >
-              <div
-                class="md-icon-not-found"
-                data-autoscale="false"
-                data-scale="16"
-              >
-                ⃞
-              </div>
-            </div>
-          </span>
-        </button>
-      </div>
+          name 2
+        </mdc-option>
+      </mdc-select>
     </div>
     <mdc-button
       aria-disabled="true"
@@ -4352,97 +3703,48 @@ exports[`Outdial Call Component calls startOutdial with correct payload when cli
     <div
       class="outdial-ani-select-container"
     >
-      <mdc-icon
-        class="outdial-select-arrow-icon"
-        data-testid="select-arrow-icon"
-        name="arrow-down-bold"
-        title=""
-      />
-      <div
-        class="outdial-input md-select-wrapper"
-        id="outdial-ani-option-select"
-        style="--local-width: 100%;"
+      <mdc-select
+        class="outdial-input"
+        data-testid="outdial-ani-option-select"
+        help-text-type="default"
+        label="Outdial ANI"
+        name="outdial-ani-option-select"
+        value=""
       >
-        <label
-          id="react-aria-:rl:"
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-none"
+          label="Enter Outdial ANI"
+          tabindex="0"
+          value="none"
+          variant="inset-rectangle"
         >
-          <mdc-text
-            class="md-text-wrapper"
-            tagname="p"
-            type="body-large-regular"
-          >
-            Outdial ANI
-          </mdc-text>
-        </label>
-        <div
-          aria-hidden="true"
-          style="border: 0px; clip-path: inset(50%); height: 1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; width: 1px; white-space: nowrap;"
+          Enter Outdial ANI
+        </mdc-option>
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-1"
+          label="name 1"
+          tabindex="0"
+          value="1"
+          variant="inset-rectangle"
         >
-          <input
-            style="font-size: 16px;"
-            tabindex="0"
-            type="text"
-          />
-          <label>
-            Outdial ANI
-            <select
-              size="3"
-              tabindex="-1"
-            >
-              <option />
-              <option
-                value="none"
-              >
-                Enter Outdial ANI
-              </option>
-              <option
-                value="1"
-              >
-                name 1
-              </option>
-              <option
-                value="2"
-              >
-                name 2
-              </option>
-            </select>
-          </label>
-        </div>
-        <button
-          aria-controls="outdial-ani-option-select"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-labelledby="react-aria-:rl: react-aria-:rn:"
-          class="md-select-dropdown-input"
-          data-testid="outdial-ani-option-select"
-          id="outdial-ani-option-select"
-          role="combobox"
-          type="button"
+          name 1
+        </mdc-option>
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-2"
+          label="name 2"
+          tabindex="0"
+          value="2"
+          variant="inset-rectangle"
         >
-          <span
-            class="md-select-selected-item-wrapper"
-            id="react-aria-:rn:"
-          >
-            Enter Outdial ANI
-          </span>
-          <span
-            aria-hidden="true"
-            class="md-select-icon-wrapper"
-          >
-            <div
-              class="md-icon-wrapper"
-            >
-              <div
-                class="md-icon-not-found"
-                data-autoscale="false"
-                data-scale="16"
-              >
-                ⃞
-              </div>
-            </div>
-          </span>
-        </button>
-      </div>
+          name 2
+        </mdc-option>
+      </mdc-select>
     </div>
     <mdc-button
       color="default"
@@ -4649,97 +3951,48 @@ exports[`Outdial Call Component does not allow empty input 1`] = `
     <div
       class="outdial-ani-select-container"
     >
-      <mdc-icon
-        class="outdial-select-arrow-icon"
-        data-testid="select-arrow-icon"
-        name="arrow-down-bold"
-        title=""
-      />
-      <div
-        class="outdial-input md-select-wrapper"
-        id="outdial-ani-option-select"
-        style="--local-width: 100%;"
+      <mdc-select
+        class="outdial-input"
+        data-testid="outdial-ani-option-select"
+        help-text-type="default"
+        label="Outdial ANI"
+        name="outdial-ani-option-select"
+        value=""
       >
-        <label
-          id="react-aria-:r26:"
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-none"
+          label="Enter Outdial ANI"
+          tabindex="0"
+          value="none"
+          variant="inset-rectangle"
         >
-          <mdc-text
-            class="md-text-wrapper"
-            tagname="p"
-            type="body-large-regular"
-          >
-            Outdial ANI
-          </mdc-text>
-        </label>
-        <div
-          aria-hidden="true"
-          style="border: 0px; clip-path: inset(50%); height: 1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; width: 1px; white-space: nowrap;"
+          Enter Outdial ANI
+        </mdc-option>
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-1"
+          label="name 1"
+          tabindex="0"
+          value="1"
+          variant="inset-rectangle"
         >
-          <input
-            style="font-size: 16px;"
-            tabindex="0"
-            type="text"
-          />
-          <label>
-            Outdial ANI
-            <select
-              size="3"
-              tabindex="-1"
-            >
-              <option />
-              <option
-                value="none"
-              >
-                Enter Outdial ANI
-              </option>
-              <option
-                value="1"
-              >
-                name 1
-              </option>
-              <option
-                value="2"
-              >
-                name 2
-              </option>
-            </select>
-          </label>
-        </div>
-        <button
-          aria-controls="outdial-ani-option-select"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-labelledby="react-aria-:r26: react-aria-:r28:"
-          class="md-select-dropdown-input"
-          data-testid="outdial-ani-option-select"
-          id="outdial-ani-option-select"
-          role="combobox"
-          type="button"
+          name 1
+        </mdc-option>
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-2"
+          label="name 2"
+          tabindex="0"
+          value="2"
+          variant="inset-rectangle"
         >
-          <span
-            class="md-select-selected-item-wrapper"
-            id="react-aria-:r28:"
-          >
-            Enter Outdial ANI
-          </span>
-          <span
-            aria-hidden="true"
-            class="md-select-icon-wrapper"
-          >
-            <div
-              class="md-icon-wrapper"
-            >
-              <div
-                class="md-icon-not-found"
-                data-autoscale="false"
-                data-scale="16"
-              >
-                ⃞
-              </div>
-            </div>
-          </span>
-        </button>
-      </div>
+          name 2
+        </mdc-option>
+      </mdc-select>
     </div>
     <mdc-button
       aria-disabled="true"
@@ -4948,97 +4201,48 @@ exports[`Outdial Call Component does not allow invalid characters when typing 1`
     <div
       class="outdial-ani-select-container"
     >
-      <mdc-icon
-        class="outdial-select-arrow-icon"
-        data-testid="select-arrow-icon"
-        name="arrow-down-bold"
-        title=""
-      />
-      <div
-        class="outdial-input md-select-wrapper"
-        id="outdial-ani-option-select"
-        style="--local-width: 100%;"
+      <mdc-select
+        class="outdial-input"
+        data-testid="outdial-ani-option-select"
+        help-text-type="default"
+        label="Outdial ANI"
+        name="outdial-ani-option-select"
+        value=""
       >
-        <label
-          id="react-aria-:r17:"
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-none"
+          label="Enter Outdial ANI"
+          tabindex="0"
+          value="none"
+          variant="inset-rectangle"
         >
-          <mdc-text
-            class="md-text-wrapper"
-            tagname="p"
-            type="body-large-regular"
-          >
-            Outdial ANI
-          </mdc-text>
-        </label>
-        <div
-          aria-hidden="true"
-          style="border: 0px; clip-path: inset(50%); height: 1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; width: 1px; white-space: nowrap;"
+          Enter Outdial ANI
+        </mdc-option>
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-1"
+          label="name 1"
+          tabindex="0"
+          value="1"
+          variant="inset-rectangle"
         >
-          <input
-            style="font-size: 16px;"
-            tabindex="0"
-            type="text"
-          />
-          <label>
-            Outdial ANI
-            <select
-              size="3"
-              tabindex="-1"
-            >
-              <option />
-              <option
-                value="none"
-              >
-                Enter Outdial ANI
-              </option>
-              <option
-                value="1"
-              >
-                name 1
-              </option>
-              <option
-                value="2"
-              >
-                name 2
-              </option>
-            </select>
-          </label>
-        </div>
-        <button
-          aria-controls="outdial-ani-option-select"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-labelledby="react-aria-:r17: react-aria-:r19:"
-          class="md-select-dropdown-input"
-          data-testid="outdial-ani-option-select"
-          id="outdial-ani-option-select"
-          role="combobox"
-          type="button"
+          name 1
+        </mdc-option>
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-2"
+          label="name 2"
+          tabindex="0"
+          value="2"
+          variant="inset-rectangle"
         >
-          <span
-            class="md-select-selected-item-wrapper"
-            id="react-aria-:r19:"
-          >
-            Enter Outdial ANI
-          </span>
-          <span
-            aria-hidden="true"
-            class="md-select-icon-wrapper"
-          >
-            <div
-              class="md-icon-wrapper"
-            >
-              <div
-                class="md-icon-not-found"
-                data-autoscale="false"
-                data-scale="16"
-              >
-                ⃞
-              </div>
-            </div>
-          </span>
-        </button>
-      </div>
+          name 2
+        </mdc-option>
+      </mdc-select>
     </div>
     <mdc-button
       aria-disabled="true"
@@ -5247,80 +4451,26 @@ exports[`Outdial Call Component has no ANI entry options when the entry list is 
     <div
       class="outdial-ani-select-container"
     >
-      <mdc-icon
-        class="outdial-select-arrow-icon"
-        data-testid="select-arrow-icon"
-        name="arrow-down-bold"
-        title=""
-      />
-      <div
-        class="outdial-input md-select-wrapper"
-        id="outdial-ani-option-select"
-        style="--local-width: 100%;"
+      <mdc-select
+        class="outdial-input"
+        data-testid="outdial-ani-option-select"
+        help-text-type="default"
+        label="Outdial ANI"
+        name="outdial-ani-option-select"
+        value=""
       >
-        <label
-          id="react-aria-:r1d:"
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-none"
+          label="Enter Outdial ANI"
+          tabindex="0"
+          value="none"
+          variant="inset-rectangle"
         >
-          <mdc-text
-            class="md-text-wrapper"
-            tagname="p"
-            type="body-large-regular"
-          >
-            Outdial ANI
-          </mdc-text>
-        </label>
-        <div
-          aria-hidden="true"
-          style="border: 0px; clip-path: inset(50%); height: 1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; width: 1px; white-space: nowrap;"
-        >
-          <input
-            style="font-size: 16px;"
-            tabindex="-1"
-            type="text"
-          />
-          <label>
-            Outdial ANI
-            <select
-              size="1"
-              tabindex="-1"
-            >
-              <option />
-              <option
-                value="none"
-              >
-                Enter Outdial ANI
-              </option>
-            </select>
-          </label>
-        </div>
-        <button
-          aria-controls="outdial-ani-option-select"
-          aria-expanded="true"
-          aria-haspopup="listbox"
-          aria-labelledby="react-aria-:r1d: react-aria-:r1f:"
-          class="md-select-dropdown-input md-select-open"
-          data-testid="outdial-ani-option-select"
-          id="outdial-ani-option-select"
-          role="combobox"
-          type="button"
-        >
-          <span
-            class="md-select-selected-item-wrapper"
-            id="react-aria-:r1f:"
-          >
-            Enter Outdial ANI
-          </span>
-          <span
-            aria-hidden="true"
-            class="md-select-icon-wrapper"
-          />
-        </button>
-        <div
-          data-tippy-root=""
-          id="tippy-8"
-          style="z-index: 9999; transition: none; position: absolute; left: 0px; top: 0px; margin: 0px;"
-        />
-      </div>
+          Enter Outdial ANI
+        </mdc-option>
+      </mdc-select>
     </div>
     <mdc-button
       aria-disabled="true"
@@ -5529,216 +4679,48 @@ exports[`Outdial Call Component sets selected ani when an option is selected 1`]
     <div
       class="outdial-ani-select-container"
     >
-      <mdc-icon
-        class="outdial-select-arrow-icon"
-        data-testid="select-arrow-icon"
-        name="arrow-up-bold"
-        title=""
-      />
-      <div
-        class="outdial-input md-select-wrapper"
-        id="outdial-ani-option-select"
-        style="--local-width: 100%;"
+      <mdc-select
+        class="outdial-input"
+        data-testid="outdial-ani-option-select"
+        help-text-type="default"
+        label="Outdial ANI"
+        name="outdial-ani-option-select"
+        value=""
       >
-        <label
-          id="react-aria-:r1j:"
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-none"
+          label="Enter Outdial ANI"
+          tabindex="0"
+          value="none"
+          variant="inset-rectangle"
         >
-          <mdc-text
-            class="md-text-wrapper"
-            tagname="p"
-            type="body-large-regular"
-          >
-            Outdial ANI
-          </mdc-text>
-        </label>
-        <div
-          aria-hidden="true"
-          style="border: 0px; clip-path: inset(50%); height: 1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; width: 1px; white-space: nowrap;"
+          Enter Outdial ANI
+        </mdc-option>
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-1"
+          label="name 1"
+          tabindex="0"
+          value="1"
+          variant="inset-rectangle"
         >
-          <input
-            style="font-size: 16px;"
-            tabindex="-1"
-            type="text"
-          />
-          <label>
-            Outdial ANI
-            <select
-              size="3"
-              tabindex="-1"
-            >
-              <option />
-              <option
-                value="none"
-              >
-                Enter Outdial ANI
-              </option>
-              <option
-                value="1"
-              >
-                name 1
-              </option>
-              <option
-                value="2"
-              >
-                name 2
-              </option>
-            </select>
-          </label>
-        </div>
-        <button
-          aria-controls="outdial-ani-option-select"
-          aria-expanded="true"
-          aria-haspopup="listbox"
-          aria-labelledby="react-aria-:r1j: react-aria-:r1l:"
-          class="md-select-dropdown-input md-select-open"
-          data-testid="outdial-ani-option-select"
-          id="outdial-ani-option-select"
-          role="combobox"
-          type="button"
+          name 1
+        </mdc-option>
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-2"
+          label="name 2"
+          tabindex="0"
+          value="2"
+          variant="inset-rectangle"
         >
-          <span
-            class="md-select-selected-item-wrapper"
-            id="react-aria-:r1l:"
-          >
-            Enter Outdial ANI
-          </span>
-          <span
-            aria-hidden="true"
-            class="md-select-icon-wrapper"
-          >
-            <div
-              class="md-icon-wrapper"
-            >
-              <div
-                class="md-icon-not-found"
-                data-autoscale="false"
-                data-scale="16"
-              >
-                ⃞
-              </div>
-            </div>
-          </span>
-        </button>
-        <div
-          data-tippy-root=""
-          id="tippy-9"
-          style="z-index: 9999; position: absolute; left: 0px; top: 0px; margin: 0px; transform: translate(0px, 0px);"
-        >
-          <span
-            data-focus-scope-start="true"
-            hidden=""
-          />
-          <div
-            aria-labelledby="outdial-ani-option-select"
-            class="md-select-popover md-modal-container-wrapper"
-            data-arrow-orientation="vertical"
-            data-color="primary"
-            data-elevation="3"
-            data-exclude-focus="true"
-            data-padded="true"
-            data-placement="bottom"
-            data-round="50"
-            style="max-height: none;"
-            tabindex="-1"
-          >
-            <ul
-              aria-labelledby="react-aria-:r1j:"
-              class="md-select-menu-listbox md-menu-list-background-wrapper"
-              data-color="primary"
-              id="react-aria-:r1h:"
-              role="listbox"
-              tabindex="0"
-            >
-              <li
-                aria-selected="false"
-                class="md-list-item-base-wrapper"
-                data-allow-text-select="false"
-                data-disabled="false"
-                data-interactive="true"
-                data-key="none"
-                data-padded="true"
-                data-shape="rectangle"
-                data-size="40"
-                data-testid="outdial-ani-option-none"
-                id="react-aria-:r1h:-option-none"
-                role="option"
-                tabindex="0"
-              >
-                <div
-                  data-position="fill"
-                  title="Enter Outdial ANI"
-                >
-                  <div
-                    class="outdial-ani-option-name"
-                  >
-                    Enter Outdial ANI
-                  </div>
-                </div>
-              </li>
-              <li
-                aria-selected="false"
-                class="md-list-item-base-wrapper"
-                data-allow-text-select="false"
-                data-disabled="false"
-                data-interactive="true"
-                data-key="1"
-                data-padded="true"
-                data-shape="rectangle"
-                data-size="40"
-                data-testid="outdial-ani-option-1"
-                id="react-aria-:r1h:-option-1"
-                role="option"
-                tabindex="-1"
-              >
-                <div
-                  data-position="fill"
-                  title="name 1"
-                >
-                  <div
-                    class="outdial-ani-option-name"
-                  >
-                    name 1
-                  </div>
-                </div>
-              </li>
-              <li
-                aria-selected="false"
-                class="md-list-item-base-wrapper"
-                data-allow-text-select="false"
-                data-disabled="false"
-                data-interactive="true"
-                data-key="2"
-                data-padded="true"
-                data-shape="rectangle"
-                data-size="40"
-                data-testid="outdial-ani-option-2"
-                id="react-aria-:r1h:-option-2"
-                role="option"
-                tabindex="-1"
-              >
-                <div
-                  data-position="fill"
-                  title="name 2"
-                >
-                  <div
-                    class="outdial-ani-option-name"
-                  >
-                    name 2
-                  </div>
-                </div>
-              </li>
-            </ul>
-          </div>
-          <span
-            data-focus-scope-end="true"
-            hidden=""
-          />
-        </div>
-        <div
-          aria-hidden="true"
-          class="md-popover-backdrop"
-        />
-      </div>
+          name 2
+        </mdc-option>
+      </mdc-select>
     </div>
     <mdc-button
       aria-disabled="true"
@@ -5947,97 +4929,48 @@ exports[`Outdial Call Component shows error help text when invalid characters ar
     <div
       class="outdial-ani-select-container"
     >
-      <mdc-icon
-        class="outdial-select-arrow-icon"
-        data-testid="select-arrow-icon"
-        name="arrow-down-bold"
-        title=""
-      />
-      <div
-        class="outdial-input md-select-wrapper"
-        id="outdial-ani-option-select"
-        style="--local-width: 100%;"
+      <mdc-select
+        class="outdial-input"
+        data-testid="outdial-ani-option-select"
+        help-text-type="default"
+        label="Outdial ANI"
+        name="outdial-ani-option-select"
+        value=""
       >
-        <label
-          id="react-aria-:r11:"
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-none"
+          label="Enter Outdial ANI"
+          tabindex="0"
+          value="none"
+          variant="inset-rectangle"
         >
-          <mdc-text
-            class="md-text-wrapper"
-            tagname="p"
-            type="body-large-regular"
-          >
-            Outdial ANI
-          </mdc-text>
-        </label>
-        <div
-          aria-hidden="true"
-          style="border: 0px; clip-path: inset(50%); height: 1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; width: 1px; white-space: nowrap;"
+          Enter Outdial ANI
+        </mdc-option>
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-1"
+          label="name 1"
+          tabindex="0"
+          value="1"
+          variant="inset-rectangle"
         >
-          <input
-            style="font-size: 16px;"
-            tabindex="0"
-            type="text"
-          />
-          <label>
-            Outdial ANI
-            <select
-              size="3"
-              tabindex="-1"
-            >
-              <option />
-              <option
-                value="none"
-              >
-                Enter Outdial ANI
-              </option>
-              <option
-                value="1"
-              >
-                name 1
-              </option>
-              <option
-                value="2"
-              >
-                name 2
-              </option>
-            </select>
-          </label>
-        </div>
-        <button
-          aria-controls="outdial-ani-option-select"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-labelledby="react-aria-:r11: react-aria-:r13:"
-          class="md-select-dropdown-input"
-          data-testid="outdial-ani-option-select"
-          id="outdial-ani-option-select"
-          role="combobox"
-          type="button"
+          name 1
+        </mdc-option>
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-2"
+          label="name 2"
+          tabindex="0"
+          value="2"
+          variant="inset-rectangle"
         >
-          <span
-            class="md-select-selected-item-wrapper"
-            id="react-aria-:r13:"
-          >
-            Enter Outdial ANI
-          </span>
-          <span
-            aria-hidden="true"
-            class="md-select-icon-wrapper"
-          >
-            <div
-              class="md-icon-wrapper"
-            >
-              <div
-                class="md-icon-not-found"
-                data-autoscale="false"
-                data-scale="16"
-              >
-                ⃞
-              </div>
-            </div>
-          </span>
-        </button>
-      </div>
+          name 2
+        </mdc-option>
+      </mdc-select>
     </div>
     <mdc-button
       aria-disabled="true"
@@ -6246,97 +5179,48 @@ exports[`Outdial Call Component updates input value when clicking keypad buttons
     <div
       class="outdial-ani-select-container"
     >
-      <mdc-icon
-        class="outdial-select-arrow-icon"
-        data-testid="select-arrow-icon"
-        name="arrow-down-bold"
-        title=""
-      />
-      <div
-        class="outdial-input md-select-wrapper"
-        id="outdial-ani-option-select"
-        style="--local-width: 100%;"
+      <mdc-select
+        class="outdial-input"
+        data-testid="outdial-ani-option-select"
+        help-text-type="default"
+        label="Outdial ANI"
+        name="outdial-ani-option-select"
+        value=""
       >
-        <label
-          id="react-aria-:rf:"
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-none"
+          label="Enter Outdial ANI"
+          tabindex="0"
+          value="none"
+          variant="inset-rectangle"
         >
-          <mdc-text
-            class="md-text-wrapper"
-            tagname="p"
-            type="body-large-regular"
-          >
-            Outdial ANI
-          </mdc-text>
-        </label>
-        <div
-          aria-hidden="true"
-          style="border: 0px; clip-path: inset(50%); height: 1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; width: 1px; white-space: nowrap;"
+          Enter Outdial ANI
+        </mdc-option>
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-1"
+          label="name 1"
+          tabindex="0"
+          value="1"
+          variant="inset-rectangle"
         >
-          <input
-            style="font-size: 16px;"
-            tabindex="-1"
-            type="text"
-          />
-          <label>
-            Outdial ANI
-            <select
-              size="3"
-              tabindex="-1"
-            >
-              <option />
-              <option
-                value="none"
-              >
-                Enter Outdial ANI
-              </option>
-              <option
-                value="1"
-              >
-                name 1
-              </option>
-              <option
-                value="2"
-              >
-                name 2
-              </option>
-            </select>
-          </label>
-        </div>
-        <button
-          aria-controls="outdial-ani-option-select"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-labelledby="react-aria-:rf: react-aria-:rh:"
-          class="md-select-dropdown-input"
-          data-testid="outdial-ani-option-select"
-          id="outdial-ani-option-select"
-          role="combobox"
-          type="button"
+          name 1
+        </mdc-option>
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-2"
+          label="name 2"
+          tabindex="0"
+          value="2"
+          variant="inset-rectangle"
         >
-          <span
-            class="md-select-selected-item-wrapper"
-            id="react-aria-:rh:"
-          >
-            Enter Outdial ANI
-          </span>
-          <span
-            aria-hidden="true"
-            class="md-select-icon-wrapper"
-          >
-            <div
-              class="md-icon-wrapper"
-            >
-              <div
-                class="md-icon-not-found"
-                data-autoscale="false"
-                data-scale="16"
-              >
-                ⃞
-              </div>
-            </div>
-          </span>
-        </button>
-      </div>
+          name 2
+        </mdc-option>
+      </mdc-select>
     </div>
     <mdc-button
       aria-disabled="true"
@@ -6545,97 +5429,48 @@ exports[`Outdial Call Component updates input value when typing directly 1`] = `
     <div
       class="outdial-ani-select-container"
     >
-      <mdc-icon
-        class="outdial-select-arrow-icon"
-        data-testid="select-arrow-icon"
-        name="arrow-down-bold"
-        title=""
-      />
-      <div
-        class="outdial-input md-select-wrapper"
-        id="outdial-ani-option-select"
-        style="--local-width: 100%;"
+      <mdc-select
+        class="outdial-input"
+        data-testid="outdial-ani-option-select"
+        help-text-type="default"
+        label="Outdial ANI"
+        name="outdial-ani-option-select"
+        value=""
       >
-        <label
-          id="react-aria-:r9:"
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-none"
+          label="Enter Outdial ANI"
+          tabindex="0"
+          value="none"
+          variant="inset-rectangle"
         >
-          <mdc-text
-            class="md-text-wrapper"
-            tagname="p"
-            type="body-large-regular"
-          >
-            Outdial ANI
-          </mdc-text>
-        </label>
-        <div
-          aria-hidden="true"
-          style="border: 0px; clip-path: inset(50%); height: 1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; width: 1px; white-space: nowrap;"
+          Enter Outdial ANI
+        </mdc-option>
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-1"
+          label="name 1"
+          tabindex="0"
+          value="1"
+          variant="inset-rectangle"
         >
-          <input
-            style="font-size: 16px;"
-            tabindex="-1"
-            type="text"
-          />
-          <label>
-            Outdial ANI
-            <select
-              size="3"
-              tabindex="-1"
-            >
-              <option />
-              <option
-                value="none"
-              >
-                Enter Outdial ANI
-              </option>
-              <option
-                value="1"
-              >
-                name 1
-              </option>
-              <option
-                value="2"
-              >
-                name 2
-              </option>
-            </select>
-          </label>
-        </div>
-        <button
-          aria-controls="outdial-ani-option-select"
-          aria-expanded="false"
-          aria-haspopup="listbox"
-          aria-labelledby="react-aria-:r9: react-aria-:rb:"
-          class="md-select-dropdown-input"
-          data-testid="outdial-ani-option-select"
-          id="outdial-ani-option-select"
-          role="combobox"
-          type="button"
+          name 1
+        </mdc-option>
+        <mdc-option
+          aria-disabled="false"
+          aria-selected="false"
+          data-testid="outdial-ani-option-2"
+          label="name 2"
+          tabindex="0"
+          value="2"
+          variant="inset-rectangle"
         >
-          <span
-            class="md-select-selected-item-wrapper"
-            id="react-aria-:rb:"
-          >
-            Enter Outdial ANI
-          </span>
-          <span
-            aria-hidden="true"
-            class="md-select-icon-wrapper"
-          >
-            <div
-              class="md-icon-wrapper"
-            >
-              <div
-                class="md-icon-not-found"
-                data-autoscale="false"
-                data-scale="16"
-              >
-                ⃞
-              </div>
-            </div>
-          </span>
-        </button>
-      </div>
+          name 2
+        </mdc-option>
+      </mdc-select>
     </div>
     <mdc-button
       aria-disabled="true"
