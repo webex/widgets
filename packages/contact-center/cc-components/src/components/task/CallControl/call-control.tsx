@@ -324,7 +324,6 @@ function CallControlComponent(props: CallControlComponentProps) {
               <Select
                 label={WRAP_UP_REASON}
                 help-text-type=""
-                height="auto"
                 data-aria-label="wrapup-reason"
                 toggletip-text=""
                 toggletip-placement=""

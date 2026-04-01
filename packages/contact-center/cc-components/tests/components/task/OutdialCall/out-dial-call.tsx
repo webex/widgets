@@ -194,7 +194,7 @@ describe('OutdialCallComponent', () => {
     // Verify the option is now selected
     await waitFor(() => {
       const option = screen.getByTestId('outdial-ani-option-1');
-      expect(option).toHaveAttribute('selected', '');
+      expect(option).toHaveAttribute('selected', 'true');
     });
   });
 

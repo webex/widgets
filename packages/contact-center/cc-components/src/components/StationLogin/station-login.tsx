@@ -235,8 +235,6 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
                 }}
                 value={selectedDeviceType}
                 className="station-login-select"
-                selectedValue={selectedDeviceType}
-                selectedValueText={LoginOptions[selectedDeviceType]}
               >
                 {Object.keys(LoginOptions).map((option: string, index: number) => {
                   // only show loginOptions provided by store and filtered by hideDesktopLogin
@@ -292,7 +290,6 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
               }}
               className="station-login-select"
               placeholder={StationLoginLabels.YOUR_TEAM}
-              selectedValueText={teams.find((team) => team.id === selectedTeamId)?.name}
             >
               {teams.map((team: {id: string; name: string}, index: number) => {
                 return (

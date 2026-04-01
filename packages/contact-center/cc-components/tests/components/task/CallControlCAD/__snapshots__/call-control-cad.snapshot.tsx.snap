@@ -213,6 +213,7 @@ exports[`CallControlCADComponent Snapshots should handle edge cases and control 
         class="consult-header"
       >
         <mdc-avatar
+          aria-hidden="true"
           class="task-avatar"
         />
         <div>
@@ -1940,6 +1941,7 @@ exports[`CallControlCADComponent Snapshots should render consultation and wrapup
         class="consult-header"
       >
         <mdc-avatar
+          aria-hidden="true"
           class="task-avatar"
         />
         <div>

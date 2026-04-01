@@ -165,25 +165,28 @@ exports[`Station Login Component Actions ProfileMode interaction confirmation Po
             Handle calls using
           </mdc-text>
           <mdc-icon
-            aria-describedby="agent-login-label-tooltip"
             data-testid="station-login-icon"
             id="agent-login-info-badge"
             name="info-badge-filled"
           />
           <mdc-tooltip
-            append-to=""
+            boundary="clippingAncestors"
+            boundary-root="viewport"
             color="contrast"
             data-testid="station-login-tooltip"
             delay="0,0"
             disable-aria-expanded=""
-            flip=""
             hide-on-blur=""
             hide-on-escape=""
             id="agent-login-label-tooltip"
+            is-backdrop-invisible=""
             offset="4"
-            placement="top"
+            placement="bottom"
             role="tooltip"
+            should-focus-trap-wrap=""
             show-arrow=""
+            stack-group-name=""
+            strategy="absolute"
             style="z-index: 1000;"
             tooltip-type="description"
             trigger="mouseenter focusin"
@@ -202,17 +205,23 @@ exports[`Station Login Component Actions ProfileMode interaction confirmation Po
         </div>
         <div>
           <mdc-select
+            boundary="clippingAncestors"
             class="station-login-select"
             data-testid="login-option-select"
             help-text-type="default"
+            id="login-option"
             name="login-option"
+            placement="bottom-start"
+            strategy="absolute"
+            toggletip-placement="top"
+            toggletip-strategy="absolute"
             value="EXTENSION"
           >
             <mdc-option
               aria-disabled="false"
               aria-selected="false"
               data-testid="login-option-Dial Number"
-              tabindex="0"
+              tabindex="-1"
               value="AGENT_DN"
               variant="inset-rectangle"
             >
@@ -222,8 +231,8 @@ exports[`Station Login Component Actions ProfileMode interaction confirmation Po
               aria-disabled="false"
               aria-selected="true"
               data-testid="login-option-Extension"
-              selected=""
-              tabindex="-1"
+              selected="true"
+              tabindex="0"
               value="EXTENSION"
               variant="inset-rectangle"
             >
@@ -244,25 +253,35 @@ exports[`Station Login Component Actions ProfileMode interaction confirmation Po
       </div>
       <mdc-input
         data-testid="dial-number-input"
+        id="dial-number-input"
         label=""
         name=""
+        toggletip-placement="top"
+        toggletip-strategy="absolute"
         value=""
       />
       <div
         class="select-container"
       >
         <mdc-select
+          boundary="clippingAncestors"
           class="station-login-select"
           data-testid="teams-select-dropdown"
           help-text-type="default"
+          id="teams-dropdown"
           label="Your Team"
           name="teams-dropdown"
+          placement="bottom-start"
+          strategy="absolute"
+          toggletip-placement="top"
+          toggletip-strategy="absolute"
+          value=""
         >
           <mdc-option
             aria-disabled="false"
             aria-selected="true"
             data-testid="teams-dropdown-Team A"
-            selected=""
+            selected="true"
             tabindex="0"
             value="team123"
             variant="inset-rectangle"
@@ -273,7 +292,7 @@ exports[`Station Login Component Actions ProfileMode interaction confirmation Po
             aria-disabled="false"
             aria-selected="false"
             data-testid="teams-dropdown-Team B"
-            tabindex="0"
+            tabindex="-1"
             value="team456"
             variant="inset-rectangle"
           >
@@ -468,25 +487,28 @@ exports[`Station Login Component Actions ProfileMode interaction confirmation Po
             Handle calls using
           </mdc-text>
           <mdc-icon
-            aria-describedby="agent-login-label-tooltip"
             data-testid="station-login-icon"
             id="agent-login-info-badge"
             name="info-badge-filled"
           />
           <mdc-tooltip
-            append-to=""
+            boundary="clippingAncestors"
+            boundary-root="viewport"
             color="contrast"
             data-testid="station-login-tooltip"
             delay="0,0"
             disable-aria-expanded=""
-            flip=""
             hide-on-blur=""
             hide-on-escape=""
             id="agent-login-label-tooltip"
+            is-backdrop-invisible=""
             offset="4"
-            placement="top"
+            placement="bottom"
             role="tooltip"
+            should-focus-trap-wrap=""
             show-arrow=""
+            stack-group-name=""
+            strategy="absolute"
             style="z-index: 1000;"
             tooltip-type="description"
             trigger="mouseenter focusin"
@@ -505,17 +527,23 @@ exports[`Station Login Component Actions ProfileMode interaction confirmation Po
         </div>
         <div>
           <mdc-select
+            boundary="clippingAncestors"
             class="station-login-select"
             data-testid="login-option-select"
             help-text-type="default"
+            id="login-option"
             name="login-option"
+            placement="bottom-start"
+            strategy="absolute"
+            toggletip-placement="top"
+            toggletip-strategy="absolute"
             value="EXTENSION"
           >
             <mdc-option
               aria-disabled="false"
               aria-selected="false"
               data-testid="login-option-Dial Number"
-              tabindex="0"
+              tabindex="-1"
               value="AGENT_DN"
               variant="inset-rectangle"
             >
@@ -525,8 +553,8 @@ exports[`Station Login Component Actions ProfileMode interaction confirmation Po
               aria-disabled="false"
               aria-selected="true"
               data-testid="login-option-Extension"
-              selected=""
-              tabindex="-1"
+              selected="true"
+              tabindex="0"
               value="EXTENSION"
               variant="inset-rectangle"
             >
@@ -547,25 +575,35 @@ exports[`Station Login Component Actions ProfileMode interaction confirmation Po
       </div>
       <mdc-input
         data-testid="dial-number-input"
+        id="dial-number-input"
         label=""
         name=""
+        toggletip-placement="top"
+        toggletip-strategy="absolute"
         value=""
       />
       <div
         class="select-container"
       >
         <mdc-select
+          boundary="clippingAncestors"
           class="station-login-select"
           data-testid="teams-select-dropdown"
           help-text-type="default"
+          id="teams-dropdown"
           label="Your Team"
           name="teams-dropdown"
+          placement="bottom-start"
+          strategy="absolute"
+          toggletip-placement="top"
+          toggletip-strategy="absolute"
+          value=""
         >
           <mdc-option
             aria-disabled="false"
             aria-selected="true"
             data-testid="teams-dropdown-Team A"
-            selected=""
+            selected="true"
             tabindex="0"
             value="team123"
             variant="inset-rectangle"
@@ -576,7 +614,7 @@ exports[`Station Login Component Actions ProfileMode interaction confirmation Po
             aria-disabled="false"
             aria-selected="false"
             data-testid="teams-dropdown-Team B"
-            tabindex="0"
+            tabindex="-1"
             value="team456"
             variant="inset-rectangle"
           >
@@ -778,25 +816,28 @@ exports[`Station Login Component Actions SignOut Modal Popup should close modal 
             Handle calls using
           </mdc-text>
           <mdc-icon
-            aria-describedby="agent-login-label-tooltip"
             data-testid="station-login-icon"
             id="agent-login-info-badge"
             name="info-badge-filled"
           />
           <mdc-tooltip
-            append-to=""
+            boundary="clippingAncestors"
+            boundary-root="viewport"
             color="contrast"
             data-testid="station-login-tooltip"
             delay="0,0"
             disable-aria-expanded=""
-            flip=""
             hide-on-blur=""
             hide-on-escape=""
             id="agent-login-label-tooltip"
+            is-backdrop-invisible=""
             offset="4"
-            placement="top"
+            placement="bottom"
             role="tooltip"
+            should-focus-trap-wrap=""
             show-arrow=""
+            stack-group-name=""
+            strategy="absolute"
             style="z-index: 1000;"
             tooltip-type="description"
             trigger="mouseenter focusin"
@@ -815,17 +856,23 @@ exports[`Station Login Component Actions SignOut Modal Popup should close modal 
         </div>
         <div>
           <mdc-select
+            boundary="clippingAncestors"
             class="station-login-select"
             data-testid="login-option-select"
             help-text-type="default"
+            id="login-option"
             name="login-option"
+            placement="bottom-start"
+            strategy="absolute"
+            toggletip-placement="top"
+            toggletip-strategy="absolute"
             value="EXTENSION"
           >
             <mdc-option
               aria-disabled="false"
               aria-selected="false"
               data-testid="login-option-Dial Number"
-              tabindex="0"
+              tabindex="-1"
               value="AGENT_DN"
               variant="inset-rectangle"
             >
@@ -835,8 +882,8 @@ exports[`Station Login Component Actions SignOut Modal Popup should close modal 
               aria-disabled="false"
               aria-selected="true"
               data-testid="login-option-Extension"
-              selected=""
-              tabindex="-1"
+              selected="true"
+              tabindex="0"
               value="EXTENSION"
               variant="inset-rectangle"
             >
@@ -857,25 +904,35 @@ exports[`Station Login Component Actions SignOut Modal Popup should close modal 
       </div>
       <mdc-input
         data-testid="dial-number-input"
+        id="dial-number-input"
         label=""
         name=""
+        toggletip-placement="top"
+        toggletip-strategy="absolute"
         value=""
       />
       <div
         class="select-container"
       >
         <mdc-select
+          boundary="clippingAncestors"
           class="station-login-select"
           data-testid="teams-select-dropdown"
           help-text-type="default"
+          id="teams-dropdown"
           label="Your Team"
           name="teams-dropdown"
+          placement="bottom-start"
+          strategy="absolute"
+          toggletip-placement="top"
+          toggletip-strategy="absolute"
+          value=""
         >
           <mdc-option
             aria-disabled="false"
             aria-selected="true"
             data-testid="teams-dropdown-Team A"
-            selected=""
+            selected="true"
             tabindex="0"
             value="team123"
             variant="inset-rectangle"
@@ -886,7 +943,7 @@ exports[`Station Login Component Actions SignOut Modal Popup should close modal 
             aria-disabled="false"
             aria-selected="false"
             data-testid="teams-dropdown-Team B"
-            tabindex="0"
+            tabindex="-1"
             value="team456"
             variant="inset-rectangle"
           >
@@ -1100,25 +1157,28 @@ exports[`Station Login Component Actions SignOut Modal Popup show signOut modal 
             Handle calls using
           </mdc-text>
           <mdc-icon
-            aria-describedby="agent-login-label-tooltip"
             data-testid="station-login-icon"
             id="agent-login-info-badge"
             name="info-badge-filled"
           />
           <mdc-tooltip
-            append-to=""
+            boundary="clippingAncestors"
+            boundary-root="viewport"
             color="contrast"
             data-testid="station-login-tooltip"
             delay="0,0"
             disable-aria-expanded=""
-            flip=""
             hide-on-blur=""
             hide-on-escape=""
             id="agent-login-label-tooltip"
+            is-backdrop-invisible=""
             offset="4"
-            placement="top"
+            placement="bottom"
             role="tooltip"
+            should-focus-trap-wrap=""
             show-arrow=""
+            stack-group-name=""
+            strategy="absolute"
             style="z-index: 1000;"
             tooltip-type="description"
             trigger="mouseenter focusin"
@@ -1137,17 +1197,23 @@ exports[`Station Login Component Actions SignOut Modal Popup show signOut modal 
         </div>
         <div>
           <mdc-select
+            boundary="clippingAncestors"
             class="station-login-select"
             data-testid="login-option-select"
             help-text-type="default"
+            id="login-option"
             name="login-option"
+            placement="bottom-start"
+            strategy="absolute"
+            toggletip-placement="top"
+            toggletip-strategy="absolute"
             value="EXTENSION"
           >
             <mdc-option
               aria-disabled="false"
               aria-selected="false"
               data-testid="login-option-Dial Number"
-              tabindex="0"
+              tabindex="-1"
               value="AGENT_DN"
               variant="inset-rectangle"
             >
@@ -1157,8 +1223,8 @@ exports[`Station Login Component Actions SignOut Modal Popup show signOut modal 
               aria-disabled="false"
               aria-selected="true"
               data-testid="login-option-Extension"
-              selected=""
-              tabindex="-1"
+              selected="true"
+              tabindex="0"
               value="EXTENSION"
               variant="inset-rectangle"
             >
@@ -1179,25 +1245,35 @@ exports[`Station Login Component Actions SignOut Modal Popup show signOut modal 
       </div>
       <mdc-input
         data-testid="dial-number-input"
+        id="dial-number-input"
         label=""
         name=""
+        toggletip-placement="top"
+        toggletip-strategy="absolute"
         value=""
       />
       <div
         class="select-container"
       >
         <mdc-select
+          boundary="clippingAncestors"
           class="station-login-select"
           data-testid="teams-select-dropdown"
           help-text-type="default"
+          id="teams-dropdown"
           label="Your Team"
           name="teams-dropdown"
+          placement="bottom-start"
+          strategy="absolute"
+          toggletip-placement="top"
+          toggletip-strategy="absolute"
+          value=""
         >
           <mdc-option
             aria-disabled="false"
             aria-selected="true"
             data-testid="teams-dropdown-Team A"
-            selected=""
+            selected="true"
             tabindex="0"
             value="team123"
             variant="inset-rectangle"
@@ -1208,7 +1284,7 @@ exports[`Station Login Component Actions SignOut Modal Popup show signOut modal 
             aria-disabled="false"
             aria-selected="false"
             data-testid="teams-dropdown-Team B"
-            tabindex="0"
+            tabindex="-1"
             value="team456"
             variant="inset-rectangle"
           >
@@ -1409,25 +1485,28 @@ exports[`Station Login Component Actions SignOut Modal Popup show signOut modal 
             Handle calls using
           </mdc-text>
           <mdc-icon
-            aria-describedby="agent-login-label-tooltip"
             data-testid="station-login-icon"
             id="agent-login-info-badge"
             name="info-badge-filled"
           />
           <mdc-tooltip
-            append-to=""
+            boundary="clippingAncestors"
+            boundary-root="viewport"
             color="contrast"
             data-testid="station-login-tooltip"
             delay="0,0"
             disable-aria-expanded=""
-            flip=""
             hide-on-blur=""
             hide-on-escape=""
             id="agent-login-label-tooltip"
+            is-backdrop-invisible=""
             offset="4"
-            placement="top"
+            placement="bottom"
             role="tooltip"
+            should-focus-trap-wrap=""
             show-arrow=""
+            stack-group-name=""
+            strategy="absolute"
             style="z-index: 1000;"
             tooltip-type="description"
             trigger="mouseenter focusin"
@@ -1446,17 +1525,23 @@ exports[`Station Login Component Actions SignOut Modal Popup show signOut modal 
         </div>
         <div>
           <mdc-select
+            boundary="clippingAncestors"
             class="station-login-select"
             data-testid="login-option-select"
             help-text-type="default"
+            id="login-option"
             name="login-option"
+            placement="bottom-start"
+            strategy="absolute"
+            toggletip-placement="top"
+            toggletip-strategy="absolute"
             value="EXTENSION"
           >
             <mdc-option
               aria-disabled="false"
               aria-selected="false"
               data-testid="login-option-Dial Number"
-              tabindex="0"
+              tabindex="-1"
               value="AGENT_DN"
               variant="inset-rectangle"
             >
@@ -1466,8 +1551,8 @@ exports[`Station Login Component Actions SignOut Modal Popup show signOut modal 
               aria-disabled="false"
               aria-selected="true"
               data-testid="login-option-Extension"
-              selected=""
-              tabindex="-1"
+              selected="true"
+              tabindex="0"
               value="EXTENSION"
               variant="inset-rectangle"
             >
@@ -1488,25 +1573,35 @@ exports[`Station Login Component Actions SignOut Modal Popup show signOut modal 
       </div>
       <mdc-input
         data-testid="dial-number-input"
+        id="dial-number-input"
         label=""
         name=""
+        toggletip-placement="top"
+        toggletip-strategy="absolute"
         value=""
       />
       <div
         class="select-container"
       >
         <mdc-select
+          boundary="clippingAncestors"
           class="station-login-select"
           data-testid="teams-select-dropdown"
           help-text-type="default"
+          id="teams-dropdown"
           label="Your Team"
           name="teams-dropdown"
+          placement="bottom-start"
+          strategy="absolute"
+          toggletip-placement="top"
+          toggletip-strategy="absolute"
+          value=""
         >
           <mdc-option
             aria-disabled="false"
             aria-selected="true"
             data-testid="teams-dropdown-Team A"
-            selected=""
+            selected="true"
             tabindex="0"
             value="team123"
             variant="inset-rectangle"
@@ -1517,7 +1612,7 @@ exports[`Station Login Component Actions SignOut Modal Popup show signOut modal 
             aria-disabled="false"
             aria-selected="false"
             data-testid="teams-dropdown-Team B"
-            tabindex="0"
+            tabindex="-1"
             value="team456"
             variant="inset-rectangle"
           >
@@ -1718,25 +1813,28 @@ exports[`Station Login Component Actions SignOut Modal Popup show signOut modal 
             Handle calls using
           </mdc-text>
           <mdc-icon
-            aria-describedby="agent-login-label-tooltip"
             data-testid="station-login-icon"
             id="agent-login-info-badge"
             name="info-badge-filled"
           />
           <mdc-tooltip
-            append-to=""
+            boundary="clippingAncestors"
+            boundary-root="viewport"
             color="contrast"
             data-testid="station-login-tooltip"
             delay="0,0"
             disable-aria-expanded=""
-            flip=""
             hide-on-blur=""
             hide-on-escape=""
             id="agent-login-label-tooltip"
+            is-backdrop-invisible=""
             offset="4"
-            placement="top"
+            placement="bottom"
             role="tooltip"
+            should-focus-trap-wrap=""
             show-arrow=""
+            stack-group-name=""
+            strategy="absolute"
             style="z-index: 1000;"
             tooltip-type="description"
             trigger="mouseenter focusin"
@@ -1755,17 +1853,23 @@ exports[`Station Login Component Actions SignOut Modal Popup show signOut modal 
         </div>
         <div>
           <mdc-select
+            boundary="clippingAncestors"
             class="station-login-select"
             data-testid="login-option-select"
             help-text-type="default"
+            id="login-option"
             name="login-option"
+            placement="bottom-start"
+            strategy="absolute"
+            toggletip-placement="top"
+            toggletip-strategy="absolute"
             value="EXTENSION"
           >
             <mdc-option
               aria-disabled="false"
               aria-selected="false"
               data-testid="login-option-Dial Number"
-              tabindex="0"
+              tabindex="-1"
               value="AGENT_DN"
               variant="inset-rectangle"
             >
@@ -1775,8 +1879,8 @@ exports[`Station Login Component Actions SignOut Modal Popup show signOut modal 
               aria-disabled="false"
               aria-selected="true"
               data-testid="login-option-Extension"
-              selected=""
-              tabindex="-1"
+              selected="true"
+              tabindex="0"
               value="EXTENSION"
               variant="inset-rectangle"
             >
@@ -1797,25 +1901,35 @@ exports[`Station Login Component Actions SignOut Modal Popup show signOut modal 
       </div>
       <mdc-input
         data-testid="dial-number-input"
+        id="dial-number-input"
         label=""
         name=""
+        toggletip-placement="top"
+        toggletip-strategy="absolute"
         value=""
       />
       <div
         class="select-container"
       >
         <mdc-select
+          boundary="clippingAncestors"
           class="station-login-select"
           data-testid="teams-select-dropdown"
           help-text-type="default"
+          id="teams-dropdown"
           label="Your Team"
           name="teams-dropdown"
+          placement="bottom-start"
+          strategy="absolute"
+          toggletip-placement="top"
+          toggletip-strategy="absolute"
+          value=""
         >
           <mdc-option
             aria-disabled="false"
             aria-selected="true"
             data-testid="teams-dropdown-Team A"
-            selected=""
+            selected="true"
             tabindex="0"
             value="team123"
             variant="inset-rectangle"
@@ -1826,7 +1940,7 @@ exports[`Station Login Component Actions SignOut Modal Popup show signOut modal 
             aria-disabled="false"
             aria-selected="false"
             data-testid="teams-dropdown-Team B"
-            tabindex="0"
+            tabindex="-1"
             value="team456"
             variant="inset-rectangle"
           >
@@ -2027,25 +2141,28 @@ exports[`Station Login Component Actions SignOut Modal Popup show signOut modal 
             Handle calls using
           </mdc-text>
           <mdc-icon
-            aria-describedby="agent-login-label-tooltip"
             data-testid="station-login-icon"
             id="agent-login-info-badge"
             name="info-badge-filled"
           />
           <mdc-tooltip
-            append-to=""
+            boundary="clippingAncestors"
+            boundary-root="viewport"
             color="contrast"
             data-testid="station-login-tooltip"
             delay="0,0"
             disable-aria-expanded=""
-            flip=""
             hide-on-blur=""
             hide-on-escape=""
             id="agent-login-label-tooltip"
+            is-backdrop-invisible=""
             offset="4"
-            placement="top"
+            placement="bottom"
             role="tooltip"
+            should-focus-trap-wrap=""
             show-arrow=""
+            stack-group-name=""
+            strategy="absolute"
             style="z-index: 1000;"
             tooltip-type="description"
             trigger="mouseenter focusin"
@@ -2064,17 +2181,23 @@ exports[`Station Login Component Actions SignOut Modal Popup show signOut modal 
         </div>
         <div>
           <mdc-select
+            boundary="clippingAncestors"
             class="station-login-select"
             data-testid="login-option-select"
             help-text-type="default"
+            id="login-option"
             name="login-option"
+            placement="bottom-start"
+            strategy="absolute"
+            toggletip-placement="top"
+            toggletip-strategy="absolute"
             value="EXTENSION"
           >
             <mdc-option
               aria-disabled="false"
               aria-selected="false"
               data-testid="login-option-Dial Number"
-              tabindex="0"
+              tabindex="-1"
               value="AGENT_DN"
               variant="inset-rectangle"
             >
@@ -2084,8 +2207,8 @@ exports[`Station Login Component Actions SignOut Modal Popup show signOut modal 
               aria-disabled="false"
               aria-selected="true"
               data-testid="login-option-Extension"
-              selected=""
-              tabindex="-1"
+              selected="true"
+              tabindex="0"
               value="EXTENSION"
               variant="inset-rectangle"
             >
@@ -2106,25 +2229,35 @@ exports[`Station Login Component Actions SignOut Modal Popup show signOut modal 
       </div>
       <mdc-input
         data-testid="dial-number-input"
+        id="dial-number-input"
         label=""
         name=""
+        toggletip-placement="top"
+        toggletip-strategy="absolute"
         value=""
       />
       <div
         class="select-container"
       >
         <mdc-select
+          boundary="clippingAncestors"
           class="station-login-select"
           data-testid="teams-select-dropdown"
           help-text-type="default"
+          id="teams-dropdown"
           label="Your Team"
           name="teams-dropdown"
+          placement="bottom-start"
+          strategy="absolute"
+          toggletip-placement="top"
+          toggletip-strategy="absolute"
+          value=""
         >
           <mdc-option
             aria-disabled="false"
             aria-selected="true"
             data-testid="teams-dropdown-Team A"
-            selected=""
+            selected="true"
             tabindex="0"
             value="team123"
             variant="inset-rectangle"
@@ -2135,7 +2268,7 @@ exports[`Station Login Component Actions SignOut Modal Popup show signOut modal 
             aria-disabled="false"
             aria-selected="false"
             data-testid="teams-dropdown-Team B"
-            tabindex="0"
+            tabindex="-1"
             value="team456"
             variant="inset-rectangle"
           >
@@ -2336,25 +2469,28 @@ exports[`Station Login Component Actions calls handleDNInputChanged with correct
             Handle calls using
           </mdc-text>
           <mdc-icon
-            aria-describedby="agent-login-label-tooltip"
             data-testid="station-login-icon"
             id="agent-login-info-badge"
             name="info-badge-filled"
           />
           <mdc-tooltip
-            append-to=""
+            boundary="clippingAncestors"
+            boundary-root="viewport"
             color="contrast"
             data-testid="station-login-tooltip"
             delay="0,0"
             disable-aria-expanded=""
-            flip=""
             hide-on-blur=""
             hide-on-escape=""
             id="agent-login-label-tooltip"
+            is-backdrop-invisible=""
             offset="4"
-            placement="top"
+            placement="bottom"
             role="tooltip"
+            should-focus-trap-wrap=""
             show-arrow=""
+            stack-group-name=""
+            strategy="absolute"
             style="z-index: 1000;"
             tooltip-type="description"
             trigger="mouseenter focusin"
@@ -2373,17 +2509,23 @@ exports[`Station Login Component Actions calls handleDNInputChanged with correct
         </div>
         <div>
           <mdc-select
+            boundary="clippingAncestors"
             class="station-login-select"
             data-testid="login-option-select"
             help-text-type="default"
+            id="login-option"
             name="login-option"
+            placement="bottom-start"
+            strategy="absolute"
+            toggletip-placement="top"
+            toggletip-strategy="absolute"
             value="EXTENSION"
           >
             <mdc-option
               aria-disabled="false"
               aria-selected="false"
               data-testid="login-option-Dial Number"
-              tabindex="0"
+              tabindex="-1"
               value="AGENT_DN"
               variant="inset-rectangle"
             >
@@ -2393,8 +2535,8 @@ exports[`Station Login Component Actions calls handleDNInputChanged with correct
               aria-disabled="false"
               aria-selected="true"
               data-testid="login-option-Extension"
-              selected=""
-              tabindex="-1"
+              selected="true"
+              tabindex="0"
               value="EXTENSION"
               variant="inset-rectangle"
             >
@@ -2415,25 +2557,35 @@ exports[`Station Login Component Actions calls handleDNInputChanged with correct
       </div>
       <mdc-input
         data-testid="dial-number-input"
+        id="dial-number-input"
         label=""
         name=""
+        toggletip-placement="top"
+        toggletip-strategy="absolute"
         value=""
       />
       <div
         class="select-container"
       >
         <mdc-select
+          boundary="clippingAncestors"
           class="station-login-select"
           data-testid="teams-select-dropdown"
           help-text-type="default"
+          id="teams-dropdown"
           label="Your Team"
           name="teams-dropdown"
+          placement="bottom-start"
+          strategy="absolute"
+          toggletip-placement="top"
+          toggletip-strategy="absolute"
+          value=""
         >
           <mdc-option
             aria-disabled="false"
             aria-selected="true"
             data-testid="teams-dropdown-Team A"
-            selected=""
+            selected="true"
             tabindex="0"
             value="team123"
             variant="inset-rectangle"
@@ -2444,7 +2596,7 @@ exports[`Station Login Component Actions calls handleDNInputChanged with correct
             aria-disabled="false"
             aria-selected="false"
             data-testid="teams-dropdown-Team B"
-            tabindex="0"
+            tabindex="-1"
             value="team456"
             variant="inset-rectangle"
           >
@@ -2658,25 +2810,28 @@ exports[`Station Login Component Actions calls handleTeamSelectChanged utility f
             Handle calls using
           </mdc-text>
           <mdc-icon
-            aria-describedby="agent-login-label-tooltip"
             data-testid="station-login-icon"
             id="agent-login-info-badge"
             name="info-badge-filled"
           />
           <mdc-tooltip
-            append-to=""
+            boundary="clippingAncestors"
+            boundary-root="viewport"
             color="contrast"
             data-testid="station-login-tooltip"
             delay="0,0"
             disable-aria-expanded=""
-            flip=""
             hide-on-blur=""
             hide-on-escape=""
             id="agent-login-label-tooltip"
+            is-backdrop-invisible=""
             offset="4"
-            placement="top"
+            placement="bottom"
             role="tooltip"
+            should-focus-trap-wrap=""
             show-arrow=""
+            stack-group-name=""
+            strategy="absolute"
             style="z-index: 1000;"
             tooltip-type="description"
             trigger="mouseenter focusin"
@@ -2695,17 +2850,23 @@ exports[`Station Login Component Actions calls handleTeamSelectChanged utility f
         </div>
         <div>
           <mdc-select
+            boundary="clippingAncestors"
             class="station-login-select"
             data-testid="login-option-select"
             help-text-type="default"
+            id="login-option"
             name="login-option"
+            placement="bottom-start"
+            strategy="absolute"
+            toggletip-placement="top"
+            toggletip-strategy="absolute"
             value="EXTENSION"
           >
             <mdc-option
               aria-disabled="false"
               aria-selected="false"
               data-testid="login-option-Dial Number"
-              tabindex="0"
+              tabindex="-1"
               value="AGENT_DN"
               variant="inset-rectangle"
             >
@@ -2715,8 +2876,8 @@ exports[`Station Login Component Actions calls handleTeamSelectChanged utility f
               aria-disabled="false"
               aria-selected="true"
               data-testid="login-option-Extension"
-              selected=""
-              tabindex="-1"
+              selected="true"
+              tabindex="0"
               value="EXTENSION"
               variant="inset-rectangle"
             >
@@ -2737,25 +2898,35 @@ exports[`Station Login Component Actions calls handleTeamSelectChanged utility f
       </div>
       <mdc-input
         data-testid="dial-number-input"
+        id="dial-number-input"
         label=""
         name=""
+        toggletip-placement="top"
+        toggletip-strategy="absolute"
         value=""
       />
       <div
         class="select-container"
       >
         <mdc-select
+          boundary="clippingAncestors"
           class="station-login-select"
           data-testid="teams-select-dropdown"
           help-text-type="default"
+          id="teams-dropdown"
           label="Your Team"
           name="teams-dropdown"
+          placement="bottom-start"
+          strategy="absolute"
+          toggletip-placement="top"
+          toggletip-strategy="absolute"
+          value=""
         >
           <mdc-option
             aria-disabled="false"
             aria-selected="true"
             data-testid="teams-dropdown-Team A"
-            selected=""
+            selected="true"
             tabindex="0"
             value="team123"
             variant="inset-rectangle"
@@ -2766,7 +2937,7 @@ exports[`Station Login Component Actions calls handleTeamSelectChanged utility f
             aria-disabled="false"
             aria-selected="false"
             data-testid="teams-dropdown-Team B"
-            tabindex="0"
+            tabindex="-1"
             value="team456"
             variant="inset-rectangle"
           >
@@ -2980,25 +3151,28 @@ exports[`Station Login Component Rendering does not render loginOptions if not i
             Handle calls using
           </mdc-text>
           <mdc-icon
-            aria-describedby="agent-login-label-tooltip"
             data-testid="station-login-icon"
             id="agent-login-info-badge"
             name="info-badge-filled"
           />
           <mdc-tooltip
-            append-to=""
+            boundary="clippingAncestors"
+            boundary-root="viewport"
             color="contrast"
             data-testid="station-login-tooltip"
             delay="0,0"
             disable-aria-expanded=""
-            flip=""
             hide-on-blur=""
             hide-on-escape=""
             id="agent-login-label-tooltip"
+            is-backdrop-invisible=""
             offset="4"
-            placement="top"
+            placement="bottom"
             role="tooltip"
+            should-focus-trap-wrap=""
             show-arrow=""
+            stack-group-name=""
+            strategy="absolute"
             style="z-index: 1000;"
             tooltip-type="description"
             trigger="mouseenter focusin"
@@ -3017,16 +3191,23 @@ exports[`Station Login Component Rendering does not render loginOptions if not i
         </div>
         <div>
           <mdc-select
+            boundary="clippingAncestors"
             class="station-login-select"
             data-testid="login-option-select"
             help-text-type="default"
+            id="login-option"
             name="login-option"
+            placement="bottom-start"
+            strategy="absolute"
+            toggletip-placement="top"
+            toggletip-strategy="absolute"
             value="EXTENSION"
           >
             <mdc-option
               aria-disabled="false"
               aria-selected="false"
               data-testid="login-option-Dial Number"
+              selected="true"
               tabindex="0"
               value="AGENT_DN"
               variant="inset-rectangle"
@@ -3038,25 +3219,35 @@ exports[`Station Login Component Rendering does not render loginOptions if not i
       </div>
       <mdc-input
         data-testid="dial-number-input"
+        id="dial-number-input"
         label=""
         name=""
+        toggletip-placement="top"
+        toggletip-strategy="absolute"
         value=""
       />
       <div
         class="select-container"
       >
         <mdc-select
+          boundary="clippingAncestors"
           class="station-login-select"
           data-testid="teams-select-dropdown"
           help-text-type="default"
+          id="teams-dropdown"
           label="Your Team"
           name="teams-dropdown"
+          placement="bottom-start"
+          strategy="absolute"
+          toggletip-placement="top"
+          toggletip-strategy="absolute"
+          value=""
         >
           <mdc-option
             aria-disabled="false"
             aria-selected="true"
             data-testid="teams-dropdown-Team A"
-            selected=""
+            selected="true"
             tabindex="0"
             value="team123"
             variant="inset-rectangle"
@@ -3067,7 +3258,7 @@ exports[`Station Login Component Rendering does not render loginOptions if not i
             aria-disabled="false"
             aria-selected="false"
             data-testid="teams-dropdown-Team B"
-            tabindex="0"
+            tabindex="-1"
             value="team456"
             variant="inset-rectangle"
           >
@@ -3274,25 +3465,28 @@ exports[`Station Login Component Rendering hides Desktop login option in profile
             Handle calls using
           </mdc-text>
           <mdc-icon
-            aria-describedby="agent-login-label-tooltip"
             data-testid="station-login-icon"
             id="agent-login-info-badge"
             name="info-badge-filled"
           />
           <mdc-tooltip
-            append-to=""
+            boundary="clippingAncestors"
+            boundary-root="viewport"
             color="contrast"
             data-testid="station-login-tooltip"
             delay="0,0"
             disable-aria-expanded=""
-            flip=""
             hide-on-blur=""
             hide-on-escape=""
             id="agent-login-label-tooltip"
+            is-backdrop-invisible=""
             offset="4"
-            placement="top"
+            placement="bottom"
             role="tooltip"
+            should-focus-trap-wrap=""
             show-arrow=""
+            stack-group-name=""
+            strategy="absolute"
             style="z-index: 1000;"
             tooltip-type="description"
             trigger="mouseenter focusin"
@@ -3311,17 +3505,23 @@ exports[`Station Login Component Rendering hides Desktop login option in profile
         </div>
         <div>
           <mdc-select
+            boundary="clippingAncestors"
             class="station-login-select"
             data-testid="login-option-select"
             help-text-type="default"
+            id="login-option"
             name="login-option"
+            placement="bottom-start"
+            strategy="absolute"
+            toggletip-placement="top"
+            toggletip-strategy="absolute"
             value="EXTENSION"
           >
             <mdc-option
               aria-disabled="false"
               aria-selected="false"
               data-testid="login-option-Dial Number"
-              tabindex="0"
+              tabindex="-1"
               value="AGENT_DN"
               variant="inset-rectangle"
             >
@@ -3331,8 +3531,8 @@ exports[`Station Login Component Rendering hides Desktop login option in profile
               aria-disabled="false"
               aria-selected="true"
               data-testid="login-option-Extension"
-              selected=""
-              tabindex="-1"
+              selected="true"
+              tabindex="0"
               value="EXTENSION"
               variant="inset-rectangle"
             >
@@ -3343,25 +3543,35 @@ exports[`Station Login Component Rendering hides Desktop login option in profile
       </div>
       <mdc-input
         data-testid="dial-number-input"
+        id="dial-number-input"
         label=""
         name=""
+        toggletip-placement="top"
+        toggletip-strategy="absolute"
         value=""
       />
       <div
         class="select-container"
       >
         <mdc-select
+          boundary="clippingAncestors"
           class="station-login-select"
           data-testid="teams-select-dropdown"
           help-text-type="default"
+          id="teams-dropdown"
           label="Your Team"
           name="teams-dropdown"
+          placement="bottom-start"
+          strategy="absolute"
+          toggletip-placement="top"
+          toggletip-strategy="absolute"
+          value=""
         >
           <mdc-option
             aria-disabled="false"
             aria-selected="true"
             data-testid="teams-dropdown-Team A"
-            selected=""
+            selected="true"
             tabindex="0"
             value="team123"
             variant="inset-rectangle"
@@ -3372,7 +3582,7 @@ exports[`Station Login Component Rendering hides Desktop login option in profile
             aria-disabled="false"
             aria-selected="false"
             data-testid="teams-dropdown-Team B"
-            tabindex="0"
+            tabindex="-1"
             value="team456"
             variant="inset-rectangle"
           >
@@ -3574,25 +3784,28 @@ exports[`Station Login Component Rendering hides Desktop login option when hideD
             Handle calls using
           </mdc-text>
           <mdc-icon
-            aria-describedby="agent-login-label-tooltip"
             data-testid="station-login-icon"
             id="agent-login-info-badge"
             name="info-badge-filled"
           />
           <mdc-tooltip
-            append-to=""
+            boundary="clippingAncestors"
+            boundary-root="viewport"
             color="contrast"
             data-testid="station-login-tooltip"
             delay="0,0"
             disable-aria-expanded=""
-            flip=""
             hide-on-blur=""
             hide-on-escape=""
             id="agent-login-label-tooltip"
+            is-backdrop-invisible=""
             offset="4"
-            placement="top"
+            placement="bottom"
             role="tooltip"
+            should-focus-trap-wrap=""
             show-arrow=""
+            stack-group-name=""
+            strategy="absolute"
             style="z-index: 1000;"
             tooltip-type="description"
             trigger="mouseenter focusin"
@@ -3611,17 +3824,23 @@ exports[`Station Login Component Rendering hides Desktop login option when hideD
         </div>
         <div>
           <mdc-select
+            boundary="clippingAncestors"
             class="station-login-select"
             data-testid="login-option-select"
             help-text-type="default"
+            id="login-option"
             name="login-option"
+            placement="bottom-start"
+            strategy="absolute"
+            toggletip-placement="top"
+            toggletip-strategy="absolute"
             value="EXTENSION"
           >
             <mdc-option
               aria-disabled="false"
               aria-selected="false"
               data-testid="login-option-Dial Number"
-              tabindex="0"
+              tabindex="-1"
               value="AGENT_DN"
               variant="inset-rectangle"
             >
@@ -3631,8 +3850,8 @@ exports[`Station Login Component Rendering hides Desktop login option when hideD
               aria-disabled="false"
               aria-selected="true"
               data-testid="login-option-Extension"
-              selected=""
-              tabindex="-1"
+              selected="true"
+              tabindex="0"
               value="EXTENSION"
               variant="inset-rectangle"
             >
@@ -3643,25 +3862,35 @@ exports[`Station Login Component Rendering hides Desktop login option when hideD
       </div>
       <mdc-input
         data-testid="dial-number-input"
+        id="dial-number-input"
         label=""
         name=""
+        toggletip-placement="top"
+        toggletip-strategy="absolute"
         value=""
       />
       <div
         class="select-container"
       >
         <mdc-select
+          boundary="clippingAncestors"
           class="station-login-select"
           data-testid="teams-select-dropdown"
           help-text-type="default"
+          id="teams-dropdown"
           label="Your Team"
           name="teams-dropdown"
+          placement="bottom-start"
+          strategy="absolute"
+          toggletip-placement="top"
+          toggletip-strategy="absolute"
+          value=""
         >
           <mdc-option
             aria-disabled="false"
             aria-selected="true"
             data-testid="teams-dropdown-Team A"
-            selected=""
+            selected="true"
             tabindex="0"
             value="team123"
             variant="inset-rectangle"
@@ -3672,7 +3901,7 @@ exports[`Station Login Component Rendering hides Desktop login option when hideD
             aria-disabled="false"
             aria-selected="false"
             data-testid="teams-dropdown-Team B"
-            tabindex="0"
+            tabindex="-1"
             value="team456"
             variant="inset-rectangle"
           >
@@ -3886,25 +4115,28 @@ exports[`Station Login Component Rendering renders login failure when passed 1`]
             Handle calls using
           </mdc-text>
           <mdc-icon
-            aria-describedby="agent-login-label-tooltip"
             data-testid="station-login-icon"
             id="agent-login-info-badge"
             name="info-badge-filled"
           />
           <mdc-tooltip
-            append-to=""
+            boundary="clippingAncestors"
+            boundary-root="viewport"
             color="contrast"
             data-testid="station-login-tooltip"
             delay="0,0"
             disable-aria-expanded=""
-            flip=""
             hide-on-blur=""
             hide-on-escape=""
             id="agent-login-label-tooltip"
+            is-backdrop-invisible=""
             offset="4"
-            placement="top"
+            placement="bottom"
             role="tooltip"
+            should-focus-trap-wrap=""
             show-arrow=""
+            stack-group-name=""
+            strategy="absolute"
             style="z-index: 1000;"
             tooltip-type="description"
             trigger="mouseenter focusin"
@@ -3923,17 +4155,23 @@ exports[`Station Login Component Rendering renders login failure when passed 1`]
         </div>
         <div>
           <mdc-select
+            boundary="clippingAncestors"
             class="station-login-select"
             data-testid="login-option-select"
             help-text-type="default"
+            id="login-option"
             name="login-option"
+            placement="bottom-start"
+            strategy="absolute"
+            toggletip-placement="top"
+            toggletip-strategy="absolute"
             value="EXTENSION"
           >
             <mdc-option
               aria-disabled="false"
               aria-selected="false"
               data-testid="login-option-Dial Number"
-              tabindex="0"
+              tabindex="-1"
               value="AGENT_DN"
               variant="inset-rectangle"
             >
@@ -3943,8 +4181,8 @@ exports[`Station Login Component Rendering renders login failure when passed 1`]
               aria-disabled="false"
               aria-selected="true"
               data-testid="login-option-Extension"
-              selected=""
-              tabindex="-1"
+              selected="true"
+              tabindex="0"
               value="EXTENSION"
               variant="inset-rectangle"
             >
@@ -3965,25 +4203,35 @@ exports[`Station Login Component Rendering renders login failure when passed 1`]
       </div>
       <mdc-input
         data-testid="dial-number-input"
+        id="dial-number-input"
         label=""
         name=""
+        toggletip-placement="top"
+        toggletip-strategy="absolute"
         value=""
       />
       <div
         class="select-container"
       >
         <mdc-select
+          boundary="clippingAncestors"
           class="station-login-select"
           data-testid="teams-select-dropdown"
           help-text-type="default"
+          id="teams-dropdown"
           label="Your Team"
           name="teams-dropdown"
+          placement="bottom-start"
+          strategy="absolute"
+          toggletip-placement="top"
+          toggletip-strategy="absolute"
+          value=""
         >
           <mdc-option
             aria-disabled="false"
             aria-selected="true"
             data-testid="teams-dropdown-Team A"
-            selected=""
+            selected="true"
             tabindex="0"
             value="team123"
             variant="inset-rectangle"
@@ -3994,7 +4242,7 @@ exports[`Station Login Component Rendering renders login failure when passed 1`]
             aria-disabled="false"
             aria-selected="false"
             data-testid="teams-dropdown-Team B"
-            tabindex="0"
+            tabindex="-1"
             value="team456"
             variant="inset-rectangle"
           >
@@ -4216,25 +4464,28 @@ exports[`Station Login Component Rendering renders save error when passed 1`] = 
             Handle calls using
           </mdc-text>
           <mdc-icon
-            aria-describedby="agent-login-label-tooltip"
             data-testid="station-login-icon"
             id="agent-login-info-badge"
             name="info-badge-filled"
           />
           <mdc-tooltip
-            append-to=""
+            boundary="clippingAncestors"
+            boundary-root="viewport"
             color="contrast"
             data-testid="station-login-tooltip"
             delay="0,0"
             disable-aria-expanded=""
-            flip=""
             hide-on-blur=""
             hide-on-escape=""
             id="agent-login-label-tooltip"
+            is-backdrop-invisible=""
             offset="4"
-            placement="top"
+            placement="bottom"
             role="tooltip"
+            should-focus-trap-wrap=""
             show-arrow=""
+            stack-group-name=""
+            strategy="absolute"
             style="z-index: 1000;"
             tooltip-type="description"
             trigger="mouseenter focusin"
@@ -4253,17 +4504,23 @@ exports[`Station Login Component Rendering renders save error when passed 1`] = 
         </div>
         <div>
           <mdc-select
+            boundary="clippingAncestors"
             class="station-login-select"
             data-testid="login-option-select"
             help-text-type="default"
+            id="login-option"
             name="login-option"
+            placement="bottom-start"
+            strategy="absolute"
+            toggletip-placement="top"
+            toggletip-strategy="absolute"
             value="EXTENSION"
           >
             <mdc-option
               aria-disabled="false"
               aria-selected="false"
               data-testid="login-option-Dial Number"
-              tabindex="0"
+              tabindex="-1"
               value="AGENT_DN"
               variant="inset-rectangle"
             >
@@ -4273,8 +4530,8 @@ exports[`Station Login Component Rendering renders save error when passed 1`] = 
               aria-disabled="false"
               aria-selected="true"
               data-testid="login-option-Extension"
-              selected=""
-              tabindex="-1"
+              selected="true"
+              tabindex="0"
               value="EXTENSION"
               variant="inset-rectangle"
             >
@@ -4295,25 +4552,35 @@ exports[`Station Login Component Rendering renders save error when passed 1`] = 
       </div>
       <mdc-input
         data-testid="dial-number-input"
+        id="dial-number-input"
         label=""
         name=""
+        toggletip-placement="top"
+        toggletip-strategy="absolute"
         value=""
       />
       <div
         class="select-container"
       >
         <mdc-select
+          boundary="clippingAncestors"
           class="station-login-select"
           data-testid="teams-select-dropdown"
           help-text-type="default"
+          id="teams-dropdown"
           label="Your Team"
           name="teams-dropdown"
+          placement="bottom-start"
+          strategy="absolute"
+          toggletip-placement="top"
+          toggletip-strategy="absolute"
+          value=""
         >
           <mdc-option
             aria-disabled="false"
             aria-selected="true"
             data-testid="teams-dropdown-Team A"
-            selected=""
+            selected="true"
             tabindex="0"
             value="team123"
             variant="inset-rectangle"
@@ -4324,7 +4591,7 @@ exports[`Station Login Component Rendering renders save error when passed 1`] = 
             aria-disabled="false"
             aria-selected="false"
             data-testid="teams-dropdown-Team B"
-            tabindex="0"
+            tabindex="-1"
             value="team456"
             variant="inset-rectangle"
           >
@@ -4546,25 +4813,28 @@ exports[`Station Login Component Rendering renders the component correctly 1`] =
             Handle calls using
           </mdc-text>
           <mdc-icon
-            aria-describedby="agent-login-label-tooltip"
             data-testid="station-login-icon"
             id="agent-login-info-badge"
             name="info-badge-filled"
           />
           <mdc-tooltip
-            append-to=""
+            boundary="clippingAncestors"
+            boundary-root="viewport"
             color="contrast"
             data-testid="station-login-tooltip"
             delay="0,0"
             disable-aria-expanded=""
-            flip=""
             hide-on-blur=""
             hide-on-escape=""
             id="agent-login-label-tooltip"
+            is-backdrop-invisible=""
             offset="4"
-            placement="top"
+            placement="bottom"
             role="tooltip"
+            should-focus-trap-wrap=""
             show-arrow=""
+            stack-group-name=""
+            strategy="absolute"
             style="z-index: 1000;"
             tooltip-type="description"
             trigger="mouseenter focusin"
@@ -4583,17 +4853,23 @@ exports[`Station Login Component Rendering renders the component correctly 1`] =
         </div>
         <div>
           <mdc-select
+            boundary="clippingAncestors"
             class="station-login-select"
             data-testid="login-option-select"
             help-text-type="default"
+            id="login-option"
             name="login-option"
+            placement="bottom-start"
+            strategy="absolute"
+            toggletip-placement="top"
+            toggletip-strategy="absolute"
             value="EXTENSION"
           >
             <mdc-option
               aria-disabled="false"
               aria-selected="false"
               data-testid="login-option-Dial Number"
-              tabindex="0"
+              tabindex="-1"
               value="AGENT_DN"
               variant="inset-rectangle"
             >
@@ -4603,8 +4879,8 @@ exports[`Station Login Component Rendering renders the component correctly 1`] =
               aria-disabled="false"
               aria-selected="true"
               data-testid="login-option-Extension"
-              selected=""
-              tabindex="-1"
+              selected="true"
+              tabindex="0"
               value="EXTENSION"
               variant="inset-rectangle"
             >
@@ -4625,25 +4901,35 @@ exports[`Station Login Component Rendering renders the component correctly 1`] =
       </div>
       <mdc-input
         data-testid="dial-number-input"
+        id="dial-number-input"
         label=""
         name=""
+        toggletip-placement="top"
+        toggletip-strategy="absolute"
         value=""
       />
       <div
         class="select-container"
       >
         <mdc-select
+          boundary="clippingAncestors"
           class="station-login-select"
           data-testid="teams-select-dropdown"
           help-text-type="default"
+          id="teams-dropdown"
           label="Your Team"
           name="teams-dropdown"
+          placement="bottom-start"
+          strategy="absolute"
+          toggletip-placement="top"
+          toggletip-strategy="absolute"
+          value=""
         >
           <mdc-option
             aria-disabled="false"
             aria-selected="true"
             data-testid="teams-dropdown-Team A"
-            selected=""
+            selected="true"
             tabindex="0"
             value="team123"
             variant="inset-rectangle"
@@ -4654,7 +4940,7 @@ exports[`Station Login Component Rendering renders the component correctly 1`] =
             aria-disabled="false"
             aria-selected="false"
             data-testid="teams-dropdown-Team B"
-            tabindex="0"
+            tabindex="-1"
             value="team456"
             variant="inset-rectangle"
           >
@@ -4861,25 +5147,28 @@ exports[`Station Login Component Rendering renders the component correctly in pr
             Handle calls using
           </mdc-text>
           <mdc-icon
-            aria-describedby="agent-login-label-tooltip"
             data-testid="station-login-icon"
             id="agent-login-info-badge"
             name="info-badge-filled"
           />
           <mdc-tooltip
-            append-to=""
+            boundary="clippingAncestors"
+            boundary-root="viewport"
             color="contrast"
             data-testid="station-login-tooltip"
             delay="0,0"
             disable-aria-expanded=""
-            flip=""
             hide-on-blur=""
             hide-on-escape=""
             id="agent-login-label-tooltip"
+            is-backdrop-invisible=""
             offset="4"
-            placement="top"
+            placement="bottom"
             role="tooltip"
+            should-focus-trap-wrap=""
             show-arrow=""
+            stack-group-name=""
+            strategy="absolute"
             style="z-index: 1000;"
             tooltip-type="description"
             trigger="mouseenter focusin"
@@ -4898,17 +5187,23 @@ exports[`Station Login Component Rendering renders the component correctly in pr
         </div>
         <div>
           <mdc-select
+            boundary="clippingAncestors"
             class="station-login-select"
             data-testid="login-option-select"
             help-text-type="default"
+            id="login-option"
             name="login-option"
+            placement="bottom-start"
+            strategy="absolute"
+            toggletip-placement="top"
+            toggletip-strategy="absolute"
             value="EXTENSION"
           >
             <mdc-option
               aria-disabled="false"
               aria-selected="false"
               data-testid="login-option-Dial Number"
-              tabindex="0"
+              tabindex="-1"
               value="AGENT_DN"
               variant="inset-rectangle"
             >
@@ -4918,8 +5213,8 @@ exports[`Station Login Component Rendering renders the component correctly in pr
               aria-disabled="false"
               aria-selected="true"
               data-testid="login-option-Extension"
-              selected=""
-              tabindex="-1"
+              selected="true"
+              tabindex="0"
               value="EXTENSION"
               variant="inset-rectangle"
             >
@@ -4940,25 +5235,35 @@ exports[`Station Login Component Rendering renders the component correctly in pr
       </div>
       <mdc-input
         data-testid="dial-number-input"
+        id="dial-number-input"
         label=""
         name=""
+        toggletip-placement="top"
+        toggletip-strategy="absolute"
         value=""
       />
       <div
         class="select-container"
       >
         <mdc-select
+          boundary="clippingAncestors"
           class="station-login-select"
           data-testid="teams-select-dropdown"
           help-text-type="default"
+          id="teams-dropdown"
           label="Your Team"
           name="teams-dropdown"
+          placement="bottom-start"
+          strategy="absolute"
+          toggletip-placement="top"
+          toggletip-strategy="absolute"
+          value=""
         >
           <mdc-option
             aria-disabled="false"
             aria-selected="true"
             data-testid="teams-dropdown-Team A"
-            selected=""
+            selected="true"
             tabindex="0"
             value="team123"
             variant="inset-rectangle"
@@ -4969,7 +5274,7 @@ exports[`Station Login Component Rendering renders the component correctly in pr
             aria-disabled="false"
             aria-selected="false"
             data-testid="teams-dropdown-Team B"
-            tabindex="0"
+            tabindex="-1"
             value="team456"
             variant="inset-rectangle"
           >
@@ -5171,25 +5476,28 @@ exports[`Station Login Component Rendering shows Desktop login option when hideD
             Handle calls using
           </mdc-text>
           <mdc-icon
-            aria-describedby="agent-login-label-tooltip"
             data-testid="station-login-icon"
             id="agent-login-info-badge"
             name="info-badge-filled"
           />
           <mdc-tooltip
-            append-to=""
+            boundary="clippingAncestors"
+            boundary-root="viewport"
             color="contrast"
             data-testid="station-login-tooltip"
             delay="0,0"
             disable-aria-expanded=""
-            flip=""
             hide-on-blur=""
             hide-on-escape=""
             id="agent-login-label-tooltip"
+            is-backdrop-invisible=""
             offset="4"
-            placement="top"
+            placement="bottom"
             role="tooltip"
+            should-focus-trap-wrap=""
             show-arrow=""
+            stack-group-name=""
+            strategy="absolute"
             style="z-index: 1000;"
             tooltip-type="description"
             trigger="mouseenter focusin"
@@ -5208,17 +5516,23 @@ exports[`Station Login Component Rendering shows Desktop login option when hideD
         </div>
         <div>
           <mdc-select
+            boundary="clippingAncestors"
             class="station-login-select"
             data-testid="login-option-select"
             help-text-type="default"
+            id="login-option"
             name="login-option"
+            placement="bottom-start"
+            strategy="absolute"
+            toggletip-placement="top"
+            toggletip-strategy="absolute"
             value="EXTENSION"
           >
             <mdc-option
               aria-disabled="false"
               aria-selected="false"
               data-testid="login-option-Dial Number"
-              tabindex="0"
+              tabindex="-1"
               value="AGENT_DN"
               variant="inset-rectangle"
             >
@@ -5228,8 +5542,8 @@ exports[`Station Login Component Rendering shows Desktop login option when hideD
               aria-disabled="false"
               aria-selected="true"
               data-testid="login-option-Extension"
-              selected=""
-              tabindex="-1"
+              selected="true"
+              tabindex="0"
               value="EXTENSION"
               variant="inset-rectangle"
             >
@@ -5250,25 +5564,35 @@ exports[`Station Login Component Rendering shows Desktop login option when hideD
       </div>
       <mdc-input
         data-testid="dial-number-input"
+        id="dial-number-input"
         label=""
         name=""
+        toggletip-placement="top"
+        toggletip-strategy="absolute"
         value=""
       />
       <div
         class="select-container"
       >
         <mdc-select
+          boundary="clippingAncestors"
           class="station-login-select"
           data-testid="teams-select-dropdown"
           help-text-type="default"
+          id="teams-dropdown"
           label="Your Team"
           name="teams-dropdown"
+          placement="bottom-start"
+          strategy="absolute"
+          toggletip-placement="top"
+          toggletip-strategy="absolute"
+          value=""
         >
           <mdc-option
             aria-disabled="false"
             aria-selected="true"
             data-testid="teams-dropdown-Team A"
-            selected=""
+            selected="true"
             tabindex="0"
             value="team123"
             variant="inset-rectangle"
@@ -5279,7 +5603,7 @@ exports[`Station Login Component Rendering shows Desktop login option when hideD
             aria-disabled="false"
             aria-selected="false"
             data-testid="teams-dropdown-Team B"
-            tabindex="0"
+            tabindex="-1"
             value="team456"
             variant="inset-rectangle"
           >
@@ -5493,25 +5817,28 @@ exports[`Station Login Component Rendering shows Desktop login option when hideD
             Handle calls using
           </mdc-text>
           <mdc-icon
-            aria-describedby="agent-login-label-tooltip"
             data-testid="station-login-icon"
             id="agent-login-info-badge"
             name="info-badge-filled"
           />
           <mdc-tooltip
-            append-to=""
+            boundary="clippingAncestors"
+            boundary-root="viewport"
             color="contrast"
             data-testid="station-login-tooltip"
             delay="0,0"
             disable-aria-expanded=""
-            flip=""
             hide-on-blur=""
             hide-on-escape=""
             id="agent-login-label-tooltip"
+            is-backdrop-invisible=""
             offset="4"
-            placement="top"
+            placement="bottom"
             role="tooltip"
+            should-focus-trap-wrap=""
             show-arrow=""
+            stack-group-name=""
+            strategy="absolute"
             style="z-index: 1000;"
             tooltip-type="description"
             trigger="mouseenter focusin"
@@ -5530,17 +5857,23 @@ exports[`Station Login Component Rendering shows Desktop login option when hideD
         </div>
         <div>
           <mdc-select
+            boundary="clippingAncestors"
             class="station-login-select"
             data-testid="login-option-select"
             help-text-type="default"
+            id="login-option"
             name="login-option"
+            placement="bottom-start"
+            strategy="absolute"
+            toggletip-placement="top"
+            toggletip-strategy="absolute"
             value="EXTENSION"
           >
             <mdc-option
               aria-disabled="false"
               aria-selected="false"
               data-testid="login-option-Dial Number"
-              tabindex="0"
+              tabindex="-1"
               value="AGENT_DN"
               variant="inset-rectangle"
             >
@@ -5550,8 +5883,8 @@ exports[`Station Login Component Rendering shows Desktop login option when hideD
               aria-disabled="false"
               aria-selected="true"
               data-testid="login-option-Extension"
-              selected=""
-              tabindex="-1"
+              selected="true"
+              tabindex="0"
               value="EXTENSION"
               variant="inset-rectangle"
             >
@@ -5572,25 +5905,35 @@ exports[`Station Login Component Rendering shows Desktop login option when hideD
       </div>
       <mdc-input
         data-testid="dial-number-input"
+        id="dial-number-input"
         label=""
         name=""
+        toggletip-placement="top"
+        toggletip-strategy="absolute"
         value=""
       />
       <div
         class="select-container"
       >
         <mdc-select
+          boundary="clippingAncestors"
           class="station-login-select"
           data-testid="teams-select-dropdown"
           help-text-type="default"
+          id="teams-dropdown"
           label="Your Team"
           name="teams-dropdown"
+          placement="bottom-start"
+          strategy="absolute"
+          toggletip-placement="top"
+          toggletip-strategy="absolute"
+          value=""
         >
           <mdc-option
             aria-disabled="false"
             aria-selected="true"
             data-testid="teams-dropdown-Team A"
-            selected=""
+            selected="true"
             tabindex="0"
             value="team123"
             variant="inset-rectangle"
@@ -5601,7 +5944,7 @@ exports[`Station Login Component Rendering shows Desktop login option when hideD
             aria-disabled="false"
             aria-selected="false"
             data-testid="teams-dropdown-Team B"
-            tabindex="0"
+            tabindex="-1"
             value="team456"
             variant="inset-rectangle"
           >

@@ -337,7 +337,6 @@ const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> =
           data-testid="outdial-ani-option-select"
           placeholder={OutdialStrings.ANI_SELECT_PLACEHOLDER}
           value={selectedANI || ''}
-          selectedValueText={selectedANI ? outdialANIList.find((ani) => ani.number === selectedANI)?.name : undefined}
           onChange={(event: CustomEvent) => {
             const value = event.detail?.value;
             const newANI = !value || value === 'none' ? undefined : value;
