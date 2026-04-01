@@ -3,6 +3,8 @@ run-name: ${{ github.actor }} is running Pull Request CI
 
 on:
   pull_request_target:
+    branches:
+      - next
     types: [opened, labeled, reopened, synchronize]
   workflow_dispatch:
 
