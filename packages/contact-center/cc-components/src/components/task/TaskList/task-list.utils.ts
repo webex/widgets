@@ -1,4 +1,4 @@
-import {MEDIA_CHANNEL, TaskListItemData} from '../task.types';
+import {MEDIA_CHANNEL, TaskListItemData, getCallerIdentifier} from '../task.types';
 import store, {isIncomingTask, ILogger, ITask} from '@webex/cc-store';
 /**
  * Extracts and processes data from a task for rendering in the task list
@@ -34,17 +34,14 @@ export const extractTaskListItemData = (
     const isTelephony = mediaType === MEDIA_CHANNEL.TELEPHONY;
     const isSocial = mediaType === MEDIA_CHANNEL.SOCIAL;
 
-    // Check if this is an outdial call
-    const isOutdial = task?.data?.interaction?.outboundType === 'OUTDIAL';
-
     // Compute button text based on conditions
     const acceptText = isTaskIncoming ? (isTelephony && !isBrowser ? 'Ringing...' : 'Accept') : undefined;
 
     const declineText = isTaskIncoming && isTelephony && isBrowser ? 'Decline' : undefined;
 
     // Compute title based on media type
-    // For outdial calls, show the dialed number (dn) instead of the entrypoint (ani)
-    const title = isSocial ? customerName : isOutdial ? dn || ani : ani;
+    const outboundType = task?.data?.interaction?.outboundType;
+    const title = isSocial ? customerName : getCallerIdentifier(ani, dn, outboundType);
 
     const isAutoAnswering = task.data.isAutoAnswering || false;
 

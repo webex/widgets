@@ -1,7 +1,7 @@
 import React from 'react';
 import {render} from '@testing-library/react';
 import CallControlCADComponent from '../../../../src/components/task/CallControlCAD/call-control-cad';
-import {CallControlComponentProps, TARGET_TYPE} from '../../../../src/components/task/task.types';
+import {CallControlComponentProps, TARGET_TYPE, OUTBOUND_TYPE} from '../../../../src/components/task/task.types';
 import {mockTask} from '@webex/test-fixtures';
 import {BuddyDetails} from '@webex/cc-store';
 import '@testing-library/jest-dom';
@@ -285,7 +285,7 @@ describe('CallControlCADComponent', () => {
           ...defaultProps.currentTask.data,
           interaction: {
             ...defaultProps.currentTask.data.interaction,
-            outboundType: 'OUTDIAL',
+            outboundType: OUTBOUND_TYPE.OUTDIAL,
           },
         },
       },

@@ -6,7 +6,7 @@ import {
   getTasksArray,
   createTaskSelectHandler,
 } from '../../../../src/components/task/TaskList/task-list.utils';
-import {MEDIA_CHANNEL, TaskListItemData} from '../../../../src/components/task/task.types';
+import {MEDIA_CHANNEL, TaskListItemData, OUTBOUND_TYPE} from '../../../../src/components/task/task.types';
 import {mockTask} from '@webex/test-fixtures';
 
 // Mock the store with a mockable isIncomingTask function
@@ -253,7 +253,7 @@ describe('task-list.utils', () => {
 
         mockTask.data.interaction.state = 'connected';
         mockTask.data.interaction.mediaType = MEDIA_CHANNEL.TELEPHONY;
-        mockTask.data.interaction.outboundType = 'OUTDIAL';
+        mockTask.data.interaction.outboundType = OUTBOUND_TYPE.OUTDIAL;
         mockTask.data.interaction.callAssociatedDetails = {
           ani: '+18005551234',
           dn: '+14155559876',
@@ -282,7 +282,7 @@ describe('task-list.utils', () => {
 
         mockTask.data.interaction.state = 'connected';
         mockTask.data.interaction.mediaType = MEDIA_CHANNEL.TELEPHONY;
-        mockTask.data.interaction.outboundType = 'OUTDIAL';
+        mockTask.data.interaction.outboundType = OUTBOUND_TYPE.OUTDIAL;
         mockTask.data.interaction.callAssociatedDetails = {
           ani: '+18005551234',
           customerName: 'Outdial Customer',
@@ -332,7 +332,7 @@ describe('task-list.utils', () => {
 
         mockTask.data.interaction.state = 'connected';
         mockTask.data.interaction.mediaType = MEDIA_CHANNEL.TELEPHONY;
-        mockTask.data.interaction.outboundType = 'OUTDIAL';
+        mockTask.data.interaction.outboundType = OUTBOUND_TYPE.OUTDIAL;
         mockTask.data.interaction.callAssociatedDetails = {
           ani: '+18005551234',
           dn: '',
@@ -359,7 +359,7 @@ describe('task-list.utils', () => {
 
         mockTask.data.interaction.state = 'connected';
         mockTask.data.interaction.mediaType = MEDIA_CHANNEL.TELEPHONY;
-        mockTask.data.interaction.outboundType = 'CALLBACK';
+        mockTask.data.interaction.outboundType = OUTBOUND_TYPE.CALLBACK;
         mockTask.data.interaction.callAssociatedDetails = {
           ani: '+18005551234',
           dn: '+14155559876',
@@ -386,7 +386,7 @@ describe('task-list.utils', () => {
 
         mockTask.data.interaction.state = 'connected';
         mockTask.data.interaction.mediaType = MEDIA_CHANNEL.SOCIAL;
-        mockTask.data.interaction.outboundType = 'OUTDIAL';
+        mockTask.data.interaction.outboundType = OUTBOUND_TYPE.OUTDIAL;
         mockTask.data.interaction.callAssociatedDetails = {
           ani: 'social-ani',
           dn: 'social-dn',
@@ -417,7 +417,7 @@ describe('task-list.utils', () => {
 
         mockTask.data.interaction.state = 'new';
         mockTask.data.interaction.mediaType = MEDIA_CHANNEL.TELEPHONY;
-        mockTask.data.interaction.outboundType = 'OUTDIAL';
+        mockTask.data.interaction.outboundType = OUTBOUND_TYPE.OUTDIAL;
         mockTask.data.wrapUpRequired = false;
         mockTask.data.interaction.callAssociatedDetails = {
           ani: '+18005551234',

@@ -1,5 +1,5 @@
 import {extractIncomingTaskData} from '../../../../src/components/task/IncomingTask/incoming-task.utils';
-import {MEDIA_CHANNEL} from '../../../../src/components/task/task.types';
+import {MEDIA_CHANNEL, OUTBOUND_TYPE} from '../../../../src/components/task/task.types';
 import {mockTask} from '@webex/test-fixtures';
 
 describe('incoming-task.utils', () => {
@@ -112,7 +112,7 @@ describe('incoming-task.utils', () => {
         const originalOutboundType = mockTask.data.interaction.outboundType;
 
         mockTask.data.interaction.mediaType = MEDIA_CHANNEL.TELEPHONY;
-        mockTask.data.interaction.outboundType = 'OUTDIAL';
+        mockTask.data.interaction.outboundType = OUTBOUND_TYPE.OUTDIAL;
         mockTask.data.interaction.callAssociatedDetails = {
           ani: '+18005551234',
           dn: '+14155559876',
@@ -139,7 +139,7 @@ describe('incoming-task.utils', () => {
         const originalOutboundType = mockTask.data.interaction.outboundType;
 
         mockTask.data.interaction.mediaType = MEDIA_CHANNEL.TELEPHONY;
-        mockTask.data.interaction.outboundType = 'OUTDIAL';
+        mockTask.data.interaction.outboundType = OUTBOUND_TYPE.OUTDIAL;
         mockTask.data.interaction.callAssociatedDetails = {
           ani: '+18005551234',
           customerName: 'Outdial Customer',
@@ -180,7 +180,7 @@ describe('incoming-task.utils', () => {
         const originalOutboundType = mockTask.data.interaction.outboundType;
 
         mockTask.data.interaction.mediaType = MEDIA_CHANNEL.TELEPHONY;
-        mockTask.data.interaction.outboundType = 'OUTDIAL';
+        mockTask.data.interaction.outboundType = OUTBOUND_TYPE.OUTDIAL;
         mockTask.data.interaction.callAssociatedDetails = {
           ani: '+18005551234',
           dn: '',
@@ -204,7 +204,7 @@ describe('incoming-task.utils', () => {
         const originalOutboundType = mockTask.data.interaction.outboundType;
 
         mockTask.data.interaction.mediaType = MEDIA_CHANNEL.TELEPHONY;
-        mockTask.data.interaction.outboundType = 'CALLBACK';
+        mockTask.data.interaction.outboundType = OUTBOUND_TYPE.CALLBACK;
         mockTask.data.interaction.callAssociatedDetails = {
           ani: '+18005551234',
           dn: '+14155559876',
@@ -228,7 +228,7 @@ describe('incoming-task.utils', () => {
         const originalOutboundType = mockTask.data.interaction.outboundType;
 
         mockTask.data.interaction.mediaType = MEDIA_CHANNEL.SOCIAL;
-        mockTask.data.interaction.outboundType = 'OUTDIAL';
+        mockTask.data.interaction.outboundType = OUTBOUND_TYPE.OUTDIAL;
         mockTask.data.interaction.callAssociatedDetails = {
           ani: 'social-ani',
           dn: 'social-dn',
@@ -253,7 +253,7 @@ describe('incoming-task.utils', () => {
         const originalWrapUpRequired = mockTask.data.wrapUpRequired;
 
         mockTask.data.interaction.mediaType = MEDIA_CHANNEL.TELEPHONY;
-        mockTask.data.interaction.outboundType = 'OUTDIAL';
+        mockTask.data.interaction.outboundType = OUTBOUND_TYPE.OUTDIAL;
         mockTask.data.wrapUpRequired = false;
         mockTask.data.interaction.callAssociatedDetails = {
           ani: '+18005551234',
@@ -275,6 +275,29 @@ describe('incoming-task.utils', () => {
         mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
         mockTask.data.interaction.outboundType = originalOutboundType;
         mockTask.data.wrapUpRequired = originalWrapUpRequired;
+      });
+    });
+
+    describe('Standard inbound tasks', () => {
+      it('should use ani for title when outboundType is undefined (standard inbound)', () => {
+        const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
+        const originalOutboundType = mockTask.data.interaction.outboundType;
+
+        mockTask.data.interaction.outboundType = undefined;
+        mockTask.data.interaction.callAssociatedDetails = {
+          ani: '+18005551234',
+          dn: '+14155559876',
+          customerName: 'Inbound Customer',
+          virtualTeamName: 'Support Team',
+        };
+
+        const result = extractIncomingTaskData(mockTask, true);
+
+        expect(result.title).toBe('+18005551234'); // Standard inbound uses ani
+
+        // Restore
+        mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
+        mockTask.data.interaction.outboundType = originalOutboundType;
       });
     });
 
