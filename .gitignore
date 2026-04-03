@@ -49,6 +49,9 @@ node_modules/
 .yarn/*
 !.yarn/releases
 
+# SDK sync cache (local dev only)
+.sdk-cache/
+
 # Playwright reports
 **/test-results/
 **/playwright-report

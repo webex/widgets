@@ -610,6 +610,34 @@ ccWidgets/
 
 ---
 
+## SDK Sync (Cross-Repo Dependency Tracking)
+
+This repo tracks all `@webex/contact-center` SDK API usages via `sdk-dependencies.yaml`.
+When the SDK changes, run `/sync-sdk` to see which files are affected.
+
+### When to run
+- After bumping SDK version in `package.json`
+- After the SDK team notifies of API changes
+- Before starting work that depends on SDK APIs
+
+### How to run
+```bash
+npm run generate:sdk-deps
+```
+Or use the Claude Code skill: `/sync-sdk`
+
+### What it produces
+`sdk-dependencies.yaml` — maps each SDK import to exact file + line number.
+
+### SDK API Verification (MANDATORY for AI agents)
+Before generating code that calls `@webex/contact-center`:
+1. Read the SDK manifest: `node_modules/@webex/contact-center/sdk-manifest.yaml`
+2. Verify the method signature matches what you're about to write
+3. Check `sdk-dependencies.yaml` for existing usage patterns
+4. NEVER assume SDK method signatures from memory — always verify
+
+---
+
 ## Related Documentation
 
 - **Repository Rules:** [RULES.md](./RULES.md)

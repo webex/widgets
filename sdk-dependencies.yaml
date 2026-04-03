@@ -1,0 +1,168 @@
+generated_at: "2026-03-26T09:05:57.957Z"
+generator: generate-sdk-deps.ts v1.0
+dependencies:
+  "@webex/contact-center":
+    version: workspace
+    manifest_hash: 977fc0b8
+    methods:
+      default.init:
+        usages:
+          - file: packages/contact-center/store/src/store.ts
+            line: 141
+            context: const webex = Webex.init({
+    events: {}
+    types:
+      LogoutSuccess:
+        imports:
+          - file: packages/contact-center/station-login/src/helper.ts
+            line: 2
+            context: import {LogoutSuccess, AgentProfileUpdate, LoginOption, StationLoginSuccessResponse} from '@webex/co
+          - file: packages/contact-center/cc-components/src/components/StationLogin/station-login.types.ts
+            line: 1
+            context: import {StationLoginSuccessResponse, LogoutSuccess} from '@webex/contact-center';
+      AgentProfileUpdate:
+        imports:
+          - file: packages/contact-center/station-login/src/helper.ts
+            line: 2
+            context: import {LogoutSuccess, AgentProfileUpdate, LoginOption, StationLoginSuccessResponse} from '@webex/co
+      LoginOption:
+        imports:
+          - file: packages/contact-center/station-login/src/helper.ts
+            line: 2
+            context: import {LogoutSuccess, AgentProfileUpdate, LoginOption, StationLoginSuccessResponse} from '@webex/co
+      StationLoginSuccessResponse:
+        imports:
+          - file: packages/contact-center/station-login/src/helper.ts
+            line: 2
+            context: import {LogoutSuccess, AgentProfileUpdate, LoginOption, StationLoginSuccessResponse} from '@webex/co
+          - file: packages/contact-center/cc-components/src/components/StationLogin/station-login.types.ts
+            line: 1
+            context: import {StationLoginSuccessResponse, LogoutSuccess} from '@webex/contact-center';
+      ITask:
+        imports:
+          - file: packages/contact-center/store/src/store.ts
+            line: 2
+            context: import Webex, {ITask} from '@webex/contact-center';
+          - file: packages/contact-center/store/src/store.types.ts
+            line: 6
+            context: ITask,
+          - file: packages/contact-center/task/src/helper.ts
+            line: 2
+            context: import {AddressBookEntriesResponse, AddressBookEntrySearchParams, ITask} from '@webex/contact-center
+          - file: packages/contact-center/task/src/Utils/task-util.ts
+            line: 13
+            context: import {ITask, Interaction} from '@webex/contact-center';
+      Webex:
+        imports:
+          - file: packages/contact-center/store/src/store.ts
+            line: 2
+            context: import Webex, {ITask} from '@webex/contact-center';
+      AgentLogin:
+        imports:
+          - file: packages/contact-center/store/src/store.types.ts
+            line: 2
+            context: AgentLogin,
+      Profile:
+        imports:
+          - file: packages/contact-center/store/src/store.types.ts
+            line: 3
+            context: Profile,
+      BuddyDetails:
+        imports:
+          - file: packages/contact-center/store/src/store.types.ts
+            line: 4
+            context: BuddyDetails,
+      ContactServiceQueue:
+        imports:
+          - file: packages/contact-center/store/src/store.types.ts
+            line: 5
+            context: ContactServiceQueue,
+      BuddyAgents:
+        imports:
+          - file: packages/contact-center/store/src/store.types.ts
+            line: 7
+            context: BuddyAgents,
+      BuddyAgentsResponse:
+        imports:
+          - file: packages/contact-center/store/src/store.types.ts
+            line: 8
+            context: BuddyAgentsResponse,
+      StateChange:
+        imports:
+          - file: packages/contact-center/store/src/store.types.ts
+            line: 9
+            context: StateChange,
+      Logout:
+        imports:
+          - file: packages/contact-center/store/src/store.types.ts
+            line: 10
+            context: Logout,
+      EntryPointRecord:
+        imports:
+          - file: packages/contact-center/store/src/store.types.ts
+            line: 11
+            context: EntryPointRecord,
+      EntryPointListResponse:
+        imports:
+          - file: packages/contact-center/store/src/store.types.ts
+            line: 12
+            context: EntryPointListResponse,
+      EntryPointSearchParams:
+        imports:
+          - file: packages/contact-center/store/src/store.types.ts
+            line: 13
+            context: EntryPointSearchParams,
+      AddressBookEntry:
+        imports:
+          - file: packages/contact-center/store/src/store.types.ts
+            line: 14
+            context: AddressBookEntry,
+          - file: packages/contact-center/cc-components/src/components/task/OutdialCall/outdial-call.tsx
+            line: 4
+            context: import {AddressBookEntry} from '@webex/contact-center';
+      AddressBookEntriesResponse:
+        imports:
+          - file: packages/contact-center/store/src/store.types.ts
+            line: 15
+            context: AddressBookEntriesResponse,
+          - file: packages/contact-center/task/src/helper.ts
+            line: 2
+            context: import {AddressBookEntriesResponse, AddressBookEntrySearchParams, ITask} from '@webex/contact-center
+      AddressBookEntrySearchParams:
+        imports:
+          - file: packages/contact-center/store/src/store.types.ts
+            line: 16
+            context: AddressBookEntrySearchParams,
+          - file: packages/contact-center/task/src/helper.ts
+            line: 2
+            context: import {AddressBookEntriesResponse, AddressBookEntrySearchParams, ITask} from '@webex/contact-center
+      ContactServiceQueuesResponse:
+        imports:
+          - file: packages/contact-center/store/src/store.types.ts
+            line: 17
+            context: ContactServiceQueuesResponse,
+      ContactServiceQueueSearchParams:
+        imports:
+          - file: packages/contact-center/store/src/store.types.ts
+            line: 18
+            context: ContactServiceQueueSearchParams,
+      AddressBook:
+        imports:
+          - file: packages/contact-center/store/src/store.types.ts
+            line: 19
+            context: AddressBook,
+      OutdialAniEntriesResponse:
+        imports:
+          - file: packages/contact-center/task/src/helper.ts
+            line: 25
+            context: import {OutdialAniEntriesResponse} from '@webex/contact-center/dist/types/services/config/types';
+      Interaction:
+        imports:
+          - file: packages/contact-center/task/src/Utils/task-util.ts
+            line: 13
+            context: import {ITask, Interaction} from '@webex/contact-center';
+      Team:
+        imports:
+          - file: packages/contact-center/cc-components/src/components/StationLogin/station-login.types.ts
+            line: 5
+            context: import {Team} from '@webex/contact-center/dist/types/types';
