@@ -327,15 +327,31 @@ export default function createDigitalIncomingTaskAndTaskControlsTests() {
     await acceptExtensionCall(testManager.agent1ExtensionPage);
     await testManager.agent1Page.waitForTimeout(3000);
 
-    // Now create chat and email tasks
-    await Promise.all([
-      createChatTask(testManager.chatPage, process.env[`${testManager.projectName}_CHAT_URL`]!),
-      createEmailTask(process.env[`${testManager.projectName}_EMAIL_ENTRY_POINT`]!),
-    ]);
+    // Create and accept chat/email sequentially to reduce RONA during burst arrivals.
+    await createChatTask(testManager.chatPage, process.env[`${testManager.projectName}_CHAT_URL`]!);
     await incomingChatTaskDiv.waitFor({state: 'visible', timeout: 40000});
     await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.CHAT);
+
+    await createEmailTask(process.env[`${testManager.projectName}_EMAIL_ENTRY_POINT`]!);
     await incomingEmailTaskDiv.waitFor({state: 'visible', timeout: 40000});
     await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.EMAIL);
+
+    const isRonaPopupVisible = await testManager.agent1Page
+      .getByTestId('samples:rona-popup')
+      .isVisible()
+      .catch(() => false);
+    if (isRonaPopupVisible) {
+      await submitRonaPopup(testManager.agent1Page, RONA_OPTIONS.AVAILABLE);
+      const hasChatTask = await incomingChatTaskDiv.isVisible().catch(() => false);
+      const hasEmailTask = await incomingEmailTaskDiv.isVisible().catch(() => false);
+      if (hasChatTask) {
+        await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.CHAT);
+      }
+      if (hasEmailTask) {
+        await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.EMAIL);
+      }
+    }
+
     await waitForState(testManager.agent1Page, USER_STATES.ENGAGED);
     await verifyCurrentState(testManager.agent1Page, USER_STATES.ENGAGED);
     await waitForStateLogs(capturedLogs, USER_STATES.ENGAGED);
@@ -355,7 +371,7 @@ export default function createDigitalIncomingTaskAndTaskControlsTests() {
         await endButton.click({timeout: 5000});
         await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
       } else {
-        const wrapupBox = testManager.agent1Page.getByTestId('wrapup-button').first();
+        const wrapupBox = testManager.agent1Page.getByTestId('call-control:wrapup-button').first();
         const isWrapupBoxVisible = await wrapupBox
           .waitFor({state: 'visible', timeout: 2000})
           .then(() => true)

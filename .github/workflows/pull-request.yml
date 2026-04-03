@@ -3,9 +3,6 @@ run-name: ${{ github.actor }} is running Pull Request CI
 
 on:
   pull_request_target:
-    branches:
-      - next
-
     types: [opened, labeled, reopened, synchronize]
   workflow_dispatch:
 
@@ -26,6 +23,10 @@ env:
   PW_ENTRY_POINT6: ${{ secrets.PW_ENTRY_POINT6 }}
   PW_ENTRY_POINT7: ${{ secrets.PW_ENTRY_POINT7 }}
   PW_ENTRY_POINT8: ${{ secrets.PW_ENTRY_POINT8 }}
+  PW_ENTRY_POINT9: ${{ secrets.PW_ENTRY_POINT9 }}
+  PW_ENTRY_POINT10: ${{ secrets.PW_ENTRY_POINT10 }}
+  PW_ENTRY_POINT11: ${{ secrets.PW_ENTRY_POINT11 }}
+  PW_ENTRY_POINT12: ${{ secrets.PW_ENTRY_POINT12 }}
   PW_SENDER_EMAIL: ${{ secrets.PW_SENDER_EMAIL }}
   PW_CHAT_URL: ${{ secrets.PW_CHAT_URL }}
   PW_DIAL_NUMBER_LOGIN_USERNAME: ${{ secrets.PW_DIAL_NUMBER_LOGIN_USERNAME }}
@@ -277,3 +278,6 @@ jobs:
 
       - name: Test CC Widgets
         run: yarn run test:cc-widgets
+
+      - name: Test Meetings Widget
+        run: yarn run test:meetings-widget
