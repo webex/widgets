@@ -4,6 +4,8 @@ const {CleanWebpackPlugin} = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const {version} = require('./package.json');
 
+const widgetsDir = path.dirname(require.resolve('@webex/widgets/package.json'));
+
 module.exports = function(env, argv) {
   return {
     cache: true,
@@ -19,11 +21,11 @@ module.exports = function(env, argv) {
     resolve: {
       extensions: ['.js', '.jsx'],
       alias: {
-        react: path.dirname(require.resolve('react/package.json')),
-        'react-dom': path.dirname(require.resolve('react-dom/package.json')),
-        'prop-types': path.dirname(require.resolve('prop-types/package.json')),
-        webex: path.resolve(path.dirname(require.resolve('webex')), '..'),
-        '@webex/common': path.dirname(require.resolve('@webex/common/package.json')),
+        react: path.dirname(require.resolve('react/package.json', { paths: [widgetsDir] })),
+        'react-dom': path.dirname(require.resolve('react-dom/package.json', { paths: [widgetsDir] })),
+        'prop-types': path.dirname(require.resolve('prop-types/package.json', { paths: [widgetsDir] })),
+        webex: path.dirname(require.resolve('webex/package.json', { paths: [widgetsDir] })),
+        '@webex/common': path.dirname(require.resolve('@webex/common/package.json', { paths: [widgetsDir] })),
       },
       fallback: {
         "buffer": require.resolve("buffer/"),
