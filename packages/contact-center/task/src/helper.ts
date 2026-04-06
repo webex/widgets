@@ -595,10 +595,12 @@ export const useCallControl = (props: useCallControlProps) => {
   const pauseRecordingCallback = () => {
     try {
       setIsRecording(false);
-      onRecordingToggle({
-        isRecording: false,
-        task: currentTask,
-      });
+      if (onRecordingToggle) {
+        onRecordingToggle({
+          isRecording: false,
+          task: currentTask,
+        });
+      }
     } catch (error) {
       logger?.error(`CC-Widgets: Task: Error in pauseRecordingCallback - ${error.message}`, {
         module: 'useCallControl',
@@ -610,10 +612,12 @@ export const useCallControl = (props: useCallControlProps) => {
   const resumeRecordingCallback = () => {
     try {
       setIsRecording(true);
-      onRecordingToggle({
-        isRecording: true,
-        task: currentTask,
-      });
+      if (onRecordingToggle) {
+        onRecordingToggle({
+          isRecording: true,
+          task: currentTask,
+        });
+      }
     } catch (error) {
       logger?.error(`CC-Widgets: Task: Error in resumeRecordingCallback - ${error.message}`, {
         module: 'useCallControl',
@@ -648,8 +652,8 @@ export const useCallControl = (props: useCallControlProps) => {
       store.removeTaskCallback(TASK_EVENTS.TASK_RESUME, resumeCallback, interactionId);
       store.removeTaskCallback(TASK_EVENTS.TASK_END, endCallCallback, interactionId);
       store.removeTaskCallback(TASK_EVENTS.AGENT_WRAPPEDUP, wrapupCallCallback, interactionId);
-      store.removeTaskCallback(TASK_EVENTS.CONTACT_RECORDING_PAUSED, pauseRecordingCallback, interactionId);
-      store.removeTaskCallback(TASK_EVENTS.CONTACT_RECORDING_RESUMED, resumeRecordingCallback, interactionId);
+      store.removeTaskCallback(TASK_EVENTS.TASK_RECORDING_PAUSED, pauseRecordingCallback, interactionId);
+      store.removeTaskCallback(TASK_EVENTS.TASK_RECORDING_RESUMED, resumeRecordingCallback, interactionId);
     };
   }, [currentTask]);
 

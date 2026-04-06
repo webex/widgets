@@ -5730,6 +5730,64 @@ describe('Task Hook Error Handling and Logging', () => {
       );
     });
 
+    it('should not throw when onRecordingToggle is not provided and pauseRecordingCallback fires', () => {
+      const setTaskCallbackSpy = jest.spyOn(store, 'setTaskCallback');
+
+      renderHook(() =>
+        useCallControl({
+          currentTask: mockTaskWithInteraction,
+          logger,
+          deviceType: 'BROWSER',
+          featureFlags: {},
+          isMuted: false,
+          conferenceEnabled: false,
+          agentId: 'agent1',
+        })
+      );
+
+      const pauseCallback = setTaskCallbackSpy.mock.calls.find(
+        (call) => call[0] === TASK_EVENTS.TASK_RECORDING_PAUSED
+      )?.[1];
+
+      act(() => {
+        pauseCallback();
+      });
+
+      expect(logger.error).not.toHaveBeenCalledWith(
+        expect.stringContaining('pauseRecordingCallback'),
+        expect.any(Object)
+      );
+    });
+
+    it('should not throw when onRecordingToggle is not provided and resumeRecordingCallback fires', () => {
+      const setTaskCallbackSpy = jest.spyOn(store, 'setTaskCallback');
+
+      renderHook(() =>
+        useCallControl({
+          currentTask: mockTaskWithInteraction,
+          logger,
+          deviceType: 'BROWSER',
+          featureFlags: {},
+          isMuted: false,
+          conferenceEnabled: false,
+          agentId: 'agent1',
+        })
+      );
+
+      const resumeCallback = setTaskCallbackSpy.mock.calls.find(
+        (call) => call[0] === TASK_EVENTS.TASK_RECORDING_RESUMED
+      )?.[1];
+
+      act(() => {
+        resumeCallback();
+      });
+
+      expect(logger.error).not.toHaveBeenCalledWith(
+        expect.stringContaining('resumeRecordingCallback'),
+        expect.any(Object)
+      );
+    });
+
     it('should handle synchronous errors in toggleRecording', () => {
       const errorTask = {
         ...mockTaskWithInteraction,
