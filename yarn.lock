@@ -12087,7 +12087,7 @@ __metadata:
     prop-types: ^15.7.2
     react: 18.3.1
     react-dom: 18.3.1
-    webex: 2.60.2
+    webex: 2.60.4
   languageName: unknown
   linkType: soft
 
@@ -30738,7 +30738,6 @@ __metadata:
     url: "npm:^0.11.4"
     util: "npm:^0.12.5"
     vm-browserify: "npm:^1.1.2"
-    webex: "npm:2.60.4"
     webpack: "npm:^5.94.0"
     webpack-cli: "npm:^5.1.4"
     webpack-dev-server: "npm:^5.1.0"

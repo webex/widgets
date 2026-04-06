@@ -24,7 +24,7 @@ module.exports = function(env, argv) {
         react: path.dirname(require.resolve('react/package.json', { paths: [widgetsDir] })),
         'react-dom': path.dirname(require.resolve('react-dom/package.json', { paths: [widgetsDir] })),
         'prop-types': path.dirname(require.resolve('prop-types/package.json', { paths: [widgetsDir] })),
-        webex: path.dirname(require.resolve('webex/package.json', { paths: [widgetsDir] })),
+        webex: path.dirname(require.resolve('webex/package', { paths: [widgetsDir] })),
         '@webex/common': path.dirname(require.resolve('@webex/common/package.json', { paths: [widgetsDir] })),
       },
       fallback: {
