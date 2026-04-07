@@ -957,6 +957,119 @@ describe('useCallControl', () => {
     expect(mockOnHoldResume).toHaveBeenCalledWith({isHeld: false, task: mockCurrentTask});
   });
 
+  it('should set controlVisibility.isHeld to true when holdCallback fires', async () => {
+    const setTaskCallbackSpy = jest.spyOn(store, 'setTaskCallback');
+
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: mockCurrentTask,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
+        isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
+      })
+    );
+
+    // Initially isHeld should be false
+    expect(result.current.controlVisibility.isHeld).toBe(false);
+
+    // Find the hold callback registered via setTaskCallback
+    const holdCallback = setTaskCallbackSpy.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_HOLD)?.[1];
+
+    act(() => {
+      holdCallback();
+    });
+
+    // After holdCallback fires, isHeld should be true
+    expect(result.current.controlVisibility.isHeld).toBe(true);
+  });
+
+  it('should set controlVisibility.isHeld to false when resumeCallback fires', async () => {
+    const setTaskCallbackSpy = jest.spyOn(store, 'setTaskCallback');
+
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: mockCurrentTask,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
+        isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
+      })
+    );
+
+    // First hold the call
+    const holdCallback = setTaskCallbackSpy.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_HOLD)?.[1];
+    act(() => {
+      holdCallback();
+    });
+    expect(result.current.controlVisibility.isHeld).toBe(true);
+
+    // Then resume — isHeld should go back to false
+    const resumeCallback = setTaskCallbackSpy.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_RESUME)?.[1];
+    act(() => {
+      resumeCallback();
+    });
+
+    expect(result.current.controlVisibility.isHeld).toBe(false);
+  });
+
+  it('should override getControlsVisibility isHeld with local event-driven state', async () => {
+    // Mock getControlsVisibility to return isHeld: true (simulating stale task data)
+    mockGetControlsVisibility.mockReturnValue({
+      ...mockGetControlsVisibility.mock.results[0]?.value,
+      muteUnmute: {isVisible: true, isEnabled: true},
+      holdResume: {isVisible: true, isEnabled: true},
+      end: {isVisible: true, isEnabled: true},
+      isHeld: true,
+      wrapup: {isVisible: false, isEnabled: false},
+    });
+
+    const setTaskCallbackSpy = jest.spyOn(store, 'setTaskCallback');
+
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: mockCurrentTask,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+        featureFlags: store.featureFlags,
+        deviceType: store.deviceType,
+        isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
+      })
+    );
+
+    // Even though getControlsVisibility returns isHeld: true,
+    // the local state starts as false, so controlVisibility.isHeld should be false
+    expect(result.current.controlVisibility.isHeld).toBe(false);
+
+    // After holdCallback, it should be true (event-driven, not from getControlsVisibility)
+    const holdCallback = setTaskCallbackSpy.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_HOLD)?.[1];
+    act(() => {
+      holdCallback();
+    });
+    expect(result.current.controlVisibility.isHeld).toBe(true);
+
+    // After resumeCallback, it should be false again
+    const resumeCallback = setTaskCallbackSpy.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_RESUME)?.[1];
+    act(() => {
+      resumeCallback();
+    });
+    expect(result.current.controlVisibility.isHeld).toBe(false);
+  });
+
   it('should log an error if hold fails', async () => {
     mockCurrentTask.hold.mockRejectedValueOnce(new Error('Hold error'));
 

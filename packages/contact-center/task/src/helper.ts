@@ -447,16 +447,20 @@ export const useCallControl = (props: useCallControlProps) => {
     }
   }, [currentTask, logger, lastTargetType, consultAgentName, setConsultAgentName]);
 
-  // Sync local hold state from task data when currentTask changes
+  // Sync local hold state from task data only when a different task is selected
+  // (not on every currentTask reference change, which would overwrite event-driven state)
   useEffect(() => {
     if (currentTask?.data?.interaction) {
       try {
         setIsHeld(findHoldStatus(currentTask, 'mainCall', agentId));
-      } catch {
-        // findHoldStatus may fail if task data is incomplete
+      } catch (error) {
+        logger?.warn(`CC-Widgets: Task: Error syncing hold state - ${error?.message || error}`, {
+          module: 'useCallControl',
+          method: 'syncHoldState',
+        });
       }
     }
-  }, [currentTask, agentId]);
+  }, [currentTask?.data?.interactionId, agentId]);
 
   // Extract main call timestamp whenever currentTask changes
   useEffect(() => {
@@ -952,10 +956,7 @@ export const useCallControl = (props: useCallControlProps) => {
   );
 
   // Override isHeld with event-driven local state to avoid stale task data from getAllTasks()
-  const controlVisibility = useMemo(
-    () => ({...controlVisibilityBase, isHeld}),
-    [controlVisibilityBase, isHeld]
-  );
+  const controlVisibility = useMemo(() => ({...controlVisibilityBase, isHeld}), [controlVisibilityBase, isHeld]);
 
   // Add useEffect for auto wrap-up timer
   useEffect(() => {
