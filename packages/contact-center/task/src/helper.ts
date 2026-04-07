@@ -16,6 +16,7 @@ import store, {
   getConferenceParticipants,
   Participant,
   findMediaResourceId,
+  findHoldStatus,
   MEDIA_TYPE_TELEPHONY_LOWER,
 } from '@webex/cc-store';
 import {getControlsVisibility} from './Utils/task-util';
@@ -297,6 +298,7 @@ export const useCallControl = (props: useCallControlProps) => {
     agentId,
   } = props;
   const [isRecording, setIsRecording] = useState(true);
+  const [isHeld, setIsHeld] = useState(false);
   const [buddyAgents, setBuddyAgents] = useState<BuddyDetails[]>([]);
   const [loadingBuddyAgents, setLoadingBuddyAgents] = useState(false);
   const [consultAgentName, setConsultAgentName] = useState<string>('Consult Agent');
@@ -445,6 +447,17 @@ export const useCallControl = (props: useCallControlProps) => {
     }
   }, [currentTask, logger, lastTargetType, consultAgentName, setConsultAgentName]);
 
+  // Sync local hold state from task data when currentTask changes
+  useEffect(() => {
+    if (currentTask?.data?.interaction) {
+      try {
+        setIsHeld(findHoldStatus(currentTask, 'mainCall', agentId));
+      } catch {
+        // findHoldStatus may fail if task data is incomplete
+      }
+    }
+  }, [currentTask, agentId]);
+
   // Extract main call timestamp whenever currentTask changes
   useEffect(() => {
     extractConsultingAgent();
@@ -530,6 +543,7 @@ export const useCallControl = (props: useCallControlProps) => {
 
   const holdCallback = () => {
     try {
+      setIsHeld(true);
       if (onHoldResume) {
         onHoldResume({
           isHeld: true,
@@ -546,6 +560,7 @@ export const useCallControl = (props: useCallControlProps) => {
 
   const resumeCallback = () => {
     try {
+      setIsHeld(false);
       if (onHoldResume) {
         onHoldResume({
           isHeld: false,
@@ -931,9 +946,15 @@ export const useCallControl = (props: useCallControlProps) => {
     currentTask.cancelAutoWrapupTimer();
   };
 
-  const controlVisibility = useMemo(
+  const controlVisibilityBase = useMemo(
     () => getControlsVisibility(deviceType, featureFlags, currentTask, agentId, conferenceEnabled, logger),
     [deviceType, featureFlags, currentTask, agentId, conferenceEnabled, logger]
+  );
+
+  // Override isHeld with event-driven local state to avoid stale task data from getAllTasks()
+  const controlVisibility = useMemo(
+    () => ({...controlVisibilityBase, isHeld}),
+    [controlVisibilityBase, isHeld]
   );
 
   // Add useEffect for auto wrap-up timer
