@@ -1,5 +1,4 @@
-import {ITask, findHoldTimestamp} from '@webex/cc-store';
-import {ControlVisibility} from '@webex/cc-components';
+import {ITask, findHoldTimestamp, TaskUIControls} from '@webex/cc-store';
 import {
   TIMER_LABEL_WRAP_UP,
   TIMER_LABEL_POST_CALL,
@@ -19,21 +18,16 @@ export interface TimerData {
 /**
  * Calculate state timer label and timestamp based on task state.
  * Priority: Wrap Up > Post Call
- *
- * @param currentTask - The current task object
- * @param controlVisibility - Control visibility flags
- * @param agentId - The current agent ID
- * @returns TimerData object with label and timestamp
  */
 export function calculateStateTimerData(
   currentTask: ITask | null,
-  controlVisibility: ControlVisibility | null,
+  controls: TaskUIControls | null,
   agentId: string
 ): TimerData {
   // Default return value
   const defaultTimer: TimerData = {label: null, timestamp: 0};
 
-  if (!currentTask || !controlVisibility) {
+  if (!currentTask || !controls) {
     return defaultTimer;
   }
 
@@ -59,7 +53,7 @@ export function calculateStateTimerData(
   postCallTimestamp = participant.currentStateTimestamp || 0;
 
   // Priority 1: Wrap-up state (highest priority)
-  if (controlVisibility.wrapup?.isVisible && wrapUpTimestamp) {
+  if (controls.wrapup?.isVisible && wrapUpTimestamp) {
     return {
       label: TIMER_LABEL_WRAP_UP,
       timestamp: wrapUpTimestamp,
@@ -81,21 +75,15 @@ export function calculateStateTimerData(
 /**
  * Calculate consult timer label and timestamp based on consult state.
  * Handles consult on hold vs active consulting states.
- *
- * @param currentTask - The current task object
- * @param controlVisibility - Control visibility flags
- * @param agentId - The current agent ID
- * @returns TimerData object with label and timestamp
  */
 export function calculateConsultTimerData(
   currentTask: ITask | null,
-  controlVisibility: ControlVisibility | null,
+  controls: TaskUIControls | null,
   agentId: string
 ): TimerData {
-  // Default return value
   const defaultTimer: TimerData = {label: TIMER_LABEL_CONSULTING, timestamp: 0};
 
-  if (!currentTask || !controlVisibility) {
+  if (!currentTask || !controls) {
     return defaultTimer;
   }
 
@@ -119,20 +107,21 @@ export function calculateConsultTimerData(
     return defaultTimer;
   }
 
-  // Check if consult call is on hold
-  if (controlVisibility.consultCallHeld) {
-    // Extract consult hold timestamp
+  // Derive consultCallHeld from controls: switchToConsult.isVisible means consult call is held
+  const consultCallHeld = controls.switchToConsult?.isVisible ?? false;
+
+  if (consultCallHeld) {
     const consultHoldTimestamp = findHoldTimestamp(currentTask, 'consult');
 
     return {
       label: TIMER_LABEL_CONSULT_ON_HOLD,
-      // Use consultHoldTimestamp when on hold, fallback to consult start time
       timestamp: consultHoldTimestamp && consultHoldTimestamp > 0 ? consultHoldTimestamp : consultStartTimeStamp,
     };
   }
 
-  // Active consulting - determine label based on consult state
-  const label = controlVisibility.isConsultInitiated ? TIMER_LABEL_CONSULT_REQUESTED : TIMER_LABEL_CONSULTING;
+  // Use task.data.consultStatus for consult phase distinction
+  const isConsultInitiated = currentTask.data?.consultStatus === 'consultInitiated';
+  const label = isConsultInitiated ? TIMER_LABEL_CONSULT_REQUESTED : TIMER_LABEL_CONSULTING;
 
   return {
     label,

@@ -246,3 +246,19 @@ const IncomingTaskComponent = ({ acceptControl, declineControl, onAccept, onReje
 ---
 
 _Parent: [migration-overview.md](./migration-overview.md)_
+
+---
+
+## Migration Fix Log
+
+### Fix: Restore `isDeclineButtonEnabled` from Store to Component Level
+
+- **Issue**: During the task-refactor migration, `store.isDeclineButtonEnabled` was removed from the IncomingTask and TaskList component layers. The migration docs instructed replacing it with `task.uiControls.decline.isEnabled`. However, the store property is still set by `handleAutoAnswer` in `storeEventsWrapper.ts` and needs to be kept as an additional override for the decline button enabled state.
+- **Root Cause**: The migration assumed `task.uiControls.decline.isEnabled` fully replaces `store.isDeclineButtonEnabled`, but the store property provides an additional auto-answer override that the SDK state machine may not account for in all scenarios.
+- **Fix**:
+  - `task/src/helper.ts` (`useIncomingTask`): Reads `store.isDeclineButtonEnabled` and merges it with the SDK's `declineControl` — if either the SDK or the store says decline is enabled, the button is enabled: `isEnabled: sdkDeclineControl.isEnabled || store.isDeclineButtonEnabled`.
+  - `task/src/TaskList/index.tsx`: Reads `store.isDeclineButtonEnabled` and passes it as a prop to `TaskListComponent`.
+  - `cc-components/.../task.types.ts`: Added `isDeclineButtonEnabled?: boolean` to `TaskListComponentProps`.
+  - `cc-components/.../task-list.tsx`: Destructures `isDeclineButtonEnabled` and passes it to `extractTaskListItemData`.
+  - `cc-components/.../task-list.utils.ts`: `extractTaskListItemData` accepts `isDeclineButtonEnabled` param and merges it with `task.uiControls.decline.isEnabled`: `isEnabled: sdkDecline.isEnabled || !!isDeclineButtonEnabled`.
+- **Result**: The decline button is enabled when either the SDK's `task.uiControls.decline.isEnabled` is `true` OR `store.isDeclineButtonEnabled` is `true` (set by auto-answer handler). Both IncomingTask and TaskList components respect this combined logic.

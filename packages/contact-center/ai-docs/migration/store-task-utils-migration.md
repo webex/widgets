@@ -152,9 +152,9 @@ The old `getControlsVisibility` applied integrator-provided widget props (`featu
 | `featureFlags.isEndCallEnabled` | `config.isEndTaskEnabled` |
 | `featureFlags.isEndConsultEnabled` | `config.isEndConsultEnabled` |
 | `featureFlags.webRtcEnabled` (recording gate) | `config.isRecordingEnabled` |
-| `conferenceEnabled` | SDK computes conference/mergeToConference/exitConference visibility based on task state and config |
+| ~~`conferenceEnabled`~~ | **RESTORED** — This is an application-level config (not a feature flag). Applied at button builder level to gate conference button visibility. See call-control-hook-migration.md and component-layer-migration.md fix logs |
 
-Since `task.uiControls` already reflects these gates, the widget layer can **remove** the `featureFlags`, `conferenceEnabled`, and `deviceType` props — no widget-side overlay is needed.
+Since `task.uiControls` already reflects these gates, the widget layer can **remove** the `featureFlags` and `deviceType` props. **`conferenceEnabled` is RETAINED** — it is an application-level configuration passed from the consumer app that controls conference UI availability independently of SDK state.
 
 ```typescript
 const controls = currentTask?.uiControls ?? getDefaultUIControls();
@@ -170,7 +170,7 @@ const controls = currentTask?.uiControls ?? getDefaultUIControls();
 - [ ] 12 state constants deleted; 7 participant/media constants kept
 - [ ] `getControlsVisibility` + 22 visibility functions deleted from `task-util.ts`
 - [ ] `findHoldTimestamp` dual-signature (task vs interaction) not confused
-- [ ] Widget props `featureFlags`, `conferenceEnabled`, `deviceType` removed (SDK handles via `UIControlConfig`)
+- [ ] Widget props `featureFlags`, `deviceType` removed (SDK handles via `UIControlConfig`); `conferenceEnabled` **retained** (application-level config)
 - [ ] No regression in conference participant display, hold timers, or switch-call actions
 - [ ] Downstream (Epic) confirmed unused before removing barrel exports
 

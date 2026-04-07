@@ -1,10 +1,6 @@
 import {CallControlMenuType} from '../task.types';
-import type {
-  CallControlButton,
-  ControlVisibility,
-  MEDIA_CHANNEL as MediaChannelType,
-  MediaTypeInfo,
-} from '../task.types';
+import type {CallControlButton, MEDIA_CHANNEL as MediaChannelType, MediaTypeInfo} from '../task.types';
+import type {TaskUIControls} from '@webex/cc-store';
 import {getMediaTypeInfo} from '../../../utils';
 import {DestinationType, ILogger, ITask} from '@webex/cc-store';
 import {
@@ -194,7 +190,8 @@ export const buildCallControlButtons = (
   isRecording: boolean,
   isMuteButtonDisabled: boolean,
   currentMediaType: MediaTypeInfo,
-  controlVisibility: ControlVisibility,
+  controls: TaskUIControls,
+  isHeld: boolean,
   handleMuteToggleFunc: () => void,
   handleToggleHoldFunc: () => void,
   toggleRecording: () => void,
@@ -203,7 +200,8 @@ export const buildCallControlButtons = (
   switchToConsult: () => void,
   onTransferConsult: () => void,
   handleConsultConferencePress: () => void,
-  logger?: ILogger
+  logger?: ILogger,
+  conferenceEnabled = true
 ): CallControlButton[] => {
   try {
     return [
@@ -214,7 +212,7 @@ export const buildCallControlButtons = (
         tooltip: isMuted ? UNMUTE_CALL : MUTE_CALL,
         className: `${isMuted ? 'call-control-button-muted' : 'call-control-button'}`,
         disabled: isMuteButtonDisabled,
-        isVisible: controlVisibility.muteUnmute.isVisible,
+        isVisible: controls?.mute?.isVisible ?? false,
         dataTestId: 'call-control:mute-toggle',
       },
       {
@@ -223,19 +221,18 @@ export const buildCallControlButtons = (
         tooltip: 'Switch to Consult Call',
         className: 'call-control-button',
         onClick: switchToConsult,
-        disabled: !controlVisibility.switchToConsult.isEnabled,
-        isVisible: controlVisibility.switchToConsult.isVisible,
+        disabled: !(controls?.switchToConsult?.isEnabled ?? false),
+        isVisible: controls?.switchToConsult?.isVisible ?? false,
         dataTestId: 'call-control:switch-to-consult',
       },
-
       {
         id: 'hold',
-        icon: controlVisibility.isHeld ? 'play-bold' : 'pause-bold',
+        icon: isHeld ? 'play-bold' : 'pause-bold',
         onClick: handleToggleHoldFunc,
-        tooltip: controlVisibility.isHeld ? RESUME_CALL : HOLD_CALL,
+        tooltip: isHeld ? RESUME_CALL : HOLD_CALL,
         className: 'call-control-button',
-        disabled: !controlVisibility.holdResume.isEnabled,
-        isVisible: controlVisibility.holdResume.isVisible,
+        disabled: !(controls?.hold?.isEnabled ?? false),
+        isVisible: controls?.hold?.isVisible ?? false,
         dataTestId: 'call-control:hold-toggle',
       },
       {
@@ -243,19 +240,19 @@ export const buildCallControlButtons = (
         icon: 'headset-bold',
         tooltip: CONSULT_AGENT,
         className: 'call-control-button',
-        disabled: !controlVisibility.consult.isEnabled,
+        disabled: !(controls?.consult?.isEnabled ?? false),
         menuType: 'Consult',
-        isVisible: controlVisibility.consult.isVisible,
+        isVisible: controls?.consult?.isVisible ?? false,
         dataTestId: 'call-control:consult',
       },
       {
         id: 'transferConsult',
         icon: 'next-bold',
-        tooltip: controlVisibility.isConferenceInProgress ? 'Transfer Conference' : 'Transfer',
+        tooltip: 'Transfer',
         onClick: onTransferConsult || (() => {}),
         className: 'call-control-button',
-        disabled: !controlVisibility.consultTransfer.isEnabled,
-        isVisible: controlVisibility.consultTransfer.isVisible && !!onTransferConsult,
+        disabled: !(controls?.consultTransfer?.isEnabled ?? false),
+        isVisible: (controls?.consultTransfer?.isVisible ?? false) && !!onTransferConsult,
       },
       {
         id: 'conference',
@@ -263,17 +260,17 @@ export const buildCallControlButtons = (
         tooltip: 'conference',
         onClick: handleConsultConferencePress || (() => {}),
         className: 'call-control-button',
-        disabled: !controlVisibility.mergeConference.isEnabled,
-        isVisible: controlVisibility.mergeConference.isVisible && !!handleConsultConferencePress,
+        disabled: !(controls?.mergeToConference?.isEnabled ?? false),
+        isVisible: conferenceEnabled && (controls?.mergeToConference?.isVisible ?? false) && !!handleConsultConferencePress,
       },
       {
         id: 'transfer',
         icon: 'next-bold',
         tooltip: `${TRANSFER} ${currentMediaType.labelName}`,
         className: 'call-control-button',
-        disabled: !controlVisibility.transfer.isEnabled,
+        disabled: !(controls?.transfer?.isEnabled ?? false),
         menuType: 'Transfer',
-        isVisible: controlVisibility.transfer.isVisible,
+        isVisible: controls?.transfer?.isVisible ?? false,
         dataTestId: 'call-control:transfer',
       },
       {
@@ -282,8 +279,8 @@ export const buildCallControlButtons = (
         onClick: toggleRecording,
         tooltip: isRecording ? PAUSE_RECORDING : RESUME_RECORDING,
         className: 'call-control-button',
-        disabled: !controlVisibility.pauseResumeRecording.isEnabled,
-        isVisible: controlVisibility.pauseResumeRecording.isVisible,
+        disabled: !(controls?.recording?.isEnabled ?? false),
+        isVisible: controls?.recording?.isVisible ?? false,
         dataTestId: 'call-control:recording-toggle',
       },
       {
@@ -292,8 +289,8 @@ export const buildCallControlButtons = (
         tooltip: 'Exit Conference',
         className: 'call-control-button-muted',
         onClick: exitConference,
-        disabled: !controlVisibility.exitConference.isEnabled,
-        isVisible: controlVisibility.exitConference.isVisible,
+        disabled: !(controls?.exitConference?.isEnabled ?? false),
+        isVisible: conferenceEnabled && (controls?.exitConference?.isVisible ?? false),
         dataTestId: 'call-control:exit-conference',
       },
       {
@@ -302,8 +299,8 @@ export const buildCallControlButtons = (
         onClick: endCall,
         tooltip: `${END} ${currentMediaType.labelName}`,
         className: 'call-control-button-cancel',
-        disabled: !controlVisibility.end.isEnabled,
-        isVisible: controlVisibility.end.isVisible,
+        disabled: !(controls?.end?.isEnabled ?? false),
+        isVisible: controls?.end?.isVisible ?? false,
         dataTestId: 'call-control:end-call',
       },
     ];
@@ -320,6 +317,11 @@ export const buildCallControlButtons = (
 
 /**
  * Filters buttons based on consultation state
+ * During consulting:
+ * - Hide: hold, consult, and blind transfer buttons
+ * - Respect SDK enabled/disabled state for consulting buttons (transferConsult, conference)
+ *   They will be enabled when on main call, disabled when on consult call
+ * - Show as-is: mute, switchToConsult, recording, exitConference, end
  */
 export const filterButtonsForConsultation = (
   buttons: CallControlButton[],
@@ -328,9 +330,13 @@ export const filterButtonsForConsultation = (
   logger?
 ): CallControlButton[] => {
   try {
-    return consultInitiated && isTelephony
-      ? buttons.filter((button) => !['hold', 'consult'].includes(button.id))
-      : buttons;
+    if (!consultInitiated || !isTelephony) {
+      return buttons;
+    }
+
+    // Filter out buttons that shouldn't be visible during consulting
+    // SDK now properly controls enable/disable state based on consultCallHeld
+    return buttons.filter((button) => !['hold', 'consult', 'transfer'].includes(button.id));
   } catch (error) {
     logger?.error('CC-Widgets: CallControl: Error in filterButtonsForConsultation', {
       module: 'cc-components#call-control.utils.ts',

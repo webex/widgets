@@ -1,5 +1,5 @@
 import {MEDIA_CHANNEL, TaskListItemData} from '../task.types';
-import store, {isIncomingTask, ILogger, ITask} from '@webex/cc-store';
+import {isIncomingTask, ILogger, ITask} from '@webex/cc-store';
 /**
  * Extracts and processes data from a task for rendering in the task list
  * @param task - The task object
@@ -8,13 +8,19 @@ import store, {isIncomingTask, ILogger, ITask} from '@webex/cc-store';
  */
 export const extractTaskListItemData = (
   task: ITask,
-  isBrowser: boolean,
   agentId: string,
-  logger?: ILogger
+  logger?: ILogger,
+  isDeclineButtonEnabled?: boolean
 ): TaskListItemData => {
   try {
+    const accept = task.uiControls?.accept ?? {isVisible: false, isEnabled: false};
+    const sdkDecline = task.uiControls?.decline ?? {isVisible: false, isEnabled: false};
+    const decline = {
+      ...sdkDecline,
+      isEnabled: sdkDecline.isEnabled || !!isDeclineButtonEnabled,
+    };
+
     // Extract basic data from task
-    //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
     const callAssociationDetails = task?.data?.interaction?.callAssociatedDetails;
     const ani = callAssociationDetails?.ani;
     const customerName = callAssociationDetails?.customerName;
@@ -33,21 +39,14 @@ export const extractTaskListItemData = (
     const isTelephony = mediaType === MEDIA_CHANNEL.TELEPHONY;
     const isSocial = mediaType === MEDIA_CHANNEL.SOCIAL;
 
-    // Compute button text based on conditions
-    const acceptText = isTaskIncoming ? (isTelephony && !isBrowser ? 'Ringing...' : 'Accept') : undefined;
-
-    const declineText = isTaskIncoming && isTelephony && isBrowser ? 'Decline' : undefined;
+    const acceptText = accept.isVisible && isTaskIncoming ? 'Accept' : undefined;
+    const declineText = decline.isVisible && isTaskIncoming ? 'Decline' : undefined;
 
     // Compute title based on media type
     const title = isSocial ? customerName : ani;
 
-    const isAutoAnswering = task.data.isAutoAnswering || false;
-
-    // Compute disable state for accept button
-    const disableAccept = (isTaskIncoming && isTelephony && !isBrowser) || isAutoAnswering;
-
-    const disableDecline =
-      (isTaskIncoming && isTelephony && !isBrowser) || (isAutoAnswering && !store.isDeclineButtonEnabled);
+    const disableAccept = !accept.isEnabled;
+    const disableDecline = !decline.isEnabled;
 
     const ronaTimeout = isTaskIncoming ? rawRonaTimeout : null;
 
@@ -210,7 +209,7 @@ export const createTaskSelectHandler = (
   return () => {
     try {
       // Logging moved to helper.ts
-      const taskData = extractTaskListItemData(task, true, agentId, logger); // Use browser=true for selection logic
+      const taskData = extractTaskListItemData(task, agentId, logger);
 
       if (isTaskSelectable(task, currentTask, taskData, logger)) {
         onTaskSelect(task);

@@ -12,6 +12,7 @@ import {
   Participant,
   AddressBookEntrySearchParams,
   AddressBookEntriesResponse,
+  TaskUIControls,
 } from '@webex/cc-store';
 
 type Enum<T extends Record<string, unknown>> = T[keyof T];
@@ -105,11 +106,6 @@ export interface TaskProps {
    */
   onTaskSelect: (task: ITask) => void;
   /**
-   * Flag to determine if the user is logged in with a browser option
-   */
-  isBrowser: boolean;
-
-  /**
    * Flag to determine if the task is answered
    */
   isAnswered: boolean;
@@ -118,11 +114,6 @@ export interface TaskProps {
    * Flag to determine if the task is ended
    */
   isEnded: boolean;
-
-  /**
-   * Selected login option
-   */
-  deviceType: string;
 
   /**
    * List of tasks
@@ -138,20 +129,22 @@ export interface TaskProps {
    * Agent ID of the logged-in user
    */
   agentId: string;
-  /**
-   * Flag to enable decline button on incoming task component
-   */
-  isDeclineButtonEnabled?: boolean;
 }
 
-export type IncomingTaskComponentProps = Pick<TaskProps, 'isBrowser' | 'accept' | 'reject' | 'logger'> &
-  Partial<Pick<TaskProps, 'incomingTask' | 'isDeclineButtonEnabled'>>;
+export type IncomingTaskComponentProps = Pick<TaskProps, 'accept' | 'reject' | 'logger'> &
+  Partial<Pick<TaskProps, 'incomingTask'>> & {
+    acceptControl?: {isVisible: boolean; isEnabled: boolean};
+    declineControl?: {isVisible: boolean; isEnabled: boolean};
+    isDeclineButtonEnabled?: boolean;
+  };
 
 export type TaskListComponentProps = Pick<
   TaskProps,
-  'isBrowser' | 'acceptTask' | 'declineTask' | 'onTaskSelect' | 'logger' | 'agentId'
+  'acceptTask' | 'declineTask' | 'onTaskSelect' | 'logger' | 'agentId'
 > &
-  Partial<Pick<TaskProps, 'currentTask' | 'taskList'>>;
+  Partial<Pick<TaskProps, 'currentTask' | 'taskList'>> & {
+    isDeclineButtonEnabled?: boolean;
+  };
 
 /**
  * Interface representing the properties for control actions on a task.
@@ -244,11 +237,6 @@ export interface ControlProps {
    * @param wrapupId - The ID associated with the wrap-up reason.
    */
   wrapupCall: (wrapupReason: string, wrapupId: string) => void;
-
-  /**
-   * Selected login option
-   */
-  deviceType: string;
 
   /**
    * Flag to determine if the task is held
@@ -384,11 +372,6 @@ export interface ControlProps {
   holdTime: number;
 
   /**
-   * Feature flags for the task.
-   */
-  featureFlags: {[key: string]: boolean};
-
-  /**
    * Custom CSS ClassName for CallControlCAD component.
    */
   callControlClassName?: string;
@@ -438,7 +421,7 @@ export interface ControlProps {
    */
   setLastTargetType: (targetType: TargetType) => void;
 
-  controlVisibility: ControlVisibility;
+  controls: TaskUIControls;
 
   secondsUntilAutoWrapup?: number;
 
@@ -475,6 +458,7 @@ export interface ControlProps {
 export type CallControlComponentProps = Pick<
   ControlProps,
   | 'currentTask'
+  | 'isHeld'
   | 'wrapupCodes'
   | 'toggleHold'
   | 'toggleRecording'
@@ -509,7 +493,7 @@ export type CallControlComponentProps = Pick<
   | 'allowConsultToQueue'
   | 'lastTargetType'
   | 'setLastTargetType'
-  | 'controlVisibility'
+  | 'controls'
   | 'logger'
   | 'secondsUntilAutoWrapup'
   | 'cancelAutoWrapup'
@@ -518,6 +502,7 @@ export type CallControlComponentProps = Pick<
   | 'getEntryPoints'
   | 'getQueuesFetcher'
   | 'consultTransferOptions'
+  | 'conferenceEnabled'
 >;
 
 export type OutdialAniEntry = {
@@ -647,8 +632,9 @@ export interface CallControlConsultComponentsProps {
   switchToMainCall: () => void;
   logger: ILogger;
   isMuted: boolean;
-  controlVisibility: ControlVisibility;
+  controls: TaskUIControls;
   toggleConsultMute: () => void;
+  conferenceEnabled: boolean;
 }
 
 /**

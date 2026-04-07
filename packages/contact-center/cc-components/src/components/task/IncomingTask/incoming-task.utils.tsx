@@ -26,13 +26,20 @@ export interface IncomingTaskData {
  */
 export const extractIncomingTaskData = (
   incomingTask: ITask,
-  isBrowser: boolean,
   logger?,
+  acceptControl?: {isVisible: boolean; isEnabled: boolean},
+  declineControl?: {isVisible: boolean; isEnabled: boolean},
   isDeclineButtonEnabled?: boolean
 ): IncomingTaskData => {
   try {
+    const accept = acceptControl ?? incomingTask?.uiControls?.accept ?? {isVisible: false, isEnabled: false};
+    const sdkDecline = declineControl ?? incomingTask?.uiControls?.decline ?? {isVisible: false, isEnabled: false};
+    const decline = {
+      ...sdkDecline,
+      isEnabled: sdkDecline.isEnabled || !!isDeclineButtonEnabled,
+    };
+
     // Extract basic data from task
-    //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
     const callAssociationDetails = incomingTask?.data?.interaction?.callAssociatedDetails;
     const ani = callAssociationDetails?.ani;
     const customerName = callAssociationDetails?.customerName;
@@ -46,24 +53,14 @@ export const extractIncomingTaskData = (
     const isTelephony = mediaType === MEDIA_CHANNEL.TELEPHONY;
     const isSocial = mediaType === MEDIA_CHANNEL.SOCIAL;
 
-    // Compute button text based on conditions
-    const acceptText = !incomingTask.data.wrapUpRequired
-      ? isTelephony && !isBrowser
-        ? 'Ringing...'
-        : 'Accept'
-      : undefined;
-
-    const declineText = !incomingTask.data.wrapUpRequired && isTelephony && isBrowser ? 'Decline' : undefined;
+    const acceptText = accept.isVisible ? 'Accept' : undefined;
+    const declineText = decline.isVisible ? 'Decline' : undefined;
 
     // Compute title based on media type
     const title = isSocial ? customerName : ani;
 
-    // Compute disable state for accept button when auto-answering
-    const isAutoAnswering = incomingTask.data.isAutoAnswering || false;
-    // Compute disable state for accept button
-    const disableAccept = (isTelephony && !isBrowser) || isAutoAnswering;
-
-    const disableDecline = (isTelephony && !isBrowser) || (isAutoAnswering && !isDeclineButtonEnabled);
+    const disableAccept = !accept.isEnabled;
+    const disableDecline = !decline.isEnabled;
 
     return {
       ani,

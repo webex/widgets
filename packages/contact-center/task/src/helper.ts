@@ -1,5 +1,11 @@
-import {useEffect, useCallback, useState, useMemo} from 'react';
-import {AddressBookEntriesResponse, AddressBookEntrySearchParams, ITask} from '@webex/contact-center';
+import {useEffect, useCallback, useState, useMemo, useRef} from 'react';
+import {
+  AddressBookEntriesResponse,
+  AddressBookEntrySearchParams,
+  ITask,
+  TaskUIControls,
+  getDefaultUIControls,
+} from '@webex/contact-center';
 import {
   useCallControlProps,
   UseTaskListProps,
@@ -16,9 +22,9 @@ import store, {
   getConferenceParticipants,
   Participant,
   findMediaResourceId,
+  isInteractionOnHold,
   MEDIA_TYPE_TELEPHONY_LOWER,
 } from '@webex/cc-store';
-import {getControlsVisibility} from './Utils/task-util';
 import {TIMER_LABEL_CONSULTING} from './Utils/constants';
 import {calculateStateTimerData, calculateConsultTimerData} from './Utils/timer-utils';
 import {useHoldTimer} from './Utils/useHoldTimer';
@@ -29,8 +35,7 @@ const ENGAGED_USERNAME = 'Engaged';
 
 // Hook for managing the task list
 export const useTaskList = (props: UseTaskListProps) => {
-  const {deviceType, onTaskAccepted, onTaskDeclined, onTaskSelected, logger, taskList} = props;
-  const isBrowser = deviceType === 'BROWSER';
+  const {onTaskAccepted, onTaskDeclined, onTaskSelected, logger, taskList} = props;
 
   const logError = (message: string, method: string) => {
     logger.error(message, {
@@ -143,15 +148,20 @@ export const useTaskList = (props: UseTaskListProps) => {
     }
   };
 
-  return {taskList, acceptTask, declineTask, onTaskSelect, isBrowser};
+  return {taskList, acceptTask, declineTask, onTaskSelect};
 };
 
 export const useIncomingTask = (props: UseTaskProps) => {
-  const {onAccepted, onRejected, deviceType, incomingTask, logger} = props;
-  const isBrowser = deviceType === 'BROWSER';
-  const isDeclineButtonEnabled = store.isDeclineButtonEnabled;
+  const {onAccepted, onRejected, incomingTask, logger} = props;
 
-  const taskAssignCallback = () => {
+  const acceptControl = incomingTask?.uiControls?.accept ?? {isVisible: false, isEnabled: false};
+  const sdkDeclineControl = incomingTask?.uiControls?.decline ?? {isVisible: false, isEnabled: false};
+  const declineControl = {
+    ...sdkDeclineControl,
+    isEnabled: sdkDeclineControl.isEnabled || store.isDeclineButtonEnabled,
+  };
+
+  const taskAssignCallback = useCallback(() => {
     try {
       if (onAccepted) onAccepted({task: incomingTask});
     } catch (error) {
@@ -160,9 +170,9 @@ export const useIncomingTask = (props: UseTaskProps) => {
         method: 'taskAssignCallback',
       });
     }
-  };
+  }, [onAccepted, incomingTask, logger]);
 
-  const taskRejectCallback = () => {
+  const taskRejectCallback = useCallback(() => {
     try {
       if (onRejected) onRejected({task: incomingTask});
     } catch (error) {
@@ -171,25 +181,12 @@ export const useIncomingTask = (props: UseTaskProps) => {
         method: 'taskRejectCallback',
       });
     }
-  };
+  }, [onRejected, incomingTask, logger]);
 
   useEffect(() => {
     try {
       if (!incomingTask) return;
-      store.setTaskCallback(
-        TASK_EVENTS.TASK_ASSIGNED,
-        () => {
-          try {
-            if (onAccepted) onAccepted({task: incomingTask});
-          } catch (error) {
-            logger?.error(`CC-Widgets: Task: Error in TASK_ASSIGNED callback - ${error.message}`, {
-              module: 'useIncomingTask',
-              method: 'TASK_ASSIGNED_callback',
-            });
-          }
-        },
-        incomingTask.data.interactionId
-      );
+      store.setTaskCallback(TASK_EVENTS.TASK_ASSIGNED, taskAssignCallback, incomingTask.data.interactionId);
       store.setTaskCallback(TASK_EVENTS.TASK_CONSULT_ACCEPTED, taskAssignCallback, incomingTask?.data.interactionId);
       store.setTaskCallback(TASK_EVENTS.TASK_END, taskRejectCallback, incomingTask?.data.interactionId);
       store.setTaskCallback(TASK_EVENTS.TASK_REJECT, taskRejectCallback, incomingTask?.data.interactionId);
@@ -219,7 +216,7 @@ export const useIncomingTask = (props: UseTaskProps) => {
         method: 'useEffect',
       });
     }
-  }, [incomingTask]);
+  }, [incomingTask, taskAssignCallback, taskRejectCallback]);
 
   const logError = (message: string, method: string) => {
     logger.error(message, {
@@ -276,27 +273,16 @@ export const useIncomingTask = (props: UseTaskProps) => {
     incomingTask,
     accept,
     reject,
-    isBrowser,
-    isDeclineButtonEnabled,
+    acceptControl,
+    declineControl,
   };
 };
 
 export const useCallControl = (props: useCallControlProps) => {
-  const {
-    currentTask,
-    onHoldResume,
-    onEnd,
-    onWrapUp,
-    onRecordingToggle,
-    onToggleMute,
-    logger,
-    deviceType,
-    featureFlags,
-    isMuted,
-    conferenceEnabled,
-    agentId,
-  } = props;
+  const {currentTask, onHoldResume, onEnd, onWrapUp, onRecordingToggle, onToggleMute, logger, isMuted, agentId, conferenceEnabled = true} = props;
   const [isRecording, setIsRecording] = useState(true);
+  const [controls, setControls] = useState<TaskUIControls>(currentTask?.uiControls ?? getDefaultUIControls());
+  const [isHeld, setIsHeld] = useState<boolean>(() => (currentTask ? isInteractionOnHold(currentTask) : false));
   const [buddyAgents, setBuddyAgents] = useState<BuddyDetails[]>([]);
   const [loadingBuddyAgents, setLoadingBuddyAgents] = useState(false);
   const [consultAgentName, setConsultAgentName] = useState<string>('Consult Agent');
@@ -312,6 +298,27 @@ export const useCallControl = (props: useCallControlProps) => {
   const [consultTimerTimestamp, setConsultTimerTimestamp] = useState<number>(0);
   const [lastTargetType, setLastTargetType] = useState<TargetType>(TARGET_TYPE.AGENT);
   const [conferenceParticipants, setConferenceParticipants] = useState<Participant[]>([]);
+  const lastWrapupAuxCodeIdRef = useRef<string | null>(null);
+
+  // Subscribe to SDK-computed UI control updates
+  useEffect(() => {
+    if (!currentTask) {
+      setControls(getDefaultUIControls());
+      return;
+    }
+    setControls(currentTask.uiControls ?? getDefaultUIControls());
+    const onControlsUpdated = (updatedControls: TaskUIControls) => {
+      setControls(updatedControls);
+    };
+    currentTask.on(TASK_EVENTS.TASK_UI_CONTROLS_UPDATED, onControlsUpdated);
+    return () => {
+      currentTask.off(TASK_EVENTS.TASK_UI_CONTROLS_UPDATED, onControlsUpdated);
+    };
+  }, [currentTask]);
+
+  useEffect(() => {
+    setIsHeld(currentTask ? isInteractionOnHold(currentTask) : false);
+  }, [currentTask]);
 
   // Use custom hook for hold timer management
   const holdTime = useHoldTimer(currentTask);
@@ -393,8 +400,7 @@ export const useCallControl = (props: useCallControlProps) => {
       } else {
         // Fallback: Use old logic if consult media not found
         const otherAgents = Object.values(interaction.participants || {}).filter(
-          (participant): participant is Participant =>
-            (participant as Participant).pType === 'Agent' && (participant as Participant).id !== myAgentId
+          (participant) => participant.pType === 'Agent' && participant.id !== myAgentId
         );
 
         // In a conference with multiple agents, find the agent currently being consulted
@@ -530,6 +536,7 @@ export const useCallControl = (props: useCallControlProps) => {
 
   const holdCallback = () => {
     try {
+      setIsHeld(true);
       if (onHoldResume) {
         onHoldResume({
           isHeld: true,
@@ -546,6 +553,7 @@ export const useCallControl = (props: useCallControlProps) => {
 
   const resumeCallback = () => {
     try {
+      setIsHeld(false);
       if (onHoldResume) {
         onHoldResume({
           isHeld: false,
@@ -575,14 +583,16 @@ export const useCallControl = (props: useCallControlProps) => {
     }
   };
 
-  const wrapupCallCallback = ({wrapUpAuxCodeId}) => {
+  const wrapupCallCallback = () => {
     try {
-      const wrapUpReason = store.wrapupCodes.find((code) => code.id === wrapUpAuxCodeId)?.name;
-      if (onWrapUp) {
-        onWrapUp({
-          task: currentTask,
-          wrapUpReason: wrapUpReason,
-        });
+      if (lastWrapupAuxCodeIdRef.current) {
+        const wrapUpReason = store.wrapupCodes.find((code) => code.id === lastWrapupAuxCodeIdRef.current)?.name;
+        if (onWrapUp) {
+          onWrapUp({
+            task: currentTask,
+            wrapUpReason: wrapUpReason,
+          });
+        }
       }
     } catch (error) {
       logger?.error(`CC-Widgets: Task: Error in wrapupCallCallback - ${error.message}`, {
@@ -639,7 +649,8 @@ export const useCallControl = (props: useCallControlProps) => {
     );
     store.setTaskCallback(TASK_EVENTS.TASK_RESUME, resumeCallback, interactionId);
     store.setTaskCallback(TASK_EVENTS.TASK_END, endCallCallback, interactionId);
-    store.setTaskCallback(TASK_EVENTS.AGENT_WRAPPEDUP, wrapupCallCallback, interactionId);
+    store.setTaskCallback(TASK_EVENTS.TASK_WRAPUP, endCallCallback, interactionId); // Also call onEnd when entering wrapup
+    store.setTaskCallback(TASK_EVENTS.TASK_WRAPPEDUP, wrapupCallCallback, interactionId);
     store.setTaskCallback(TASK_EVENTS.TASK_RECORDING_PAUSED, pauseRecordingCallback, interactionId);
     store.setTaskCallback(TASK_EVENTS.TASK_RECORDING_RESUMED, resumeRecordingCallback, interactionId);
 
@@ -647,9 +658,10 @@ export const useCallControl = (props: useCallControlProps) => {
       store.removeTaskCallback(TASK_EVENTS.TASK_HOLD, holdCallback, interactionId);
       store.removeTaskCallback(TASK_EVENTS.TASK_RESUME, resumeCallback, interactionId);
       store.removeTaskCallback(TASK_EVENTS.TASK_END, endCallCallback, interactionId);
-      store.removeTaskCallback(TASK_EVENTS.AGENT_WRAPPEDUP, wrapupCallCallback, interactionId);
-      store.removeTaskCallback(TASK_EVENTS.CONTACT_RECORDING_PAUSED, pauseRecordingCallback, interactionId);
-      store.removeTaskCallback(TASK_EVENTS.CONTACT_RECORDING_RESUMED, resumeRecordingCallback, interactionId);
+      store.removeTaskCallback(TASK_EVENTS.TASK_WRAPUP, endCallCallback, interactionId);
+      store.removeTaskCallback(TASK_EVENTS.TASK_WRAPPEDUP, wrapupCallCallback, interactionId);
+      store.removeTaskCallback(TASK_EVENTS.TASK_RECORDING_PAUSED, pauseRecordingCallback, interactionId);
+      store.removeTaskCallback(TASK_EVENTS.TASK_RECORDING_RESUMED, resumeRecordingCallback, interactionId);
     };
   }, [currentTask]);
 
@@ -701,8 +713,7 @@ export const useCallControl = (props: useCallControlProps) => {
 
   const toggleMute = async () => {
     try {
-      console.log('Mute control not available', controlVisibility);
-      if (!controlVisibility?.muteUnmute) {
+      if (!controls?.mute?.isVisible) {
         logger.warn('Mute control not available', {module: 'useCallControl', method: 'toggleMute'});
         return;
       }
@@ -760,6 +771,9 @@ export const useCallControl = (props: useCallControlProps) => {
 
   const wrapupCall = (wrapUpReason: string, auxCodeId: string) => {
     try {
+      // Store auxCodeId for use in wrapupCallCallback
+      lastWrapupAuxCodeIdRef.current = auxCodeId;
+
       currentTask
         .wrapup({wrapUpReason: wrapUpReason, auxCodeId: auxCodeId})
         .then(() => {
@@ -808,7 +822,7 @@ export const useCallControl = (props: useCallControlProps) => {
 
   const switchToMainCall = async () => {
     try {
-      await currentTask.resume(findMediaResourceId(currentTask, 'consult'));
+      await currentTask.switchCall();
       logger.info('switchToMainCall success', {module: 'useCallControl', method: 'switchToMainCall'});
     } catch (error) {
       logger.error(`Error switchToMainCall: ${error}`, {module: 'useCallControl', method: 'switchToMainCall'});
@@ -818,7 +832,7 @@ export const useCallControl = (props: useCallControlProps) => {
 
   const switchToConsult = async () => {
     try {
-      await currentTask.hold(findMediaResourceId(currentTask, 'mainCall'));
+      await currentTask.switchCall();
       logger.info('switchToConsult success', {module: 'useCallControl', method: 'switchToConsult'});
     } catch (error) {
       logger.error(`Error switching to consult: ${error}`, {module: 'useCallControl', method: 'switchToConsult'});
@@ -846,6 +860,8 @@ export const useCallControl = (props: useCallControlProps) => {
       destinationType: destinationType,
       holdParticipants: !allowParticipantsToInteract,
     };
+
+    store.setLastConsultDestination({to: consultDestination, destinationType});
 
     if (destinationType === 'queue') {
       store.setIsQueueConsultInProgress(true);
@@ -883,8 +899,10 @@ export const useCallControl = (props: useCallControlProps) => {
     try {
       await currentTask.endConsult(consultEndPayload);
     } catch (error) {
-      logError(`Error ending consult call: ${error}`, 'endConsultCall');
-      throw error;
+      // Log error but don't throw - SDK retry mechanism will handle timing issues
+      // If endConsult fails due to backend timing (called before CONSULTING_ACTIVE),
+      // the SDK's requestEndConsultRetry will automatically retry when ready
+      logError(`Error ending consult call (will retry automatically): ${error}`, 'endConsultCall');
     }
   };
 
@@ -895,15 +913,27 @@ export const useCallControl = (props: useCallControlProps) => {
     }
 
     try {
-      if (currentTask.data.isConferenceInProgress) {
+      // When consulting (even from within a conference), use regular transfer.
+      // transferConference() is only for transferring the entire conference ownership,
+      // not for transferring a consult to join the conference.
+      // Check state machine: CONSULTING state means we should use transfer(), not transferConference()
+      const currentState = currentTask.state?.value;
+      const isCurrentlyConsulting = currentState === 'CONSULTING';
+
+      if (!isCurrentlyConsulting && currentTask.data.isConferenceInProgress) {
         logger.info('Conference in progress, using transferConference', {
           module: 'useCallControl',
-          method: 'transferCall',
+          method: 'consultTransfer',
         });
         await currentTask.transferConference();
       } else {
         logger.info('Consult transfer initiated', {module: 'useCallControl', method: 'consultTransfer'});
-        await currentTask.consultTransfer();
+        await currentTask.transfer(
+          store.lastConsultDestination ?? {
+            to: currentTask.data.destAgentId,
+            destinationType: 'agent' as DestinationType,
+          }
+        );
       }
     } catch (error) {
       logError(`Error transferring consult call: ${error}`, 'consultTransfer');
@@ -927,16 +957,11 @@ export const useCallControl = (props: useCallControlProps) => {
     currentTask.cancelAutoWrapupTimer();
   };
 
-  const controlVisibility = useMemo(
-    () => getControlsVisibility(deviceType, featureFlags, currentTask, agentId, conferenceEnabled, logger),
-    [deviceType, featureFlags, currentTask, agentId, conferenceEnabled, logger]
-  );
-
   // Add useEffect for auto wrap-up timer
   useEffect(() => {
-    let timerId: NodeJS.Timeout;
+    let timerId: ReturnType<typeof setInterval>;
 
-    if (currentTask?.autoWrapup && controlVisibility?.wrapup) {
+    if (currentTask?.autoWrapup && controls?.wrapup) {
       try {
         // Initialize time left from the autoWrapup object
         const initialTimeLeft = currentTask.autoWrapup.getTimeLeftSeconds();
@@ -966,25 +991,25 @@ export const useCallControl = (props: useCallControlProps) => {
         clearInterval(timerId);
       }
     };
-  }, [currentTask?.autoWrapup, controlVisibility?.wrapup]);
+  }, [currentTask?.autoWrapup, controls?.wrapup]);
 
   // Calculate state timer label and timestamp using utils
-  // Priority: Wrap Up > Post Call
   useEffect(() => {
-    const stateTimerData = calculateStateTimerData(currentTask, controlVisibility, agentId);
+    const stateTimerData = calculateStateTimerData(currentTask, controls, agentId);
     setStateTimerLabel(stateTimerData.label);
     setStateTimerTimestamp(stateTimerData.timestamp);
-  }, [currentTask, controlVisibility, agentId]);
+  }, [currentTask, controls, agentId]);
 
   // Calculate consult timer label and timestamp using utils
   useEffect(() => {
-    const consultTimerData = calculateConsultTimerData(currentTask, controlVisibility, agentId);
+    const consultTimerData = calculateConsultTimerData(currentTask, controls, agentId);
     setConsultTimerLabel(consultTimerData.label);
     setConsultTimerTimestamp(consultTimerData.timestamp);
-  }, [currentTask, controlVisibility, agentId]);
+  }, [currentTask, controls, agentId]);
 
   return {
     currentTask,
+    isHeld,
     endCall,
     toggleHold,
     toggleRecording,
@@ -1014,7 +1039,8 @@ export const useCallControl = (props: useCallControlProps) => {
     consultTimerTimestamp,
     lastTargetType,
     setLastTargetType,
-    controlVisibility,
+    controls,
+    conferenceEnabled,
     secondsUntilAutoWrapup,
     cancelAutoWrapup,
     conferenceParticipants,

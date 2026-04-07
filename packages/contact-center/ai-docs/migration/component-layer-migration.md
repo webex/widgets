@@ -370,11 +370,11 @@ This function builds the main call control button array. It references 12 old co
 - `isHeld: boolean` → get from the task object (SDK provides hold state); remove `findHoldStatus` derivation
 - `deviceType: string` → REMOVE (SDK handles)
 - `featureFlags: {[key: string]: boolean}` → REMOVE (SDK handles)
-- `conferenceEnabled: boolean` → REMOVE (SDK handles)
+- ~~`conferenceEnabled: boolean` → REMOVE~~ **RESTORED** — application-level config (not a feature flag), applied at button builder level
 - `agentId: string` → RETAIN (needed for timer participant lookup)
 
 ### `CallControlCAD` — task package and cc-components view
-- **task/src/CallControlCAD/index.tsx:** `deviceType`, `featureFlags`, `conferenceEnabled` are used today in `getControlsVisibility` (task-util.ts lines 421–525). The **SDK** handles feature-flag-like gating internally via `config.isEndTaskEnabled`, `config.isEndConsultEnabled`, `config.isRecordingEnabled` from agent profile and `callProcessingDetails`. Since widgets will read `task.uiControls` instead of calling `getControlsVisibility`, these props can be **removed** — the SDK has already computed them. **Retain `agentId`** for timer participant lookup.
+- **task/src/CallControlCAD/index.tsx:** `deviceType` and `featureFlags` are used today in `getControlsVisibility` (task-util.ts lines 421–525). The **SDK** handles feature-flag-like gating internally via `config.isEndTaskEnabled`, `config.isEndConsultEnabled`, `config.isRecordingEnabled` from agent profile and `callProcessingDetails`. Since widgets will read `task.uiControls` instead of calling `getControlsVisibility`, `deviceType` and `featureFlags` can be **removed** — the SDK has already computed them. **`conferenceEnabled` is RETAINED** — it is an application-level configuration (not a feature flag) passed from the consumer app. **Retain `agentId`** for timer participant lookup.
 - **cc-components/.../CallControlCAD/call-control-cad.tsx:** This view consumes `controlVisibility` (and related state flags such as `isConferenceInProgress`, `isHeld`, `isConsultReceived`, `recordingIndicator`, `isConsultInitiatedOrAccepted`). It must be updated to use `TaskUIControls` and the new prop shape when replacing `ControlVisibility`; otherwise migration will leave stale references and break at compile or runtime.
 
 ### Files NOT Impacted (Confirmed)
@@ -581,7 +581,7 @@ const WebTaskList = r2wc(TaskListComponent, {
 | `cc-components/.../TaskList/task-list.utils.ts` | Update `extractTaskListItemData()`: remove `isBrowser` param and `store.isDeclineButtonEnabled` usage; use `task.uiControls?.accept` / `task.uiControls?.decline` for button text and disable state | **MEDIUM** |
 | `cc-components/.../CallControlCAD/call-control-cad.tsx` | Replace `ControlVisibility` / legacy control-shape usage with `TaskUIControls`; update props (`controlVisibility.isConferenceInProgress`, `isHeld`, `isConsultReceived`, `recordingIndicator`, `isConsultInitiatedOrAccepted`, etc.) | **MEDIUM** |
 | `cc-components/src/wc.ts` | Update Web Component prop definitions: remove `isBrowser` from `WebIncomingTask` and `WebTaskList` r2wc props when migrating to per-task uiControls; align with React prop changes so WC consumers do not pass obsolete attributes | **LOW** |
-| `task/src/CallControlCAD/index.tsx` | **Remove** `deviceType`, `featureFlags`, `conferenceEnabled` (SDK handles via `task.uiControls`); retain `agentId` for timer participant lookup | **MEDIUM** |
+| `task/src/CallControlCAD/index.tsx` | **Remove** `deviceType`, `featureFlags` (SDK handles via `task.uiControls`); **retain** `conferenceEnabled` (app-level config) and `agentId` (timer participant lookup) | **MEDIUM** |
 | All test files for above | Update mocks and assertions | **HIGH** |
 
 ---
@@ -603,3 +603,50 @@ const WebTaskList = r2wc(TaskListComponent, {
 ---
 
 _Part of the task refactor migration doc set (overview in PR 1/4)._
+
+---
+
+## Migration Fix Log
+
+### Fix: Duplicate Transfer Button — Wrong `uiControls` Field Mapping
+
+- **Issue**: After accepting a call, both "Transfer" and "Transfer Call" buttons appeared simultaneously. The `transferConsult` button and the consult strip `transfer` button were both reading `controls.transfer` instead of `controls.consultTransfer`.
+- **Root Cause**: Three button definitions all mapped to `controls.transfer`:
+  - `call-control.utils.ts` — `transferConsult` button used `controls.transfer` (should be `controls.consultTransfer`)
+  - `call-control-custom.utils.ts` — consult strip `transfer` button used `controls.transfer` (should be `controls.consultTransfer`)
+  - `call-control.utils.ts` — main `transfer` button correctly used `controls.transfer`
+- **SDK Source of Truth**: `uiControlsComputer.ts` computes `consultTransfer: DISABLED` for `CONNECTED` state and only enables it during active consultation. The main `transfer` control handles the primary transfer action.
+- **Fix**:
+  - `call-control.utils.ts` L252-258: Changed `transferConsult` button's `disabled` and `isVisible` from `controls?.transfer` to `controls?.consultTransfer`
+  - `call-control-custom.utils.ts` L46-54: Changed consult strip `transfer` button's `disabled` and `isVisible` from `controls?.transfer` to `controls?.consultTransfer`
+- **Result**: Only the main "Transfer Call" button shows in `CONNECTED` state. The `transferConsult` button only appears when `consultTransfer` is explicitly enabled by the SDK during active consultation.
+
+### Fix: Hold Button Icon/Tooltip Not Toggling & Multi-Login Hold State Not Syncing
+
+- **Issue**: (1) After clicking Hold, the button icon stayed as pause and tooltip stayed as "Hold the call" instead of changing to play/"Resume the call". (2) In multi-login scenarios, holding/resuming on one system did not reflect on the other system.
+- **Root Cause**:
+  - The old `controlVisibility.isHeld` was removed during migration. The replacement `controls.hold.isEnabled` is an **action flag** (can the user click hold?), not the current hold state. `task.data.isOnHold` exists in SDK types but is not populated at runtime.
+  - For multi-login: The SDK's `TaskStateMachine.ts` `CONNECTED` state had no handler for `HOLD_SUCCESS` (another system held), and `HELD` state had no handler for `UNHOLD_SUCCESS` (another system resumed). These events were silently dropped.
+- **Fix (Widgets)**:
+  - `helper.ts` (`useCallControl` hook): Added `useState(isHeld)` initialized from `isInteractionOnHold(currentTask)`. Updated `holdCallback` to `setIsHeld(true)` and `resumeCallback` to `setIsHeld(false)`. Added `useEffect([currentTask])` to re-sync from `isInteractionOnHold` on task reference changes (covers multi-login `refreshTaskList`).
+  - `call-control.utils.ts`: Added `isHeld: boolean` parameter to `buildCallControlButtons()`. Hold button uses `isHeld ? 'play-bold' : 'pause-bold'` for icon and `isHeld ? RESUME_CALL : HOLD_CALL` for tooltip.
+  - `call-control.tsx`: Destructured `isHeld` from props, passed to `buildCallControlButtons()` and `handleToggleHoldUtil()`.
+  - `task.types.ts`: Added `'isHeld'` to `CallControlComponentProps` pick list.
+- **Fix (SDK)**: Added `HOLD_SUCCESS` transition in `CONNECTED` state and `UNHOLD_SUCCESS` transition in `HELD` state of `TaskStateMachine.ts`, both with actions `['updateTaskData', 'setHoldState', 'emitTaskHold'/'emitTaskResume']`.
+- **Result**: Hold button icon/tooltip toggles correctly on click. Multi-login hold/resume state syncs across systems via SDK state machine transitions.
+
+### Fix: Restore `conferenceEnabled` Prop — Application-Level Conference Gating
+
+- **Issue**: The `conferenceEnabled` prop was removed from widget APIs during migration. This is an application-level configuration (not a feature flag) passed from the consumer app that controls whether conference-related UI controls are available to the agent.
+- **Root Cause**: The migration assumed all UI visibility is exclusively SDK-driven. However, `conferenceEnabled` is a consumer-level override independent of SDK state.
+- **Design Decision**: Option A — widget-side override applied directly at the button builder level. When `conferenceEnabled` is `false`, the `isVisible` property of conference-related buttons (`conference`, `exitConference`, `merge`) is forced to `false` in `buildCallControlButtons()` and `createConsultButtons()`. Defaults to `true`.
+- **Component-Layer Changes**:
+  - `task.types.ts`: Added `conferenceEnabled: boolean` to `ControlProps`, `CallControlComponentProps`, `CallControlConsultComponentsProps`
+  - `call-control.utils.ts`: Added `conferenceEnabled` param to `buildCallControlButtons()`, gated `conference` and `exitConference` buttons via `conferenceEnabled && (controls?.…isVisible)`
+  - `call-control-custom.utils.ts`: Added `conferenceEnabled` param to `createConsultButtons()`, gated `conference` (merge) button
+  - `call-control.tsx`: Destructured `conferenceEnabled` from props, passed to `buildCallControlButtons()`
+  - `call-control-consult.tsx`: Destructured `conferenceEnabled`, passed to `createConsultButtons()`
+  - `call-control-cad.tsx`: Destructured `conferenceEnabled`, passed to `CallControlConsultComponent`
+  - `cc-widgets/src/wc.ts`: Exposed `conferenceEnabled` as r2wc `boolean` prop on `WebCallControl` and `WebCallControlCAD`
+- **No SDK changes required**: Gating is applied at the widget component layer directly on button definitions.
+- **Result**: Conference merge and exit buttons are hidden when `conferenceEnabled={false}`. All other SDK-driven controls remain unaffected.

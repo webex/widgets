@@ -15,8 +15,6 @@ const CallControlInternal: React.FunctionComponent<CallControlProps> = observer(
       wrapupCodes,
       consultStartTimeStamp,
       callControlAudio,
-      deviceType,
-      featureFlags,
       allowConsultToQueue,
       isMuted,
       agentId,
@@ -31,11 +29,9 @@ const CallControlInternal: React.FunctionComponent<CallControlProps> = observer(
         onRecordingToggle,
         onToggleMute,
         logger,
-        deviceType,
-        featureFlags,
         isMuted,
-        conferenceEnabled,
         agentId,
+        conferenceEnabled,
       }),
       wrapupCodes,
       consultStartTimeStamp,
@@ -57,7 +53,7 @@ const CallControl: React.FunctionComponent<CallControlProps> = (props) => {
         if (store.onErrorCallback) store.onErrorCallback('CallControl', error);
       }}
     >
-      <CallControlInternal {...props} conferenceEnabled={props.conferenceEnabled ?? true} />
+      <CallControlInternal {...props} />
     </ErrorBoundary>
   );
 };

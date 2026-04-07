@@ -20,7 +20,7 @@ The following functions are deleted — their only consumer (`getControlsVisibil
 |----------|-------------|
 | `deviceType` | SDK handles via `UIControlConfig` |
 | `featureFlags` | SDK handles via `config.isEndTaskEnabled`, `config.isEndConsultEnabled`, `config.isRecordingEnabled` |
-| `conferenceEnabled` | SDK computes conference/mergeToConference/exitConference visibility based on task state and config |
+| ~~`conferenceEnabled`~~ | **RESTORED** — This is an application-level config (not a feature flag). See [Fix Log: Restore conferenceEnabled](#fix-restore-conferenceenabled-prop--application-level-conference-gating) below |
 
 ### Props retained
 
@@ -415,7 +415,7 @@ export function calculateStateTimerData(
 
 ## Migration Gotchas
 
-1. **`UIControlConfig` is built by SDK:** Widgets do NOT provide it. The SDK handles feature-flag gating internally via `config.isEndTaskEnabled`, `config.isEndConsultEnabled`, `config.isRecordingEnabled`. Widget props `deviceType`, `featureFlags`, and `conferenceEnabled` can be **removed**. There is no `applyFeatureGates` function. **Retain `agentId`** — timer utils need it for participant lookup.
+1. **`UIControlConfig` is built by SDK:** Widgets do NOT provide it. The SDK handles feature-flag gating internally via `config.isEndTaskEnabled`, `config.isEndConsultEnabled`, `config.isRecordingEnabled`. Widget props `deviceType` and `featureFlags` can be **removed**. **`conferenceEnabled` is RETAINED** — it is an application-level config (not a feature flag) that gates conference UI at the consumer level. There is no `applyFeatureGates` function. **Retain `agentId`** — timer utils need it for participant lookup.
 
 2. **`isHeld` derivation:** Hold control can be `VISIBLE_DISABLED` in conference/consulting states without meaning the call is held. Do NOT derive from `controls.hold.isEnabled` — it is an action flag (button clickability), not hold state. Get hold state from the task object (SDK tracks hold state internally). `findHoldStatus()` is dead code and will be removed (see [store-task-utils-migration.md](./store-task-utils-migration.md)).
 
@@ -456,3 +456,69 @@ export function calculateStateTimerData(
 ---
 
 _Parent: [migration-overview.md](./migration-overview.md)_
+
+---
+
+## Migration Fix Log
+
+### Fix: `isHeld` Reactivity — Hold Button State and Multi-Login Sync
+
+- **Issue**: After migration, the hold button icon/tooltip did not toggle on click, and multi-login hold/resume did not sync across systems.
+- **Root Cause**: The old `controlVisibility.isHeld` was removed. `controls.hold.isEnabled` is an action flag, not state. `task.data.isOnHold` is not populated by SDK at runtime. The SDK state machine also lacked `HOLD_SUCCESS`/`UNHOLD_SUCCESS` transitions for multi-login scenarios.
+- **SDK Source of Truth**: `uiControlsComputer.ts` derives `isHeld` from `serverHold ?? state === TaskState.HELD`. `controls.hold` is `VISIBLE_ENABLED` in both `CONNECTED` and `HELD` states — it's an action flag, not a state indicator.
+- **Fix Pattern** (in `useCallControl` hook — `helper.ts`):
+  ```typescript
+  import { isInteractionOnHold } from '@webex/cc-store';
+
+  const [isHeld, setIsHeld] = useState<boolean>(() =>
+    currentTask ? isInteractionOnHold(currentTask) : false
+  );
+
+  useEffect(() => {
+    setIsHeld(currentTask ? isInteractionOnHold(currentTask) : false);
+  }, [currentTask]);
+
+  // In holdCallback: setIsHeld(true);
+  // In resumeCallback: setIsHeld(false);
+  // Return isHeld from hook
+  ```
+- **SDK Fix**: Added `HOLD_SUCCESS` handler to `CONNECTED` state and `UNHOLD_SUCCESS` handler to `HELD` state in `TaskStateMachine.ts` for multi-login sync.
+
+### Fix: Restore `conferenceEnabled` Prop — Application-Level Conference Gating
+
+- **Issue**: During the task-refactor migration, the `conferenceEnabled` prop was removed from the widget APIs. This prop is **not a feature flag** — it is an application-level configuration passed from `App.tsx` that controls whether conference-related UI controls should be available to the agent. Without it, applications cannot disable conference features regardless of SDK `uiControls`.
+- **Root Cause**: The migration assumed all UI visibility is driven exclusively by `task.uiControls` from the SDK state machine. However, `conferenceEnabled` is an application-level override that gates conference availability at the consumer level, independent of the SDK's computed state.
+- **Design Decision (Option A — Widget-Side Override at Button Level)**: `conferenceEnabled` is applied directly in the button builder functions (`buildCallControlButtons` and `createConsultButtons`) where conference-related buttons are defined. When `false`, the `isVisible` property of conference buttons (`conference`, `exitConference`, `merge`) is forced to `false` regardless of SDK `uiControls`. When `true` (default), SDK controls pass through unchanged.
+- **Gating Pattern** (in button builder functions):
+  ```typescript
+  // call-control.utils.ts — buildCallControlButtons
+  // conferenceEnabled param defaults to true
+  {
+    id: 'conference',
+    isVisible: conferenceEnabled && (controls?.mergeToConference?.isVisible ?? false) && !!handleConsultConferencePress,
+  },
+  {
+    id: 'exitConference',
+    isVisible: conferenceEnabled && (controls?.exitConference?.isVisible ?? false),
+  },
+
+  // call-control-custom.utils.ts — createConsultButtons
+  {
+    key: 'conference',
+    isVisible: conferenceEnabled && (controls?.mergeToConference?.isVisible ?? false),
+  },
+  ```
+- **Prop Flow**: `App.tsx` → `CallControl`/`CallControlCAD` → `useCallControl` hook → returned as prop → `CallControlComponent` → `buildCallControlButtons()` / `CallControlConsultComponent` → `createConsultButtons()`
+- **Files Changed**:
+  - `cc-components/…/task.types.ts`: Added `conferenceEnabled: boolean` to `ControlProps`, `CallControlComponentProps`, `CallControlConsultComponentsProps`
+  - `cc-components/…/call-control.utils.ts`: Added `conferenceEnabled` param to `buildCallControlButtons`, gated `conference` and `exitConference` buttons
+  - `cc-components/…/call-control-custom.utils.ts`: Added `conferenceEnabled` param to `createConsultButtons`, gated `conference` (merge) button
+  - `cc-components/…/call-control.tsx`: Destructured `conferenceEnabled`, passed to `buildCallControlButtons`
+  - `cc-components/…/call-control-consult.tsx`: Destructured `conferenceEnabled`, passed to `createConsultButtons`
+  - `cc-components/…/call-control-cad.tsx`: Destructured `conferenceEnabled`, passed to `CallControlConsultComponent`
+  - `task/src/task.types.ts`: Added `conferenceEnabled` to `CallControlProps` and `useCallControlProps`
+  - `task/src/helper.ts`: Destructured `conferenceEnabled` (default `true`), returned from hook
+  - `task/src/CallControl/index.tsx` and `CallControlCAD/index.tsx`: Pass `conferenceEnabled` to `useCallControl`
+  - `cc-widgets/src/wc.ts`: Exposed `conferenceEnabled` as r2wc `boolean` prop on `WebCallControl` and `WebCallControlCAD`
+- **Consumer Usage**: Apps pass `conferenceEnabled={true|false}` as a prop to `<CallControl>` or `<CallControlCAD>`. Web component consumers set the `conference-enabled` attribute. Defaults to `true` if not provided.
+- **Result**: Conference buttons (merge, exit conference) are hidden when `conferenceEnabled` is `false`, while all other SDK-driven controls remain unaffected.

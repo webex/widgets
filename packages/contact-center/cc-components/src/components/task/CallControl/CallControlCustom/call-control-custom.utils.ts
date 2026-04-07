@@ -1,6 +1,6 @@
-import {BuddyDetails, ContactServiceQueue, ILogger} from '@webex/cc-store';
+import {BuddyDetails, ContactServiceQueue, ILogger, TaskUIControls} from '@webex/cc-store';
 import {MUTE_CALL, UNMUTE_CALL} from '../../constants';
-import {ButtonConfig, ControlVisibility} from '../../task.types';
+import {ButtonConfig} from '../../task.types';
 
 /**
  * Interface for list item data
@@ -15,13 +15,14 @@ export interface ListItemData {
  */
 export const createConsultButtons = (
   isMuted: boolean,
-  controlVisibility: ControlVisibility,
+  controls: TaskUIControls,
   consultTransfer: () => void,
   toggleConsultMute: () => void,
   endConsultCall: () => void,
   consultConference: () => void,
   switchToMainCall: () => void,
-  logger?
+  logger?,
+  conferenceEnabled = true
 ): ButtonConfig[] => {
   try {
     return [
@@ -31,26 +32,26 @@ export const createConsultButtons = (
         onClick: toggleConsultMute,
         tooltip: isMuted ? UNMUTE_CALL : MUTE_CALL,
         className: `${isMuted ? 'call-control-button-muted' : 'call-control-button'}`,
-        disabled: !controlVisibility.muteUnmuteConsult.isEnabled,
-        isVisible: controlVisibility.muteUnmuteConsult.isVisible,
+        disabled: !(controls?.mute?.isEnabled ?? false),
+        isVisible: controls?.mute?.isVisible ?? false,
       },
       {
         key: 'switchToMainCall',
         icon: 'call-swap-bold',
-        tooltip: controlVisibility.isConferenceInProgress ? 'Switch to Conference Call' : 'Switch to Call',
+        tooltip: 'Switch to Call',
         onClick: switchToMainCall,
         className: 'call-control-button',
-        disabled: !controlVisibility.switchToMainCall.isEnabled,
-        isVisible: controlVisibility.switchToMainCall.isVisible,
+        disabled: !(controls?.switchToMainCall?.isEnabled ?? false),
+        isVisible: controls?.switchToMainCall?.isVisible ?? false,
       },
       {
         key: 'transfer',
         icon: 'next-bold',
-        tooltip: controlVisibility.isConferenceInProgress ? 'Transfer Conference' : 'Transfer',
+        tooltip: 'Transfer',
         onClick: consultTransfer,
         className: 'call-control-button',
-        disabled: !controlVisibility.consultTransferConsult.isEnabled,
-        isVisible: controlVisibility.consultTransferConsult.isVisible,
+        disabled: !(controls?.consultTransfer?.isEnabled ?? false),
+        isVisible: controls?.consultTransfer?.isVisible ?? false,
       },
       {
         key: 'conference',
@@ -58,8 +59,8 @@ export const createConsultButtons = (
         tooltip: 'Merge',
         onClick: consultConference,
         className: 'call-control-button',
-        disabled: !controlVisibility.mergeConferenceConsult.isEnabled,
-        isVisible: controlVisibility.mergeConferenceConsult.isVisible,
+        disabled: !(controls?.mergeToConference?.isEnabled ?? false),
+        isVisible: conferenceEnabled && (controls?.mergeToConference?.isVisible ?? false),
       },
       {
         key: 'cancel',
@@ -67,7 +68,7 @@ export const createConsultButtons = (
         tooltip: 'End Consult',
         onClick: endConsultCall,
         className: 'call-control-consult-button-cancel',
-        isVisible: controlVisibility.endConsult.isVisible,
+        isVisible: controls?.endConsult?.isVisible ?? false,
       },
     ];
   } catch (error) {
@@ -595,7 +596,7 @@ export const debounce = <T extends (...args: unknown[]) => unknown>(
   logger?
 ): ((...args: Parameters<T>) => void) => {
   try {
-    let timeout: NodeJS.Timeout;
+    let timeout: ReturnType<typeof setTimeout>;
     return (...args: Parameters<T>) => {
       clearTimeout(timeout);
       timeout = setTimeout(() => func(...args), wait);

@@ -173,5 +173,56 @@ Widgets no longer compute control visibility — `task.uiControls` is the single
 
 ---
 
+## Migration Fix Log
+
+### 2026-03-30 - Dial Number Transfer Wrapup Visibility (Complete Fix)
+
+**Issue**: After dial number consult transfers, wrapup button not appearing. Tests in SET_6 failing with `findFirstVisibleWrapupIndex` returning -1 (timeout after 15 seconds).
+
+**Root Cause (Deeper Analysis)**:
+1. Initial hypothesis: `shouldWrapUpOrIsInitiator` guard relied on backend `wrapUpRequired` flag which wasn't set for dial number transfers.
+2. **Actual root cause**: Backend sends `AgentConsultEnded` **before** `AgentConsultTransferred` for dial number transfers.
+3. Event ordering issue: CONSULT_END (clears `consultInitiator`) → TRANSFER_SUCCESS (checks `consultInitiator`, now false) → transitions to CONNECTED instead of WRAPPING_UP.
+
+**Fix Location**: SDK `/packages/@webex/contact-center/src/services/task/state-machine/`
+
+**Changes Made**:
+1. **TaskStateMachine.ts** - Updated TRANSFER_SUCCESS guards (lines 256-267, 336-347, 489-505):
+   - Changed to directly check `consultInitiator` instead of using `guards.shouldWrapUpOrIsInitiator`
+   - Ensures consult initiators always wrap up regardless of backend flags
+
+2. **Added `transferRequested` flag** to track transfer initiation:
+   - **types.ts**: Added `transferRequested: boolean` to TaskContext
+   - **constants.ts**: Added `TRANSFER` event
+   - **actions.ts**:
+     - Initialize `transferRequested: false` in `createInitialContext`
+     - Added `setTransferRequested` and `clearTransferRequested` actions
+     - Added `clearConsultStatePreservingTransfer` action that preserves `consultInitiator` if `transferRequested` is true
+   - **TaskStateMachine.ts**:
+     - CONNECTED, HELD, CONSULTING states: Added TRANSFER event handler that sets `transferRequested` flag
+     - CONSULT_END in CONSULTING state: Changed to use `clearConsultStatePreservingTransfer` instead of `clearConsultState`
+     - TRANSFER_SUCCESS in all states (CONNECTED, HELD, CONSULTING): Added `clearTransferRequested` to ALL branches (wrapup and fallback)
+     - TRANSFER_FAILED in all states: Added `clearTransferRequested` action
+   - **Voice.ts**: `transfer()` method now dispatches TRANSFER event before API call
+
+**Why**: For dial number transfers, backend event ordering can vary - CONSULT_END may arrive before TRANSFER_SUCCESS. The `transferRequested` flag tracks that a transfer is in progress, preventing CONSULT_END from clearing `consultInitiator` prematurely. This ensures TRANSFER_SUCCESS can properly check `consultInitiator` for wrapup transition.
+
+**Impact on Widgets**: No widget changes needed. Pure SDK state machine fix. Widgets already consume `task.uiControls.wrapup.isVisible`.
+
+**Tests Fixed**: SET_6 Tests 1, 2, 4, 9 (all dial number transfer wrapup visibility failures)
+
+**Fix Iterations**:
+- Iteration 1-3: Implemented transferRequested flag and preservation logic, but only added clearTransferRequested to CONSULTING state
+- Iteration 4 (2026-03-31): Discovered CONNECTED and HELD states' TRANSFER_SUCCESS handlers were missing clearTransferRequested. This was critical because when CONSULT_END arrives during transfer, state transitions CONSULTING → HELD, and TRANSFER_SUCCESS is then handled in HELD state. Without cleanup in HELD state, the flag would leak. Fixed by adding clearTransferRequested to ALL TRANSFER_SUCCESS branches in ALL states
+- **CRITICAL DISCOVERY (2026-03-31)**: SDK was on WRONG BRANCH (`ADD_MISSING_EVENT_EMITTER_TYPES` instead of `task-refactor`). This meant:
+  - stateMachineService was not initialized
+  - All previous fix iterations were applied to wrong branch
+  - Widgets were NOT using state machine at all
+  - All test failures were due to missing state machine, not implementation bugs
+  - **Resolution**: Switched SDK to `task-refactor` branch and re-applied all fixes. Tests must be re-run to validate fixes work on correct branch.
+
+---
+
 _Created: 2026-03-09_
 _Updated: 2026-03-24 (added dead code removal and task-object source of truth sections; aligned with PR #648 decisions)_
+_Updated: 2026-03-30 (added dial number transfer wrapup fix log)_

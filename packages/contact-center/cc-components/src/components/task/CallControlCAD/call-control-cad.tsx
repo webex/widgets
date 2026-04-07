@@ -19,6 +19,7 @@ import {
   CUSTOMER_NAME,
 } from '../constants';
 import {withMetrics} from '@webex/cc-ui-logging';
+import {isInteractionOnHold} from '@webex/cc-store';
 
 const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => {
   const {
@@ -37,11 +38,12 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
     startTimestamp,
     stateTimerLabel,
     stateTimerTimestamp,
-    controlVisibility,
+    controls,
     logger,
     isMuted,
     toggleMute,
     conferenceParticipants,
+    conferenceEnabled = true,
   } = props;
 
   const formatTime = (time: number): string => {
@@ -61,12 +63,9 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
   const participantsCount = conferenceParticipants?.length || 1;
   const participantsLabel = participantsCount === 1 ? 'Participant' : 'Participants';
 
-  //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
   const customerName = currentTask?.data?.interaction?.callAssociatedDetails?.customerName;
 
-  //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
   const ani = currentTask?.data?.interaction?.callAssociatedDetails?.ani;
-  //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
   const dn = currentTask?.data?.interaction?.callAssociatedDetails?.dn;
 
   // Create unique IDs for tooltips
@@ -178,7 +177,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
                     </>
                   )}
                 </Text>
-                {controlVisibility.isConferenceInProgress && !controlVisibility.wrapup.isVisible && (
+                {currentTask?.data?.isConferenceInProgress && !controls?.wrapup?.isVisible && (
                   <>
                     <div className="vertical-divider"></div>
                     <div className="participants-section">
@@ -228,25 +227,22 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
                 )}
               </div>
               <div className="call-status">
-                {!controlVisibility.wrapup.isVisible &&
-                  controlVisibility.isHeld &&
-                  !controlVisibility.isConsultReceived &&
-                  !controlVisibility.consultCallHeld && (
-                    <>
-                      <span className="dot">•</span>
-                      <div className="on-hold">
-                        <Icon name="call-hold-filled" size={1} className="call-hold-filled-icon" />
-                        <span className="on-hold-chip-text">
-                          {ON_HOLD} {formatTime(holdTime)}
-                        </span>
-                      </div>
-                    </>
-                  )}
+                {!controls?.wrapup?.isVisible && isInteractionOnHold(currentTask) && (
+                  <>
+                    <span className="dot">•</span>
+                    <div className="on-hold">
+                      <Icon name="call-hold-filled" size={1} className="call-hold-filled-icon" />
+                      <span className="on-hold-chip-text">
+                        {ON_HOLD} {formatTime(holdTime)}
+                      </span>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
         </div>
-        {!controlVisibility.wrapup.isVisible && controlVisibility.recordingIndicator.isVisible && (
+        {!controls?.wrapup?.isVisible && controls?.recording?.isVisible && (
           <div className="recording-indicator">
             <Icon name={isRecording ? 'record-active-badge-filled' : 'record-paused-badge-filled'} size={1.3} />
           </div>
@@ -255,18 +251,12 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
         <div className="cad-variables">
           <Text className="queue" type="body-secondary" tagName={'small'}>
             <strong>{QUEUE}</strong>{' '}
-            <span>
-              {
-                //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
-
-                currentTask?.data?.interaction?.callAssociatedDetails?.virtualTeamName || NO_TEAM_NAME
-              }
-            </span>
+            <span>{currentTask?.data?.interaction?.callAssociatedDetails?.virtualTeamName || NO_TEAM_NAME}</span>
           </Text>
           {renderPhoneNumber()}
         </div>
       </div>
-      {controlVisibility.isConsultInitiatedOrAccepted && !controlVisibility.wrapup.isVisible && (
+      {controls?.endConsult?.isVisible && !controls?.wrapup?.isVisible && (
         <div className={`call-control-consult-container ${callControlConsultClassName || ''}`}>
           <CallControlConsultComponent
             agentName={consultAgentName}
@@ -278,8 +268,9 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
             switchToMainCall={switchToMainCall}
             logger={logger}
             isMuted={isMuted}
-            controlVisibility={controlVisibility}
+            controls={controls}
             toggleConsultMute={toggleMute}
+            conferenceEnabled={conferenceEnabled}
           />
         </div>
       )}
