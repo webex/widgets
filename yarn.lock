@@ -7860,7 +7860,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/babel__plugin-transform-runtime@npm:^7":
+"@types/babel__plugin-transform-runtime@npm:^7, @types/babel__plugin-transform-runtime@npm:^7.9.5":
   version: 7.9.5
   resolution: "@types/babel__plugin-transform-runtime@npm:7.9.5"
   checksum: 10c0/119d8f88188c63eb21bf150d294991d3470e6aa90dc8ec9f634197760af8acc981564e29af9087bfa8ad713b5b5419cae03047cd225fccb9977bb97adf25a871
@@ -12023,6 +12023,8 @@ __metadata:
     "@babel/register": "npm:^7.25.9"
     "@commitlint/cli": "npm:^8.3.5"
     "@commitlint/config-conventional": "npm:^8.3.4"
+    "@momentum-ui/core": "npm:19.16.0"
+    "@momentum-ui/icons": "npm:8.28.5"
     "@momentum-ui/react": "npm:^23.21.4"
     "@semantic-release/changelog": "npm:^6.0.0"
     "@semantic-release/git": "npm:^10.0.0"
@@ -34731,7 +34733,7 @@ __metadata:
     "@semantic-release/git": "npm:^10.0.1"
     "@semantic-release/github": "npm:^11.0.1"
     "@testing-library/react-hooks": "npm:^8.0.1"
-    "@types/babel__plugin-transform-runtime": "npm:^7"
+    "@types/babel__plugin-transform-runtime": "npm:^7.9.5"
     "@webex/cli-tools": "npm:0.0.0-next.2"
     "@webex/package-tools": "npm:0.0.0-next.6"
     babel-jest: "npm:^29.7.0"
