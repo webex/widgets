@@ -1,4 +1,4 @@
-import {MEDIA_CHANNEL} from '../task.types';
+import {MEDIA_CHANNEL, getCallerIdentifier} from '../task.types';
 import {ITask} from '@webex/cc-store';
 
 export interface IncomingTaskData {
@@ -35,6 +35,7 @@ export const extractIncomingTaskData = (
     //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
     const callAssociationDetails = incomingTask?.data?.interaction?.callAssociatedDetails;
     const ani = callAssociationDetails?.ani;
+    const dn = callAssociationDetails?.dn;
     const customerName = callAssociationDetails?.customerName;
     const virtualTeamName = callAssociationDetails?.virtualTeamName;
     const ronaTimeout = callAssociationDetails?.ronaTimeout ? Number(callAssociationDetails?.ronaTimeout) : null;
@@ -56,7 +57,8 @@ export const extractIncomingTaskData = (
     const declineText = !incomingTask.data.wrapUpRequired && isTelephony && isBrowser ? 'Decline' : undefined;
 
     // Compute title based on media type
-    const title = isSocial ? customerName : ani;
+    const outboundType = incomingTask?.data?.interaction?.outboundType;
+    const title = isSocial ? customerName : getCallerIdentifier(ani, dn, outboundType);
 
     // Compute disable state for accept button when auto-answering
     const isAutoAnswering = incomingTask.data.isAutoAnswering || false;
