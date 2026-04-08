@@ -19,7 +19,7 @@
     "@semantic-release/git": "^10.0.1",
     "@semantic-release/github": "^11.0.1",
     "@testing-library/react-hooks": "^8.0.1",
-    "@types/babel__plugin-transform-runtime": "^7",
+    "@types/babel__plugin-transform-runtime": "^7.9.5",
     "@webex/cli-tools": "0.0.0-next.2",
     "@webex/package-tools": "0.0.0-next.6",
     "babel-jest": "^29.7.0",
