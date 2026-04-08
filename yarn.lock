@@ -12023,6 +12023,8 @@ __metadata:
     "@babel/register": "npm:^7.25.9"
     "@commitlint/cli": "npm:^8.3.5"
     "@commitlint/config-conventional": "npm:^8.3.4"
+    "@momentum-ui/core": "npm:19.16.0"
+    "@momentum-ui/icons": "npm:8.28.5"
     "@momentum-ui/react": "npm:^23.21.4"
     "@semantic-release/changelog": "npm:^6.0.0"
     "@semantic-release/git": "npm:^10.0.0"
