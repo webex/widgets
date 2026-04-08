@@ -16,7 +16,6 @@ import store, {
   getConferenceParticipants,
   Participant,
   findMediaResourceId,
-  findHoldStatus,
   MEDIA_TYPE_TELEPHONY_LOWER,
 } from '@webex/cc-store';
 import {getControlsVisibility} from './Utils/task-util';
@@ -447,19 +446,11 @@ export const useCallControl = (props: useCallControlProps) => {
     }
   }, [currentTask, logger, lastTargetType, consultAgentName, setConsultAgentName]);
 
-  // Sync local hold state from task data only when a different task is selected
+  // Sync local hold state from controlVisibilityBase only when a different task is selected
   // (not on every currentTask reference change, which would overwrite event-driven state)
   useEffect(() => {
-    if (currentTask?.data?.interaction) {
-      try {
-        setIsHeld(findHoldStatus(currentTask, 'mainCall', agentId));
-      } catch (error) {
-        logger?.warn(`CC-Widgets: Task: Error syncing hold state - ${error?.message || error}`, {
-          module: 'useCallControl',
-          method: 'syncHoldState',
-        });
-      }
-    }
+    setIsHeld(controlVisibilityBase?.isHeld ?? false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentTask?.data?.interactionId, agentId]);
 
   // Extract main call timestamp whenever currentTask changes

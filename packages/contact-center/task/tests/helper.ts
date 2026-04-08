@@ -1023,8 +1023,8 @@ describe('useCallControl', () => {
     expect(result.current.controlVisibility.isHeld).toBe(false);
   });
 
-  it('should override getControlsVisibility isHeld with local event-driven state', async () => {
-    // Mock getControlsVisibility to return isHeld: true (simulating stale task data)
+  it('should override getControlsVisibility isHeld with event-driven state from callbacks', async () => {
+    // Mock getControlsVisibility to return isHeld: true (simulating stale task data after refreshTaskList)
     mockGetControlsVisibility.mockReturnValue({
       ...mockGetControlsVisibility.mock.results[0]?.value,
       muteUnmute: {isVisible: true, isEnabled: true},
@@ -1051,23 +1051,19 @@ describe('useCallControl', () => {
       })
     );
 
-    // Even though getControlsVisibility returns isHeld: true,
-    // the local state starts as false, so controlVisibility.isHeld should be false
-    expect(result.current.controlVisibility.isHeld).toBe(false);
-
-    // After holdCallback, it should be true (event-driven, not from getControlsVisibility)
-    const holdCallback = setTaskCallbackSpy.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_HOLD)?.[1];
-    act(() => {
-      holdCallback();
-    });
-    expect(result.current.controlVisibility.isHeld).toBe(true);
-
-    // After resumeCallback, it should be false again
+    // resumeCallback should override getControlsVisibility isHeld: true with false
     const resumeCallback = setTaskCallbackSpy.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_RESUME)?.[1];
     act(() => {
       resumeCallback();
     });
     expect(result.current.controlVisibility.isHeld).toBe(false);
+
+    // holdCallback should set it back to true
+    const holdCallback = setTaskCallbackSpy.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_HOLD)?.[1];
+    act(() => {
+      holdCallback();
+    });
+    expect(result.current.controlVisibility.isHeld).toBe(true);
   });
 
   it('should log an error if hold fails', async () => {
