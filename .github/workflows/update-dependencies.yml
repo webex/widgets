@@ -8,7 +8,7 @@ jobs:
     if: github.event.action == 'component-adapter-interfaces:version-changed'
     steps:
       - name: checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5 # v2
       - run: |
           npm install @webex/component-adapter-interfaces
           if [ -n "$(git status --porcelain)" ]; then
@@ -24,7 +24,7 @@ jobs:
     if: github.event.action == 'components:version-changed'
     steps:
       - name: checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5 # v2
       - run: |
           npm install @webex/components
           if [ -n "$(git status --porcelain)" ]; then
@@ -40,7 +40,7 @@ jobs:
     if: github.event.action == 'sdk-component-adapter:version-changed'
     steps:
       - name: checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5 # v2
       - run: |
           npm install @webex/sdk-component-adapter
           if [ -n "$(git status --porcelain)" ]; then
