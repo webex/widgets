@@ -123,7 +123,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
       ? customerName || NO_CUSTOMER_NAME
       : isTelephony
         ? ani || NO_PHONE_NUMBER
-        : NO_PHONE_NUMBER;
+        : ani || NO_PHONE_NUMBER;
     const labelText = isSocial ? CUSTOMER_NAME : PHONE_NUMBER;
 
     const textComponent = (
