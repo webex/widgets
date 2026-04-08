@@ -147,7 +147,7 @@ const populateFormFieldsFromURL = async () => {
     commitHash: queryParams.get('commitHash'),
   };
 
-  let hasAtleastOneParam = false;
+  let hasAtLeastOneParam = false;
 
   if (searchParams.stable_version) {
     versionSelectDropdown.value = searchParams.stable_version;
@@ -159,28 +159,28 @@ const populateFormFieldsFromURL = async () => {
   if (searchParams.package && !packageNameInputDropdown.disabled) {
     packageNameInputDropdown.value = searchParams.package;
     packageNameInputDropdown.dispatchEvent(new Event('change'));
-    hasAtleastOneParam = true;
+    hasAtLeastOneParam = true;
   }
 
   if (searchParams.version) {
     versionInput.value = searchParams.version;
-    hasAtleastOneParam = true;
+    hasAtLeastOneParam = true;
     validateVersionInput({version: searchParams.version});
   }
 
   if (searchParams.commitMessage) {
     commitMessageInput.value = searchParams.commitMessage;
-    hasAtleastOneParam = true;
+    hasAtLeastOneParam = true;
   }
 
   if (searchParams.commitHash) {
     commitHashInput.value = searchParams.commitHash;
-    hasAtleastOneParam = true;
+    hasAtLeastOneParam = true;
   }
 
   updateFormState(searchParams);
 
-  if (hasAtleastOneParam) {
+  if (hasAtLeastOneParam) {
     doSearch(searchParams);
   }
 };
@@ -214,22 +214,22 @@ const fetchChangelog = async (versionPath) => {
 };
 
 const populatePackageNames = (changelog) => {
-  let specialPackages = ['@webex/widgets', '@webex/cc-widgets'];
+  const specialPackages = ['@webex/widgets', '@webex/cc-widgets'];
 
   // Get all packages that actually exist in this version's changelog
-  let allPackages = Object.keys(changelog);
+  const allPackages = Object.keys(changelog);
 
   // Filter special packages that ACTUALLY EXIST in this version
-  let existingSpecialPackages = specialPackages.filter((pkg) => allPackages.includes(pkg));
+  const existingSpecialPackages = specialPackages.filter((pkg) => allPackages.includes(pkg));
 
   // Get remaining packages (excluding special ones)
-  let otherPackages = allPackages.filter((pkg) => !specialPackages.includes(pkg));
+  const otherPackages = allPackages.filter((pkg) => !specialPackages.includes(pkg));
 
   // Sort the remaining packages alphabetically
   otherPackages.sort();
 
   // Build the sorted list - only add separator if special packages exist
-  let sortedPackages;
+  const sortedPackages = [];
   if (existingSpecialPackages.length > 0) {
     sortedPackages = ['separator', ...existingSpecialPackages, 'separator', ...otherPackages];
   } else {
@@ -237,7 +237,7 @@ const populatePackageNames = (changelog) => {
     sortedPackages = otherPackages;
   }
 
-  let optionsHtml = '<option value="">Select a package</option>';
+  const optionsHtml = '<option value="">Select a package</option>';
 
   sortedPackages.forEach((packageName) => {
     if (packageName === 'separator') {
@@ -1180,22 +1180,20 @@ const collectCommitsAcrossStables = async (packageName, stableA, stableB, versio
     if (!path) continue;
 
     let changelog;
-    if (stable === stableA && comparisonState.cachedChangelogA ) {
+    if (stable === stableA && comparisonState.cachedChangelogA) {
       changelog = comparisonState.cachedChangelogA;
     } else if (stable === stableB && comparisonState.cachedChangelogB) {
       changelog = comparisonState.cachedChangelogB;
     } else {
-     try {
-       const res = await fetch(path);
-       if (!res.ok) {
-        throw new Error(`Failed to fetch changelog for stable ${stable}`);
+      try {
+        const res = await fetch(path);
+        if (!res.ok) throw new Error(`Failed to fetch changelog for stable ${stable}`);
+        changelog = await res.json();
+      } catch (error) {
+        console.error('Error fetching changelog:', error);
+        continue;
       }
-       changelog = await res.json();
-     } catch (error) {
-
-      continue;
     }
-  }
 
     const packageData = changelog[packageName];
     if (!packageData) continue;
