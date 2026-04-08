@@ -73,7 +73,8 @@ module.exports = function(env, argv) {
           test: /\.css$/,
           use: [isDemo ? 'style-loader' : MiniCssExtractPlugin.loader, 'css-loader'],
           include: [
-            path.resolve(__dirname, 'node_modules/@momentum-ui'),
+            resolveMonorepoRoot('node_modules/@momentum-ui'),
+            path.resolve(__dirname, 'packages'),
             path.resolve(__dirname, 'node_modules/@webex/components'),
           ],
         },
