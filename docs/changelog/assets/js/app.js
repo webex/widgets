@@ -229,7 +229,7 @@ const populatePackageNames = (changelog) => {
   otherPackages.sort();
 
   // Build the sorted list - only add separator if special packages exist
-  const sortedPackages = [];
+  let sortedPackages;
   if (existingSpecialPackages.length > 0) {
     sortedPackages = ['separator', ...existingSpecialPackages, 'separator', ...otherPackages];
   } else {
@@ -237,7 +237,7 @@ const populatePackageNames = (changelog) => {
     sortedPackages = otherPackages;
   }
 
-  const optionsHtml = '<option value="">Select a package</option>';
+  let optionsHtml = '<option value="">Select a package</option>';
 
   sortedPackages.forEach((packageName) => {
     if (packageName === 'separator') {
@@ -1285,7 +1285,6 @@ const handleComparisonSubmit = async (event) => {
         commits.length
       );
 
-      updateEnhancedComparisonURL(stableA, stableB, selectedPackage, finalVersionA, finalVersionB);
     } catch (error) {
       showComparisonError(error);
     }
