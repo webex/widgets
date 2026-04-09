@@ -134,11 +134,7 @@ jobs:
           OUTPUT=$(yarn package-tools increment --packages ${{ needs.analyze-changes.outputs.node-recursive }} --tag ${GITHUB_REF##*/})
           echo "$OUTPUT"
           echo "package_versions<<EOF" >> $GITHUB_OUTPUT
-          echo "$OUTPUT" | while IFS= read -r line; do
-            if echo "$line" | grep -q ' => '; then
-              echo "__webex_release__: $line"
-            fi
-          done >> $GITHUB_OUTPUT
+          echo "$OUTPUT" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
       - name: Build Changed Packages
         if: steps.check-changes.outputs.has_changes == 'true'
@@ -371,8 +367,8 @@ jobs:
         with:
           script: |
             const deploySha = context.sha;
-            const owner = 'webex';
-            const repo = 'widgets';
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
 
             try {
               const prs = await github.rest.repos.listPullRequestsAssociatedWithCommit({
@@ -398,13 +394,13 @@ jobs:
             const raw = `${{ needs.publish-npm.outputs.package_versions }}`;
             const packageVersions = {};
             for (const line of raw.split('\n')) {
-              const match = line.match(/^__webex_release__:\s+(.+?)\s+=>\s+(.+)$/);
+              const match = line.match(/^(.+?)\s+=>\s+(.+)$/);
               if (match) packageVersions[match[1].trim()] = match[2].trim();
             }
             const packageEntries = Object.entries(packageVersions);
 
-            const owner = 'webex';
-            const repo = 'widgets';
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
             const repoUrl = `https://github.com/${owner}/${repo}`;
             const hasPackages = packageEntries.length > 0;
 
@@ -413,32 +409,45 @@ jobs:
               '@webex/cc-widgets': 'webex-cc-widgets'
             };
 
+            const aggregators = ['@webex/cc-widgets', '@webex/widgets'];
+
             let commentBody;
 
             if (hasPackages) {
-              const tagLinks = Object.entries(taggablePackages)
+              const primaryPackage = aggregators.find(p => packageVersions[p])
+                || packageEntries[0][0];
+              const primaryVersion = packageVersions[primaryPackage];
+              const stableVersion = primaryVersion
+                .replace(/-next\..*/, '')
+                .replace(/-[a-z]*\..*/, '');
+
+              let cname = 'widgets.webex.com';
+              try {
+                const cnameFile = await github.rest.repos.getContent({ owner, repo, path: 'docs/CNAME' });
+                const encoded = cnameFile.data.content;
+                if (typeof encoded === 'string') {
+                  cname = Buffer.from(encoded, 'base64').toString().trim();
+                }
+              } catch (e) {
+                console.log(`Could not read docs/CNAME, using default changelog host: ${e.message}`);
+              }
+
+              const changelogUrl = new URL(`https://${cname}/changelog/`);
+              if (stableVersion) {
+                changelogUrl.searchParams.set('stable_version', stableVersion);
+              }
+              changelogUrl.searchParams.set('package', primaryPackage);
+              changelogUrl.searchParams.set('version', primaryVersion);
+
+              const tagLinkParts = Object.entries(taggablePackages)
                 .filter(([pkg]) => packageVersions[pkg])
                 .map(([pkg, prefix]) => {
                   const tag = `${prefix}-v${packageVersions[pkg]}`;
                   return `[\`${tag}\`](${repoUrl}/releases/tag/${tag})`;
-                })
-                .join(', ');
-
-              const releaseLine = tagLinks
-                ? `**Released in:** ${tagLinks}`
+                });
+              const releaseLine = tagLinkParts.length
+                ? `| **Released in:** ${tagLinkParts.join(', ')} |`
                 : '';
-
-              const changelogBaseUrl = 'https://widgets.webex.com/changelog/';
-              const aggregators = ['@webex/cc-widgets', '@webex/widgets'];
-              const changelogPkg = aggregators.find(p => packageVersions[p])
-                || packageEntries[0]?.[0];
-              let changelogLine = '';
-              if (changelogPkg) {
-                const ver = packageVersions[changelogPkg];
-                const stableVersion = ver.replace(/-.*$/, '');
-                const url = `${changelogBaseUrl}?stable_version=${stableVersion}&package=${encodeURIComponent(changelogPkg)}&version=${encodeURIComponent(ver)}`;
-                changelogLine = `:book: **[View full changelog](${url})**`;
-              }
 
               const rows = packageEntries
                 .sort(([a], [b]) => {
@@ -460,14 +469,14 @@ jobs:
               ].join('\n');
 
               commentBody = [
-                ':tada: **Your changes are now available!**',
-                '',
+                '| :tada: Your changes are now available! |',
+                '|---|',
                 releaseLine,
-                changelogLine,
+                `| :book: **[View full changelog →](${changelogUrl})** |`,
                 packagesTable,
                 'Thank you for your contribution!',
                 '',
-                `_:robot: This is an automated message. For questions, please refer to the [documentation](${repoUrl}#readme)._`
+                `_:robot: This is an automated message. For queries, please contact [support](https://developer.webex.com/support)._`
               ].filter(Boolean).join('\n');
             } else {
               commentBody = [
@@ -475,7 +484,7 @@ jobs:
                 '',
                 'Thank you for your contribution!',
                 '',
-                `_:robot: This is an automated message. For questions, please refer to the [documentation](${repoUrl}#readme)._`
+                `_:robot: This is an automated message. For queries, please contact [support](https://developer.webex.com/support)._`
               ].join('\n');
             }
 
@@ -483,17 +492,17 @@ jobs:
               const pr = await github.rest.pulls.get({ owner, repo, pull_number: prNumber });
               if (!pr.data.merged_at) return;
 
-              const existingComments = await github.rest.issues.listComments({
+              const comments = await github.paginate(github.rest.issues.listComments, {
                 owner, repo,
                 issue_number: prNumber,
                 per_page: 100
               });
 
-              const detailedComment = existingComments.data.find(comment =>
+              const detailedComment = comments.find(comment =>
                 comment.user.type === 'Bot' &&
                 comment.body.includes('Your changes are now available')
               );
-              const mergedComment = existingComments.data.find(comment =>
+              const mergedComment = comments.find(comment =>
                 comment.user.type === 'Bot' &&
                 comment.body.includes('Your changes have been merged')
               );
