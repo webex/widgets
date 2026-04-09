@@ -5,6 +5,7 @@ import CallControlCADComponent from './components/task/CallControlCAD/call-contr
 import IncomingTaskComponent from './components/task/IncomingTask/incoming-task';
 import TaskListComponent from './components/task/TaskList/task-list';
 import OutdialCallComponent from './components/task/OutdialCall/outdial-call';
+import CampaignErrorDialogComponent from './components/task/CampaignErrorDialog/CampaignErrorDialog';
 
 export {
   UserStateComponent,
@@ -14,8 +15,10 @@ export {
   IncomingTaskComponent,
   TaskListComponent,
   OutdialCallComponent,
+  CampaignErrorDialogComponent,
 };
 export * from './components/StationLogin/constants';
 export * from './components/StationLogin/station-login.types';
 export * from './components/UserState/user-state.types';
 export * from './components/task/task.types';
+export * from './components/task/CampaignErrorDialog/campaign-error-dialog.types';
