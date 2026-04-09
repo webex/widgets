@@ -4,8 +4,8 @@ import {
   useCallControlProps,
   UseTaskListProps,
   UseTaskProps,
-  UseRealtimeTranscriptInternalProps,
-  RealtimeTranscriptEntry,
+  UseRealTimeTranscriptInternalProps,
+  RealTimeTranscriptEntry,
   useOutdialCallProps,
   TargetType,
   TARGET_TYPE,
@@ -19,7 +19,7 @@ import store, {
   Participant,
   findMediaResourceId,
   MEDIA_TYPE_TELEPHONY_LOWER,
-  RealtimeTranscriptionData,
+  RealTimeTranscriptionData,
 } from '@webex/cc-store';
 import {getControlsVisibility} from './Utils/task-util';
 import {TIMER_LABEL_CONSULTING} from './Utils/constants';
@@ -30,7 +30,7 @@ import {OutdialAniEntriesResponse} from '@webex/contact-center/dist/types/servic
 const ENGAGED_LABEL = 'ENGAGED';
 const ENGAGED_USERNAME = 'Engaged';
 
-const getTranscriptSpeaker = (payload: RealtimeTranscriptionData): string => {
+const getTranscriptSpeaker = (payload: RealTimeTranscriptionData): string => {
   const role = payload.role?.toUpperCase();
   if (role === 'AGENT') return 'Agent';
   if (role === 'CUSTOMER') return 'Customer';
@@ -38,14 +38,14 @@ const getTranscriptSpeaker = (payload: RealtimeTranscriptionData): string => {
   return role;
 };
 
-const getTranscriptTimestamp = (payload: RealtimeTranscriptionData): number => {
+const getTranscriptTimestamp = (payload: RealTimeTranscriptionData): number => {
   const rawTimestamp = payload.publishTimestamp;
   const parsedTimestamp =
     typeof rawTimestamp === 'number' ? rawTimestamp : Number.parseInt(`${rawTimestamp || ''}`, 10);
   return Number.isNaN(parsedTimestamp) ? Date.now() : parsedTimestamp;
 };
 
-const isCustomerSpeaker = (payload: RealtimeTranscriptionData, speaker: string): boolean => {
+const isCustomerSpeaker = (payload: RealTimeTranscriptionData, speaker: string): boolean => {
   const role = (payload.role || '').toUpperCase();
   if (role) return role === 'CUSTOMER' || role === 'CALLER';
   const normalizedSpeaker = speaker.toLowerCase();
@@ -171,17 +171,9 @@ export const useTaskList = (props: UseTaskListProps) => {
   return {taskList, acceptTask, declineTask, onTaskSelect, isBrowser};
 };
 
-export const useRealtimeTranscript = (props: UseRealtimeTranscriptInternalProps) => {
-  const {
-    ivrTranscript = '',
-    liveTranscriptEntries = [],
-    activeTab = 'live',
-    onTabChange,
-    className,
-    currentTaskId,
-    realtimeTranscriptLines = [],
-  } = props;
-  const mappedRealtimeEntries = useMemo<RealtimeTranscriptEntry[]>(() => {
+export const useRealTimeTranscript = (props: UseRealTimeTranscriptInternalProps) => {
+  const {liveTranscriptEntries = [], className, currentTaskId, realtimeTranscriptLines = []} = props;
+  const mappedRealtimeEntries = useMemo<RealTimeTranscriptEntry[]>(() => {
     if (!currentTaskId) return liveTranscriptEntries;
 
     const transcriptLines = realtimeTranscriptLines;
@@ -190,7 +182,7 @@ export const useRealtimeTranscript = (props: UseRealtimeTranscriptInternalProps)
     }
 
     return transcriptLines.map((line, index) => {
-      const payload: RealtimeTranscriptionData = {
+      const payload: RealTimeTranscriptionData = {
         messageId: line.messageId,
         conversationId: line.conversationId,
         role: line.role,
@@ -214,10 +206,7 @@ export const useRealtimeTranscript = (props: UseRealtimeTranscriptInternalProps)
   }, [currentTaskId, realtimeTranscriptLines, liveTranscriptEntries]);
 
   return {
-    ivrTranscript,
     liveTranscriptEntries: mappedRealtimeEntries,
-    activeTab,
-    onTabChange,
     className,
   };
 };

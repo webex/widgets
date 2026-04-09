@@ -110,10 +110,7 @@ if (!customElements.get('component-cc-out-dial-call')) {
 
 const WebRealtimeTranscriptComponent = r2wc(RealtimeTranscriptComponent, {
   props: {
-    ivrTranscript: 'string',
     liveTranscriptEntries: 'json',
-    activeTab: 'string',
-    onTabChange: 'function',
     className: 'string',
   },
 });

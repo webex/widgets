@@ -7,31 +7,6 @@
   padding: 0.75rem 0.875rem;
 }
 
-.real-time-transcript__tabs {
-  align-items: center;
-  column-gap: 1.5rem;
-  display: flex;
-  margin-bottom: 0.75rem;
-}
-
-.real-time-transcript__tab {
-  background: transparent;
-  border: 0;
-  border-bottom: 0.125rem solid transparent;
-  color: var(--mds-color-theme-text-secondary-normal);
-  cursor: pointer;
-  font-size: 0.9375rem;
-  font-weight: 500;
-  line-height: 1.25rem;
-  padding: 0.125rem 0;
-}
-
-.real-time-transcript__tab--active {
-  border-bottom-color: var(--mds-color-theme-text-primary-normal);
-  color: var(--mds-color-theme-text-primary-normal);
-  font-weight: 700;
-}
-
 .real-time-transcript__content {
   display: flex;
   flex: 1;

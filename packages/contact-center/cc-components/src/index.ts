@@ -5,7 +5,7 @@ import CallControlCADComponent from './components/task/CallControlCAD/call-contr
 import IncomingTaskComponent from './components/task/IncomingTask/incoming-task';
 import TaskListComponent from './components/task/TaskList/task-list';
 import OutdialCallComponent from './components/task/OutdialCall/outdial-call';
-import RealtimeTranscriptComponent from './components/task/RealTimeTranscript/real-time-transcript';
+import RealTimeTranscriptComponent from './components/task/RealTimeTranscript/real-time-transcript';
 
 export {
   UserStateComponent,
@@ -15,7 +15,7 @@ export {
   IncomingTaskComponent,
   TaskListComponent,
   OutdialCallComponent,
-  RealtimeTranscriptComponent,
+  RealTimeTranscriptComponent,
 };
 export * from './components/StationLogin/constants';
 export * from './components/StationLogin/station-login.types';

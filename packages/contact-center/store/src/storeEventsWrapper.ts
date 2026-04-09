@@ -22,7 +22,7 @@ import {
   Profile,
   AgentLoginProfile,
   ERROR_TRIGGERING_IDLE_CODES,
-  RealtimeTranscriptionEventPayload,
+  RealTimeTranscriptionEventPayload,
 } from './store.types';
 import Store from './store';
 import {
@@ -44,7 +44,7 @@ class StoreWrapper implements IStoreWrapper {
   onErrorCallback?: (widgetName: string, error: Error) => void;
   private realtimeTranscriptionListeners: Record<
     string,
-    (payload: NonNullable<RealtimeTranscriptionEventPayload['data']>) => void
+    (payload: NonNullable<RealTimeTranscriptionEventPayload['data']>) => void
   > = {};
 
   constructor() {
@@ -626,7 +626,7 @@ class StoreWrapper implements IStoreWrapper {
     task.on(TASK_EVENTS.TASK_POST_CALL_ACTIVITY, this.refreshTaskList);
     const taskId = task.data?.interactionId;
     if (taskId && !this.realtimeTranscriptionListeners[taskId]) {
-      this.realtimeTranscriptionListeners[taskId] = (payload: NonNullable<RealtimeTranscriptionEventPayload['data']>) =>
+      this.realtimeTranscriptionListeners[taskId] = (payload: NonNullable<RealTimeTranscriptionEventPayload['data']>) =>
         this.handleRealtimeTranscription(payload);
     }
     if (taskId && this.realtimeTranscriptionListeners[taskId]) {
@@ -756,7 +756,7 @@ class StoreWrapper implements IStoreWrapper {
     return {existingIndex, insertPosition};
   };
 
-  handleRealtimeTranscription = (payload: NonNullable<RealtimeTranscriptionEventPayload['data']>) => {
+  handleRealtimeTranscription = (payload: NonNullable<RealTimeTranscriptionEventPayload['data']>) => {
     // SDK emits task events with the unwrapped inner data: task.emit(eventType, websocketPayload.data)
     // So `payload` here is RealtimeTranscriptionEventPayload['data'], and `payload.data` is RealtimeTranscriptionData
     const data = payload?.data;

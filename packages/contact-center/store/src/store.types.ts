@@ -95,7 +95,7 @@ type IdleCode = {
   isDefault: boolean;
 };
 
-type RealtimeTranscriptionData = {
+type RealTimeTranscriptionData = {
   content?: string;
   conversationId?: string;
   isFinal?: boolean;
@@ -108,13 +108,13 @@ type RealtimeTranscriptionData = {
   utteranceId?: string;
 };
 
-type RealtimeTranscriptionEventPayload = {
+type RealTimeTranscriptionEventPayload = {
   data?: {
     agentId?: string;
     content?: string;
     publishTimestamp?: number | string;
     role?: string;
-    data?: RealtimeTranscriptionData;
+    data?: RealTimeTranscriptionData;
     notifDetails?: {
       actionEvent?: string;
     };
@@ -126,7 +126,7 @@ type RealtimeTranscriptionEventPayload = {
   type?: string;
 };
 
-type RealtimeTranscriptLine = {
+type RealTimeTranscriptLine = {
   messageId: string;
   role: string;
   caller: string;
@@ -168,8 +168,8 @@ interface IStore {
   isAddressBookEnabled: boolean;
   isDigitalChannelsInitialized: boolean;
   dataCenter: string;
-  realtimeTranscriptionData: RealtimeTranscriptionData;
-  realtimeTranscriptLines: RealtimeTranscriptLine[];
+  realtimeTranscriptionData: RealTimeTranscriptionData;
+  realtimeTranscriptLines: RealTimeTranscriptLine[];
   init(params: InitParams, callback: (ccSDK: IContactCenter) => void): Promise<void>;
   registerCC(webex?: WithWebex['webex']): Promise<void>;
 }
@@ -362,9 +362,9 @@ export type {
   PaginatedListParams,
   FetchPaginatedList,
   TransformPaginatedData,
-  RealtimeTranscriptionData,
-  RealtimeTranscriptionEventPayload,
-  RealtimeTranscriptLine,
+  RealTimeTranscriptionData,
+  RealTimeTranscriptionEventPayload,
+  RealTimeTranscriptLine,
 };
 
 export {

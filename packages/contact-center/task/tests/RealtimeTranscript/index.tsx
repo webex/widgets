@@ -1,9 +1,9 @@
 import React from 'react';
 import {render, screen} from '@testing-library/react';
 import '@testing-library/jest-dom';
-import {RealtimeTranscript} from '../../src/index';
 import * as helper from '../../src/helper';
 import store from '@webex/cc-store';
+import {RealTimeTranscript} from '../../src/RealTimeTranscript';
 
 jest.mock('@webex/cc-store', () => ({
   currentTask: {
@@ -20,7 +20,7 @@ jest.mock('@webex/cc-store', () => ({
   },
 }));
 
-describe('RealtimeTranscript Widget', () => {
+describe('RealTimeTranscript Widget', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.spyOn(console, 'error').mockImplementation(() => {});
@@ -31,13 +31,12 @@ describe('RealtimeTranscript Widget', () => {
   });
 
   it('passes props to useRealtimeTranscript hook', () => {
-    const spy = jest.spyOn(helper, 'useRealtimeTranscript');
+    const spy = jest.spyOn(helper, 'useRealTimeTranscript');
     const transcriptProps = {
-      ivrTranscript: 'ivr',
       liveTranscriptEntries: [{id: '1', speaker: 'Agent', message: 'Hello', timestamp: 1}],
     };
 
-    render(<RealtimeTranscript {...transcriptProps} />);
+    render(<RealTimeTranscript {...transcriptProps} />);
 
     expect(spy).toHaveBeenCalledWith({
       ...transcriptProps,
@@ -50,12 +49,12 @@ describe('RealtimeTranscript Widget', () => {
   it('renders fallback when an error is thrown', () => {
     const mockOnErrorCallback = jest.fn();
     store.onErrorCallback = mockOnErrorCallback;
-    jest.spyOn(helper, 'useRealtimeTranscript').mockImplementation(() => {
-      throw new Error('RealtimeTranscript test error');
+    jest.spyOn(helper, 'useRealTimeTranscript').mockImplementation(() => {
+      throw new Error('RealTimeTranscript test error');
     });
 
-    const {container} = render(<RealtimeTranscript />);
+    const {container} = render(<RealTimeTranscript />);
     expect(container.firstChild).toBeNull();
-    expect(mockOnErrorCallback).toHaveBeenCalledWith('RealtimeTranscript', expect.any(Error));
+    expect(mockOnErrorCallback).toHaveBeenCalledWith('RealTimeTranscript', expect.any(Error));
   });
 });
