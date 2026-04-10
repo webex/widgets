@@ -1,4 +1,4 @@
-import {MEDIA_CHANNEL, TaskListItemData} from '../task.types';
+import {MEDIA_CHANNEL, TaskListItemData, getCallerIdentifier} from '../task.types';
 import store, {isIncomingTask, ILogger, ITask} from '@webex/cc-store';
 /**
  * Extracts and processes data from a task for rendering in the task list
@@ -17,6 +17,7 @@ export const extractTaskListItemData = (
     //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
     const callAssociationDetails = task?.data?.interaction?.callAssociatedDetails;
     const ani = callAssociationDetails?.ani;
+    const dn = callAssociationDetails?.dn;
     const customerName = callAssociationDetails?.customerName;
     const virtualTeamName = callAssociationDetails?.virtualTeamName;
 
@@ -39,7 +40,8 @@ export const extractTaskListItemData = (
     const declineText = isTaskIncoming && isTelephony && isBrowser ? 'Decline' : undefined;
 
     // Compute title based on media type
-    const title = isSocial ? customerName : ani;
+    const outboundType = task?.data?.interaction?.outboundType;
+    const title = isSocial ? customerName : getCallerIdentifier(ani, dn, outboundType);
 
     const isAutoAnswering = task.data.isAutoAnswering || false;
 

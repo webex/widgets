@@ -198,7 +198,7 @@ exports[`CallControlCADComponent Snapshots should handle edge cases and control 
         </strong>
          
         <span>
-          No Phone Number
+          555-123-4567
         </span>
       </mdc-text>
     </div>
@@ -377,7 +377,7 @@ exports[`CallControlCADComponent Snapshots should handle edge cases and control 
       </strong>
        
       <span>
-        No Phone Number
+        555-123-4567
       </span>
     </mdc-text>
   </div>
@@ -909,7 +909,7 @@ exports[`CallControlCADComponent Snapshots should render basic call states and m
       </strong>
        
       <span>
-        No Phone Number
+        chat-customer@example.com
       </span>
     </mdc-text>
     <mdc-tooltip
@@ -919,7 +919,7 @@ exports[`CallControlCADComponent Snapshots should render basic call states and m
       <mdc-text
         class="md-text-wrapper"
       >
-        No Phone Number
+        chat-customer@example.com
       </mdc-text>
     </mdc-tooltip>
   </div>
@@ -1179,7 +1179,7 @@ exports[`CallControlCADComponent Snapshots should render basic call states and m
       </strong>
        
       <span>
-        No Phone Number
+        555-123-4567
       </span>
     </mdc-text>
   </div>
@@ -1439,7 +1439,7 @@ exports[`CallControlCADComponent Snapshots should render basic call states and m
       </strong>
        
       <span>
-        No Phone Number
+        555-123-4567
       </span>
     </mdc-text>
   </div>
@@ -1926,7 +1926,7 @@ exports[`CallControlCADComponent Snapshots should render consultation and wrapup
         </strong>
          
         <span>
-          No Phone Number
+          555-123-4567
         </span>
       </mdc-text>
     </div>
@@ -2221,7 +2221,7 @@ exports[`CallControlCADComponent Snapshots should render consultation and wrapup
       </strong>
        
       <span>
-        No Phone Number
+        555-123-4567
       </span>
     </mdc-text>
   </div>
@@ -2482,7 +2482,7 @@ exports[`CallControlCADComponent Snapshots should render consultation and wrapup
         </strong>
          
         <span>
-          No Phone Number
+          555-123-4567
         </span>
       </mdc-text>
     </div>
@@ -2743,7 +2743,7 @@ exports[`CallControlCADComponent Snapshots should render consultation and wrapup
       </strong>
        
       <span>
-        No Phone Number
+        555-123-4567
       </span>
     </mdc-text>
   </div>
