@@ -30,26 +30,42 @@ import {OutdialAniEntriesResponse} from '@webex/contact-center/dist/types/servic
 const ENGAGED_LABEL = 'ENGAGED';
 const ENGAGED_USERNAME = 'Engaged';
 
-const getTranscriptSpeaker = (payload: RealTimeTranscriptionData): string => {
-  const role = payload.role?.toUpperCase();
-  if (role === 'AGENT') return 'Agent';
-  if (role === 'CUSTOMER') return 'Customer';
+const getTranscriptSpeaker = (role?: string): string => {
+  const normalizedRole = role?.toUpperCase();
+  if (normalizedRole === 'AGENT') return 'Agent';
+  if (normalizedRole === 'CUSTOMER' || normalizedRole === 'CALLER') return 'Customer';
 
-  return role;
+  return normalizedRole || 'Unknown';
 };
 
-const getTranscriptTimestamp = (payload: RealTimeTranscriptionData): number => {
-  const rawTimestamp = payload.publishTimestamp;
+const getTranscriptTimestamp = (rawTimestamp?: number | string): number => {
   const parsedTimestamp =
     typeof rawTimestamp === 'number' ? rawTimestamp : Number.parseInt(`${rawTimestamp || ''}`, 10);
   return Number.isNaN(parsedTimestamp) ? Date.now() : parsedTimestamp;
 };
 
-const isCustomerSpeaker = (payload: RealTimeTranscriptionData, speaker: string): boolean => {
-  const role = (payload.role || '').toUpperCase();
-  if (role) return role === 'CUSTOMER' || role === 'CALLER';
-  const normalizedSpeaker = speaker.toLowerCase();
-  return normalizedSpeaker.includes('customer') || normalizedSpeaker.includes('caller');
+const isCustomerSpeaker = (role?: string): boolean => {
+  const normalizedRole = (role || '').toUpperCase();
+  return normalizedRole === 'CUSTOMER' || normalizedRole === 'CALLER';
+};
+
+const mapTranscriptLineToEntry = (
+  transcriptionData: Partial<RealTimeTranscriptionData>,
+  currentTaskId: string,
+  index: number
+): RealTimeTranscriptEntry => {
+  const timestamp = getTranscriptTimestamp(transcriptionData.publishTimestamp);
+  const speaker = getTranscriptSpeaker(transcriptionData.role);
+
+  return {
+    id: `${currentTaskId}-${transcriptionData.messageId}-${index}`,
+    speaker,
+    message: transcriptionData.content,
+    timestamp,
+    displayTime: new Date(timestamp).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}),
+    event: 'REAL_TIME_TRANSCRIPTION',
+    isCustomer: isCustomerSpeaker(transcriptionData.role),
+  };
 };
 
 // Hook for managing the task list
@@ -172,39 +188,20 @@ export const useTaskList = (props: UseTaskListProps) => {
 };
 
 export const useRealTimeTranscript = (props: UseRealTimeTranscriptInternalProps) => {
-  const {liveTranscriptEntries = [], className, currentTaskId, realtimeTranscriptLines = []} = props;
+  const {liveTranscriptEntries = [], className, currentTaskId, realtimeTranscriptionData = []} = props;
+  console.log('pkesari realtimeTranscriptionData', realtimeTranscriptionData);
   const mappedRealtimeEntries = useMemo<RealTimeTranscriptEntry[]>(() => {
     if (!currentTaskId) return liveTranscriptEntries;
 
-    const transcriptLines = realtimeTranscriptLines;
+    const transcriptLines = realtimeTranscriptionData;
     if (!transcriptLines.length) {
       return liveTranscriptEntries;
     }
 
-    return transcriptLines.map((line, index) => {
-      const payload: RealTimeTranscriptionData = {
-        messageId: line.messageId,
-        conversationId: line.conversationId,
-        role: line.role,
-        content: line.content,
-        publishTimestamp: line.publishTimestamp,
-      };
+    return transcriptLines.map((line, index) => mapTranscriptLineToEntry(line, currentTaskId, index));
+  }, [currentTaskId, realtimeTranscriptionData, liveTranscriptEntries]);
 
-      const timestamp = getTranscriptTimestamp(payload);
-      const speaker = getTranscriptSpeaker(payload);
-
-      return {
-        id: `${currentTaskId}-${line.messageId}-${index}`,
-        speaker,
-        message: line.content,
-        timestamp,
-        displayTime: new Date(timestamp).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}),
-        event: 'REAL_TIME_TRANSCRIPTION',
-        isCustomer: isCustomerSpeaker(payload, speaker),
-      };
-    });
-  }, [currentTaskId, realtimeTranscriptLines, liveTranscriptEntries]);
-
+  console.log('pkesari mappedRealtimeEntries', mappedRealtimeEntries);
   return {
     liveTranscriptEntries: mappedRealtimeEntries,
     className,

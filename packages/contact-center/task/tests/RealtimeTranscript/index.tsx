@@ -11,7 +11,7 @@ jest.mock('@webex/cc-store', () => ({
       interactionId: 'test-interaction-id',
     },
   },
-  realtimeTranscriptLines: [],
+  realtimeTranscriptionData: [],
   logger: {
     log: jest.fn(),
     error: jest.fn(),
@@ -41,7 +41,7 @@ describe('RealTimeTranscript Widget', () => {
     expect(spy).toHaveBeenCalledWith({
       ...transcriptProps,
       currentTaskId: 'test-interaction-id',
-      realtimeTranscriptLines: [],
+      realtimeTranscriptionData: [],
     });
     expect(screen.getByTestId('real-time-transcript:root')).toBeInTheDocument();
   });

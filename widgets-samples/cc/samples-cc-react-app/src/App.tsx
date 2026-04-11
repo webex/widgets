@@ -8,7 +8,7 @@ import {
   CallControlCAD,
   store,
   OutdialCall,
-  RealtimeTranscript,
+  RealTimeTranscript,
 } from '@webex/cc-widgets';
 import {StationLogoutResponse} from '@webex/contact-center';
 import {ERROR_TRIGGERING_IDLE_CODES} from '@webex/cc-store';
@@ -961,7 +961,7 @@ function App() {
                         <section className="section-box">
                           <fieldset className="fieldset">
                             <legend className="legend-box">Realtime Transcript</legend>
-                            <RealtimeTranscript />
+                            <RealTimeTranscript />
                           </fieldset>
                         </section>
                       </div>

@@ -96,43 +96,26 @@ type IdleCode = {
 };
 
 type RealTimeTranscriptionData = {
-  content?: string;
-  conversationId?: string;
-  isFinal?: boolean;
+  content: string;
+  conversationId: string;
+  isFinal: boolean;
   languageCode?: string;
-  messageId?: string;
-  orgId?: string;
-  publishTimestamp?: number | string;
-  role?: string;
-  trackingId?: string;
-  utteranceId?: string;
+  messageId: string;
+  orgId: string;
+  publishTimestamp: number | string;
+  role: string;
+  trackingId: string;
+  utteranceId: string;
 };
 
 type RealTimeTranscriptionEventPayload = {
-  data?: {
-    agentId?: string;
-    content?: string;
-    publishTimestamp?: number | string;
-    role?: string;
-    data?: RealTimeTranscriptionData;
-    notifDetails?: {
-      actionEvent?: string;
-    };
-    notifType?: string;
-    orgId?: string;
+  agentId: string;
+  data: RealTimeTranscriptionData;
+  notifDetails: {
+    actionEvent?: string;
   };
-  orgId?: string;
-  trackingId?: string;
-  type?: string;
-};
-
-type RealTimeTranscriptLine = {
-  messageId: string;
-  role: string;
-  caller: string;
-  content: string;
-  publishTimestamp: number;
-  conversationId?: string;
+  notifType: string;
+  orgId: string;
 };
 
 interface IStore {
@@ -168,8 +151,7 @@ interface IStore {
   isAddressBookEnabled: boolean;
   isDigitalChannelsInitialized: boolean;
   dataCenter: string;
-  realtimeTranscriptionData: RealTimeTranscriptionData;
-  realtimeTranscriptLines: RealTimeTranscriptLine[];
+  realtimeTranscriptionData: Partial<RealTimeTranscriptionData>[];
   init(params: InitParams, callback: (ccSDK: IContactCenter) => void): Promise<void>;
   registerCC(webex?: WithWebex['webex']): Promise<void>;
 }
@@ -364,7 +346,6 @@ export type {
   TransformPaginatedData,
   RealTimeTranscriptionData,
   RealTimeTranscriptionEventPayload,
-  RealTimeTranscriptLine,
 };
 
 export {

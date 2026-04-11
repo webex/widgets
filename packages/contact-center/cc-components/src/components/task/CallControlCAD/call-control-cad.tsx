@@ -5,7 +5,7 @@ import {Brandvisual, Icon, Tooltip, Button} from '@momentum-design/components/di
 import './call-control-cad.styles.scss';
 import TaskTimer from '../TaskTimer/index';
 import CallControlConsultComponent from '../CallControl/CallControlCustom/call-control-consult';
-import {MEDIA_CHANNEL as MediaChannelType, CallControlComponentProps} from '../task.types';
+import {MEDIA_CHANNEL as MediaChannelType, CallControlComponentProps, getCallerIdentifier} from '../task.types';
 
 import {getMediaTypeInfo} from '../../../utils';
 import {
@@ -75,8 +75,14 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
   const phoneNumberTriggerId = `phone-number-trigger-${currentTask.data.interaction.interactionId}`;
   const phoneNumberTooltipId = `phone-number-tooltip-${currentTask.data.interaction.interactionId}`;
 
+  // For telephony calls, ani is the originating number and dn is the destination.
+  // Inbound: ani = caller's number, dn = entry point dialed by caller
+  // Outdial: ani = agent's originating number (entry point), dn = customer's dialed number
+  const outboundType = currentTask?.data?.interaction?.outboundType;
+  const callerNumber = getCallerIdentifier(ani, dn, outboundType);
+
   const renderCustomerName = () => {
-    const customerText = isSocial ? customerName || NO_CUSTOMER_NAME : ani || NO_CALLER_ID;
+    const customerText = isSocial ? customerName || NO_CUSTOMER_NAME : callerNumber || NO_CALLER_ID;
 
     const textComponent = (
       <Text
@@ -113,7 +119,11 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
   };
 
   const renderPhoneNumber = () => {
-    const phoneText = isSocial ? customerName || NO_CUSTOMER_NAME : dn || NO_PHONE_NUMBER;
+    const phoneText = isSocial
+      ? customerName || NO_CUSTOMER_NAME
+      : isTelephony
+        ? ani || NO_PHONE_NUMBER
+        : ani || NO_PHONE_NUMBER;
     const labelText = isSocial ? CUSTOMER_NAME : PHONE_NUMBER;
 
     const textComponent = (

@@ -5,7 +5,7 @@ import {
   RealTimeTranscriptComponentProps,
   RealTimeTranscriptEntry,
 } from '@webex/cc-components';
-import {RealTimeTranscriptLine} from '@webex/cc-store';
+import {RealTimeTranscriptionData} from '@webex/cc-store';
 
 export type UseTaskProps = Pick<TaskProps, 'incomingTask' | 'deviceType' | 'logger'> &
   Partial<Pick<TaskProps, 'onAccepted' | 'onRejected'>>;
@@ -19,10 +19,9 @@ export type TaskListProps = Partial<Pick<TaskProps, 'onTaskAccepted' | 'onTaskDe
 
 export type RealTimeTranscriptProps = Pick<RealTimeTranscriptComponentProps, 'liveTranscriptEntries' | 'className'>;
 
-export type UseRealTimeTranscriptProps = RealTimeTranscriptProps;
-export type UseRealTimeTranscriptInternalProps = UseRealTimeTranscriptProps & {
+export type UseRealTimeTranscriptInternalProps = RealTimeTranscriptProps & {
   currentTaskId?: string;
-  realtimeTranscriptLines?: RealTimeTranscriptLine[];
+  realtimeTranscriptionData?: Partial<RealTimeTranscriptionData>[];
 };
 
 export type CallControlProps = Partial<

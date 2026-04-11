@@ -42,10 +42,7 @@ class StoreWrapper implements IStoreWrapper {
   onTaskAssigned?: (task: ITask) => void;
   onTaskSelected?: (task: ITask, isClicked: boolean) => void;
   onErrorCallback?: (widgetName: string, error: Error) => void;
-  private realtimeTranscriptionListeners: Record<
-    string,
-    (payload: NonNullable<RealTimeTranscriptionEventPayload['data']>) => void
-  > = {};
+  private realtimeTranscriptionListeners: Record<string, (payload: RealTimeTranscriptionEventPayload) => void> = {};
 
   constructor() {
     this.store = Store.getInstance();
@@ -151,10 +148,6 @@ class StoreWrapper implements IStoreWrapper {
 
   get realtimeTranscriptionData() {
     return this.store.realtimeTranscriptionData;
-  }
-
-  get realtimeTranscriptLines() {
-    return this.store.realtimeTranscriptLines;
   }
 
   setDataCenter = (value: string): void => {
@@ -473,8 +466,7 @@ class StoreWrapper implements IStoreWrapper {
       if (taskToRemove) {
         const removedTaskId = taskToRemove.data?.interactionId;
         if (removedTaskId && this.store.currentTask?.data?.interactionId === removedTaskId) {
-          this.store.realtimeTranscriptionData = {};
-          this.store.realtimeTranscriptLines = [];
+          this.store.realtimeTranscriptionData = [];
         }
       }
       if (taskToRemove && this.store.currentTask?.data.interactionId === taskToRemove.data.interactionId) {
@@ -626,7 +618,7 @@ class StoreWrapper implements IStoreWrapper {
     task.on(TASK_EVENTS.TASK_POST_CALL_ACTIVITY, this.refreshTaskList);
     const taskId = task.data?.interactionId;
     if (taskId && !this.realtimeTranscriptionListeners[taskId]) {
-      this.realtimeTranscriptionListeners[taskId] = (payload: NonNullable<RealTimeTranscriptionEventPayload['data']>) =>
+      this.realtimeTranscriptionListeners[taskId] = (payload: RealTimeTranscriptionEventPayload) =>
         this.handleRealtimeTranscription(payload);
     }
     if (taskId && this.realtimeTranscriptionListeners[taskId]) {
@@ -738,83 +730,33 @@ class StoreWrapper implements IStoreWrapper {
     }
   };
 
-  private findTranscriptPosition = (messageId: string, timestamp: number) => {
-    let existingIndex = -1;
-    let insertPosition = -1;
+  handleRealtimeTranscription = (payload: RealTimeTranscriptionEventPayload) => {
+    if (!payload.data.messageId || !payload.data.isFinal) return;
 
-    for (let i = this.store.realtimeTranscriptLines.length - 1; i >= 0; i -= 1) {
-      const line = this.store.realtimeTranscriptLines[i];
-      if (line.messageId === messageId) {
-        existingIndex = i;
-        break;
-      }
-      if (insertPosition === -1 && line.publishTimestamp <= timestamp) {
-        insertPosition = i;
-      }
-    }
+    console.log('pkesari payload', payload);
+    const content = payload.data.content || '';
+    if (!content) return;
 
-    return {existingIndex, insertPosition};
-  };
-
-  handleRealtimeTranscription = (payload: NonNullable<RealTimeTranscriptionEventPayload['data']>) => {
-    // SDK emits task events with the unwrapped inner data: task.emit(eventType, websocketPayload.data)
-    // So `payload` here is RealtimeTranscriptionEventPayload['data'], and `payload.data` is RealtimeTranscriptionData
-    const data = payload?.data;
-    if (!data?.messageId) return;
-
-    const role = (payload?.role || data.role || 'CALLER').toUpperCase();
-    const caller = role === 'CALLER' || role === 'CUSTOMER' ? 'Customer' : 'Agent';
-    const publishTimestampRaw = payload?.publishTimestamp || data.publishTimestamp;
+    const role = payload.data.role.toUpperCase();
+    const publishTimestampRaw = payload.data.publishTimestamp;
     const publishTimestamp =
       typeof publishTimestampRaw === 'number'
         ? publishTimestampRaw
         : Number.parseInt(`${publishTimestampRaw || Date.now()}`, 10);
-
-    const normalizedRealtimeData = {
-      ...data,
-      role,
-      caller,
-      content: (payload?.content || data.content || '').trim(),
-      publishTimestamp: Number.isNaN(publishTimestamp) ? Date.now() : publishTimestamp,
-    };
-    if (!normalizedRealtimeData.content) return;
+    const normalizedPublishTimestamp = Number.isNaN(publishTimestamp) ? Date.now() : publishTimestamp;
 
     runInAction(() => {
-      this.store.realtimeTranscriptionData = normalizedRealtimeData;
-
-      const {existingIndex, insertPosition} = this.findTranscriptPosition(
-        data.messageId,
-        normalizedRealtimeData.publishTimestamp
-      );
-
-      if (existingIndex >= 0) {
-        const currentLine = this.store.realtimeTranscriptLines[existingIndex];
-        if ((currentLine.content || '') === (normalizedRealtimeData.content || '')) {
-          return;
-        }
-        const updatedLines = [...this.store.realtimeTranscriptLines];
-        updatedLines[existingIndex] = {
-          ...currentLine,
-          caller,
-          content: normalizedRealtimeData.content || '',
-          publishTimestamp: normalizedRealtimeData.publishTimestamp,
-          conversationId: normalizedRealtimeData.conversationId,
-        };
-        this.store.realtimeTranscriptLines = updatedLines;
-        return;
-      }
-
-      const newLine = {
-        messageId: data.messageId,
-        role,
-        caller,
-        content: normalizedRealtimeData.content || '',
-        publishTimestamp: normalizedRealtimeData.publishTimestamp,
-        conversationId: normalizedRealtimeData.conversationId,
-      };
-      const updatedLines = [...this.store.realtimeTranscriptLines];
-      updatedLines.splice(insertPosition + 1, 0, newLine);
-      this.store.realtimeTranscriptLines = updatedLines;
+      console.log('pkesari this.store.realtimeTranscriptionData', this.store.realtimeTranscriptionData);
+      this.store.realtimeTranscriptionData = [
+        ...this.store.realtimeTranscriptionData,
+        {
+          messageId: payload.data.messageId,
+          role,
+          content,
+          publishTimestamp: normalizedPublishTimestamp,
+          conversationId: payload.data.conversationId,
+        },
+      ];
     });
   };
 
@@ -914,8 +856,7 @@ class StoreWrapper implements IStoreWrapper {
       this.setConsultStartTimeStamp(undefined);
       this.setTeamId('');
       this.setDigitalChannelsInitialized(false);
-      this.store.realtimeTranscriptionData = {};
-      this.store.realtimeTranscriptLines = [];
+      this.store.realtimeTranscriptionData = [];
       this.realtimeTranscriptionListeners = {};
     });
   };

@@ -8,11 +8,11 @@ import {useRealTimeTranscript} from '../helper';
 import {RealTimeTranscriptProps} from '../task.types';
 
 const RealTimeTranscriptInternal: React.FunctionComponent<RealTimeTranscriptProps> = observer((props) => {
-  const {currentTask, realtimeTranscriptLines} = store;
+  const {currentTask, realtimeTranscriptionData} = store;
   const result = useRealTimeTranscript({
     ...props,
     currentTaskId: currentTask?.data?.interactionId,
-    realtimeTranscriptLines,
+    realtimeTranscriptionData,
   });
   return <RealTimeTranscriptComponent {...result} />;
 });

@@ -14,7 +14,6 @@ import {
   LoginOptions,
   WithWebex,
   RealTimeTranscriptionData,
-  RealTimeTranscriptLine,
 } from './store.types';
 
 import {getFeatureFlags} from './util';
@@ -53,8 +52,7 @@ class Store implements IStore {
   isMuted: boolean = false;
   isDigitalChannelsInitialized: boolean = false;
   dataCenter: string = '';
-  realtimeTranscriptionData: RealTimeTranscriptionData = {};
-  realtimeTranscriptLines: RealTimeTranscriptLine[] = [];
+  realtimeTranscriptionData: Partial<RealTimeTranscriptionData>[] = [];
 
   constructor() {
     makeAutoObservable(this, {
