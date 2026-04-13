@@ -114,22 +114,20 @@ describe('CampaignErrorDialogComponent', () => {
       expect(mockOnClose).toHaveBeenCalledTimes(1);
     });
 
-    it('should call onClose when Escape key is pressed', () => {
+    it('should call onClose when native close event fires while isOpen is true', () => {
       render(<CampaignErrorDialogComponent {...defaultProps} isOpen={true} />);
 
       const dialog = screen.getByTestId('campaign-error-dialog');
-      fireEvent.keyDown(dialog, {key: 'Escape'});
+      fireEvent(dialog, new Event('close'));
 
       expect(mockOnClose).toHaveBeenCalledTimes(1);
     });
 
-    it('should not call onClose when other keys are pressed', () => {
-      render(<CampaignErrorDialogComponent {...defaultProps} isOpen={true} />);
+    it('should not call onClose when native close event fires while isOpen is false', () => {
+      render(<CampaignErrorDialogComponent {...defaultProps} isOpen={false} />);
 
       const dialog = screen.getByTestId('campaign-error-dialog');
-      fireEvent.keyDown(dialog, {key: 'Enter'});
-      fireEvent.keyDown(dialog, {key: 'Tab'});
-      fireEvent.keyDown(dialog, {key: 'Space'});
+      fireEvent(dialog, new Event('close'));
 
       expect(mockOnClose).not.toHaveBeenCalled();
     });

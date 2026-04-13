@@ -18,18 +18,25 @@ const CampaignErrorDialog: React.FunctionComponent<CampaignErrorDialogProps> = (
     }
   }, [isOpen]);
 
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLDialogElement>) => {
-    if (event.key === 'Escape') {
-      onClose();
-    }
-  };
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+
+    const handleClose = () => {
+      if (isOpen) {
+        onClose();
+      }
+    };
+
+    dialog.addEventListener('close', handleClose);
+    return () => dialog.removeEventListener('close', handleClose);
+  }, [isOpen, onClose]);
 
   return (
     <dialog
       ref={dialogRef}
       className="campaign-error-dialog"
       data-testid="campaign-error-dialog"
-      onKeyDown={handleKeyDown}
       aria-labelledby="campaign-error-dialog-title"
     >
       <Text
