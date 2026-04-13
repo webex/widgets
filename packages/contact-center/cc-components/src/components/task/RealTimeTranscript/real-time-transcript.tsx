@@ -5,6 +5,7 @@ import {RealTimeTranscriptComponentProps} from '../task.types';
 import './real-time-transcript.style.scss';
 
 const formatSpeaker = (speaker?: string) => speaker || 'Unknown';
+const EMPTY_TRANSCRIPT_MESSAGE = 'No live transcript available.';
 
 const RealTimeTranscriptComponent: React.FC<RealTimeTranscriptComponentProps> = ({
   liveTranscriptEntries = [],
@@ -23,7 +24,7 @@ const RealTimeTranscriptComponent: React.FC<RealTimeTranscriptComponentProps> = 
     <section className={`real-time-transcript ${className || ''}`.trim()} data-testid="real-time-transcript:root">
       <div className="real-time-transcript__content" data-testid="real-time-transcript:live-content">
         {sortedEntries.length === 0 ? (
-          <div className="real-time-transcript__empty">No live transcript available.</div>
+          <div className="real-time-transcript__empty">{EMPTY_TRANSCRIPT_MESSAGE}</div>
         ) : (
           <>
             {sortedEntries.map((entry) => (
