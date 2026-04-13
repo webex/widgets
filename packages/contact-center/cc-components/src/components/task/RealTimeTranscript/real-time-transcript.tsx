@@ -26,38 +26,45 @@ const RealTimeTranscriptComponent: React.FC<RealTimeTranscriptComponentProps> = 
           <div className="real-time-transcript__empty">No live transcript available.</div>
         ) : (
           <>
-            {sortedEntries[0].event ? (
-              <div className="real-time-transcript__event" data-testid="real-time-transcript:first-event">
-                {sortedEntries[0].event}
-              </div>
-            ) : null}
             {sortedEntries.map((entry) => (
-              <div key={entry.id} className="real-time-transcript__item" data-testid="real-time-transcript:item">
-                <div className="real-time-transcript__avatar-wrap">
-                  {entry.avatarUrl ? (
-                    <img
-                      src={entry.avatarUrl}
-                      alt={formatSpeaker(entry.speaker)}
-                      className="real-time-transcript__avatar-image"
-                    />
-                  ) : (
-                    <Avatar
-                      className="real-time-transcript__avatar-fallback"
-                      icon-name={entry.isCustomer ? undefined : 'placeholder-bold'}
-                      title={formatSpeaker(entry.speaker)}
-                    >
-                      {entry.initials || (entry.isCustomer ? 'CU' : 'YO')}
-                    </Avatar>
-                  )}
-                </div>
-                <div className="real-time-transcript__text-block">
-                  <div className="real-time-transcript__meta">
-                    <span>{formatSpeaker(entry.speaker)}</span>
-                    {entry.displayTime ? <span className="real-time-transcript__time">{entry.displayTime}</span> : null}
+              <React.Fragment key={entry.id}>
+                {entry.event ? (
+                  <div className="real-time-transcript__event" data-testid="real-time-transcript:event">
+                    {entry.event}
+                    {entry.displayTime ? (
+                      <span className="real-time-transcript__event-time">. {entry.displayTime}</span>
+                    ) : null}
                   </div>
-                  <p className="real-time-transcript__message">{entry.message}</p>
+                ) : null}
+                <div className="real-time-transcript__item" data-testid="real-time-transcript:item">
+                  <div className="real-time-transcript__avatar-wrap">
+                    {entry.avatarUrl ? (
+                      <img
+                        src={entry.avatarUrl}
+                        alt={formatSpeaker(entry.speaker)}
+                        className="real-time-transcript__avatar-image"
+                      />
+                    ) : (
+                      <Avatar
+                        className="real-time-transcript__avatar-fallback"
+                        icon-name={entry.isCustomer ? undefined : 'placeholder-bold'}
+                        title={formatSpeaker(entry.speaker)}
+                      >
+                        {entry.initials || (entry.isCustomer ? 'CU' : 'YO')}
+                      </Avatar>
+                    )}
+                  </div>
+                  <div className="real-time-transcript__text-block">
+                    <div className="real-time-transcript__meta">
+                      <span>{formatSpeaker(entry.speaker)}</span>
+                      {entry.displayTime ? (
+                        <span className="real-time-transcript__time">{entry.displayTime}</span>
+                      ) : null}
+                    </div>
+                    <p className="real-time-transcript__message">{entry.message}</p>
+                  </div>
                 </div>
-              </div>
+              </React.Fragment>
             ))}
           </>
         )}

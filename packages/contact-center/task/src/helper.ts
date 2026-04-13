@@ -32,39 +32,27 @@ const ENGAGED_USERNAME = 'Engaged';
 
 const getTranscriptSpeaker = (role?: string): string => {
   const normalizedRole = role?.toUpperCase();
-  if (normalizedRole === 'AGENT') return 'Agent';
+  if (normalizedRole === 'AGENT') return 'You';
   if (normalizedRole === 'CUSTOMER' || normalizedRole === 'CALLER') return 'Customer';
 
   return normalizedRole || 'Unknown';
 };
 
-const getTranscriptTimestamp = (rawTimestamp?: number | string): number => {
-  const parsedTimestamp =
-    typeof rawTimestamp === 'number' ? rawTimestamp : Number.parseInt(`${rawTimestamp || ''}`, 10);
-  return Number.isNaN(parsedTimestamp) ? Date.now() : parsedTimestamp;
-};
-
-const isCustomerSpeaker = (role?: string): boolean => {
-  const normalizedRole = (role || '').toUpperCase();
-  return normalizedRole === 'CUSTOMER' || normalizedRole === 'CALLER';
-};
-
 const mapTranscriptLineToEntry = (
   transcriptionData: Partial<RealTimeTranscriptionData>,
-  currentTaskId: string,
-  index: number
+  currentTaskId: string
 ): RealTimeTranscriptEntry => {
-  const timestamp = getTranscriptTimestamp(transcriptionData.publishTimestamp);
   const speaker = getTranscriptSpeaker(transcriptionData.role);
+  const timestamp =
+    typeof transcriptionData.publishTimestamp === 'number' ? transcriptionData.publishTimestamp : Date.now();
 
   return {
-    id: `${currentTaskId}-${transcriptionData.messageId}-${index}`,
+    id: `${currentTaskId}-${transcriptionData.messageId}`,
     speaker,
     message: transcriptionData.content,
     timestamp,
     displayTime: new Date(timestamp).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}),
-    event: 'REAL_TIME_TRANSCRIPTION',
-    isCustomer: isCustomerSpeaker(transcriptionData.role),
+    isCustomer: speaker === 'Customer',
   };
 };
 
@@ -189,7 +177,6 @@ export const useTaskList = (props: UseTaskListProps) => {
 
 export const useRealTimeTranscript = (props: UseRealTimeTranscriptInternalProps) => {
   const {liveTranscriptEntries = [], className, currentTaskId, realtimeTranscriptionData = []} = props;
-  console.log('pkesari realtimeTranscriptionData', realtimeTranscriptionData);
   const mappedRealtimeEntries = useMemo<RealTimeTranscriptEntry[]>(() => {
     if (!currentTaskId) return liveTranscriptEntries;
 
@@ -198,10 +185,9 @@ export const useRealTimeTranscript = (props: UseRealTimeTranscriptInternalProps)
       return liveTranscriptEntries;
     }
 
-    return transcriptLines.map((line, index) => mapTranscriptLineToEntry(line, currentTaskId, index));
+    return transcriptLines.map((line) => mapTranscriptLineToEntry(line, currentTaskId));
   }, [currentTaskId, realtimeTranscriptionData, liveTranscriptEntries]);
 
-  console.log('pkesari mappedRealtimeEntries', mappedRealtimeEntries);
   return {
     liveTranscriptEntries: mappedRealtimeEntries,
     className,

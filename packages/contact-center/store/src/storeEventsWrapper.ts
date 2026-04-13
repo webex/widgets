@@ -731,14 +731,14 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   handleRealtimeTranscription = (payload: RealTimeTranscriptionEventPayload) => {
-    if (!payload.data.messageId || !payload.data.isFinal) return;
+    const transcriptData = payload.data;
+    if (!transcriptData?.messageId) return;
 
-    console.log('pkesari payload', payload);
-    const content = payload.data.content || '';
+    const content = transcriptData.content || '';
     if (!content) return;
 
-    const role = payload.data.role.toUpperCase();
-    const publishTimestampRaw = payload.data.publishTimestamp;
+    const role = transcriptData.role.toUpperCase();
+    const publishTimestampRaw = transcriptData.publishTimestamp;
     const publishTimestamp =
       typeof publishTimestampRaw === 'number'
         ? publishTimestampRaw
@@ -746,17 +746,20 @@ class StoreWrapper implements IStoreWrapper {
     const normalizedPublishTimestamp = Number.isNaN(publishTimestamp) ? Date.now() : publishTimestamp;
 
     runInAction(() => {
-      console.log('pkesari this.store.realtimeTranscriptionData', this.store.realtimeTranscriptionData);
-      this.store.realtimeTranscriptionData = [
-        ...this.store.realtimeTranscriptionData,
-        {
-          messageId: payload.data.messageId,
-          role,
-          content,
-          publishTimestamp: normalizedPublishTimestamp,
-          conversationId: payload.data.conversationId,
-        },
-      ];
+      const transcriptLines = this.store.realtimeTranscriptionData || [];
+      const newTranscriptData = {
+        ...transcriptData,
+        role,
+        content,
+        publishTimestamp: normalizedPublishTimestamp,
+      };
+      const hasExistingLine = transcriptLines.some((line) => line.messageId === transcriptData.messageId);
+
+      this.store.realtimeTranscriptionData = hasExistingLine
+        ? transcriptLines.map((line) =>
+            line.messageId === transcriptData.messageId ? {...line, ...newTranscriptData} : line
+          )
+        : [...transcriptLines, newTranscriptData];
     });
   };
 

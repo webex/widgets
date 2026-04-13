@@ -34,6 +34,27 @@ describe('RealTimeTranscriptComponent', () => {
     expect(messages[1]).toHaveTextContent('Customer message');
   });
 
+  it('renders transcript event inline with timestamp', () => {
+    render(
+      <RealTimeTranscriptComponent
+        liveTranscriptEntries={[
+          {
+            id: 'event-1',
+            speaker: '%You%',
+            message: 'Agent message',
+            timestamp: 1,
+            displayTime: '11:26 AM',
+            event: '%Tombstone - action occurred%',
+          },
+        ]}
+      />
+    );
+
+    expect(screen.getByTestId('real-time-transcript:event')).toHaveTextContent(
+      '%Tombstone - action occurred%. 11:26 AM'
+    );
+  });
+
   it('renders empty state when there are no transcript entries', () => {
     render(<RealTimeTranscriptComponent liveTranscriptEntries={[]} />);
     expect(screen.getByText('No live transcript available.')).toBeInTheDocument();

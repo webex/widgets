@@ -531,6 +531,7 @@ describe('storeEventsWrapper', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
+      storeWrapper['store'].realtimeTranscriptionData = [];
       // mock return the task list from cc.taskManager
     });
 
@@ -778,6 +779,88 @@ describe('storeEventsWrapper', () => {
       storeWrapper.handleTaskMedia(mockTrack);
 
       expect(setCallControlAudioSpy).toHaveBeenCalledWith(new MediaStream([mockTrack]));
+    });
+
+    it('should append and then replace realtime transcript content by messageId', () => {
+      storeWrapper.handleRealtimeTranscription({
+        agentId: 'agent-1',
+        data: {
+          content: 'Hello',
+          conversationId: 'conversation-1',
+          isFinal: false,
+          messageId: 'message-1',
+          orgId: 'org-1',
+          publishTimestamp: 101,
+          role: 'caller',
+          trackingId: 'tracking-1',
+          utteranceId: 'utterance-1',
+        },
+        notifDetails: {actionEvent: 'REAL_TIME_TRANSCRIPTION'},
+        notifType: 'REAL_TIME_TRANSCRIPTION',
+        orgId: 'org-1',
+      });
+
+      expect(storeWrapper['store'].realtimeTranscriptionData).toEqual([
+        expect.objectContaining({
+          content: 'Hello',
+          isFinal: false,
+          messageId: 'message-1',
+          publishTimestamp: 101,
+          role: 'CALLER',
+        }),
+      ]);
+
+      storeWrapper.handleRealtimeTranscription({
+        agentId: 'agent-1',
+        data: {
+          content: 'Hello there',
+          conversationId: 'conversation-1',
+          isFinal: true,
+          messageId: 'message-1',
+          orgId: 'org-1',
+          publishTimestamp: 102,
+          role: 'caller',
+          trackingId: 'tracking-1',
+          utteranceId: 'utterance-1',
+        },
+        notifDetails: {actionEvent: 'REAL_TIME_TRANSCRIPTION'},
+        notifType: 'REAL_TIME_TRANSCRIPTION',
+        orgId: 'org-1',
+      });
+
+      expect(storeWrapper['store'].realtimeTranscriptionData).toEqual([
+        expect.objectContaining({
+          content: 'Hello there',
+          isFinal: true,
+          messageId: 'message-1',
+          publishTimestamp: 102,
+          role: 'CALLER',
+        }),
+      ]);
+    });
+
+    it('should accept direct realtime transcript data payloads', () => {
+      storeWrapper.handleRealtimeTranscription({
+        content: 'Agent speaking',
+        conversationId: 'conversation-2',
+        isFinal: false,
+        messageId: 'message-2',
+        orgId: 'org-2',
+        publishTimestamp: '201',
+        role: 'agent',
+        trackingId: 'tracking-2',
+        utteranceId: 'utterance-2',
+      });
+
+      expect(storeWrapper['store'].realtimeTranscriptionData).toEqual([
+        expect.objectContaining({
+          content: 'Agent speaking',
+          isFinal: false,
+          messageId: 'message-2',
+          publishTimestamp: 201,
+          role: 'AGENT',
+        }),
+      ]);
     });
 
     it('should handle task removal', () => {
