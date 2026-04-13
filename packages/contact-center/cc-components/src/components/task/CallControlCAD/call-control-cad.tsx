@@ -19,12 +19,12 @@ import {
   CUSTOMER_NAME,
 } from '../constants';
 import {withMetrics} from '@webex/cc-ui-logging';
-import {isInteractionOnHold} from '@webex/cc-store';
 
 const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => {
   const {
     currentTask,
     isRecording,
+    isHeld,
     holdTime,
     consultAgentName,
     consultTimerLabel,
@@ -227,7 +227,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
                 )}
               </div>
               <div className="call-status">
-                {!controls?.wrapup?.isVisible && isInteractionOnHold(currentTask) && (
+                {!controls?.wrapup?.isVisible && isHeld && !controls?.endConsult?.isVisible && (
                   <>
                     <span className="dot">•</span>
                     <div className="on-hold">

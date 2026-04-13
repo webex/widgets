@@ -53,7 +53,15 @@ export const extractIncomingTaskData = (
     const isTelephony = mediaType === MEDIA_CHANNEL.TELEPHONY;
     const isSocial = mediaType === MEDIA_CHANNEL.SOCIAL;
 
-    const acceptText = accept.isVisible ? 'Accept' : undefined;
+    // Compute button text based on conditions
+    // Extension mode (EPDN): accept button is visible but disabled → show "Ringing..."
+    // WebRTC mode (Desktop): accept button is visible and enabled → show "Accept"
+    const acceptText = accept.isVisible
+      ? isTelephony && !accept.isEnabled
+        ? 'Ringing...'
+        : 'Accept'
+      : undefined;
+
     const declineText = decline.isVisible ? 'Decline' : undefined;
 
     // Compute title based on media type
