@@ -9,20 +9,9 @@
     background-color: rgba(0, 0, 0, 0.5);
   }
 
-  .campaign-error-dialog-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 1rem;
-  }
-
   .campaign-error-dialog-title {
     margin: 0;
     flex: 1;
-  }
-
-  .campaign-error-dialog-close {
-    margin-left: 0.5rem;
   }
 
   .campaign-error-dialog-message {

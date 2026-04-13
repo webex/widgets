@@ -1,7 +1,7 @@
 import React from 'react';
 import {render, fireEvent, screen} from '@testing-library/react';
 import '@testing-library/jest-dom';
-import CampaignErrorDialogComponent from '../../../../src/components/task/CampaignErrorDialog/CampaignErrorDialog';
+import CampaignErrorDialogComponent from '../../../../src/components/task/CampaignErrorDialog/campaign-error-dialog';
 import {
   CampaignErrorDialogProps,
   CampaignErrorType,

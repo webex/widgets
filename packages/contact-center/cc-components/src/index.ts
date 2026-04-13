@@ -5,7 +5,7 @@ import CallControlCADComponent from './components/task/CallControlCAD/call-contr
 import IncomingTaskComponent from './components/task/IncomingTask/incoming-task';
 import TaskListComponent from './components/task/TaskList/task-list';
 import OutdialCallComponent from './components/task/OutdialCall/outdial-call';
-import CampaignErrorDialogComponent from './components/task/CampaignErrorDialog/CampaignErrorDialog';
+import CampaignErrorDialogComponent from './components/task/CampaignErrorDialog/campaign-error-dialog';
 
 export {
   UserStateComponent,
