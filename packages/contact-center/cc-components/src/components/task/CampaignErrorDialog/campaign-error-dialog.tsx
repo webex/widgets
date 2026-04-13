@@ -24,18 +24,16 @@ const CampaignErrorDialog: React.FunctionComponent<CampaignErrorDialogProps> = (
     }
   };
 
-  const handleClose = () => {
-    onClose();
-  };
-
   return (
     <dialog
       ref={dialogRef}
       className="campaign-error-dialog"
       data-testid="campaign-error-dialog"
       onKeyDown={handleKeyDown}
+      aria-labelledby="campaign-error-dialog-title"
     >
       <Text
+        id="campaign-error-dialog-title"
         tagname="h2"
         type="body-large-bold"
         className="campaign-error-dialog-title"
@@ -44,6 +42,7 @@ const CampaignErrorDialog: React.FunctionComponent<CampaignErrorDialogProps> = (
         {ERROR_TITLES[errorType]}
       </Text>
       <Text
+        id="campaign-error-dialog-message"
         tagname="p"
         type="body-midsize-regular"
         className="campaign-error-dialog-message"
@@ -52,7 +51,7 @@ const CampaignErrorDialog: React.FunctionComponent<CampaignErrorDialogProps> = (
         {ERROR_MESSAGE}
       </Text>
       <div className="campaign-error-dialog-actions">
-        <Button onClick={handleClose} data-testid="campaign-error-dialog-ok-button">
+        <Button onClick={onClose} data-testid="campaign-error-dialog-ok-button">
           OK
         </Button>
       </div>
