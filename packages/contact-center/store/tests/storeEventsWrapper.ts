@@ -839,17 +839,23 @@ describe('storeEventsWrapper', () => {
       ]);
     });
 
-    it('should accept direct realtime transcript data payloads', () => {
+    it('should accept wrapped realtime transcript event payloads', () => {
       storeWrapper.handleRealtimeTranscription({
-        content: 'Agent speaking',
-        conversationId: 'conversation-2',
-        isFinal: false,
-        messageId: 'message-2',
+        agentId: 'agent-2',
+        data: {
+          content: 'Agent speaking',
+          conversationId: 'conversation-2',
+          isFinal: false,
+          messageId: 'message-2',
+          orgId: 'org-2',
+          publishTimestamp: '201',
+          role: 'agent',
+          trackingId: 'tracking-2',
+          utteranceId: 'utterance-2',
+        },
+        notifDetails: {actionEvent: 'REAL_TIME_TRANSCRIPTION'},
+        notifType: 'REAL_TIME_TRANSCRIPTION',
         orgId: 'org-2',
-        publishTimestamp: '201',
-        role: 'agent',
-        trackingId: 'tracking-2',
-        utteranceId: 'utterance-2',
       });
 
       expect(storeWrapper['store'].realtimeTranscriptionData).toEqual([
