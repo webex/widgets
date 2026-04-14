@@ -8,6 +8,13 @@ Create a commit, push, and open a pull request for a ticket that was fixed in a 
 ## Arguments
 - Required: ticket ID (e.g., `/submit-pr CAI-1234`)
 
+## Skills Integration
+
+| Skill | When to Invoke | Purpose |
+|-------|---------------|---------|
+| `superpowers:verification-before-completion` | Step 2 (showing changes) | Verify staged changes are correct before committing |
+| `superpowers:requesting-code-review` | Step 8 (after PR creation) | Self-review changes before requesting human review |
+
 ## Workflow
 
 ### Step 1: Validate Worktree
@@ -27,6 +34,8 @@ git diff --cached --stat
 - If no staged changes: inform user that there's nothing to submit
 
 ### Step 2: Show Changes for Review
+
+**Invoke `superpowers:verification-before-completion` skill** to verify the staged changes are correct and tests pass before proceeding.
 
 Display the diff summary and any unstaged changes:
 
@@ -174,7 +183,11 @@ PREOF
 )"
 ```
 
-### Step 9: Report Result
+### Step 9: Self-Review
+
+**Invoke `superpowers:requesting-code-review` skill** to self-review the PR changes before requesting human review.
+
+### Step 10: Report Result
 
 On success:
 ```

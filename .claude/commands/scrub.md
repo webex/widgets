@@ -9,6 +9,12 @@ Evaluate bug tickets for completeness and AI-readiness. Classifies each ticket a
 - Optional: ticket IDs (e.g., `/scrub CAI-1234 CAI-5678`)
 - If no tickets specified, fetches open bugs from JIRA
 
+## Skills Integration
+
+| Skill | When to Invoke | Purpose |
+|-------|---------------|---------|
+| `superpowers:dispatching-parallel-agents` | Step 3 (spawning scrubbers) | Parallel agent orchestration pattern |
+
 ## Workflow
 
 ### Step 1: Resolve Tickets
@@ -43,6 +49,8 @@ mcp__jira__call_jira_rest_api(endpoint="/issue/{TICKET_ID}", method="GET")
 Extract: summary, description, type, comments, labels, priority, assignee, reporter.
 
 ### Step 3: Spawn Parallel Scrubber Agents
+
+**Invoke `superpowers:dispatching-parallel-agents` skill** before spawning agents. Follow the skill's pattern for parallel task orchestration.
 
 Launch ALL scrubbers in a **single message** with multiple `Agent()` calls for true parallel execution.
 

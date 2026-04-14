@@ -9,6 +9,13 @@ Deep-dive into prioritized bugs — reproduce, root-cause, and propose a fix. Re
 - Optional: ticket IDs (e.g., `/triage CAI-1234 CAI-5678`)
 - If no tickets specified, fetches bugs labeled `prioritize` from JIRA
 
+## Skills Integration
+
+| Skill | When to Invoke | Purpose |
+|-------|---------------|---------|
+| `superpowers:dispatching-parallel-agents` | Step 3 (spawning triagers) | Parallel agent orchestration pattern |
+| `superpowers:systematic-debugging` | Passed to subagents via prompt | Root cause analysis methodology |
+
 ## Workflow
 
 ### Step 1: Resolve Tickets
@@ -43,6 +50,8 @@ mcp__jira__call_jira_rest_api(endpoint="/issue/{TICKET_ID}", method="GET")
 Extract: summary, description, type, all comments (especially Scrubber classification), labels, priority.
 
 ### Step 3: Spawn Parallel Triager Agents
+
+**Invoke `superpowers:dispatching-parallel-agents` skill** before spawning agents. Follow the skill's pattern for parallel task orchestration.
 
 Launch ALL triagers in a **single message** with multiple `Agent()` calls for parallel execution.
 

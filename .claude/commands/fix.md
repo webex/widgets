@@ -9,6 +9,18 @@ Implement bug fixes, create PRs, and handle review feedback. The final stage of 
 - Optional: ticket IDs (e.g., `/fix CAI-1234 CAI-5678`)
 - If no tickets specified, fetches bugs labeled `triaged` from JIRA
 
+## Skills Integration
+
+| Skill | When to Invoke | Purpose |
+|-------|---------------|---------|
+| `superpowers:using-git-worktrees` | Step 3 (worktree creation) | Safe worktree setup with smart directory selection |
+| `superpowers:dispatching-parallel-agents` | Step 6 (spawning fixers) | Parallel agent orchestration pattern |
+| `superpowers:test-driven-development` | Passed to subagents via prompt | TDD methodology for implementation |
+| `superpowers:systematic-debugging` | Passed to subagents via prompt | Root cause analysis before fixing |
+| `superpowers:verification-before-completion` | Step 6b (verifying results) | Verify fixes before claiming success |
+| `superpowers:receiving-code-review` | Step 7 (review polling, changes requested) | Verify review feedback before implementing |
+| `superpowers:finishing-a-development-branch` | Step 8 (summary) | Guide merge/cleanup decisions |
+
 ## Workflow
 
 ### Step 1: Resolve Tickets
@@ -45,6 +57,8 @@ gh pr list --head {TICKET_ID} --repo webex/widgets --state all --json number,tit
 - **If no PR:** Continue to implementation (Step 3)
 
 ### Step 3: Create Worktrees
+
+**Invoke `superpowers:using-git-worktrees` skill** before creating worktrees. Follow the skill's safety verification and smart directory selection patterns.
 
 For each ticket that needs implementation:
 
@@ -84,6 +98,8 @@ Extract the Triager's analysis comment (look for "**Triager Analysis: FIX SUGGES
 
 ### Step 6: Spawn Fixer Agents
 
+**Invoke `superpowers:dispatching-parallel-agents` skill** before spawning agents. Follow the skill's pattern for parallel task orchestration.
+
 Launch fixer agents — one per ticket, in parallel, with `run_in_background: true`:
 
 ```
@@ -119,6 +135,8 @@ Read .claude/agents/fixer.md for your full workflow. Implement the fix, run test
 **Fallback:** If the subagent fails, do the implementation work directly in the main conversation following fixer.md workflow.
 
 ### Step 6b: Post-Agent Staging
+
+**Invoke `superpowers:verification-before-completion` skill** before accepting results as successful.
 
 After each fixer agent completes, verify staging worked:
 ```bash
@@ -248,6 +266,9 @@ gh pr view {PR_NUMBER} --repo webex/widgets --json reviews,reviewRequests,state
 ```
 
 **If changes requested:**
+
+**Invoke `superpowers:receiving-code-review` skill** before implementing suggestions. Verify feedback is technically sound before blindly applying.
+
 1. Ensure worktree exists (recreate if cleaned up):
    ```bash
    if [ ! -d /tmp/claude-widgets/{TICKET_ID} ]; then
@@ -290,6 +311,8 @@ gh pr view {PR_NUMBER} --repo webex/widgets --json reviews,reviewRequests,state
 - Report: "PR #{PR_NUMBER} is waiting for reviews. Re-run `/fix {TICKET_ID}` to check again."
 
 ### Step 8: Present Summary
+
+**Invoke `superpowers:finishing-a-development-branch` skill** to guide the user on next steps for each completed ticket.
 
 ```
 ## Fix Results

@@ -95,6 +95,23 @@ Jira labels track progress: `scrubbed` → `prioritize`/`followup`/`dolater` →
 - Test naming: describe the scenario and expected outcome (e.g., `should handle null agent profile when station login completes`).
 - Write a failing test first (TDD), then implement the fix.
 
+## Superpowers Skills
+
+Invoke these skills at the right workflow stage — they enforce discipline that's easy to skip under pressure.
+
+| Skill | When to Invoke |
+|-------|---------------|
+| `superpowers:brainstorming` | Before building new features or modifying behavior. Explores intent and design before code. |
+| `superpowers:writing-plans` | When you have a spec or requirements for a multi-step task, before touching code. |
+| `superpowers:systematic-debugging` | Before proposing any fix. Understand root cause first — no guessing. |
+| `superpowers:test-driven-development` | Before writing implementation code. Write a failing test first. |
+| `superpowers:dispatching-parallel-agents` | When spawning 2+ independent subagents (e.g., parallel scrubbers/triagers/fixers). |
+| `superpowers:using-git-worktrees` | Before creating worktrees for feature work or bug fixes. |
+| `superpowers:verification-before-completion` | Before claiming work is done, committing, or creating PRs. Evidence before assertions. |
+| `superpowers:requesting-code-review` | After completing a feature or fix, before merging. |
+| `superpowers:receiving-code-review` | When PR review feedback arrives. Verify before blindly implementing suggestions. |
+| `superpowers:finishing-a-development-branch` | When implementation is complete and tests pass — guides merge/PR/cleanup decisions. |
+
 ## Documentation Pointers
 
 | What | Where |
