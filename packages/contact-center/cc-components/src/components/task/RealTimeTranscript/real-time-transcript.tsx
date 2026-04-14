@@ -1,5 +1,5 @@
 import React, {useMemo} from 'react';
-import {Avatar} from '@momentum-design/components/dist/react';
+import {Avatar, Text} from '@momentum-design/components/dist/react';
 import {withMetrics} from '@webex/cc-ui-logging';
 import {RealTimeTranscriptComponentProps} from '../task.types';
 import './real-time-transcript.style.scss';
@@ -24,45 +24,53 @@ const RealTimeTranscriptComponent: React.FC<RealTimeTranscriptComponentProps> = 
     <section className={`real-time-transcript ${className || ''}`.trim()} data-testid="real-time-transcript:root">
       <div className="real-time-transcript__content" data-testid="real-time-transcript:live-content">
         {sortedEntries.length === 0 ? (
-          <div className="real-time-transcript__empty">{EMPTY_TRANSCRIPT_MESSAGE}</div>
+          <Text className="real-time-transcript__empty" tagname="div" type="body-midsize-regular">
+            {EMPTY_TRANSCRIPT_MESSAGE}
+          </Text>
         ) : (
           <>
             {sortedEntries.map((entry) => (
               <React.Fragment key={entry.id}>
                 {entry.event ? (
-                  <div className="real-time-transcript__event" data-testid="real-time-transcript:event">
+                  <Text
+                    className="real-time-transcript__event"
+                    data-testid="real-time-transcript:event"
+                    tagname="div"
+                    type="body-midsize-regular"
+                  >
                     {entry.event}
                     {entry.displayTime ? (
-                      <span className="real-time-transcript__event-time">. {entry.displayTime}</span>
+                      <Text className="real-time-transcript__event-time" tagname="span" type="body-midsize-regular">
+                        . {entry.displayTime}
+                      </Text>
                     ) : null}
-                  </div>
+                  </Text>
                 ) : null}
                 <div className="real-time-transcript__item" data-testid="real-time-transcript:item">
                   <div className="real-time-transcript__avatar-wrap">
-                    {entry.avatarUrl ? (
-                      <img
-                        src={entry.avatarUrl}
-                        alt={formatSpeaker(entry.speaker)}
-                        className="real-time-transcript__avatar-image"
-                      />
-                    ) : (
-                      <Avatar
-                        className="real-time-transcript__avatar-fallback"
-                        icon-name={entry.isCustomer ? undefined : 'placeholder-bold'}
-                        title={formatSpeaker(entry.speaker)}
-                      >
-                        {entry.initials || (entry.isCustomer ? 'CU' : 'YO')}
-                      </Avatar>
-                    )}
+                    <Avatar
+                      className="real-time-transcript__avatar-fallback"
+                      icon-name={entry.avatarUrl || entry.isCustomer ? undefined : 'placeholder-bold'}
+                      src={entry.avatarUrl}
+                      title={formatSpeaker(entry.speaker)}
+                    >
+                      {entry.initials || (entry.isCustomer ? 'CU' : 'YO')}
+                    </Avatar>
                   </div>
                   <div className="real-time-transcript__text-block">
                     <div className="real-time-transcript__meta">
-                      <span>{formatSpeaker(entry.speaker)}</span>
+                      <Text tagname="span" type="body-large-bold">
+                        {formatSpeaker(entry.speaker)}
+                      </Text>
                       {entry.displayTime ? (
-                        <span className="real-time-transcript__time">{entry.displayTime}</span>
+                        <Text className="real-time-transcript__time" tagname="span" type="body-midsize-regular">
+                          {entry.displayTime}
+                        </Text>
                       ) : null}
                     </div>
-                    <p className="real-time-transcript__message">{entry.message}</p>
+                    <Text className="real-time-transcript__message" tagname="p" type="body-large-regular">
+                      {entry.message}
+                    </Text>
                   </div>
                 </div>
               </React.Fragment>
