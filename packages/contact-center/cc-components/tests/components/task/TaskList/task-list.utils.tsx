@@ -6,7 +6,7 @@ import {
   getTasksArray,
   createTaskSelectHandler,
 } from '../../../../src/components/task/TaskList/task-list.utils';
-import {MEDIA_CHANNEL, TaskListItemData} from '../../../../src/components/task/task.types';
+import {MEDIA_CHANNEL, TaskListItemData, OUTBOUND_TYPE} from '../../../../src/components/task/task.types';
 import {mockTask} from '@webex/test-fixtures';
 
 // Mock the store with a mockable isIncomingTask function
@@ -241,6 +241,205 @@ describe('task-list.utils', () => {
         mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
         mockTask.data.wrapUpRequired = originalWrapUpRequired;
         mockTask.data.interaction.mediaType = originalMediaType;
+      });
+    });
+
+    describe('Outdial tasks', () => {
+      it('should use dn (dialed number) as title for outdial telephony tasks', () => {
+        const originalState = mockTask.data.interaction.state;
+        const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
+        const originalMediaType = mockTask.data.interaction.mediaType;
+        const originalOutboundType = mockTask.data.interaction.outboundType;
+
+        mockTask.data.interaction.state = 'connected';
+        mockTask.data.interaction.mediaType = MEDIA_CHANNEL.TELEPHONY;
+        mockTask.data.interaction.outboundType = OUTBOUND_TYPE.OUTDIAL;
+        mockTask.data.interaction.callAssociatedDetails = {
+          ani: '+18005551234',
+          dn: '+14155559876',
+          customerName: 'Outdial Customer',
+          virtualTeamName: 'Outbound Team',
+        };
+
+        const result = extractTaskListItemData(mockTask, true, mockTask.data.agentId);
+
+        expect(result.title).toBe('+14155559876'); // Should show dn, not ani
+        expect(result.ani).toBe('+18005551234');
+        expect(result.isTelephony).toBe(true);
+
+        // Restore
+        mockTask.data.interaction.state = originalState;
+        mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
+        mockTask.data.interaction.mediaType = originalMediaType;
+        mockTask.data.interaction.outboundType = originalOutboundType;
+      });
+
+      it('should fall back to ani when dn is not available for outdial tasks', () => {
+        const originalState = mockTask.data.interaction.state;
+        const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
+        const originalMediaType = mockTask.data.interaction.mediaType;
+        const originalOutboundType = mockTask.data.interaction.outboundType;
+
+        mockTask.data.interaction.state = 'connected';
+        mockTask.data.interaction.mediaType = MEDIA_CHANNEL.TELEPHONY;
+        mockTask.data.interaction.outboundType = OUTBOUND_TYPE.OUTDIAL;
+        mockTask.data.interaction.callAssociatedDetails = {
+          ani: '+18005551234',
+          customerName: 'Outdial Customer',
+          virtualTeamName: 'Outbound Team',
+        };
+
+        const result = extractTaskListItemData(mockTask, true, mockTask.data.agentId);
+
+        expect(result.title).toBe('+18005551234'); // Falls back to ani
+
+        // Restore
+        mockTask.data.interaction.state = originalState;
+        mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
+        mockTask.data.interaction.mediaType = originalMediaType;
+        mockTask.data.interaction.outboundType = originalOutboundType;
+      });
+
+      it('should use ani as title for non-outdial telephony tasks even when dn is present', () => {
+        const originalState = mockTask.data.interaction.state;
+        const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
+        const originalMediaType = mockTask.data.interaction.mediaType;
+
+        mockTask.data.interaction.state = 'connected';
+        mockTask.data.interaction.mediaType = MEDIA_CHANNEL.TELEPHONY;
+        mockTask.data.interaction.callAssociatedDetails = {
+          ani: '+18005551234',
+          dn: '+14155559876',
+          customerName: 'Inbound Customer',
+          virtualTeamName: 'Support Team',
+        };
+
+        const result = extractTaskListItemData(mockTask, true, mockTask.data.agentId);
+
+        expect(result.title).toBe('+18005551234'); // Should show ani for inbound
+
+        // Restore
+        mockTask.data.interaction.state = originalState;
+        mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
+        mockTask.data.interaction.mediaType = originalMediaType;
+      });
+
+      it('should fall back to ani when dn is empty string for outdial tasks', () => {
+        const originalState = mockTask.data.interaction.state;
+        const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
+        const originalMediaType = mockTask.data.interaction.mediaType;
+        const originalOutboundType = mockTask.data.interaction.outboundType;
+
+        mockTask.data.interaction.state = 'connected';
+        mockTask.data.interaction.mediaType = MEDIA_CHANNEL.TELEPHONY;
+        mockTask.data.interaction.outboundType = OUTBOUND_TYPE.OUTDIAL;
+        mockTask.data.interaction.callAssociatedDetails = {
+          ani: '+18005551234',
+          dn: '',
+          customerName: 'Outdial Customer',
+          virtualTeamName: 'Outbound Team',
+        };
+
+        const result = extractTaskListItemData(mockTask, true, mockTask.data.agentId);
+
+        expect(result.title).toBe('+18005551234'); // Empty dn falls back to ani
+
+        // Restore
+        mockTask.data.interaction.state = originalState;
+        mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
+        mockTask.data.interaction.mediaType = originalMediaType;
+        mockTask.data.interaction.outboundType = originalOutboundType;
+      });
+
+      it('should use ani for CALLBACK outboundType (not OUTDIAL)', () => {
+        const originalState = mockTask.data.interaction.state;
+        const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
+        const originalMediaType = mockTask.data.interaction.mediaType;
+        const originalOutboundType = mockTask.data.interaction.outboundType;
+
+        mockTask.data.interaction.state = 'connected';
+        mockTask.data.interaction.mediaType = MEDIA_CHANNEL.TELEPHONY;
+        mockTask.data.interaction.outboundType = OUTBOUND_TYPE.CALLBACK;
+        mockTask.data.interaction.callAssociatedDetails = {
+          ani: '+18005551234',
+          dn: '+14155559876',
+          customerName: 'Callback Customer',
+          virtualTeamName: 'Callback Team',
+        };
+
+        const result = extractTaskListItemData(mockTask, true, mockTask.data.agentId);
+
+        expect(result.title).toBe('+18005551234'); // CALLBACK uses ani, not dn
+
+        // Restore
+        mockTask.data.interaction.state = originalState;
+        mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
+        mockTask.data.interaction.mediaType = originalMediaType;
+        mockTask.data.interaction.outboundType = originalOutboundType;
+      });
+
+      it('should still use customerName for social media outdial tasks', () => {
+        const originalState = mockTask.data.interaction.state;
+        const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
+        const originalMediaType = mockTask.data.interaction.mediaType;
+        const originalOutboundType = mockTask.data.interaction.outboundType;
+
+        mockTask.data.interaction.state = 'connected';
+        mockTask.data.interaction.mediaType = MEDIA_CHANNEL.SOCIAL;
+        mockTask.data.interaction.outboundType = OUTBOUND_TYPE.OUTDIAL;
+        mockTask.data.interaction.callAssociatedDetails = {
+          ani: 'social-ani',
+          dn: 'social-dn',
+          customerName: 'Social Outdial Customer',
+          virtualTeamName: 'Social Team',
+        };
+
+        const result = extractTaskListItemData(mockTask, true, mockTask.data.agentId);
+
+        expect(result.title).toBe('Social Outdial Customer'); // Social always uses customerName
+
+        // Restore
+        mockTask.data.interaction.state = originalState;
+        mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
+        mockTask.data.interaction.mediaType = originalMediaType;
+        mockTask.data.interaction.outboundType = originalOutboundType;
+      });
+
+      it('should extract correct button states for incoming outdial telephony on non-browser', () => {
+        // Mock isIncomingTask to return true for this test
+        (isIncomingTask as jest.Mock).mockReturnValueOnce(true);
+
+        const originalState = mockTask.data.interaction.state;
+        const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
+        const originalMediaType = mockTask.data.interaction.mediaType;
+        const originalOutboundType = mockTask.data.interaction.outboundType;
+        const originalWrapUpRequired = mockTask.data.wrapUpRequired;
+
+        mockTask.data.interaction.state = 'new';
+        mockTask.data.interaction.mediaType = MEDIA_CHANNEL.TELEPHONY;
+        mockTask.data.interaction.outboundType = OUTBOUND_TYPE.OUTDIAL;
+        mockTask.data.wrapUpRequired = false;
+        mockTask.data.interaction.callAssociatedDetails = {
+          ani: '+18005551234',
+          dn: '+14155559876',
+          customerName: 'Outdial Customer',
+          virtualTeamName: 'Outbound Team',
+          ronaTimeout: '30',
+        };
+
+        const result = extractTaskListItemData(mockTask, false, mockTask.data.agentId);
+
+        expect(result.title).toBe('+14155559876');
+        expect(result.acceptText).toBe('Ringing...');
+        expect(result.declineText).toBeUndefined();
+        expect(result.disableAccept).toBe(true);
+
+        // Restore
+        mockTask.data.interaction.state = originalState;
+        mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
+        mockTask.data.interaction.mediaType = originalMediaType;
+        mockTask.data.interaction.outboundType = originalOutboundType;
+        mockTask.data.wrapUpRequired = originalWrapUpRequired;
       });
     });
   });

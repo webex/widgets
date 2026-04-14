@@ -771,6 +771,19 @@ export interface TaskListItemData {
   displayState: string;
 }
 
+export enum OUTBOUND_TYPE {
+  OUTDIAL = 'OUTDIAL',
+  CALLBACK = 'CALLBACK',
+}
+
+/**
+ * Returns the appropriate caller identifier based on outbound type.
+ * For outdial calls, the customer's number is in `dn`; for all others it's in `ani`.
+ */
+export const getCallerIdentifier = (ani: string, dn: string, outboundType?: string): string => {
+  return outboundType === OUTBOUND_TYPE.OUTDIAL ? dn || ani : ani;
+};
+
 export enum TaskState {
   NEW = 'new',
   ACTIVE = 'active',
