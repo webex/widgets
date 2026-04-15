@@ -6,6 +6,7 @@ import IncomingTaskComponent from './components/task/IncomingTask/incoming-task'
 import TaskListComponent from './components/task/TaskList/task-list';
 import OutdialCallComponent from './components/task/OutdialCall/outdial-call';
 import CampaignErrorDialogComponent from './components/task/CampaignErrorDialog/campaign-error-dialog';
+import RealTimeTranscriptComponent from './components/task/RealTimeTranscript/real-time-transcript';
 
 export {
   UserStateComponent,
@@ -16,6 +17,7 @@ export {
   TaskListComponent,
   OutdialCallComponent,
   CampaignErrorDialogComponent,
+  RealTimeTranscriptComponent,
 };
 export * from './components/StationLogin/constants';
 export * from './components/StationLogin/station-login.types';
