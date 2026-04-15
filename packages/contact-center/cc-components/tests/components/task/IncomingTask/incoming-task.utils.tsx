@@ -1,5 +1,5 @@
 import {extractIncomingTaskData} from '../../../../src/components/task/IncomingTask/incoming-task.utils';
-import {MEDIA_CHANNEL} from '../../../../src/components/task/task.types';
+import {MEDIA_CHANNEL, OUTBOUND_TYPE} from '../../../../src/components/task/task.types';
 import {mockTask} from '@webex/test-fixtures';
 
 describe('incoming-task.utils', () => {
@@ -102,6 +102,202 @@ describe('incoming-task.utils', () => {
         // Restore original values
         mockTask.data.interaction.mediaType = originalMediaType;
         mockTask.data.wrapUpRequired = originalWrapUpRequired;
+      });
+    });
+
+    describe('Outdial tasks', () => {
+      it('should use dn (dialed number) as title for outdial telephony tasks', () => {
+        const originalMediaType = mockTask.data.interaction.mediaType;
+        const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
+        const originalOutboundType = mockTask.data.interaction.outboundType;
+
+        mockTask.data.interaction.mediaType = MEDIA_CHANNEL.TELEPHONY;
+        mockTask.data.interaction.outboundType = OUTBOUND_TYPE.OUTDIAL;
+        mockTask.data.interaction.callAssociatedDetails = {
+          ani: '+18005551234',
+          dn: '+14155559876',
+          customerName: 'Outdial Customer',
+          virtualTeamName: 'Outbound Team',
+          ronaTimeout: '30',
+        };
+
+        const result = extractIncomingTaskData(mockTask, true);
+
+        expect(result.title).toBe('+14155559876'); // Should show dn, not ani
+        expect(result.ani).toBe('+18005551234');
+        expect(result.isTelephony).toBe(true);
+
+        // Restore
+        mockTask.data.interaction.mediaType = originalMediaType;
+        mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
+        mockTask.data.interaction.outboundType = originalOutboundType;
+      });
+
+      it('should fall back to ani when dn is not available for outdial tasks', () => {
+        const originalMediaType = mockTask.data.interaction.mediaType;
+        const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
+        const originalOutboundType = mockTask.data.interaction.outboundType;
+
+        mockTask.data.interaction.mediaType = MEDIA_CHANNEL.TELEPHONY;
+        mockTask.data.interaction.outboundType = OUTBOUND_TYPE.OUTDIAL;
+        mockTask.data.interaction.callAssociatedDetails = {
+          ani: '+18005551234',
+          customerName: 'Outdial Customer',
+          virtualTeamName: 'Outbound Team',
+        };
+
+        const result = extractIncomingTaskData(mockTask, true);
+
+        expect(result.title).toBe('+18005551234'); // Falls back to ani
+
+        // Restore
+        mockTask.data.interaction.mediaType = originalMediaType;
+        mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
+        mockTask.data.interaction.outboundType = originalOutboundType;
+      });
+
+      it('should use ani as title for non-outdial telephony tasks', () => {
+        const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
+
+        mockTask.data.interaction.callAssociatedDetails = {
+          ani: '+18005551234',
+          dn: '+14155559876',
+          customerName: 'Inbound Customer',
+          virtualTeamName: 'Support Team',
+        };
+
+        const result = extractIncomingTaskData(mockTask, true);
+
+        expect(result.title).toBe('+18005551234'); // Should show ani for inbound
+
+        // Restore
+        mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
+      });
+
+      it('should fall back to ani when dn is empty string for outdial tasks', () => {
+        const originalMediaType = mockTask.data.interaction.mediaType;
+        const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
+        const originalOutboundType = mockTask.data.interaction.outboundType;
+
+        mockTask.data.interaction.mediaType = MEDIA_CHANNEL.TELEPHONY;
+        mockTask.data.interaction.outboundType = OUTBOUND_TYPE.OUTDIAL;
+        mockTask.data.interaction.callAssociatedDetails = {
+          ani: '+18005551234',
+          dn: '',
+          customerName: 'Outdial Customer',
+          virtualTeamName: 'Outbound Team',
+        };
+
+        const result = extractIncomingTaskData(mockTask, true);
+
+        expect(result.title).toBe('+18005551234'); // Empty dn falls back to ani
+
+        // Restore
+        mockTask.data.interaction.mediaType = originalMediaType;
+        mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
+        mockTask.data.interaction.outboundType = originalOutboundType;
+      });
+
+      it('should use ani for CALLBACK outboundType (not OUTDIAL)', () => {
+        const originalMediaType = mockTask.data.interaction.mediaType;
+        const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
+        const originalOutboundType = mockTask.data.interaction.outboundType;
+
+        mockTask.data.interaction.mediaType = MEDIA_CHANNEL.TELEPHONY;
+        mockTask.data.interaction.outboundType = OUTBOUND_TYPE.CALLBACK;
+        mockTask.data.interaction.callAssociatedDetails = {
+          ani: '+18005551234',
+          dn: '+14155559876',
+          customerName: 'Callback Customer',
+          virtualTeamName: 'Callback Team',
+        };
+
+        const result = extractIncomingTaskData(mockTask, true);
+
+        expect(result.title).toBe('+18005551234'); // CALLBACK uses ani, not dn
+
+        // Restore
+        mockTask.data.interaction.mediaType = originalMediaType;
+        mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
+        mockTask.data.interaction.outboundType = originalOutboundType;
+      });
+
+      it('should still use customerName for social media outdial tasks', () => {
+        const originalMediaType = mockTask.data.interaction.mediaType;
+        const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
+        const originalOutboundType = mockTask.data.interaction.outboundType;
+
+        mockTask.data.interaction.mediaType = MEDIA_CHANNEL.SOCIAL;
+        mockTask.data.interaction.outboundType = OUTBOUND_TYPE.OUTDIAL;
+        mockTask.data.interaction.callAssociatedDetails = {
+          ani: 'social-ani',
+          dn: 'social-dn',
+          customerName: 'Social Outdial Customer',
+          virtualTeamName: 'Social Team',
+        };
+
+        const result = extractIncomingTaskData(mockTask, true);
+
+        expect(result.title).toBe('Social Outdial Customer'); // Social always uses customerName
+
+        // Restore
+        mockTask.data.interaction.mediaType = originalMediaType;
+        mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
+        mockTask.data.interaction.outboundType = originalOutboundType;
+      });
+
+      it('should extract correct button states for outdial telephony on non-browser', () => {
+        const originalMediaType = mockTask.data.interaction.mediaType;
+        const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
+        const originalOutboundType = mockTask.data.interaction.outboundType;
+        const originalWrapUpRequired = mockTask.data.wrapUpRequired;
+
+        mockTask.data.interaction.mediaType = MEDIA_CHANNEL.TELEPHONY;
+        mockTask.data.interaction.outboundType = OUTBOUND_TYPE.OUTDIAL;
+        mockTask.data.wrapUpRequired = false;
+        mockTask.data.interaction.callAssociatedDetails = {
+          ani: '+18005551234',
+          dn: '+14155559876',
+          customerName: 'Outdial Customer',
+          virtualTeamName: 'Outbound Team',
+          ronaTimeout: '30',
+        };
+
+        const result = extractIncomingTaskData(mockTask, false);
+
+        expect(result.title).toBe('+14155559876');
+        expect(result.acceptText).toBe('Ringing...');
+        expect(result.declineText).toBeUndefined();
+        expect(result.disableAccept).toBe(true);
+
+        // Restore
+        mockTask.data.interaction.mediaType = originalMediaType;
+        mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
+        mockTask.data.interaction.outboundType = originalOutboundType;
+        mockTask.data.wrapUpRequired = originalWrapUpRequired;
+      });
+    });
+
+    describe('Standard inbound tasks', () => {
+      it('should use ani for title when outboundType is undefined (standard inbound)', () => {
+        const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
+        const originalOutboundType = mockTask.data.interaction.outboundType;
+
+        mockTask.data.interaction.outboundType = undefined;
+        mockTask.data.interaction.callAssociatedDetails = {
+          ani: '+18005551234',
+          dn: '+14155559876',
+          customerName: 'Inbound Customer',
+          virtualTeamName: 'Support Team',
+        };
+
+        const result = extractIncomingTaskData(mockTask, true);
+
+        expect(result.title).toBe('+18005551234'); // Standard inbound uses ani
+
+        // Restore
+        mockTask.data.interaction.callAssociatedDetails = originalCallAssociatedDetails;
+        mockTask.data.interaction.outboundType = originalOutboundType;
       });
     });
 
