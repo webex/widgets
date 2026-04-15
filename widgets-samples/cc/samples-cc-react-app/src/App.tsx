@@ -8,6 +8,7 @@ import {
   CallControlCAD,
   store,
   OutdialCall,
+  RealTimeTranscript,
 } from '@webex/cc-widgets';
 import {StationLogoutResponse} from '@webex/contact-center';
 import {ERROR_TRIGGERING_IDLE_CODES} from '@webex/cc-store';
@@ -39,6 +40,7 @@ const defaultWidgets = {
   callControl: true,
   callControlCAD: true,
   outdialCall: true,
+  realtimeTranscript: true,
 };
 
 function App() {
@@ -950,6 +952,16 @@ function App() {
                               onTaskDeclined={onTaskDeclined}
                               onTaskSelected={onTaskSelected}
                             />
+                          </fieldset>
+                        </section>
+                      </div>
+                    )}
+                    {selectedWidgets.realtimeTranscript && store.currentTask && (
+                      <div className="box">
+                        <section className="section-box">
+                          <fieldset className="fieldset">
+                            <legend className="legend-box">Realtime Transcript</legend>
+                            <RealTimeTranscript />
                           </fieldset>
                         </section>
                       </div>
