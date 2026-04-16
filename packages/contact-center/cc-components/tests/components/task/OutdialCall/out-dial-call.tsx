@@ -1,5 +1,5 @@
 import React from 'react';
-import {render, fireEvent, screen, waitFor, within} from '@testing-library/react';
+import {act, render, fireEvent, screen, waitFor, within} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import OutdialCallComponent from '../../../../src/components/task/OutdialCall/outdial-call';
 import {KEY_LIST} from '../../../../src/components/task/OutdialCall/constants';
@@ -1089,71 +1089,93 @@ describe('OutdialCallComponent', () => {
     });
 
     it('maintains scroll pagination with search', async () => {
-      const mockGetAddressBook = jest
-        .fn()
-        .mockResolvedValueOnce({
-          data: Array.from({length: 25}, (_, i) => ({
-            id: `${i}`,
-            name: `John ${i}`,
-            number: `+1469000${i}`,
-          })),
-          total: 50,
-        })
-        .mockResolvedValueOnce({
-          data: Array.from({length: 25}, (_, i) => ({
-            id: `${i + 25}`,
-            name: `John ${i + 25}`,
-            number: `+1469000${i + 25}`,
-          })),
-          total: 50,
+      jest.useFakeTimers();
+      try {
+        const mockGetAddressBook = jest
+          .fn()
+          .mockResolvedValueOnce({
+            data: Array.from({length: 25}, (_, i) => ({
+              id: `${i}`,
+              name: `Contact ${i}`,
+              number: `+1469000${i}`,
+            })),
+            total: 50,
+          })
+          .mockResolvedValueOnce({
+            data: Array.from({length: 25}, (_, i) => ({
+              id: `search-${i}`,
+              name: `John ${i}`,
+              number: `+1469100${i}`,
+            })),
+            total: 50,
+          })
+          .mockResolvedValueOnce({
+            data: Array.from({length: 25}, (_, i) => ({
+              id: `search-${i + 25}`,
+              name: `John ${i + 25}`,
+              number: `+1469000${i + 25}`,
+            })),
+            total: 50,
+          });
+
+        const addressBookProps: OutdialCallComponentProps = {
+          ...props,
+          isAddressBookEnabled: true,
+          getAddressBookEntries: mockGetAddressBook,
+        };
+
+        const {container} = render(<OutdialCallComponent {...addressBookProps} />);
+        const tabList = await waitFor(() => getTabList(container));
+        const tabs = within(tabList as HTMLElement).getAllByRole('tab');
+        const addressBookTab = tabs[0];
+        fireEvent.click(addressBookTab);
+
+        await waitFor(() => {
+          expect(screen.getByText('Contact 0')).toBeInTheDocument();
         });
 
-      const addressBookProps: OutdialCallComponentProps = {
-        ...props,
-        isAddressBookEnabled: true,
-        getAddressBookEntries: mockGetAddressBook,
-      };
+        // Search
+        const searchInput = await screen.findByTestId('outdial-address-book-search-input');
+        const searchEvent = new Event('input', {bubbles: true});
+        Object.defineProperty(searchEvent, 'target', {
+          writable: false,
+          value: {value: 'John'},
+        });
+        fireEvent(searchInput, searchEvent);
 
-      const {container} = render(<OutdialCallComponent {...addressBookProps} />);
-      const tabList = await waitFor(() => getTabList(container));
-      const tabs = within(tabList as HTMLElement).getAllByRole('tab');
-      const addressBookTab = tabs[0];
-      fireEvent.click(addressBookTab);
+        await act(async () => {
+          jest.advanceTimersByTime(500);
+        });
 
-      await waitFor(() => {
-        expect(screen.getByText('John 0')).toBeInTheDocument();
-      });
+        // Wait for debounced search
+        await waitFor(
+          () => {
+            expect(mockGetAddressBook).toHaveBeenCalledWith({page: 0, pageSize: 25, search: 'John'});
+          },
+          {timeout: 1000}
+        );
 
-      // Search
-      const searchInput = await screen.findByTestId('outdial-address-book-search-input');
-      const searchEvent = new Event('input', {bubbles: true});
-      Object.defineProperty(searchEvent, 'target', {
-        writable: false,
-        value: {value: 'John'},
-      });
-      fireEvent(searchInput, searchEvent);
+        await waitFor(() => {
+          expect(screen.getByText('John 0')).toBeInTheDocument();
+        });
 
-      // Wait for debounced search
-      await waitFor(
-        () => {
-          expect(mockGetAddressBook).toHaveBeenCalledWith({page: 0, pageSize: 25, search: 'John'});
-        },
-        {timeout: 1000}
-      );
+        // Trigger load more with search term
+        const mockEntry = {
+          isIntersecting: true,
+          target: container.querySelector('.address-book-observer'),
+        } as IntersectionObserverEntry;
 
-      // Trigger load more with search term
-      const mockEntry = {
-        isIntersecting: true,
-        target: container.querySelector('.address-book-observer'),
-      } as IntersectionObserverEntry;
+        if (intersectionCallback) {
+          intersectionCallback([mockEntry], {} as IntersectionObserver);
+        }
 
-      if (intersectionCallback) {
-        intersectionCallback([mockEntry], {} as IntersectionObserver);
+        await waitFor(() => {
+          expect(mockGetAddressBook).toHaveBeenCalledWith({page: 1, pageSize: 25, search: 'John'});
+        });
+      } finally {
+        jest.runOnlyPendingTimers();
+        jest.useRealTimers();
       }
-
-      await waitFor(() => {
-        expect(mockGetAddressBook).toHaveBeenCalledWith({page: 1, pageSize: 25, search: 'John'});
-      });
     });
   });
 });

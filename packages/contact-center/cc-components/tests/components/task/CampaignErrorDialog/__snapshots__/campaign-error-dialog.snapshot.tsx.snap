@@ -1,0 +1,137 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CampaignErrorDialog Snapshots Rendering should match snapshot for ACCEPT_FAILED error type 1`] = `
+<div>
+  <dialog
+    aria-labelledby="campaign-error-dialog-title"
+    class="campaign-error-dialog"
+    data-testid="campaign-error-dialog"
+  >
+    <mdc-text
+      class="campaign-error-dialog-title"
+      data-testid="campaign-error-dialog-title"
+      id="campaign-error-dialog-title"
+    >
+      Can't accept contact
+    </mdc-text>
+    <mdc-text
+      class="campaign-error-dialog-message"
+      data-testid="campaign-error-dialog-message"
+      id="campaign-error-dialog-message"
+    >
+      We ran into an issue connecting you with this contact. Check your network connection and try again.
+    </mdc-text>
+    <div
+      class="campaign-error-dialog-actions"
+    >
+      <mdc-button
+        data-testid="campaign-error-dialog-ok-button"
+      >
+        OK
+      </mdc-button>
+    </div>
+  </dialog>
+</div>
+`;
+
+exports[`CampaignErrorDialog Snapshots Rendering should match snapshot for REMOVE_FAILED error type 1`] = `
+<div>
+  <dialog
+    aria-labelledby="campaign-error-dialog-title"
+    class="campaign-error-dialog"
+    data-testid="campaign-error-dialog"
+  >
+    <mdc-text
+      class="campaign-error-dialog-title"
+      data-testid="campaign-error-dialog-title"
+      id="campaign-error-dialog-title"
+    >
+      Can't remove contact
+    </mdc-text>
+    <mdc-text
+      class="campaign-error-dialog-message"
+      data-testid="campaign-error-dialog-message"
+      id="campaign-error-dialog-message"
+    >
+      We ran into an issue connecting you with this contact. Check your network connection and try again.
+    </mdc-text>
+    <div
+      class="campaign-error-dialog-actions"
+    >
+      <mdc-button
+        data-testid="campaign-error-dialog-ok-button"
+      >
+        OK
+      </mdc-button>
+    </div>
+  </dialog>
+</div>
+`;
+
+exports[`CampaignErrorDialog Snapshots Rendering should match snapshot for SKIP_FAILED error type 1`] = `
+<div>
+  <dialog
+    aria-labelledby="campaign-error-dialog-title"
+    class="campaign-error-dialog"
+    data-testid="campaign-error-dialog"
+  >
+    <mdc-text
+      class="campaign-error-dialog-title"
+      data-testid="campaign-error-dialog-title"
+      id="campaign-error-dialog-title"
+    >
+      Can't skip contact
+    </mdc-text>
+    <mdc-text
+      class="campaign-error-dialog-message"
+      data-testid="campaign-error-dialog-message"
+      id="campaign-error-dialog-message"
+    >
+      We ran into an issue connecting you with this contact. Check your network connection and try again.
+    </mdc-text>
+    <div
+      class="campaign-error-dialog-actions"
+    >
+      <mdc-button
+        data-testid="campaign-error-dialog-ok-button"
+      >
+        OK
+      </mdc-button>
+    </div>
+  </dialog>
+</div>
+`;
+
+exports[`CampaignErrorDialog Snapshots Rendering should match snapshot when dialog is closed 1`] = `
+<div>
+  <dialog
+    aria-labelledby="campaign-error-dialog-title"
+    class="campaign-error-dialog"
+    data-testid="campaign-error-dialog"
+  >
+    <mdc-text
+      class="campaign-error-dialog-title"
+      data-testid="campaign-error-dialog-title"
+      id="campaign-error-dialog-title"
+    >
+      Can't accept contact
+    </mdc-text>
+    <mdc-text
+      class="campaign-error-dialog-message"
+      data-testid="campaign-error-dialog-message"
+      id="campaign-error-dialog-message"
+    >
+      We ran into an issue connecting you with this contact. Check your network connection and try again.
+    </mdc-text>
+    <div
+      class="campaign-error-dialog-actions"
+    >
+      <mdc-button
+        data-testid="campaign-error-dialog-ok-button"
+      >
+        OK
+      </mdc-button>
+    </div>
+  </dialog>
+</div>
+`;

@@ -1,0 +1,26 @@
+.campaign-error-dialog {
+  width: 25rem;
+  border-radius: 0.5rem;
+  border-color: transparent;
+  padding: 1rem;
+  box-shadow: 0rem 0.25rem 0.5rem 0rem rgba(0, 0, 0, 0.16), 0rem 0rem 0.0625rem 0rem rgba(0, 0, 0, 0.16);
+
+  &::backdrop {
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+
+  .campaign-error-dialog-title {
+    margin: 0;
+    flex: 1;
+  }
+
+  .campaign-error-dialog-message {
+    margin-bottom: 1.5rem;
+  }
+
+  .campaign-error-dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+}

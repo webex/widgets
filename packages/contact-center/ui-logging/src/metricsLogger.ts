@@ -87,16 +87,10 @@ export function havePropsChanged(prev: any, next: any): boolean {
 
   if (prevKeys.length !== nextKeys.length) return true;
 
-  // Check if any primitive values changed
+  // Shallow comparison: detect any value change (primitives by value, objects/arrays by reference)
   for (const key of prevKeys) {
-    const prevVal = prev[key];
-    const nextVal = next[key];
-
-    if (prevVal === nextVal) continue;
-    if (typeof prevVal !== 'object' || prevVal === null) return true;
-    if (typeof nextVal !== 'object' || nextVal === null) return true;
+    if (prev[key] !== next[key]) return true;
   }
 
-  // All shallow comparisons passed, consider props unchanged
   return false;
 }
