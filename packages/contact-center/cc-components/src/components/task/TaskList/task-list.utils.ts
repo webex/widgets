@@ -13,8 +13,8 @@ export const extractTaskListItemData = (
   isDeclineButtonEnabled?: boolean
 ): TaskListItemData => {
   try {
-    const accept = task.uiControls?.accept ?? {isVisible: false, isEnabled: false};
-    const sdkDecline = task.uiControls?.decline ?? {isVisible: false, isEnabled: false};
+    const accept = task.uiControls?.main?.accept ?? {isVisible: false, isEnabled: false};
+    const sdkDecline = task.uiControls?.main?.decline ?? {isVisible: false, isEnabled: false};
     const decline = {
       ...sdkDecline,
       isEnabled: sdkDecline.isEnabled || !!isDeclineButtonEnabled,

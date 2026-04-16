@@ -144,7 +144,7 @@ function CallControlComponent(props: CallControlComponentProps) {
     conferenceEnabled
   );
 
-  const isConsulting = controls?.endConsult?.isVisible ?? false;
+  const isConsulting = (controls?.consult?.endConsult?.isVisible || controls?.main?.endConsult?.isVisible) ?? false;
   const filteredButtons = filterButtonsForConsultation(buttons, isConsulting, isTelephony, logger);
 
   if (!currentTask) return null;
@@ -157,7 +157,7 @@ function CallControlComponent(props: CallControlComponentProps) {
         autoPlay
       ></audio>
       <div className="call-control-container" data-testid="call-control-container">
-        {!controls?.wrapup?.isVisible && (
+        {!controls?.main?.wrapup?.isVisible && (
           <div className="button-group">
             {filteredButtons.map((button, index) => {
               if (!button.isVisible) return null;
@@ -284,7 +284,7 @@ function CallControlComponent(props: CallControlComponentProps) {
             })}
           </div>
         )}
-        {controls?.wrapup?.isVisible && (
+        {controls?.main?.wrapup?.isVisible && (
           <div className="wrapup-group">
             <PopoverNext
               color="primary"

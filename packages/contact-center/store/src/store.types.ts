@@ -20,6 +20,8 @@ import {
   TASK_EVENTS,
   TaskUIControls,
   TaskUIControlState,
+  InteractionUIControls,
+  TaskUILeg,
   getDefaultUIControls,
 } from '@webex/contact-center';
 import {
@@ -287,6 +289,8 @@ export type {
   TransformPaginatedData,
   TaskUIControls,
   TaskUIControlState,
+  InteractionUIControls,
+  TaskUILeg,
 };
 
 export {

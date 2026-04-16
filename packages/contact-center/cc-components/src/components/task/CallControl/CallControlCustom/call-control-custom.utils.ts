@@ -25,6 +25,8 @@ export const createConsultButtons = (
   conferenceEnabled = true
 ): ButtonConfig[] => {
   try {
+    const consultCtrl = controls?.consult;
+    const mainCtrl = controls?.main;
     return [
       {
         key: 'mute',
@@ -32,8 +34,8 @@ export const createConsultButtons = (
         onClick: toggleConsultMute,
         tooltip: isMuted ? UNMUTE_CALL : MUTE_CALL,
         className: `${isMuted ? 'call-control-button-muted' : 'call-control-button'}`,
-        disabled: !(controls?.mute?.isEnabled ?? false),
-        isVisible: controls?.mute?.isVisible ?? false,
+        disabled: !(consultCtrl?.mute?.isEnabled ?? false),
+        isVisible: consultCtrl?.mute?.isVisible ?? false,
       },
       {
         key: 'switchToMainCall',
@@ -41,8 +43,8 @@ export const createConsultButtons = (
         tooltip: 'Switch to Call',
         onClick: switchToMainCall,
         className: 'call-control-button',
-        disabled: !(controls?.switchToMainCall?.isEnabled ?? false),
-        isVisible: controls?.switchToMainCall?.isVisible ?? false,
+        disabled: !(consultCtrl?.switch?.isEnabled ?? false),
+        isVisible: consultCtrl?.switch?.isVisible ?? false,
       },
       {
         key: 'transfer',
@@ -50,8 +52,8 @@ export const createConsultButtons = (
         tooltip: 'Transfer',
         onClick: consultTransfer,
         className: 'call-control-button',
-        disabled: !(controls?.consultTransfer?.isEnabled ?? false),
-        isVisible: controls?.consultTransfer?.isVisible ?? false,
+        disabled: !(consultCtrl?.transfer?.isEnabled ?? false),
+        isVisible: consultCtrl?.transfer?.isVisible ?? false,
       },
       {
         key: 'conference',
@@ -59,8 +61,8 @@ export const createConsultButtons = (
         tooltip: 'Merge',
         onClick: consultConference,
         className: 'call-control-button',
-        disabled: !(controls?.mergeToConference?.isEnabled ?? false),
-        isVisible: conferenceEnabled && (controls?.mergeToConference?.isVisible ?? false),
+        disabled: !(consultCtrl?.mergeToConference?.isEnabled ?? false),
+        isVisible: conferenceEnabled && (consultCtrl?.mergeToConference?.isVisible ?? false),
       },
       {
         key: 'cancel',
@@ -68,7 +70,7 @@ export const createConsultButtons = (
         tooltip: 'End Consult',
         onClick: endConsultCall,
         className: 'call-control-consult-button-cancel',
-        isVisible: controls?.endConsult?.isVisible ?? false,
+        isVisible: (consultCtrl?.endConsult?.isVisible ?? false) || (mainCtrl?.endConsult?.isVisible ?? false),
       },
     ];
   } catch (error) {

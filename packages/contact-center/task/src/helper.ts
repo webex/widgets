@@ -154,8 +154,8 @@ export const useTaskList = (props: UseTaskListProps) => {
 export const useIncomingTask = (props: UseTaskProps) => {
   const {onAccepted, onRejected, incomingTask, logger} = props;
 
-  const acceptControl = incomingTask?.uiControls?.accept ?? {isVisible: false, isEnabled: false};
-  const sdkDeclineControl = incomingTask?.uiControls?.decline ?? {isVisible: false, isEnabled: false};
+  const acceptControl = incomingTask?.uiControls?.main?.accept ?? {isVisible: false, isEnabled: false};
+  const sdkDeclineControl = incomingTask?.uiControls?.main?.decline ?? {isVisible: false, isEnabled: false};
   const declineControl = {
     ...sdkDeclineControl,
     isEnabled: sdkDeclineControl.isEnabled || store.isDeclineButtonEnabled,
@@ -713,7 +713,7 @@ export const useCallControl = (props: useCallControlProps) => {
 
   const toggleMute = async () => {
     try {
-      if (!controls?.mute?.isVisible) {
+      if (!controls?.main?.mute?.isVisible) {
         logger.warn('Mute control not available', {module: 'useCallControl', method: 'toggleMute'});
         return;
       }
@@ -961,7 +961,7 @@ export const useCallControl = (props: useCallControlProps) => {
   useEffect(() => {
     let timerId: ReturnType<typeof setInterval>;
 
-    if (currentTask?.autoWrapup && controls?.wrapup) {
+    if (currentTask?.autoWrapup && controls?.main?.wrapup) {
       try {
         // Initialize time left from the autoWrapup object
         const initialTimeLeft = currentTask.autoWrapup.getTimeLeftSeconds();
@@ -991,7 +991,7 @@ export const useCallControl = (props: useCallControlProps) => {
         clearInterval(timerId);
       }
     };
-  }, [currentTask?.autoWrapup, controls?.wrapup]);
+  }, [currentTask?.autoWrapup, controls?.main?.wrapup]);
 
   // Calculate state timer label and timestamp using utils
   useEffect(() => {

@@ -53,7 +53,7 @@ export function calculateStateTimerData(
   postCallTimestamp = participant.currentStateTimestamp || 0;
 
   // Priority 1: Wrap-up state (highest priority)
-  if (controls.wrapup?.isVisible && wrapUpTimestamp) {
+  if (controls.main?.wrapup?.isVisible && wrapUpTimestamp) {
     return {
       label: TIMER_LABEL_WRAP_UP,
       timestamp: wrapUpTimestamp,
@@ -107,8 +107,8 @@ export function calculateConsultTimerData(
     return defaultTimer;
   }
 
-  // Derive consultCallHeld from controls: switchToConsult.isVisible means consult call is held
-  const consultCallHeld = controls.switchToConsult?.isVisible ?? false;
+  // Derive consultCallHeld from controls: main.switch.isVisible means consult call is held (agent is on main, can switch to consult)
+  const consultCallHeld = controls.main?.switch?.isVisible ?? false;
 
   if (consultCallHeld) {
     const consultHoldTimestamp = findHoldTimestamp(currentTask, 'consult');

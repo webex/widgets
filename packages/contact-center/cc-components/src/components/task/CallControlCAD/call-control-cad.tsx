@@ -177,7 +177,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
                     </>
                   )}
                 </Text>
-                {currentTask?.data?.isConferenceInProgress && !controls?.wrapup?.isVisible && (
+                {currentTask?.data?.isConferenceInProgress && !controls?.main?.wrapup?.isVisible && (
                   <>
                     <div className="vertical-divider"></div>
                     <div className="participants-section">
@@ -227,7 +227,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
                 )}
               </div>
               <div className="call-status">
-                {!controls?.wrapup?.isVisible && isHeld && !controls?.endConsult?.isVisible && (
+                {!controls?.main?.wrapup?.isVisible && isHeld && !controls?.main?.endConsult?.isVisible && (
                   <>
                     <span className="dot">•</span>
                     <div className="on-hold">
@@ -242,7 +242,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
             </div>
           </div>
         </div>
-        {!controls?.wrapup?.isVisible && controls?.recording?.isVisible && (
+        {!controls?.main?.wrapup?.isVisible && controls?.main?.recording?.isVisible && (
           <div className="recording-indicator">
             <Icon name={isRecording ? 'record-active-badge-filled' : 'record-paused-badge-filled'} size={1.3} />
           </div>
@@ -256,7 +256,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
           {renderPhoneNumber()}
         </div>
       </div>
-      {controls?.endConsult?.isVisible && !controls?.wrapup?.isVisible && (
+      {(controls?.consult?.endConsult?.isVisible || controls?.main?.endConsult?.isVisible) && !controls?.main?.wrapup?.isVisible && (
         <div className={`call-control-consult-container ${callControlConsultClassName || ''}`}>
           <CallControlConsultComponent
             agentName={consultAgentName}
