@@ -252,8 +252,11 @@ export const buildCallControlButtons = (
         tooltip: 'Transfer',
         onClick: onTransferConsult || (() => {}),
         className: 'call-control-button',
-        disabled: !(controls?.consult?.transfer?.isEnabled ?? false),
-        isVisible: (controls?.consult?.transfer?.isVisible ?? false) && !!onTransferConsult,
+        disabled: !(mainCtrl?.transfer?.isEnabled ?? false),
+        isVisible:
+          (mainCtrl?.transfer?.isVisible ?? false) &&
+          ((controls?.consult?.endConsult?.isVisible || controls?.main?.endConsult?.isVisible) ?? false) &&
+          !!onTransferConsult,
       },
       {
         id: 'conference',
