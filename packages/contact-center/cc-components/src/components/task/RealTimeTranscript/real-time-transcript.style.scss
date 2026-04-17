@@ -1,0 +1,75 @@
+.real-time-transcript {
+  background: var(--mds-color-theme-background-primary-normal);
+  border-radius: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 12rem;
+  padding: 1rem 1.125rem;
+}
+
+.real-time-transcript__content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  overflow-y: auto;
+  row-gap: 1.25rem;
+}
+
+.real-time-transcript__event {
+  color: var(--mds-color-theme-text-secondary-normal);
+  font-size: 0.75rem;
+  line-height: 1rem;
+  margin: 0.25rem 0 0.125rem;
+  text-align: center;
+}
+
+.real-time-transcript__event-time {
+  color: inherit;
+}
+
+.real-time-transcript__item {
+  align-items: flex-start;
+  column-gap: 0.875rem;
+  display: flex;
+}
+
+.real-time-transcript__avatar-wrap {
+  flex-shrink: 0;
+  height: 2.25rem;
+  width: 2.25rem;
+}
+
+.real-time-transcript__avatar-fallback {
+  --mdc-avatar-size: 2.25rem;
+}
+
+.real-time-transcript__text-block {
+  min-width: 0;
+}
+
+.real-time-transcript__meta {
+  color: var(--mds-color-theme-text-secondary-normal);
+  display: flex;
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+.real-time-transcript__time {
+  color: #2e6de5;
+  margin-left: 0.625rem;
+  text-decoration: underline;
+}
+
+.real-time-transcript__message {
+  color: var(--mds-color-theme-text-primary-normal);
+  font-size: 1.0625rem;
+  line-height: 1.5rem;
+  margin: 0.25rem 0 0;
+}
+
+.real-time-transcript__empty {
+  color: var(--mds-color-theme-text-secondary-normal);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  padding: 1rem 0.125rem;
+}
