@@ -94,7 +94,11 @@ export function isInteractionOnHold(task: ITask): boolean {
   if (!interaction.media) {
     return false;
   }
-  return Object.values(interaction.media).some((media) => media.isHold);
+  // Only check the main call media — consult hold is handled separately
+  // in the consulting section UI. Without this filter, switching to
+  // main call during a consult would incorrectly show the hold indicator
+  // because the consult media has isHold: true.
+  return Object.values(interaction.media).some((media) => media.mType === 'mainCall' && media.isHold);
 }
 
 export const setmTypeForEPDN = (task: ITask, mType: string) => {

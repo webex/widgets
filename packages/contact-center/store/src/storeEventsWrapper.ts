@@ -449,6 +449,7 @@ class StoreWrapper implements IStoreWrapper {
       taskToRemove.off(TASK_EVENTS.TASK_AUTO_ANSWERED, this.handleAutoAnswer);
       taskToRemove.off(TASK_EVENTS.TASK_CONSULT_ACCEPTED, this.handleConsultAccepted);
       taskToRemove.off(TASK_EVENTS.TASK_CONSULT_QUEUE_CANCELLED, this.handleConsultQueueCancelled);
+      taskToRemove.off(TASK_EVENTS.TASK_SWITCH_CALL, this.handleSwitchCall);
       taskToRemove.off(TASK_EVENTS.TASK_HOLD, this.refreshTaskList);
       taskToRemove.off(TASK_EVENTS.TASK_RESUME, this.refreshTaskList);
       taskToRemove.off(TASK_EVENTS.TASK_CONFERENCE_ENDED, this.handleConferenceEnded);
@@ -586,6 +587,10 @@ class StoreWrapper implements IStoreWrapper {
     this.refreshTaskList();
   };
 
+  handleSwitchCall = () => {
+    this.refreshTaskList();
+  };
+
   private registerTaskEventListeners = (task: ITask): void => {
     task.on(TASK_EVENTS.TASK_END, this.handleTaskEnd);
     task.on(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
@@ -617,6 +622,7 @@ class StoreWrapper implements IStoreWrapper {
     task.on(TASK_EVENTS.TASK_PARTICIPANT_LEFT, this.handleConferenceEnded);
     task.on(TASK_EVENTS.TASK_OFFER_CONSULT, this.handleConsultOffer);
 
+    task.on(TASK_EVENTS.TASK_SWITCH_CALL, this.handleSwitchCall);
     task.on(TASK_EVENTS.TASK_HOLD, this.refreshTaskList);
     task.on(TASK_EVENTS.TASK_RESUME, this.refreshTaskList);
     task.on(TASK_EVENTS.TASK_POST_CALL_ACTIVITY, this.refreshTaskList);

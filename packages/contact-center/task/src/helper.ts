@@ -317,11 +317,20 @@ export const useCallControl = (props: useCallControlProps) => {
   }, [currentTask]);
 
   useEffect(() => {
-    setIsHeld(currentTask ? isInteractionOnHold(currentTask) : false);
-  }, [currentTask]);
+    // During consulting, derive hold state from activeLeg (set synchronously
+    // by the SDK on switch). Raw media data has a timing gap — the backend
+    // hold/unhold response arrives after the switch event, so media.isHold
+    // is stale at the time the controls update.
+    const isConsulting = controls?.consult?.endConsult?.isVisible || controls?.main?.endConsult?.isVisible;
+    if (isConsulting) {
+      setIsHeld(controls?.activeLeg === 'consult');
+    } else {
+      setIsHeld(currentTask ? isInteractionOnHold(currentTask) : false);
+    }
+  }, [currentTask, controls]);
 
   // Use custom hook for hold timer management
-  const holdTime = useHoldTimer(currentTask);
+  const holdTime = useHoldTimer(currentTask, controls);
 
   useEffect(() => {
     if (currentTask && store?.cc?.agentConfig?.agentId) {
