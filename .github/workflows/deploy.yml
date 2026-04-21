@@ -362,6 +362,7 @@ jobs:
 
     outputs:
       pr_number: ${{ steps.get-pr.outputs.pr_number }}
+      primary_package: ${{ steps.post-comment.outputs.primary_package }}
       primary_version: ${{ steps.post-comment.outputs.primary_version }}
       changelog_url: ${{ steps.post-comment.outputs.changelog_url }}
 
@@ -418,11 +419,12 @@ jobs:
             const aggregators = ['@webex/cc-widgets', '@webex/widgets'];
 
             let commentBody;
+            let primaryPackage = '';
             let primaryVersion = '';
             let changelogUrl = '';
 
             if (hasPackages) {
-              const primaryPackage = aggregators.find(p => packageVersions[p])
+              primaryPackage = aggregators.find(p => packageVersions[p])
                 || packageEntries[0][0];
               primaryVersion = packageVersions[primaryPackage];
               const stableVersion = primaryVersion
@@ -537,6 +539,7 @@ jobs:
             }
 
             // Set outputs for downstream jobs
+            core.setOutput('primary_package', primaryPackage);
             core.setOutput('primary_version', primaryVersion);
             core.setOutput('changelog_url', changelogUrl);
 
@@ -553,6 +556,7 @@ jobs:
           WEBEX_ROOM_ID: ${{ secrets.WEBEX_ROOM_ID }}
           COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
         run: |
+          PACKAGE="${{ needs.comment-on-pr.outputs.primary_package }}"
           VERSION="${{ needs.comment-on-pr.outputs.primary_version }}"
           PR_NUMBER="${{ needs.comment-on-pr.outputs.pr_number }}"
           CHANGELOG_URL="${{ needs.comment-on-pr.outputs.changelog_url }}"
@@ -563,35 +567,34 @@ jobs:
             PR_LINK=""
           fi
 
-          PR_TITLE=$(printf '%s' "${COMMIT_MESSAGE}" | head -n 1)
+          PR_TITLE=$(echo "${COMMIT_MESSAGE}" | head -n 1)
 
-          MESSAGE=""
-          if [ -n "${VERSION}" ]; then
-            MESSAGE=$(printf '%s' "**Version:** ${VERSION}")
+          # Build message parts as an array
+          MESSAGE_PARTS=()
+
+          if [ -n "${VERSION}" ] && [ -n "${PACKAGE}" ]; then
+            MESSAGE_PARTS+=("**Version:** ${PACKAGE}@${VERSION}")
           fi
+
           if [ -n "${PR_LINK}" ]; then
-            PR_BLOCK=$(printf '%s' "**PR:** [${PR_TITLE}](${PR_LINK})")
-            if [ -n "${MESSAGE}" ]; then
-              MESSAGE=$(printf '%s\n\n%s' "${MESSAGE}" "${PR_BLOCK}")
-            else
-              MESSAGE="${PR_BLOCK}"
-            fi
-          fi
-          if [ -n "${CHANGELOG_URL}" ]; then
-            CL_BLOCK=$(printf '%s' "**Changelog:** ${CHANGELOG_URL}")
-            if [ -n "${MESSAGE}" ]; then
-              MESSAGE=$(printf '%s\n\n%s' "${MESSAGE}" "${CL_BLOCK}")
-            else
-              MESSAGE="${CL_BLOCK}"
-            fi
+            MESSAGE_PARTS+=("**PR:** [${PR_TITLE}](${PR_LINK})")
           fi
 
-          if [ -z "${MESSAGE}" ]; then
+          if [ -n "${CHANGELOG_URL}" ]; then
+            MESSAGE_PARTS+=("**Changelog:** ${CHANGELOG_URL}")
+          fi
+
+          if [ ${#MESSAGE_PARTS[@]} -eq 0 ]; then
             echo "No version or PR info available. Skipping notification."
             exit 0
           fi
 
+          # Join parts with double newlines (creates one blank line between sections)
+          MESSAGE=$(IFS=$'\n\n'; echo "${MESSAGE_PARTS[*]}")
+
           echo "Sending message to Webex Space..."
+          echo "Message content:"
+          echo "${MESSAGE}"
 
           BODY=$(jq -n --arg room "${WEBEX_ROOM_ID}" --arg md "${MESSAGE}" '{roomId: $room, markdown: $md}')
           curl -sSf \
