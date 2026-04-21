@@ -5,6 +5,7 @@ on:
   push:
     branches: # Allow list of deployable tags and branches. Note that all allow-listed branches cannot include any `/` characters
       - next
+      - test-webex-notification
 
 env:
   rid: ${{ github.run_id }}-${{ github.run_number }}
@@ -360,6 +361,11 @@ jobs:
     needs: [publish-npm, publish-tag]
     runs-on: ubuntu-latest
 
+    outputs:
+      pr_number: ${{ steps.get-pr.outputs.pr_number }}
+      primary_version: ${{ steps.post-comment.outputs.primary_version }}
+      changelog_url: ${{ steps.post-comment.outputs.changelog_url }}
+
     steps:
       - name: Get PR Number
         id: get-pr
@@ -385,6 +391,7 @@ jobs:
             core.setOutput('pr_number', '');
 
       - name: Post Release Comment on PR
+        id: post-comment
         if: steps.get-pr.outputs.pr_number != ''
         uses: actions/github-script@v7
         with:
@@ -412,11 +419,13 @@ jobs:
             const aggregators = ['@webex/cc-widgets', '@webex/widgets'];
 
             let commentBody;
+            let primaryVersion = '';
+            let changelogUrl = '';
 
             if (hasPackages) {
               const primaryPackage = aggregators.find(p => packageVersions[p])
                 || packageEntries[0][0];
-              const primaryVersion = packageVersions[primaryPackage];
+              primaryVersion = packageVersions[primaryPackage];
               const stableVersion = primaryVersion
                 .replace(/-next\..*/, '')
                 .replace(/-[a-z]*\..*/, '');
@@ -432,12 +441,13 @@ jobs:
                 console.log(`Could not read docs/CNAME, using default changelog host: ${e.message}`);
               }
 
-              const changelogUrl = new URL(`https://${cname}/changelog/`);
+              const changelogUrlObj = new URL(`https://${cname}/changelog/`);
               if (stableVersion) {
-                changelogUrl.searchParams.set('stable_version', stableVersion);
+                changelogUrlObj.searchParams.set('stable_version', stableVersion);
               }
-              changelogUrl.searchParams.set('package', primaryPackage);
-              changelogUrl.searchParams.set('version', primaryVersion);
+              changelogUrlObj.searchParams.set('package', primaryPackage);
+              changelogUrlObj.searchParams.set('version', primaryVersion);
+              changelogUrl = changelogUrlObj.toString();
 
               const tagLinkParts = Object.entries(taggablePackages)
                 .filter(([pkg]) => packageVersions[pkg])
@@ -526,3 +536,69 @@ jobs:
             } catch (error) {
               core.warning(`Failed to comment on PR #${prNumber}: ${error.message}`);
             }
+
+            // Set outputs for downstream jobs
+            core.setOutput('primary_version', primaryVersion);
+            core.setOutput('changelog_url', changelogUrl);
+
+  notify-webex-space:
+    name: Send Webex Space Notification
+    needs: [publish-tag, publish-npm, comment-on-pr]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Post Webex Space Message
+        env:
+          WEBEX_BOT_TOKEN: ${{ secrets.WEBEX_BOT_TOKEN }}
+          WEBEX_ROOM_ID: ${{ secrets.WEBEX_ROOM_ID }}
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        run: |
+          VERSION="${{ needs.comment-on-pr.outputs.primary_version }}"
+          PR_NUMBER="${{ needs.comment-on-pr.outputs.pr_number }}"
+          CHANGELOG_URL="${{ needs.comment-on-pr.outputs.changelog_url }}"
+
+          if [ -n "${PR_NUMBER}" ]; then
+            PR_LINK="https://github.com/${{ github.repository }}/pull/${PR_NUMBER}"
+          else
+            PR_LINK=""
+          fi
+
+          PR_TITLE=$(printf '%s' "${COMMIT_MESSAGE}" | head -n 1)
+
+          MESSAGE=""
+          if [ -n "${VERSION}" ]; then
+            MESSAGE=$(printf '%s' "**Version:** ${VERSION}")
+          fi
+          if [ -n "${PR_LINK}" ]; then
+            PR_BLOCK=$(printf '%s' "**PR:** [${PR_TITLE}](${PR_LINK})")
+            if [ -n "${MESSAGE}" ]; then
+              MESSAGE=$(printf '%s\n\n%s' "${MESSAGE}" "${PR_BLOCK}")
+            else
+              MESSAGE="${PR_BLOCK}"
+            fi
+          fi
+          if [ -n "${CHANGELOG_URL}" ]; then
+            CL_BLOCK=$(printf '%s' "**Changelog:** ${CHANGELOG_URL}")
+            if [ -n "${MESSAGE}" ]; then
+              MESSAGE=$(printf '%s\n\n%s' "${MESSAGE}" "${CL_BLOCK}")
+            else
+              MESSAGE="${CL_BLOCK}"
+            fi
+          fi
+
+          if [ -z "${MESSAGE}" ]; then
+            echo "No version or PR info available. Skipping notification."
+            exit 0
+          fi
+
+          echo "Sending message to Webex Space..."
+
+          BODY=$(jq -n --arg room "${WEBEX_ROOM_ID}" --arg md "${MESSAGE}" '{roomId: $room, markdown: $md}')
+          curl -sSf \
+            -H "Authorization: Bearer ${WEBEX_BOT_TOKEN}" \
+            -H "Content-Type: application/json" \
+            -d "${BODY}" \
+            https://webexapis.com/v1/messages > /dev/null
+
+          echo "Message sent successfully!"
