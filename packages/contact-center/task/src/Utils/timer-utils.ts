@@ -1,4 +1,4 @@
-import {ITask, findHoldTimestamp, TaskUIControls} from '@webex/cc-store';
+import {ITask, TaskUIControls} from '@webex/cc-store';
 import {
   TIMER_LABEL_WRAP_UP,
   TIMER_LABEL_POST_CALL,
@@ -16,6 +16,26 @@ export interface TimerData {
 }
 
 /**
+ * Find the latest (most recently added) consult media from the interaction.
+ *
+ * After transfer → re-consult the backend may leave the OLD consult media
+ * in the interaction alongside the NEW one.  Using Array.find() would return
+ * the first (stale) entry; we need the last one which is the active consult.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function findLatestConsultMedia(interaction: any): any {
+  if (!interaction?.media) return null;
+  const allMedia = Object.values(interaction.media);
+  let latest = null;
+  for (const m of allMedia) {
+    if ((m as {mType: string}).mType === 'consult') {
+      latest = m;
+    }
+  }
+  return latest;
+}
+
+/**
  * Calculate state timer label and timestamp based on task state.
  * Priority: Wrap Up > Post Call
  */
@@ -24,7 +44,6 @@ export function calculateStateTimerData(
   controls: TaskUIControls | null,
   agentId: string
 ): TimerData {
-  // Default return value
   const defaultTimer: TimerData = {label: null, timestamp: 0};
 
   if (!currentTask || !controls) {
@@ -38,21 +57,17 @@ export function calculateStateTimerData(
     return defaultTimer;
   }
 
-  // Extract timestamps from participant data
   let wrapUpTimestamp = 0;
   let postCallTimestamp = 0;
 
-  // Wrap-up timestamp: use lastUpdated if currently in wrap-up, otherwise use wrapUpTimestamp
   if (participant.isWrapUp) {
     wrapUpTimestamp = participant.lastUpdated || 0;
   } else {
     wrapUpTimestamp = participant.wrapUpTimestamp || 0;
   }
 
-  // Post-call timestamp: use currentStateTimestamp
   postCallTimestamp = participant.currentStateTimestamp || 0;
 
-  // Priority 1: Wrap-up state (highest priority)
   if (controls.main?.wrapup?.isVisible && wrapUpTimestamp) {
     return {
       label: TIMER_LABEL_WRAP_UP,
@@ -60,7 +75,6 @@ export function calculateStateTimerData(
     };
   }
 
-  // Priority 2: Post-call state (only if not in wrap-up)
   const isInPostCall = interaction?.state === 'post_call' || participant?.currentState === 'post_call';
   if (isInPostCall && postCallTimestamp) {
     return {
@@ -75,6 +89,12 @@ export function calculateStateTimerData(
 /**
  * Calculate consult timer label and timestamp based on consult state.
  * Handles consult on hold vs active consulting states.
+ *
+ * Approach mirrors the original next-branch pattern: derive consultCallHeld
+ * from the consult media's isHold flag (task data), NOT from SDK uiControls
+ * properties like activeLeg or switch button visibility.  Those UI properties
+ * have different lifecycle timing and broader semantics that cause false
+ * positives (e.g., switch.isVisible is true during CONSULT_INITIATING).
  */
 export function calculateConsultTimerData(
   currentTask: ITask | null,
@@ -94,7 +114,6 @@ export function calculateConsultTimerData(
     return defaultTimer;
   }
 
-  // Extract consult start timestamp
   let consultStartTimeStamp = 0;
   if (participant.consultTimestamp) {
     consultStartTimeStamp = participant.consultTimestamp;
@@ -102,25 +121,29 @@ export function calculateConsultTimerData(
     consultStartTimeStamp = participant.lastUpdated;
   }
 
-  // If no consult timestamp, return default
   if (!consultStartTimeStamp) {
     return defaultTimer;
   }
 
-  // Derive consultCallHeld from controls: main.switch.isVisible means consult call is held (agent is on main, can switch to consult)
-  const consultCallHeld = controls.main?.switch?.isVisible ?? false;
+  // Use the LATEST consult media, not the first. After transfer → re-consult
+  // the backend keeps the old consult media (with stale isHold=true) alongside
+  // the new one. Array.find() would return the old stale entry.
+  const consultMedia = findLatestConsultMedia(interaction);
+  const isConsultMediaHeld = consultMedia?.isHold === true;
+  const consultHoldTimestamp = consultMedia?.holdTimestamp ?? null;
+  const consultCallHeld = isConsultMediaHeld && consultHoldTimestamp !== null && consultHoldTimestamp > 0;
 
   if (consultCallHeld) {
-    const consultHoldTimestamp = findHoldTimestamp(currentTask, 'consult');
-
     return {
       label: TIMER_LABEL_CONSULT_ON_HOLD,
-      timestamp: consultHoldTimestamp && consultHoldTimestamp > 0 ? consultHoldTimestamp : consultStartTimeStamp,
+      timestamp: consultHoldTimestamp,
     };
   }
 
-  // Use task.data.consultStatus for consult phase distinction
-  const isConsultInitiated = currentTask.data?.consultStatus === 'consultInitiated';
+  // Distinguish "Consult Requested" from "Consulting" using participant data.
+  const isConsultInitiated =
+    participant?.consultState === 'consultInitiated' ||
+    currentTask.data?.consultStatus === 'consultInitiated';
   const label = isConsultInitiated ? TIMER_LABEL_CONSULT_REQUESTED : TIMER_LABEL_CONSULTING;
 
   return {

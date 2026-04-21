@@ -25,8 +25,8 @@ import store, {
   isInteractionOnHold,
   MEDIA_TYPE_TELEPHONY_LOWER,
 } from '@webex/cc-store';
-import {TIMER_LABEL_CONSULTING} from './Utils/constants';
-import {calculateStateTimerData, calculateConsultTimerData} from './Utils/timer-utils';
+import {TIMER_LABEL_CONSULTING, TIMER_LABEL_CONSULT_REQUESTED, TIMER_LABEL_CONSULT_ON_HOLD, TIMER_LABEL_WRAP_UP} from './Utils/constants';
+import {calculateStateTimerData, calculateConsultTimerData, findLatestConsultMedia} from './Utils/timer-utils';
 import {useHoldTimer} from './Utils/useHoldTimer';
 import {OutdialAniEntriesResponse} from '@webex/contact-center/dist/types/services/config/types';
 
@@ -279,7 +279,18 @@ export const useIncomingTask = (props: UseTaskProps) => {
 };
 
 export const useCallControl = (props: useCallControlProps) => {
-  const {currentTask, onHoldResume, onEnd, onWrapUp, onRecordingToggle, onToggleMute, logger, isMuted, agentId, conferenceEnabled = true} = props;
+  const {
+    currentTask,
+    onHoldResume,
+    onEnd,
+    onWrapUp,
+    onRecordingToggle,
+    onToggleMute,
+    logger,
+    isMuted,
+    agentId,
+    conferenceEnabled = true,
+  } = props;
   const [isRecording, setIsRecording] = useState(true);
   const [controls, setControls] = useState<TaskUIControls>(currentTask?.uiControls ?? getDefaultUIControls());
   const [isHeld, setIsHeld] = useState<boolean>(() => (currentTask ? isInteractionOnHold(currentTask) : false));
@@ -296,6 +307,7 @@ export const useCallControl = (props: useCallControlProps) => {
   // Consult timer labels and timestamps
   const [consultTimerLabel, setConsultTimerLabel] = useState<string>(TIMER_LABEL_CONSULTING);
   const [consultTimerTimestamp, setConsultTimerTimestamp] = useState<number>(0);
+  const prevIsConsultingRef = useRef(false);
   const [lastTargetType, setLastTargetType] = useState<TargetType>(TARGET_TYPE.AGENT);
   const [conferenceParticipants, setConferenceParticipants] = useState<Participant[]>([]);
   const lastWrapupAuxCodeIdRef = useRef<string | null>(null);
@@ -922,10 +934,6 @@ export const useCallControl = (props: useCallControlProps) => {
     }
 
     try {
-      // When consulting (even from within a conference), use regular transfer.
-      // transferConference() is only for transferring the entire conference ownership,
-      // not for transferring a consult to join the conference.
-      // Check state machine: CONSULTING state means we should use transfer(), not transferConference()
       const currentState = currentTask.state?.value;
       const isCurrentlyConsulting = currentState === 'CONSULTING';
 
@@ -936,13 +944,40 @@ export const useCallControl = (props: useCallControlProps) => {
         });
         await currentTask.transferConference();
       } else {
-        logger.info('Consult transfer initiated', {module: 'useCallControl', method: 'consultTransfer'});
-        await currentTask.transfer(
-          store.lastConsultDestination ?? {
-            to: currentTask.data.destAgentId,
-            destinationType: 'agent' as DestinationType,
+        let destination = store.lastConsultDestination;
+
+        if (!destination?.to) {
+          // After page refresh, lastConsultDestination is lost (in-memory only).
+          // Recover the transfer target from the consult media's participants.
+          const myAgentId = store.cc.agentConfig?.agentId;
+          const {interaction} = currentTask.data;
+          const consultMediaId = findMediaResourceId(currentTask, 'consult');
+          const consultMedia = consultMediaId ? interaction?.media?.[consultMediaId] : null;
+
+          let consultedAgentId: string | null = null;
+          if (consultMedia?.participants) {
+            consultedAgentId = consultMedia.participants.find((pid: string) => {
+              const p = interaction?.participants?.[pid];
+              return p && p.id !== myAgentId && p.pType === 'Agent';
+            }) ?? null;
           }
-        );
+
+          if (consultedAgentId) {
+            destination = {to: consultedAgentId, destinationType: 'agent' as DestinationType};
+            logger.info(`Recovered consult destination from interaction data: ${consultedAgentId}`, {
+              module: 'useCallControl',
+              method: 'consultTransfer',
+            });
+          }
+        }
+
+        if (!destination?.to) {
+          logError('Cannot transfer: consult destination not found', 'consultTransfer');
+          return;
+        }
+
+        logger.info('Consult transfer initiated', {module: 'useCallControl', method: 'consultTransfer'});
+        await currentTask.transfer(destination);
       }
     } catch (error) {
       logError(`Error transferring consult call: ${error}`, 'consultTransfer');
@@ -966,17 +1001,39 @@ export const useCallControl = (props: useCallControlProps) => {
     currentTask.cancelAutoWrapupTimer();
   };
 
-  // Add useEffect for auto wrap-up timer
+  // Derive stable primitives from MobX-observed task data so that effects
+  // re-fire when the backend pushes fresh interaction/participant state —
+  // not only when controls change.  `currentTask` is a MobX proxy whose
+  // reference never changes, so effects would otherwise miss data-only
+  // updates.
+  const _interaction = currentTask?.data?.interaction;
+  const _participant = _interaction?.participants?.[agentId];
+
+  // Consult-timer primitives
+  const _consultMedia = findLatestConsultMedia(_interaction);
+  const consultMediaIsHold = !!_consultMedia?.isHold;
+  const consultMediaId = _consultMedia?.mediaResourceId ?? '';
+  const participantConsultState = _participant?.consultState ?? null;
+
+  // State-timer (wrap-up / post-call) primitives
+  const participantIsWrapUp = !!_participant?.isWrapUp;
+  const participantWrapUpTimestamp = _participant?.wrapUpTimestamp ?? 0;
+  const participantLastUpdated = _participant?.lastUpdated ?? 0;
+  const participantCurrentState = _participant?.currentState ?? null;
+  const interactionState = _interaction?.state ?? null;
+
+  // Auto wrap-up timer.
+  // `currentTask.autoWrapup` must remain a useEffect dependency so that when
+  // the SDK sets it (after the initial wrapup render), React detects the
+  // change on the next re-render and re-fires the effect.
   useEffect(() => {
     let timerId: ReturnType<typeof setInterval>;
 
     if (currentTask?.autoWrapup && controls?.main?.wrapup) {
       try {
-        // Initialize time left from the autoWrapup object
         const initialTimeLeft = currentTask.autoWrapup.getTimeLeftSeconds();
         setsecondsUntilAutoWrapup(initialTimeLeft);
 
-        // Update timer every second
         timerId = setInterval(() => {
           setsecondsUntilAutoWrapup((prevTime) => {
             if (prevTime && prevTime > 0) {
@@ -994,7 +1051,6 @@ export const useCallControl = (props: useCallControlProps) => {
       }
     }
 
-    // Clear the interval when component unmounts or when auto wrap-up is no longer active
     return () => {
       if (timerId) {
         clearInterval(timerId);
@@ -1002,19 +1058,56 @@ export const useCallControl = (props: useCallControlProps) => {
     };
   }, [currentTask?.autoWrapup, controls?.main?.wrapup]);
 
-  // Calculate state timer label and timestamp using utils
+  // Calculate state timer label and timestamp (Wrap Up / Post Call).
+  // When the SDK sets wrapup controls visible (ContactEnded event), the
+  // participant data may not yet contain the wrapup timestamp (it arrives
+  // in the subsequent AgentWrapup event).  Bridge this gap by showing the
+  // "Wrap Up" label immediately with Date.now() as a close approximation;
+  // the timer auto-corrects when the real timestamp arrives.
   useEffect(() => {
     const stateTimerData = calculateStateTimerData(currentTask, controls, agentId);
-    setStateTimerLabel(stateTimerData.label);
-    setStateTimerTimestamp(stateTimerData.timestamp);
-  }, [currentTask, controls, agentId]);
 
-  // Calculate consult timer label and timestamp using utils
+    if (stateTimerData.label && stateTimerData.timestamp) {
+      setStateTimerLabel(stateTimerData.label);
+      setStateTimerTimestamp(stateTimerData.timestamp);
+    } else if (controls?.main?.wrapup?.isVisible) {
+      setStateTimerLabel(TIMER_LABEL_WRAP_UP);
+      setStateTimerTimestamp((prev) => prev || Date.now());
+    } else {
+      setStateTimerLabel(stateTimerData.label);
+      setStateTimerTimestamp(stateTimerData.timestamp);
+    }
+  }, [
+    currentTask, controls, agentId,
+    participantIsWrapUp, participantWrapUpTimestamp, participantLastUpdated,
+    participantCurrentState, interactionState,
+  ]);
+
+  // Calculate consult timer label and timestamp.
+  // The calculation relies on consult media's isHold + holdTimestamp as the
+  // sole source of truth for "Consult on Hold" (same as the next branch).
+  //
+  // On hidden→visible transition (new consult starts), stale data from the
+  // previous flow may produce "Consult on Hold". Override to safe defaults.
+  // We never early-return — the calculation always runs — so that when data
+  // is already fresh (e.g., Agent 1 accepts a consult and data says
+  // "Consulting"), the correct label is applied immediately.
   useEffect(() => {
+    const isConsulting = controls?.consult?.endConsult?.isVisible || controls?.main?.endConsult?.isVisible;
+    const wasConsulting = prevIsConsultingRef.current;
+    prevIsConsultingRef.current = !!isConsulting;
+
     const consultTimerData = calculateConsultTimerData(currentTask, controls, agentId);
-    setConsultTimerLabel(consultTimerData.label);
-    setConsultTimerTimestamp(consultTimerData.timestamp);
-  }, [currentTask, controls, agentId]);
+    const justBecameConsulting = isConsulting && !wasConsulting;
+
+    if (justBecameConsulting && consultTimerData.label === TIMER_LABEL_CONSULT_ON_HOLD) {
+      setConsultTimerLabel(TIMER_LABEL_CONSULT_REQUESTED);
+      setConsultTimerTimestamp(0);
+    } else {
+      setConsultTimerLabel(consultTimerData.label);
+      setConsultTimerTimestamp(consultTimerData.timestamp);
+    }
+  }, [currentTask, controls, agentId, consultMediaIsHold, consultMediaId, participantConsultState]);
 
   return {
     currentTask,
