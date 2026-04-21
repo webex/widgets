@@ -589,8 +589,8 @@ jobs:
             exit 0
           fi
 
-          # Join parts with double newlines (creates one blank line between sections)
-          MESSAGE=$(IFS=$'\n\n'; echo "${MESSAGE_PARTS[*]}")
+          # Join parts with double newlines and add extra newline for markdown spacing
+          MESSAGE=$(printf '%s\n\n' "${MESSAGE_PARTS[@]}" | sed '$ s/\n\n$//')
 
           echo "Sending message to Webex Space..."
           echo "Message content:"
