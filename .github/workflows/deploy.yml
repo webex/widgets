@@ -5,7 +5,6 @@ on:
   push:
     branches: # Allow list of deployable tags and branches. Note that all allow-listed branches cannot include any `/` characters
       - next
-      - test-webex-notification
 
 env:
   rid: ${{ github.run_id }}-${{ github.run_number }}
