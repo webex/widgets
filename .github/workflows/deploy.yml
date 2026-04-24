@@ -547,7 +547,7 @@ jobs:
     name: Send Webex Space Notification
     needs: [publish-tag, publish-npm, comment-on-pr]
     runs-on: ubuntu-latest
-    if: always()
+    if: always() && github.run_attempt == 1
 
     steps:
       - name: Post Webex Space Message
