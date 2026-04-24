@@ -6,6 +6,7 @@ import CallControlCADComponent from './components/task/CallControl/call-control'
 import IncomingTaskComponent from './components/task/IncomingTask/incoming-task';
 import TaskListComponent from './components/task/TaskList/task-list';
 import OutdialCallComponent from './components/task/OutdialCall/outdial-call';
+import RealtimeTranscriptComponent from './components/task/RealTimeTranscript/real-time-transcript';
 
 const WebUserState = r2wc(UserStateComponent, {
   props: {
@@ -105,4 +106,14 @@ if (!customElements.get('component-cc-task-list')) {
 const WebOutdialCallComponent = r2wc(OutdialCallComponent);
 if (!customElements.get('component-cc-out-dial-call')) {
   customElements.define('component-cc-out-dial-call', WebOutdialCallComponent);
+}
+
+const WebRealtimeTranscriptComponent = r2wc(RealtimeTranscriptComponent, {
+  props: {
+    liveTranscriptEntries: 'json',
+    className: 'string',
+  },
+});
+if (!customElements.get('component-cc-realtime-transcript')) {
+  customElements.define('component-cc-realtime-transcript', WebRealtimeTranscriptComponent);
 }

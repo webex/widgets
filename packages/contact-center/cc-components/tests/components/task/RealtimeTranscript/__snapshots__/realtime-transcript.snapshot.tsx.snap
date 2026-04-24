@@ -1,0 +1,89 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RealTimeTranscriptComponent snapshots matches snapshot with transcript content 1`] = `
+<div>
+  <section
+    class="real-time-transcript"
+    data-testid="real-time-transcript:root"
+  >
+    <div
+      class="real-time-transcript__content"
+      data-testid="real-time-transcript:live-content"
+    >
+      <div
+        class="real-time-transcript__item"
+        data-testid="real-time-transcript:item"
+      >
+        <div
+          class="real-time-transcript__avatar-wrap"
+        >
+          <mdc-avatar
+            class="real-time-transcript__avatar-fallback"
+            icon-name="placeholder-bold"
+            title="You"
+          >
+            YO
+          </mdc-avatar>
+        </div>
+        <div
+          class="real-time-transcript__text-block"
+        >
+          <div
+            class="real-time-transcript__meta"
+          >
+            <mdc-text>
+              You
+            </mdc-text>
+            <mdc-text
+              class="real-time-transcript__time"
+            >
+              11:26 AM
+            </mdc-text>
+          </div>
+          <mdc-text
+            class="real-time-transcript__message"
+          >
+            Hello there
+          </mdc-text>
+        </div>
+      </div>
+      <div
+        class="real-time-transcript__item"
+        data-testid="real-time-transcript:item"
+      >
+        <div
+          class="real-time-transcript__avatar-wrap"
+        >
+          <mdc-avatar
+            class="real-time-transcript__avatar-fallback"
+            title="Customer"
+          >
+            CU
+          </mdc-avatar>
+        </div>
+        <div
+          class="real-time-transcript__text-block"
+        >
+          <div
+            class="real-time-transcript__meta"
+          >
+            <mdc-text>
+              Customer
+            </mdc-text>
+            <mdc-text
+              class="real-time-transcript__time"
+            >
+              11:27 AM
+            </mdc-text>
+          </div>
+          <mdc-text
+            class="real-time-transcript__message"
+          >
+            Hi
+          </mdc-text>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+`;

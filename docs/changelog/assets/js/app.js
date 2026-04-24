@@ -229,7 +229,7 @@ const populatePackageNames = (changelog) => {
   otherPackages.sort();
 
   // Build the sorted list - only add separator if special packages exist
-  const sortedPackages = [];
+  let sortedPackages;
   if (existingSpecialPackages.length > 0) {
     sortedPackages = ['separator', ...existingSpecialPackages, 'separator', ...otherPackages];
   } else {
@@ -237,7 +237,7 @@ const populatePackageNames = (changelog) => {
     sortedPackages = otherPackages;
   }
 
-  const optionsHtml = '<option value="">Select a package</option>';
+  let optionsHtml = '<option value="">Select a package</option>';
 
   sortedPackages.forEach((packageName) => {
     if (packageName === 'separator') {
@@ -787,15 +787,6 @@ const compareAndRenderPackageVersions = (packageName, versionASpecific, versionB
     comparisonResults.innerHTML += html;
     comparisonResults.classList.remove('hide');
 
-    // Update URL for sharing
-    updateEnhancedComparisonURL(
-      versionASelect.value,
-      versionBSelect.value,
-      packageName,
-      comparisonData.versionA,
-      comparisonData.versionB
-    );
-
     // Show copy link button and helper
     if (copyComparisonLinkBtn) copyComparisonLinkBtn.classList.remove('hide');
     if (comparisonHelper) comparisonHelper.classList.remove('hide');
@@ -1285,6 +1276,7 @@ const handleComparisonSubmit = async (event) => {
         commits.length
       );
 
+      // Push to history only on user-initiated comparisons — not on page load or popstate.
       updateEnhancedComparisonURL(stableA, stableB, selectedPackage, finalVersionA, finalVersionB);
     } catch (error) {
       showComparisonError(error);
@@ -1396,6 +1388,16 @@ const initializeComparisonMode = async () => {
   // Setup all event listeners
   setupComparisonEventListeners();
 
+  // Handle Back/Forward for version comparison
+  window.addEventListener('popstate', async () => {
+    const enhancedParams = await handleEnhancedComparisonURL();
+    if (enhancedParams.shouldCompare) {
+      await loadEnhancedComparisonFromURL(enhancedParams);
+    } else {
+      clearComparisonForm();
+    }
+  });
+
   // Check for URL parameters on page load
   const enhancedParams = await handleEnhancedComparisonURL();
   if (enhancedParams.shouldCompare) {
@@ -1414,6 +1416,44 @@ const initializeApplication = async () => {
 
   // Step 2: Then initialize comparison mode (which checks URL params)
   await initializeComparisonMode();
+
+  // Step 3: Handle Back/Forward for single-version search.
+  // searchForm submit calls pushState but had no popstate listener,
+  // so the URL changed while the form and results stayed frozen.
+  window.addEventListener('popstate', async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+
+    // Comparison URLs are handled by the listener in initializeComparisonMode.
+    if (urlParams.has('compareStableA')) return;
+
+    const hasSingleSearchParams =
+      urlParams.has('stable_version') ||
+      urlParams.has('package') ||
+      urlParams.has('version') ||
+      urlParams.has('commitMessage') ||
+      urlParams.has('commitHash');
+
+    if (hasSingleSearchParams) {
+      // Restore the previous search — re-populate form and re-run.
+      await populateFormFieldsFromURL();
+    } else {
+      // URL is empty — clear form fields and hide results.
+      versionSelectDropdown.value = '';
+      packageNameInputDropdown.value = '';
+      versionInput.value = '';
+      commitMessageInput.value = '';
+      commitHashInput.value = '';
+      searchResults.innerHTML = '';
+      searchResults.classList.add('hide');
+      updateFormState({
+        stable_version: '',
+        package: '',
+        version: '',
+        commitMessage: '',
+        commitHash: '',
+      });
+    }
+  });
 };
 
 // Wait for DOM to be ready, then initialize
