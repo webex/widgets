@@ -17,6 +17,61 @@ import {
 type Enum<T extends Record<string, unknown>> = T[keyof T];
 
 /**
+ * Represents a single Call Associated Data (CAD) variable on an interaction.
+ * Global variables have `global: true` and are set by flow control.
+ */
+export interface CADVariable {
+  name: string;
+  displayName: string;
+  value: string;
+  type: string;
+  agentEditable: boolean;
+  agentViewable: boolean;
+  global: boolean;
+  isSecure: boolean;
+  secureKeyId: string;
+  secureKeyVersion: number;
+}
+
+/**
+ * Record of CAD variables keyed by variable name.
+ * This is the shape of `callAssociatedData` on the interaction at runtime.
+ */
+export type CallAssociatedDataMap = Record<string, CADVariable>;
+
+/** System CAD variable keys that are already displayed elsewhere in the UI. */
+export const SYSTEM_CAD_KEYS = new Set([
+  'ani',
+  'dn',
+  'customerName',
+  'virtualTeamName',
+  'ronaTimeout',
+  'FC-DESKTOP-VIEW',
+]);
+
+/**
+ * Returns agent-viewable global variables from a callAssociatedData map,
+ * excluding system variables that are already rendered elsewhere.
+ */
+export const getAgentViewableGlobalVariables = (
+  callAssociatedData: CallAssociatedDataMap | undefined
+): CADVariable[] => {
+  if (!callAssociatedData || typeof callAssociatedData !== 'object') {
+    return [];
+  }
+
+  return Object.entries(callAssociatedData)
+    .filter(([key, cadVar]) => {
+      if (!cadVar || !cadVar.name) return false;
+      if (cadVar.agentViewable === false) return false;
+      if (!cadVar.global) return false;
+      if (SYSTEM_CAD_KEYS.has(key)) return false;
+      return true;
+    })
+    .map(([, cadVar]) => cadVar);
+};
+
+/**
  * Target types for consult/transfer operations
  */
 export const TARGET_TYPE = {
