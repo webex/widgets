@@ -32,7 +32,10 @@ const CampaignCountdown: React.FC<CampaignCountdownProps> = ({
 
     if (remainingSeconds > 0) {
       timerRef.current = setTimeout(() => {
-        setRemainingSeconds((prev) => prev - 1);
+        // Recalculate from wall clock when using timeoutTimestamp to handle
+        // browser throttling (background tabs, blocked main thread)
+        const newRemaining = timeoutTimestamp !== undefined ? calculateRemaining() : remainingSeconds - 1;
+        setRemainingSeconds(newRemaining);
         timerRef.current = undefined;
       }, 1000);
     } else if (remainingSeconds === 0 && !hasTimedOut) {
@@ -46,7 +49,7 @@ const CampaignCountdown: React.FC<CampaignCountdownProps> = ({
         timerRef.current = undefined;
       }
     };
-  }, [remainingSeconds, hasTimedOut, onTimeout]);
+  }, [remainingSeconds, hasTimedOut, onTimeout, timeoutTimestamp, calculateRemaining]);
 
   const formattedTime = formatCountdown(remainingSeconds, logger);
 
