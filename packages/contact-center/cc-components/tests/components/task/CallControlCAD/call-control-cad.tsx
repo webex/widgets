@@ -449,11 +449,11 @@ describe('CallControlCADComponent', () => {
       expect(globalVarsContainer).toBeInTheDocument();
 
       expect(screen.getByTestId('cc-cad:global-var-Global_Language')).toBeInTheDocument();
-      expect(screen.getByText('Customer Language:')).toBeInTheDocument();
+      expect(screen.getByText('Customer Language')).toBeInTheDocument();
       expect(screen.getByText('English')).toBeInTheDocument();
 
       expect(screen.getByTestId('cc-cad:global-var-Global_FeedbackSurveyOptIn')).toBeInTheDocument();
-      expect(screen.getByText('Post Call Survey Opt-in:')).toBeInTheDocument();
+      expect(screen.getByText('Post Call Survey Opt-in')).toBeInTheDocument();
       expect(screen.getByText('true')).toBeInTheDocument();
     });
 
@@ -510,7 +510,7 @@ describe('CallControlCADComponent', () => {
       };
       const screen = render(<CallControlCADComponent {...makePropsWithCallAssociatedData(dataWithEmptyDisplayName)} />);
 
-      expect(screen.getByText('Global_NoDisplay:')).toBeInTheDocument();
+      expect(screen.getByText('Global_NoDisplay')).toBeInTheDocument();
       expect(screen.getByText('some value')).toBeInTheDocument();
     });
   });

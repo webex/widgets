@@ -288,15 +288,14 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
         {globalVariables.length > 0 && (
           <div className="global-variables" data-testid="cc-cad:global-variables">
             {globalVariables.map((variable) => (
-              <Text
+              <div
                 key={variable.name}
                 className="global-variable-item"
-                type="body-secondary"
-                tagName={'small'}
                 data-testid={`cc-cad:global-var-${variable.name}`}
               >
-                <strong>{variable.displayName || variable.name}:</strong> <span>{variable.value || ''}</span>
-              </Text>
+                <span className="global-variable-label">{variable.displayName || variable.name}</span>
+                <span className="global-variable-value">{variable.value || ''}</span>
+              </div>
             ))}
           </div>
         )}
