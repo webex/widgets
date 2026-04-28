@@ -1,8 +1,5 @@
-import {
-  getAgentViewableGlobalVariables,
-  CallAssociatedDataMap,
-  SYSTEM_CAD_KEYS,
-} from '../../../src/components/task/task.types';
+import {CallAssociatedDataMap} from '../../../src/components/task/task.types';
+import {getAgentViewableGlobalVariables, SYSTEM_CAD_KEYS} from '../../../src/components/task/Task/task.utils';
 
 describe('getAgentViewableGlobalVariables', () => {
   const makeGlobalVar = (

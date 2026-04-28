@@ -10,8 +10,8 @@ import {
   CallControlComponentProps,
   getCallerIdentifier,
   CallAssociatedDataMap,
-  getAgentViewableGlobalVariables,
 } from '../task.types';
+import {getAgentViewableGlobalVariables} from '../Task/task.utils';
 
 import {getMediaTypeInfo} from '../../../utils';
 import {
@@ -293,8 +293,12 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
                 className="global-variable-item"
                 data-testid={`cc-cad:global-var-${variable.name}`}
               >
-                <span className="global-variable-label">{variable.displayName || variable.name}</span>
-                <span className="global-variable-value">{variable.value || ''}</span>
+                <Text type="body-secondary" tagName={'small'}>
+                  {variable.displayName || variable.name}
+                </Text>
+                <Text type="body-secondary" tagName={'small'}>
+                  {variable.value || ''}
+                </Text>
               </div>
             ))}
           </div>

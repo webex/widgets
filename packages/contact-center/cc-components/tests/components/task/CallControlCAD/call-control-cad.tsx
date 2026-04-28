@@ -7,7 +7,7 @@ import {
   OUTBOUND_TYPE,
   CallAssociatedDataMap,
 } from '../../../../src/components/task/task.types';
-import {mockTask} from '@webex/test-fixtures';
+import {mockTask, mockCallAssociatedData} from '@webex/test-fixtures';
 import {BuddyDetails} from '@webex/cc-store';
 import '@testing-library/jest-dom';
 
@@ -377,57 +377,6 @@ describe('CallControlCADComponent', () => {
   });
 
   describe('Global Variables', () => {
-    const mockCallAssociatedData: CallAssociatedDataMap = {
-      Global_Language: {
-        name: 'Global_Language',
-        displayName: 'Customer Language',
-        value: 'English',
-        type: 'STRING',
-        agentEditable: false,
-        agentViewable: true,
-        global: true,
-        isSecure: false,
-        secureKeyId: '',
-        secureKeyVersion: 0,
-      },
-      Global_FeedbackSurveyOptIn: {
-        name: 'Global_FeedbackSurveyOptIn',
-        displayName: 'Post Call Survey Opt-in',
-        value: 'true',
-        type: 'STRING',
-        agentEditable: false,
-        agentViewable: true,
-        global: true,
-        isSecure: false,
-        secureKeyId: '',
-        secureKeyVersion: 0,
-      },
-      ani: {
-        name: 'ani',
-        displayName: 'ani',
-        value: '555-123-4567',
-        type: 'STRING',
-        agentEditable: false,
-        agentViewable: true,
-        global: false,
-        isSecure: false,
-        secureKeyId: '',
-        secureKeyVersion: 0,
-      },
-      Global_Hidden: {
-        name: 'Global_Hidden',
-        displayName: 'Hidden Variable',
-        value: 'secret',
-        type: 'STRING',
-        agentEditable: false,
-        agentViewable: false,
-        global: true,
-        isSecure: false,
-        secureKeyId: '',
-        secureKeyVersion: 0,
-      },
-    };
-
     const makePropsWithCallAssociatedData = (callAssociatedData: CallAssociatedDataMap) => ({
       ...defaultProps,
       currentTask: {
