@@ -45,20 +45,38 @@ jobs:
     if: contains(toJson(github.event.pull_request.labels), 'validated')
 
     steps:
-      - name: Validate PR title
-        run: |
-          TITLE="${{ github.event.pull_request.title }}"
-          echo "PR Title is: '$TITLE'"
+      - name: Validate PR title safely
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = (context.payload.pull_request?.title ?? "").normalize("NFC");
 
-          regex="^(fix|feat|chore|docs)\([^()]+\): .+"
+            // 1) Required
+            if (!title.length) {
+              core.setFailed("PR title is empty.");
+              return;
+            }
 
-          if [[ $TITLE =~ $regex ]]; then
-            echo "PR title is valid."
-          else
-            echo "Error: PR title does NOT follow the required convention."
-            echo "Expected format: fix|feat|chore(some-text): description..."
-            exit 1
-          fi
+            // 2) Length guard
+            if (title.length > 200) {
+              core.setFailed("PR title is too long (max 200 chars).");
+              return;
+            }
+
+            // 3) Hardened control-char guard (all Unicode control/invisible chars)
+            if (/[\p{C}]/u.test(title)) {
+              core.setFailed("PR title contains disallowed control/invisible characters.");
+              return;
+            }
+
+            // 4) Enforce convention (scope is optional)
+            const regex = /^(fix|feat|chore|docs)(\([^()\s][^()]{0,78}[^()\s]?\))?: [^\s].*$/u;
+            if (!regex.test(title)) {
+              core.setFailed("PR title must follow: fix|feat|chore|docs(scope): description OR fix|feat|chore|docs: description");
+              return;
+            }
+
+            core.info(`PR title is valid: "${title}"`);
 
   install:
     runs-on: ubuntu-latest
