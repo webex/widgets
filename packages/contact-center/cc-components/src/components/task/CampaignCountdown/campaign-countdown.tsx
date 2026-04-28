@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState, useCallback} from 'react';
-import {Text} from '@momentum-ui/react-collaboration';
+import {Text} from '@momentum-design/components/dist/react';
 import {CampaignCountdownProps} from './campaign-countdown.types';
 import {formatCountdown, calculateRemainingSeconds} from './campaign-countdown.utils';
 import {withMetrics} from '@webex/cc-ui-logging';
@@ -54,7 +54,7 @@ const CampaignCountdown: React.FC<CampaignCountdownProps> = ({
   const formattedTime = formatCountdown(remainingSeconds, logger);
 
   return (
-    <Text tagName="span" type="body-midsize-regular" className="task-text" data-testid="campaign-countdown">
+    <Text type="body-midsize-regular" className="task-text" data-testid="campaign-countdown">
       {TIME_LEFT} {formattedTime}
     </Text>
   );

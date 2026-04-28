@@ -3,7 +3,7 @@
 exports[`CampaignCountdown Snapshots Rendering should match snapshot with 0 seconds timeout 1`] = `
 <div>
   <mdc-text
-    class="md-text-wrapper task-text"
+    class="task-text"
     data-testid="campaign-countdown"
   >
     Time left:
@@ -16,7 +16,7 @@ exports[`CampaignCountdown Snapshots Rendering should match snapshot with 0 seco
 exports[`CampaignCountdown Snapshots Rendering should match snapshot with 30 seconds timeout 1`] = `
 <div>
   <mdc-text
-    class="md-text-wrapper task-text"
+    class="task-text"
     data-testid="campaign-countdown"
   >
     Time left:
@@ -29,7 +29,7 @@ exports[`CampaignCountdown Snapshots Rendering should match snapshot with 30 sec
 exports[`CampaignCountdown Snapshots Rendering should match snapshot with 125 seconds timeout 1`] = `
 <div>
   <mdc-text
-    class="md-text-wrapper task-text"
+    class="task-text"
     data-testid="campaign-countdown"
   >
     Time left:
