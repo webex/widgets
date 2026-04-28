@@ -3,7 +3,7 @@
     "PreToolUse": [
       {
         "matcher": "Bash",
-        "hooks": [".claude/hooks/check-ai-docs-drift.sh"]
+        "hooks": [{"type": "command", "command": ".claude/hooks/check-ai-docs-drift.sh"}]
       }
     ]
   }
