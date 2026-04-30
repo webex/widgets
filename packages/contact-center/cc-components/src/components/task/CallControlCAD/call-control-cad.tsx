@@ -5,7 +5,13 @@ import {Brandvisual, Icon, Tooltip, Button} from '@momentum-design/components/di
 import './call-control-cad.styles.scss';
 import TaskTimer from '../TaskTimer/index';
 import CallControlConsultComponent from '../CallControl/CallControlCustom/call-control-consult';
-import {MEDIA_CHANNEL as MediaChannelType, CallControlComponentProps, getCallerIdentifier} from '../task.types';
+import {
+  MEDIA_CHANNEL as MediaChannelType,
+  CallControlComponentProps,
+  getCallerIdentifier,
+  CallAssociatedDataMap,
+} from '../task.types';
+import {getAgentViewableGlobalVariables} from '../Task/task.utils';
 
 import {getMediaTypeInfo} from '../../../utils';
 import {
@@ -68,6 +74,10 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
   const ani = currentTask?.data?.interaction?.callAssociatedDetails?.ani;
   //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
   const dn = currentTask?.data?.interaction?.callAssociatedDetails?.dn;
+
+  //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
+  const callAssociatedData = currentTask?.data?.interaction?.callAssociatedData as CallAssociatedDataMap | undefined;
+  const globalVariables = getAgentViewableGlobalVariables(callAssociatedData);
 
   // Create unique IDs for tooltips
   const customerNameTriggerId = `customer-name-trigger-${currentTask.data.interaction.interactionId}`;
@@ -275,6 +285,24 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
           </Text>
           {renderPhoneNumber()}
         </div>
+        {globalVariables.length > 0 && (
+          <div className="global-variables" data-testid="cc-cad:global-variables">
+            {globalVariables.map((variable) => (
+              <div
+                key={variable.name}
+                className="global-variable-item"
+                data-testid={`cc-cad:global-var-${variable.name}`}
+              >
+                <Text type="body-secondary" tagName={'small'}>
+                  {variable.displayName || variable.name}
+                </Text>
+                <Text type="body-secondary" tagName={'small'}>
+                  {variable.value || ''}
+                </Text>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
       {controlVisibility.isConsultInitiatedOrAccepted && !controlVisibility.wrapup.isVisible && (
         <div className={`call-control-consult-container ${callControlConsultClassName || ''}`}>
