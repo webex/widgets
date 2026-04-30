@@ -37,3 +37,4 @@ export const QUEUE = 'Queue:';
 export const PHONE_NUMBER = 'Phone Number:';
 export const CUSTOMER_NAME = 'Customer Name';
 export const RONA = 'RONA:';
+export const TIME_LEFT = 'Time left:';
