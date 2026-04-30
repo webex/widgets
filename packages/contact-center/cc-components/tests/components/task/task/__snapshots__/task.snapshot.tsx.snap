@@ -18,6 +18,7 @@ exports[`Task Component Snapshots Actions should handle accept task action corre
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="telephony"
         icon-name="handset-filled"
         size="32"
@@ -111,6 +112,7 @@ exports[`Task Component Snapshots Actions should handle accept task action corre
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="telephony"
         icon-name="handset-filled"
         size="32"
@@ -204,6 +206,7 @@ exports[`Task Component Snapshots Actions should handle accept task action corre
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="telephony"
         icon-name="handset-filled"
         size="32"
@@ -297,6 +300,7 @@ exports[`Task Component Snapshots Actions should handle accept task action corre
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="telephony"
         icon-name="handset-filled"
         size="32"
@@ -390,6 +394,7 @@ exports[`Task Component Snapshots Actions should handle accept task action corre
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="telephony"
         icon-name="handset-filled"
         size="32"
@@ -502,6 +507,7 @@ exports[`Task Component Snapshots Actions should handle accept task action corre
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="telephony"
         icon-name="handset-filled"
         size="32"
@@ -614,6 +620,7 @@ exports[`Task Component Snapshots Actions should handle decline task action corr
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="telephony"
         icon-name="handset-filled"
         size="32"
@@ -707,6 +714,7 @@ exports[`Task Component Snapshots Actions should handle decline task action corr
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="telephony"
         icon-name="handset-filled"
         size="32"
@@ -800,6 +808,7 @@ exports[`Task Component Snapshots Actions should handle decline task action corr
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="telephony"
         icon-name="handset-filled"
         size="32"
@@ -912,6 +921,7 @@ exports[`Task Component Snapshots Actions should handle decline task action corr
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="telephony"
         icon-name="handset-filled"
         size="32"
@@ -1024,6 +1034,7 @@ exports[`Task Component Snapshots Actions should handle decline task action corr
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="telephony"
         icon-name="handset-filled"
         size="32"
@@ -1136,6 +1147,7 @@ exports[`Task Component Snapshots Actions should handle task selection action co
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="telephony"
         icon-name="handset-filled"
         size="32"
@@ -1209,6 +1221,7 @@ exports[`Task Component Snapshots Actions should handle task selection action co
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="telephony"
         icon-name="handset-filled"
         size="32"
@@ -1282,6 +1295,7 @@ exports[`Task Component Snapshots Actions should handle task selection action co
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="telephony"
         icon-name="handset-filled"
         size="32"
@@ -1394,6 +1408,7 @@ exports[`Task Component Snapshots Actions should handle task selection action co
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="telephony"
         icon-name="handset-filled"
         size="32"
@@ -1506,6 +1521,7 @@ exports[`Task Component Snapshots Actions should handle task selection action co
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="telephony"
         icon-name="handset-filled"
         size="32"
@@ -1618,6 +1634,7 @@ exports[`Task Component Snapshots Actions should handle task selection action co
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="telephony"
         icon-name="handset-filled"
         size="32"
@@ -1730,6 +1747,7 @@ exports[`Task Component Snapshots Actions should handle task selection action co
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="telephony"
         icon-name="handset-filled"
         size="32"
@@ -1842,6 +1860,7 @@ exports[`Task Component Snapshots Actions should handle task selection action co
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="telephony"
         icon-name="handset-filled"
         size="32"
@@ -1954,6 +1973,7 @@ exports[`Task Component Snapshots Actions should handle task selection action co
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="telephony"
         icon-name="handset-filled"
         size="32"
@@ -2027,6 +2047,7 @@ exports[`Task Component Snapshots Actions should handle task selection action co
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="telephony"
         icon-name="handset-filled"
         size="32"
@@ -2100,6 +2121,7 @@ exports[`Task Component Snapshots Actions should handle task selection action co
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="chat"
         icon-name="chat-filled"
         size="32"
@@ -2112,7 +2134,6 @@ exports[`Task Component Snapshots Actions should handle task selection action co
         class="task-details"
       >
         <mdc-text
-          aria-describedby="tooltip-test-interaction-123"
           class="md-text-wrapper task-digital-title"
           data-testid="task:title"
           id="tooltip-trigger-test-interaction-123"
@@ -2122,18 +2143,22 @@ exports[`Task Component Snapshots Actions should handle task selection action co
           Chat Customer
         </mdc-text>
         <mdc-tooltip
-          append-to=""
+          boundary="clippingAncestors"
+          boundary-root="viewport"
           class="task-tooltip"
           color="contrast"
           delay="0,0"
           disable-aria-expanded=""
-          flip=""
           hide-on-blur=""
           hide-on-escape=""
           id="tooltip-test-interaction-123"
+          is-backdrop-invisible=""
           offset="4"
           placement="top-start"
           role="tooltip"
+          should-focus-trap-wrap=""
+          stack-group-name=""
+          strategy="absolute"
           style="z-index: 1000;"
           tooltip-type="description"
           trigger="mouseenter focusin"
@@ -2196,6 +2221,7 @@ exports[`Task Component Snapshots Actions should handle task selection action co
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="chat"
         icon-name="chat-filled"
         size="32"
@@ -2208,7 +2234,6 @@ exports[`Task Component Snapshots Actions should handle task selection action co
         class="task-details"
       >
         <mdc-text
-          aria-describedby="tooltip-test-interaction-123"
           class="md-text-wrapper task-digital-title"
           data-testid="task:title"
           id="tooltip-trigger-test-interaction-123"
@@ -2218,18 +2243,22 @@ exports[`Task Component Snapshots Actions should handle task selection action co
           Chat Customer
         </mdc-text>
         <mdc-tooltip
-          append-to=""
+          boundary="clippingAncestors"
+          boundary-root="viewport"
           class="task-tooltip"
           color="contrast"
           delay="0,0"
           disable-aria-expanded=""
-          flip=""
           hide-on-blur=""
           hide-on-escape=""
           id="tooltip-test-interaction-123"
+          is-backdrop-invisible=""
           offset="4"
           placement="top-start"
           role="tooltip"
+          should-focus-trap-wrap=""
+          stack-group-name=""
+          strategy="absolute"
           style="z-index: 1000;"
           tooltip-type="description"
           trigger="mouseenter focusin"
@@ -2292,6 +2321,7 @@ exports[`Task Component Snapshots Actions should handle task selection action co
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="telephony"
         icon-name="handset-filled"
         size="32"
@@ -2365,6 +2395,7 @@ exports[`Task Component Snapshots Actions should handle task selection action co
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="telephony"
         icon-name="handset-filled"
         size="32"
@@ -2438,6 +2469,7 @@ exports[`Task Component Snapshots Actions should handle task selection action co
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="telephony"
         icon-name="handset-filled"
         size="32"
@@ -2503,6 +2535,7 @@ exports[`Task Component Snapshots Actions should handle task selection action co
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="telephony"
         icon-name="handset-filled"
         size="32"
@@ -2568,6 +2601,7 @@ exports[`Task Component Snapshots Rendering should handle default prop values an
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="telephony"
         icon-name="handset-filled"
         size="32"
@@ -2638,6 +2672,7 @@ exports[`Task Component Snapshots Rendering should handle default prop values an
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="telephony"
         icon-name="handset-filled"
         size="32"
@@ -2731,6 +2766,7 @@ exports[`Task Component Snapshots Rendering should handle default prop values an
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="telephony"
         icon-name="handset-filled"
         size="32"
@@ -2804,6 +2840,7 @@ exports[`Task Component Snapshots Rendering should handle default prop values an
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="telephony"
         icon-name="handset-filled"
         size="32"
@@ -2877,6 +2914,7 @@ exports[`Task Component Snapshots Rendering should handle default prop values an
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="telephony"
         icon-name="handset-filled"
         size="32"
@@ -2927,6 +2965,7 @@ exports[`Task Component Snapshots Rendering should handle default prop values an
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="telephony"
         icon-name="handset-filled"
         size="32"
@@ -2968,6 +3007,7 @@ exports[`Task Component Snapshots Rendering should handle default prop values an
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="telephony"
         icon-name="handset-filled"
         size="32"
@@ -3038,6 +3078,7 @@ exports[`Task Component Snapshots Rendering should render accept and decline but
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="telephony"
         icon-name="handset-filled"
         size="32"
@@ -3150,6 +3191,7 @@ exports[`Task Component Snapshots Rendering should render accept and decline but
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="telephony"
         icon-name="handset-filled"
         size="32"
@@ -3243,6 +3285,7 @@ exports[`Task Component Snapshots Rendering should render accept and decline but
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="telephony"
         icon-name="handset-filled"
         size="32"
@@ -3336,6 +3379,7 @@ exports[`Task Component Snapshots Rendering should render media type icons and b
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="chat"
         icon-name="chat-filled"
         size="32"
@@ -3357,18 +3401,22 @@ exports[`Task Component Snapshots Rendering should render media type icons and b
           Chat Customer Name
         </mdc-text>
         <mdc-tooltip
-          append-to=""
+          boundary="clippingAncestors"
+          boundary-root="viewport"
           class="task-tooltip"
           color="contrast"
           delay="0,0"
           disable-aria-expanded=""
-          flip=""
           hide-on-blur=""
           hide-on-escape=""
           id="tooltip-test-interaction-123"
+          is-backdrop-invisible=""
           offset="4"
           placement="top-start"
           role="tooltip"
+          should-focus-trap-wrap=""
+          stack-group-name=""
+          strategy="absolute"
           style="z-index: 1000;"
           tooltip-type="description"
           trigger="mouseenter focusin"
@@ -3431,6 +3479,7 @@ exports[`Task Component Snapshots Rendering should render media type icons and b
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="email"
         icon-name="email-filled"
         size="32"
@@ -3452,18 +3501,22 @@ exports[`Task Component Snapshots Rendering should render media type icons and b
           Email Subject Line
         </mdc-text>
         <mdc-tooltip
-          append-to=""
+          boundary="clippingAncestors"
+          boundary-root="viewport"
           class="task-tooltip"
           color="contrast"
           delay="0,0"
           disable-aria-expanded=""
-          flip=""
           hide-on-blur=""
           hide-on-escape=""
           id="tooltip-test-interaction-123"
+          is-backdrop-invisible=""
           offset="4"
           placement="top-start"
           role="tooltip"
+          should-focus-trap-wrap=""
+          stack-group-name=""
+          strategy="absolute"
           style="z-index: 1000;"
           tooltip-type="description"
           trigger="mouseenter focusin"
@@ -3541,7 +3594,6 @@ exports[`Task Component Snapshots Rendering should render media type icons and b
         class="task-details"
       >
         <mdc-text
-          aria-describedby="tooltip-test-interaction-123"
           class="md-text-wrapper task-digital-title"
           data-testid="task:title"
           id="tooltip-trigger-test-interaction-123"
@@ -3551,18 +3603,22 @@ exports[`Task Component Snapshots Rendering should render media type icons and b
           Facebook Customer
         </mdc-text>
         <mdc-tooltip
-          append-to=""
+          boundary="clippingAncestors"
+          boundary-root="viewport"
           class="task-tooltip"
           color="contrast"
           delay="0,0"
           disable-aria-expanded=""
-          flip=""
           hide-on-blur=""
           hide-on-escape=""
           id="tooltip-test-interaction-123"
+          is-backdrop-invisible=""
           offset="4"
           placement="top-start"
           role="tooltip"
+          should-focus-trap-wrap=""
+          stack-group-name=""
+          strategy="absolute"
           style="z-index: 1000;"
           tooltip-type="description"
           trigger="mouseenter focusin"
@@ -3625,6 +3681,7 @@ exports[`Task Component Snapshots Rendering should render media type icons and b
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="telephony"
         icon-name="handset-filled"
         size="32"
@@ -3722,18 +3779,22 @@ exports[`Task Component Snapshots Rendering should render media type icons and b
           WhatsApp Contact
         </mdc-text>
         <mdc-tooltip
-          append-to=""
+          boundary="clippingAncestors"
+          boundary-root="viewport"
           class="task-tooltip"
           color="contrast"
           delay="0,0"
           disable-aria-expanded=""
-          flip=""
           hide-on-blur=""
           hide-on-escape=""
           id="tooltip-test-interaction-123"
+          is-backdrop-invisible=""
           offset="4"
           placement="top-start"
           role="tooltip"
+          should-focus-trap-wrap=""
+          stack-group-name=""
+          strategy="absolute"
           style="z-index: 1000;"
           tooltip-type="description"
           trigger="mouseenter focusin"
@@ -3788,6 +3849,7 @@ exports[`Task Component Snapshots Rendering should render state, queue, and time
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="telephony"
         icon-name="handset-filled"
         size="32"
@@ -3861,6 +3923,7 @@ exports[`Task Component Snapshots Rendering should render state, queue, and time
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="telephony"
         icon-name="handset-filled"
         size="32"
@@ -3949,7 +4012,6 @@ exports[`Task Component Snapshots Rendering should render state, queue, and time
         class="task-details"
       >
         <mdc-text
-          aria-describedby="tooltip-test-interaction-123"
           class="md-text-wrapper incoming-digital-task-title"
           data-testid="task:title"
           id="tooltip-trigger-test-interaction-123"
@@ -3959,18 +4021,22 @@ exports[`Task Component Snapshots Rendering should render state, queue, and time
           Test Task
         </mdc-text>
         <mdc-tooltip
-          append-to=""
+          boundary="clippingAncestors"
+          boundary-root="viewport"
           class="task-tooltip"
           color="contrast"
           delay="0,0"
           disable-aria-expanded=""
-          flip=""
           hide-on-blur=""
           hide-on-escape=""
           id="tooltip-test-interaction-123"
+          is-backdrop-invisible=""
           offset="4"
           placement="top-start"
           role="tooltip"
+          should-focus-trap-wrap=""
+          stack-group-name=""
+          strategy="absolute"
           style="z-index: 1000;"
           tooltip-type="description"
           trigger="mouseenter focusin"
@@ -4033,6 +4099,7 @@ exports[`Task Component Snapshots Rendering should render titles and tooltips co
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="chat"
         icon-name="chat-filled"
         size="32"
@@ -4045,7 +4112,6 @@ exports[`Task Component Snapshots Rendering should render titles and tooltips co
         class="task-details"
       >
         <mdc-text
-          aria-describedby="tooltip-test-interaction-123"
           class="md-text-wrapper task-digital-title"
           data-testid="task:title"
           id="tooltip-trigger-test-interaction-123"
@@ -4055,18 +4121,22 @@ exports[`Task Component Snapshots Rendering should render titles and tooltips co
           Live Chat with Customer Support
         </mdc-text>
         <mdc-tooltip
-          append-to=""
+          boundary="clippingAncestors"
+          boundary-root="viewport"
           class="task-tooltip"
           color="contrast"
           delay="0,0"
           disable-aria-expanded=""
-          flip=""
           hide-on-blur=""
           hide-on-escape=""
           id="tooltip-test-interaction-123"
+          is-backdrop-invisible=""
           offset="4"
           placement="top-start"
           role="tooltip"
+          should-focus-trap-wrap=""
+          stack-group-name=""
+          strategy="absolute"
           style="z-index: 1000;"
           tooltip-type="description"
           trigger="mouseenter focusin"
@@ -4153,18 +4223,22 @@ exports[`Task Component Snapshots Rendering should render titles and tooltips co
           New Facebook Message from Customer
         </mdc-text>
         <mdc-tooltip
-          append-to=""
+          boundary="clippingAncestors"
+          boundary-root="viewport"
           class="task-tooltip"
           color="contrast"
           delay="0,0"
           disable-aria-expanded=""
-          flip=""
           hide-on-blur=""
           hide-on-escape=""
           id="tooltip-test-interaction-123"
+          is-backdrop-invisible=""
           offset="4"
           placement="top-start"
           role="tooltip"
+          should-focus-trap-wrap=""
+          stack-group-name=""
+          strategy="absolute"
           style="z-index: 1000;"
           tooltip-type="description"
           trigger="mouseenter focusin"
@@ -4219,6 +4293,7 @@ exports[`Task Component Snapshots Rendering should render titles and tooltips co
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="email"
         icon-name="email-filled"
         size="32"
@@ -4240,18 +4315,22 @@ exports[`Task Component Snapshots Rendering should render titles and tooltips co
           Urgent: Customer Complaint Email
         </mdc-text>
         <mdc-tooltip
-          append-to=""
+          boundary="clippingAncestors"
+          boundary-root="viewport"
           class="task-tooltip"
           color="contrast"
           delay="0,0"
           disable-aria-expanded=""
-          flip=""
           hide-on-blur=""
           hide-on-escape=""
           id="tooltip-test-interaction-123"
+          is-backdrop-invisible=""
           offset="4"
           placement="top-start"
           role="tooltip"
+          should-focus-trap-wrap=""
+          stack-group-name=""
+          strategy="absolute"
           style="z-index: 1000;"
           tooltip-type="description"
           trigger="mouseenter focusin"
@@ -4314,6 +4393,7 @@ exports[`Task Component Snapshots Rendering should render titles and tooltips co
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="telephony"
         icon-name="handset-filled"
         size="32"
@@ -4387,6 +4467,7 @@ exports[`Task Component Snapshots Rendering should render titles and tooltips co
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="telephony"
         icon-name="handset-filled"
         size="32"
@@ -4460,6 +4541,7 @@ exports[`Task Component Snapshots Rendering should render titles and tooltips co
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="telephony"
         icon-name="handset-filled"
         size="32"
@@ -4525,6 +4607,7 @@ exports[`Task Component Snapshots Rendering should render titles and tooltips co
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="telephony"
         icon-name="handset-filled"
         size="32"
@@ -4590,6 +4673,7 @@ exports[`Task Component Snapshots Rendering should render titles and tooltips co
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="telephony"
         icon-name="handset-filled"
         size="32"
@@ -4663,6 +4747,7 @@ exports[`Task Component Snapshots Rendering should render titles and tooltips co
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="email"
         icon-name="email-filled"
         size="32"
@@ -4684,18 +4769,22 @@ exports[`Task Component Snapshots Rendering should render titles and tooltips co
           Standard Customer Inquiry Email
         </mdc-text>
         <mdc-tooltip
-          append-to=""
+          boundary="clippingAncestors"
+          boundary-root="viewport"
           class="task-tooltip"
           color="contrast"
           delay="0,0"
           disable-aria-expanded=""
-          flip=""
           hide-on-blur=""
           hide-on-escape=""
           id="tooltip-test-interaction-123"
+          is-backdrop-invisible=""
           offset="4"
           placement="top-start"
           role="tooltip"
+          should-focus-trap-wrap=""
+          stack-group-name=""
+          strategy="absolute"
           style="z-index: 1000;"
           tooltip-type="description"
           trigger="mouseenter focusin"

@@ -289,4 +289,7 @@ export async function verifyDesktopOptionVisibility(page: Page, shouldBeVisible:
   } else {
     await expect(desktopOption).not.toBeVisible();
   }
+
+  // Close the dropdown to prevent the mdc-select popover from intercepting pointer events on other elements
+  await page.keyboard.press('Escape');
 }

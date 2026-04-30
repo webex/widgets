@@ -340,7 +340,7 @@ describe('IncomingTaskComponent', () => {
       const chatTitle = chatContainer.querySelector('.incoming-digital-task-title');
       expect(chatTitle).toBeInTheDocument();
       expect(chatTitle).toHaveTextContent('Chat Customer'); // Customer name as title
-      expect(chatTitle).toHaveAttribute('aria-describedby', 'tooltip-chat-task');
+      // aria-describedby is set dynamically by mdc-tooltip connectedCallback (doesn't run in JSDOM)
       expect(chatTitle).toHaveAttribute('id', 'tooltip-trigger-chat-task');
 
       // Chat tooltip
@@ -379,7 +379,7 @@ describe('IncomingTaskComponent', () => {
       const socialTitle = socialContainer.querySelector('.incoming-digital-task-title');
       expect(socialTitle).toBeInTheDocument();
       expect(socialTitle).toHaveTextContent('Social Customer'); // Customer name as title
-      expect(socialTitle).toHaveAttribute('aria-describedby', 'tooltip-social-task');
+      // aria-describedby is set dynamically by mdc-tooltip connectedCallback (doesn't run in JSDOM)
       expect(socialTitle).toHaveAttribute('id', 'tooltip-trigger-social-task');
 
       // Social tooltip

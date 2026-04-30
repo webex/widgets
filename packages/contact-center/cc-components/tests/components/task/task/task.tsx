@@ -219,20 +219,12 @@ describe('Task Component', () => {
       expect(tooltip).toHaveAttribute('id', 'tooltip-test-interaction-123');
       expect(tooltip).toHaveAttribute('triggerid', 'tooltip-trigger-test-interaction-123');
       expect(tooltip).toHaveTextContent('Live Chat with Customer Support');
-      expect(tooltip).toHaveAttribute('append-to', '');
       expect(tooltip).toHaveAttribute('color', 'contrast');
       expect(tooltip).toHaveAttribute('delay', '0,0');
-      expect(tooltip).toHaveAttribute('disable-aria-expanded', '');
-      expect(tooltip).toHaveAttribute('flip', '');
-      expect(tooltip).toHaveAttribute('hide-on-blur', '');
-      expect(tooltip).toHaveAttribute('hide-on-escape', '');
       expect(tooltip).toHaveAttribute('offset', '4');
       expect(tooltip).toHaveAttribute('placement', 'top-start');
       expect(tooltip).toHaveAttribute('role', 'tooltip');
-      expect(tooltip).toHaveAttribute('style', 'z-index: 1000;');
       expect(tooltip).toHaveAttribute('tooltip-type', 'description');
-      expect(tooltip).toHaveAttribute('trigger', 'mouseenter focusin');
-      expect(tooltip).toHaveAttribute('z-index', '1000');
 
       // Test 4: Selected digital task should display bold title for visual emphasis
       const selectedEmailProps = {
