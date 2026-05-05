@@ -128,7 +128,19 @@ export function calculateConsultTimerData(
   // Use the LATEST consult media, not the first. After transfer → re-consult
   // the backend keeps the old consult media (with stale isHold=true) alongside
   // the new one. Array.find() would return the old stale entry.
-  const consultMedia = findLatestConsultMedia(interaction);
+  let consultMedia = findLatestConsultMedia(interaction);
+
+  // Consulted agent (Agent 2): their call is mType "mainCall" not "consult".
+  // When the initiator switches away, Agent 2's mainCall is put on hold.
+  if (!consultMedia && interaction?.media) {
+    const mainMedia = Object.values(interaction.media).find(
+      (m: any) => m?.mType === 'mainCall'
+    ) as any;
+    if (mainMedia) {
+      consultMedia = mainMedia;
+    }
+  }
+
   const isConsultMediaHeld = consultMedia?.isHold === true;
   const consultHoldTimestamp = consultMedia?.holdTimestamp ?? null;
   const consultCallHeld = isConsultMediaHeld && consultHoldTimestamp !== null && consultHoldTimestamp > 0;

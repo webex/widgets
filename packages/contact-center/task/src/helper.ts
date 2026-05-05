@@ -957,17 +957,28 @@ export const useCallControl = (props: useCallControlProps) => {
           const consultMediaId = findMediaResourceId(currentTask, 'consult');
           const consultMedia = consultMediaId ? interaction?.media?.[consultMediaId] : null;
 
-          let consultedAgentId: string | null = null;
+          let recoveredTo: string | null = null;
+          let recoveredDestinationType: DestinationType = 'agent' as DestinationType;
           if (consultMedia?.participants) {
-            consultedAgentId = consultMedia.participants.find((pid: string) => {
-              const p = interaction?.participants?.[pid];
-              return p && p.id !== myAgentId && p.pType === 'Agent';
-            }) ?? null;
+            for (const pid of consultMedia.participants) {
+              const p = interaction?.participants?.[pid] as any;
+              if (!p || p.id === myAgentId) continue;
+              if (p.pType === 'Agent') {
+                recoveredTo = pid;
+                recoveredDestinationType = 'agent' as DestinationType;
+                break;
+              }
+              if (p.pType === 'EP-DN' && p.epId) {
+                recoveredTo = p.epId;
+                recoveredDestinationType = 'entryPoint' as DestinationType;
+                break;
+              }
+            }
           }
 
-          if (consultedAgentId) {
-            destination = {to: consultedAgentId, destinationType: 'agent' as DestinationType};
-            logger.info(`Recovered consult destination from interaction data: ${consultedAgentId}`, {
+          if (recoveredTo) {
+            destination = {to: recoveredTo, destinationType: recoveredDestinationType};
+            logger.info(`Recovered consult destination from interaction data: ${recoveredTo}`, {
               module: 'useCallControl',
               method: 'consultTransfer',
             });
