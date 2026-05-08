@@ -333,7 +333,9 @@ export const useCallControl = (props: useCallControlProps) => {
 
   useEffect(() => {
     // During conference, the call is never on hold
-    const isInConference = controls?.main?.exitConference?.isVisible;
+    const isInConference =
+      controls?.main?.exitConference?.isVisible ||
+      currentTask?.data?.interaction?.state === 'conference';
     if (isInConference) {
       setIsHeld(false);
       return;
@@ -1129,7 +1131,10 @@ export const useCallControl = (props: useCallControlProps) => {
     }
   }, [currentTask, controls, agentId, consultMediaIsHold, consultMediaId, participantConsultState]);
 
-  const effectiveIsHeld = controls?.main?.exitConference?.isVisible ? false : isHeld;
+  const isInConferenceState =
+    controls?.main?.exitConference?.isVisible ||
+    currentTask?.data?.interaction?.state === 'conference';
+  const effectiveIsHeld = isInConferenceState ? false : isHeld;
 
   return {
     currentTask,
