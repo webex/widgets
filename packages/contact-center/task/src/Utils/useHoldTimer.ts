@@ -41,9 +41,17 @@ export const useHoldTimer = (currentTask: ITask | null, controls?: TaskUIControl
 
   const isConsulting = controls?.consult?.endConsult?.isVisible || controls?.main?.endConsult?.isVisible;
 
+  const customerPresent = Boolean(
+    currentTask?.data?.interaction?.participants &&
+      Object.values(currentTask.data.interaction.participants).some(
+        (p: any) => p?.pType === 'Customer' && !p?.hasLeft
+      )
+  );
+
   // During consulting, activeLeg='consult' means the main call is on hold.
   // Outside consulting, fall back to the actual media hold state.
-  const mainCallOnHold = isConsulting
+  // When customer has left, never show the hold timer (follows Agent Desktop behavior).
+  const mainCallOnHold = isConsulting && customerPresent
     ? controls?.activeLeg === 'consult'
     : currentTask
       ? isInteractionOnHold(currentTask)

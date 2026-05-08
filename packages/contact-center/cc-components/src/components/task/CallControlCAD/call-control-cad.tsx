@@ -5,7 +5,8 @@ import {Brandvisual, Icon, Tooltip, Button} from '@momentum-design/components/di
 import './call-control-cad.styles.scss';
 import TaskTimer from '../TaskTimer/index';
 import CallControlConsultComponent from '../CallControl/CallControlCustom/call-control-consult';
-import {MEDIA_CHANNEL as MediaChannelType, CallControlComponentProps} from '../task.types';
+import {MEDIA_CHANNEL as MediaChannelType, CallControlComponentProps, CallAssociatedDataMap} from '../task.types';
+import {getAgentViewableGlobalVariables} from '../Task/task.utils';
 
 import {getMediaTypeInfo} from '../../../utils';
 import {
@@ -68,6 +69,10 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
   const ani = currentTask?.data?.interaction?.callAssociatedDetails?.ani;
   const dn = currentTask?.data?.interaction?.callAssociatedDetails?.dn;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const callAssociatedData = (currentTask?.data?.interaction as any)?.callAssociatedData as CallAssociatedDataMap | undefined;
+  const globalVariables = getAgentViewableGlobalVariables(callAssociatedData);
+
   // Create unique IDs for tooltips
   const customerNameTriggerId = `customer-name-trigger-${currentTask.data.interaction.interactionId}`;
   const customerNameTooltipId = `customer-name-tooltip-${currentTask.data.interaction.interactionId}`;
@@ -112,7 +117,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
   };
 
   const renderPhoneNumber = () => {
-    const phoneText = isSocial ? customerName || NO_CUSTOMER_NAME : dn || NO_PHONE_NUMBER;
+    const phoneText = isSocial ? customerName || NO_CUSTOMER_NAME : ani || NO_PHONE_NUMBER;
     const labelText = isSocial ? CUSTOMER_NAME : PHONE_NUMBER;
 
     const textComponent = (
@@ -177,7 +182,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
                     </>
                   )}
                 </Text>
-                {currentTask?.data?.isConferenceInProgress && !controls?.main?.wrapup?.isVisible && (
+                {controls?.main?.exitConference?.isVisible && !controls?.main?.wrapup?.isVisible && (
                   <>
                     <div className="vertical-divider"></div>
                     <div className="participants-section">
@@ -242,7 +247,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
             </div>
           </div>
         </div>
-        {!controls?.main?.wrapup?.isVisible && controls?.main?.recording?.isVisible && (
+        {!controls?.main?.wrapup?.isVisible && isTelephony && (
           <div className="recording-indicator">
             <Icon name={isRecording ? 'record-active-badge-filled' : 'record-paused-badge-filled'} size={1.3} />
           </div>
@@ -255,6 +260,24 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
           </Text>
           {renderPhoneNumber()}
         </div>
+        {globalVariables.length > 0 && (
+          <div className="global-variables" data-testid="cc-cad:global-variables">
+            {globalVariables.map((variable) => (
+              <div
+                key={variable.name}
+                className="global-variable-item"
+                data-testid={`cc-cad:global-var-${variable.name}`}
+              >
+                <Text type="body-secondary" tagName={'small'}>
+                  {variable.displayName || variable.name}
+                </Text>
+                <Text type="body-secondary" tagName={'small'}>
+                  {variable.value || ''}
+                </Text>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
       {(controls?.consult?.endConsult?.isVisible || controls?.main?.endConsult?.isVisible) && !controls?.main?.wrapup?.isVisible && (
         <div className={`call-control-consult-container ${callControlConsultClassName || ''}`}>

@@ -250,7 +250,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                                 showEntryPointTab: false,
                               }
                         }
-                        isConferenceInProgress={currentTask?.data?.isConferenceInProgress ?? false}
+                        isConferenceInProgress={controls?.main?.exitConference?.isVisible ?? false}
                         logger={logger}
                       />
                     ) : null}

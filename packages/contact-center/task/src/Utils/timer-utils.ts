@@ -68,11 +68,14 @@ export function calculateStateTimerData(
 
   postCallTimestamp = participant.currentStateTimestamp || 0;
 
-  if (controls.main?.wrapup?.isVisible && wrapUpTimestamp) {
-    return {
-      label: TIMER_LABEL_WRAP_UP,
-      timestamp: wrapUpTimestamp,
-    };
+  if (controls.main?.wrapup?.isVisible) {
+    const effectiveWrapUpTimestamp = wrapUpTimestamp || currentTask.data?.eventTime || 0;
+    if (effectiveWrapUpTimestamp) {
+      return {
+        label: TIMER_LABEL_WRAP_UP,
+        timestamp: effectiveWrapUpTimestamp,
+      };
+    }
   }
 
   const isInPostCall = interaction?.state === 'post_call' || participant?.currentState === 'post_call';

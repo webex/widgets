@@ -332,6 +332,12 @@ export const useCallControl = (props: useCallControlProps) => {
   }, [currentTask]);
 
   useEffect(() => {
+    // During conference, the call is never on hold
+    const isInConference = controls?.main?.exitConference?.isVisible;
+    if (isInConference) {
+      setIsHeld(false);
+      return;
+    }
     // During consulting, derive hold state from activeLeg (set synchronously
     // by the SDK on switch). Raw media data has a timing gap — the backend
     // hold/unhold response arrives after the switch event, so media.isHold
@@ -352,7 +358,7 @@ export const useCallControl = (props: useCallControlProps) => {
       const participants = getConferenceParticipants(currentTask, store.cc.agentConfig.agentId);
       setConferenceParticipants(participants);
     }
-  }, [currentTask]);
+  }, [currentTask, controls]);
   // Function to extract consulting agent information
   const extractConsultingAgent = useCallback(() => {
     try {
@@ -1123,9 +1129,11 @@ export const useCallControl = (props: useCallControlProps) => {
     }
   }, [currentTask, controls, agentId, consultMediaIsHold, consultMediaId, participantConsultState]);
 
+  const effectiveIsHeld = controls?.main?.exitConference?.isVisible ? false : isHeld;
+
   return {
     currentTask,
-    isHeld,
+    isHeld: effectiveIsHeld,
     endCall,
     toggleHold,
     toggleRecording,
