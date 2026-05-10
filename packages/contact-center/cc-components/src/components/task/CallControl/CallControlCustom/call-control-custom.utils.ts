@@ -27,6 +27,7 @@ export const createConsultButtons = (
   try {
     const consultCtrl = controls?.consult;
     const mainCtrl = controls?.main;
+    const isConsultLegActive = controls?.activeLeg === 'consult';
     return [
       {
         key: 'mute',
@@ -34,7 +35,8 @@ export const createConsultButtons = (
         onClick: toggleConsultMute,
         tooltip: isMuted ? UNMUTE_CALL : MUTE_CALL,
         className: `${isMuted ? 'call-control-button-muted' : 'call-control-button'}`,
-        disabled: !(consultCtrl?.mute?.isEnabled ?? false),
+        // Consult mute should only be interactive while consult leg is active.
+        disabled: !isConsultLegActive || !(consultCtrl?.mute?.isEnabled ?? false),
         isVisible: consultCtrl?.mute?.isVisible ?? false,
       },
       {

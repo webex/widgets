@@ -212,7 +212,8 @@ export const buildCallControlButtons = (
         onClick: handleMuteToggleFunc,
         tooltip: isMuted ? UNMUTE_CALL : MUTE_CALL,
         className: `${isMuted ? 'call-control-button-muted' : 'call-control-button'}`,
-        disabled: isMuteButtonDisabled,
+        // Respect SDK state and temporary click-guard state.
+        disabled: isMuteButtonDisabled || !(mainCtrl?.mute?.isEnabled ?? false),
         isVisible: mainCtrl?.mute?.isVisible ?? false,
         dataTestId: 'call-control:mute-toggle',
       },
