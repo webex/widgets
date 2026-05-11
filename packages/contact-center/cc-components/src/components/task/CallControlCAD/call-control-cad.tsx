@@ -84,8 +84,15 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
 
   // Persist global variables across task updates — some store refreshes
   // replace currentTask with a snapshot that omits callAssociatedData.
+  // Reset when the interaction changes so stale CAD from a previous task
+  // is never shown on a new call.
+  const interactionId = currentTask.data.interaction.interactionId;
   const globalVariablesRef = useRef(latestGlobalVariables);
-  if (latestGlobalVariables.length > 0) {
+  const prevInteractionIdRef = useRef(interactionId);
+  if (prevInteractionIdRef.current !== interactionId) {
+    prevInteractionIdRef.current = interactionId;
+    globalVariablesRef.current = latestGlobalVariables;
+  } else if (latestGlobalVariables.length > 0) {
     globalVariablesRef.current = latestGlobalVariables;
   }
   const globalVariables = globalVariablesRef.current;
