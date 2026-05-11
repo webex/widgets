@@ -5,6 +5,7 @@ import TaskTimer from '../../TaskTimer/index';
 import {CampaignTaskListItemProps} from './campaign-task-list-item.types';
 import {
   CAMPAIGN_ACCEPT,
+  CAMPAIGN_CONNECTING,
   CAMPAIGN_SKIP,
   CAMPAIGN_SKIP_TOOLTIP,
   CAMPAIGN_SKIP_DISABLED_TOOLTIP,
@@ -27,6 +28,7 @@ const CampaignTaskListItem: React.FC<CampaignTaskListItemProps> = ({
   customerName,
   timeoutTimestamp,
   isAcceptClicked,
+  isAccepted,
   isAcceptDisabled,
   isSkipDisabled,
   isRemoveDisabled,
@@ -56,12 +58,12 @@ const CampaignTaskListItem: React.FC<CampaignTaskListItemProps> = ({
           {phoneNumber}
         </Text>
       )}
-      {!isAcceptClicked && timeoutTimestamp && (
+      {!isAccepted && timeoutTimestamp && (
         <div slot="leading-text-tertiary-label">
           <CampaignCountdown timeoutTimestamp={timeoutTimestamp} onTimeout={onTimeout} logger={logger} />
         </div>
       )}
-      {isAcceptClicked && handleTimestamp && (
+      {isAccepted && handleTimestamp && (
         <Text
           slot="leading-text-tertiary-label"
           tagname="span"
@@ -73,24 +75,36 @@ const CampaignTaskListItem: React.FC<CampaignTaskListItemProps> = ({
         </Text>
       )}
 
-      {!isAcceptClicked && (
+      {!isAccepted && (
         <div
           slot="trailing-controls"
           className="campaign-task-actions"
           aria-label={CAMPAIGN_ACTIONS_LABEL}
           data-testid={`${testIdPrefix}-actions`}
         >
-          <Button
-            variant="primary"
-            color="positive"
-            size={28}
-            onClick={onAccept}
-            disabled={isAcceptDisabled}
-            aria-label={CAMPAIGN_ACCEPT}
-            data-testid={`${testIdPrefix}-accept-button`}
-          >
-            {CAMPAIGN_ACCEPT}
-          </Button>
+          {!isAcceptClicked ? (
+            <Button
+              variant="primary"
+              color="positive"
+              size={28}
+              onClick={onAccept}
+              disabled={isAcceptDisabled}
+              aria-label={CAMPAIGN_ACCEPT}
+              data-testid={`${testIdPrefix}-accept-button`}
+            >
+              {CAMPAIGN_ACCEPT}
+            </Button>
+          ) : (
+            <Button
+              variant="secondary"
+              size={28}
+              disabled
+              aria-label={CAMPAIGN_CONNECTING}
+              data-testid={`${testIdPrefix}-connecting-button`}
+            >
+              {CAMPAIGN_CONNECTING}
+            </Button>
+          )}
 
           <div
             className="campaign-task-skip-remove"

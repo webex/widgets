@@ -328,6 +328,7 @@ const CampaignTask: React.FC<CampaignTaskProps> = ({
         logger={logger}
         triggerId={campaignTaskTriggerId}
         isAcceptClicked={isAcceptClicked}
+        isAccepted={isAccepted}
         isAcceptDisabled={isAcceptDisabled}
         isSkipDisabled={isSkipButtonDisabled}
         isRemoveDisabled={isRemoveButtonDisabled}
@@ -343,6 +344,7 @@ const CampaignTask: React.FC<CampaignTaskProps> = ({
         customerName={customerName}
         timeoutTimestamp={timeoutTimestamp}
         isAcceptClicked={isAcceptClicked}
+        isAccepted={isAccepted}
         isAcceptDisabled={isAcceptDisabled}
         isSkipDisabled={isSkipButtonDisabled}
         isRemoveDisabled={isRemoveButtonDisabled}
@@ -358,7 +360,7 @@ const CampaignTask: React.FC<CampaignTaskProps> = ({
       <div className="campaign-task-expanded" data-testid="campaign-task-expanded">
         <GlobalVariablesPanel variables={globalVariables} />
 
-        {isBrowser && !isAcceptClicked && (
+        {isBrowser && !isAccepted && (
           <Button
             variant="secondary"
             color="negative"

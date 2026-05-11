@@ -5,6 +5,7 @@ import CampaignTaskListItem from '../../../../src/components/task/CampaignTask/C
 import {CampaignTaskListItemProps} from '../../../../src/components/task/CampaignTask/CampaignTaskListItem/campaign-task-list-item.types';
 import {
   CAMPAIGN_ACCEPT,
+  CAMPAIGN_CONNECTING,
   CAMPAIGN_SKIP,
   CAMPAIGN_REMOVE,
   CAMPAIGN_ACTIONS_LABEL,
@@ -29,6 +30,7 @@ const defaultProps: CampaignTaskListItemProps = {
   customerName: 'John Doe',
   timeoutTimestamp: String(Date.now() + 30000),
   isAcceptClicked: false,
+  isAccepted: false,
   isAcceptDisabled: false,
   isSkipDisabled: false,
   isRemoveDisabled: false,
@@ -82,13 +84,18 @@ describe('CampaignTaskListItem', () => {
     expect(screen.getByTestId('mock-countdown')).toBeInTheDocument();
   });
 
-  it('should NOT render countdown when accepted', () => {
-    renderComponent({isAcceptClicked: true, handleTimestamp: Date.now()});
+  it('should still render countdown when accept clicked but not yet confirmed by backend', () => {
+    renderComponent({isAcceptClicked: true, isAccepted: false});
+    expect(screen.getByTestId('mock-countdown')).toBeInTheDocument();
+  });
+
+  it('should NOT render countdown when accepted by backend', () => {
+    renderComponent({isAcceptClicked: true, isAccepted: true, handleTimestamp: Date.now()});
     expect(screen.queryByTestId('mock-countdown')).not.toBeInTheDocument();
   });
 
-  it('should render handle time timer when accepted with handleTimestamp', () => {
-    renderComponent({isAcceptClicked: true, handleTimestamp: Date.now()});
+  it('should render handle time timer when accepted by backend with handleTimestamp', () => {
+    renderComponent({isAcceptClicked: true, isAccepted: true, handleTimestamp: Date.now()});
     expect(screen.getByTestId('mock-task-timer')).toBeInTheDocument();
   });
 
@@ -112,8 +119,18 @@ describe('CampaignTaskListItem', () => {
     expect(screen.getByTestId('campaign-task-remove-button')).toBeInTheDocument();
   });
 
-  it('should NOT render any action buttons when campaign is accepted', () => {
-    renderComponent({isAcceptClicked: true, handleTimestamp: Date.now()});
+  it('should show Connecting button and disabled Skip/Remove when accept clicked but not confirmed', () => {
+    renderComponent({isAcceptClicked: true, isAccepted: false});
+    expect(screen.getByTestId('campaign-task-actions')).toBeInTheDocument();
+    expect(screen.queryByTestId('campaign-task-accept-button')).not.toBeInTheDocument();
+    expect(screen.getByTestId('campaign-task-connecting-button')).toBeInTheDocument();
+    expect(screen.getByTestId('campaign-task-connecting-button')).toHaveTextContent(CAMPAIGN_CONNECTING);
+    expect(screen.getByTestId('campaign-task-skip-button')).toBeInTheDocument();
+    expect(screen.getByTestId('campaign-task-remove-button')).toBeInTheDocument();
+  });
+
+  it('should NOT render any action buttons when campaign is accepted by backend', () => {
+    renderComponent({isAcceptClicked: true, isAccepted: true, handleTimestamp: Date.now()});
     expect(screen.queryByTestId('campaign-task-actions')).not.toBeInTheDocument();
     expect(screen.queryByTestId('campaign-task-accept-button')).not.toBeInTheDocument();
     expect(screen.queryByTestId('campaign-task-skip-button')).not.toBeInTheDocument();

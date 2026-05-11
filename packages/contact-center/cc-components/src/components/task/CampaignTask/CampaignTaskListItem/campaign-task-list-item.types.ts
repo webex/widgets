@@ -23,6 +23,9 @@ export interface CampaignTaskListItemProps {
   /** Whether the Accept button has been clicked (shows "Connecting..." state). */
   isAcceptClicked: boolean;
 
+  /** Whether the campaign preview has been accepted by the backend (call controls visible). */
+  isAccepted: boolean;
+
   /** Whether the Accept button is disabled. */
   isAcceptDisabled: boolean;
 

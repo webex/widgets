@@ -62,6 +62,7 @@ const defaultProps: CampaignTaskPopoverProps = {
   task: createMockTask(),
   triggerId: 'campaign-task-trigger-interaction-1',
   isAcceptClicked: false,
+  isAccepted: false,
   isAcceptDisabled: false,
   isSkipDisabled: false,
   isRemoveDisabled: false,
@@ -128,8 +129,16 @@ describe('CampaignTaskPopover', () => {
     expect(screen.getByTestId('campaign-popover-remove-button')).toBeInTheDocument();
   });
 
-  it('should hide action buttons when accepted', () => {
-    renderComponent({isAcceptClicked: true, handleTimestamp: Date.now()});
+  it('should show Connecting button and disabled Skip/Remove when accept clicked but not confirmed', () => {
+    renderComponent({isAcceptClicked: true, isAccepted: false});
+    expect(screen.queryByTestId('campaign-popover-accept-button')).not.toBeInTheDocument();
+    expect(screen.getByTestId('campaign-popover-connecting-button')).toBeInTheDocument();
+    expect(screen.getByTestId('campaign-popover-skip-button')).toBeInTheDocument();
+    expect(screen.getByTestId('campaign-popover-remove-button')).toBeInTheDocument();
+  });
+
+  it('should hide all action buttons when accepted by backend', () => {
+    renderComponent({isAcceptClicked: true, isAccepted: true, handleTimestamp: Date.now()});
     expect(screen.queryByTestId('campaign-popover-accept-button')).not.toBeInTheDocument();
     expect(screen.queryByTestId('campaign-popover-skip-button')).not.toBeInTheDocument();
     expect(screen.queryByTestId('campaign-popover-remove-button')).not.toBeInTheDocument();
@@ -142,8 +151,8 @@ describe('CampaignTaskPopover', () => {
     expect(screen.getByTestId('mock-countdown')).toBeInTheDocument();
   });
 
-  it('should render handle time timer when accepted', () => {
-    renderComponent({isAcceptClicked: true, handleTimestamp: Date.now()});
+  it('should render handle time timer when accepted by backend', () => {
+    renderComponent({isAcceptClicked: true, isAccepted: true, handleTimestamp: Date.now()});
     expect(screen.queryByTestId('mock-countdown')).not.toBeInTheDocument();
     expect(screen.getByTestId('mock-task-timer')).toBeInTheDocument();
   });

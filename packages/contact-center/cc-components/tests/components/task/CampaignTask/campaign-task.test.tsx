@@ -174,7 +174,7 @@ describe('CampaignTask', () => {
 
   // ── Accept flow ────────────────────────────────────────────────────
 
-  it('should hide all action buttons after Accept is clicked', async () => {
+  it('should show Connecting button and keep Skip/Remove visible after Accept is clicked', async () => {
     const acceptPreviewContact = jest.fn().mockResolvedValue(undefined);
     renderComponent({acceptPreviewContact});
 
@@ -183,12 +183,15 @@ describe('CampaignTask', () => {
     });
 
     expect(acceptPreviewContact).toHaveBeenCalledTimes(1);
+    // Accept button replaced with Connecting button
     expect(screen.queryByTestId('campaign-task-accept-button')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('campaign-task-skip-button')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('campaign-task-remove-button')).not.toBeInTheDocument();
+    expect(screen.getByTestId('campaign-task-connecting-button')).toBeInTheDocument();
+    // Skip/Remove still visible (disabled)
+    expect(screen.getByTestId('campaign-task-skip-button')).toBeInTheDocument();
+    expect(screen.getByTestId('campaign-task-remove-button')).toBeInTheDocument();
   });
 
-  it('should hide Cancel button after Accept is clicked (browser mode)', async () => {
+  it('should keep Cancel button visible after Accept is clicked (browser mode)', async () => {
     const acceptPreviewContact = jest.fn().mockResolvedValue(undefined);
     renderComponent({isBrowser: true, acceptPreviewContact});
 
@@ -196,10 +199,11 @@ describe('CampaignTask', () => {
       fireEvent.click(screen.getByTestId('campaign-task-accept-button'));
     });
 
-    expect(screen.queryByTestId('campaign-task-cancel-button')).not.toBeInTheDocument();
+    // Cancel still visible — hidden only when isAccepted becomes true
+    expect(screen.getByTestId('campaign-task-cancel-button')).toBeInTheDocument();
   });
 
-  it('should hide countdown and show handle time after Accept is clicked', async () => {
+  it('should keep countdown visible after Accept is clicked (hidden only when backend confirms)', async () => {
     const acceptPreviewContact = jest.fn().mockResolvedValue(undefined);
     renderComponent({acceptPreviewContact});
 
@@ -207,8 +211,8 @@ describe('CampaignTask', () => {
       fireEvent.click(screen.getByTestId('campaign-task-accept-button'));
     });
 
-    expect(screen.queryByTestId('mock-countdown')).not.toBeInTheDocument();
-    expect(screen.getByTestId('mock-task-timer')).toBeInTheDocument();
+    // Countdown still visible — handle timer only shown when isAccepted
+    expect(screen.getByTestId('mock-countdown')).toBeInTheDocument();
   });
 
   it('should show error dialog when accept fails', async () => {
@@ -361,7 +365,7 @@ describe('CampaignTask', () => {
 
   // ── Accept state persists across task data updates ─────────────────
 
-  it('should NOT reset accepted state when task data changes after accept', async () => {
+  it('should hide buttons and show handle time once isAccepted becomes true', async () => {
     const acceptPreviewContact = jest.fn().mockResolvedValue(undefined);
     const task = createMockTask();
     const {rerender} = render(<CampaignTask {...createDefaultProps({acceptPreviewContact, task})} />);
@@ -371,16 +375,19 @@ describe('CampaignTask', () => {
       fireEvent.click(screen.getByTestId('campaign-task-accept-button'));
     });
 
-    expect(screen.queryByTestId('campaign-task-accept-button')).not.toBeInTheDocument();
-    expect(screen.getByTestId('mock-task-timer')).toBeInTheDocument();
+    // Still in connecting state — buttons visible but Accept replaced with Connecting
+    expect(screen.getByTestId('campaign-task-connecting-button')).toBeInTheDocument();
+    expect(screen.getByTestId('campaign-task-skip-button')).toBeInTheDocument();
 
-    // Simulate task data update with a different timeout (backend CPD update after accept).
-    // The store marks the campaign as accepted (isAccepted: true) once the agent clicks Accept.
+    // Backend confirms — isAccepted becomes true
     const updatedTask = createMockTask({cpd: {campaignPreviewOfferTimeout: String(Date.now() + 60000)}});
     rerender(<CampaignTask {...createDefaultProps({acceptPreviewContact, task: updatedTask, isAccepted: true})} />);
 
-    // Buttons should stay hidden — accepted state persists
+    // Buttons should now be hidden — backend confirmed acceptance
     expect(screen.queryByTestId('campaign-task-accept-button')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('campaign-task-connecting-button')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('campaign-task-skip-button')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('campaign-task-remove-button')).not.toBeInTheDocument();
     expect(screen.getByTestId('mock-task-timer')).toBeInTheDocument();
   });
 
@@ -454,9 +461,9 @@ describe('CampaignTask', () => {
 
       // Accept API should NOT be called — backend handles auto-accept
       expect(acceptPreviewContact).not.toHaveBeenCalled();
-      // But UI should transition to accepted state (countdown hidden, timer shown)
-      expect(screen.queryByTestId('mock-countdown')).not.toBeInTheDocument();
-      expect(screen.getByTestId('mock-task-timer')).toBeInTheDocument();
+      // UI shows Connecting state (accept clicked locally) — countdown still visible since !isAccepted
+      expect(screen.getByTestId('campaign-task-connecting-button')).toBeInTheDocument();
+      expect(screen.getByTestId('mock-countdown')).toBeInTheDocument();
     });
 
     it('should NOT call skipPreviewContact when countdown expires with SKIP autoAction', async () => {
@@ -493,7 +500,7 @@ describe('CampaignTask', () => {
       expect((screen.getByTestId('campaign-task-accept-button') as unknown as {disabled: boolean}).disabled).toBe(true);
     });
 
-    it('should disable all buttons on timeout for ACCEPT autoAction', async () => {
+    it('should show Connecting button and disable Skip/Remove on timeout for ACCEPT autoAction', async () => {
       renderComponent();
 
       expect(capturedOnTimeout).toBeDefined();
@@ -501,10 +508,11 @@ describe('CampaignTask', () => {
         capturedOnTimeout!();
       });
 
-      // After auto-accept timeout, action buttons should be hidden (accepted state)
+      // After auto-accept timeout, Accept replaced with Connecting, Skip/Remove still visible but disabled
       expect(screen.queryByTestId('campaign-task-accept-button')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('campaign-task-skip-button')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('campaign-task-remove-button')).not.toBeInTheDocument();
+      expect(screen.getByTestId('campaign-task-connecting-button')).toBeInTheDocument();
+      expect(screen.getByTestId('campaign-task-skip-button')).toBeInTheDocument();
+      expect(screen.getByTestId('campaign-task-remove-button')).toBeInTheDocument();
     });
 
     it('should log a warning when autoAction is invalid/empty', async () => {

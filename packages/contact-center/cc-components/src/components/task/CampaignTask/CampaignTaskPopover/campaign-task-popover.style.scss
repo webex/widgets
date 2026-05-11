@@ -1,7 +1,4 @@
 .campaign-task-popover {
-  // Override the Popover component max-height so variables panel scrolls
-  --mdc-popover-max-height: 28rem;
-
   &__content {
     display: flex;
     flex-direction: column;
@@ -9,6 +6,14 @@
     gap: 0.5rem;
     min-height: 0;
     overflow: hidden;
+
+    // Cap the variables panel height inside the popover so it scrolls
+    // instead of overflowing past the popover boundary.
+    // Agent Desktop uses max-height: 120px (~7.5rem) on the details container.
+    .global-variables-panel--two-column {
+      max-height: 7.5rem;
+      overflow-y: auto;
+    }
   }
 
   &__list-item {
