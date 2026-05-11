@@ -156,22 +156,6 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.acceptedCampaignIds;
   }
 
-  get dismissedCampaignIds() {
-    return this.store.dismissedCampaignIds;
-  }
-
-  dismissCampaign = (interactionId: string): void => {
-    runInAction(() => {
-      this.store.dismissedCampaignIds = new Set(this.store.dismissedCampaignIds).add(interactionId);
-    });
-  };
-
-  clearDismissedCampaigns = (): void => {
-    runInAction(() => {
-      this.store.dismissedCampaignIds = new Set();
-    });
-  };
-
   setDataCenter = (value: string): void => {
     this.store.dataCenter = value;
   };
@@ -578,18 +562,8 @@ class StoreWrapper implements IStoreWrapper {
     this.refreshTaskList();
   };
 
-  handleTaskEnd = (event?: ITask) => {
-    const interactionId = event?.data?.interactionId;
+  handleTaskEnd = () => {
     this.setIsDeclineButtonEnabled(false);
-
-    // Clean up dismissed tracking for this campaign now that the task has ended.
-    if (interactionId && this.store.dismissedCampaignIds.has(interactionId)) {
-      const next = new Set(this.store.dismissedCampaignIds);
-      next.delete(interactionId);
-      runInAction(() => {
-        this.store.dismissedCampaignIds = next;
-      });
-    }
 
     this.refreshTaskList();
   };
@@ -1022,7 +996,6 @@ class StoreWrapper implements IStoreWrapper {
       this.setDigitalChannelsInitialized(false);
       this.store.realtimeTranscriptionData = [];
       this.store.acceptedCampaignIds = new Set();
-      this.store.dismissedCampaignIds = new Set();
       this.realtimeTranscriptionListeners = {};
     });
   };

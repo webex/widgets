@@ -104,7 +104,6 @@ jest.mock('../src/store', () => ({
     isDeclineButtonEnabled: false,
     isDigitalChannelsInitialized: false,
     acceptedCampaignIds: new Set<string>(),
-    dismissedCampaignIds: new Set<string>(),
     setShowMultipleLoginAlert: jest.fn(),
     setCurrentState: jest.fn(),
     setLastStateChangeTimestamp: jest.fn(),
@@ -2247,7 +2246,6 @@ describe('storeEventsWrapper', () => {
     beforeEach(() => {
       jest.clearAllMocks();
       storeWrapper['store'].acceptedCampaignIds = new Set<string>();
-      storeWrapper['store'].dismissedCampaignIds = new Set<string>();
       storeWrapper['store'].taskList = {};
       storeWrapper['store'].currentTask = null;
     });
@@ -2262,22 +2260,10 @@ describe('storeEventsWrapper', () => {
 
         const refreshSpy = jest.spyOn(storeWrapper, 'refreshTaskList');
 
-        storeWrapper.handleTaskEnd(task);
+        storeWrapper.handleTaskEnd();
 
         // refreshTaskList should be called (normal path, no force cleanup)
         expect(refreshSpy).toHaveBeenCalled();
-      });
-
-      it('should clean up dismissedCampaignIds when task ends', () => {
-        const task = createCampaignPreviewTask('campaign-2');
-        storeWrapper['store'].dismissedCampaignIds = new Set(['campaign-2']);
-        storeWrapper['store'].taskList = {'campaign-2': task};
-        storeWrapper['store'].currentTask = task;
-        storeWrapper['store'].cc.taskManager.getAllTasks = jest.fn().mockReturnValue({'campaign-2': task});
-
-        storeWrapper.handleTaskEnd(task);
-
-        expect(storeWrapper['store'].dismissedCampaignIds.has('campaign-2')).toBe(false);
       });
     });
 
@@ -2291,7 +2277,7 @@ describe('storeEventsWrapper', () => {
 
         const refreshSpy = jest.spyOn(storeWrapper, 'refreshTaskList');
 
-        storeWrapper.handleTaskEnd(task);
+        storeWrapper.handleTaskEnd();
 
         // acceptedCampaignIds should NOT be cleaned up here (deferred to handleTaskRemove)
         expect(storeWrapper['store'].acceptedCampaignIds.has('campaign-accepted')).toBe(true);
@@ -2347,7 +2333,7 @@ describe('storeEventsWrapper', () => {
 
         const refreshSpy = jest.spyOn(storeWrapper, 'refreshTaskList');
 
-        storeWrapper.handleTaskEnd(regularTask);
+        storeWrapper.handleTaskEnd();
 
         // Should call refreshTaskList normally
         expect(refreshSpy).toHaveBeenCalled();

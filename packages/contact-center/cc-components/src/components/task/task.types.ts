@@ -180,19 +180,6 @@ export interface TaskProps {
    * transient task-list updates during the accept transition.
    */
   acceptedCampaignIds?: Set<string>;
-
-  /**
-   * Set of interaction IDs for campaign previews that have been dismissed
-   * (skipped or removed).  Used to immediately hide the campaign from the
-   * task list without waiting for the backend ContactEnded event.
-   */
-  dismissedCampaignIds?: Set<string>;
-
-  /**
-   * Callback invoked when a campaign preview is dismissed (skipped or removed)
-   * so the store can track it in dismissedCampaignIds.
-   */
-  onCampaignDismissed?: (interactionId: string) => void;
 }
 
 export type IncomingTaskComponentProps = Pick<TaskProps, 'isBrowser' | 'accept' | 'reject' | 'logger'> &
@@ -202,12 +189,7 @@ export type TaskListComponentProps = Pick<
   TaskProps,
   'isBrowser' | 'acceptTask' | 'declineTask' | 'onTaskSelect' | 'logger' | 'agentId' | 'cc'
 > &
-  Partial<
-    Pick<
-      TaskProps,
-      'currentTask' | 'taskList' | 'hasCampaignPreviewEnabled' | 'acceptedCampaignIds' | 'onCampaignDismissed'
-    >
-  >;
+  Partial<Pick<TaskProps, 'currentTask' | 'taskList' | 'hasCampaignPreviewEnabled' | 'acceptedCampaignIds'>>;
 
 export interface RealTimeTranscriptEntry {
   id: string;

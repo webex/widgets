@@ -160,7 +160,6 @@ interface IStore {
   dataCenter: string;
   realtimeTranscriptionData: Partial<RealTimeTranscriptionData>[];
   acceptedCampaignIds: Set<string>;
-  dismissedCampaignIds: Set<string>;
   init(params: InitParams, callback: (ccSDK: IContactCenter) => void): Promise<void>;
   registerCC(webex?: WithWebex['webex']): Promise<void>;
 }
@@ -195,8 +194,6 @@ interface IStoreWrapper extends IStore {
   getAccessToken(): Promise<string>;
   addAcceptedCampaign(interactionId: string): void;
   removeAcceptedCampaign(interactionId: string): void;
-  dismissCampaign(interactionId: string): void;
-  clearDismissedCampaigns(): void;
 }
 
 interface IWrapupCode {

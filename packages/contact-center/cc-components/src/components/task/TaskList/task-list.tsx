@@ -29,7 +29,6 @@ const TaskListComponent: React.FunctionComponent<TaskListComponentProps> = (prop
     cc,
     hasCampaignPreviewEnabled = true,
     acceptedCampaignIds,
-    onCampaignDismissed,
   } = props;
 
   // Early return for empty task list
@@ -66,22 +65,13 @@ const TaskListComponent: React.FunctionComponent<TaskListComponentProps> = (prop
             | undefined;
           const campaignId = cpd?.campaignId ?? '';
 
-          const dismissAndSkip = () =>
-            cc.skipPreviewContact({interactionId, campaignId}).then(() => {
-              onCampaignDismissed?.(interactionId);
-            });
-          const dismissAndRemove = () =>
-            cc.removePreviewContact({interactionId, campaignId}).then(() => {
-              onCampaignDismissed?.(interactionId);
-            });
-
           return (
             <CampaignTask
               key={interactionId}
               task={task}
               acceptPreviewContact={() => cc.acceptPreviewContact({interactionId, campaignId}).then(() => {})}
-              skipPreviewContact={dismissAndSkip}
-              removePreviewContact={dismissAndRemove}
+              skipPreviewContact={() => cc.skipPreviewContact({interactionId, campaignId}).then(() => {})}
+              removePreviewContact={() => cc.removePreviewContact({interactionId, campaignId}).then(() => {})}
               cancelPreviewContact={() => task.end().then(() => {})}
               isBrowser={isBrowser}
               logger={logger}

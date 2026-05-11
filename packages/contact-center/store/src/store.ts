@@ -54,7 +54,6 @@ class Store implements IStore {
   dataCenter: string = '';
   realtimeTranscriptionData: Partial<RealTimeTranscriptionData>[] = [];
   acceptedCampaignIds: Set<string> = new Set();
-  dismissedCampaignIds: Set<string> = new Set();
 
   constructor() {
     makeAutoObservable(this, {

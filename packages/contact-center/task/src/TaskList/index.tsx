@@ -9,7 +9,7 @@ import {TaskListProps} from '../task.types';
 
 const TaskListInternal: React.FunctionComponent<TaskListProps> = observer(
   ({onTaskAccepted, onTaskDeclined, onTaskSelected, hasCampaignPreviewEnabled}) => {
-    const {cc, taskList, currentTask, deviceType, logger, agentId, acceptedCampaignIds, dismissedCampaignIds} = store;
+    const {cc, taskList, currentTask, deviceType, logger, agentId, acceptedCampaignIds} = store;
 
     const result = useTaskList({cc, deviceType, logger, taskList, onTaskAccepted, onTaskDeclined, onTaskSelected});
     const props = {
@@ -20,8 +20,6 @@ const TaskListInternal: React.FunctionComponent<TaskListProps> = observer(
       agentId,
       hasCampaignPreviewEnabled,
       acceptedCampaignIds,
-      dismissedCampaignIds,
-      onCampaignDismissed: store.dismissCampaign,
     };
 
     return <TaskListComponent {...props} />;
