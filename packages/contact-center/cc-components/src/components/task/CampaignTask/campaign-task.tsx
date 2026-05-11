@@ -27,13 +27,21 @@ interface ParticipantWithJoin {
 
 /**
  * Extract the agent's joinTimestamp from the task participants.
+ * Looks up the agent by `agentId` so that we always read the correct
+ * participant even when multiple participants have joined.
  * Returns `undefined` when the agent hasn't joined yet.
  */
-const getAgentJoinTimestamp = (task: CampaignTaskProps['task']): number | undefined => {
+const getAgentJoinTimestamp = (task: CampaignTaskProps['task'], agentId?: string): number | undefined => {
   const participants = task.data.interaction.participants as Record<string, ParticipantWithJoin> | undefined;
 
   if (!participants) return undefined;
 
+  if (agentId && participants[agentId]) {
+    const agent = participants[agentId];
+    return agent.hasJoined && agent.joinTimestamp ? agent.joinTimestamp : undefined;
+  }
+
+  // Fallback: if agentId is not provided or not found, use first joined participant
   for (const participant of Object.values(participants)) {
     if (participant.hasJoined && participant.joinTimestamp) {
       return participant.joinTimestamp;
@@ -57,6 +65,7 @@ const CampaignTask: React.FC<CampaignTaskProps> = ({
   isBrowser = false,
   logger,
   isAccepted = false,
+  agentId,
 }) => {
   const cpd = task.data.interaction.callProcessingDetails;
   const campaignCpd = getCampaignCpd(cpd as unknown as Record<string, unknown>);
@@ -87,7 +96,7 @@ const CampaignTask: React.FC<CampaignTaskProps> = ({
 
   const [isAcceptClicked, setIsAcceptClicked] = useState<boolean>(isAccepted);
   const [handleTimestamp, setHandleTimestamp] = useState<number | undefined>(
-    isAccepted ? (getAgentJoinTimestamp(task) ?? Date.now()) : undefined
+    isAccepted ? (getAgentJoinTimestamp(task, agentId) ?? Date.now()) : undefined
   );
   const [isAcceptDisabled, setIsAcceptDisabled] = useState<boolean>(isAccepted);
   const [isSkipButtonDisabled, setIsSkipButtonDisabled] = useState<boolean>(
@@ -112,7 +121,7 @@ const CampaignTask: React.FC<CampaignTaskProps> = ({
   useEffect(() => {
     if (isAccepted && !isAcceptClicked) {
       setIsAcceptClicked(true);
-      setHandleTimestamp(getAgentJoinTimestamp(task) ?? Date.now());
+      setHandleTimestamp(getAgentJoinTimestamp(task, agentId) ?? Date.now());
       setIsAcceptDisabled(true);
       setIsSkipButtonDisabled(true);
       setIsRemoveButtonDisabled(true);
@@ -123,7 +132,7 @@ const CampaignTask: React.FC<CampaignTaskProps> = ({
   // so the timer matches CallControlCAD exactly.
   useEffect(() => {
     if (!isAcceptClicked) return;
-    const joinTs = getAgentJoinTimestamp(task);
+    const joinTs = getAgentJoinTimestamp(task, agentId);
     if (joinTs && joinTs !== handleTimestamp) {
       setHandleTimestamp(joinTs);
     }

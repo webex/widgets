@@ -76,6 +76,7 @@ const TaskListComponent: React.FunctionComponent<TaskListComponentProps> = (prop
               isBrowser={isBrowser}
               logger={logger}
               isAccepted={acceptedCampaignIds?.has(interactionId) ?? false}
+              agentId={agentId}
             />
           );
         }

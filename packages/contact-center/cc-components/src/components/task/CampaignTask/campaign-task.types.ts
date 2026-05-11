@@ -104,4 +104,10 @@ export interface CampaignTaskProps {
    * and the handle-time timer is shown instead.
    */
   isAccepted?: boolean;
+
+  /**
+   * The logged-in agent's ID.  Used to look up the agent's participant
+   * entry when reading `joinTimestamp` for the handle-time timer.
+   */
+  agentId?: string;
 }
