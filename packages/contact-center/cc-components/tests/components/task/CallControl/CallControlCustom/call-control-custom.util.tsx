@@ -188,6 +188,37 @@ describe('Call Control Custom Utils', () => {
       const muteButton = buttons.find((b) => b.key === 'mute');
       expect(muteButton?.isVisible).toBe(false);
     });
+
+    it('should disable consult mute when active leg is main', () => {
+      const nestedControls = {
+        activeLeg: 'main',
+        main: {
+          endConsult: {isVisible: true, isEnabled: true},
+        },
+        consult: {
+          mute: {isVisible: true, isEnabled: true},
+          switch: {isVisible: true, isEnabled: true},
+          transfer: {isVisible: true, isEnabled: true},
+          mergeToConference: {isVisible: true, isEnabled: true},
+          endConsult: {isVisible: true, isEnabled: true},
+        },
+      };
+
+      const buttons = createConsultButtons(
+        false,
+        nestedControls as never,
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        loggerMock
+      );
+
+      const muteButton = buttons.find((b) => b.key === 'mute');
+      expect(muteButton?.isVisible).toBe(true);
+      expect(muteButton?.disabled).toBe(true);
+    });
   });
 
   describe('getVisibleButtons', () => {

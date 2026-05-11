@@ -671,6 +671,46 @@ describe('CallControl Utils', () => {
         dataTestId: 'call-control:exit-conference',
       });
     });
+
+    it('should disable mute button when sdk marks main mute disabled', () => {
+      const nestedControls = {
+        main: {
+          mute: {isVisible: true, isEnabled: false},
+          hold: {isVisible: false, isEnabled: false},
+          consult: {isVisible: false, isEnabled: false},
+          transfer: {isVisible: false, isEnabled: false},
+          recording: {isVisible: false, isEnabled: false},
+          end: {isVisible: false, isEnabled: false},
+          conference: {isVisible: false, isEnabled: false},
+          switch: {isVisible: false, isEnabled: false},
+          exitConference: {isVisible: false, isEnabled: false},
+        },
+        consult: {
+          endConsult: {isVisible: false, isEnabled: false},
+        },
+      };
+
+      const buttons = buildCallControlButtons(
+        false,
+        false,
+        false,
+        mockMediaTypeInfo,
+        nestedControls as never,
+        false,
+        mockFunctions.handleMuteToggleFunc,
+        mockFunctions.handleToggleHoldFunc,
+        mockFunctions.toggleRecording,
+        mockFunctions.endCall,
+        mockFunctions.exitConference,
+        mockFunctions.switchToConsult,
+        jest.fn(),
+        jest.fn()
+      );
+
+      const muteButton = buttons.find((b) => b.id === 'mute');
+      expect(muteButton?.isVisible).toBe(true);
+      expect(muteButton?.disabled).toBe(true);
+    });
   });
 
   describe('filterButtonsForConsultation', () => {

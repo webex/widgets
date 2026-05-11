@@ -25,7 +25,12 @@ import store, {
   isInteractionOnHold,
   MEDIA_TYPE_TELEPHONY_LOWER,
 } from '@webex/cc-store';
-import {TIMER_LABEL_CONSULTING, TIMER_LABEL_CONSULT_REQUESTED, TIMER_LABEL_CONSULT_ON_HOLD, TIMER_LABEL_WRAP_UP} from './Utils/constants';
+import {
+  TIMER_LABEL_CONSULTING,
+  TIMER_LABEL_CONSULT_REQUESTED,
+  TIMER_LABEL_CONSULT_ON_HOLD,
+  TIMER_LABEL_WRAP_UP,
+} from './Utils/constants';
 import {calculateStateTimerData, calculateConsultTimerData, findLatestConsultMedia} from './Utils/timer-utils';
 import {useHoldTimer} from './Utils/useHoldTimer';
 import {OutdialAniEntriesResponse} from '@webex/contact-center/dist/types/services/config/types';
@@ -334,8 +339,7 @@ export const useCallControl = (props: useCallControlProps) => {
   useEffect(() => {
     // During conference, the call is never on hold
     const isInConference =
-      controls?.main?.exitConference?.isVisible ||
-      currentTask?.data?.interaction?.state === 'conference';
+      controls?.main?.exitConference?.isVisible || currentTask?.data?.interaction?.state === 'conference';
     if (isInConference) {
       setIsHeld(false);
       return;
@@ -368,6 +372,9 @@ export const useCallControl = (props: useCallControlProps) => {
 
       const {interaction} = currentTask.data;
       const myAgentId = store.cc.agentConfig?.agentId;
+      const currentDestination = store.lastConsultDestination;
+      const destinationType = currentDestination?.destinationType;
+      const destinationId = currentDestination?.to;
 
       // For Entry Point or Dial Number consults, check if destination agent has joined
       if (lastTargetType === TARGET_TYPE.ENTRY_POINT || lastTargetType === TARGET_TYPE.DIAL_NUMBER) {
@@ -396,8 +403,10 @@ export const useCallControl = (props: useCallControlProps) => {
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               const participant = interaction.participants[consultParticipantId] as any;
               const phoneNumber = participant.dn || participant.id;
+              const matchesCurrentDestination =
+                !destinationId || participant.epId === destinationId || participant.id === destinationId;
 
-              if (phoneNumber && phoneNumber !== consultAgentName) {
+              if (phoneNumber && matchesCurrentDestination) {
                 setConsultAgentName(phoneNumber);
                 logger.info(`${lastTargetType} consult ringing - showing phone number: ${phoneNumber}`, {
                   module: 'widget-cc-task#helper.ts',
@@ -418,7 +427,12 @@ export const useCallControl = (props: useCallControlProps) => {
         // Find the agent participant in consult media who is not the current agent
         const consultParticipantId = consultMedia.participants?.find((participantId: string) => {
           const participant = interaction.participants[participantId];
-          return participant && participant.id !== myAgentId && participant.pType === 'Agent';
+          const matchesDestination =
+            destinationType !== 'agent' ||
+            !destinationId ||
+            participantId === destinationId ||
+            participant?.id === destinationId;
+          return participant && participant.id !== myAgentId && participant.pType === 'Agent' && matchesDestination;
         });
 
         if (consultParticipantId && interaction.participants[consultParticipantId]) {
@@ -430,45 +444,12 @@ export const useCallControl = (props: useCallControlProps) => {
           });
         }
       } else {
-        // Fallback: Use old logic if consult media not found
-        const otherAgents = Object.values(interaction.participants || {}).filter(
-          (participant) => participant.pType === 'Agent' && participant.id !== myAgentId
-        );
-
-        // In a conference with multiple agents, find the agent currently being consulted
-        // Priority: 1) consultState="consulting" 2) most recent consultTimestamp
-        let foundAgent: {id: string; name: string} | null = null;
-
-        if (otherAgents.length > 0) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const consultingAgent = otherAgents.find((agent: any) => agent.consultState === 'consulting');
-
-          if (consultingAgent) {
-            foundAgent = {
-              id: consultingAgent.id,
-              name: consultingAgent.name,
-            };
-          } else {
-            // Fallback: Find agent with most recent consultTimestamp
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const agentWithMostRecentTimestamp = otherAgents.reduce((latest: any, current: any) => {
-              const currentTimestamp = current.consultTimestamp || current.joinTimestamp || 0;
-              const latestTimestamp = latest ? latest.consultTimestamp || latest.joinTimestamp || 0 : 0;
-              return currentTimestamp >= latestTimestamp ? current : latest;
-            }, null);
-
-            if (agentWithMostRecentTimestamp) {
-              foundAgent = {
-                id: agentWithMostRecentTimestamp.id,
-                name: agentWithMostRecentTimestamp.name,
-              };
-            }
-          }
-        }
-
-        if (foundAgent) {
-          setConsultAgentName(foundAgent.name);
-          logger.info(`Consulting agent detected (fallback): ${foundAgent.name} ${foundAgent.id}`, {
+        // When consult media is temporarily missing, trust the current consult
+        // destination instead of broad participant fallbacks that can be stale.
+        if (destinationType === 'agent' && destinationId && interaction.participants?.[destinationId]) {
+          const targetedAgent = interaction.participants[destinationId];
+          setConsultAgentName(targetedAgent.name || targetedAgent.id);
+          logger.info(`Consulting agent detected (destination): ${targetedAgent.name} ${targetedAgent.id}`, {
             module: 'widget-cc-task#helper.ts',
             method: 'useCallControl#extractConsultingAgent',
           });
@@ -481,7 +462,7 @@ export const useCallControl = (props: useCallControlProps) => {
         method: 'extractConsultingAgent',
       });
     }
-  }, [currentTask, logger, lastTargetType, consultAgentName, setConsultAgentName]);
+  }, [currentTask, logger, lastTargetType]);
 
   // Extract main call timestamp whenever currentTask changes
   useEffect(() => {
@@ -893,6 +874,10 @@ export const useCallControl = (props: useCallControlProps) => {
       holdParticipants: !allowParticipantsToInteract,
     };
 
+    // Update target type at source before consult starts so extraction logic
+    // does not use a stale previous consult target type.
+    setLastTargetType(destinationType as TargetType);
+
     store.setLastConsultDestination({to: consultDestination, destinationType});
 
     if (destinationType === 'queue') {
@@ -969,7 +954,7 @@ export const useCallControl = (props: useCallControlProps) => {
           let recoveredDestinationType: DestinationType = 'agent' as DestinationType;
           if (consultMedia?.participants) {
             for (const pid of consultMedia.participants) {
-              const p = interaction?.participants?.[pid] as any;
+              const p = interaction?.participants?.[pid] as {id?: string; pType?: string; epId?: string} | undefined;
               if (!p || p.id === myAgentId) continue;
               if (p.pType === 'Agent') {
                 recoveredTo = pid;
@@ -1100,9 +1085,14 @@ export const useCallControl = (props: useCallControlProps) => {
       setStateTimerTimestamp(stateTimerData.timestamp);
     }
   }, [
-    currentTask, controls, agentId,
-    participantIsWrapUp, participantWrapUpTimestamp, participantLastUpdated,
-    participantCurrentState, interactionState,
+    currentTask,
+    controls,
+    agentId,
+    participantIsWrapUp,
+    participantWrapUpTimestamp,
+    participantLastUpdated,
+    participantCurrentState,
+    interactionState,
   ]);
 
   // Calculate consult timer label and timestamp.
@@ -1132,8 +1122,7 @@ export const useCallControl = (props: useCallControlProps) => {
   }, [currentTask, controls, agentId, consultMediaIsHold, consultMediaId, participantConsultState]);
 
   const isInConferenceState =
-    controls?.main?.exitConference?.isVisible ||
-    currentTask?.data?.interaction?.state === 'conference';
+    controls?.main?.exitConference?.isVisible || currentTask?.data?.interaction?.state === 'conference';
   const effectiveIsHeld = isInConferenceState ? false : isHeld;
 
   return {
