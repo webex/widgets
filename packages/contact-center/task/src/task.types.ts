@@ -15,7 +15,14 @@ export type UseTaskListProps = Pick<TaskProps, 'cc' | 'taskList' | 'deviceType' 
 
 export type IncomingTaskProps = Pick<TaskProps, 'incomingTask'> & Partial<Pick<TaskProps, 'onAccepted' | 'onRejected'>>;
 
-export type TaskListProps = Partial<Pick<TaskProps, 'onTaskAccepted' | 'onTaskDeclined' | 'onTaskSelected'>>;
+export type TaskListProps = Partial<Pick<TaskProps, 'onTaskAccepted' | 'onTaskDeclined' | 'onTaskSelected'>> & {
+  /**
+   * Flag to enable campaign preview task rendering.
+   * When true and the task is a campaign preview, CampaignTask is rendered.
+   * Defaults to true.
+   */
+  hasCampaignPreviewEnabled?: boolean;
+};
 
 export type RealTimeTranscriptProps = Pick<RealTimeTranscriptComponentProps, 'liveTranscriptEntries' | 'className'>;
 

@@ -40,6 +40,12 @@ describe('TaskListComponent', () => {
     trace: jest.fn(),
   };
 
+  const mockCc = {
+    skipPreviewContact: jest.fn().mockResolvedValue(undefined),
+    removePreviewContact: jest.fn().mockResolvedValue(undefined),
+    acceptPreviewContact: jest.fn().mockResolvedValue(undefined),
+  } as unknown as TaskListComponentProps['cc'];
+
   // Default props using TaskListComponentProps interface
   const defaultProps: TaskListComponentProps = {
     currentTask: null,
@@ -50,6 +56,7 @@ describe('TaskListComponent', () => {
     onTaskSelect: mockOnTaskSelect,
     logger: mockLogger,
     agentId: mockTask.data.agentId,
+    cc: mockCc,
   };
 
   // Utility function spies

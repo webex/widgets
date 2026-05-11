@@ -512,6 +512,9 @@ const mockCC: IContactCenter = {
   setAgentState: jest.fn().mockResolvedValue({}),
   getOutdialAniEntries: jest.fn().mockResolvedValue({entries: []}),
   getAccessToken: jest.fn().mockResolvedValue('mock-access-token'),
+  acceptPreviewContact: jest.fn().mockResolvedValue({}),
+  skipPreviewContact: jest.fn().mockResolvedValue({}),
+  removePreviewContact: jest.fn().mockResolvedValue({}),
 };
 
 const mockCallAssociatedData: Record<

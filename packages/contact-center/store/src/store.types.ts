@@ -17,12 +17,16 @@ import {
   ContactServiceQueuesResponse,
   ContactServiceQueueSearchParams,
   AddressBook,
+  TaskResponse,
 } from '@webex/contact-center';
 import {
   OutdialAniEntriesResponse,
   OutdialAniParams,
 } from 'node_modules/@webex/contact-center/dist/types/services/config/types';
-import {DestinationType} from 'node_modules/@webex/contact-center/dist/types/services/task/types';
+import {
+  DestinationType,
+  PreviewContactPayload,
+} from 'node_modules/@webex/contact-center/dist/types/services/task/types';
 import {
   AgentProfileUpdate,
   LogContext,
@@ -60,6 +64,9 @@ interface IContactCenter {
   setAgentState(data: StateChange): Promise<SetStateResponse>;
   getOutdialAniEntries(params: OutdialAniParams): Promise<OutdialAniEntriesResponse>;
   getAccessToken(): Promise<string>;
+  acceptPreviewContact(payload: PreviewContactPayload): Promise<TaskResponse>;
+  skipPreviewContact(payload: PreviewContactPayload): Promise<TaskResponse>;
+  removePreviewContact(payload: PreviewContactPayload): Promise<TaskResponse>;
 }
 //  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
 type IWebex = {
@@ -152,6 +159,8 @@ interface IStore {
   isDigitalChannelsInitialized: boolean;
   dataCenter: string;
   realtimeTranscriptionData: Partial<RealTimeTranscriptionData>[];
+  acceptedCampaignIds: Set<string>;
+  dismissedCampaignIds: Set<string>;
   init(params: InitParams, callback: (ccSDK: IContactCenter) => void): Promise<void>;
   registerCC(webex?: WithWebex['webex']): Promise<void>;
 }
@@ -184,6 +193,10 @@ interface IStoreWrapper extends IStore {
   setOnError(callback: (widgetName: string, error: Error) => void): void;
   setDataCenter(value: string): void;
   getAccessToken(): Promise<string>;
+  addAcceptedCampaign(interactionId: string): void;
+  removeAcceptedCampaign(interactionId: string): void;
+  dismissCampaign(interactionId: string): void;
+  clearDismissedCampaigns(): void;
 }
 
 interface IWrapupCode {
@@ -232,6 +245,8 @@ enum TASK_EVENTS {
   TASK_POST_CALL_ACTIVITY = 'task:postCallActivity',
   TASK_OUTDIAL_FAILED = 'task:outdialFailed',
   REAL_TIME_TRANSCRIPTION = 'REAL_TIME_TRANSCRIPTION',
+  TASK_CAMPAIGN_PREVIEW_RESERVATION = 'task:campaignPreviewReservation',
+  TASK_CAMPAIGN_CONTACT_UPDATED = 'task:campaignContactUpdated',
 } // TODO: remove this once cc sdk exports this enum
 
 // Events that are received on the contact center SDK
@@ -258,6 +273,9 @@ type ICustomState = ICustomStateSet | ICustomStateReset;
 
 const ENGAGED_LABEL = 'ENGAGED';
 const ENGAGED_USERNAME = 'Engaged';
+
+const RESERVED_LABEL = 'RESERVED';
+const RESERVED_USERNAME = 'Reserved';
 
 type AgentLoginProfile = {
   agentName?: string;
@@ -353,6 +371,8 @@ export {
   TASK_EVENTS,
   ENGAGED_LABEL,
   ENGAGED_USERNAME,
+  RESERVED_LABEL,
+  RESERVED_USERNAME,
   DIAL_NUMBER,
   EXTENSION,
   DESKTOP,

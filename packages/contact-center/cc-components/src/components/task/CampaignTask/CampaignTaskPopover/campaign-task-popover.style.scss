@@ -1,0 +1,51 @@
+.campaign-task-popover {
+  // Override the Popover component max-height so variables panel scrolls
+  --mdc-popover-max-height: 28rem;
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    padding: 0.5rem;
+    gap: 0.5rem;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  &__list-item {
+    --mdc-listitem-padding-left-right: 0.75rem;
+    --mdc-listitem-padding-top-bottom: 0.5rem;
+    --mdc-listitem-background-color-hover: transparent;
+    --mdc-listitem-background-color-active: transparent;
+    --mdc-listitem-cursor: default;
+    width: 100%;
+
+    .campaign-avatar {
+      --mdc-avatar-default-background-color: var(--mds-color-theme-avatar-campaign);
+      --mdc-avatar-default-foreground-color: var(--mds-color-theme-indicator-stable);
+    }
+  }
+
+  // Action buttons — vertical column on the right (Accept on top, Skip + Remove below)
+  .campaign-task-actions {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: flex-end;
+    gap: 0.25rem;
+    height: 100%;
+  }
+
+  .campaign-task-skip-remove {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-left: auto;
+  }
+
+  // Icon buttons (skip / remove) — match call-control circular icon button style
+  .campaign-task-icon-button {
+    width: 1.75rem !important;
+    height: 1.75rem !important;
+  }
+
+}

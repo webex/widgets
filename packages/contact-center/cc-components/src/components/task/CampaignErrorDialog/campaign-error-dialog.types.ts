@@ -1,4 +1,4 @@
-export type CampaignErrorType = 'ACCEPT_FAILED' | 'SKIP_FAILED' | 'REMOVE_FAILED';
+export type CampaignErrorType = 'ACCEPT_FAILED' | 'SKIP_FAILED' | 'REMOVE_FAILED' | 'CANCEL_FAILED';
 
 export interface CampaignErrorDialogProps {
   errorType: CampaignErrorType;
@@ -10,6 +10,7 @@ export const ERROR_TITLES: Record<CampaignErrorType, string> = {
   ACCEPT_FAILED: "Can't accept contact",
   SKIP_FAILED: "Can't skip contact",
   REMOVE_FAILED: "Can't remove contact",
+  CANCEL_FAILED: "Can't cancel contact",
 };
 
 export const ERROR_MESSAGE =

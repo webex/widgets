@@ -1,7 +1,7 @@
-import React from 'react';
+import React, {useRef} from 'react';
 import CallControlComponent from '../CallControl/call-control';
 import {Text, PopoverNext} from '@momentum-ui/react-collaboration';
-import {Brandvisual, Icon, Tooltip, Button} from '@momentum-design/components/dist/react';
+import {Avatar, Brandvisual, Icon, Tooltip, Button} from '@momentum-design/components/dist/react';
 import './call-control-cad.styles.scss';
 import TaskTimer from '../TaskTimer/index';
 import CallControlConsultComponent from '../CallControl/CallControlCustom/call-control-consult';
@@ -12,6 +12,7 @@ import {
   CallAssociatedDataMap,
 } from '../task.types';
 import {getAgentViewableGlobalVariables} from '../Task/task.utils';
+import GlobalVariablesPanel from '../GlobalVariablesPanel/global-variables-panel';
 
 import {getMediaTypeInfo} from '../../../utils';
 import {
@@ -23,6 +24,7 @@ import {
   QUEUE,
   PHONE_NUMBER,
   CUSTOMER_NAME,
+  CAMPAIGN_CALL,
 } from '../constants';
 import {withMetrics} from '@webex/cc-ui-logging';
 
@@ -48,6 +50,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
     isMuted,
     toggleMute,
     conferenceParticipants,
+    isCampaignCall = false,
   } = props;
 
   const formatTime = (time: number): string => {
@@ -77,7 +80,15 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
 
   //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
   const callAssociatedData = currentTask?.data?.interaction?.callAssociatedData as CallAssociatedDataMap | undefined;
-  const globalVariables = getAgentViewableGlobalVariables(callAssociatedData);
+  const latestGlobalVariables = getAgentViewableGlobalVariables(callAssociatedData);
+
+  // Persist global variables across task updates — some store refreshes
+  // replace currentTask with a snapshot that omits callAssociatedData.
+  const globalVariablesRef = useRef(latestGlobalVariables);
+  if (latestGlobalVariables.length > 0) {
+    globalVariablesRef.current = latestGlobalVariables;
+  }
+  const globalVariables = globalVariablesRef.current;
 
   // Create unique IDs for tooltips
   const customerNameTriggerId = `customer-name-trigger-${currentTask.data.interaction.interactionId}`;
@@ -178,7 +189,9 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
         {/* Caller Information */}
         <div className="caller-info">
           <div className="call-icon-background">
-            {currentMediaType.isBrandVisual ? (
+            {isCampaignCall ? (
+              <Avatar icon-name="campaign-management-bold" className="campaign-call-avatar" />
+            ) : currentMediaType.isBrandVisual ? (
               <Brandvisual name={currentMediaType.iconName} className={`media-icon ${currentMediaType.className}`} />
             ) : (
               <Icon name={currentMediaType.iconName} size={1} className={`media-icon ${currentMediaType.className}`} />
@@ -190,7 +203,8 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
             <div className="call-details">
               <div className="call-details-row">
                 <Text className="call-timer" type="body-secondary" tagName={'small'} data-testid="cc-cad:call-timer">
-                  {currentMediaType.labelName} - <TaskTimer startTimeStamp={startTimestamp} />
+                  {isCampaignCall ? CAMPAIGN_CALL : currentMediaType.labelName} -{' '}
+                  <TaskTimer startTimeStamp={startTimestamp} />
                   {stateTimerLabel && stateTimerTimestamp && (
                     <>
                       {' '}
@@ -285,24 +299,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
           </Text>
           {renderPhoneNumber()}
         </div>
-        {globalVariables.length > 0 && (
-          <div className="global-variables" data-testid="cc-cad:global-variables">
-            {globalVariables.map((variable) => (
-              <div
-                key={variable.name}
-                className="global-variable-item"
-                data-testid={`cc-cad:global-var-${variable.name}`}
-              >
-                <Text type="body-secondary" tagName={'small'}>
-                  {variable.displayName || variable.name}
-                </Text>
-                <Text type="body-secondary" tagName={'small'}>
-                  {variable.value || ''}
-                </Text>
-              </div>
-            ))}
-          </div>
-        )}
+        <GlobalVariablesPanel variables={globalVariables} className="cad-global-variables" />
       </div>
       {controlVisibility.isConsultInitiatedOrAccepted && !controlVisibility.wrapup.isVisible && (
         <div className={`call-control-consult-container ${callControlConsultClassName || ''}`}>

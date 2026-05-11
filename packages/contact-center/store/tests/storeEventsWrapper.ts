@@ -103,6 +103,8 @@ jest.mock('../src/store', () => ({
     allowConsultToQueue: false,
     isDeclineButtonEnabled: false,
     isDigitalChannelsInitialized: false,
+    acceptedCampaignIds: new Set<string>(),
+    dismissedCampaignIds: new Set<string>(),
     setShowMultipleLoginAlert: jest.fn(),
     setCurrentState: jest.fn(),
     setLastStateChangeTimestamp: jest.fn(),
@@ -1203,7 +1205,7 @@ describe('storeEventsWrapper', () => {
 
       //  The call is answered and the task is assigned to the agent
       act(() => {
-        mockTaskOnSpy.mock.calls[1][1]();
+        mockTaskOnSpy.mock.calls[1][1](mockTask);
       });
 
       waitFor(() => {
@@ -1213,7 +1215,7 @@ describe('storeEventsWrapper', () => {
 
       //  Task end stage: the task is completed
       act(() => {
-        mockTaskOnSpy.mock.calls[0][1]({wrapupRequired: true});
+        mockTaskOnSpy.mock.calls[0][1](mockTask);
       });
 
       waitFor(() => {
@@ -2222,6 +2224,136 @@ describe('storeEventsWrapper', () => {
       // Current task should remain unchanged (still mockTaskA)
       expect(storeWrapper.currentTask).toEqual(mockTaskA);
       expect(storeWrapper.currentTask).not.toEqual(taskWithoutJoined);
+    });
+  });
+
+  describe('campaign preview task lifecycle', () => {
+    const createCampaignPreviewTask = (interactionId: string): ITask =>
+      ({
+        data: {
+          interactionId,
+          interaction: {
+            state: 'new',
+            outboundType: 'STANDARD_PREVIEW_CAMPAIGN',
+            callProcessingDetails: {
+              campaignType: 'preview_standard',
+            },
+          },
+        },
+        on: jest.fn(),
+        off: jest.fn(),
+      }) as unknown as ITask;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      storeWrapper['store'].acceptedCampaignIds = new Set<string>();
+      storeWrapper['store'].dismissedCampaignIds = new Set<string>();
+      storeWrapper['store'].taskList = {};
+      storeWrapper['store'].currentTask = null;
+    });
+
+    describe('handleTaskEnd — campaign preview (unaccepted)', () => {
+      it('should call refreshTaskList and let the backend drive task removal', () => {
+        const task = createCampaignPreviewTask('campaign-1');
+        storeWrapper['store'].taskList = {'campaign-1': task};
+        storeWrapper['store'].currentTask = task;
+        // SDK still returns the task — refreshTaskList will keep it in taskList
+        storeWrapper['store'].cc.taskManager.getAllTasks = jest.fn().mockReturnValue({'campaign-1': task});
+
+        const refreshSpy = jest.spyOn(storeWrapper, 'refreshTaskList');
+
+        storeWrapper.handleTaskEnd(task);
+
+        // refreshTaskList should be called (normal path, no force cleanup)
+        expect(refreshSpy).toHaveBeenCalled();
+      });
+
+      it('should clean up dismissedCampaignIds when task ends', () => {
+        const task = createCampaignPreviewTask('campaign-2');
+        storeWrapper['store'].dismissedCampaignIds = new Set(['campaign-2']);
+        storeWrapper['store'].taskList = {'campaign-2': task};
+        storeWrapper['store'].currentTask = task;
+        storeWrapper['store'].cc.taskManager.getAllTasks = jest.fn().mockReturnValue({'campaign-2': task});
+
+        storeWrapper.handleTaskEnd(task);
+
+        expect(storeWrapper['store'].dismissedCampaignIds.has('campaign-2')).toBe(false);
+      });
+    });
+
+    describe('handleTaskEnd — accepted campaign preview', () => {
+      it('should call refreshTaskList for accepted campaign', () => {
+        const task = createCampaignPreviewTask('campaign-accepted');
+        storeWrapper['store'].acceptedCampaignIds = new Set(['campaign-accepted']);
+        storeWrapper['store'].taskList = {'campaign-accepted': task};
+        storeWrapper['store'].currentTask = task;
+        storeWrapper['store'].cc.taskManager.getAllTasks = jest.fn().mockReturnValue({'campaign-accepted': task});
+
+        const refreshSpy = jest.spyOn(storeWrapper, 'refreshTaskList');
+
+        storeWrapper.handleTaskEnd(task);
+
+        // acceptedCampaignIds should NOT be cleaned up here (deferred to handleTaskRemove)
+        expect(storeWrapper['store'].acceptedCampaignIds.has('campaign-accepted')).toBe(true);
+        // refreshTaskList SHOULD be called (normal path)
+        expect(refreshSpy).toHaveBeenCalled();
+      });
+    });
+
+    describe('handleTaskRemove — campaign ID cleanup', () => {
+      it('should remove interactionId from acceptedCampaignIds on task removal', () => {
+        const task = createCampaignPreviewTask('campaign-remove');
+        storeWrapper['store'].acceptedCampaignIds = new Set(['campaign-remove']);
+        storeWrapper['store'].taskList = {'campaign-remove': task};
+        storeWrapper['store'].currentTask = task;
+        storeWrapper['store'].cc.taskManager.getAllTasks = jest.fn().mockReturnValue({});
+
+        storeWrapper.handleTaskRemove(task);
+
+        expect(storeWrapper['store'].acceptedCampaignIds.has('campaign-remove')).toBe(false);
+      });
+
+      it('should not affect acceptedCampaignIds when task is not an accepted campaign', () => {
+        const task = createCampaignPreviewTask('campaign-notaccepted');
+        storeWrapper['store'].acceptedCampaignIds = new Set(['some-other-id']);
+        storeWrapper['store'].taskList = {'campaign-notaccepted': task};
+        storeWrapper['store'].currentTask = task;
+        storeWrapper['store'].cc.taskManager.getAllTasks = jest.fn().mockReturnValue({});
+
+        storeWrapper.handleTaskRemove(task);
+
+        // The other accepted campaign should remain
+        expect(storeWrapper['store'].acceptedCampaignIds.has('some-other-id')).toBe(true);
+      });
+    });
+
+    describe('handleTaskEnd — non-campaign tasks', () => {
+      it('should call refreshTaskList for a regular (non-campaign) task', () => {
+        const regularTask: ITask = {
+          data: {
+            interactionId: 'regular-1',
+            interaction: {
+              state: 'connected',
+              outboundType: 'OUTDIAL',
+            },
+          },
+          on: jest.fn(),
+          off: jest.fn(),
+        } as unknown as ITask;
+
+        storeWrapper['store'].taskList = {'regular-1': regularTask};
+        storeWrapper['store'].currentTask = regularTask;
+        storeWrapper['store'].cc.taskManager.getAllTasks = jest.fn().mockReturnValue({'regular-1': regularTask});
+
+        const refreshSpy = jest.spyOn(storeWrapper, 'refreshTaskList');
+
+        storeWrapper.handleTaskEnd(regularTask);
+
+        // Should call refreshTaskList normally
+        expect(refreshSpy).toHaveBeenCalled();
+        // taskList should still contain the task (SDK still returns it)
+        expect(storeWrapper['store'].taskList['regular-1']).toBeDefined();
+      });
     });
   });
 });

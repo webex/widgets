@@ -165,6 +165,34 @@ export interface TaskProps {
    * Flag to enable decline button on incoming task component
    */
   isDeclineButtonEnabled?: boolean;
+
+  /**
+   * Flag to enable campaign preview task rendering.
+   * When true and the task is a campaign preview interaction,
+   * the CampaignTask component is rendered instead of the normal Task.
+   * Defaults to true.
+   */
+  hasCampaignPreviewEnabled?: boolean;
+
+  /**
+   * Set of interaction IDs for campaign previews that have been accepted.
+   * Managed by the store — survives component remounts caused by
+   * transient task-list updates during the accept transition.
+   */
+  acceptedCampaignIds?: Set<string>;
+
+  /**
+   * Set of interaction IDs for campaign previews that have been dismissed
+   * (skipped or removed).  Used to immediately hide the campaign from the
+   * task list without waiting for the backend ContactEnded event.
+   */
+  dismissedCampaignIds?: Set<string>;
+
+  /**
+   * Callback invoked when a campaign preview is dismissed (skipped or removed)
+   * so the store can track it in dismissedCampaignIds.
+   */
+  onCampaignDismissed?: (interactionId: string) => void;
 }
 
 export type IncomingTaskComponentProps = Pick<TaskProps, 'isBrowser' | 'accept' | 'reject' | 'logger'> &
@@ -172,9 +200,14 @@ export type IncomingTaskComponentProps = Pick<TaskProps, 'isBrowser' | 'accept' 
 
 export type TaskListComponentProps = Pick<
   TaskProps,
-  'isBrowser' | 'acceptTask' | 'declineTask' | 'onTaskSelect' | 'logger' | 'agentId'
+  'isBrowser' | 'acceptTask' | 'declineTask' | 'onTaskSelect' | 'logger' | 'agentId' | 'cc'
 > &
-  Partial<Pick<TaskProps, 'currentTask' | 'taskList'>>;
+  Partial<
+    Pick<
+      TaskProps,
+      'currentTask' | 'taskList' | 'hasCampaignPreviewEnabled' | 'acceptedCampaignIds' | 'onCampaignDismissed'
+    >
+  >;
 
 export interface RealTimeTranscriptEntry {
   id: string;
@@ -558,7 +591,14 @@ export type CallControlComponentProps = Pick<
   | 'getEntryPoints'
   | 'getQueuesFetcher'
   | 'consultTransferOptions'
->;
+> & {
+  /**
+   * Whether the current task is an accepted campaign preview call.
+   * When `true`, the header renders the campaign icon and
+   * "Campaign call" label instead of the standard media type.
+   */
+  isCampaignCall?: boolean;
+};
 
 export type OutdialAniEntry = {
   /** Unique identifier for the ANI entry */

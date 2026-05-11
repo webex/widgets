@@ -1,5 +1,63 @@
 import {MEDIA_CHANNEL, TaskListItemData, getCallerIdentifier} from '../task.types';
 import store, {isIncomingTask, ILogger, ITask} from '@webex/cc-store';
+
+/**
+ * outboundType values that identify a campaign preview interaction.
+ * Matches CAMPAIGN_OUTBOUND_TYPE from agent desktop constants.
+ */
+const CAMPAIGN_PREVIEW_OUTBOUND_TYPES = ['STANDARD_PREVIEW_CAMPAIGN', 'DIRECT_PREVIEW_CAMPAIGN'];
+
+/**
+ * campaignType values on callProcessingDetails that identify a preview campaign.
+ * Matches CAMPAIGN_TYPE from agent desktop constants.
+ */
+const CAMPAIGN_PREVIEW_CAMPAIGN_TYPES = ['preview_standard', 'preview_direct'];
+
+/**
+ * Determines whether a task is a campaign preview interaction.
+ *
+ * Consistent with the agent desktop logic that checks both
+ * `interaction.outboundType` and `callProcessingDetails.campaignType`.
+ */
+export const isCampaignPreviewTask = (task: ITask): boolean => {
+  const outboundType = task.data.interaction.outboundType ?? '';
+  const cpd = task.data.interaction.callProcessingDetails as unknown as Record<string, string | undefined>;
+  const campaignType = cpd?.campaignType ?? '';
+
+  return (
+    CAMPAIGN_PREVIEW_OUTBOUND_TYPES.includes(outboundType) || CAMPAIGN_PREVIEW_CAMPAIGN_TYPES.includes(campaignType)
+  );
+};
+
+/**
+ * Determines whether the agent has joined the interaction.
+ *
+ * Matches the agent desktop logic:
+ * `taskMap[id]?.interaction.participants[agentId]?.hasJoined`
+ *
+ * The SDK types `participants` as `any`; at runtime it is
+ * `Record<string, { hasJoined?: boolean; ... }>`.
+ */
+export const hasAgentJoinedTask = (task: ITask, agentId: string | undefined): boolean => {
+  if (!agentId) return false;
+  const participants = task.data.interaction.participants as Record<string, {hasJoined?: boolean}> | undefined;
+
+  return participants?.[agentId]?.hasJoined === true;
+};
+/**
+ * Returns the interactionId of the most recent active campaign preview task
+ * that the agent has joined. Only one campaign preview should be visible at a time.
+ */
+export const getActiveCampaignPreviewId = (tasks: ITask[], agentId: string | undefined): string | null => {
+  const activePreviews = tasks.filter((t) => isCampaignPreviewTask(t) && hasAgentJoinedTask(t, agentId));
+  if (activePreviews.length === 0) return null;
+  // Pick the most recent by createdTimestamp
+  activePreviews.sort(
+    (a, b) => (b.data.interaction.createdTimestamp ?? 0) - (a.data.interaction.createdTimestamp ?? 0)
+  );
+  return activePreviews[0].data.interactionId;
+};
+
 /**
  * Extracts and processes data from a task for rendering in the task list
  * @param task - The task object

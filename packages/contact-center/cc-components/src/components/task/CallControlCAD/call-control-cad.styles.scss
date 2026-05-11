@@ -22,22 +22,8 @@
   }
 }
 
-.global-variables {
-  display: flex;
-  flex-flow: row wrap;
-  justify-content: space-between;
-  width: 100%;
-  max-height: 11.25rem;
-  overflow-y: auto;
-  margin-top: 0.75rem;
-
-  .global-variable-item {
-    flex-basis: 50%;
-    min-width: 0;
-    box-sizing: border-box;
-    padding: 0.125rem 0;
-    line-height: 1.75rem;
-  }
+.cad-global-variables {
+  margin-top: 0.5rem;
 }
 
 /* On-hold chip styling */
@@ -191,6 +177,11 @@
 
   .media-icon.chat {
     color: var(--mds-color-theme-indicator-secure);
+  }
+
+  .campaign-call-avatar {
+    --mdc-avatar-default-background-color: var(--mds-color-theme-avatar-campaign);
+    --mdc-avatar-default-foreground-color: var(--mds-color-theme-indicator-stable);
   }
 }
 .call-control-task-tooltip::part(popover-content) {
