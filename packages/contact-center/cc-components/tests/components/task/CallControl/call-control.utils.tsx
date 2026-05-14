@@ -722,7 +722,7 @@ describe('CallControl Utils', () => {
     it('should update recording state from task data', () => {
       updateCallStateFromTask(mockCurrentTask as unknown as ITask, mockSetIsRecording);
 
-      expect(mockSetIsRecording).toHaveBeenCalledWith(true); // !isPaused = !false = true
+      expect(mockSetIsRecording).toHaveBeenCalledWith(true);
     });
 
     it('should handle task with recording paused', () => {
@@ -733,7 +733,7 @@ describe('CallControl Utils', () => {
           interaction: {
             ...mockCurrentTask.data.interaction,
             callProcessingDetails: {
-              isPaused: true,
+              isPaused: 'true',
             },
           },
         },
@@ -741,7 +741,45 @@ describe('CallControl Utils', () => {
 
       updateCallStateFromTask(taskWithPausedRecording as unknown as ITask, mockSetIsRecording);
 
-      expect(mockSetIsRecording).toHaveBeenCalledWith(false); // !isPaused = !true = false
+      expect(mockSetIsRecording).toHaveBeenCalledWith(false);
+    });
+
+    it('should handle isPaused as string "true" from backend', () => {
+      const taskWithStringPaused = {
+        ...mockCurrentTask,
+        data: {
+          ...mockCurrentTask.data,
+          interaction: {
+            ...mockCurrentTask.data.interaction,
+            callProcessingDetails: {
+              isPaused: 'true',
+            },
+          },
+        },
+      };
+
+      updateCallStateFromTask(taskWithStringPaused as unknown as ITask, mockSetIsRecording);
+
+      expect(mockSetIsRecording).toHaveBeenCalledWith(false);
+    });
+
+    it('should handle isPaused as string "false" from backend', () => {
+      const taskWithStringNotPaused = {
+        ...mockCurrentTask,
+        data: {
+          ...mockCurrentTask.data,
+          interaction: {
+            ...mockCurrentTask.data.interaction,
+            callProcessingDetails: {
+              isPaused: 'false',
+            },
+          },
+        },
+      };
+
+      updateCallStateFromTask(taskWithStringNotPaused as unknown as ITask, mockSetIsRecording);
+
+      expect(mockSetIsRecording).toHaveBeenCalledWith(true);
     });
 
     it('should return early when currentTask is null', () => {
