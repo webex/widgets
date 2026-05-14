@@ -265,7 +265,7 @@ describe('TaskListComponent', () => {
       const chatTitle = chatTaskElement.querySelector('.task-digital-title') as HTMLElement;
       expect(chatTitle).toHaveTextContent('Chat Customer');
       expect(chatTitle).toHaveAttribute('type', 'body-large-medium');
-      expect(chatTitle).toHaveAttribute('aria-describedby', 'tooltip-chat-task');
+      // aria-describedby is set dynamically by mdc-tooltip connectedCallback (doesn't run in JSDOM)
       expect(chatTitle).toHaveAttribute('id', 'tooltip-trigger-chat-task');
 
       // Verify chat tooltip
@@ -290,7 +290,7 @@ describe('TaskListComponent', () => {
       const socialTitle = socialTaskElement.querySelector('.task-digital-title') as HTMLElement;
       expect(socialTitle).toHaveTextContent('Facebook Customer');
       expect(socialTitle).toHaveAttribute('type', 'body-large-medium');
-      expect(socialTitle).toHaveAttribute('aria-describedby', 'tooltip-social-task');
+      // aria-describedby is set dynamically by mdc-tooltip connectedCallback (doesn't run in JSDOM)
       expect(socialTitle).toHaveAttribute('id', 'tooltip-trigger-social-task');
 
       // Verify social tooltip
@@ -487,7 +487,7 @@ describe('TaskListComponent', () => {
       // Verify digital incoming task uses specific class name for incoming digital tasks
       const digitalTitle = screen.container.querySelector('.incoming-digital-task-title') as HTMLElement;
       expect(digitalTitle).toHaveTextContent('Chat Customer');
-      expect(digitalTitle).toHaveAttribute('aria-describedby', 'tooltip-incoming-chat-task');
+      // aria-describedby is set dynamically by mdc-tooltip connectedCallback (doesn't run in JSDOM)
       expect(digitalTitle).toHaveAttribute('id', 'tooltip-trigger-incoming-chat-task');
       expect(digitalTitle).toHaveAttribute('type', 'body-large-medium');
 

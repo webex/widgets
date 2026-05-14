@@ -19,17 +19,6 @@
     padding-bottom: 1rem;
   }
 
-  .outdial-select-arrow-icon {
-    position: absolute;
-    right: 0.375rem;
-    top: 71%;
-    transform: translateY(-50%);
-    display: flex;
-    align-items: center;
-    pointer-events: none;
-    z-index: 1;
-  }
-
   #outdial-ani-option-select {
     width: 100%;
     label {
@@ -136,12 +125,16 @@
       display: none;
     }
 
-    mdc-tab {
-      --mdc-tab-glass-active-color: #000000F2;
-      --mdc-tab-glass-active-background-color-hover: #b2b2b2;
-      --mdc-tab-glass-active-background-color-normal: #DEDEDE;
+    // dialpad icon has no -filled variant, so keep the regular icon visible when active
+    // and hide the empty filled-icon container to prevent alignment issues
+    mdc-tab[tab-id="dial_pad"][active]::part(regular-icon) {
+      display: block;
     }
-    
+
+    mdc-tab[tab-id="dial_pad"][active]::part(filled-icon) {
+      display: none;
+    }
+
   }
 }
 

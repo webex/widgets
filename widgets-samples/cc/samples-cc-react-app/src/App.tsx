@@ -487,10 +487,10 @@ function App() {
                       setLoginType(selectedType);
                     }}
                   >
-                    <Option data-testid="samples:login_option_token" key={1} value="token">
+                    <Option data-testid="samples:login_option_token" key={1} value="token" label="Access Token">
                       Access Token
                     </Option>
-                    <Option data-testid="samples:login_option_oauth" key={2} value="oauth">
+                    <Option data-testid="samples:login_option_oauth" key={2} value="oauth" label="Login with Webex">
                       Login with Webex
                     </Option>
                   </Select>
@@ -1010,10 +1010,10 @@ function App() {
                   }}
                   data-testid="samples:rona-select-state"
                 >
-                  <Option key={1} value="Available" data-testid="samples:rona-option-available">
+                  <Option key={1} value="Available" label="Available" data-testid="samples:rona-option-available">
                     Available
                   </Option>
-                  <Option key={2} value="Idle" data-testid="samples:rona-option-idle">
+                  <Option key={2} value="Idle" label="Idle" data-testid="samples:rona-option-idle">
                     Idle
                   </Option>
                 </Select>

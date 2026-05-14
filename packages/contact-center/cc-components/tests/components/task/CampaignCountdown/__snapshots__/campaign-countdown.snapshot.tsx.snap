@@ -1,0 +1,40 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CampaignCountdown Snapshots Rendering should match snapshot with 0 seconds timeout 1`] = `
+<div>
+  <mdc-text
+    class="task-text"
+    data-testid="campaign-countdown"
+  >
+    Time left:
+     
+    00:00
+  </mdc-text>
+</div>
+`;
+
+exports[`CampaignCountdown Snapshots Rendering should match snapshot with 30 seconds timeout 1`] = `
+<div>
+  <mdc-text
+    class="task-text"
+    data-testid="campaign-countdown"
+  >
+    Time left:
+     
+    00:30
+  </mdc-text>
+</div>
+`;
+
+exports[`CampaignCountdown Snapshots Rendering should match snapshot with 125 seconds timeout 1`] = `
+<div>
+  <mdc-text
+    class="task-text"
+    data-testid="campaign-countdown"
+  >
+    Time left:
+     
+    02:05
+  </mdc-text>
+</div>
+`;

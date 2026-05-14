@@ -2964,15 +2964,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@floating-ui/core@npm:^1.6.0":
-  version: 1.6.9
-  resolution: "@floating-ui/core@npm:1.6.9"
-  dependencies:
-    "@floating-ui/utils": "npm:^0.2.9"
-  checksum: 10c0/77debdfc26bc36c6f5ae1f26ab3c15468215738b3f5682af4e1915602fa21ba33ad210273f31c9d2da1c531409929e1afb1138b1608c6b54a0f5853ee84c340d
-  languageName: node
-  linkType: hard
-
 "@floating-ui/core@npm:^1.7.3":
   version: 1.7.3
   resolution: "@floating-ui/core@npm:1.7.3"
@@ -2982,13 +2973,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@floating-ui/dom@npm:^1.6.12":
-  version: 1.6.13
-  resolution: "@floating-ui/dom@npm:1.6.13"
+"@floating-ui/core@npm:^1.7.5":
+  version: 1.7.5
+  resolution: "@floating-ui/core@npm:1.7.5"
   dependencies:
-    "@floating-ui/core": "npm:^1.6.0"
-    "@floating-ui/utils": "npm:^0.2.9"
-  checksum: 10c0/272242d2eb6238ffcee0cb1f3c66e0eafae804d5d7b449db5ecf904bc37d31ad96cf575a9e650b93c1190f64f49a684b1559d10e05ed3ec210628b19116991a9
+    "@floating-ui/utils": "npm:^0.2.11"
+  checksum: 10c0/f9c52205e198b231d63a387b09c659aab08c46a1899e0b0bbe147b8b4f048b546f15ba17cb5d2a471da9534f1883d979425e13e5c4ceee67be63e4b0abd4db5d
   languageName: node
   linkType: hard
 
@@ -3002,6 +2992,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@floating-ui/dom@npm:^1.7.2":
+  version: 1.7.6
+  resolution: "@floating-ui/dom@npm:1.7.6"
+  dependencies:
+    "@floating-ui/core": "npm:^1.7.5"
+    "@floating-ui/utils": "npm:^0.2.11"
+  checksum: 10c0/5c098e0d7b58c9bc769f276cca1766994c2c9c70c92d091a61bba8b3e9be53c011e0a79a8457fc2fb2f3d91697a26eb52e0a4962ef936dc963b45f58613c212f
+  languageName: node
+  linkType: hard
+
 "@floating-ui/utils@npm:^0.2.10":
   version: 0.2.10
   resolution: "@floating-ui/utils@npm:0.2.10"
@@ -3009,10 +3009,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@floating-ui/utils@npm:^0.2.9":
-  version: 0.2.9
-  resolution: "@floating-ui/utils@npm:0.2.9"
-  checksum: 10c0/48bbed10f91cb7863a796cc0d0e917c78d11aeb89f98d03fc38d79e7eb792224a79f538ed8a2d5d5584511d4ca6354ef35f1712659fd569868e342df4398ad6f
+"@floating-ui/utils@npm:^0.2.11":
+  version: 0.2.11
+  resolution: "@floating-ui/utils@npm:0.2.11"
+  checksum: 10c0/f4bcea1559bdbb721ecc8e8ead423ac58d6a5b6e70b602cf0810ba6ad4ed1c77211b207faa88b278a9042f0c743133de08a203ed6741c1b6443423332884d5b3
   languageName: node
   linkType: hard
 
@@ -3862,6 +3862,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@momentum-design/animations@npm:*":
+  version: 0.4.3
+  resolution: "@momentum-design/animations@npm:0.4.3"
+  checksum: 10c0/0c73876eb181d8ca9c82fab325a759a5f2465647aafeb5ce14e8e915cd7cc2633b90564d111b4c89bfe96fc713a625668ad68b20082545c6433c06733aadbba0
+  languageName: node
+  linkType: hard
+
 "@momentum-design/animations@npm:^0.0.4":
   version: 0.0.4
   resolution: "@momentum-design/animations@npm:0.0.4"
@@ -3876,21 +3883,30 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@momentum-design/components@npm:0.53.8":
-  version: 0.53.8
-  resolution: "@momentum-design/components@npm:0.53.8"
+"@momentum-design/brand-visuals@npm:^0.30.0":
+  version: 0.30.0
+  resolution: "@momentum-design/brand-visuals@npm:0.30.0"
+  checksum: 10c0/291701556862c9e5391a2227695b9bff7774c4e85455f19804b2e2f1754270dba7f15fbe327c155d6d23935d471b3b731b5db867f481d95536bbf5bff6432c9e
+  languageName: node
+  linkType: hard
+
+"@momentum-design/components@npm:0.133.23":
+  version: 0.133.23
+  resolution: "@momentum-design/components@npm:0.133.23"
   dependencies:
-    "@floating-ui/dom": "npm:^1.6.12"
+    "@floating-ui/dom": "npm:^1.7.2"
     "@lit/context": "npm:^1.1.2"
     "@lit/react": "npm:^1.0.5"
+    "@momentum-design/animations": "npm:*"
     "@momentum-design/brand-visuals": "npm:*"
     "@momentum-design/fonts": "npm:*"
     "@momentum-design/icons": "npm:*"
     "@momentum-design/tokens": "npm:*"
-    "@tanstack/lit-virtual": "npm:^3.11.3"
+    "@tanstack/lit-virtual": "npm:^3.13.2"
     lit: "npm:^3.2.0"
+    lottie-web: "npm:^5.12.2"
     uuid: "npm:^11.0.5"
-  checksum: 10c0/00d98b6b51fb5d47402951ef0f77a688b213566f7e95f1ce101290bd5d17693f1d2acc2c5c74168d5727dfc1d315e89466db3d492598d34c3abbe6e21954778a
+  checksum: 10c0/51bf3a33f45cd9ae652081518286c48e92e05b3e2c35c1739693e7dadd735dc2649e3532aab8b0560a23d6d8ad7ddc530b087b4caede9a023f45575d193271fd
   languageName: node
   linkType: hard
 
@@ -3912,6 +3928,13 @@ __metadata:
   version: 0.17.0
   resolution: "@momentum-design/icons@npm:0.17.0"
   checksum: 10c0/3581d9bdf683201aa776ac8d4318118de92bd166a131569f7c5902149df5a1c21aea4bb155e2131df694f81a9473683d9cd24d6612cea4c29670ca4a887d6a61
+  languageName: node
+  linkType: hard
+
+"@momentum-design/illustrations@npm:^0.3.0":
+  version: 0.3.0
+  resolution: "@momentum-design/illustrations@npm:0.3.0"
+  checksum: 10c0/d897c8fada9bd6fba5db329757a801035088ed5315f822802773fc23a3b399d14462347bd3c83d1e91c41ef024b28e57233a02a30dab02beb79d8f9259ca73f9
   languageName: node
   linkType: hard
 
@@ -7680,21 +7703,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/lit-virtual@npm:^3.11.3":
-  version: 3.13.2
-  resolution: "@tanstack/lit-virtual@npm:3.13.2"
+"@tanstack/lit-virtual@npm:^3.13.2":
+  version: 3.13.24
+  resolution: "@tanstack/lit-virtual@npm:3.13.24"
   dependencies:
-    "@tanstack/virtual-core": "npm:3.13.2"
+    "@tanstack/virtual-core": "npm:3.13.23"
   peerDependencies:
     lit: ^3.1.0
-  checksum: 10c0/110f09d6eb859d696eb020e1d453648a3fab20d1b651a7c5981f1e0ae9711c1dc0aa663659cbd292659b52edd19dae360baf47d37ac46e9813fad4b6ed3f8986
+  checksum: 10c0/324721af3d040b21e79040df785b474171c7090d13b91d0a20d791663e85a9eba411bb35d768f0ea934e87afc08e1ff331abc510b45d05fc882ff1cd3d0ad223
   languageName: node
   linkType: hard
 
-"@tanstack/virtual-core@npm:3.13.2":
-  version: 3.13.2
-  resolution: "@tanstack/virtual-core@npm:3.13.2"
-  checksum: 10c0/6527f4e2db071e03b6a0768b10405d072c2692551148314e36ea673878c78ea50f10849f173b32ec8b8d265bd624ab03cacb770c60719885e1ca02cdccf04927
+"@tanstack/virtual-core@npm:3.13.23":
+  version: 3.13.23
+  resolution: "@tanstack/virtual-core@npm:3.13.23"
+  checksum: 10c0/3487089ea4e1dcbb01836f51a1b35b709f9ba03312fe600ddb97c893c16be213e1690af735717b1d6b2e22dfec691c338bc96b5965228c195840249699d5273a
   languageName: node
   linkType: hard
 
@@ -25233,6 +25256,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"lottie-web@npm:^5.12.2":
+  version: 5.13.0
+  resolution: "lottie-web@npm:5.13.0"
+  checksum: 10c0/b463ad462169df3f7e04b7f3716274e269842554f1d72b8303ca7245628f2512982a59ae31698b3d57fbcda886228ae160fcb2aa518c6cecd8a95974db2458ee
+  languageName: node
+  linkType: hard
+
 "loud-rejection@npm:^1.0.0":
   version: 1.6.0
   resolution: "loud-rejection@npm:1.6.0"
@@ -35097,6 +35127,8 @@ __metadata:
   dependencies:
     "@babel/plugin-transform-runtime": "npm:^7.29.0"
     "@babel/preset-typescript": "npm:7.25.9"
+    "@momentum-design/brand-visuals": "npm:^0.30.0"
+    "@momentum-design/illustrations": "npm:^0.3.0"
     "@playwright/test": "npm:^1.51.1"
     "@semantic-release/changelog": "npm:^6.0.3"
     "@semantic-release/exec": "npm:^6.0.3"
