@@ -514,6 +514,71 @@ const mockCC: IContactCenter = {
   getAccessToken: jest.fn().mockResolvedValue('mock-access-token'),
 };
 
+const mockCallAssociatedData: Record<
+  string,
+  {
+    name: string;
+    displayName: string;
+    value: string;
+    type: string;
+    agentEditable: boolean;
+    agentViewable: boolean;
+    global: boolean;
+    isSecure: boolean;
+    secureKeyId: string;
+    secureKeyVersion: number;
+  }
+> = {
+  Global_Language: {
+    name: 'Global_Language',
+    displayName: 'Customer Language',
+    value: 'English',
+    type: 'STRING',
+    agentEditable: false,
+    agentViewable: true,
+    global: true,
+    isSecure: false,
+    secureKeyId: '',
+    secureKeyVersion: 0,
+  },
+  Global_FeedbackSurveyOptIn: {
+    name: 'Global_FeedbackSurveyOptIn',
+    displayName: 'Post Call Survey Opt-in',
+    value: 'true',
+    type: 'STRING',
+    agentEditable: false,
+    agentViewable: true,
+    global: true,
+    isSecure: false,
+    secureKeyId: '',
+    secureKeyVersion: 0,
+  },
+  ani: {
+    name: 'ani',
+    displayName: 'ani',
+    value: '555-123-4567',
+    type: 'STRING',
+    agentEditable: false,
+    agentViewable: true,
+    global: false,
+    isSecure: false,
+    secureKeyId: '',
+    secureKeyVersion: 0,
+  },
+  Global_Hidden: {
+    name: 'Global_Hidden',
+    displayName: 'Hidden Variable',
+    value: 'secret',
+    type: 'STRING',
+    agentEditable: false,
+    agentViewable: false,
+    global: true,
+    isSecure: false,
+    secureKeyId: '',
+    secureKeyVersion: 0,
+  },
+};
+
 export {
   mockProfile,
   mockCC,
@@ -523,4 +588,5 @@ export {
   mockEntryPointsResponse,
   mockAddressBookEntriesResponse,
   makeMockAddressBook,
+  mockCallAssociatedData,
 };

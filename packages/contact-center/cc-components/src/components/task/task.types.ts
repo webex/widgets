@@ -17,6 +17,29 @@ import {
 type Enum<T extends Record<string, unknown>> = T[keyof T];
 
 /**
+ * Represents a single Call Associated Data (CAD) variable on an interaction.
+ * Global variables have `global: true` and are set by flow control.
+ */
+export interface CADVariable {
+  name: string;
+  displayName: string;
+  value: string;
+  type: string;
+  agentEditable: boolean;
+  agentViewable: boolean;
+  global: boolean;
+  isSecure: boolean;
+  secureKeyId: string;
+  secureKeyVersion: number;
+}
+
+/**
+ * Record of CAD variables keyed by variable name.
+ * This is the shape of `callAssociatedData` on the interaction at runtime.
+ */
+export type CallAssociatedDataMap = Record<string, CADVariable>;
+
+/**
  * Target types for consult/transfer operations
  */
 export const TARGET_TYPE = {

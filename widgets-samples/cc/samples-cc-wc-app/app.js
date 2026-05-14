@@ -1,3 +1,5 @@
+const store = window.store;
+
 const accessTokenElem = document.getElementById('access_token_elem');
 const oAuthLoginBtn = document.getElementById('oauth_login_btn');
 const loginTypeElem = document.getElementById('loginType');

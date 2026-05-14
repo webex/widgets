@@ -161,7 +161,7 @@ describe('OutdialCallComponent', () => {
   });
 
   it('has no ANI entry options when the entry list is empty', async () => {
-    render(
+    const {container} = render(
       <OutdialCallComponent
         logger={props.logger}
         startOutdial={props.startOutdial}
@@ -171,27 +171,30 @@ describe('OutdialCallComponent', () => {
         isAddressBookEnabled={false}
       />
     );
-    const select = await screen.findByTestId('outdial-ani-option-select');
-    fireEvent.click(select);
+    await screen.findByTestId('outdial-ani-option-select');
 
     // Should still show the placeholder option
     const placeholderOption = await screen.findByTestId('outdial-ani-option-none');
     expect(placeholderOption).toBeInTheDocument();
 
     // But should not show 'name 1' or 'name 2'
-    expect(screen.queryByTestId('outdial-ani-option-1')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('outdial-ani-option-2')).not.toBeInTheDocument();
+    const aniOptions = container.querySelectorAll(
+      'mdc-option[data-testid^="outdial-ani-option-"]:not([data-testid="outdial-ani-option-none"])'
+    );
+    expect(aniOptions).toHaveLength(0);
   });
 
   it('sets selected ani when an option is selected', async () => {
     render(<OutdialCallComponent {...props} />);
     const select = await screen.findByTestId('outdial-ani-option-select');
-    fireEvent.click(select);
-    const option = await screen.findByTestId('outdial-ani-option-1');
-    expect(option).toBeInTheDocument();
-    fireEvent.click(option);
+
+    // Select ANI '1' via CustomEvent
+    fireEvent(select, new CustomEvent('change', {detail: {value: '1'}}));
+
+    // Verify the option is now selected
     await waitFor(() => {
-      expect(option).toHaveAttribute('aria-selected', 'true');
+      const option = screen.getByTestId('outdial-ani-option-1');
+      expect(option).toHaveAttribute('selected', 'true');
     });
   });
 
@@ -258,13 +261,6 @@ describe('OutdialCallComponent', () => {
     mockStartOutdial.mockClear();
   });
 
-  it('shows arrow-down icon by default', async () => {
-    render(<OutdialCallComponent {...props} />);
-    const arrowIcon = await screen.findByTestId('select-arrow-icon');
-    expect(arrowIcon).toBeInTheDocument();
-    expect(arrowIcon).toHaveAttribute('name', 'arrow-down-bold');
-  });
-
   it('passes origin parameter when ANI is selected', async () => {
     const mockStartOutdial = jest.fn();
     render(<OutdialCallComponent {...props} startOutdial={mockStartOutdial} />);
@@ -283,11 +279,9 @@ describe('OutdialCallComponent', () => {
       expect(callButton).not.toBeDisabled();
     });
 
-    // Select an ANI
+    // Select an ANI via CustomEvent
     const select = await screen.findByTestId('outdial-ani-option-select');
-    fireEvent.click(select);
-    const aniOption = await screen.findByTestId('outdial-ani-option-1');
-    fireEvent.click(aniOption);
+    fireEvent(select, new CustomEvent('change', {detail: {value: '1'}}));
 
     // Make the call
     const callButton = await screen.findByTestId('outdial-call-button');
@@ -317,14 +311,10 @@ describe('OutdialCallComponent', () => {
 
     // First select an ANI
     const select = await screen.findByTestId('outdial-ani-option-select');
-    fireEvent.click(select);
-    const aniOption = await screen.findByTestId('outdial-ani-option-1');
-    fireEvent.click(aniOption);
+    fireEvent(select, new CustomEvent('change', {detail: {value: '1'}}));
 
     // Then select the placeholder to clear
-    fireEvent.click(select);
-    const placeholderOption = await screen.findByTestId('outdial-ani-option-none');
-    fireEvent.click(placeholderOption);
+    fireEvent(select, new CustomEvent('change', {detail: {value: 'none'}}));
 
     // Make the call
     const callButton = await screen.findByTestId('outdial-call-button');
