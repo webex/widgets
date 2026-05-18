@@ -335,4 +335,64 @@ describe('CallControlCADComponent', () => {
     const customConsultContainer = customScreen.container.querySelector('.call-control-consult-container');
     expect(customConsultContainer).toHaveClass('custom-consult-control');
   });
+
+  describe('on hold banner visibility', () => {
+    const baseControls = {
+      main: {
+        wrapup: {isVisible: false, isEnabled: false},
+        endConsult: {isVisible: false, isEnabled: false},
+        exitConference: {isVisible: false, isEnabled: false},
+      },
+      consult: {
+        endConsult: {isVisible: false, isEnabled: false},
+      },
+      activeLeg: 'main',
+    };
+
+    it('shows On hold banner when isHeld is true', () => {
+      const screen = render(
+        <CallControlCADComponent
+          {...defaultProps}
+          isHeld={true}
+          holdTime={65}
+          controls={baseControls as unknown as CallControlComponentProps['controls']}
+        />
+      );
+
+      expect(screen.getByText(/On hold/)).toBeInTheDocument();
+      expect(screen.getByText(/01:05/)).toBeInTheDocument();
+    });
+
+    it('hides On hold banner when isHeld is false', () => {
+      const screen = render(
+        <CallControlCADComponent
+          {...defaultProps}
+          isHeld={false}
+          controls={baseControls as unknown as CallControlComponentProps['controls']}
+        />
+      );
+
+      expect(screen.queryByText(/On hold/)).not.toBeInTheDocument();
+    });
+
+    it('hides On hold banner during wrapup even if isHeld is true', () => {
+      const wrapupControls = {
+        ...baseControls,
+        main: {
+          ...baseControls.main,
+          wrapup: {isVisible: true, isEnabled: true},
+        },
+      };
+
+      const screen = render(
+        <CallControlCADComponent
+          {...defaultProps}
+          isHeld={true}
+          controls={wrapupControls as unknown as CallControlComponentProps['controls']}
+        />
+      );
+
+      expect(screen.queryByText(/On hold/)).not.toBeInTheDocument();
+    });
+  });
 });
