@@ -337,22 +337,72 @@ export const useCallControl = (props: useCallControlProps) => {
   }, [currentTask]);
 
   useEffect(() => {
-    // During conference, the call is never on hold
-    const isInConference =
-      controls?.main?.exitConference?.isVisible || currentTask?.data?.interaction?.state === 'conference';
-    if (isInConference) {
-      setIsHeld(false);
-      return;
-    }
+    // Prefer the latest state-machine taskData snapshot when available.
+    // currentTask.data can lag one event behind in conference transitions.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const latestTaskData = (currentTask as any)?.state?.context?.taskData;
+    const interaction = latestTaskData?.interaction ?? currentTask?.data?.interaction;
+    const isInConference = interaction?.state === 'conference';
+    const taskEventType = latestTaskData?.type ?? currentTask?.data?.type;
+    const isExplicitUnheldEvent = taskEventType === 'AgentContactUnheld';
+    const isExplicitHeldEvent = taskEventType === 'AgentContactHeld';
+    const currentCallProcessingDetails = interaction?.callProcessingDetails as Record<string, unknown> | undefined;
+    const latestCallProcessingDetails = latestTaskData?.interaction?.callProcessingDetails as
+      | Record<string, unknown>
+      | undefined;
+    const conferenceHoldParticipant =
+      currentCallProcessingDetails?.conferenceHoldParticipant ?? latestCallProcessingDetails?.conferenceHoldParticipant;
+    const conferenceHoldKnown =
+      conferenceHoldParticipant === true ||
+      conferenceHoldParticipant === false ||
+      conferenceHoldParticipant === 'true' ||
+      conferenceHoldParticipant === 'false';
+    const isConferenceParticipantHeld = conferenceHoldParticipant === true || conferenceHoldParticipant === 'true';
+
     // During consulting, derive hold state from activeLeg (set synchronously
     // by the SDK on switch). Raw media data has a timing gap — the backend
     // hold/unhold response arrives after the switch event, so media.isHold
     // is stale at the time the controls update.
     const isConsulting = controls?.consult?.endConsult?.isVisible || controls?.main?.endConsult?.isVisible;
-    if (isConsulting) {
+    if (isInConference) {
+      // Event type is the strongest signal for hold/unhold transitions in
+      // conference flows and should override stale callProcessingDetails.
+      if (isExplicitUnheldEvent) {
+        setIsHeld(false);
+        return;
+      }
+      if (isExplicitHeldEvent) {
+        setIsHeld(true);
+        return;
+      }
+
+      // In conference, hold can be represented either by main leg media hold
+      // or by callProcessingDetails.conferenceHoldParticipant.
+      const mainCallHeld = interaction?.media
+        ? Object.values(interaction.media).some(
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (media: any) => (media?.mType === 'mainCall' || media?.mType === 'main') && media?.isHold === true
+          )
+        : false;
+      if (conferenceHoldKnown) {
+        setIsHeld(mainCallHeld || isConferenceParticipantHeld);
+      } else {
+        // No explicit conference hold signal -> trust current media hold only.
+        // This avoids stale "Resume"/On Hold UI when previous snapshots were held.
+        setIsHeld(mainCallHeld);
+      }
+    } else if (isConsulting) {
       setIsHeld(controls?.activeLeg === 'consult');
     } else {
-      setIsHeld(currentTask ? isInteractionOnHold(currentTask) : false);
+      const mainCallHeld = interaction?.media
+        ? Object.values(interaction.media).some(
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (media: any) => (media?.mType === 'mainCall' || media?.mType === 'main') && media?.isHold === true
+          )
+        : currentTask
+          ? isInteractionOnHold(currentTask)
+          : false;
+      setIsHeld(mainCallHeld);
     }
   }, [currentTask, controls]);
 
@@ -1121,13 +1171,9 @@ export const useCallControl = (props: useCallControlProps) => {
     }
   }, [currentTask, controls, agentId, consultMediaIsHold, consultMediaId, participantConsultState]);
 
-  const isInConferenceState =
-    controls?.main?.exitConference?.isVisible || currentTask?.data?.interaction?.state === 'conference';
-  const effectiveIsHeld = isInConferenceState ? false : isHeld;
-
   return {
     currentTask,
-    isHeld: effectiveIsHeld,
+    isHeld,
     endCall,
     toggleHold,
     toggleRecording,

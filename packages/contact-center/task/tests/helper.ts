@@ -957,6 +957,132 @@ describe('useCallControl', () => {
     expect(mockOnHoldResume).toHaveBeenCalledWith({isHeld: false, task: mockCurrentTask});
   });
 
+  describe('conference hold precedence', () => {
+    const buildConferenceTask = (
+      overrides: {
+        eventType?: string;
+        conferenceHoldParticipant?: boolean | string;
+        mainCallIsHold?: boolean;
+      } = {}
+    ) => {
+      const {eventType = 'AgentConsultConferenced', conferenceHoldParticipant, mainCallIsHold = false} = overrides;
+      const interaction = {
+        ...mockCurrentTask.data.interaction,
+        state: 'conference',
+        callProcessingDetails: {
+          ...mockCurrentTask.data.interaction.callProcessingDetails,
+          ...(conferenceHoldParticipant !== undefined ? {conferenceHoldParticipant} : {}),
+        },
+        media: {
+          main: {
+            mType: 'mainCall',
+            isHold: mainCallIsHold,
+            mediaResourceId: 'main',
+            participants: ['agent1'],
+          },
+        },
+      };
+
+      return {
+        ...mockCurrentTask,
+        data: {
+          ...mockCurrentTask.data,
+          type: eventType,
+          interaction,
+        },
+        state: {
+          context: {
+            taskData: {
+              type: eventType,
+              interaction,
+            },
+          },
+        },
+        uiControls: {
+          main: {
+            ...mockCurrentTask.uiControls?.main,
+            endConsult: {isVisible: false, isEnabled: false},
+          },
+          consult: {
+            ...mockCurrentTask.uiControls?.consult,
+            endConsult: {isVisible: false, isEnabled: false},
+          },
+          activeLeg: 'main',
+        },
+      };
+    };
+
+    it('sets isHeld=false for AgentConsultConferenced when no hold signals exist', async () => {
+      const task = buildConferenceTask({
+        eventType: 'AgentConsultConferenced',
+        mainCallIsHold: false,
+      });
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: task as unknown as ITask,
+          logger: mockLogger,
+          featureFlags: store.featureFlags,
+          deviceType: store.deviceType,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'agent1',
+        })
+      );
+
+      await waitFor(() => {
+        expect(result.current.isHeld).toBe(false);
+      });
+    });
+
+    it('forces isHeld=false on AgentContactUnheld even if conferenceHoldParticipant is stale true', async () => {
+      const task = buildConferenceTask({
+        eventType: 'AgentContactUnheld',
+        conferenceHoldParticipant: 'true',
+        mainCallIsHold: false,
+      });
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: task as unknown as ITask,
+          logger: mockLogger,
+          featureFlags: store.featureFlags,
+          deviceType: store.deviceType,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'agent1',
+        })
+      );
+
+      await waitFor(() => {
+        expect(result.current.isHeld).toBe(false);
+      });
+    });
+
+    it('forces isHeld=true on AgentContactHeld regardless of media lag', async () => {
+      const task = buildConferenceTask({
+        eventType: 'AgentContactHeld',
+        mainCallIsHold: false,
+      });
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: task as unknown as ITask,
+          logger: mockLogger,
+          featureFlags: store.featureFlags,
+          deviceType: store.deviceType,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'agent1',
+        })
+      );
+
+      await waitFor(() => {
+        expect(result.current.isHeld).toBe(true);
+      });
+    });
+  });
+
   it('should log an error if hold fails', async () => {
     mockCurrentTask.hold.mockRejectedValueOnce(new Error('Hold error'));
 

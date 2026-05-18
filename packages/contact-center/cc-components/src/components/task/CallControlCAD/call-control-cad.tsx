@@ -232,7 +232,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
                 )}
               </div>
               <div className="call-status">
-                {!controls?.main?.wrapup?.isVisible && isHeld && !controls?.main?.endConsult?.isVisible && (
+                {!controls?.main?.wrapup?.isVisible && isHeld && (
                   <>
                     <span className="dot">•</span>
                     <div className="on-hold">
