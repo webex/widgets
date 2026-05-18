@@ -1261,6 +1261,7 @@ export const useOutdialCall = (props: useOutdialCallProps) => {
             module: 'widget-OutdialCall#helper.ts',
             method: 'startOutdial',
           });
+          store.handleOutdialFailed(error.message || 'Outdial failed');
         });
     } catch (error) {
       logger?.error(`CC-Widgets: Task: Error in startOutdial - ${error.message}`, {
