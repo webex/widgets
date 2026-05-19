@@ -159,6 +159,7 @@ export type IncomingTaskComponentProps = Pick<TaskProps, 'accept' | 'reject' | '
     acceptControl?: {isVisible: boolean; isEnabled: boolean};
     declineControl?: {isVisible: boolean; isEnabled: boolean};
     isDeclineButtonEnabled?: boolean;
+    isBrowser?: boolean;
   };
 
 export type TaskListComponentProps = Pick<
@@ -167,6 +168,7 @@ export type TaskListComponentProps = Pick<
 > &
   Partial<Pick<TaskProps, 'currentTask' | 'taskList'>> & {
     isDeclineButtonEnabled?: boolean;
+    isBrowser?: boolean;
   };
 
 /**

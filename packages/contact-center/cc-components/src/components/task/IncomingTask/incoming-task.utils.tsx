@@ -29,7 +29,8 @@ export const extractIncomingTaskData = (
   logger?,
   acceptControl?: {isVisible: boolean; isEnabled: boolean},
   declineControl?: {isVisible: boolean; isEnabled: boolean},
-  isDeclineButtonEnabled?: boolean
+  isDeclineButtonEnabled?: boolean,
+  isBrowser?: boolean
 ): IncomingTaskData => {
   try {
     const accept = acceptControl ?? incomingTask?.uiControls?.main?.accept ?? {isVisible: false, isEnabled: false};
@@ -41,7 +42,9 @@ export const extractIncomingTaskData = (
 
     // Extract basic data from task
     const callAssociationDetails = incomingTask?.data?.interaction?.callAssociatedDetails;
-    const ani = callAssociationDetails?.ani;
+    const isOutdial = incomingTask?.data?.interaction?.outboundType === 'OUTDIAL';
+    const dnis = callAssociationDetails?.dnis || incomingTask?.data?.interaction?.callProcessingDetails?.dnis;
+    const ani = isOutdial ? dnis || callAssociationDetails?.ani : callAssociationDetails?.ani;
     const customerName = callAssociationDetails?.customerName;
     const virtualTeamName = callAssociationDetails?.virtualTeamName;
     const ronaTimeout = callAssociationDetails?.ronaTimeout ? Number(callAssociationDetails?.ronaTimeout) : null;
@@ -54,13 +57,11 @@ export const extractIncomingTaskData = (
     const isSocial = mediaType === MEDIA_CHANNEL.SOCIAL;
 
     // Compute button text based on conditions
-    // Extension mode (EPDN): accept button is visible but disabled → show "Ringing..."
-    // WebRTC mode (Desktop): accept button is visible and enabled → show "Accept"
-    const acceptText = accept.isVisible
-      ? isTelephony && !accept.isEnabled
-        ? 'Ringing...'
-        : 'Accept'
-      : undefined;
+    // Extension mode (any call): accept visible but disabled → show "Ringing..."
+    // Desktop/WebRTC outdial: accept visible but disabled → show "Accept" (auto-answer handles it)
+    // Desktop/WebRTC inbound: accept visible and enabled → show "Accept"
+    const showRinging = isTelephony && !accept.isEnabled && !(isBrowser && isOutdial);
+    const acceptText = accept.isVisible ? (showRinging ? 'Ringing...' : 'Accept') : undefined;
 
     const declineText = decline.isVisible ? 'Decline' : undefined;
 

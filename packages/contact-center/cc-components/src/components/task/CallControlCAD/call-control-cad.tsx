@@ -67,6 +67,11 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
   const customerName = currentTask?.data?.interaction?.callAssociatedDetails?.customerName;
 
   const ani = currentTask?.data?.interaction?.callAssociatedDetails?.ani;
+  const isOutdial = currentTask?.data?.interaction?.outboundType === 'OUTDIAL';
+  const dnis =
+    currentTask?.data?.interaction?.callAssociatedDetails?.dnis ||
+    currentTask?.data?.interaction?.callProcessingDetails?.dnis;
+  const displayNumber = isOutdial ? dnis || ani : ani;
   const dn = currentTask?.data?.interaction?.callAssociatedDetails?.dn;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -80,7 +85,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
   const phoneNumberTooltipId = `phone-number-tooltip-${currentTask.data.interaction.interactionId}`;
 
   const renderCustomerName = () => {
-    const customerText = isSocial ? customerName || NO_CUSTOMER_NAME : ani || NO_CALLER_ID;
+    const customerText = isSocial ? customerName || NO_CUSTOMER_NAME : displayNumber || NO_CALLER_ID;
 
     const textComponent = (
       <Text
