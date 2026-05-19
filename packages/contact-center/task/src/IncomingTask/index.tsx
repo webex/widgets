@@ -9,13 +9,14 @@ import {IncomingTaskProps} from '../task.types';
 
 const IncomingTaskInternal: React.FunctionComponent<IncomingTaskProps> = observer(
   ({incomingTask, onAccepted, onRejected}) => {
-    const {logger, isDeclineButtonEnabled} = store;
+    const {logger, isDeclineButtonEnabled, deviceType} = store;
     const result = useIncomingTask({incomingTask, onAccepted, onRejected, logger});
 
     const props = {
       ...result,
       logger,
       isDeclineButtonEnabled,
+      isBrowser: deviceType === 'BROWSER',
     };
 
     return <IncomingTaskComponent {...props} />;

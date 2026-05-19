@@ -10,7 +10,8 @@ export const extractTaskListItemData = (
   task: ITask,
   agentId: string,
   logger?: ILogger,
-  isDeclineButtonEnabled?: boolean
+  isDeclineButtonEnabled?: boolean,
+  isBrowser?: boolean
 ): TaskListItemData => {
   try {
     const accept = task.uiControls?.main?.accept ?? {isVisible: false, isEnabled: false};
@@ -22,7 +23,9 @@ export const extractTaskListItemData = (
 
     // Extract basic data from task
     const callAssociationDetails = task?.data?.interaction?.callAssociatedDetails;
-    const ani = callAssociationDetails?.ani;
+    const isOutdial = task?.data?.interaction?.outboundType === 'OUTDIAL';
+    const dnis = callAssociationDetails?.dnis || task?.data?.interaction?.callProcessingDetails?.dnis;
+    const ani = isOutdial ? dnis || callAssociationDetails?.ani : callAssociationDetails?.ani;
     const customerName = callAssociationDetails?.customerName;
     const virtualTeamName = callAssociationDetails?.virtualTeamName;
 
@@ -40,10 +43,11 @@ export const extractTaskListItemData = (
     const isSocial = mediaType === MEDIA_CHANNEL.SOCIAL;
 
     // Compute button text based on conditions
-    // Extension mode (EPDN): accept button is visible but disabled → show "Ringing..."
-    // WebRTC mode (Desktop): accept button is visible and enabled → show "Accept"
-    const acceptText =
-      accept.isVisible && isTaskIncoming ? (isTelephony && !accept.isEnabled ? 'Ringing...' : 'Accept') : undefined;
+    // Extension mode (any call): accept visible but disabled → show "Ringing..."
+    // Desktop/WebRTC outdial: accept visible but disabled → show "Accept" (auto-answer handles it)
+    // Desktop/WebRTC inbound: accept visible and enabled → show "Accept"
+    const showRinging = isTelephony && !accept.isEnabled && !(isBrowser && isOutdial);
+    const acceptText = accept.isVisible && isTaskIncoming ? (showRinging ? 'Ringing...' : 'Accept') : undefined;
 
     const declineText = decline.isVisible && isTaskIncoming ? 'Decline' : undefined;
 

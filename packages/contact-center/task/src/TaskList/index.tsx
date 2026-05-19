@@ -9,7 +9,7 @@ import {TaskListProps} from '../task.types';
 
 const TaskListInternal: React.FunctionComponent<TaskListProps> = observer(
   ({onTaskAccepted, onTaskDeclined, onTaskSelected}) => {
-    const {cc, taskList, currentTask, logger, agentId, isDeclineButtonEnabled} = store;
+    const {cc, taskList, currentTask, logger, agentId, isDeclineButtonEnabled, deviceType} = store;
 
     const result = useTaskList({cc, logger, taskList, onTaskAccepted, onTaskDeclined, onTaskSelected});
     const props = {
@@ -18,6 +18,7 @@ const TaskListInternal: React.FunctionComponent<TaskListProps> = observer(
       logger,
       agentId,
       isDeclineButtonEnabled,
+      isBrowser: deviceType === 'BROWSER',
     };
 
     return <TaskListComponent {...props} />;
