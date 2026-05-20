@@ -1,5 +1,46 @@
 import {MEDIA_CHANNEL, TaskListItemData, getCallerIdentifier} from '../task.types';
+import {CampaignCallProcessingDetails} from '../CampaignTask/campaign-task.types';
 import store, {isIncomingTask, ILogger, ITask} from '@webex/cc-store';
+
+interface ParticipantWithJoin {
+  hasJoined?: boolean;
+  joinTimestamp?: number;
+}
+
+/**
+ * Extract the agent's joinTimestamp from the task participants.
+ * Looks up the agent by `agentId` so that we always read the correct
+ * participant even when multiple participants have joined.
+ * Returns `undefined` when the agent hasn't joined yet.
+ */
+export const getAgentJoinTimestamp = (task: ITask, agentId?: string): number | undefined => {
+  const participants = task.data.interaction.participants as Record<string, ParticipantWithJoin> | undefined;
+
+  if (!participants) return undefined;
+
+  if (agentId && participants[agentId]) {
+    const agent = participants[agentId];
+    return agent.hasJoined && agent.joinTimestamp ? agent.joinTimestamp : undefined;
+  }
+
+  // Fallback: if agentId is not provided or not found, use first joined participant
+  for (const participant of Object.values(participants)) {
+    if (participant.hasJoined && participant.joinTimestamp) {
+      return participant.joinTimestamp;
+    }
+  }
+
+  return undefined;
+};
+
+/**
+ * Safely extracts campaign-specific call processing details from a task.
+ * Returns an empty object when `cpd` is undefined.
+ */
+export const getCampaignCpd = (cpd: Record<string, unknown> | undefined): CampaignCallProcessingDetails => {
+  if (!cpd) return {};
+  return cpd as CampaignCallProcessingDetails;
+};
 
 /**
  * outboundType values that identify a campaign preview interaction.

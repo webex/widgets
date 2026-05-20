@@ -19,7 +19,7 @@ import {
   MAX_PARTICIPANTS_IN_MULTIPARTY_CONFERENCE,
   DestinationAgentType,
 } from './constants';
-import {DeviceTypeFlags} from '../task.types';
+import {DeviceTypeFlags, CAMPAIGN_PREVIEW_OUTBOUND_TYPES, CAMPAIGN_PREVIEW_CAMPAIGN_TYPES} from '../task.types';
 
 // ==================== UTILITY FUNCTIONS ====================
 
@@ -80,6 +80,35 @@ export function findHoldTimestamp(interaction: Interaction, mType = 'mainCall'):
     return media?.holdTimestamp ?? null;
   }
   return null;
+}
+
+// ==================== CAMPAIGN PREVIEW FUNCTIONS ====================
+
+/**
+ * Checks whether the given task is a campaign preview task based on
+ * its outboundType or callProcessingDetails.campaignType.
+ */
+export function isCampaignPreviewTask(task: ITask): boolean {
+  const outboundType = task.data.interaction.outboundType ?? '';
+  const cpd = task.data.interaction.callProcessingDetails as unknown as Record<string, string | undefined>;
+  const campaignType = cpd?.campaignType ?? '';
+
+  return (
+    CAMPAIGN_PREVIEW_OUTBOUND_TYPES.includes(outboundType) || CAMPAIGN_PREVIEW_CAMPAIGN_TYPES.includes(campaignType)
+  );
+}
+
+/**
+ * Checks whether the task is a campaign preview that the agent has not
+ * explicitly accepted.  Uses the store's acceptedCampaignIds as the
+ * source of truth — the participants.hasJoined flag is unreliable
+ * because CampaignContactUpdated payloads can set it even when the
+ * agent only skipped or removed the preview.
+ */
+export function isUnacceptedCampaignPreview(task: ITask, acceptedCampaignIds: Set<string>): boolean {
+  if (!isCampaignPreviewTask(task)) return false;
+
+  return !acceptedCampaignIds.has(task.data.interactionId);
 }
 
 // ==================== CALL CONTROL BUTTON VISIBILITY FUNCTIONS ====================

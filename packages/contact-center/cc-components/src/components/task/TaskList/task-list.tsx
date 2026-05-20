@@ -1,4 +1,5 @@
 import React from 'react';
+import {ErrorBoundary} from 'react-error-boundary';
 import {withMetrics} from '@webex/cc-ui-logging';
 import {TaskListComponentProps, MEDIA_CHANNEL} from '../task.types';
 import Task from '../Task';
@@ -66,18 +67,25 @@ const TaskListComponent: React.FunctionComponent<TaskListComponentProps> = (prop
           const campaignId = cpd?.campaignId ?? '';
 
           return (
-            <CampaignTask
+            <ErrorBoundary
               key={interactionId}
-              task={task}
-              acceptPreviewContact={() => cc.acceptPreviewContact({interactionId, campaignId}).then(() => {})}
-              skipPreviewContact={() => cc.skipPreviewContact({interactionId, campaignId}).then(() => {})}
-              removePreviewContact={() => cc.removePreviewContact({interactionId, campaignId}).then(() => {})}
-              cancelPreviewContact={() => task.end().then(() => {})}
-              isBrowser={isBrowser}
-              logger={logger}
-              isAccepted={acceptedCampaignIds?.has(interactionId) ?? false}
-              agentId={agentId}
-            />
+              fallbackRender={() => <></>}
+              onError={(error: Error) => {
+                logger?.error?.('CampaignTask crashed', {error});
+              }}
+            >
+              <CampaignTask
+                task={task}
+                acceptPreviewContact={() => cc.acceptPreviewContact({interactionId, campaignId}).then(() => {})}
+                skipPreviewContact={() => cc.skipPreviewContact({interactionId, campaignId}).then(() => {})}
+                removePreviewContact={() => cc.removePreviewContact({interactionId, campaignId}).then(() => {})}
+                cancelPreviewContact={() => task.end().then(() => {})}
+                isBrowser={isBrowser}
+                logger={logger}
+                isAccepted={acceptedCampaignIds?.has(interactionId) ?? false}
+                agentId={agentId}
+              />
+            </ErrorBoundary>
           );
         }
 

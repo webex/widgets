@@ -5,16 +5,11 @@ import GlobalVariablesPanel from '../../GlobalVariablesPanel/global-variables-pa
 import {CampaignTaskPopoverProps} from './campaign-task-popover.types';
 import {CallAssociatedDataMap, getCallerIdentifier} from '../../task.types';
 import {getAgentViewableGlobalVariables} from '../../Task/task.utils';
-import {CampaignCallProcessingDetails} from '../campaign-task.types';
+import {getCampaignCpd} from '../../TaskList/task-list.utils';
 import './campaign-task-popover.style.scss';
 
 const POPOVER_WIDTH = '440px';
 const POPOVER_DELAY = '200,100';
-
-const getCampaignCpd = (cpd: Record<string, unknown> | undefined): CampaignCallProcessingDetails => {
-  if (!cpd) return {};
-  return cpd as CampaignCallProcessingDetails;
-};
 
 const CampaignTaskPopover: React.FC<CampaignTaskPopoverProps> = ({
   task,
@@ -49,7 +44,11 @@ const CampaignTaskPopover: React.FC<CampaignTaskPopoverProps> = ({
   const latestGlobalVariables = getAgentViewableGlobalVariables(callAssociatedData);
 
   // Persist global variables across task updates — some store refreshes
-  // replace the task with a snapshot that omits callAssociatedData.
+  // replace the task with a snapshot that omits callAssociatedData,
+  // which causes getAgentViewableGlobalVariables to return [].
+  // We intentionally keep the previous values when length === 0 because
+  // an empty array indicates missing data, not a legitimate clearing of
+  // variables.  Variables are never cleared mid-call by the backend.
   const globalVariablesRef = useRef(latestGlobalVariables);
   if (latestGlobalVariables.length > 0) {
     globalVariablesRef.current = latestGlobalVariables;

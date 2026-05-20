@@ -2,33 +2,11 @@ import React from 'react';
 import {observer} from 'mobx-react-lite';
 import {ErrorBoundary} from 'react-error-boundary';
 
-import store, {ITask} from '@webex/cc-store';
+import store from '@webex/cc-store';
 import {useCallControl} from '../helper';
 import {CallControlProps} from '../task.types';
 import {CallControlComponent} from '@webex/cc-components';
-
-const CAMPAIGN_PREVIEW_OUTBOUND_TYPES = ['STANDARD_PREVIEW_CAMPAIGN', 'DIRECT_PREVIEW_CAMPAIGN'];
-const CAMPAIGN_PREVIEW_CAMPAIGN_TYPES = ['preview_standard', 'preview_direct'];
-
-/**
- * Checks whether the task is a campaign preview that the agent has not
- * explicitly accepted.  Uses the store's acceptedCampaignIds as the
- * source of truth — the participants.hasJoined flag is unreliable
- * because CampaignContactUpdated payloads can set it even when the
- * agent only skipped or removed the preview.
- */
-const isUnacceptedCampaignPreview = (task: ITask, acceptedCampaignIds: Set<string>): boolean => {
-  const outboundType = task.data.interaction.outboundType ?? '';
-  const cpd = task.data.interaction.callProcessingDetails as unknown as Record<string, string | undefined>;
-  const campaignType = cpd?.campaignType ?? '';
-
-  const isCampaignPreview =
-    CAMPAIGN_PREVIEW_OUTBOUND_TYPES.includes(outboundType) || CAMPAIGN_PREVIEW_CAMPAIGN_TYPES.includes(campaignType);
-
-  if (!isCampaignPreview) return false;
-
-  return !acceptedCampaignIds.has(task.data.interactionId);
-};
+import {isUnacceptedCampaignPreview} from '../Utils/task-util';
 
 const CallControlInternal: React.FunctionComponent<CallControlProps> = observer(
   ({onHoldResume, onEnd, onWrapUp, onRecordingToggle, onToggleMute, consultTransferOptions, conferenceEnabled}) => {

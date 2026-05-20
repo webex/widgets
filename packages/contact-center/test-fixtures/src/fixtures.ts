@@ -1,5 +1,6 @@
 import type {
   ITask,
+  Interaction,
   Profile,
   TaskData,
   TaskResponse,
@@ -198,6 +199,63 @@ const mockTask: ITask = {
   transferConference: jest.fn(),
   exitConference: jest.fn(),
   toggleMute: jest.fn(),
+};
+
+interface MakeMockTaskOverrides {
+  data?: Partial<TaskData> & {
+    interaction?: Partial<Interaction>;
+  };
+}
+
+const makeMockTask = (overrides?: MakeMockTaskOverrides): ITask => {
+  const interactionOverrides = overrides?.data?.interaction ?? {};
+  const dataOverrides = overrides?.data ?? {};
+
+  return {
+    ...mockTask,
+    data: {
+      ...mockTask.data,
+      ...dataOverrides,
+      interaction: {
+        ...mockTask.data.interaction,
+        ...interactionOverrides,
+      },
+    } as unknown as TaskData,
+    on: jest.fn(),
+    off: jest.fn(),
+    emit: jest.fn(),
+    addListener: jest.fn(),
+    once: jest.fn(),
+    removeListener: jest.fn(),
+    removeAllListeners: jest.fn(),
+    setMaxListeners: jest.fn(),
+    getMaxListeners: jest.fn().mockReturnValue(10),
+    listeners: jest.fn().mockReturnValue([]),
+    rawListeners: jest.fn().mockReturnValue([]),
+    listenerCount: jest.fn().mockReturnValue(0),
+    prependListener: jest.fn(),
+    prependOnceListener: jest.fn(),
+    eventNames: jest.fn().mockReturnValue([]),
+    cancelAutoWrapupTimer: jest.fn(),
+    unregisterWebCallListeners: jest.fn(),
+    updateTaskData: jest.fn().mockReturnValue({} as ITask),
+    accept: jest.fn().mockResolvedValue({} as TaskResponse),
+    decline: jest.fn().mockResolvedValue({} as TaskResponse),
+    hold: jest.fn().mockResolvedValue({} as TaskResponse),
+    resume: jest.fn().mockResolvedValue({} as TaskResponse),
+    end: jest.fn().mockResolvedValue({} as TaskResponse),
+    wrapup: jest.fn().mockResolvedValue({} as TaskResponse),
+    pauseRecording: jest.fn().mockResolvedValue({} as TaskResponse),
+    resumeRecording: jest.fn().mockResolvedValue({} as TaskResponse),
+    consult: jest.fn().mockResolvedValue({} as TaskResponse),
+    transfer: jest.fn().mockResolvedValue({} as TaskResponse),
+    consultTransfer: jest.fn().mockResolvedValue({} as TaskResponse),
+    endConsult: jest.fn().mockResolvedValue({} as TaskResponse),
+    consultConference: jest.fn(),
+    transferConference: jest.fn(),
+    exitConference: jest.fn(),
+    toggleMute: jest.fn(),
+  };
 };
 
 const mockQueueDetails = [
@@ -586,6 +644,7 @@ export {
   mockProfile,
   mockCC,
   mockTask,
+  makeMockTask,
   mockQueueDetails,
   mockAgents,
   mockEntryPointsResponse,

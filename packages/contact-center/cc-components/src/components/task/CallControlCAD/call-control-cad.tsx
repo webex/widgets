@@ -83,7 +83,11 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
   const latestGlobalVariables = getAgentViewableGlobalVariables(callAssociatedData);
 
   // Persist global variables across task updates — some store refreshes
-  // replace currentTask with a snapshot that omits callAssociatedData.
+  // replace currentTask with a snapshot that omits callAssociatedData,
+  // which causes getAgentViewableGlobalVariables to return [].
+  // We intentionally keep the previous values when length === 0 because
+  // an empty array indicates missing data, not a legitimate clearing of
+  // variables.  Variables are never cleared mid-call by the backend.
   // Reset when the interaction changes so stale CAD from a previous task
   // is never shown on a new call.
   const interactionId = currentTask.data.interaction.interactionId;

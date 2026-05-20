@@ -28,6 +28,7 @@ import {ITask} from '@webex/contact-center';
 import {
   mockCC,
   mockTask as mockTaskFixture,
+  makeMockTask,
   mockEntryPointsResponse,
   mockAddressBookEntriesResponse,
   mockQueueDetails,
@@ -175,7 +176,7 @@ describe('storeEventsWrapper', () => {
     it('should proxy currentTask', () => {
       // Set the store's agentId to match the task's agentId
       storeWrapper['store'].agentId = 'agent1';
-      const mockCurrentTask = {
+      const mockCurrentTask = makeMockTask({
         data: {
           interactionId: 'mockInteractionId',
           interaction: {
@@ -188,7 +189,7 @@ describe('storeEventsWrapper', () => {
           },
           agentId: 'agent1',
         },
-      } as ITask;
+      });
       storeWrapper.setCurrentTask(mockCurrentTask);
       expect(storeWrapper.currentTask).toEqual(mockCurrentTask);
     });
@@ -513,7 +514,7 @@ describe('storeEventsWrapper', () => {
   });
 
   describe('storeEventsWrapper', () => {
-    const mockTask: ITask = {
+    const mockTask = makeMockTask({
       data: {
         interactionId: 'interaction1',
         interaction: {
@@ -526,9 +527,7 @@ describe('storeEventsWrapper', () => {
         },
         agentId: 'agent1',
       },
-      on: jest.fn(),
-      off: jest.fn(),
-    } as unknown as ITask;
+    });
 
     beforeEach(() => {
       jest.clearAllMocks();
@@ -561,7 +560,7 @@ describe('storeEventsWrapper', () => {
       const mockIncomingTaskCallback = jest.fn();
       storeWrapper.setIncomingTaskCb(mockIncomingTaskCallback);
       // Ensure mockTask is properly set up
-      const mockTask2: ITask = {
+      const mockTask2 = makeMockTask({
         data: {
           interactionId: 'interaction1',
           interaction: {
@@ -570,9 +569,7 @@ describe('storeEventsWrapper', () => {
           agentId: 'agent1',
           // Note: mockTask2 doesn't have hasJoined: true to simulate an incoming task
         },
-        on: jest.fn(),
-        off: jest.fn(),
-      } as unknown as ITask;
+      });
 
       // Set up mockTask with hasJoined: true so it can be set as current task
       const mockTaskWithJoined = {
@@ -619,16 +616,14 @@ describe('storeEventsWrapper', () => {
       const mockIncomingTaskCallback = jest.fn();
       storeWrapper.setIncomingTaskCb(mockIncomingTaskCallback);
       // Ensure mockTask is properly set up
-      const mockTask: ITask = {
+      const mockTask = makeMockTask({
         data: {
           interactionId: 'interaction1',
           interaction: {
             state: 'connected',
           },
         },
-        on: jest.fn(),
-        off: jest.fn(),
-      } as unknown as ITask;
+      });
 
       storeWrapper['store'].cc.taskManager.getAllTasks = jest
         .fn()
@@ -658,16 +653,14 @@ describe('storeEventsWrapper', () => {
       const mockIncomingTaskCallback = jest.fn();
       storeWrapper.setIncomingTaskCb(undefined);
       // Ensure mockTask is properly set up
-      const mockTask: ITask = {
+      const mockTask = makeMockTask({
         data: {
           interactionId: 'interaction1',
           interaction: {
             state: 'connected',
           },
         },
-        on: jest.fn(),
-        off: jest.fn(),
-      } as unknown as ITask;
+      });
 
       // Add the mock task to the task list
       storeWrapper['store'].taskList = {interaction1: mockTask};
@@ -1076,16 +1069,14 @@ describe('storeEventsWrapper', () => {
   });
 
   describe('storeEventsWrapper events reactions', () => {
-    const mockTask: ITask = {
+    const mockTask = makeMockTask({
       data: {
         interactionId: 'interaction1',
         interaction: {
           state: 'connected',
         },
       },
-      on: jest.fn(),
-      off: jest.fn(),
-    } as unknown as ITask;
+    });
 
     const options = {
       webex: {
@@ -1681,11 +1672,9 @@ describe('storeEventsWrapper', () => {
     });
 
     it('should handle task rejection event and call onTaskRejected with the provided reason', () => {
-      const rejectTask: ITask = {
+      const rejectTask = makeMockTask({
         data: {interactionId: 'rejectTest', interaction: {state: 'connected'}},
-        on: jest.fn(),
-        off: jest.fn(),
-      } as unknown as ITask;
+      });
 
       const rejectTaskOnSpy = jest.spyOn(rejectTask, 'on');
       const onTaskRejectedMock = jest.fn();
@@ -1723,11 +1712,9 @@ describe('storeEventsWrapper', () => {
     });
 
     it('should handle task rejection event and call onTaskRejected with no reason', () => {
-      const rejectTask: ITask = {
+      const rejectTask = makeMockTask({
         data: {interactionId: 'rejectTest', interaction: {state: 'connected'}},
-        on: jest.fn(),
-        off: jest.fn(),
-      } as unknown as ITask;
+      });
       const rejectTaskOnSpy = jest.spyOn(rejectTask, 'on');
 
       const onTaskRejectedMock = jest.fn();
@@ -1778,11 +1765,9 @@ describe('storeEventsWrapper', () => {
     });
 
     it('should handle outdial failed event and call onOutdialFailed with the provided reason', () => {
-      const outdialTask: ITask = {
+      const outdialTask = makeMockTask({
         data: {interactionId: 'outdialTest', interaction: {state: 'connected'}},
-        on: jest.fn(),
-        off: jest.fn(),
-      } as unknown as ITask;
+      });
 
       const outdialTaskOnSpy = jest.spyOn(outdialTask, 'on');
       const onOutdialFailedMock = jest.fn();
@@ -1817,16 +1802,14 @@ describe('storeEventsWrapper', () => {
     });
 
     it('should register TASK_CONSULT_QUEUE_CANCELLED handler on incoming task', () => {
-      const mockTask: ITask = {
+      const mockTask = makeMockTask({
         data: {
           interactionId: 'interaction1',
           interaction: {
             state: 'connected',
           },
         },
-        on: jest.fn(),
-        off: jest.fn(),
-      } as unknown as ITask;
+      });
 
       storeWrapper['store'].taskList = {};
       storeWrapper.handleIncomingTask(mockTask);
@@ -1836,16 +1819,14 @@ describe('storeEventsWrapper', () => {
     });
 
     it('should register TASK_AUTO_ANSWERED handler on incoming task', () => {
-      const mockTask: ITask = {
+      const mockTask = makeMockTask({
         data: {
           interactionId: 'interaction1',
           interaction: {
             state: 'connected',
           },
         },
-        on: jest.fn(),
-        off: jest.fn(),
-      } as unknown as ITask;
+      });
 
       storeWrapper['store'].taskList = {};
       storeWrapper.handleIncomingTask(mockTask);
@@ -1855,11 +1836,9 @@ describe('storeEventsWrapper', () => {
     });
 
     it('should handle auto answer event and enable decline button', () => {
-      const autoAnswerTask: ITask = {
+      const autoAnswerTask = makeMockTask({
         data: {interactionId: 'autoAnswerTest', interaction: {state: 'connected'}},
-        on: jest.fn(),
-        off: jest.fn(),
-      } as unknown as ITask;
+      });
 
       const autoAnswerTaskOnSpy = jest.spyOn(autoAnswerTask, 'on');
       const setIsDeclineButtonEnabledSpy = jest.spyOn(storeWrapper, 'setIsDeclineButtonEnabled');
@@ -1885,16 +1864,14 @@ describe('storeEventsWrapper', () => {
   });
 
   describe('task:media conditionally attached based on deviceType', () => {
-    const mockTask: ITask = {
+    const mockTask = makeMockTask({
       data: {
         interactionId: 'interaction1',
         interaction: {
           state: 'connected',
         },
       },
-      on: jest.fn(),
-      off: jest.fn(),
-    } as unknown as ITask;
+    });
 
     beforeEach(() => {
       jest.clearAllMocks();
@@ -2103,7 +2080,7 @@ describe('storeEventsWrapper', () => {
     beforeEach(() => {
       // Set the store's agentId to match the tasks' agentId
       storeWrapper['store'].agentId = 'agent1';
-      mockTaskA = {
+      mockTaskA = makeMockTask({
         data: {
           interactionId: 'taskA',
           interaction: {
@@ -2116,8 +2093,8 @@ describe('storeEventsWrapper', () => {
           },
           agentId: 'agent1',
         },
-      } as ITask;
-      mockTaskB = {
+      });
+      mockTaskB = makeMockTask({
         data: {
           interactionId: 'taskB',
           interaction: {
@@ -2130,7 +2107,7 @@ describe('storeEventsWrapper', () => {
           },
           agentId: 'agent1',
         },
-      } as ITask;
+      });
       storeWrapper['store'].isQueueConsultInProgress = true;
       storeWrapper['store'].currentConsultQueueId = 'queue1';
       storeWrapper['store'].consultStartTimeStamp = 123;
@@ -2177,16 +2154,16 @@ describe('storeEventsWrapper', () => {
       expect(storeWrapper.currentTask).toEqual(mockTaskA);
 
       // Create an incoming task (without hasJoined: true)
-      const incomingTask: ITask = {
+      const incomingTask = makeMockTask({
         data: {
           interactionId: 'incomingTask',
           interaction: {
             state: 'new',
-            // Note: no participants or hasJoined property to simulate incoming task
+            participants: {},
           },
           agentId: 'agent1',
         },
-      } as ITask;
+      });
 
       // Try to set the incoming task as current task
       storeWrapper.setCurrentTask(incomingTask);
@@ -2202,7 +2179,7 @@ describe('storeEventsWrapper', () => {
       expect(storeWrapper.currentTask).toEqual(mockTaskA);
 
       // Create a task with explicitly hasJoined: false
-      const taskWithoutJoined: ITask = {
+      const taskWithoutJoined = makeMockTask({
         data: {
           interactionId: 'taskWithoutJoined',
           interaction: {
@@ -2215,7 +2192,7 @@ describe('storeEventsWrapper', () => {
           },
           agentId: 'agent1',
         },
-      } as ITask;
+      });
 
       // Try to set the task without joined as current task
       storeWrapper.setCurrentTask(taskWithoutJoined);
@@ -2228,7 +2205,7 @@ describe('storeEventsWrapper', () => {
 
   describe('campaign preview task lifecycle', () => {
     const createCampaignPreviewTask = (interactionId: string): ITask =>
-      ({
+      makeMockTask({
         data: {
           interactionId,
           interaction: {
@@ -2239,9 +2216,7 @@ describe('storeEventsWrapper', () => {
             },
           },
         },
-        on: jest.fn(),
-        off: jest.fn(),
-      }) as unknown as ITask;
+      });
 
     beforeEach(() => {
       jest.clearAllMocks();
@@ -2315,7 +2290,7 @@ describe('storeEventsWrapper', () => {
 
     describe('handleTaskEnd — non-campaign tasks', () => {
       it('should call refreshTaskList for a regular (non-campaign) task', () => {
-        const regularTask: ITask = {
+        const regularTask = makeMockTask({
           data: {
             interactionId: 'regular-1',
             interaction: {
@@ -2323,9 +2298,7 @@ describe('storeEventsWrapper', () => {
               outboundType: 'OUTDIAL',
             },
           },
-          on: jest.fn(),
-          off: jest.fn(),
-        } as unknown as ITask;
+        });
 
         storeWrapper['store'].taskList = {'regular-1': regularTask};
         storeWrapper['store'].currentTask = regularTask;
