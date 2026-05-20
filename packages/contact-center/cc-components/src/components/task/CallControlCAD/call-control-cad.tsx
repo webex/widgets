@@ -75,7 +75,9 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
   const dn = currentTask?.data?.interaction?.callAssociatedDetails?.dn;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const callAssociatedData = (currentTask?.data?.interaction as any)?.callAssociatedData as CallAssociatedDataMap | undefined;
+  const callAssociatedData = (currentTask?.data?.interaction as any)?.callAssociatedData as
+    | CallAssociatedDataMap
+    | undefined;
   const globalVariables = getAgentViewableGlobalVariables(callAssociatedData);
 
   // Create unique IDs for tooltips
@@ -284,24 +286,25 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
           </div>
         )}
       </div>
-      {(controls?.consult?.endConsult?.isVisible || controls?.main?.endConsult?.isVisible) && !controls?.main?.wrapup?.isVisible && (
-        <div className={`call-control-consult-container ${callControlConsultClassName || ''}`}>
-          <CallControlConsultComponent
-            agentName={consultAgentName}
-            consultTimerLabel={consultTimerLabel}
-            consultTimerTimestamp={consultTimerTimestamp}
-            endConsultCall={endConsultCall}
-            consultTransfer={consultTransfer}
-            consultConference={consultConference}
-            switchToMainCall={switchToMainCall}
-            logger={logger}
-            isMuted={isMuted}
-            controls={controls}
-            toggleConsultMute={toggleMute}
-            conferenceEnabled={conferenceEnabled}
-          />
-        </div>
-      )}
+      {(controls?.consult?.endConsult?.isVisible || controls?.main?.endConsult?.isVisible) &&
+        !controls?.main?.wrapup?.isVisible && (
+          <div className={`call-control-consult-container ${callControlConsultClassName || ''}`}>
+            <CallControlConsultComponent
+              agentName={consultAgentName}
+              consultTimerLabel={consultTimerLabel}
+              consultTimerTimestamp={consultTimerTimestamp}
+              endConsultCall={endConsultCall}
+              consultTransfer={consultTransfer}
+              consultConference={consultConference}
+              switchToMainCall={switchToMainCall}
+              logger={logger}
+              isMuted={isMuted}
+              controls={controls}
+              toggleConsultMute={toggleMute}
+              conferenceEnabled={conferenceEnabled}
+            />
+          </div>
+        )}
     </>
   );
 };

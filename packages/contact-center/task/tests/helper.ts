@@ -3337,6 +3337,92 @@ describe('useCallControl', () => {
           }
         );
       });
+
+      it('should call transferConference when transferConference control is visible', async () => {
+        const taskWithTransferConferenceControl = {
+          ...mockCurrentTask,
+          data: {
+            ...mockCurrentTask.data,
+            isConferenceInProgress: false,
+          },
+          uiControls: {
+            ...mockCurrentTask.uiControls,
+            activeLeg: 'consult',
+            consult: {
+              ...mockCurrentTask.uiControls.consult,
+              transferConference: {isVisible: true, isEnabled: true},
+            },
+          },
+          transferConference: jest.fn().mockResolvedValue(undefined),
+        };
+
+        const {result} = renderHook(() =>
+          useCallControl({
+            currentTask: taskWithTransferConferenceControl,
+            onHoldResume: mockOnHoldResume,
+            onEnd: mockOnEnd,
+            onWrapUp: mockOnWrapUp,
+            logger: mockLogger,
+            featureFlags: store.featureFlags,
+            deviceType: store.deviceType,
+            isMuted: false,
+            conferenceEnabled: true,
+            agentId: 'test-agent-id',
+          })
+        );
+
+        await act(async () => {
+          await result.current.consultTransfer();
+        });
+
+        expect(taskWithTransferConferenceControl.transferConference).toHaveBeenCalled();
+      });
+
+      it('should call transferConference even when state is CONSULTING and transferConference is visible', async () => {
+        const taskWithConsultAndConference = {
+          ...mockCurrentTask,
+          state: {
+            ...mockCurrentTask.state,
+            value: 'CONSULTING',
+          },
+          data: {
+            ...mockCurrentTask.data,
+            isConferenceInProgress: false,
+          },
+          uiControls: {
+            ...mockCurrentTask.uiControls,
+            activeLeg: 'consult',
+            consult: {
+              ...mockCurrentTask.uiControls.consult,
+              transferConference: {isVisible: true, isEnabled: true},
+            },
+          },
+          transferConference: jest.fn().mockResolvedValue(undefined),
+          transfer: jest.fn().mockResolvedValue(undefined),
+        };
+
+        const {result} = renderHook(() =>
+          useCallControl({
+            currentTask: taskWithConsultAndConference,
+            onHoldResume: mockOnHoldResume,
+            onEnd: mockOnEnd,
+            onWrapUp: mockOnWrapUp,
+            logger: mockLogger,
+            featureFlags: store.featureFlags,
+            deviceType: store.deviceType,
+            isMuted: false,
+            conferenceEnabled: true,
+            agentId: 'test-agent-id',
+          })
+        );
+
+        await act(async () => {
+          await result.current.consultTransfer();
+        });
+
+        expect(taskWithConsultAndConference.transferConference).toHaveBeenCalled();
+        expect(taskWithConsultAndConference.transfer).not.toHaveBeenCalled();
+      });
     });
 
     describe('consult button disabled via controlVisibility with conference participants', () => {

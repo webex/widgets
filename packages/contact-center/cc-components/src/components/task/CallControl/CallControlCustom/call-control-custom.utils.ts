@@ -28,6 +28,13 @@ export const createConsultButtons = (
     const consultCtrl = controls?.consult;
     const mainCtrl = controls?.main;
     const isConsultLegActive = controls?.activeLeg === 'consult';
+    const consultTransferCtrl = consultCtrl?.transfer;
+    const consultTransferConferenceCtrl = consultCtrl?.transferConference;
+    const mainTransferConferenceCtrl = mainCtrl?.transferConference;
+    const isTransferConferenceVisible =
+      (consultTransferConferenceCtrl?.isVisible ?? false) || (mainTransferConferenceCtrl?.isVisible ?? false);
+    const isTransferConferenceEnabled =
+      (consultTransferConferenceCtrl?.isEnabled ?? false) || (mainTransferConferenceCtrl?.isEnabled ?? false);
     return [
       {
         key: 'mute',
@@ -51,11 +58,11 @@ export const createConsultButtons = (
       {
         key: 'transfer',
         icon: 'next-bold',
-        tooltip: 'Transfer',
+        tooltip: isTransferConferenceVisible ? 'Transfer Conference' : 'Transfer',
         onClick: consultTransfer,
         className: 'call-control-button',
-        disabled: !(consultCtrl?.transfer?.isEnabled ?? false),
-        isVisible: consultCtrl?.transfer?.isVisible ?? false,
+        disabled: !((consultTransferCtrl?.isEnabled ?? false) || isTransferConferenceEnabled),
+        isVisible: (consultTransferCtrl?.isVisible ?? false) || isTransferConferenceVisible,
       },
       {
         key: 'conference',
