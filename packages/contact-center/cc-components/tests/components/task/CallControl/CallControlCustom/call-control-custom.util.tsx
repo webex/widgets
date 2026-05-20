@@ -46,33 +46,19 @@ describe('Call Control Custom Utils', () => {
   });
 
   const mockControlVisibility = {
-    accept: {isVisible: true, isEnabled: true},
-    decline: {isVisible: true, isEnabled: true},
-    end: {isVisible: true, isEnabled: true},
-    muteUnmute: {isVisible: true, isEnabled: true},
-    muteUnmuteConsult: {isVisible: true, isEnabled: true},
-    holdResume: {isVisible: true, isEnabled: true},
-    consult: {isVisible: true, isEnabled: true},
-    transfer: {isVisible: true, isEnabled: true},
-    conference: {isVisible: true, isEnabled: true},
-    wrapup: {isVisible: false, isEnabled: false},
-    pauseResumeRecording: {isVisible: true, isEnabled: true},
-    endConsult: {isVisible: true, isEnabled: true},
-    recordingIndicator: {isVisible: true, isEnabled: true},
-    exitConference: {isVisible: false, isEnabled: false},
-    mergeConference: {isVisible: false, isEnabled: false},
-    mergeConferenceConsult: {isVisible: false, isEnabled: false},
-    consultTransfer: {isVisible: false, isEnabled: false},
-    consultTransferConsult: {isVisible: false, isEnabled: false},
-    switchToMainCall: {isVisible: false, isEnabled: false},
-    switchToConsult: {isVisible: false, isEnabled: false},
-    isConferenceInProgress: false,
-    isConsultInitiated: false,
-    isConsultInitiatedAndAccepted: false,
-    isConsultInitiatedOrAccepted: false,
-    isConsultReceived: false,
-    isHeld: false,
-    consultCallHeld: false,
+    activeLeg: 'consult',
+    main: {
+      endConsult: {isVisible: false, isEnabled: false},
+      transferConference: {isVisible: false, isEnabled: false},
+    },
+    consult: {
+      mute: {isVisible: true, isEnabled: true},
+      switch: {isVisible: true, isEnabled: true},
+      transfer: {isVisible: true, isEnabled: true},
+      transferConference: {isVisible: false, isEnabled: false},
+      mergeToConference: {isVisible: true, isEnabled: true},
+      endConsult: {isVisible: true, isEnabled: true},
+    },
   };
 
   describe('createConsultButtons', () => {
@@ -139,7 +125,10 @@ describe('Call Control Custom Utils', () => {
     });
 
     it('should disable transfer button when consult not completed', () => {
-      const customVisibility = {...mockControlVisibility, consultTransferConsult: {isVisible: true, isEnabled: false}};
+      const customVisibility = {
+        ...mockControlVisibility,
+        consult: {...mockControlVisibility.consult, transfer: {isVisible: true, isEnabled: false}},
+      };
       const buttons = createConsultButtons(
         false, // isMuted
         customVisibility,
@@ -156,7 +145,10 @@ describe('Call Control Custom Utils', () => {
     });
 
     it('should hide transfer button when not agent being consulted or no onTransfer', () => {
-      const customVisibility = {...mockControlVisibility, consultTransferConsult: {isVisible: false, isEnabled: false}};
+      const customVisibility = {
+        ...mockControlVisibility,
+        consult: {...mockControlVisibility.consult, transfer: {isVisible: false, isEnabled: false}},
+      };
       const buttons = createConsultButtons(
         false, // isMuted
         customVisibility,
@@ -172,8 +164,11 @@ describe('Call Control Custom Utils', () => {
       expect(transferButton?.isVisible).toBe(false);
     });
 
-    it('should hide mute button when muteUnmuteConsult is false', () => {
-      const customVisibility = {...mockControlVisibility, muteUnmuteConsult: {isVisible: false, isEnabled: false}};
+    it('should hide mute button when consult mute is false', () => {
+      const customVisibility = {
+        ...mockControlVisibility,
+        consult: {...mockControlVisibility.consult, mute: {isVisible: false, isEnabled: false}},
+      };
       const buttons = createConsultButtons(
         false, // isMuted
         customVisibility,
@@ -187,6 +182,34 @@ describe('Call Control Custom Utils', () => {
 
       const muteButton = buttons.find((b) => b.key === 'mute');
       expect(muteButton?.isVisible).toBe(false);
+    });
+
+    it('should show Transfer Conference button from transferConference controls', () => {
+      const conferenceTransferControls = {
+        ...mockControlVisibility,
+        consult: {
+          ...mockControlVisibility.consult,
+          transfer: {isVisible: false, isEnabled: false},
+          transferConference: {isVisible: true, isEnabled: true},
+        },
+      };
+
+      const buttons = createConsultButtons(
+        false,
+        conferenceTransferControls as never,
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        loggerMock
+      );
+
+      const transferButton = buttons.find((b) => b.key === 'transfer');
+      expect(transferButton?.isVisible).toBe(true);
+      expect(transferButton?.disabled).toBe(false);
+      expect(transferButton?.tooltip).toBe('Transfer Conference');
+      expect(transferButton?.icon).toBe('next-bold');
     });
 
     it('should disable consult mute when active leg is main', () => {

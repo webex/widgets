@@ -986,10 +986,12 @@ export const useCallControl = (props: useCallControlProps) => {
     }
 
     try {
-      const currentState = currentTask.state?.value;
-      const isCurrentlyConsulting = currentState === 'CONSULTING';
+      const shouldUseTransferConference =
+        currentTask.data.isConferenceInProgress ||
+        controls?.consult?.transferConference?.isVisible ||
+        controls?.main?.transferConference?.isVisible;
 
-      if (!isCurrentlyConsulting && currentTask.data.isConferenceInProgress) {
+      if (shouldUseTransferConference) {
         logger.info('Conference in progress, using transferConference', {
           module: 'useCallControl',
           method: 'consultTransfer',
