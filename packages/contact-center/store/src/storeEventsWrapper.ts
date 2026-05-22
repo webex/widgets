@@ -244,19 +244,21 @@ class StoreWrapper implements IStoreWrapper {
     // Don't assign the task as current task is incoming
     if (isIncomingTask(task, this.agentId)) return;
 
-    // Don't assign a pending campaign preview as current task.
+    // Don't promote a pending campaign preview as the current task.
     // The agent has joined the telephony reservation but hasn't accepted the
     // campaign preview yet (Accept/Skip/Remove buttons still showing).
     // CallControl should only render after the preview is explicitly accepted.
     // Allow accepted previews through even if the SDK hasn't transitioned the
     // state from 'new' yet — acceptedCampaignIds is the source of truth.
+    // Instead of returning early (which would leave a stale currentTask),
+    // fall through with null so the previous task is properly cleared.
     if (
       task &&
       this.isCampaignPreview(task) &&
       task.data.interaction.state === 'new' &&
       !this.store.acceptedCampaignIds.has(task.data.interactionId)
     ) {
-      return;
+      task = null;
     }
 
     runInAction(() => {
