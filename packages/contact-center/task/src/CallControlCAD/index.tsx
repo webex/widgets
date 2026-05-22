@@ -49,7 +49,11 @@ const CallControlCADInternal: React.FunctionComponent<CallControlProps> = observ
       agentId,
     });
 
-    if (currentTask && isUnacceptedCampaignPreview(currentTask, acceptedCampaignIds)) {
+    if (!currentTask) {
+      return <></>;
+    }
+
+    if (isUnacceptedCampaignPreview(currentTask, acceptedCampaignIds)) {
       return <></>;
     }
 
