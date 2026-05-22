@@ -45,11 +45,15 @@ const CampaignTaskPopover: React.FC<CampaignTaskPopoverProps> = ({
   // Persist global variables across task updates — some store refreshes
   // replace the task with a snapshot that omits callAssociatedData,
   // which causes getAgentViewableGlobalVariables to return [].
-  // We intentionally keep the previous values when length === 0 because
-  // an empty array indicates missing data, not a legitimate clearing of
-  // variables.  Variables are never cleared mid-call by the backend.
+  // Reset when the interaction changes so stale CAD from a previous
+  // contact is never shown on the next preview.
+  const interactionId = task.data.interactionId;
   const globalVariablesRef = useRef(latestGlobalVariables);
-  if (latestGlobalVariables.length > 0) {
+  const prevInteractionIdRef = useRef(interactionId);
+  if (prevInteractionIdRef.current !== interactionId) {
+    prevInteractionIdRef.current = interactionId;
+    globalVariablesRef.current = latestGlobalVariables;
+  } else if (latestGlobalVariables.length > 0) {
     globalVariablesRef.current = latestGlobalVariables;
   }
   const globalVariables = globalVariablesRef.current;
