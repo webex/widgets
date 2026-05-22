@@ -107,21 +107,21 @@ describe('CampaignTask', () => {
 
   // ── Initial rendering ──────────────────────────────────────────────
 
-  it('should render the campaign task section', () => {
+  it('should render the campaign task section', async () => {
     renderComponent();
-    expect(screen.getByTestId('campaign-task')).toBeInTheDocument();
+    expect(await screen.findByTestId('campaign-task')).toBeInTheDocument();
   });
 
-  it('should render the task list item with title', () => {
+  it('should render the task list item with title', async () => {
     renderComponent();
-    expect(screen.getByTestId('campaign-task-title')).toHaveTextContent('Jane Smith');
+    expect(await screen.findByTestId('campaign-task-title')).toHaveTextContent('Jane Smith');
   });
 
-  it('should render action buttons in initial state', () => {
+  it('should render action buttons in initial state', async () => {
     renderComponent();
-    expect(screen.getByTestId('campaign-task-accept-button')).toBeInTheDocument();
-    expect(screen.getByTestId('campaign-task-skip-button')).toBeInTheDocument();
-    expect(screen.getByTestId('campaign-task-remove-button')).toBeInTheDocument();
+    expect(await screen.findByTestId('campaign-task-accept-button')).toBeInTheDocument();
+    expect(await screen.findByTestId('campaign-task-skip-button')).toBeInTheDocument();
+    expect(await screen.findByTestId('campaign-task-remove-button')).toBeInTheDocument();
   });
 
   it('should render the countdown in initial state', () => {

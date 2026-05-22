@@ -83,15 +83,15 @@ describe('CampaignTaskPopover', () => {
 
   // ── Rendering ──────────────────────────────────────────────────────
 
-  it('should render the popover', () => {
+  it('should render the popover', async () => {
     renderComponent();
-    expect(screen.getByTestId('campaign-task-popover')).toBeInTheDocument();
+    expect(await screen.findByTestId('campaign-task-popover')).toBeInTheDocument();
   });
 
-  it('should render the list item with campaign-popover testIdPrefix', () => {
+  it('should render the list item with campaign-popover testIdPrefix', async () => {
     renderComponent();
-    expect(screen.getByTestId('campaign-popover-list-item')).toBeInTheDocument();
-    expect(screen.getByTestId('campaign-popover-title')).toHaveTextContent('Jane Smith');
+    expect(await screen.findByTestId('campaign-popover-list-item')).toBeInTheDocument();
+    expect(await screen.findByTestId('campaign-popover-title')).toHaveTextContent('Jane Smith');
   });
 
   it('should render the variables panel with two-column layout', () => {

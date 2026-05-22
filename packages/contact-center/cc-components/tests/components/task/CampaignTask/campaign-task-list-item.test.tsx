@@ -139,24 +139,22 @@ describe('CampaignTaskListItem', () => {
 
   // ── Button disabled states ─────────────────────────────────────────
 
-  it('should pass disabled prop to Accept button when isAcceptDisabled is true', () => {
+  it('should pass disabled prop to Accept button when isAcceptDisabled is true', async () => {
     renderComponent({isAcceptDisabled: true});
-    const button = screen.getByTestId('campaign-task-accept-button');
-    // Momentum web components set disabled as a JS property via @lit/react;
-    // JSDOM does not upgrade custom elements so we verify the property directly.
-    expect((button as unknown as {disabled: boolean}).disabled).toBe(true);
+    const button = await screen.findByTestId('campaign-task-accept-button');
+    expect(button).toHaveProperty('disabled', true);
   });
 
-  it('should pass disabled prop to Skip button when isSkipDisabled is true', () => {
+  it('should pass disabled prop to Skip button when isSkipDisabled is true', async () => {
     renderComponent({isSkipDisabled: true});
-    const button = screen.getByTestId('campaign-task-skip-button');
-    expect((button as unknown as {disabled: boolean}).disabled).toBe(true);
+    const button = await screen.findByTestId('campaign-task-skip-button');
+    expect(button).toHaveProperty('disabled', true);
   });
 
-  it('should pass disabled prop to Remove button when isRemoveDisabled is true', () => {
+  it('should pass disabled prop to Remove button when isRemoveDisabled is true', async () => {
     renderComponent({isRemoveDisabled: true});
-    const button = screen.getByTestId('campaign-task-remove-button');
-    expect((button as unknown as {disabled: boolean}).disabled).toBe(true);
+    const button = await screen.findByTestId('campaign-task-remove-button');
+    expect(button).toHaveProperty('disabled', true);
   });
 
   // ── Button click handlers ──────────────────────────────────────────

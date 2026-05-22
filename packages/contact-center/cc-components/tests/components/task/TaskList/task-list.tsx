@@ -1,7 +1,7 @@
 import React from 'react';
 import {render, fireEvent} from '@testing-library/react';
 import '@testing-library/jest-dom';
-import {mockTask, mockTaskData} from '@webex/test-fixtures';
+import {mockTask, mockTaskData, mockCC} from '@webex/test-fixtures';
 import TaskListComponent from '../../../../src/components/task/TaskList/task-list';
 import {TaskListComponentProps, MEDIA_CHANNEL} from '../../../../src/components/task/task.types';
 import type {ILogger} from '@webex/cc-store';
@@ -40,12 +40,6 @@ describe('TaskListComponent', () => {
     trace: jest.fn(),
   };
 
-  const mockCc = {
-    skipPreviewContact: jest.fn().mockResolvedValue(undefined),
-    removePreviewContact: jest.fn().mockResolvedValue(undefined),
-    acceptPreviewContact: jest.fn().mockResolvedValue(undefined),
-  } as unknown as TaskListComponentProps['cc'];
-
   // Default props using TaskListComponentProps interface
   const defaultProps: TaskListComponentProps = {
     currentTask: null,
@@ -56,7 +50,7 @@ describe('TaskListComponent', () => {
     onTaskSelect: mockOnTaskSelect,
     logger: mockLogger,
     agentId: '',
-    cc: mockCc,
+    cc: mockCC,
   };
 
   // Utility function spies

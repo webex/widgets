@@ -89,7 +89,7 @@ describe('GlobalVariablesPanel', () => {
     expect(panel.style.background).toBe('');
   });
 
-  it('should set inline background style when panelBackground is provided', () => {
+  it('should set inline background style when panelBackground is provided', async () => {
     render(
       <GlobalVariablesPanel
         variables={sampleVariables}
@@ -99,7 +99,7 @@ describe('GlobalVariablesPanel', () => {
     // JSDOM cannot parse CSS custom properties (var()), so the style
     // attribute is completely stripped.  Verify the panel still renders
     // correctly — the actual CSS value is validated in browser/E2E tests.
-    const panel = screen.getByTestId('global-variables-panel');
+    const panel = await screen.findByTestId('global-variables-panel');
     expect(panel).toBeInTheDocument();
   });
 
