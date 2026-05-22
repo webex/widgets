@@ -3,7 +3,7 @@ import {render, screen, fireEvent, act, waitFor} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import CampaignTask from '../../../../src/components/task/CampaignTask/campaign-task';
 import {CampaignTaskProps} from '../../../../src/components/task/task.types';
-import {ITask} from '@webex/cc-store';
+import {makeMockCampaignTask} from '@webex/test-fixtures';
 
 // ── Mocks ────────────────────────────────────────────────────────────
 
@@ -49,38 +49,8 @@ jest.mock('@webex/cc-ui-logging', () => ({
 
 // ── Helpers ──────────────────────────────────────────────────────────
 
-const TIMEOUT_TIMESTAMP = String(Date.now() + 30000);
-
-const createMockTask = (overrides: Record<string, unknown> = {}): ITask => {
-  const cpd = {
-    campaignPreviewSkipDisabled: 'false',
-    campaignPreviewRemoveDisabled: 'false',
-    campaignPreviewAutoAction: 'ACCEPT',
-    campaignPreviewOfferTimeout: TIMEOUT_TIMESTAMP,
-    ...(overrides.cpd as Record<string, unknown>),
-  };
-
-  return {
-    data: {
-      interactionId: 'interaction-1',
-      interaction: {
-        callProcessingDetails: cpd,
-        callAssociatedDetails: {
-          ani: '+14085550001',
-          dn: '+14085550002',
-          customerName: 'Jane Smith',
-        },
-        callAssociatedData: {},
-        outboundType: 'OUTDIAL',
-        ...(overrides.interaction as Record<string, unknown>),
-      },
-      ...(overrides.data as Record<string, unknown>),
-    },
-  } as unknown as ITask;
-};
-
 const createDefaultProps = (overrides: Partial<CampaignTaskProps> = {}): CampaignTaskProps => ({
-  task: createMockTask(),
+  task: makeMockCampaignTask(),
   acceptPreviewContact: jest.fn().mockResolvedValue(undefined),
   skipPreviewContact: jest.fn().mockResolvedValue(undefined),
   removePreviewContact: jest.fn().mockResolvedValue(undefined),
@@ -130,15 +100,8 @@ describe('CampaignTask', () => {
   });
 
   it('should render the variables panel', () => {
-    const task = createMockTask({
+    const task = makeMockCampaignTask({
       interaction: {
-        callProcessingDetails: {
-          campaignPreviewOfferTimeout: TIMEOUT_TIMESTAMP,
-          campaignPreviewSkipDisabled: 'false',
-          campaignPreviewRemoveDisabled: 'false',
-          campaignPreviewAutoAction: 'ACCEPT',
-        },
-        callAssociatedDetails: {ani: '+14085550001', dn: '+14085550002', customerName: 'Jane Smith'},
         callAssociatedData: {
           CampaignId: {
             name: 'CampaignId',
@@ -153,7 +116,6 @@ describe('CampaignTask', () => {
             secureKeyVersion: 0,
           },
         },
-        outboundType: 'OUTDIAL',
       },
     });
     renderComponent({task});
@@ -274,7 +236,7 @@ describe('CampaignTask', () => {
 
   it('should not call skipPreviewContact when Skip is disabled', () => {
     const skipPreviewContact = jest.fn();
-    const task = createMockTask({cpd: {campaignPreviewSkipDisabled: 'true'}});
+    const task = makeMockCampaignTask({cpd: {campaignPreviewSkipDisabled: 'true'}});
     renderComponent({task, skipPreviewContact});
 
     fireEvent.click(screen.getByTestId('campaign-task-skip-button'));
@@ -309,7 +271,7 @@ describe('CampaignTask', () => {
 
   it('should not call removePreviewContact when Remove is disabled', () => {
     const removePreviewContact = jest.fn();
-    const task = createMockTask({cpd: {campaignPreviewRemoveDisabled: 'true'}});
+    const task = makeMockCampaignTask({cpd: {campaignPreviewRemoveDisabled: 'true'}});
     renderComponent({task, removePreviewContact});
 
     fireEvent.click(screen.getByTestId('campaign-task-remove-button'));
@@ -367,7 +329,7 @@ describe('CampaignTask', () => {
 
   it('should hide buttons and show handle time once isAccepted becomes true', async () => {
     const acceptPreviewContact = jest.fn().mockResolvedValue(undefined);
-    const task = createMockTask();
+    const task = makeMockCampaignTask();
     const {rerender} = render(<CampaignTask {...createDefaultProps({acceptPreviewContact, task})} />);
 
     // Accept the campaign
@@ -380,7 +342,7 @@ describe('CampaignTask', () => {
     expect(screen.getByTestId('campaign-task-skip-button')).toBeInTheDocument();
 
     // Backend confirms — isAccepted becomes true
-    const updatedTask = createMockTask({cpd: {campaignPreviewOfferTimeout: String(Date.now() + 60000)}});
+    const updatedTask = makeMockCampaignTask({cpd: {campaignPreviewOfferTimeout: String(Date.now() + 60000)}});
     rerender(<CampaignTask {...createDefaultProps({acceptPreviewContact, task: updatedTask, isAccepted: true})} />);
 
     // Buttons should now be hidden — backend confirmed acceptance
@@ -394,7 +356,7 @@ describe('CampaignTask', () => {
   // ── State reset on new contact after skip/remove ───────────────────
 
   it('should reset buttons when a new contact is offered (timeout changes while not accepted)', () => {
-    const task1 = createMockTask({cpd: {campaignPreviewOfferTimeout: '1000'}});
+    const task1 = makeMockCampaignTask({cpd: {campaignPreviewOfferTimeout: '1000'}});
     const props = createDefaultProps({task: task1});
     const {rerender} = render(<CampaignTask {...props} />);
 
@@ -402,7 +364,7 @@ describe('CampaignTask', () => {
     expect(screen.getByTestId('campaign-task-accept-button')).toBeInTheDocument();
 
     // Simulate new contact offer with different timeout
-    const task2 = createMockTask({cpd: {campaignPreviewOfferTimeout: '2000'}});
+    const task2 = makeMockCampaignTask({cpd: {campaignPreviewOfferTimeout: '2000'}});
     rerender(<CampaignTask {...createDefaultProps({task: task2})} />);
 
     // Buttons should still be visible (reset occurred, state is fresh)
@@ -429,17 +391,10 @@ describe('CampaignTask', () => {
   // ── Caller identifier fallback ─────────────────────────────────────
 
   it('should use ANI as title when customerName is not available', () => {
-    const task = createMockTask({
+    const task = makeMockCampaignTask({
       interaction: {
-        callProcessingDetails: {
-          campaignPreviewOfferTimeout: TIMEOUT_TIMESTAMP,
-          campaignPreviewSkipDisabled: 'false',
-          campaignPreviewRemoveDisabled: 'false',
-          campaignPreviewAutoAction: 'ACCEPT',
-        },
         callAssociatedDetails: {ani: '+14085550001', dn: '', customerName: undefined},
         callAssociatedData: {},
-        outboundType: 'OUTDIAL',
       },
     });
     renderComponent({task});
@@ -468,7 +423,7 @@ describe('CampaignTask', () => {
 
     it('should NOT call skipPreviewContact when countdown expires with SKIP autoAction', async () => {
       const skipPreviewContact = jest.fn().mockResolvedValue(undefined);
-      const task = createMockTask({cpd: {campaignPreviewAutoAction: 'SKIP'}});
+      const task = makeMockCampaignTask({cpd: {campaignPreviewAutoAction: 'SKIP'}});
       renderComponent({task, skipPreviewContact});
 
       expect(capturedOnTimeout).toBeDefined();
@@ -479,14 +434,14 @@ describe('CampaignTask', () => {
       // Skip API should NOT be called — backend handles auto-skip
       expect(skipPreviewContact).not.toHaveBeenCalled();
       // Buttons should be disabled
-      expect((screen.getByTestId('campaign-task-accept-button') as unknown as {disabled: boolean}).disabled).toBe(true);
-      expect((screen.getByTestId('campaign-task-skip-button') as unknown as {disabled: boolean}).disabled).toBe(true);
-      expect((screen.getByTestId('campaign-task-remove-button') as unknown as {disabled: boolean}).disabled).toBe(true);
+      expect(screen.getByTestId('campaign-task-accept-button')).toHaveProperty('disabled', true);
+      expect(screen.getByTestId('campaign-task-skip-button')).toHaveProperty('disabled', true);
+      expect(screen.getByTestId('campaign-task-remove-button')).toHaveProperty('disabled', true);
     });
 
     it('should NOT call removePreviewContact when countdown expires with REMOVE autoAction', async () => {
       const removePreviewContact = jest.fn().mockResolvedValue(undefined);
-      const task = createMockTask({cpd: {campaignPreviewAutoAction: 'REMOVE'}});
+      const task = makeMockCampaignTask({cpd: {campaignPreviewAutoAction: 'REMOVE'}});
       renderComponent({task, removePreviewContact});
 
       expect(capturedOnTimeout).toBeDefined();
@@ -497,7 +452,7 @@ describe('CampaignTask', () => {
       // Remove API should NOT be called — backend handles auto-remove
       expect(removePreviewContact).not.toHaveBeenCalled();
       // Buttons should be disabled
-      expect((screen.getByTestId('campaign-task-accept-button') as unknown as {disabled: boolean}).disabled).toBe(true);
+      expect(screen.getByTestId('campaign-task-accept-button')).toHaveProperty('disabled', true);
     });
 
     it('should show Connecting button and disable Skip/Remove on timeout for ACCEPT autoAction', async () => {
@@ -523,7 +478,7 @@ describe('CampaignTask', () => {
         error: jest.fn(),
         trace: jest.fn(),
       };
-      const task = createMockTask({cpd: {campaignPreviewAutoAction: ''}});
+      const task = makeMockCampaignTask({cpd: {campaignPreviewAutoAction: ''}});
       renderComponent({task, logger});
 
       expect(capturedOnTimeout).toBeDefined();

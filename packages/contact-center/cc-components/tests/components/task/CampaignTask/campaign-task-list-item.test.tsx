@@ -51,14 +51,14 @@ describe('CampaignTaskListItem', () => {
 
   // ── Rendering ──────────────────────────────────────────────────────
 
-  it('should render the title', () => {
+  it('should render the title', async () => {
     renderComponent();
-    expect(screen.getByTestId('campaign-task-title')).toHaveTextContent('John Doe');
+    expect(await screen.findByTestId('campaign-task-title')).toHaveTextContent('John Doe');
   });
 
-  it('should render the phone number when customerName and phoneNumber differ', () => {
+  it('should render the phone number when customerName and phoneNumber differ', async () => {
     renderComponent({customerName: 'John Doe', phoneNumber: '+1-408-555-0002'});
-    expect(screen.getByTestId('campaign-task-phone')).toHaveTextContent('+1-408-555-0002');
+    expect(await screen.findByTestId('campaign-task-phone')).toHaveTextContent('+1-408-555-0002');
   });
 
   it('should NOT render phone when phoneNumber equals customerName', () => {
@@ -71,7 +71,7 @@ describe('CampaignTaskListItem', () => {
     expect(screen.queryByTestId('campaign-task-phone')).not.toBeInTheDocument();
   });
 
-  it('should render the campaign avatar', () => {
+  it('should render the campaign avatar', async () => {
     const {container} = renderComponent();
     const avatar = container.querySelector('[slot="leading-controls"]');
     expect(avatar).toBeInTheDocument();
@@ -79,14 +79,14 @@ describe('CampaignTaskListItem', () => {
 
   // ── Countdown / Handle Timer toggle ────────────────────────────────
 
-  it('should render countdown when not accepted', () => {
+  it('should render countdown when not accepted', async () => {
     renderComponent({isAcceptClicked: false});
-    expect(screen.getByTestId('mock-countdown')).toBeInTheDocument();
+    expect(await screen.findByTestId('mock-countdown')).toBeInTheDocument();
   });
 
-  it('should still render countdown when accept clicked but not yet confirmed by backend', () => {
+  it('should still render countdown when accept clicked but not yet confirmed by backend', async () => {
     renderComponent({isAcceptClicked: true, isAccepted: false});
-    expect(screen.getByTestId('mock-countdown')).toBeInTheDocument();
+    expect(await screen.findByTestId('mock-countdown')).toBeInTheDocument();
   });
 
   it('should NOT render countdown when accepted by backend', () => {
@@ -94,9 +94,9 @@ describe('CampaignTaskListItem', () => {
     expect(screen.queryByTestId('mock-countdown')).not.toBeInTheDocument();
   });
 
-  it('should render handle time timer when accepted by backend with handleTimestamp', () => {
+  it('should render handle time timer when accepted by backend with handleTimestamp', async () => {
     renderComponent({isAcceptClicked: true, isAccepted: true, handleTimestamp: Date.now()});
-    expect(screen.getByTestId('mock-task-timer')).toBeInTheDocument();
+    expect(await screen.findByTestId('mock-task-timer')).toBeInTheDocument();
   });
 
   it('should NOT render handle time timer when not accepted', () => {
@@ -111,22 +111,23 @@ describe('CampaignTaskListItem', () => {
 
   // ── Action buttons visibility ──────────────────────────────────────
 
-  it('should render Accept, Skip, and Remove buttons when not accepted', () => {
+  it('should render Accept, Skip, and Remove buttons when not accepted', async () => {
     renderComponent({isAcceptClicked: false});
-    expect(screen.getByTestId('campaign-task-actions')).toBeInTheDocument();
-    expect(screen.getByTestId('campaign-task-accept-button')).toBeInTheDocument();
-    expect(screen.getByTestId('campaign-task-skip-button')).toBeInTheDocument();
-    expect(screen.getByTestId('campaign-task-remove-button')).toBeInTheDocument();
+    expect(await screen.findByTestId('campaign-task-actions')).toBeInTheDocument();
+    expect(await screen.findByTestId('campaign-task-accept-button')).toBeInTheDocument();
+    expect(await screen.findByTestId('campaign-task-skip-button')).toBeInTheDocument();
+    expect(await screen.findByTestId('campaign-task-remove-button')).toBeInTheDocument();
   });
 
-  it('should show Connecting button and disabled Skip/Remove when accept clicked but not confirmed', () => {
+  it('should show Connecting button and disabled Skip/Remove when accept clicked but not confirmed', async () => {
     renderComponent({isAcceptClicked: true, isAccepted: false});
-    expect(screen.getByTestId('campaign-task-actions')).toBeInTheDocument();
+    expect(await screen.findByTestId('campaign-task-actions')).toBeInTheDocument();
     expect(screen.queryByTestId('campaign-task-accept-button')).not.toBeInTheDocument();
-    expect(screen.getByTestId('campaign-task-connecting-button')).toBeInTheDocument();
-    expect(screen.getByTestId('campaign-task-connecting-button')).toHaveTextContent(CAMPAIGN_CONNECTING);
-    expect(screen.getByTestId('campaign-task-skip-button')).toBeInTheDocument();
-    expect(screen.getByTestId('campaign-task-remove-button')).toBeInTheDocument();
+    const connectingBtn = await screen.findByTestId('campaign-task-connecting-button');
+    expect(connectingBtn).toBeInTheDocument();
+    expect(connectingBtn).toHaveTextContent(CAMPAIGN_CONNECTING);
+    expect(await screen.findByTestId('campaign-task-skip-button')).toBeInTheDocument();
+    expect(await screen.findByTestId('campaign-task-remove-button')).toBeInTheDocument();
   });
 
   it('should NOT render any action buttons when campaign is accepted by backend', () => {
@@ -159,48 +160,48 @@ describe('CampaignTaskListItem', () => {
 
   // ── Button click handlers ──────────────────────────────────────────
 
-  it('should call onAccept when Accept button is clicked', () => {
+  it('should call onAccept when Accept button is clicked', async () => {
     const onAccept = jest.fn();
     renderComponent({onAccept});
-    fireEvent.click(screen.getByTestId('campaign-task-accept-button'));
+    fireEvent.click(await screen.findByTestId('campaign-task-accept-button'));
     expect(onAccept).toHaveBeenCalledTimes(1);
   });
 
-  it('should call onSkip when Skip button is clicked', () => {
+  it('should call onSkip when Skip button is clicked', async () => {
     const onSkip = jest.fn();
     renderComponent({onSkip});
-    fireEvent.click(screen.getByTestId('campaign-task-skip-button'));
+    fireEvent.click(await screen.findByTestId('campaign-task-skip-button'));
     expect(onSkip).toHaveBeenCalledTimes(1);
   });
 
-  it('should call onRemove when Remove button is clicked', () => {
+  it('should call onRemove when Remove button is clicked', async () => {
     const onRemove = jest.fn();
     renderComponent({onRemove});
-    fireEvent.click(screen.getByTestId('campaign-task-remove-button'));
+    fireEvent.click(await screen.findByTestId('campaign-task-remove-button'));
     expect(onRemove).toHaveBeenCalledTimes(1);
   });
 
   // ── Accessibility ──────────────────────────────────────────────────
 
-  it('should set correct aria-label on the actions container', () => {
+  it('should set correct aria-label on the actions container', async () => {
     renderComponent();
-    expect(screen.getByTestId('campaign-task-actions')).toHaveAttribute('aria-label', CAMPAIGN_ACTIONS_LABEL);
+    expect(await screen.findByTestId('campaign-task-actions')).toHaveAttribute('aria-label', CAMPAIGN_ACTIONS_LABEL);
   });
 
-  it('should set correct aria-labels on action buttons', () => {
+  it('should set correct aria-labels on action buttons', async () => {
     renderComponent();
-    expect(screen.getByTestId('campaign-task-accept-button')).toHaveAttribute('aria-label', CAMPAIGN_ACCEPT);
-    expect(screen.getByTestId('campaign-task-skip-button')).toHaveAttribute('aria-label', CAMPAIGN_SKIP);
-    expect(screen.getByTestId('campaign-task-remove-button')).toHaveAttribute('aria-label', CAMPAIGN_REMOVE);
+    expect(await screen.findByTestId('campaign-task-accept-button')).toHaveAttribute('aria-label', CAMPAIGN_ACCEPT);
+    expect(await screen.findByTestId('campaign-task-skip-button')).toHaveAttribute('aria-label', CAMPAIGN_SKIP);
+    expect(await screen.findByTestId('campaign-task-remove-button')).toHaveAttribute('aria-label', CAMPAIGN_REMOVE);
   });
 
   // ── Custom testIdPrefix ────────────────────────────────────────────
 
-  it('should use custom testIdPrefix for data-testid attributes', () => {
+  it('should use custom testIdPrefix for data-testid attributes', async () => {
     renderComponent({testIdPrefix: 'campaign-popover'});
-    expect(screen.getByTestId('campaign-popover-list-item')).toBeInTheDocument();
-    expect(screen.getByTestId('campaign-popover-title')).toBeInTheDocument();
-    expect(screen.getByTestId('campaign-popover-accept-button')).toBeInTheDocument();
+    expect(await screen.findByTestId('campaign-popover-list-item')).toBeInTheDocument();
+    expect(await screen.findByTestId('campaign-popover-title')).toBeInTheDocument();
+    expect(await screen.findByTestId('campaign-popover-accept-button')).toBeInTheDocument();
   });
 
   // ── No timeout timestamp ───────────────────────────────────────────

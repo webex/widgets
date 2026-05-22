@@ -3,7 +3,7 @@ import {render, screen} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import CampaignTaskPopover from '../../../../src/components/task/CampaignTask/CampaignTaskPopover/campaign-task-popover';
 import {CampaignTaskPopoverProps} from '../../../../src/components/task/task.types';
-import {ITask} from '@webex/cc-store';
+import {mockCampaignTask} from '@webex/test-fixtures';
 
 // ── Mocks ────────────────────────────────────────────────────────────
 
@@ -21,45 +21,8 @@ jest.mock('../../../../src/components/task/TaskTimer/index', () => {
 
 // ── Helpers ──────────────────────────────────────────────────────────
 
-const TIMEOUT_TIMESTAMP = String(Date.now() + 30000);
-
-const createMockTask = (): ITask =>
-  ({
-    data: {
-      interactionId: 'interaction-1',
-      interaction: {
-        callProcessingDetails: {
-          campaignPreviewSkipDisabled: 'false',
-          campaignPreviewRemoveDisabled: 'false',
-          campaignPreviewAutoAction: 'ACCEPT',
-          campaignPreviewOfferTimeout: TIMEOUT_TIMESTAMP,
-        },
-        callAssociatedDetails: {
-          ani: '+14085550001',
-          dn: '+14085550002',
-          customerName: 'Jane Smith',
-        },
-        callAssociatedData: {
-          Global_Campaign: {
-            name: 'Global_Campaign',
-            displayName: 'Campaign',
-            value: 'Test Campaign',
-            type: 'STRING',
-            agentEditable: false,
-            agentViewable: true,
-            global: true,
-            isSecure: false,
-            secureKeyId: '',
-            secureKeyVersion: 0,
-          },
-        },
-        outboundType: 'OUTDIAL',
-      },
-    },
-  }) as unknown as ITask;
-
 const defaultProps: CampaignTaskPopoverProps = {
-  task: createMockTask(),
+  task: mockCampaignTask,
   triggerId: 'campaign-task-trigger-interaction-1',
   isAcceptClicked: false,
   isAccepted: false,

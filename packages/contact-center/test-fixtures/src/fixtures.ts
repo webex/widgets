@@ -258,6 +258,70 @@ const makeMockTask = (overrides?: MakeMockTaskOverrides): ITask => {
   };
 };
 
+/** Default campaign preview call processing details. */
+const mockCampaignCpd: Record<string, string> = {
+  campaignPreviewSkipDisabled: 'false',
+  campaignPreviewRemoveDisabled: 'false',
+  campaignPreviewAutoAction: 'ACCEPT',
+  campaignPreviewOfferTimeout: String(Date.now() + 30000),
+};
+
+/** A mock task shaped as a campaign preview interaction. */
+const mockCampaignTask: ITask = {
+  ...mockTask,
+  data: {
+    ...mockTask.data,
+    interactionId: 'interaction-1',
+    interaction: {
+      ...mockTask.data.interaction,
+      callProcessingDetails: mockCampaignCpd,
+      callAssociatedDetails: {
+        ani: '+14085550001',
+        dn: '+14085550002',
+        customerName: 'Jane Smith',
+      },
+      callAssociatedData: {
+        Global_Campaign: {
+          name: 'Global_Campaign',
+          displayName: 'Campaign',
+          value: 'Test Campaign',
+          type: 'STRING',
+          agentEditable: false,
+          agentViewable: true,
+          global: true,
+          isSecure: false,
+          secureKeyId: '',
+          secureKeyVersion: 0,
+        },
+      },
+      outboundType: 'OUTDIAL',
+    } as unknown as Interaction,
+  } as unknown as TaskData,
+};
+
+interface IMakeMockCampaignTaskOverrides {
+  cpd?: Record<string, unknown>;
+  interaction?: Record<string, unknown>;
+  data?: Record<string, unknown>;
+}
+
+/** Factory that creates a campaign preview mock task with deep overrides. */
+const makeMockCampaignTask = (overrides: IMakeMockCampaignTaskOverrides = {}): ITask => ({
+  ...mockCampaignTask,
+  data: {
+    ...mockCampaignTask.data,
+    ...overrides.data,
+    interaction: {
+      ...mockCampaignTask.data.interaction,
+      callProcessingDetails: {
+        ...mockCampaignCpd,
+        ...overrides.cpd,
+      },
+      ...overrides.interaction,
+    },
+  } as unknown as TaskData,
+});
+
 const mockQueueDetails = [
   {
     id: 'q1',
@@ -645,6 +709,9 @@ export {
   mockCC,
   mockTask,
   makeMockTask,
+  mockCampaignCpd,
+  mockCampaignTask,
+  makeMockCampaignTask,
   mockQueueDetails,
   mockAgents,
   mockEntryPointsResponse,

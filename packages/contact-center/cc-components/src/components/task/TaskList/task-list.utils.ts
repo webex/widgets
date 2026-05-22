@@ -1,5 +1,11 @@
 import {MEDIA_CHANNEL, TaskListItemData, getCallerIdentifier, CampaignCallProcessingDetails} from '../task.types';
-import store, {isIncomingTask, ILogger, ITask} from '@webex/cc-store';
+import store, {
+  isIncomingTask,
+  ILogger,
+  ITask,
+  CAMPAIGN_PREVIEW_OUTBOUND_TYPES,
+  CAMPAIGN_PREVIEW_CAMPAIGN_TYPES,
+} from '@webex/cc-store';
 
 interface ParticipantWithJoin {
   hasJoined?: boolean;
@@ -40,18 +46,6 @@ export const getCampaignCpd = (cpd: Record<string, unknown> | undefined): Campai
   if (!cpd) return {};
   return cpd as CampaignCallProcessingDetails;
 };
-
-/**
- * outboundType values that identify a campaign preview interaction.
- * Matches CAMPAIGN_OUTBOUND_TYPE from agent desktop constants.
- */
-const CAMPAIGN_PREVIEW_OUTBOUND_TYPES = ['STANDARD_PREVIEW_CAMPAIGN', 'DIRECT_PREVIEW_CAMPAIGN'];
-
-/**
- * campaignType values on callProcessingDetails that identify a preview campaign.
- * Matches CAMPAIGN_TYPE from agent desktop constants.
- */
-const CAMPAIGN_PREVIEW_CAMPAIGN_TYPES = ['preview_standard', 'preview_direct'];
 
 /**
  * Determines whether a task is a campaign preview interaction.
