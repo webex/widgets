@@ -250,15 +250,20 @@ class StoreWrapper implements IStoreWrapper {
     // CallControl should only render after the preview is explicitly accepted.
     // Allow accepted previews through even if the SDK hasn't transitioned the
     // state from 'new' yet — acceptedCampaignIds is the source of truth.
-    // Instead of returning early (which would leave a stale currentTask),
-    // fall through with null so the previous task is properly cleared.
-    if (
+    // Clear currentTask so stale call-control state doesn't linger, but skip
+    // the onTaskSelected callback to preserve its ITask contract.
+    const isPendingPreview =
       task &&
       this.isCampaignPreview(task) &&
       task.data.interaction.state === 'new' &&
-      !this.store.acceptedCampaignIds.has(task.data.interactionId)
-    ) {
-      task = null;
+      !this.store.acceptedCampaignIds.has(task.data.interactionId);
+
+    if (isPendingPreview) {
+      runInAction(() => {
+        this.store.currentTask = null;
+      });
+
+      return;
     }
 
     runInAction(() => {
