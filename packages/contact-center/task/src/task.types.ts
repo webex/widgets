@@ -54,8 +54,8 @@ export type useCallControlProps = Pick<
 
 export type useOutdialCallProps = Pick<OutdialCallProps, 'cc' | 'logger'>;
 
-export const CAMPAIGN_PREVIEW_OUTBOUND_TYPES = ['STANDARD_PREVIEW_CAMPAIGN', 'DIRECT_PREVIEW_CAMPAIGN'];
-export const CAMPAIGN_PREVIEW_CAMPAIGN_TYPES = ['preview_standard', 'preview_direct'];
+// Re-exported from store — single source of truth.
+export {CAMPAIGN_PREVIEW_OUTBOUND_TYPES, CAMPAIGN_PREVIEW_CAMPAIGN_TYPES} from '@webex/cc-store';
 
 export type {RealTimeTranscriptEntry};
 export interface OutdialProps {

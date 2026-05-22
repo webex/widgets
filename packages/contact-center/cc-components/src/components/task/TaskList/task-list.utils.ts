@@ -1,5 +1,4 @@
-import {MEDIA_CHANNEL, TaskListItemData, getCallerIdentifier} from '../task.types';
-import {CampaignCallProcessingDetails} from '../CampaignTask/campaign-task.types';
+import {MEDIA_CHANNEL, TaskListItemData, getCallerIdentifier, CampaignCallProcessingDetails} from '../task.types';
 import store, {isIncomingTask, ILogger, ITask} from '@webex/cc-store';
 
 interface ParticipantWithJoin {

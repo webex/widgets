@@ -2,7 +2,7 @@ import React from 'react';
 import {render, screen, fireEvent, act, waitFor} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import CampaignTask from '../../../../src/components/task/CampaignTask/campaign-task';
-import {CampaignTaskProps} from '../../../../src/components/task/CampaignTask/campaign-task.types';
+import {CampaignTaskProps} from '../../../../src/components/task/task.types';
 import {ITask} from '@webex/cc-store';
 
 // ── Mocks ────────────────────────────────────────────────────────────

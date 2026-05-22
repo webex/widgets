@@ -1,10 +1,9 @@
 import React from 'react';
 import {ErrorBoundary} from 'react-error-boundary';
 import {withMetrics} from '@webex/cc-ui-logging';
-import {TaskListComponentProps, MEDIA_CHANNEL} from '../task.types';
+import {TaskListComponentProps, MEDIA_CHANNEL, CampaignCallProcessingDetails} from '../task.types';
 import Task from '../Task';
 import CampaignTask from '../CampaignTask/campaign-task';
-import {CampaignCallProcessingDetails} from '../CampaignTask/campaign-task.types';
 import {
   extractTaskListItemData,
   isTaskListEmpty,

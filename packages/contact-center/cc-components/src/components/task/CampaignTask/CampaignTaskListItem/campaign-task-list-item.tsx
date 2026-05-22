@@ -2,7 +2,7 @@ import React from 'react';
 import {Avatar, Button, ListItem, Text, Tooltip} from '@momentum-design/components/dist/react';
 import CampaignCountdown from '../../CampaignCountdown/campaign-countdown';
 import TaskTimer from '../../TaskTimer/index';
-import {CampaignTaskListItemProps} from './campaign-task-list-item.types';
+import {CampaignTaskListItemProps} from '../../task.types';
 import {
   CAMPAIGN_ACCEPT,
   CAMPAIGN_CONNECTING,

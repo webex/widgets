@@ -6,7 +6,7 @@ import store from '@webex/cc-store';
 import {useCallControl} from '../helper';
 import {CallControlProps} from '../task.types';
 import {CallControlCADComponent} from '@webex/cc-components';
-import {isCampaignPreviewTask, isUnacceptedCampaignPreview} from '../Utils/task-util';
+import {isUnacceptedCampaignPreview} from '../Utils/task-util';
 
 const CallControlCADInternal: React.FunctionComponent<CallControlProps> = observer(
   ({
@@ -57,8 +57,6 @@ const CallControlCADInternal: React.FunctionComponent<CallControlProps> = observ
       return <></>;
     }
 
-    const isCampaignCall = currentTask ? isCampaignPreviewTask(currentTask) : false;
-
     const result = {
       ...callControlProps,
       wrapupCodes,
@@ -69,7 +67,6 @@ const CallControlCADInternal: React.FunctionComponent<CallControlProps> = observ
       allowConsultToQueue,
       logger,
       consultTransferOptions,
-      isCampaignCall,
     };
 
     return <CallControlCADComponent {...result} />;

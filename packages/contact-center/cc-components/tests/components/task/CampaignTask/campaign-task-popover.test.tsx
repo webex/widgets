@@ -2,7 +2,7 @@ import React from 'react';
 import {render, screen} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import CampaignTaskPopover from '../../../../src/components/task/CampaignTask/CampaignTaskPopover/campaign-task-popover';
-import {CampaignTaskPopoverProps} from '../../../../src/components/task/CampaignTask/CampaignTaskPopover/campaign-task-popover.types';
+import {CampaignTaskPopoverProps} from '../../../../src/components/task/task.types';
 import {ITask} from '@webex/cc-store';
 
 // ── Mocks ────────────────────────────────────────────────────────────

@@ -11,8 +11,9 @@ import {
   CampaignAutoAction,
   CAMPAIGN_ACTION_ERROR_MAP,
   CampaignErrorActionType,
-} from './campaign-task.types';
-import {CallAssociatedDataMap, getCallerIdentifier} from '../task.types';
+  CallAssociatedDataMap,
+  getCallerIdentifier,
+} from '../task.types';
 import {getAgentViewableGlobalVariables} from '../Task/task.utils';
 import {CANCEL, CAMPAIGN_TASK_REGION_LABEL} from '../constants';
 import {getAgentJoinTimestamp, getCampaignCpd} from '../TaskList/task-list.utils';

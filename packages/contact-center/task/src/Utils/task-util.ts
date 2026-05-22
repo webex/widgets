@@ -20,6 +20,7 @@ import {
   DestinationAgentType,
 } from './constants';
 import {DeviceTypeFlags, CAMPAIGN_PREVIEW_OUTBOUND_TYPES, CAMPAIGN_PREVIEW_CAMPAIGN_TYPES} from '../task.types';
+import {CampaignCallProcessingDetails} from '@webex/cc-components';
 
 // ==================== UTILITY FUNCTIONS ====================
 
@@ -89,8 +90,10 @@ export function findHoldTimestamp(interaction: Interaction, mType = 'mainCall'):
  * its outboundType or callProcessingDetails.campaignType.
  */
 export function isCampaignPreviewTask(task: ITask): boolean {
-  const outboundType = task.data.interaction.outboundType ?? '';
-  const cpd = task.data.interaction.callProcessingDetails as unknown as Record<string, string | undefined>;
+  const interaction = task.data?.interaction;
+  if (!interaction) return false;
+  const outboundType = interaction.outboundType ?? '';
+  const cpd = interaction.callProcessingDetails as unknown as CampaignCallProcessingDetails;
   const campaignType = cpd?.campaignType ?? '';
 
   return (

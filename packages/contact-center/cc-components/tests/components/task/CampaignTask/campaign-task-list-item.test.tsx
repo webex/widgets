@@ -2,7 +2,7 @@ import React from 'react';
 import {render, screen, fireEvent} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import CampaignTaskListItem from '../../../../src/components/task/CampaignTask/CampaignTaskListItem/campaign-task-list-item';
-import {CampaignTaskListItemProps} from '../../../../src/components/task/CampaignTask/CampaignTaskListItem/campaign-task-list-item.types';
+import {CampaignTaskListItemProps} from '../../../../src/components/task/task.types';
 import {
   CAMPAIGN_ACCEPT,
   CAMPAIGN_CONNECTING,

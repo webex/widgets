@@ -1,6 +1,6 @@
 import React from 'react';
 import {Text} from '@momentum-design/components/dist/react';
-import {GlobalVariablesPanelProps} from './global-variables-panel.types';
+import {GlobalVariablesPanelProps} from '../task.types';
 import {GLOBAL_VARIABLES_LABEL} from '../constants';
 import './global-variables-panel.style.scss';
 

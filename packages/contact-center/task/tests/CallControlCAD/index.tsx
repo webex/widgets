@@ -91,6 +91,7 @@ describe('CallControlCAD Component', () => {
       stateTimerTimestamp: 0,
       consultTimerLabel: 'Consulting',
       consultTimerTimestamp: 0,
+      isCampaignCall: false,
     });
 
     render(
@@ -189,6 +190,7 @@ describe('CallControlCAD Component', () => {
       stateTimerTimestamp: 0,
       consultTimerLabel: 'Consulting',
       consultTimerTimestamp: 0,
+      isCampaignCall: false,
     });
 
     render(<CallControlCAD onHoldResume={onHoldResumeCb} onEnd={onEndCb} onWrapUp={onWrapUpCb} />);
@@ -268,6 +270,7 @@ describe('CallControlCAD Component', () => {
       stateTimerTimestamp: 0,
       consultTimerLabel: 'Consulting',
       consultTimerTimestamp: 0,
+      isCampaignCall: false,
     });
 
     render(
@@ -349,6 +352,7 @@ describe('CallControlCAD Component', () => {
       stateTimerTimestamp: 0,
       consultTimerLabel: 'Consulting',
       consultTimerTimestamp: 0,
+      isCampaignCall: false,
     });
 
     const {container} = render(

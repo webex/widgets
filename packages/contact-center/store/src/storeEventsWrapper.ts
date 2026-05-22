@@ -32,6 +32,8 @@ import {
   MEDIA_TYPE_TELEPHONY_LOWER,
   MEDIA_TYPE_TELEPHONY_UPPER,
   AGENT_STATE_AVAILABLE,
+  CAMPAIGN_PREVIEW_OUTBOUND_TYPES,
+  CAMPAIGN_PREVIEW_CAMPAIGN_TYPES,
 } from './store.types';
 import {runInAction} from 'mobx';
 import {isIncomingTask} from './task-utils';
@@ -510,9 +512,6 @@ class StoreWrapper implements IStoreWrapper {
     }
   };
 
-  private static readonly CAMPAIGN_PREVIEW_OUTBOUND_TYPES = ['STANDARD_PREVIEW_CAMPAIGN', 'DIRECT_PREVIEW_CAMPAIGN'];
-  private static readonly CAMPAIGN_PREVIEW_CAMPAIGN_TYPES = ['preview_standard', 'preview_direct'];
-
   /**
    * Checks if a task is a campaign preview interaction.
    * Matches agent desktop logic that checks both outboundType and campaignType.
@@ -525,8 +524,7 @@ class StoreWrapper implements IStoreWrapper {
     const campaignType = cpd?.campaignType ?? '';
 
     return (
-      StoreWrapper.CAMPAIGN_PREVIEW_OUTBOUND_TYPES.includes(outboundType) ||
-      StoreWrapper.CAMPAIGN_PREVIEW_CAMPAIGN_TYPES.includes(campaignType)
+      CAMPAIGN_PREVIEW_OUTBOUND_TYPES.includes(outboundType) || CAMPAIGN_PREVIEW_CAMPAIGN_TYPES.includes(campaignType)
     );
   };
 
@@ -747,7 +745,7 @@ class StoreWrapper implements IStoreWrapper {
    * for campaign preview tasks so the call does not ring out to the customer
    * before the agent explicitly accepts the preview contact.
    */
-  handleIncomingCampaignPreview = (event) => {
+  handleIncomingCampaignPreview = (event: ITask) => {
     const task: ITask = event;
 
     this.registerTaskEventListeners(task);

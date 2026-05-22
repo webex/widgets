@@ -381,6 +381,12 @@ export {
   ERROR_TRIGGERING_IDLE_CODES,
 };
 
+/** Outbound type values that identify a campaign preview task. */
+export const CAMPAIGN_PREVIEW_OUTBOUND_TYPES = ['STANDARD_PREVIEW_CAMPAIGN', 'DIRECT_PREVIEW_CAMPAIGN'];
+
+/** Campaign type values (from callProcessingDetails) that identify a campaign preview task. */
+export const CAMPAIGN_PREVIEW_CAMPAIGN_TYPES = ['preview_standard', 'preview_direct'];
+
 export enum ConsultStatus {
   NO_CONSULTATION_IN_PROGRESS = 'No consultation in progress',
   BEING_CONSULTED = 'beingConsulted',

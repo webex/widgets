@@ -29,4 +29,3 @@ export * from './components/UserState/user-state.types';
 export * from './components/task/task.types';
 export * from './components/task/CampaignErrorDialog/campaign-error-dialog.types';
 export * from './components/task/CampaignCountdown/campaign-countdown.types';
-export * from './components/task/CampaignTask/campaign-task.types';
