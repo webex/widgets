@@ -563,9 +563,13 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   handleCampaignPreviewReservation = (event: ITask) => {
-    const interactionId = event?.data?.interactionId;
-    if (interactionId) {
-      this.addAcceptedCampaign(interactionId);
+    // Only track accepted campaign IDs for actual preview campaigns.
+    // Predictive/progressive campaigns don't need preview-accept tracking.
+    if (this.isCampaignPreview(event)) {
+      const interactionId = event?.data?.interactionId;
+      if (interactionId) {
+        this.addAcceptedCampaign(interactionId);
+      }
     }
     runInAction(() => {
       this.setState({
@@ -756,10 +760,12 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   /**
-   * Handles the initial arrival of a campaign preview task.
-   * The SDK emits TASK_CAMPAIGN_PREVIEW_RESERVATION instead of TASK_INCOMING
-   * for campaign preview tasks so the call does not ring out to the customer
-   * before the agent explicitly accepts the preview contact.
+   * Handles the initial arrival of a campaign task.
+   * The SDK emits TASK_CAMPAIGN_PREVIEW_RESERVATION for all campaign types.
+   * Only standard and direct preview campaigns should enter RESERVED state
+   * (the agent must explicitly accept/skip the preview contact).
+   * Predictive and progressive campaigns go straight to the regular flow —
+   * they will transition directly to ENGAGED via handleTaskAssigned.
    */
   handleIncomingCampaignPreview = (event: ITask) => {
     const task: ITask = event;
@@ -771,16 +777,17 @@ class StoreWrapper implements IStoreWrapper {
       this.handleTaskMuteState(task);
     }
 
-    // Agent enters RESERVED state when a campaign preview arrives.
-    // The transition to ENGAGED happens after the agent explicitly
-    // accepts the preview (via handleCampaignPreviewReservation or
-    // handleTaskAssigned with a non-'new' interaction state).
-    runInAction(() => {
-      this.setState({
-        developerName: RESERVED_LABEL,
-        name: RESERVED_USERNAME,
+    // Only standard/direct preview campaigns enter RESERVED state.
+    // Predictive and progressive campaigns skip RESERVED and will
+    // transition to ENGAGED when handleTaskAssigned fires.
+    if (this.isCampaignPreview(task)) {
+      runInAction(() => {
+        this.setState({
+          developerName: RESERVED_LABEL,
+          name: RESERVED_USERNAME,
+        });
       });
-    });
+    }
 
     this.refreshTaskList();
   };

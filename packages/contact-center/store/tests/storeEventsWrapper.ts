@@ -2314,5 +2314,173 @@ describe('storeEventsWrapper', () => {
         expect(storeWrapper['store'].taskList['regular-1']).toBeDefined();
       });
     });
+
+    describe('handleIncomingCampaignPreview — campaign type branching', () => {
+      it('should set RESERVED state for standard preview campaign', () => {
+        const task = createCampaignPreviewTask('preview-standard-1');
+        const setStateSpy = jest.spyOn(storeWrapper, 'setState');
+
+        storeWrapper.handleIncomingCampaignPreview(task);
+
+        expect(setStateSpy).toHaveBeenCalledWith({
+          developerName: 'RESERVED',
+          name: 'Reserved',
+        });
+      });
+
+      it('should set RESERVED state for direct preview campaign', () => {
+        const task = makeMockTask({
+          data: {
+            interactionId: 'preview-direct-1',
+            interaction: {
+              state: 'new',
+              outboundType: 'DIRECT_PREVIEW_CAMPAIGN',
+              callProcessingDetails: {
+                campaignType: 'preview_direct',
+              },
+            },
+          },
+        });
+        const setStateSpy = jest.spyOn(storeWrapper, 'setState');
+
+        storeWrapper.handleIncomingCampaignPreview(task);
+
+        expect(setStateSpy).toHaveBeenCalledWith({
+          developerName: 'RESERVED',
+          name: 'Reserved',
+        });
+      });
+
+      it('should NOT set RESERVED state for predictive campaign', () => {
+        const task = makeMockTask({
+          data: {
+            interactionId: 'predictive-1',
+            interaction: {
+              state: 'new',
+              outboundType: 'PREDICTIVE_CAMPAIGN',
+              callProcessingDetails: {
+                campaignType: 'predictive',
+              },
+            },
+          },
+        });
+        const setStateSpy = jest.spyOn(storeWrapper, 'setState');
+
+        storeWrapper.handleIncomingCampaignPreview(task);
+
+        expect(setStateSpy).not.toHaveBeenCalledWith({
+          developerName: 'RESERVED',
+          name: 'Reserved',
+        });
+      });
+
+      it('should NOT set RESERVED state for progressive campaign', () => {
+        const task = makeMockTask({
+          data: {
+            interactionId: 'progressive-1',
+            interaction: {
+              state: 'new',
+              outboundType: 'PROGRESSIVE_CAMPAIGN',
+              callProcessingDetails: {
+                campaignType: 'progressive',
+              },
+            },
+          },
+        });
+        const setStateSpy = jest.spyOn(storeWrapper, 'setState');
+
+        storeWrapper.handleIncomingCampaignPreview(task);
+
+        expect(setStateSpy).not.toHaveBeenCalledWith({
+          developerName: 'RESERVED',
+          name: 'Reserved',
+        });
+      });
+
+      it('should still call refreshTaskList for non-preview campaigns', () => {
+        const task = makeMockTask({
+          data: {
+            interactionId: 'progressive-2',
+            interaction: {
+              state: 'new',
+              outboundType: 'PROGRESSIVE_CAMPAIGN',
+            },
+          },
+        });
+        const refreshSpy = jest.spyOn(storeWrapper, 'refreshTaskList');
+
+        storeWrapper.handleIncomingCampaignPreview(task);
+
+        expect(refreshSpy).toHaveBeenCalled();
+      });
+    });
+
+    describe('handleCampaignPreviewReservation — campaign type branching', () => {
+      it('should add to acceptedCampaignIds for standard preview campaign', () => {
+        const task = createCampaignPreviewTask('preview-accept-1');
+
+        storeWrapper.handleCampaignPreviewReservation(task);
+
+        expect(storeWrapper['store'].acceptedCampaignIds.has('preview-accept-1')).toBe(true);
+      });
+
+      it('should NOT add to acceptedCampaignIds for predictive campaign', () => {
+        const task = makeMockTask({
+          data: {
+            interactionId: 'predictive-accept-1',
+            interaction: {
+              state: 'new',
+              outboundType: 'PREDICTIVE_CAMPAIGN',
+              callProcessingDetails: {
+                campaignType: 'predictive',
+              },
+            },
+          },
+        });
+
+        storeWrapper.handleCampaignPreviewReservation(task);
+
+        expect(storeWrapper['store'].acceptedCampaignIds.has('predictive-accept-1')).toBe(false);
+      });
+
+      it('should NOT add to acceptedCampaignIds for progressive campaign', () => {
+        const task = makeMockTask({
+          data: {
+            interactionId: 'progressive-accept-1',
+            interaction: {
+              state: 'new',
+              outboundType: 'PROGRESSIVE_CAMPAIGN',
+              callProcessingDetails: {
+                campaignType: 'progressive',
+              },
+            },
+          },
+        });
+
+        storeWrapper.handleCampaignPreviewReservation(task);
+
+        expect(storeWrapper['store'].acceptedCampaignIds.has('progressive-accept-1')).toBe(false);
+      });
+
+      it('should still set ENGAGED state for all campaign types', () => {
+        const predictiveTask = makeMockTask({
+          data: {
+            interactionId: 'predictive-engaged-1',
+            interaction: {
+              state: 'new',
+              outboundType: 'PREDICTIVE_CAMPAIGN',
+            },
+          },
+        });
+        const setStateSpy = jest.spyOn(storeWrapper, 'setState');
+
+        storeWrapper.handleCampaignPreviewReservation(predictiveTask);
+
+        expect(setStateSpy).toHaveBeenCalledWith({
+          developerName: 'ENGAGED',
+          name: 'Engaged',
+        });
+      });
+    });
   });
 });
