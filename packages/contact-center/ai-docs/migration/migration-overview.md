@@ -2,7 +2,78 @@
 
 ## Purpose
 
-Guide for migrating CC Widgets from ad-hoc task state management to the new SDK state-machine-driven architecture (`task-refactor` branch). This is the single entry point — it tells you what changed, which docs to follow in what order, and what to watch out for.
+Architecture reference for CC Widgets on the SDK state-machine-driven task model (`task-refactor` branch). This is the single entry point — it describes what changed, how SDK → store → widgets consumption works today, and links to per-area docs.
+
+---
+
+## Current State (Migration Complete)
+
+The widget migration to `task.uiControls` is **largely complete**. Widgets no longer call `getControlsVisibility()`. Control visibility and enablement come from the SDK; the store mirrors task inventory and fires host callbacks; hooks and components read `task.uiControls` and invoke task methods.
+
+| Area | Status | Primary file |
+|------|--------|--------------|
+| Store event wiring | **Done** | `store/src/storeEventsWrapper.ts` |
+| Store task utils (dead code removal) | **Done** | `store/src/task-utils.ts` |
+| CallControl hook | **Done** | `task/src/helper.ts` (`useCallControl`) |
+| IncomingTask / TaskList | **Done** | `task/src/helper.ts`, `cc-components/.../IncomingTask`, `TaskList` |
+| Component layer | **Done** | `cc-components/src/components/task/` |
+| Legacy bridge: `isDeclineButtonEnabled` | **Open** | Still OR'd into decline enablement after auto-answer |
+| Outdial double-popup (SDK `emitTaskEnd` vs `emitTaskReject`) | **Planned** | Widgets-side dedup if SDK reverts to `emitTaskReject` |
+
+---
+
+## SDK → Widgets Consumption Model
+
+```mermaid
+flowchart TD
+  subgraph sdk [SDK Task State Machine]
+    SM[TaskStateMachine]
+    UIC[uiControlsComputer]
+    SM --> UIC
+    UIC --> TaskObj["ITask.uiControls\n(main/consult/activeLeg)"]
+    SM --> Events["TASK_* events"]
+  end
+
+  subgraph store [StoreWrapper]
+    Reg[registerTaskEventListeners]
+    Refresh[refreshTaskList]
+    HostCb["Host callbacks\n(onIncomingTask, onOutdialFailed, onTaskRejected)"]
+    Reg --> Refresh
+    Events --> Reg
+  end
+
+  subgraph widgets [Widgets]
+    Hooks["helper.ts hooks\nuseCallControl, useIncomingTask, useTaskList"]
+    Components["cc-components\nCallControl, IncomingTask, TaskList, CAD"]
+    Hooks --> Components
+  end
+
+  TaskObj --> Reg
+  Refresh --> Hooks
+  HostCb --> HostApp["Sample app popups/modals"]
+  Hooks -->|"task.accept/decline/hold/end"| TaskObj
+```
+
+### Three layers
+
+1. **SDK** — Owns task state machine, `task.data`, and `task.uiControls`. Recomputes controls after every transition and emits `TASK_UI_CONTROLS_UPDATED`.
+2. **Store** (`storeEventsWrapper.ts`) — Registers per-task listeners, calls `refreshTaskList()` to sync MobX `taskList` / `currentTask`, and invokes optional host callbacks. Does **not** compute control visibility.
+3. **Widgets** — Read `task.uiControls.main.*` / `task.uiControls.consult.*` and call `task.accept()`, `task.hold()`, etc. **Popups and toasts are owned by the host app**, not the widget package.
+
+---
+
+## Popup / Notification Model
+
+Widgets do not render failure or rejection popups. The host app wires store callbacks (see `widgets-samples/cc/samples-cc-react-app/src/App.tsx`):
+
+| Store callback | SDK event (via handler) | Host UI |
+|----------------|-------------------------|---------|
+| `setIncomingTaskCb` | `TASK_INCOMING` | Incoming task popup + notification sound |
+| `setTaskRejected` | `TASK_REJECT` → `handleTaskReject` | "Task Rejected" popup |
+| `setOutdialFailed` | `TASK_OUTDIAL_FAILED` → `handleOutdialFailed` | "Outdial Failed" modal |
+| Widget `onRejected` / `onAccepted` props | Per-task callbacks on `TASK_END`, `TASK_REJECT`, `TASK_OUTDIAL_FAILED`, etc. | Dismiss incoming notification only |
+
+**Outdial failure:** SDK emits `TASK_OUTDIAL_FAILED` (reason string) and `TASK_END` (via `emitTaskEnd`, not `emitTaskReject`) to avoid a duplicate "Task Rejected" popup. IncomingTask dismisses on `TASK_OUTDIAL_FAILED` via `taskRejectCallback`.
 
 ---
 
@@ -10,121 +81,103 @@ Guide for migrating CC Widgets from ad-hoc task state management to the new SDK 
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────┐
-│  OLD (Current Widgets)                 │  NEW (After Migration)                 │
-│                                        │                                        │
-│  SDK emits 27 task events              │  SDK state machine transitions         │
-│         │                              │         │                              │
-│         ▼                              │         ▼                              │
-│  Store: refreshTaskList()              │  SDK: computes TaskUIControls          │
-│  + update observables manually         │  from (TaskState + TaskContext)         │
-│         │                              │         │                              │
-│         ▼                              │         ▼                              │
-│  Hooks: getControlsVisibility(         │  SDK emits                             │
-│    deviceType, featureFlags,           │  'task:ui-controls-updated'            │
-│    task, agentId, conferenceEnabled)   │         │                              │
-│         │                              │         ▼                              │
-│         ▼                              │  Widgets read task.uiControls          │
-│  Components: flat ControlVisibility    │         │                              │
-│  (22 controls + 7 state flags)         │         ▼                              │
-│                                        │  Components: TaskUIControls            │
-│  Logic spread across:                  │  (17 controls, each                    │
-│  task-util.ts, task-utils.ts,          │   { isVisible, isEnabled })            │
-│  timer-utils.ts, component utils       │                                        │
-│                                        │  Single source of truth:               │
-│                                        │  task.uiControls                       │
+│  OLD (Pre-refactor)                    │  NEW (Current)                           │
+│                                        │                                          │
+│  SDK emits task events                 │  SDK state machine transitions           │
+│         │                              │         │                                │
+│         ▼                              │         ▼                                │
+│  Store: refreshTaskList()              │  SDK: computes TaskUIControls            │
+│  + manual observables                  │  from (TaskState + TaskContext)          │
+│         │                              │         │                                │
+│         ▼                              │         ▼                                │
+│  Hooks: getControlsVisibility()        │  SDK emits TASK_UI_CONTROLS_UPDATED      │
+│    (deviceType, featureFlags, task)    │         │                                │
+│         │                              │         ▼                                │
+│         ▼                              │  Widgets read task.uiControls           │
+│  Components: flat ControlVisibility    │    .main / .consult / .activeLeg       │
+│  (22 controls + 7 state flags)         │         │                                │
+│                                        │         ▼                                │
+│  Logic in task-util.ts, task-utils.ts  │  Components: TaskUIControls per leg      │
+│                                        │  Single source of truth: task.uiControls │
 └─────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-> The events themselves have not changed — they are the same events, now emitted via the SDK state machine. The key difference is that task state updates (including UI control computation) are handled by the SDK, not by widgets.
+> Task event names are largely unchanged; they are now emitted from the SDK state machine. UI control computation moved from widgets to SDK.
 
-### What Gets Removed (Dead Code)
+### Removed (Dead Code)
 
-The following widget-side logic is entirely replaced by `task.uiControls` and `task.data`:
+- **`getControlsVisibility()`** and 22 `get*ButtonVisibility` helpers — **removed** from `task-util.ts`
+- **`getConsultStatus()`, `getTaskStatus()`, `getConsultMPCState()`, `findHoldStatus()`** — **removed** from store `task-utils.ts`
+- Local flat `ControlVisibility` interface — **replaced** by SDK `TaskUIControls`
 
-- **`getControlsVisibility()`** (task-util.ts) + all 22 `get*ButtonVisibility` helper functions — replaced by `task.uiControls`
-- **`getConsultStatus()`, `getTaskStatus()`, `getConsultMPCState()`** (store/task-utils.ts) — dead code. These are only called inside `getControlsVisibility()`. Once it is removed, the entire chain is unused and should be deleted. If consult status is needed for display, use `task.data.consultStatus` (SDK provides directly).
-- **`findHoldStatus()`** (store/task-utils.ts) — removed. The SDK state machine tracks hold state internally; widgets get hold state from the task object. Do NOT derive from `controls.hold.isEnabled` (that is an action flag — disabled during conference/consulting even when call is held).
-
-### Task Object as Source of Truth for State Flags
-
-After migration, state flags come from the task object (`ITask`), not from widget-side helper functions:
+### Task Object as Source of Truth
 
 | State | Source | Do NOT use |
 |-------|--------|------------|
-| Control visibility/enablement | `task.uiControls` (17 controls, each `{ isVisible, isEnabled }`) | `getControlsVisibility()`, `deviceType`, `featureFlags` |
-| Hold state (`isHeld`) | Task object (SDK tracks internally) | `findHoldStatus()`, `controls.hold.isEnabled` |
-| Conference in progress | `task.data.isConferenceInProgress` | `controls.exitConference.isVisible` (can be false during consult even if conference is active) |
-| Consult status (display) | `task.data.consultStatus` (e.g. `consultInitiated`, `consultAccepted`) | `getConsultStatus()`, `getTaskStatus()` |
+| Control visibility/enablement | `task.uiControls.main.*` / `task.uiControls.consult.*` | `getControlsVisibility()`, device-type gating for buttons |
+| Active consult leg | `task.uiControls.activeLeg` (`'main'` \| `'consult'`) | Guessing from button visibility alone |
+| Hold state (`isHeld`) | `isInteractionOnHold(task)` + CallControl hook logic (activeLeg, conference flags) | `controls.main.hold.isEnabled` as hold indicator |
+| Conference in progress | `task.data` / interaction `state === 'conference'` | `controls.main.exitConference.isVisible` alone |
+| Consult status (display) | `task.data.consultStatus` | Removed `getConsultStatus()` chain |
+
+### Known Legacy Bridges
+
+- **`store.isDeclineButtonEnabled`** — Set on `TASK_AUTO_ANSWERED`. Still OR'd into decline enablement in `useIncomingTask` and IncomingTask/TaskList utils until SDK `uiControls.main.decline.isEnabled` fully covers post-offer timing.
+- **`isBrowser` prop** — Retained for **outdial accept label text** ("Accept" vs "Ringing..."), not for control visibility gating.
 
 ---
 
-## CC Widgets Files Affected
+## CC Widgets Files
 
 | Area | Path |
 |------|------|
 | Store event wrapper | `packages/contact-center/store/src/storeEventsWrapper.ts` |
 | Store task utils | `packages/contact-center/store/src/task-utils.ts` |
-| Store constants | `packages/contact-center/store/src/constants.ts` |
-| Store types | `packages/contact-center/store/src/store.types.ts` |
+| Store types (SDK re-exports) | `packages/contact-center/store/src/store.types.ts` |
 | Task hooks | `packages/contact-center/task/src/helper.ts` |
-| Task UI utils (to be removed) | `packages/contact-center/task/src/Utils/task-util.ts` |
-| Task types | `packages/contact-center/task/src/task.types.ts` |
-| CC Components — CallControl | `packages/contact-center/cc-components/src/components/task/CallControl/` |
-| CC Components — CallControlCAD | `packages/contact-center/cc-components/src/components/task/CallControlCAD/` |
-| CC Components types | `packages/contact-center/cc-components/src/components/task/task.types.ts` |
-| CC Components — WC wrapper | `packages/contact-center/cc-components/src/wc.ts` |
-
-> **Not listed:** `timer-utils.ts` and `useHoldTimer.ts` are not directly affected by the task-refactor SDK changes. Timer signature updates (if any) are tracked separately in the hook migration doc.
+| Task UI utils (timers only) | `packages/contact-center/task/src/Utils/task-util.ts` |
+| CC Components | `packages/contact-center/cc-components/src/components/task/` |
+| Sample app (host callbacks) | `widgets-samples/cc/samples-cc-react-app/src/App.tsx` |
 
 ---
 
-## Execution Order
+## Documentation Index
 
-Follow these docs in order. Each doc has old vs new code, before/after examples, and files to modify.
-
-| Order | Document | What to Do |
-|-------|----------|------------|
-| 1 | [store-event-wiring-migration.md](./store-event-wiring-migration.md) | Update 27 event handlers — switch to SDK `TASK_EVENTS` enum, keep `refreshTaskList()`, add `TASK_UI_CONTROLS_UPDATED` subscription, fix `handleConsultEnd` wiring, replace `isDeclineButtonEnabled` with `task.uiControls.decline.isEnabled` |
-| 2 | [store-task-utils-migration.md](./store-task-utils-migration.md) | Remove dead code (`getControlsVisibility` chain, `findHoldStatus`), delete associated constants; keep `findHoldTimestamp` (timers) and `isIncomingTask` |
-| 3 | [call-control-hook-migration.md](./call-control-hook-migration.md) | Replace `getControlsVisibility()` with `task.uiControls` in `useCallControl` + update timer utils |
-| 4 | [incoming-task-migration.md](./incoming-task-migration.md) | Use `task.uiControls.accept/decline` instead of visibility functions |
-| 5 | [task-list-migration.md](./task-list-migration.md) | Per-task `uiControls` for accept/decline |
-| 6 | [component-layer-migration.md](./component-layer-migration.md) | Update `cc-components` props — `ControlVisibility` → `TaskUIControls`, rename control props |
+| Document | Focus | Status |
+|----------|-------|--------|
+| [store-event-wiring-migration.md](./store-event-wiring-migration.md) | Store event handlers, host callbacks, outdial flow | Reference |
+| [store-task-utils-migration.md](./store-task-utils-migration.md) | Remaining store utils vs removed dead code | Reference |
+| [call-control-hook-migration.md](./call-control-hook-migration.md) | `useCallControl`, dual uiControls refresh, hold logic | Reference |
+| [incoming-task-migration.md](./incoming-task-migration.md) | Accept/decline, outdial text, dismiss callbacks | Reference |
+| [task-list-migration.md](./task-list-migration.md) | Per-task accept/decline in list rows | Reference |
+| [component-layer-migration.md](./component-layer-migration.md) | `TaskUIControls` per-leg props, CAD outdial display | Reference |
 
 ---
 
-## SDK Pending Exports (Prerequisites)
+## SDK Consumption (via `@webex/cc-store`)
 
-**What the SDK does not export today** (from the package entry point `src/index.ts`): the items in the table below. They exist in SDK source but are not re-exported from the public package, so widget code cannot import them until they are added to the package.
+Widgets import SDK task types through the store package, which re-exports from `@webex/contact-center`:
 
-**Before implementing:** Check whether each required export is available from the SDK — i.e. whether you can import it from the package. If an item is not yet exported, delay the work that depends on it or implement only the parts that do not need it. Full completion of the migration requires these exports.
+| Export | Purpose |
+|--------|---------|
+| `TASK_EVENTS` | Event enum (local store enum removed) |
+| `TaskUIControls`, `InteractionUIControls`, `TaskUILeg` | Per-leg control shape |
+| `TaskUIControlState` | `{ isVisible, isEnabled }` |
+| `getDefaultUIControls()` | Fallback when no task |
+| `ITask.uiControls` | Getter on task instances |
 
-| Item | SDK Change Needed |
-|------|---|
-| `TaskUIControls` type | Add to `src/index.ts` |
-| `getDefaultUIControls()` | Add to `src/index.ts` |
-| `TaskState` enum | Add to `src/index.ts` (needed for consult timer labeling) |
-| `uiControls` on `ITask` | Add getter to `ITask` interface (currently only on concrete `Task` class) |
-| `IVoice`, `IDigital`, `IWebRTC` | Add to `src/index.ts` (optional — for type narrowing) |
+Import pattern: `import { TaskUIControls, TASK_EVENTS, getDefaultUIControls } from '@webex/cc-store';`
 
 ---
 
 ## Key Types from SDK
 
-| Type | Purpose |
-|------|---------|
-| `TaskUIControls` | Pre-computed control states (17 controls, each `{ isVisible, isEnabled }`) |
-| `TaskUIControlState` | Shape: `{ isVisible: boolean; isEnabled: boolean }` |
-| `getDefaultUIControls()` | Fallback when no task: `task?.uiControls ?? getDefaultUIControls()` |
-| `TASK_EVENTS` | Import from SDK — delete local enum in `store.types.ts` |
-| `TaskState` | SDK state machine states — needed for consult timer labeling |
-
-### `TaskUIControls` Structure
+### `TaskUIControls` Structure (per-leg)
 
 ```typescript
 type TaskUIControlState = { isVisible: boolean; isEnabled: boolean };
 
-type TaskUIControls = {
+type InteractionUIControls = {
   accept: TaskUIControlState;
   decline: TaskUIControlState;
   hold: TaskUIControlState;
@@ -133,21 +186,33 @@ type TaskUIControls = {
   end: TaskUIControlState;
   recording: TaskUIControlState;
   mute: TaskUIControlState;
-  consultTransfer: TaskUIControlState;
   endConsult: TaskUIControlState;
   conference: TaskUIControlState;
   exitConference: TaskUIControlState;
   transferConference: TaskUIControlState;
   mergeToConference: TaskUIControlState;
   wrapup: TaskUIControlState;
-  switchToMainCall: TaskUIControlState;
-  switchToConsult: TaskUIControlState;
+  switch: TaskUIControlState; // switch between main and consult leg
+};
+
+type TaskUILeg = 'main' | 'consult';
+
+type TaskUIControls = {
+  main: InteractionUIControls;
+  consult: InteractionUIControls;
+  activeLeg: TaskUILeg;
 };
 ```
 
-Widgets no longer compute control visibility — `task.uiControls` is the single source of truth.
+**Usage:** Read offer/accept controls from `task.uiControls.main`. Consult panel uses `task.uiControls.consult`. Use `activeLeg` for hold/switch UI during consult.
 
-> Specific constants to delete/keep, event name mappings, and ordering constraints (e.g. "do not delete constant X until helper Y is rewritten") are documented in each migration doc listed in the [Execution Order](#execution-order) table.
+Example:
+
+```typescript
+const accept = task.uiControls.main.accept;
+const consultEnd = task.uiControls.consult.endConsult;
+const controls = currentTask?.uiControls ?? getDefaultUIControls();
+```
 
 ---
 
@@ -155,7 +220,7 @@ Widgets no longer compute control visibility — `task.uiControls` is the single
 
 | Old | New | Notes |
 |-----|-----|-------|
-| `task.consultTransfer()` | `task.transfer()` | `consultTransfer` is no longer a separate public method; a single `.transfer()` is used for all transfer types |
+| `task.consultTransfer()` | `task.transfer()` | Single `.transfer()` for consult transfer |
 
 ---
 
@@ -163,66 +228,46 @@ Widgets no longer compute control visibility — `task.uiControls` is the single
 
 > **Repo:** [webex/webex-js-sdk (task-refactor)](https://github.com/webex/webex-js-sdk/tree/task-refactor)
 
-<!-- TODO: Provide local SDK cross-repo reference approach once finalized (Rankush is investigating). Do not use hardcoded local paths. -->
-
 | File | Purpose |
 |------|---------|
-| `uiControlsComputer.ts` | Computes `TaskUIControls` from `TaskState` + `TaskContext` — the single source of truth |
-| `Task.ts` | Task service exposing `task.uiControls` getter and `task:ui-controls-updated` event |
-| `constants.ts` | `TaskState` and `TaskEvent` enums |
+| `state-machine/uiControlsComputer.ts` | Computes `TaskUIControls` from `TaskState` + `TaskContext` |
+| `state-machine/TaskStateMachine.ts` | State transitions (including OUTBOUND_FAILED, wrapup guards) |
+| `TaskManager.ts` | Maps CC backend events to state machine events |
+| `voice/Voice.ts` | Voice task methods; `emitTaskOutdialFailed` emits reason string |
+| `Task.ts` | `task.uiControls` getter; emits `TASK_UI_CONTROLS_UPDATED` |
 
 ---
 
 ## Migration Fix Log
 
-### 2026-03-30 - Dial Number Transfer Wrapup Visibility (Complete Fix)
+### 2026-05 — Outdial Flow ([SDK PR #4987](https://github.com/webex/webex-js-sdk/pull/4987))
 
-**Issue**: After dial number consult transfers, wrapup button not appearing. Tests in SET_6 failing with `findFirstVisibleWrapupIndex` returning -1 (timeout after 15 seconds).
+**Issues:** React crash on outdial failure, missing wrapup after failure, double popup (Outdial Failed + Task Rejected), incorrect accept/decline for outdial, race when `AGENT_OUTBOUND_FAILED` arrives in IDLE.
 
-**Root Cause (Deeper Analysis)**:
-1. Initial hypothesis: `shouldWrapUpOrIsInitiator` guard relied on backend `wrapUpRequired` flag which wasn't set for dial number transfers.
-2. **Actual root cause**: Backend sends `AgentConsultEnded` **before** `AgentConsultTransferred` for dial number transfers.
-3. Event ordering issue: CONSULT_END (clears `consultInitiator`) → TRANSFER_SUCCESS (checks `consultInitiator`, now false) → transitions to CONNECTED instead of WRAPPING_UP.
+**SDK fixes:**
+- `TaskManager.ts`: Pass `taskData: payload` on `OUTBOUND_FAILED` for `shouldWrapUp` guard
+- `Voice.ts`: `emitTaskOutdialFailed` emits failure `reason` string (not Task object)
+- `TaskStateMachine.ts`: `OUTBOUND_FAILED` handler in IDLE; OFFERED uses `shouldWrapUp` → WRAPPING_UP or TERMINATED; `emitTaskEnd` instead of `emitTaskReject` to avoid duplicate rejection popup
+- `uiControlsComputer.ts`: Outdial accept disabled (`isWebrtc && !isOutdial`); decline `VISIBLE_DISABLED` for WebRTC outdial
 
-**Fix Location**: SDK `/packages/@webex/contact-center/src/services/task/state-machine/`
+**Widgets fixes:**
+- `helper.ts`: `TASK_OUTDIAL_FAILED` on `taskRejectCallback` (dismiss incoming notification); outdial failure via `store.handleOutdialFailed`
+- IncomingTask / TaskList: `isBrowser` for outdial "Ringing..." vs "Accept" label; read `uiControls.main.accept/decline`
+- CallControlCAD: Outdial header uses `dnis`; phone label keeps `ani` (PROD parity)
 
-**Changes Made**:
-1. **TaskStateMachine.ts** - Updated TRANSFER_SUCCESS guards (lines 256-267, 336-347, 489-505):
-   - Changed to directly check `consultInitiator` instead of using `guards.shouldWrapUpOrIsInitiator`
-   - Ensures consult initiators always wrap up regardless of backend flags
+**Planned follow-up:** If SDK reverts to `emitTaskReject` on outdial failure, add widgets-side dedup to suppress duplicate rejection popup when `TASK_OUTDIAL_FAILED` already handled.
 
-2. **Added `transferRequested` flag** to track transfer initiation:
-   - **types.ts**: Added `transferRequested: boolean` to TaskContext
-   - **constants.ts**: Added `TRANSFER` event
-   - **actions.ts**:
-     - Initialize `transferRequested: false` in `createInitialContext`
-     - Added `setTransferRequested` and `clearTransferRequested` actions
-     - Added `clearConsultStatePreservingTransfer` action that preserves `consultInitiator` if `transferRequested` is true
-   - **TaskStateMachine.ts**:
-     - CONNECTED, HELD, CONSULTING states: Added TRANSFER event handler that sets `transferRequested` flag
-     - CONSULT_END in CONSULTING state: Changed to use `clearConsultStatePreservingTransfer` instead of `clearConsultState`
-     - TRANSFER_SUCCESS in all states (CONNECTED, HELD, CONSULTING): Added `clearTransferRequested` to ALL branches (wrapup and fallback)
-     - TRANSFER_FAILED in all states: Added `clearTransferRequested` action
-   - **Voice.ts**: `transfer()` method now dispatches TRANSFER event before API call
+---
 
-**Why**: For dial number transfers, backend event ordering can vary - CONSULT_END may arrive before TRANSFER_SUCCESS. The `transferRequested` flag tracks that a transfer is in progress, preventing CONSULT_END from clearing `consultInitiator` prematurely. This ensures TRANSFER_SUCCESS can properly check `consultInitiator` for wrapup transition.
+### 2026-03-30 — Dial Number Transfer Wrapup Visibility
 
-**Impact on Widgets**: No widget changes needed. Pure SDK state machine fix. Widgets already consume `task.uiControls.wrapup.isVisible`.
+**Issue:** After dial number consult transfers, wrapup button not appearing (SET_6 E2E failures).
 
-**Tests Fixed**: SET_6 Tests 1, 2, 4, 9 (all dial number transfer wrapup visibility failures)
+**Root cause:** Backend sends `AgentConsultEnded` before `AgentConsultTransferred`; CONSULT_END cleared `consultInitiator` before TRANSFER_SUCCESS evaluated wrapup.
 
-**Fix Iterations**:
-- Iteration 1-3: Implemented transferRequested flag and preservation logic, but only added clearTransferRequested to CONSULTING state
-- Iteration 4 (2026-03-31): Discovered CONNECTED and HELD states' TRANSFER_SUCCESS handlers were missing clearTransferRequested. This was critical because when CONSULT_END arrives during transfer, state transitions CONSULTING → HELD, and TRANSFER_SUCCESS is then handled in HELD state. Without cleanup in HELD state, the flag would leak. Fixed by adding clearTransferRequested to ALL TRANSFER_SUCCESS branches in ALL states
-- **CRITICAL DISCOVERY (2026-03-31)**: SDK was on WRONG BRANCH (`ADD_MISSING_EVENT_EMITTER_TYPES` instead of `task-refactor`). This meant:
-  - stateMachineService was not initialized
-  - All previous fix iterations were applied to wrong branch
-  - Widgets were NOT using state machine at all
-  - All test failures were due to missing state machine, not implementation bugs
-  - **Resolution**: Switched SDK to `task-refactor` branch and re-applied all fixes. Tests must be re-run to validate fixes work on correct branch.
+**Fix:** SDK `transferRequested` flag + `clearConsultStatePreservingTransfer` in state machine. Widgets consume `task.uiControls.main.wrapup.isVisible` — no widget code change.
 
 ---
 
 _Created: 2026-03-09_
-_Updated: 2026-03-24 (added dead code removal and task-object source of truth sections; aligned with PR #648 decisions)_
-_Updated: 2026-03-30 (added dial number transfer wrapup fix log)_
+_Updated: 2026-05-20 (migration complete reference; per-leg TaskUIControls; SDK→store→widgets flow; outdial fix log; popup model)_

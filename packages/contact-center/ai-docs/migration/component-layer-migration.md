@@ -2,59 +2,46 @@
 
 ## Summary
 
-The `cc-components` package contains the presentational React components for task widgets. These components receive control visibility as props. The prop interface must be updated to match the new `TaskUIControls` shape from SDK (renamed controls, merged controls, removed state flags).
+**Status: Done.** Presentational components consume SDK `TaskUIControls` with **per-leg** structure (`main`, `consult`, `activeLeg`). The old flat `ControlVisibility` interface (22 controls + 7 state flags) is replaced by `TaskUIControls` imported from `@webex/cc-store`.
 
 ### Source of truth — the task object (`ITask`)
 
-After the task-refactor, **everything comes from the SDK task object** (`ITask`). Widgets should not derive state with helper functions like `getControlsVisibility()` or `findHoldStatus()`, and should have zero awareness of the SDK's internal state machine.
+- **Control visibility/enablement:** `task.uiControls.main.*` and `task.uiControls.consult.*`
+- **Active leg during consult:** `task.uiControls.activeLeg` (`'main'` | `'consult'`)
+- **Hold state:** `isHeld` prop from hook (`isInteractionOnHold` + consult/conference logic) — not `controls.main.hold.isEnabled`
+- **Conference state:** interaction `state === 'conference'` / task data — not `exitConference.isVisible` alone
 
-- **Control visibility and enablement:** `task.uiControls` — a property on the `ITask` object. Each of the 17 controls has `{ isVisible: boolean, isEnabled: boolean }`. The widget hook reads `store.currentTask.uiControls` and passes it to the component. Do not derive from `deviceType`, `featureFlags`, `conferenceEnabled`, or the legacy `getControlsVisibility()`.
-- **Hold state (`isHeld`, `consultCallHeld`):** Provided by the task object. Do not use the legacy `findHoldStatus()` helper or `controls.hold.isEnabled` (those are action flags, not hold state).
-- **Conference state (`isConferenceInProgress`):** Provided by the task object (e.g. `task.data.isConferenceInProgress`). Do not use `controls.exitConference.isVisible` as sole source — it can be false when consult is active even if conference is in progress.
+Widgets do not call `getControlsVisibility()` or `findHoldStatus()`.
 
 ---
 
-## ControlVisibility Interface — Delete and Replace
+## ControlVisibility Interface — Replaced by `TaskUIControls`
 
 **File:** `cc-components/src/components/task/task.types.ts`
 
-The old `ControlVisibility` interface (22 controls + 7 state flags) must be replaced with `TaskUIControls` from the SDK. All new control values come from `task.uiControls` — a property on the `ITask` object provided by the SDK task-refactor branch.
-
 ```typescript
-// OLD — DELETE this interface
-export interface ControlVisibility {
-  accept: Visibility;               // → task.uiControls.accept (same name)
-  decline: Visibility;              // → task.uiControls.decline (same name)
-  end: Visibility;                  // → task.uiControls.end (same name)
-  muteUnmute: Visibility;           // → task.uiControls.mute (renamed)
-  muteUnmuteConsult: Visibility;    // → REMOVE — use task.uiControls.mute (single mute control covers both main and consult)
-  holdResume: Visibility;           // → task.uiControls.hold (renamed)
-  consult: Visibility;              // → task.uiControls.consult (same name)
-  transfer: Visibility;             // → task.uiControls.transfer (same name)
-  conference: Visibility;           // → task.uiControls.conference; SDK also has task.uiControls.mergeToConference — use mergeToConference for Merge action
-  wrapup: Visibility;               // → task.uiControls.wrapup (same name)
-  pauseResumeRecording: Visibility; // → task.uiControls.recording (renamed)
-  endConsult: Visibility;           // → task.uiControls.endConsult (same name)
-  recordingIndicator: Visibility;   // → REMOVE — merged into task.uiControls.recording (use recording.isVisible for badge, recording.isEnabled for toggle)
-  exitConference: Visibility;       // → task.uiControls.exitConference (same name)
-  mergeConference: Visibility;      // → task.uiControls.mergeToConference (renamed)
-  consultTransfer: Visibility;      // → task.uiControls.consultTransfer — NOTE: always hidden in new SDK; use task.uiControls.transfer or task.uiControls.transferConference instead
-  mergeConferenceConsult: Visibility; // → REMOVE — use task.uiControls.mergeToConference (single control covers both main and consult merge)
-  consultTransferConsult: Visibility; // → REMOVE — use task.uiControls.transfer for consult transfer, task.uiControls.transferConference for conference transfer
-  switchToMainCall: Visibility;     // → task.uiControls.switchToMainCall (same name)
-  switchToConsult: Visibility;      // → task.uiControls.switchToConsult (same name)
-  isConferenceInProgress: boolean;  // → use `task.data.isConferenceInProgress` (SDK provides this directly); do NOT use controls.exitConference.isVisible as sole source — it can be false when consult is active even if conference is in progress
-  isConsultInitiated: boolean;      // → Do NOT use endConsult.isVisible as "initiated only"; it covers both initiated and accepted. Use `task.data.consultStatus` if you need that distinction (e.g. `consultInitiated` vs `consultAccepted`).
-  isConsultInitiatedAndAccepted: boolean; // → REMOVE
-  isConsultReceived: boolean;       // → REMOVE
-  isConsultInitiatedOrAccepted: boolean; // → REMOVE
-  isHeld: boolean;                  // → get from task object (SDK provides hold state). Do NOT use controls.hold.isEnabled (that is an action flag, not hold state).
-  consultCallHeld: boolean;         // → get from task object. Do NOT use controls.switchToConsult.isVisible (that is button visibility, not hold state).
-}
+import type { TaskUIControls, InteractionUIControls, TaskUILeg } from '@webex/cc-store';
 
-// NEW — import via store to preserve layering (cc-components → store → SDK). Store re-exports TaskUIControls from SDK.
-import type { TaskUIControls } from '@webex/cc-store';
+// TaskUIControls shape (SDK):
+// {
+//   main: InteractionUIControls;
+//   consult: InteractionUIControls;
+//   activeLeg: 'main' | 'consult';
+// }
 ```
+
+### Per-leg control mapping (main leg)
+
+| Old flat prop | New path | Notes |
+|---------------|----------|-------|
+| `holdResume` | `controls.main.hold` | Renamed |
+| `muteUnmute` | `controls.main.mute` | Renamed |
+| `pauseResumeRecording` / `recordingIndicator` | `controls.main.recording` | Single control; UI splits badge vs toggle |
+| `mergeConference` | `controls.main.mergeToConference` | Renamed |
+| `switchToMainCall` / `switchToConsult` | `controls.main.switch` / `controls.consult.switch` | Renamed to `switch` |
+| State flags (`isConsultInitiated`, etc.) | Removed from props | Use `controls.consult.endConsult`, `task.data`, or hook `isHeld` |
+
+CallControl passes `controls: TaskUIControls` to `buildCallControlButtons(controls.main, ...)` and consult panel via `createConsultButtons(controls.consult, ...)`.
 
 ---
 
@@ -83,60 +70,45 @@ import type { TaskUIControls } from '@webex/cc-store';
 | `isHeld` | `isHeld` | **Retain** — get from the task object (SDK provides hold state). Do NOT derive from `controls.hold.isEnabled`. |
 | `consultCallHeld` | — | **Remove** (get from the task object if needed for display) |
 
-#### Proposed New Interface
+#### Current Interface
 
 ```typescript
 interface CallControlComponentProps {
-  controls: TaskUIControls;  // All 17 controls from task.uiControls
-  // Hold state from the task object (SDK provides this). Do NOT use findHoldStatus() or controls.hold.isEnabled.
-  isHeld: boolean;
-  isMuted: boolean;
-  isRecording: boolean;
-  holdTime: number;
-  secondsUntilAutoWrapup: number;
-  buddyAgents: BuddyDetails[];  // Use exported type from @webex/cc-store or task.types (not a generic Agent type)
-  consultAgentName: string;
-  // Actions. onToggleHold(hold) — pass intended hold state (true = hold, false = resume); matches toggleHold(hold: boolean) in task.types.
-  onToggleHold: (hold: boolean) => void;
-  onToggleMute: () => void;
-  onToggleRecording: () => void;
-  onEndCall: () => void;
-  onWrapupCall: (reason: string, auxCodeId: string) => void;  // Invoked from wrap-up UI on submit
-  onTransferCall: (payload: TransferPayLoad) => void;  // Invoked from transfer popover on submit
-  onConsultCall: (payload: ConsultPayload) => void;   // Invoked from consult popover on submit
-  onEndConsultCall: () => void;
-  onConsultTransfer: () => void;
-  onConsultConference: () => void;
-  onExitConference: () => void;
-  onSwitchToConsult: () => void;
-  onSwitchToMainCall: () => void;
-  onCancelAutoWrapup: () => void;
+  controls: TaskUIControls;  // { main, consult, activeLeg } from task.uiControls
+  isHeld: boolean;           // Hook-derived; not controls.main.hold.isEnabled
+  conferenceEnabled: boolean; // App-level gating
+  // ... actions, buddyAgents, consultAgentName, media state
 }
 ```
 
 ### CallControlConsult
 **File:** `packages/contact-center/cc-components/src/components/task/CallControl/CallControlCustom/call-control-consult.tsx`
 
-- Update to use `controls.endConsult`, `controls.mergeToConference`, `controls.switchToMainCall`, `controls.switchToConsult`
-- Remove separate `consultTransferConsult`, `mergeConferenceConsult`, `muteUnmuteConsult` props
+- Uses `controls.consult.endConsult`, `controls.consult.mergeToConference`, `controls.consult.switch`
+- Main-leg switch via `controls.main.switch` when on consult leg
+- `conferenceEnabled` gates merge/conference buttons
 
 ### IncomingTaskComponent
-**File:** `packages/contact-center/cc-components/src/components/task/IncomingTask/incoming-task.tsx`
 
-- Accept: `controls.accept.isVisible` / `controls.accept.isEnabled`
-- Decline: `controls.decline.isVisible` / `controls.decline.isEnabled`
-- Minimal changes — shape is compatible
+- Accept/decline from `acceptControl` / `declineControl` props (from `uiControls.main`)
+- `isBrowser` **retained** for outdial accept label text ("Accept" vs "Ringing...")
+- `isDeclineButtonEnabled` **retained** as legacy bridge OR'd with SDK decline enablement
 
 ### TaskListComponent
-**File:** `packages/contact-center/cc-components/src/components/task/TaskList/task-list.tsx`
 
-- Per-task accept/decline: use `task.uiControls.accept` / `task.uiControls.decline`
-- Task status display: if consult status is needed for labels, use `task.data.consultStatus` (SDK provides directly)
+- Same per-task `uiControls.main.accept/decline` via `extractTaskListItemData`
+- `isBrowser` retained for outdial label rules
+
+### CallControlCADComponent
+
+- Receives `controls: TaskUIControls` and `isHeld` from hook
+- **Outdial header number:** `displayNumber` uses `dnis` for outdial, `ani` for inbound (header title)
+- **Phone Number label:** continues to use `ani` (PROD parity)
+- `conferenceEnabled` passed to consult sub-component
 
 ### OutdialCallComponent
-**File:** `packages/contact-center/cc-components/src/components/task/OutdialCall/outdial-call.tsx`
 
-- **No changes needed** — OutdialCall does not use task controls
+- **No uiControls** — dial UI only; failure popup via host `setOutdialFailed`
 
 ---
 
@@ -196,103 +168,44 @@ const CallControlComponent = ({
 };
 ```
 
-### After
-```tsx
-// call-control.tsx — new approach
-const CallControlComponent = ({
-  controls,         // TaskUIControls — all 17 controls from task.uiControls
-  isHeld,           // From task object (SDK provides hold state)
-  isMuted, isRecording, holdTime,
-  onToggleHold, onToggleMute, onEndCall, onEndConsultCall,
-  onConsultTransfer, onConsultConference, onExitConference,
-  onSwitchToMainCall, onSwitchToConsult, ...
-}: CallControlComponentProps) => {
-  // Implement openTransferPopover / openConsultPopover / openWrapupPopover (e.g. set state to show popover); popover on submit calls onTransferCall(payload) / onConsultCall(payload) / onWrapupCall(reason, auxCodeId).
-  // Derive display-only flags from controls (replaces old state flag props)
-  const isConsulting = controls.endConsult.isVisible;
-  // Get from task object; do not use controls.exitConference.isVisible as sole source
-  const isConferencing = currentTask.data.isConferenceInProgress;
+### After (current implementation)
 
-  // isHeld comes from the task object (SDK provides hold state). Do NOT use controls.hold.isEnabled for toggle — that is an action flag, not hold state.
-  return (
-    <div className="call-control">
-      {controls.hold.isVisible && (
-        <Button onClick={() => onToggleHold(!isHeld)} disabled={!controls.hold.isEnabled}>
-          {isHeld ? 'Resume' : 'Hold'}
-        </Button>
-      )}
-      {controls.mute.isVisible && (
-        <Button onClick={onToggleMute} disabled={!controls.mute.isEnabled}>
-          {isMuted ? 'Unmute' : 'Mute'}
-        </Button>
-      )}
-      {controls.end.isVisible && (
-        <Button onClick={onEndCall} disabled={!controls.end.isEnabled}>End</Button>
-      )}
-      {/* Transfer and Consult: buttons open popover/menu; popover invokes onTransferCall(payload) / onConsultCall(payload) on confirm */}
-      {controls.transfer.isVisible && (
-        <Button onClick={openTransferPopover} disabled={!controls.transfer.isEnabled}>Transfer</Button>
-      )}
-      {controls.consult.isVisible && (
-        <Button onClick={openConsultPopover} disabled={!controls.consult.isEnabled}>Consult</Button>
-      )}
-      {/* Active consult controls */}
-      {controls.endConsult.isVisible && (
-        <Button onClick={onEndConsultCall} disabled={!controls.endConsult.isEnabled}>End Consult</Button>
-      )}
-      {controls.mergeToConference.isVisible && (
-        <Button onClick={onConsultConference} disabled={!controls.mergeToConference.isEnabled}>Merge</Button>
-      )}
-      {controls.switchToMainCall.isVisible && (
-        <Button onClick={onSwitchToMainCall} disabled={!controls.switchToMainCall.isEnabled}>Main Call</Button>
-      )}
-      {controls.switchToConsult.isVisible && (
-        <Button onClick={onSwitchToConsult} disabled={!controls.switchToConsult.isEnabled}>Consult Call</Button>
-      )}
-      {/* Conference controls */}
-      {controls.exitConference.isVisible && (
-        <Button onClick={onExitConference} disabled={!controls.exitConference.isEnabled}>Exit Conference</Button>
-      )}
-      {controls.transferConference.isVisible && (
-        <Button onClick={onConsultTransfer} disabled={!controls.transferConference.isEnabled}>Transfer Conference</Button>
-      )}
-      {/* Recording */}
-      {controls.recording.isVisible && (
-        <Button onClick={onToggleRecording} disabled={!controls.recording.isEnabled}>
-          {isRecording ? 'Pause' : 'Resume'} Recording
-        </Button>
-      )}
-      {/* Wrap Up: button opens wrap-up UI; UI on submit calls onWrapupCall(reason, auxCodeId) */}
-      {controls.wrapup.isVisible && (
-        <Button onClick={openWrapupPopover} disabled={!controls.wrapup.isEnabled}>Wrap Up</Button>
-      )}
-    </div>
+CallControl receives full `TaskUIControls` and `buildCallControlButtons` reads **`controls.main`** for the main strip and **`controls.consult`** for the consult panel (via `createConsultButtons`).
+
+```tsx
+// call-control.tsx — current approach
+const CallControlComponent = ({
+  controls,         // TaskUIControls { main, consult, activeLeg }
+  isHeld,           // From hook (isInteractionOnHold + consult/conference logic)
+  isMuted, isRecording, holdTime, conferenceEnabled,
+  onToggleHold, onToggleMute, onEndCall, ...
+}: CallControlComponentProps) => {
+  const buttons = buildCallControlButtons(
+    isMuted, isRecording, isMuteButtonDisabled, currentMediaType,
+    controls, isHeld, ..., conferenceEnabled
   );
+  const filteredButtons = filterButtonsForConsultation(buttons, controls);
+  // Consult strip: createConsultButtons(controls.consult, ...)
 };
+```
+
+Inside `buildCallControlButtons`, main-leg buttons use `controls.main.*`:
+
+```typescript
+const mainCtrl = controls?.main;
+// mainCtrl.hold, mainCtrl.mute, mainCtrl.transfer, mainCtrl.switch, etc.
 ```
 
 ---
 
 ## Deriving State Flags from Controls
 
-Components that previously relied on state flags can derive them:
-
-```typescript
-// Old: isConferenceInProgress (boolean prop)
-// New: get from the task object (e.g. task.data.isConferenceInProgress).
-// Do NOT use controls.exitConference.isVisible — it can be false when consult is active
-// even if conference is in progress.
-const isConferenceInProgress = currentTask.data.isConferenceInProgress;
-
-// Old: isConsultInitiatedOrAccepted (boolean prop)
-// New: derive from controls
-const isConsulting = controls.endConsult.isVisible;
-
-// Old: isHeld (boolean state flag from getControlsVisibility, derived via findHoldStatus)
-// New: get from the task object — SDK provides hold state directly.
-// Do NOT use findHoldStatus() (legacy widget-side derivation) or controls.hold.isEnabled (action flag).
-const isHeld = /* from task object */;
-```
+| Old flag | Current source |
+|----------|----------------|
+| `isConferenceInProgress` | Interaction `state === 'conference'` or task data |
+| `isConsultInitiatedOrAccepted` | `controls.consult.endConsult.isVisible` or `controls.main.endConsult.isVisible` |
+| `isHeld` | Hook prop from `isInteractionOnHold` + consult/conference hold events — **not** `controls.main.hold.isEnabled` |
+| `activeLeg` | `controls.activeLeg` (`'main'` \| `'consult'`) for switch/hold UI |
 
 ---
 
@@ -300,34 +213,31 @@ const isHeld = /* from task object */;
 
 ### 1. `buildCallControlButtons()` — call-control.utils.ts
 
-This function builds the main call control button array. It references 12 old control names and 2 state flags:
+Takes full `TaskUIControls`; reads **`controls.main`** for the main button strip.
 
 | Old Reference | New Equivalent |
 |--------------|---------------|
-| `controlVisibility.muteUnmute.isVisible` | `controls.mute.isVisible` |
-| `controlVisibility.isHeld` | Get from the task object (SDK provides hold state). Do NOT use `findHoldStatus()`. |
-| `controlVisibility.holdResume.isEnabled` | `controls.hold.isEnabled` |
-| `controlVisibility.holdResume.isVisible` | `controls.hold.isVisible` |
-| `controlVisibility.consult.isEnabled` | `controls.consult.isEnabled` |
-| `controlVisibility.consult.isVisible` | `controls.consult.isVisible` |
-| `controlVisibility.isConferenceInProgress` | Use `task.data.isConferenceInProgress` (SDK provides this directly). Do not use `controls.exitConference.isVisible` as sole source — it can be false when consult is active |
-| `controlVisibility.consultTransfer.isEnabled` / `.isVisible` | Use **`controls.transfer`** or **`controls.transferConference`** (consult vs conference). Do NOT use `controls.consultTransfer` — always hidden in new SDK. |
-| `controlVisibility.mergeConference.isEnabled` | `controls.mergeToConference.isEnabled` |
-| `controlVisibility.transfer.isEnabled` | `controls.transfer.isEnabled` |
-| `controlVisibility.pauseResumeRecording.isEnabled` | `controls.recording.isEnabled` |
-| `controlVisibility.exitConference.isEnabled` | `controls.exitConference.isEnabled` |
-| `controlVisibility.end.isEnabled` | `controls.end.isEnabled` |
+| `controlVisibility.muteUnmute` | `controls.main.mute` |
+| `controlVisibility.isHeld` | `isHeld` param (hook-derived) |
+| `controlVisibility.holdResume` | `controls.main.hold` |
+| `controlVisibility.consult` | `controls.main.consult` |
+| `controlVisibility.transfer` | `controls.main.transfer` |
+| `controlVisibility.mergeConference` | `controls.main.mergeToConference` / `controls.main.conference` |
+| `controlVisibility.pauseResumeRecording` | `controls.main.recording` |
+| `controlVisibility.exitConference` | `controls.main.exitConference` (gated by `conferenceEnabled`) |
+| Consult transfer during active consult | Shown when `controls.consult.endConsult` or `controls.main.endConsult` visible |
 
 ### 2. `createConsultButtons()` — call-control-custom.utils.ts
 
+Reads **`controls.consult`** for the consult strip.
+
 | Old Reference | New Equivalent |
 |--------------|---------------|
-| `controlVisibility.muteUnmuteConsult` | `controls.mute` |
-| `controlVisibility.switchToMainCall` | `controls.switchToMainCall` |
-| `controlVisibility.isConferenceInProgress` | Use `task.data.isConferenceInProgress` (SDK provides this directly). Do not use `controls.exitConference.isVisible` as sole source |
-| `controlVisibility.consultTransferConsult` | `controls.transfer` / `controls.transferConference` |
-| `controlVisibility.mergeConferenceConsult` | `controls.mergeToConference` |
-| `controlVisibility.endConsult` | `controls.endConsult` |
+| `controlVisibility.muteUnmuteConsult` | `controls.consult.mute` |
+| `controlVisibility.switchToMainCall` / `switchToConsult` | `controls.consult.switch` / `controls.main.switch` |
+| `controlVisibility.consultTransferConsult` | `controls.consult.transfer` / `controls.consult.consultTransfer` |
+| `controlVisibility.mergeConferenceConsult` | `controls.consult.mergeToConference` |
+| `controlVisibility.endConsult` | `controls.consult.endConsult` |
 
 ### 3. `filterButtonsForConsultation()` — call-control.utils.ts
 
@@ -394,129 +304,60 @@ This function builds the main call control button array. It references 12 old co
 
 ## Files to Modify
 
-**Utils and Web Component layer:** Accept/decline and task-display logic live in **task-list.utils.ts** and **incoming-task.utils.tsx** (they today take `isBrowser` and/or `isDeclineButtonEnabled`). These must be updated when moving to per-task `task.uiControls`. The **wc.ts** file defines r2wc props for the Web Component build; when React props drop `isBrowser`, the WC layer must drop the attribute so consumers stay in sync.
+**Status: Done.** Utils and WC layer updated for per-leg `uiControls`.
 
-### Before/After: Utils (accept/decline and task list data)
+### Current: Utils (accept/decline and task list data)
 
 #### `extractIncomingTaskData` (incoming-task.utils.tsx)
 
-**Before:** Signature and logic use `isBrowser` and `isDeclineButtonEnabled`; accept/decline text and disable state are gated by device type and store flag.
+**Current:** Uses `uiControls.main.accept/decline` (or caller-passed `acceptControl`/`declineControl`). **`isBrowser` retained** for outdial accept label ("Accept" vs "Ringing..."). **`isDeclineButtonEnabled` retained** as legacy bridge OR'd with SDK decline enablement.
 
 ```typescript
 export const extractIncomingTaskData = (
   incomingTask: ITask,
-  isBrowser: boolean,
   logger?,
-  isDeclineButtonEnabled?: boolean
+  acceptControl?: {isVisible: boolean; isEnabled: boolean},
+  declineControl?: {isVisible: boolean; isEnabled: boolean},
+  isDeclineButtonEnabled?: boolean,
+  isBrowser?: boolean
 ): IncomingTaskData => {
-  // ...
-  const acceptText = !incomingTask.data.wrapUpRequired
-    ? isTelephony && !isBrowser ? 'Ringing...' : 'Accept'
-    : undefined;
-  const declineText = !incomingTask.data.wrapUpRequired && isTelephony && isBrowser ? 'Decline' : undefined;
-  const disableAccept = (isTelephony && !isBrowser) || isAutoAnswering;
-  const disableDecline = (isTelephony && !isBrowser) || (isAutoAnswering && !isDeclineButtonEnabled);
-  // ...
-};
-```
-
-**After:** Remove `isBrowser` and `isDeclineButtonEnabled` from the signature. Derive accept/decline text and disable state from `task.uiControls?.accept` / `task.uiControls?.decline` (or caller-passed visibility) so the util no longer depends on device type or store flag.
-
-```typescript
-export const extractIncomingTaskData = (
-  incomingTask: ITask,
-  logger?
-): IncomingTaskData => {
-  // Use task.uiControls for button visibility and enablement when available
-  const accept = incomingTask.uiControls?.accept ?? { isVisible: false, isEnabled: false };
-  const decline = incomingTask.uiControls?.decline ?? { isVisible: false, isEnabled: false };
-  // acceptText: 'Accept' when accept.isVisible, 'Ringing...' for extension telephony if needed from task state
-  // declineText: 'Decline' when decline.isVisible
-  // disableAccept: !accept.isEnabled or isAutoAnswering
-  // disableDecline: !decline.isEnabled or (isAutoAnswering && !decline.isEnabled)
+  const accept = acceptControl ?? incomingTask?.uiControls?.main?.accept ?? {isVisible: false, isEnabled: false};
+  const sdkDecline = declineControl ?? incomingTask?.uiControls?.main?.decline ?? {...};
+  const decline = { ...sdkDecline, isEnabled: sdkDecline.isEnabled || !!isDeclineButtonEnabled };
+  const showRinging = isTelephony && !accept.isEnabled && !(isBrowser && isOutdial);
+  const acceptText = accept.isVisible ? (showRinging ? 'Ringing...' : 'Accept') : undefined;
   // ...
 };
 ```
 
 #### `extractTaskListItemData` (task-list.utils.ts)
 
-**Before:** Signature takes `isBrowser`; uses `store.isDeclineButtonEnabled` for disable state; accept/decline text gated by `isBrowser`.
-
-```typescript
-export const extractTaskListItemData = (
-  task: ITask,
-  isBrowser: boolean,
-  agentId: string,
-  logger?: ILogger
-): TaskListItemData => {
-  // ...
-  const acceptText = isTaskIncoming ? (isTelephony && !isBrowser ? 'Ringing...' : 'Accept') : undefined;
-  const declineText = isTaskIncoming && isTelephony && isBrowser ? 'Decline' : undefined;
-  const disableDecline =
-    (isTaskIncoming && isTelephony && !isBrowser) || (isAutoAnswering && !store.isDeclineButtonEnabled);
-  // ...
-};
-```
-
-**After:** Remove `isBrowser` param and `store.isDeclineButtonEnabled` usage. Use `task.uiControls?.accept` and `task.uiControls?.decline` for button text and disable state.
+**Current:** Same per-leg controls + legacy decline bridge + `isBrowser` for outdial label rules.
 
 ```typescript
 export const extractTaskListItemData = (
   task: ITask,
   agentId: string,
-  logger?: ILogger
+  logger?: ILogger,
+  isDeclineButtonEnabled?: boolean,
+  isBrowser?: boolean
 ): TaskListItemData => {
-  const accept = task.uiControls?.accept ?? { isVisible: false, isEnabled: false };
-  const decline = task.uiControls?.decline ?? { isVisible: false, isEnabled: false };
-  // acceptText from accept.isVisible / task state; declineText from decline.isVisible
-  // disableAccept: !accept.isEnabled or isAutoAnswering
-  // disableDecline: !decline.isEnabled or (isAutoAnswering && !decline.isEnabled)
-  // ...
+  const accept = task.uiControls?.main?.accept ?? {isVisible: false, isEnabled: false};
+  const decline = { ...sdkDecline, isEnabled: sdkDecline.isEnabled || !!isDeclineButtonEnabled };
+  // Same showRinging / acceptText logic as IncomingTask
 };
 ```
 
-### Before/After: CallControlCAD view (call-control-cad.tsx)
+### Current: CallControlCAD view (call-control-cad.tsx)
 
-**Before:** Component receives `controlVisibility: ControlVisibility` and reads legacy state flags and control shapes.
-
-```tsx
-// call-control-cad.tsx
-{controlVisibility.isConferenceInProgress && !controlVisibility.wrapup.isVisible && (
-  // ...
-)}
-{controlVisibility.isHeld && !controlVisibility.isConsultReceived && !controlVisibility.consultCallHeld && (
-  // ...
-)}
-{controlVisibility.recordingIndicator.isVisible && (
-  // ...
-)}
-{controlVisibility.isConsultInitiatedOrAccepted && (
-  // ...
-)}
-<CallControlComponent controlVisibility={controlVisibility} ... />
-```
-
-**After:** Component receives `controls: TaskUIControls` (from `task.uiControls`), `isHeld` from the task object, and **consult-state flags** (`isConsultReceived`, `consultCallHeld`) from the task object — do NOT use `controls.consult.isVisible` for hold-chip gating, as that is an action-availability flag, not consult state. Derive conference display from the task object (not solely `controls.exitConference.isVisible`). Pass `controls` to CallControlComponent.
+**Current:** Receives `controls: TaskUIControls`, `isHeld` from hook, and `conferenceEnabled`.
 
 ```tsx
-// call-control-cad.tsx
-// Conference: get from task object (e.g. task.data.isConferenceInProgress), not controls.exitConference.isVisible
-{isConferenceInProgress && !controls.wrapup.isVisible && (
-  // ...
-)}
-// Hold chip: keep consult-state gating; parent passes isConsultReceived and consultCallHeld from the task object
-{isHeld && !isConsultReceived && !consultCallHeld && (
-  // ...
-)}
-{controls.recording?.isVisible && (
-  // ...
-)}
-{controls.endConsult?.isVisible && (
-  // isConsultInitiatedOrAccepted replaced by controls.endConsult.isVisible (covers both initiated and accepted)
-  // For phase distinction, use task.data.consultStatus
-  // ...
-)}
-<CallControlComponent controls={controls} isHeld={isHeld} ... />
+// Outdial header uses dnis; inbound uses ani
+const displayNumber = isOutdial ? dnis || ani : ani;
+
+// Hold chip, recording badge, consult panel use controls.main / controls.consult
+<CallControlComponent controls={controls} isHeld={isHeld} conferenceEnabled={conferenceEnabled} ... />
 ```
 
 ### Before/After: Web Component layer (wc.ts)
@@ -544,65 +385,56 @@ const WebTaskList = r2wc(TaskListComponent, {
 });
 ```
 
-**After:** Remove `isBrowser` from both r2wc prop definitions so WC consumers do not pass it; accept/decline visibility comes from per-task `task.uiControls` supplied by the widget layer.
+**Current:** `isBrowser` is **retained** on Web IncomingTask and Web TaskList for outdial accept label text. Visibility comes from `uiControls.main`; `isBrowser` is not used to gate button visibility.
 
 ```typescript
 const WebIncomingTask = r2wc(IncomingTaskComponent, {
   props: {
     incomingTask: 'json',
+    isBrowser: 'boolean', // Outdial label text only
+    acceptControl: 'json',
+    declineControl: 'json',
+    isDeclineButtonEnabled: 'boolean',
     accept: 'function',
     reject: 'function',
   },
 });
-const WebTaskList = r2wc(TaskListComponent, {
-  props: {
-    currentTask: 'json',
-    taskList: 'json',
-    acceptTask: 'function',
-    declineTask: 'function',
-    logger: 'function',
-  },
-});
 ```
+
+`conferenceEnabled` exposed on `WebCallControl` and `WebCallControlCAD`.
 
 ---
 
-| File | Action | Impact |
-|------|--------|--------|
-| `cc-components/.../task/task.types.ts` | Replace `ControlVisibility` with `TaskUIControls`; update `ControlProps`, `CallControlComponentProps`; remove `isBrowser` / `isDeclineButtonEnabled` from `IncomingTaskComponentProps` and TaskList-related prop types when using per-task uiControls | **HIGH** |
-| `cc-components/.../CallControl/call-control.tsx` | Update to use `controls` prop | **HIGH** |
-| `cc-components/.../CallControl/call-control.utils.ts` | Update `buildCallControlButtons()` and `filterButtonsForConsultation()` | **HIGH** |
-| `cc-components/.../CallControlCustom/call-control-custom.utils.ts` | Update `createConsultButtons()` and `getConsultStatusText()` | **HIGH** |
-| `cc-components/.../CallControlCustom/call-control-consult.tsx` | Update consult control props | **MEDIUM** |
-| `cc-components/.../CallControlCustom/consult-transfer-popover.tsx` | Update `isConferenceInProgress` prop | **LOW** |
-| `cc-components/.../IncomingTask/incoming-task.tsx` | Minor prop updates (remove `isBrowser`, `isDeclineButtonEnabled` when using uiControls) | **LOW** |
-| `cc-components/.../IncomingTask/incoming-task.utils.tsx` | Update `extractIncomingTaskData()`: remove `isBrowser` and `isDeclineButtonEnabled` params; derive accept/decline text and disable state from task or passed visibility (e.g. `task.uiControls` or caller-provided flags) | **MEDIUM** |
-| `cc-components/.../TaskList/task-list.tsx` | Minor prop updates (remove `isBrowser`; pass task or controls for accept/decline) | **LOW** |
-| `cc-components/.../TaskList/task-list.utils.ts` | Update `extractTaskListItemData()`: remove `isBrowser` param and `store.isDeclineButtonEnabled` usage; use `task.uiControls?.accept` / `task.uiControls?.decline` for button text and disable state | **MEDIUM** |
-| `cc-components/.../CallControlCAD/call-control-cad.tsx` | Replace `ControlVisibility` / legacy control-shape usage with `TaskUIControls`; update props (`controlVisibility.isConferenceInProgress`, `isHeld`, `isConsultReceived`, `recordingIndicator`, `isConsultInitiatedOrAccepted`, etc.) | **MEDIUM** |
-| `cc-components/src/wc.ts` | Update Web Component prop definitions: remove `isBrowser` from `WebIncomingTask` and `WebTaskList` r2wc props when migrating to per-task uiControls; align with React prop changes so WC consumers do not pass obsolete attributes | **LOW** |
-| `task/src/CallControlCAD/index.tsx` | **Remove** `deviceType`, `featureFlags` (SDK handles via `task.uiControls`); **retain** `conferenceEnabled` (app-level config) and `agentId` (timer participant lookup) | **MEDIUM** |
-| All test files for above | Update mocks and assertions | **HIGH** |
+| File | Status | Notes |
+|------|--------|-------|
+| `task.types.ts` | **Done** | `TaskUIControls` replaces `ControlVisibility` |
+| `CallControl/call-control.tsx` | **Done** | Uses `controls: TaskUIControls` |
+| `CallControl/call-control.utils.ts` | **Done** | `buildCallControlButtons` reads `controls.main` |
+| `CallControlCustom/call-control-custom.utils.ts` | **Done** | `createConsultButtons` reads `controls.consult` |
+| `IncomingTask/incoming-task.utils.tsx` | **Done** | `uiControls.main` + `isBrowser` + decline bridge |
+| `TaskList/task-list.utils.ts` | **Done** | Same pattern as IncomingTask |
+| `CallControlCAD/call-control-cad.tsx` | **Done** | Outdial `displayNumber` from `dnis` |
+| `wc.ts` | **Done** | `isBrowser` retained for outdial labels; `conferenceEnabled` on CallControl |
+| Component tests | **Done** | Mocks updated for `TaskUIControls` |
 
 ---
 
 ## Validation Criteria
 
-- [ ] CallControl renders all 17 controls correctly
-- [ ] Consult sub-controls (endConsult, merge, switch) render correctly
-- [ ] Conference sub-controls (exit, transfer conference) render correctly
-- [ ] State flag derivation works for conditional rendering
-- [ ] IncomingTask accept/decline render correctly
-- [ ] TaskList per-task controls render correctly
-- [ ] CallControlCAD works with simplified props
-- [ ] `buildCallControlButtons()` returns correct buttons for all states
-- [ ] `createConsultButtons()` returns correct buttons for consult state
-- [ ] No TypeScript compilation errors
-- [ ] All component tests pass
+| Criterion | Status |
+|-----------|--------|
+| CallControl uses `TaskUIControls` (main + consult legs) | **Done** |
+| `buildCallControlButtons` / `createConsultButtons` | **Done** |
+| IncomingTask / TaskList per-task main controls | **Done** |
+| CallControlCAD outdial `dnis` header display | **Done** |
+| `conferenceEnabled` app-level gating | **Done** |
+| `isBrowser` for outdial labels (WC + React) | **Done** |
+| Component tests updated | **Done** |
 
 ---
 
-_Part of the task refactor migration doc set (overview in PR 1/4)._
+_Parent: [migration-overview.md](./migration-overview.md)_
+_Updated: 2026-05-20_
 
 ---
 
@@ -610,16 +442,9 @@ _Part of the task refactor migration doc set (overview in PR 1/4)._
 
 ### Fix: Duplicate Transfer Button — Wrong `uiControls` Field Mapping
 
-- **Issue**: After accepting a call, both "Transfer" and "Transfer Call" buttons appeared simultaneously. The `transferConsult` button and the consult strip `transfer` button were both reading `controls.transfer` instead of `controls.consultTransfer`.
-- **Root Cause**: Three button definitions all mapped to `controls.transfer`:
-  - `call-control.utils.ts` — `transferConsult` button used `controls.transfer` (should be `controls.consultTransfer`)
-  - `call-control-custom.utils.ts` — consult strip `transfer` button used `controls.transfer` (should be `controls.consultTransfer`)
-  - `call-control.utils.ts` — main `transfer` button correctly used `controls.transfer`
-- **SDK Source of Truth**: `uiControlsComputer.ts` computes `consultTransfer: DISABLED` for `CONNECTED` state and only enables it during active consultation. The main `transfer` control handles the primary transfer action.
-- **Fix**:
-  - `call-control.utils.ts` L252-258: Changed `transferConsult` button's `disabled` and `isVisible` from `controls?.transfer` to `controls?.consultTransfer`
-  - `call-control-custom.utils.ts` L46-54: Changed consult strip `transfer` button's `disabled` and `isVisible` from `controls?.transfer` to `controls?.consultTransfer`
-- **Result**: Only the main "Transfer Call" button shows in `CONNECTED` state. The `transferConsult` button only appears when `consultTransfer` is explicitly enabled by the SDK during active consultation.
+- **Issue**: After accepting a call, both "Transfer" and "Transfer Call" buttons appeared simultaneously.
+- **Fix**: `transferConsult` button visibility gated on active consult (`controls.consult.endConsult` or `controls.main.endConsult`) and uses `controls.main.transfer` — not the main blind-transfer button alone.
+- **Result**: Main "Transfer" shows in `CONNECTED`; consult-strip transfer only during active consultation.
 
 ### Fix: Hold Button Icon/Tooltip Not Toggling & Multi-Login Hold State Not Syncing
 
