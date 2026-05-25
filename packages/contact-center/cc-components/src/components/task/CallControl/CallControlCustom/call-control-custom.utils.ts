@@ -61,7 +61,8 @@ export const createConsultButtons = (
         tooltip: isTransferConferenceVisible ? 'Transfer Conference' : 'Transfer',
         onClick: consultTransfer,
         className: 'call-control-button',
-        disabled: !((consultTransferCtrl?.isEnabled ?? false) || isTransferConferenceEnabled),
+        // Keep consult actions disabled while main leg is active.
+        disabled: !isConsultLegActive || !((consultTransferCtrl?.isEnabled ?? false) || isTransferConferenceEnabled),
         isVisible: (consultTransferCtrl?.isVisible ?? false) || isTransferConferenceVisible,
       },
       {

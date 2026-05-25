@@ -205,6 +205,12 @@ export const buildCallControlButtons = (
 ): CallControlButton[] => {
   try {
     const mainCtrl = controls?.main;
+    const isTransferConferenceVisible = mainCtrl?.transferConference?.isVisible ?? false;
+    const isTransferConferenceEnabled = mainCtrl?.transferConference?.isEnabled ?? false;
+    const isTransferVisible = mainCtrl?.transfer?.isVisible ?? false;
+    const isTransferEnabled = mainCtrl?.transfer?.isEnabled ?? false;
+    const isConsulting = (controls?.consult?.endConsult?.isVisible || controls?.main?.endConsult?.isVisible) ?? false;
+    const shouldPrioritizeTransferConference = isTransferConferenceVisible;
     return [
       {
         id: 'mute',
@@ -250,14 +256,11 @@ export const buildCallControlButtons = (
       {
         id: 'transferConsult',
         icon: 'next-bold',
-        tooltip: 'Transfer',
+        tooltip: shouldPrioritizeTransferConference ? 'Transfer Conference' : 'Transfer',
         onClick: onTransferConsult || (() => {}),
         className: 'call-control-button',
-        disabled: !(mainCtrl?.transfer?.isEnabled ?? false),
-        isVisible:
-          (mainCtrl?.transfer?.isVisible ?? false) &&
-          ((controls?.consult?.endConsult?.isVisible || controls?.main?.endConsult?.isVisible) ?? false) &&
-          !!onTransferConsult,
+        disabled: shouldPrioritizeTransferConference ? !isTransferConferenceEnabled : !isTransferEnabled,
+        isVisible: (isTransferVisible || shouldPrioritizeTransferConference) && isConsulting && !!onTransferConsult,
       },
       {
         id: 'conference',
@@ -273,9 +276,10 @@ export const buildCallControlButtons = (
         icon: 'next-bold',
         tooltip: `${TRANSFER} ${currentMediaType.labelName}`,
         className: 'call-control-button',
-        disabled: !(mainCtrl?.transfer?.isEnabled ?? false),
+        disabled: !isTransferEnabled,
         menuType: 'Transfer',
-        isVisible: mainCtrl?.transfer?.isVisible ?? false,
+        // When conference-transfer is available, prefer it over blind transfer.
+        isVisible: isTransferVisible && !shouldPrioritizeTransferConference,
         dataTestId: 'call-control:transfer',
       },
       {

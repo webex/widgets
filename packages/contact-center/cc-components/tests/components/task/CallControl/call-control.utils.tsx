@@ -711,6 +711,75 @@ describe('CallControl Utils', () => {
       expect(muteButton?.isVisible).toBe(true);
       expect(muteButton?.disabled).toBe(true);
     });
+
+    it('should prioritize transferConference over transfer on main leg', () => {
+      const nestedControls = {
+        activeLeg: 'main',
+        main: {
+          accept: {isVisible: false, isEnabled: false},
+          decline: {isVisible: false, isEnabled: false},
+          hold: {isVisible: false, isEnabled: false},
+          mute: {isVisible: false, isEnabled: false},
+          end: {isVisible: true, isEnabled: true},
+          transfer: {isVisible: true, isEnabled: true},
+          consult: {isVisible: false, isEnabled: false},
+          consultTransfer: {isVisible: false, isEnabled: false},
+          endConsult: {isVisible: false, isEnabled: false},
+          recording: {isVisible: false, isEnabled: false},
+          conference: {isVisible: true, isEnabled: true},
+          wrapup: {isVisible: false, isEnabled: false},
+          exitConference: {isVisible: false, isEnabled: false},
+          transferConference: {isVisible: true, isEnabled: true},
+          mergeToConference: {isVisible: false, isEnabled: false},
+          switch: {isVisible: false, isEnabled: false},
+        },
+        consult: {
+          accept: {isVisible: false, isEnabled: false},
+          decline: {isVisible: false, isEnabled: false},
+          hold: {isVisible: false, isEnabled: false},
+          mute: {isVisible: false, isEnabled: false},
+          end: {isVisible: false, isEnabled: false},
+          transfer: {isVisible: false, isEnabled: false},
+          consult: {isVisible: true, isEnabled: false},
+          consultTransfer: {isVisible: false, isEnabled: false},
+          endConsult: {isVisible: true, isEnabled: true},
+          recording: {isVisible: false, isEnabled: false},
+          conference: {isVisible: true, isEnabled: false},
+          wrapup: {isVisible: false, isEnabled: false},
+          exitConference: {isVisible: false, isEnabled: false},
+          transferConference: {isVisible: false, isEnabled: false},
+          mergeToConference: {isVisible: true, isEnabled: false},
+          switch: {isVisible: false, isEnabled: false},
+        },
+      };
+
+      const onTransferConsult = jest.fn();
+      const buttons = buildCallControlButtons(
+        false,
+        false,
+        false,
+        mockMediaTypeInfo,
+        nestedControls as never,
+        false,
+        mockFunctions.handleMuteToggleFunc,
+        mockFunctions.handleToggleHoldFunc,
+        mockFunctions.toggleRecording,
+        mockFunctions.endCall,
+        mockFunctions.exitConference,
+        mockFunctions.switchToConsult,
+        onTransferConsult,
+        jest.fn()
+      );
+
+      const transferConsultButton = buttons.find((b) => b.id === 'transferConsult');
+      const transferMenuButton = buttons.find((b) => b.id === 'transfer');
+
+      expect(transferConsultButton?.isVisible).toBe(true);
+      expect(transferConsultButton?.tooltip).toBe('Transfer Conference');
+      expect(transferConsultButton?.disabled).toBe(false);
+
+      expect(transferMenuButton?.isVisible).toBe(false);
+    });
   });
 
   describe('filterButtonsForConsultation', () => {
