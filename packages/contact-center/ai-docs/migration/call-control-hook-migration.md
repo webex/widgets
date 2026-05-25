@@ -2,31 +2,44 @@
 
 ## Summary
 
-`useCallControl` is the largest and most complex hook in CC Widgets. It orchestrates hold, mute, recording, consult, transfer, conference, wrapup, and auto-wrapup flows. This migration replaces widget-side control computation with `task.uiControls` and simplifies event-driven state updates.
+**Status: Done.** `useCallControl` in [`helper.ts`](../../task/src/helper.ts) reads SDK-computed `TaskUIControls` (per-leg: `main`, `consult`, `activeLeg`) instead of `getControlsVisibility()`. Action methods (`task.hold()`, `task.end()`, etc.) are unchanged.
 
-### Dead code removed by this migration
+### Dual refresh path for `uiControls`
 
-The following functions are deleted — their only consumer (`getControlsVisibility`) is being removed:
+1. **Store:** `TASK_UI_CONTROLS_UPDATED` → `handleUIControlsUpdated` → `refreshTaskList()` → MobX re-render
+2. **Hook:** Direct subscription on `currentTask.on(TASK_UI_CONTROLS_UPDATED)` → `setControls(updatedControls)` for immediate button updates
 
-| Function | Why dead |
-|----------|----------|
-| `getControlsVisibility` + 22 `get*ButtonVisibility` functions | Replaced by `task.uiControls` |
-| `findHoldStatus(task, mType, agentId)` | SDK tracks hold state internally in `TaskContext`. Get from task object. |
-| `getConsultStatus` / `getTaskStatus` / `getConsultMPCState` | Entire chain consumed only by `getControlsVisibility` (see [store-task-utils-migration.md](./store-task-utils-migration.md)) |
+### Per-leg control access
 
-### Props removed
+```typescript
+const [controls, setControls] = useState<TaskUIControls>(
+  currentTask?.uiControls ?? getDefaultUIControls()
+);
 
-| Old prop | Why removed |
-|----------|-------------|
-| `deviceType` | SDK handles via `UIControlConfig` |
-| `featureFlags` | SDK handles via `config.isEndTaskEnabled`, `config.isEndConsultEnabled`, `config.isRecordingEnabled` |
-| ~~`conferenceEnabled`~~ | **RESTORED** — This is an application-level config (not a feature flag). See [Fix Log: Restore conferenceEnabled](#fix-restore-conferenceenabled-prop--application-level-conference-gating) below |
+// Main leg buttons
+controls.main.hold
+controls.main.end
+controls.main.wrapup
 
-### Props retained
+// Consult panel
+controls.consult.endConsult
+controls.consult.mergeToConference
+controls.activeLeg // 'main' | 'consult' — hold/switch UI during consult
+```
 
-| Prop | Why kept |
-|------|----------|
-| `agentId` | Timer utils need it for participant lookup |
+`buildCallControlButtons()` in [`call-control.utils.ts`](../../cc-components/src/components/task/CallControl/call-control.utils.ts) maps `controls.main.*` and optional consult panel from `controls.consult.*`.
+
+### Props
+
+| Prop | Status |
+|------|--------|
+| `deviceType`, `featureFlags` | **Removed** — SDK `UIControlConfig` handles gating |
+| `conferenceEnabled` | **Retained** — app-level override in button builders |
+| `agentId` | **Retained** — timers, buddy agents, participant lookup |
+
+### Dead code removed
+
+`getControlsVisibility` + 22 `get*ButtonVisibility` functions deleted from `task-util.ts`. See [store-task-utils-migration.md](./store-task-utils-migration.md).
 
 ---
 
@@ -114,30 +127,28 @@ The following functions are deleted — their only consumer (`getControlsVisibil
 
 ## Old → New Mapping Table
 
-### Control Properties
+### Control Properties (per-leg)
+
+Access via `controls.main.*` or `controls.consult.*`:
 
 | Old Property | New Property | Change |
 |-------------|-------------|--------|
-| `accept` | `controls.accept` | Nested under `controls` |
-| `decline` | `controls.decline` | Nested under `controls` |
-| `end` | `controls.end` | Nested under `controls` |
-| `muteUnmute` | `controls.mute` | **Renamed** + nested |
-| `holdResume` | `controls.hold` | **Renamed** + nested |
-| `pauseResumeRecording` | `controls.recording` | **Renamed** — toggle button (pause/resume) |
-| `recordingIndicator` | `controls.recording` | **Same SDK control** — widget must keep separate UI for recording status badge vs toggle. Use `recording.isVisible` for badge, `recording.isEnabled` for toggle interactivity |
-| `transfer` | `controls.transfer` | Nested |
-| `conference` | `controls.conference` | Nested |
-| `exitConference` | `controls.exitConference` | Nested |
-| `mergeConference` | `controls.mergeToConference` | **Renamed** + nested |
-| `consult` | `controls.consult` | Nested |
-| `endConsult` | `controls.endConsult` | Nested |
-| `consultTransfer` | **Use `controls.transfer` or `controls.transferConference`** for consult/conference transfer button visibility | `controls.consultTransfer` is always hidden in new SDK — do not wire UI to it |
-| `consultTransferConsult` | `controls.transfer` / `controls.transferConference` | **Split** — `transfer` for consult transfer, `transferConference` for conference transfer |
-| `mergeConferenceConsult` | `controls.mergeToConference` | **Merged** |
-| `muteUnmuteConsult` | `controls.mute` | **Merged** |
-| `switchToMainCall` | `controls.switchToMainCall` | Nested |
-| `switchToConsult` | `controls.switchToConsult` | Nested |
-| `wrapup` | `controls.wrapup` | Nested |
+| `accept` | `controls.main.accept` | Per-leg |
+| `decline` | `controls.main.decline` | Per-leg |
+| `end` | `controls.main.end` | Per-leg |
+| `muteUnmute` | `controls.main.mute` | **Renamed** |
+| `holdResume` | `controls.main.hold` | **Renamed** |
+| `pauseResumeRecording` | `controls.main.recording` | **Renamed** |
+| `recordingIndicator` | `controls.main.recording` | Same control — badge vs toggle in UI |
+| `transfer` | `controls.main.transfer` | Per-leg |
+| `conference` | `controls.main.conference` / `controls.consult.conference` | Per-leg |
+| `exitConference` | `controls.main.exitConference` | Per-leg |
+| `mergeConference` | `controls.main.mergeToConference` | **Renamed** |
+| `consult` | `controls.main.consult` | Initiate consult button |
+| `endConsult` | `controls.consult.endConsult` | Consult panel |
+| `consultTransfer` | `controls.main.transfer` / `controls.consult.transfer` | `consultTransfer` hidden in SDK |
+| `switchToMainCall` / `switchToConsult` | `controls.main.switch` / `controls.consult.switch` | **Renamed** to `switch` |
+| `wrapup` | `controls.main.wrapup` | Per-leg |
 
 ### State Flags
 
@@ -205,44 +216,34 @@ export function useCallControl(props: useCallControlProps) {
 }
 ```
 
-### After
+### After (current implementation)
 ```typescript
 export function useCallControl(props: useCallControlProps) {
   const task = props.currentTask;
-  
-  // NEW: Read SDK-computed controls directly
+
   const [controls, setControls] = useState<TaskUIControls>(
     task?.uiControls ?? getDefaultUIControls()
   );
 
-  // Subscribe to UI control updates
   useEffect(() => {
     if (!task) {
       setControls(getDefaultUIControls());
       return;
     }
-    setControls(task.uiControls);
+    setControls(task.uiControls ?? getDefaultUIControls());
     const onControlsUpdated = (updatedControls: TaskUIControls) => {
       setControls(updatedControls);
     };
-    // Event name: SDK may expose TASK_EVENTS.TASK_UI_CONTROLS_UPDATED later; until then use literal
-    task.on('task:ui-controls-updated', onControlsUpdated);
+    task.on(TASK_EVENTS.TASK_UI_CONTROLS_UPDATED, onControlsUpdated);
     return () => {
-      task.off('task:ui-controls-updated', onControlsUpdated);
+      task.off(TASK_EVENTS.TASK_UI_CONTROLS_UPDATED, onControlsUpdated);
     };
   }, [task]);
 
-  // Keep event callbacks for actions that need hook-level side effects
-  // (hold timer, mute state, recording state)
-  useEffect(() => {
-    if (!task) return;
-    store.setTaskCallback(TASK_EVENTS.TASK_HOLD, holdCallback, task.data.interactionId);
-    store.setTaskCallback(TASK_EVENTS.TASK_RESUME, resumeCallback, task.data.interactionId);
-    // ... recording callbacks
-    return () => { /* cleanup */ };
-  }, [task]);
+  // isHeld: isInteractionOnHold + consult activeLeg + conference hold flags
+  // ... event callbacks for hold, recording, wrapup host notifications ...
 
-  return { controls, isMuted, isRecording, holdTime, /* ... actions */ };
+  return { controls, isHeld, isMuted, isRecording, conferenceEnabled, /* actions */ };
 }
 ```
 
@@ -441,21 +442,19 @@ export function calculateStateTimerData(
 
 ## Validation Criteria
 
-- [ ] All 17 SDK controls render correctly in CallControl UI
-- [ ] Hold toggle works (CONNECTED ↔ HELD)
-- [ ] Mute toggle works (local WebRTC state)
-- [ ] Recording toggle works (pause/resume)
-- [ ] Consult flow: initiate → switch calls → end/transfer/conference
-- [ ] Conference flow: merge → exit → transfer conference
-- [ ] Wrapup flow: end → wrapup → complete
-- [ ] Auto-wrapup timer works
-- [ ] Hold timer displays correctly
-- [ ] Digital channel shows only accept/end/transfer/wrapup
-- [ ] All action methods still call correct SDK methods
+| Criterion | Status |
+|-----------|--------|
+| SDK controls render in CallControl UI (main + consult legs) | **Done** |
+| Hold / mute / recording / consult / conference / wrapup flows | **Done** |
+| Auto-wrapup and hold timers | **Done** |
+| `conferenceEnabled` app-level gating | **Done** |
+| `getControlsVisibility` removed | **Done** |
+| All actions call correct SDK methods | **Done** |
 
 ---
 
 _Parent: [migration-overview.md](./migration-overview.md)_
+_Updated: 2026-05-20_
 
 ---
 
