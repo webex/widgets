@@ -34,7 +34,8 @@ export const extractIncomingTaskData = (
 ): IncomingTaskData => {
   try {
     const accept = acceptControl ?? incomingTask?.uiControls?.main?.accept ?? {isVisible: false, isEnabled: false};
-    const sdkDecline = declineControl ?? incomingTask?.uiControls?.main?.decline ?? {isVisible: false, isEnabled: false};
+    const sdkDecline = declineControl ??
+      incomingTask?.uiControls?.main?.decline ?? {isVisible: false, isEnabled: false};
     const decline = {
       ...sdkDecline,
       isEnabled: sdkDecline.isEnabled || !!isDeclineButtonEnabled,

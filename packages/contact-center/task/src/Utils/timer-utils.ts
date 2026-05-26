@@ -136,9 +136,7 @@ export function calculateConsultTimerData(
   // Consulted agent (Agent 2): their call is mType "mainCall" not "consult".
   // When the initiator switches away, Agent 2's mainCall is put on hold.
   if (!consultMedia && interaction?.media) {
-    const mainMedia = Object.values(interaction.media).find(
-      (m: any) => m?.mType === 'mainCall'
-    ) as any;
+    const mainMedia = Object.values(interaction.media).find((m) => (m as {mType: string}).mType === 'mainCall');
     if (mainMedia) {
       consultMedia = mainMedia;
     }
@@ -157,8 +155,7 @@ export function calculateConsultTimerData(
 
   // Distinguish "Consult Requested" from "Consulting" using participant data.
   const isConsultInitiated =
-    participant?.consultState === 'consultInitiated' ||
-    currentTask.data?.consultStatus === 'consultInitiated';
+    participant?.consultState === 'consultInitiated' || currentTask.data?.consultStatus === 'consultInitiated';
   const label = isConsultInitiated ? TIMER_LABEL_CONSULT_REQUESTED : TIMER_LABEL_CONSULTING;
 
   return {

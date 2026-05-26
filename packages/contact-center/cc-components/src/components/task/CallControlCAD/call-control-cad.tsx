@@ -72,7 +72,6 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
     currentTask?.data?.interaction?.callAssociatedDetails?.dnis ||
     currentTask?.data?.interaction?.callProcessingDetails?.dnis;
   const displayNumber = isOutdial ? dnis || ani : ani;
-  const dn = currentTask?.data?.interaction?.callAssociatedDetails?.dn;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const callAssociatedData = (currentTask?.data?.interaction as any)?.callAssociatedData as

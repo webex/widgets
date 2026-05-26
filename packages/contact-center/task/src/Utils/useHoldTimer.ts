@@ -43,26 +43,21 @@ export const useHoldTimer = (currentTask: ITask | null, controls?: TaskUIControl
 
   const customerPresent = Boolean(
     currentTask?.data?.interaction?.participants &&
-      Object.values(currentTask.data.interaction.participants).some(
-        (p: any) => p?.pType === 'Customer' && !p?.hasLeft
-      )
+      Object.values(currentTask.data.interaction.participants).some((p) => p?.pType === 'Customer' && !p?.hasLeft)
   );
 
   // During consulting, activeLeg='consult' means the main call is on hold.
   // Outside consulting, fall back to the actual media hold state.
   // When customer has left, never show the hold timer (follows Agent Desktop behavior).
-  const mainCallOnHold = isConsulting && customerPresent
-    ? controls?.activeLeg === 'consult'
-    : currentTask
-      ? isInteractionOnHold(currentTask)
-      : false;
+  const mainCallOnHold =
+    isConsulting && customerPresent
+      ? controls?.activeLeg === 'consult'
+      : currentTask
+        ? isInteractionOnHold(currentTask)
+        : false;
 
-  const rawTs = currentTask?.data?.interaction
-    ? findHoldTimestamp(currentTask.data.interaction, 'mainCall')
-    : null;
-  const holdTimestampMs: number | null = rawTs
-    ? (rawTs < 10000000000 ? rawTs * 1000 : rawTs)
-    : null;
+  const rawTs = currentTask?.data?.interaction ? findHoldTimestamp(currentTask.data.interaction, 'mainCall') : null;
+  const holdTimestampMs: number | null = rawTs ? (rawTs < 10000000000 ? rawTs * 1000 : rawTs) : null;
 
   // --- Effect: only re-runs when the boolean or timestamp actually change ---
 

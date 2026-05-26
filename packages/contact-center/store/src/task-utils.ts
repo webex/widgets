@@ -1,4 +1,4 @@
-import {EXCLUDED_PARTICIPANT_TYPES, MEDIA_TYPE_CONSULT, RELATIONSHIP_TYPE_CONSULT} from './constants';
+import {EXCLUDED_PARTICIPANT_TYPES, RELATIONSHIP_TYPE_CONSULT} from './constants';
 import {ITask, MEDIA_TYPE_TELEPHONY_LOWER, Participant} from './store.types';
 
 /**

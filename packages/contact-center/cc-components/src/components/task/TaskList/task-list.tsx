@@ -12,8 +12,17 @@ import './styles.scss';
 import {withMetrics} from '@webex/cc-ui-logging';
 
 const TaskListComponent: React.FunctionComponent<TaskListComponentProps> = (props) => {
-  const {currentTask, taskList, acceptTask, declineTask, onTaskSelect, logger, agentId, isDeclineButtonEnabled, isBrowser} =
-    props;
+  const {
+    currentTask,
+    taskList,
+    acceptTask,
+    declineTask,
+    onTaskSelect,
+    logger,
+    agentId,
+    isDeclineButtonEnabled,
+    isBrowser,
+  } = props;
 
   // Early return for empty task list
   if (isTaskListEmpty(taskList)) {

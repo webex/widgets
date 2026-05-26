@@ -1,4 +1,9 @@
-import type {MEDIA_CHANNEL as MediaChannelType, TaskComponentData, CADVariable, CallAssociatedDataMap} from '../task.types';
+import type {
+  MEDIA_CHANNEL as MediaChannelType,
+  TaskComponentData,
+  CADVariable,
+  CallAssociatedDataMap,
+} from '../task.types';
 import {getMediaTypeInfo} from '../../../utils';
 
 /** System CAD variable keys that are already displayed elsewhere in the UI. */
