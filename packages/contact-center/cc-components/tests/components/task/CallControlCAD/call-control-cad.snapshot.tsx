@@ -2,7 +2,13 @@ import React from 'react';
 import {render} from '@testing-library/react';
 import CallControlCADComponent from '../../../../src/components/task/CallControlCAD/call-control-cad';
 import {CallControlComponentProps, TARGET_TYPE} from '../../../../src/components/task/task.types';
-import {mockTask} from '@webex/test-fixtures';
+import {
+  mockTask,
+  createEnabledMainTaskUIControls,
+  createMockTaskUIControls,
+  disabledControl,
+  enabledControl,
+} from '@webex/test-fixtures';
 import {BuddyDetails} from '@webex/cc-store';
 import '@testing-library/jest-dom';
 
@@ -102,6 +108,19 @@ describe('CallControlCADComponent Snapshots', () => {
     },
   ] as BuddyDetails[];
 
+  const mockControls = createEnabledMainTaskUIControls();
+  const consultControls = createMockTaskUIControls({
+    main: {endConsult: enabledControl},
+    consult: {
+      mute: enabledControl,
+      switch: enabledControl,
+      transfer: enabledControl,
+      mergeToConference: enabledControl,
+      endConsult: enabledControl,
+    },
+    activeLeg: 'consult',
+  });
+
   const defaultProps: CallControlComponentProps = {
     currentTask: mockCurrentTask,
     wrapupCodes: mockWrapupCodes,
@@ -134,35 +153,9 @@ describe('CallControlCADComponent Snapshots', () => {
     allowConsultToQueue: true,
     lastTargetType: TARGET_TYPE.AGENT,
     setLastTargetType: jest.fn(),
-    controlVisibility: {
-      accept: {isVisible: true, isEnabled: true},
-      decline: {isVisible: true, isEnabled: true},
-      end: {isVisible: true, isEnabled: true},
-      muteUnmute: {isVisible: true, isEnabled: true},
-      muteUnmuteConsult: {isVisible: true, isEnabled: true},
-      holdResume: {isVisible: true, isEnabled: true},
-      consult: {isVisible: true, isEnabled: true},
-      transfer: {isVisible: true, isEnabled: true},
-      conference: {isVisible: true, isEnabled: true},
-      wrapup: {isVisible: false, isEnabled: false},
-      pauseResumeRecording: {isVisible: true, isEnabled: true},
-      endConsult: {isVisible: true, isEnabled: true},
-      recordingIndicator: {isVisible: true, isEnabled: true},
-      exitConference: {isVisible: false, isEnabled: false},
-      mergeConference: {isVisible: false, isEnabled: false},
-      mergeConferenceConsult: {isVisible: false, isEnabled: false},
-      consultTransfer: {isVisible: false, isEnabled: false},
-      consultTransferConsult: {isVisible: false, isEnabled: false},
-      switchToMainCall: {isVisible: false, isEnabled: false},
-      switchToConsult: {isVisible: false, isEnabled: false},
-      isConferenceInProgress: false,
-      isConsultInitiated: false,
-      isConsultInitiatedAndAccepted: false,
-      isConsultInitiatedOrAccepted: false,
-      isConsultReceived: false,
-      isHeld: false,
-      consultCallHeld: false,
-    },
+    isHeld: false,
+    conferenceEnabled: true,
+    controls: mockControls,
     logger: mockLogger,
     secondsUntilAutoWrapup: undefined,
     cancelAutoWrapup: jest.fn(),
@@ -257,7 +250,7 @@ describe('CallControlCADComponent Snapshots', () => {
 
   it('should render consultation and wrapup modes', async () => {
     // Consultation initiated
-    const consultProps = {...defaultProps, consultInitiated: true, consultAgentName: 'Consult Agent'};
+    const consultProps = {...defaultProps, controls: consultControls, consultAgentName: 'Consult Agent'};
     let screen = render(<CallControlCADComponent {...consultProps} />);
     let mainContainer = screen.container.querySelector('.call-control-container');
     let consultContainer = screen.container.querySelector('.call-control-consult-container');
@@ -271,10 +264,7 @@ describe('CallControlCADComponent Snapshots', () => {
     // Consultation accepted
     const consultAcceptedProps = {
       ...defaultProps,
-      controlVisibility: {
-        ...defaultProps.controlVisibility,
-        isConsultInitiatedOrAccepted: true,
-      },
+      controls: consultControls,
       consultAgentName: 'Consult Agent',
     };
     screen = render(<CallControlCADComponent {...consultAcceptedProps} />);
@@ -290,7 +280,7 @@ describe('CallControlCADComponent Snapshots', () => {
     // Wrapup mode
     const wrapupProps = {
       ...defaultProps,
-      controlVisibility: {...defaultProps.controlVisibility, wrapup: true},
+      controls: createEnabledMainTaskUIControls({wrapup: enabledControl}),
     };
     screen = render(<CallControlCADComponent {...wrapupProps} />);
     const container = screen.container.querySelector('.call-control-container');
@@ -301,11 +291,10 @@ describe('CallControlCADComponent Snapshots', () => {
     // Consultation with wrapup (consultation should be hidden)
     const consultWrapupProps = {
       ...defaultProps,
-      controlVisibility: {
-        ...defaultProps.controlVisibility,
-        isConsultInitiatedOrAccepted: true,
-        wrapup: true,
-      },
+      controls: createEnabledMainTaskUIControls({
+        wrapup: enabledControl,
+        endConsult: enabledControl,
+      }),
       consultAgentName: 'Consult Agent',
     };
     screen = render(<CallControlCADComponent {...consultWrapupProps} />);
@@ -338,20 +327,21 @@ describe('CallControlCADComponent Snapshots', () => {
     // Limited control visibility
     const limitedControlsProps = {
       ...defaultProps,
-      controlVisibility: {
-        accept: true,
-        decline: true,
-        end: true,
-        muteUnmute: true,
-        holdResume: false,
-        consult: false,
-        transfer: false,
-        conference: false,
-        wrapup: false,
-        pauseResumeRecording: false,
-        endConsult: true,
-        recordingIndicator: false,
-      },
+      controls: createMockTaskUIControls({
+        main: {
+          accept: enabledControl,
+          decline: enabledControl,
+          end: enabledControl,
+          mute: enabledControl,
+          hold: disabledControl,
+          consult: disabledControl,
+          transfer: disabledControl,
+          conference: disabledControl,
+          wrapup: disabledControl,
+          recording: disabledControl,
+          endConsult: enabledControl,
+        },
+      }),
     };
     screen = render(<CallControlCADComponent {...limitedControlsProps} />);
     container = screen.container.querySelector('.call-control-container');
@@ -364,10 +354,7 @@ describe('CallControlCADComponent Snapshots', () => {
       ...defaultProps,
       callControlClassName: 'custom-call-control',
       callControlConsultClassName: 'custom-consult-control',
-      controlVisibility: {
-        ...defaultProps.controlVisibility,
-        isConsultInitiatedOrAccepted: true,
-      },
+      controls: consultControls,
       consultAgentName: 'Consult Agent',
     };
     screen = render(<CallControlCADComponent {...customProps} />);

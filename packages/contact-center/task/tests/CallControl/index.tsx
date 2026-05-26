@@ -3,7 +3,7 @@ import {render} from '@testing-library/react';
 import * as helper from '../../src/helper';
 import {CallControl} from '../../src';
 import store from '@webex/cc-store';
-import {mockTask} from '@webex/test-fixtures';
+import {createEnabledMainTaskUIControls, mockTask} from '@webex/test-fixtures';
 import {TARGET_TYPE} from '../../src/task.types';
 import '@testing-library/jest-dom';
 
@@ -11,11 +11,6 @@ const onHoldResumeCb = jest.fn();
 const onEndCb = jest.fn();
 const onWrapUpCb = jest.fn();
 const onRecordingToggleCb = jest.fn();
-
-const defaultVisibility = {
-  isVisible: false,
-  isEnabled: false,
-};
 
 describe('CallControl Component', () => {
   beforeEach(() => {
@@ -50,35 +45,9 @@ describe('CallControl Component', () => {
       startTimestamp: 0,
       lastTargetType: TARGET_TYPE.AGENT,
       setLastTargetType: jest.fn(),
-      controlVisibility: {
-        accept: defaultVisibility,
-        decline: defaultVisibility,
-        end: defaultVisibility,
-        muteUnmute: defaultVisibility,
-        muteUnmuteConsult: defaultVisibility,
-        holdResume: defaultVisibility,
-        consult: defaultVisibility,
-        transfer: defaultVisibility,
-        conference: defaultVisibility,
-        wrapup: defaultVisibility,
-        pauseResumeRecording: defaultVisibility,
-        endConsult: defaultVisibility,
-        consultTransfer: defaultVisibility,
-        mergeConference: defaultVisibility,
-        mergeConferenceConsult: defaultVisibility,
-        consultTransferConsult: defaultVisibility,
-        switchToMainCall: defaultVisibility,
-        switchToConsult: defaultVisibility,
-        exitConference: defaultVisibility,
-        recordingIndicator: defaultVisibility,
-        isConferenceInProgress: false,
-        isConsultInitiated: false,
-        isConsultInitiatedAndAccepted: false,
-        isConsultInitiatedOrAccepted: false,
-        isConsultReceived: false,
-        isHeld: false,
-        consultCallHeld: false,
-      },
+      controls: createEnabledMainTaskUIControls(),
+      isHeld: false,
+      conferenceEnabled: true,
       switchToMainCall: jest.fn(),
       switchToConsult: jest.fn(),
       secondsUntilAutoWrapup: 0,
@@ -110,13 +79,11 @@ describe('CallControl Component', () => {
     expect(useCallControlSpy).toHaveBeenCalledWith({
       currentTask: null,
       onHoldResume: onHoldResumeCb,
-      conferenceEnabled: true,
+      conferenceEnabled: undefined,
       onEnd: onEndCb,
       onWrapUp: onWrapUpCb,
       onRecordingToggle: onRecordingToggleCb,
       logger: store.logger,
-      featureFlags: store.featureFlags,
-      deviceType: '',
       isMuted: false,
       onToggleMute: undefined,
       agentId: store.agentId,

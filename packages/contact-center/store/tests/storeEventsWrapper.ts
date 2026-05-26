@@ -24,7 +24,7 @@ console.log = jest.fn();
 
 import {CC_EVENTS, TASK_EVENTS} from '../src/store.types';
 import storeWrapper from '../src/storeEventsWrapper';
-import {ITask} from '@webex/contact-center';
+import {ITask} from '../src/store.types';
 import {
   mockCC,
   mockTask as mockTaskFixture,
@@ -187,7 +187,7 @@ describe('storeEventsWrapper', () => {
           },
           agentId: 'agent1',
         },
-      } as ITask;
+      } as unknown as ITask;
       storeWrapper.setCurrentTask(mockCurrentTask);
       expect(storeWrapper.currentTask).toEqual(mockCurrentTask);
     });
@@ -494,8 +494,8 @@ describe('storeEventsWrapper', () => {
         };
         expect(storeWrapper.removeTaskCallback).toBeInstanceOf(Function);
 
-        storeWrapper.removeTaskCallback(TASK_EVENTS.AGENT_WRAPPEDUP, mockCb, 'mockTaskId');
-        expect(mockTask.off).toHaveBeenCalledWith(TASK_EVENTS.AGENT_WRAPPEDUP, mockCb);
+        storeWrapper.removeTaskCallback(TASK_EVENTS.TASK_WRAPPEDUP, mockCb, 'mockTaskId');
+        expect(mockTask.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_WRAPPEDUP, mockCb);
       });
 
       it('should return and not remove callback if callback is not present or task is not found', () => {
@@ -587,7 +587,7 @@ describe('storeEventsWrapper', () => {
           },
           agentId: 'agent1',
         },
-      };
+      } as unknown as ITask;
 
       storeWrapper['store'].taskList = {interaction2: mockTaskWithJoined};
       storeWrapper.setCurrentTask(mockTaskWithJoined);
@@ -601,13 +601,13 @@ describe('storeEventsWrapper', () => {
       expect(storeWrapper.currentTask).toBeTruthy();
       expect(mockTask2.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function));
       expect(mockTask2.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function));
-      expect(mockTask2.on).toHaveBeenCalledWith(TASK_EVENTS.AGENT_CONSULT_CREATED, expect.any(Function));
+      expect(mockTask2.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_CONSULT_CREATED, expect.any(Function));
       expect(mockTask2.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_MEDIA, expect.any(Function));
       expect(mockTask2.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_CONSULTING, expect.any(Function));
       expect(mockTask2.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_CONSULT_ACCEPTED, expect.any(Function));
       expect(mockTask2.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_CONSULT_END, expect.any(Function));
       expect(mockTask2.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_CONSULT_QUEUE_CANCELLED, expect.any(Function));
-      expect(mockTask2.on).toHaveBeenCalledWith(TASK_EVENTS.AGENT_WRAPPEDUP, expect.any(Function));
+      expect(mockTask2.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_WRAPPEDUP, expect.any(Function));
       expect(mockTask2.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_AUTO_ANSWERED, expect.any(Function));
       expect(mockTask2.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_HOLD, storeWrapper.refreshTaskList);
       expect(mockTask2.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_RESUME, storeWrapper.refreshTaskList);
@@ -643,13 +643,13 @@ describe('storeEventsWrapper', () => {
       // Verify that the correct event handlers were registered
       expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function));
       expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function));
-      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.AGENT_CONSULT_CREATED, expect.any(Function));
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_CONSULT_CREATED, expect.any(Function));
       expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_MEDIA, expect.any(Function));
       expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_CONSULTING, expect.any(Function));
       expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_CONSULT_ACCEPTED, expect.any(Function));
       expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_CONSULT_END, expect.any(Function));
       expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_CONSULT_QUEUE_CANCELLED, expect.any(Function));
-      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.AGENT_WRAPPEDUP, expect.any(Function));
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_WRAPPEDUP, expect.any(Function));
     });
 
     it('should handle incoming call without onIncomingTask callback', () => {
@@ -677,7 +677,7 @@ describe('storeEventsWrapper', () => {
       // Verify that the correct event handlers were registered
       expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function));
       expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function));
-      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.AGENT_CONSULT_CREATED, expect.any(Function));
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_CONSULT_CREATED, expect.any(Function));
     });
 
     it('should call onErrorCallback and rethrow when store.init rejects with an Error', async () => {
@@ -1158,7 +1158,7 @@ describe('storeEventsWrapper', () => {
 
       // AgentWrappedUp event stage: the agent has wrapped up the task
       act(() => {
-        const mockTaskWrappedUpCb = mockTaskOnSpy.mock.calls.find((call) => call[0] === TASK_EVENTS.AGENT_WRAPPEDUP)[1];
+        const mockTaskWrappedUpCb = mockTaskOnSpy.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_WRAPPEDUP)[1];
         mockTaskWrappedUpCb(mockTask.data);
       });
 
@@ -1362,7 +1362,7 @@ describe('storeEventsWrapper', () => {
 
       expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function));
       expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function));
-      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.AGENT_WRAPPEDUP, expect.any(Function));
+      expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_WRAPPEDUP, expect.any(Function));
       expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_REJECT, expect.any(Function));
       expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_OUTDIAL_FAILED, expect.any(Function));
       expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_HOLD, storeWrapper.refreshTaskList);
@@ -1372,7 +1372,7 @@ describe('storeEventsWrapper', () => {
       storeWrapper['store'].cc.taskManager.getAllTasks = jest.fn().mockReturnValue({});
 
       act(() => {
-        const mockWrapupCb = mockTask.on.mock.calls.find((call) => call[0] === TASK_EVENTS.AGENT_WRAPPEDUP)[1];
+        const mockWrapupCb = mockTask.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_WRAPPEDUP)[1];
         mockWrapupCb(mockTask);
       });
 
@@ -1417,7 +1417,7 @@ describe('storeEventsWrapper', () => {
       expect(refreshTaskListSpy).toHaveBeenCalled();
       expect(mockMergedTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function));
       expect(mockMergedTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function));
-      expect(mockMergedTask.on).toHaveBeenCalledWith(TASK_EVENTS.AGENT_WRAPPEDUP, expect.any(Function));
+      expect(mockMergedTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_WRAPPEDUP, expect.any(Function));
       expect(mockMergedTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_REJECT, expect.any(Function));
       expect(mockMergedTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_OUTDIAL_FAILED, expect.any(Function));
     });
@@ -2026,7 +2026,7 @@ describe('storeEventsWrapper', () => {
           },
           agentId: 'agent1',
         },
-      } as ITask;
+      } as unknown as ITask;
       mockTaskB = {
         data: {
           interactionId: 'taskB',
@@ -2040,7 +2040,7 @@ describe('storeEventsWrapper', () => {
           },
           agentId: 'agent1',
         },
-      } as ITask;
+      } as unknown as ITask;
       storeWrapper['store'].isQueueConsultInProgress = true;
       storeWrapper['store'].currentConsultQueueId = 'queue1';
       storeWrapper['store'].consultStartTimeStamp = 123;
@@ -2096,7 +2096,7 @@ describe('storeEventsWrapper', () => {
           },
           agentId: 'agent1',
         },
-      } as ITask;
+      } as unknown as ITask;
 
       // Try to set the incoming task as current task
       storeWrapper.setCurrentTask(incomingTask);
@@ -2125,7 +2125,7 @@ describe('storeEventsWrapper', () => {
           },
           agentId: 'agent1',
         },
-      } as ITask;
+      } as unknown as ITask;
 
       // Try to set the task without joined as current task
       storeWrapper.setCurrentTask(taskWithoutJoined);

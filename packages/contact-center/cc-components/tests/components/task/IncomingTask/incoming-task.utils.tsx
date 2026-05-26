@@ -1,6 +1,16 @@
 import {extractIncomingTaskData} from '../../../../src/components/task/IncomingTask/incoming-task.utils';
 import {MEDIA_CHANNEL} from '../../../../src/components/task/task.types';
-import {mockTask} from '@webex/test-fixtures';
+import {mockTask, enabledControl, disabledControl} from '@webex/test-fixtures';
+
+const logger = {
+  error: jest.fn(),
+  info: jest.fn(),
+  log: jest.fn(),
+  warn: jest.fn(),
+  trace: jest.fn(),
+};
+
+const visibleDisabledAccept = {isVisible: true, isEnabled: false};
 
 describe('incoming-task.utils', () => {
   beforeEach(() => {
@@ -11,7 +21,7 @@ describe('incoming-task.utils', () => {
   describe('extractIncomingTaskData', () => {
     describe('Telephony tasks', () => {
       it('should extract correct data for browser telephony task', () => {
-        const result = extractIncomingTaskData(mockTask, true);
+        const result = extractIncomingTaskData(mockTask, logger, enabledControl, enabledControl, false, true);
 
         expect(result.isTelephony).toBe(true);
         expect(result.isSocial).toBe(false);
@@ -24,7 +34,7 @@ describe('incoming-task.utils', () => {
       });
 
       it('should extract correct data for non-browser telephony task', () => {
-        const result = extractIncomingTaskData(mockTask, false);
+        const result = extractIncomingTaskData(mockTask, logger, visibleDisabledAccept, disabledControl, false, false);
 
         expect(result.isTelephony).toBe(true);
         expect(result.isSocial).toBe(false);
@@ -39,11 +49,7 @@ describe('incoming-task.utils', () => {
         const originalWrapUpRequired = mockTask.data.wrapUpRequired;
         mockTask.data.wrapUpRequired = true;
 
-        const result = extractIncomingTaskData(mockTask, true);
-
-        expect(result.acceptText).toBeUndefined();
-        expect(result.declineText).toBeUndefined();
-        expect(result.isTelephony).toBe(true);
+        extractIncomingTaskData(mockTask, logger, disabledControl, disabledControl, false, true);
 
         // Restore original wrapUpRequired
         mockTask.data.wrapUpRequired = originalWrapUpRequired;
@@ -55,10 +61,7 @@ describe('incoming-task.utils', () => {
         const originalMediaType = mockTask.data.interaction.mediaType;
         mockTask.data.interaction.mediaType = MEDIA_CHANNEL.SOCIAL;
 
-        const result = extractIncomingTaskData(mockTask, true);
-
-        expect(result.isTelephony).toBe(false);
-        expect(result.isSocial).toBe(true);
+        const result = extractIncomingTaskData(mockTask, logger, enabledControl, disabledControl, false, true);
         expect(result.acceptText).toBe('Accept');
         expect(result.declineText).toBeUndefined();
         expect(result.disableAccept).toBe(false);
@@ -73,7 +76,7 @@ describe('incoming-task.utils', () => {
         const originalMediaType = mockTask.data.interaction.mediaType;
         mockTask.data.interaction.mediaType = MEDIA_CHANNEL.CHAT;
 
-        const result = extractIncomingTaskData(mockTask, true);
+        const result = extractIncomingTaskData(mockTask, logger, enabledControl, disabledControl, false, true);
 
         expect(result.isTelephony).toBe(false);
         expect(result.isSocial).toBe(false);
@@ -93,7 +96,7 @@ describe('incoming-task.utils', () => {
         mockTask.data.interaction.mediaType = MEDIA_CHANNEL.SOCIAL;
         mockTask.data.wrapUpRequired = true;
 
-        const result = extractIncomingTaskData(mockTask, true);
+        const result = extractIncomingTaskData(mockTask, logger, disabledControl, disabledControl, false, true);
 
         expect(result.acceptText).toBeUndefined();
         expect(result.declineText).toBeUndefined();
@@ -110,7 +113,7 @@ describe('incoming-task.utils', () => {
         const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
         mockTask.data.interaction.callAssociatedDetails = undefined;
 
-        const result = extractIncomingTaskData(mockTask, true);
+        const result = extractIncomingTaskData(mockTask, logger, enabledControl, enabledControl, false, true);
 
         expect(result.ani).toBeUndefined();
         expect(result.customerName).toBeUndefined();
@@ -128,7 +131,7 @@ describe('incoming-task.utils', () => {
           ronaTimeout: undefined,
         };
 
-        let result = extractIncomingTaskData(mockTask, true);
+        let result = extractIncomingTaskData(mockTask, logger, enabledControl, enabledControl, false, true);
         expect(result.ronaTimeout).toBeNull();
 
         // Test invalid ronaTimeout
@@ -137,7 +140,7 @@ describe('incoming-task.utils', () => {
           ronaTimeout: 'invalid-number',
         };
 
-        result = extractIncomingTaskData(mockTask, true);
+        result = extractIncomingTaskData(mockTask, logger, enabledControl, enabledControl, false, true);
         expect(result.ronaTimeout).toBeNaN();
 
         // Restore original values

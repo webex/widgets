@@ -1,5 +1,6 @@
 import '@testing-library/jest-dom';
 import {ITask} from '@webex/cc-store';
+import {createEnabledMainTaskUIControls, enabledControl} from '@webex/test-fixtures';
 import {
   handleToggleHold,
   handleMuteToggle,
@@ -60,35 +61,7 @@ describe('CallControl Utils', () => {
     },
   };
 
-  const mockControlVisibility = {
-    accept: {isVisible: true, isEnabled: true},
-    decline: {isVisible: true, isEnabled: true},
-    end: {isVisible: true, isEnabled: true},
-    muteUnmute: {isVisible: true, isEnabled: true},
-    muteUnmuteConsult: {isVisible: true, isEnabled: true},
-    holdResume: {isVisible: true, isEnabled: true},
-    consult: {isVisible: true, isEnabled: true},
-    transfer: {isVisible: true, isEnabled: true},
-    conference: {isVisible: true, isEnabled: true},
-    wrapup: {isVisible: true, isEnabled: true},
-    pauseResumeRecording: {isVisible: true, isEnabled: true},
-    endConsult: {isVisible: true, isEnabled: true},
-    recordingIndicator: {isVisible: true, isEnabled: true},
-    exitConference: {isVisible: false, isEnabled: false},
-    mergeConference: {isVisible: false, isEnabled: false},
-    mergeConferenceConsult: {isVisible: false, isEnabled: false},
-    consultTransfer: {isVisible: false, isEnabled: false},
-    consultTransferConsult: {isVisible: false, isEnabled: false},
-    switchToMainCall: {isVisible: false, isEnabled: false},
-    switchToConsult: {isVisible: false, isEnabled: false},
-    isConferenceInProgress: false,
-    isConsultInitiated: false,
-    isConsultInitiatedAndAccepted: false,
-    isConsultInitiatedOrAccepted: false,
-    isConsultReceived: false,
-    isHeld: false,
-    consultCallHeld: false,
-  };
+  const mockControls = createEnabledMainTaskUIControls({wrapup: enabledControl});
 
   const mockMediaTypeInfo = {
     labelName: 'Call',
@@ -459,7 +432,8 @@ describe('CallControl Utils', () => {
         true, // isRecording
         false, // isMuteButtonDisabled
         mockMediaTypeInfo,
-        mockControlVisibility,
+        mockControls,
+        false, // isHeld
         mockFunctions.handleMuteToggleFunc,
         mockFunctions.handleToggleHoldFunc,
         mockFunctions.toggleRecording,
@@ -500,17 +474,17 @@ describe('CallControl Utils', () => {
     });
 
     it('should build buttons with correct configuration when not muted and held', () => {
-      const heldControlVisibility = {
-        ...mockControlVisibility,
-        isHeld: true,
-        end: {isVisible: true, isEnabled: false}, // End button should be disabled when held
-      };
+      const heldControls = createEnabledMainTaskUIControls({
+        wrapup: enabledControl,
+        end: {isVisible: true, isEnabled: false},
+      });
       const buttons = buildCallControlButtons(
         false, // isMuted
         false, // isRecording
         true, // isMuteButtonDisabled
         mockMediaTypeInfo,
-        heldControlVisibility,
+        heldControls,
+        true, // isHeld
         mockFunctions.handleMuteToggleFunc,
         mockFunctions.handleToggleHoldFunc,
         mockFunctions.toggleRecording,
@@ -558,7 +532,8 @@ describe('CallControl Utils', () => {
         false,
         false,
         mockMediaTypeInfo,
-        mockControlVisibility,
+        mockControls,
+        false, // isHeld
         mockFunctions.handleMuteToggleFunc,
         mockFunctions.handleToggleHoldFunc,
         mockFunctions.toggleRecording,
@@ -601,7 +576,8 @@ describe('CallControl Utils', () => {
         true, // isRecording
         false,
         mockMediaTypeInfo,
-        mockControlVisibility,
+        mockControls,
+        false, // isHeld
         mockFunctions.handleMuteToggleFunc,
         mockFunctions.handleToggleHoldFunc,
         mockFunctions.toggleRecording,
@@ -622,7 +598,8 @@ describe('CallControl Utils', () => {
         false, // isRecording
         false,
         mockMediaTypeInfo,
-        mockControlVisibility,
+        mockControls,
+        false, // isHeld
         mockFunctions.handleMuteToggleFunc,
         mockFunctions.handleToggleHoldFunc,
         mockFunctions.toggleRecording,
@@ -639,17 +616,17 @@ describe('CallControl Utils', () => {
     });
 
     it('should build exit conference button when in conference', () => {
-      const conferenceControlVisibility = {
-        ...mockControlVisibility,
-        isConferenceInProgress: true,
-        exitConference: {isVisible: true, isEnabled: true},
-      };
+      const conferenceControls = createEnabledMainTaskUIControls({
+        wrapup: enabledControl,
+        exitConference: enabledControl,
+      });
       const buttons = buildCallControlButtons(
         false, // isMuted
         false, // isRecording
         false, // isMuteButtonDisabled
         mockMediaTypeInfo,
-        conferenceControlVisibility,
+        conferenceControls,
+        false, // isHeld
         mockFunctions.handleMuteToggleFunc,
         mockFunctions.handleToggleHoldFunc,
         mockFunctions.toggleRecording,
@@ -795,8 +772,8 @@ describe('CallControl Utils', () => {
     it('should filter out hold and consult buttons when consultation is initiated and telephony', () => {
       const result = filterButtonsForConsultation(mockButtons, true, true);
 
-      expect(result).toHaveLength(4);
-      expect(result.map((b) => b.id)).toEqual(['mute', 'transfer', 'record', 'end']);
+      expect(result).toHaveLength(2);
+      expect(result.map((b) => b.id)).toEqual(['mute', 'end']);
     });
 
     it('should not filter buttons when consultation is not initiated', () => {
