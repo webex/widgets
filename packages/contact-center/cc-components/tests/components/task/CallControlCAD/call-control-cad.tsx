@@ -1,13 +1,18 @@
 import React from 'react';
 import {render} from '@testing-library/react';
 import CallControlCADComponent from '../../../../src/components/task/CallControlCAD/call-control-cad';
-import {CallControlComponentProps, TARGET_TYPE} from '../../../../src/components/task/task.types';
+import {
+  CallControlComponentProps,
+  TARGET_TYPE,
+  OUTBOUND_TYPE,
+  CallAssociatedDataMap,
+} from '../../../../src/components/task/task.types';
 import {
   mockTask,
   createEnabledMainTaskUIControls,
   createMockTaskUIControls,
   enabledControl,
-} from '@webex/test-fixtures';
+, mockCallAssociatedData} from '@webex/test-fixtures';
 import {BuddyDetails} from '@webex/cc-store';
 import '@testing-library/jest-dom';
 
@@ -60,6 +65,7 @@ describe('CallControlCADComponent', () => {
         callAssociatedDetails: {
           customerName: 'John Doe',
           ani: '555-123-4567',
+          dn: '555-999-0000',
           virtualTeamName: 'Support Team',
           ronaTimeout: '30',
         },
@@ -248,6 +254,40 @@ describe('CallControlCADComponent', () => {
     chatConsultScreen.unmount();
   });
 
+  it('should display correct phone number for inbound vs outdial calls', () => {
+    // Inbound call: caller ID = ani, phone number = ani
+    const inboundScreen = render(<CallControlCADComponent {...defaultProps} />);
+    // ani (555-123-4567) should appear as both caller ID and phone number
+    const aniElements = inboundScreen.getAllByText('555-123-4567');
+    expect(aniElements.length).toBe(2); // caller ID + phone number
+    // dn (555-999-0000) should NOT appear anywhere
+    expect(inboundScreen.queryByText('555-999-0000')).not.toBeInTheDocument();
+    inboundScreen.unmount();
+
+    // Outdial call: caller ID = dn, phone number = ani
+    const outdialProps = {
+      ...defaultProps,
+      currentTask: {
+        ...defaultProps.currentTask,
+        data: {
+          ...defaultProps.currentTask.data,
+          interaction: {
+            ...defaultProps.currentTask.data.interaction,
+            outboundType: OUTBOUND_TYPE.OUTDIAL,
+          },
+        },
+      },
+    };
+    const outdialScreen = render(<CallControlCADComponent {...outdialProps} />);
+    // Caller ID should show dn (555-999-0000)
+    expect(outdialScreen.getByText('555-999-0000')).toBeInTheDocument();
+    // Phone number should show ani (555-123-4567)
+    const phoneLabel = outdialScreen.getByText('Phone Number:');
+    const phoneValue = phoneLabel.nextElementSibling;
+    expect(phoneValue?.textContent).toBe('555-123-4567');
+    outdialScreen.unmount();
+  });
+
   it('should handle wrapup mode and edge cases', () => {
     // Test wrapup mode hides elements
     const wrapupProps = {
@@ -377,6 +417,94 @@ describe('CallControlCADComponent', () => {
       );
 
       expect(screen.queryByText(/On hold/)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Global Variables', () => {
+    const makePropsWithCallAssociatedData = (callAssociatedData: CallAssociatedDataMap) => ({
+      ...defaultProps,
+      currentTask: {
+        ...defaultProps.currentTask,
+        data: {
+          ...defaultProps.currentTask.data,
+          interaction: {
+            ...defaultProps.currentTask.data.interaction,
+            callAssociatedData,
+          },
+        },
+      },
+    });
+
+    it('should render agent-viewable global variables', () => {
+      const screen = render(<CallControlCADComponent {...makePropsWithCallAssociatedData(mockCallAssociatedData)} />);
+
+      const globalVarsContainer = screen.getByTestId('cc-cad:global-variables');
+      expect(globalVarsContainer).toBeInTheDocument();
+
+      expect(screen.getByTestId('cc-cad:global-var-Global_Language')).toBeInTheDocument();
+      expect(screen.getByText('Customer Language')).toBeInTheDocument();
+      expect(screen.getByText('English')).toBeInTheDocument();
+
+      expect(screen.getByTestId('cc-cad:global-var-Global_FeedbackSurveyOptIn')).toBeInTheDocument();
+      expect(screen.getByText('Post Call Survey Opt-in')).toBeInTheDocument();
+      expect(screen.getByText('true')).toBeInTheDocument();
+    });
+
+    it('should not render non-global variables (e.g. system CAD like ani)', () => {
+      const screen = render(<CallControlCADComponent {...makePropsWithCallAssociatedData(mockCallAssociatedData)} />);
+
+      expect(screen.queryByTestId('cc-cad:global-var-ani')).not.toBeInTheDocument();
+    });
+
+    it('should not render global variables where agentViewable is false', () => {
+      const screen = render(<CallControlCADComponent {...makePropsWithCallAssociatedData(mockCallAssociatedData)} />);
+
+      expect(screen.queryByTestId('cc-cad:global-var-Global_Hidden')).not.toBeInTheDocument();
+    });
+
+    it('should not render global variables section when no global variables exist', () => {
+      const screen = render(<CallControlCADComponent {...defaultProps} />);
+
+      expect(screen.queryByTestId('cc-cad:global-variables')).not.toBeInTheDocument();
+    });
+
+    it('should not render global variables section when callAssociatedData is undefined', () => {
+      const propsWithNoData = {
+        ...defaultProps,
+        currentTask: {
+          ...defaultProps.currentTask,
+          data: {
+            ...defaultProps.currentTask.data,
+            interaction: {
+              ...defaultProps.currentTask.data.interaction,
+            },
+          },
+        },
+      };
+      const screen = render(<CallControlCADComponent {...propsWithNoData} />);
+
+      expect(screen.queryByTestId('cc-cad:global-variables')).not.toBeInTheDocument();
+    });
+
+    it('should use variable name as label when displayName is empty', () => {
+      const dataWithEmptyDisplayName: CallAssociatedDataMap = {
+        Global_NoDisplay: {
+          name: 'Global_NoDisplay',
+          displayName: '',
+          value: 'some value',
+          type: 'STRING',
+          agentEditable: false,
+          agentViewable: true,
+          global: true,
+          isSecure: false,
+          secureKeyId: '',
+          secureKeyVersion: 0,
+        },
+      };
+      const screen = render(<CallControlCADComponent {...makePropsWithCallAssociatedData(dataWithEmptyDisplayName)} />);
+
+      expect(screen.getByText('Global_NoDisplay')).toBeInTheDocument();
+      expect(screen.getByText('some value')).toBeInTheDocument();
     });
   });
 });

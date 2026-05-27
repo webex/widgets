@@ -5,7 +5,14 @@ import {Brandvisual, Icon, Tooltip, Button} from '@momentum-design/components/di
 import './call-control-cad.styles.scss';
 import TaskTimer from '../TaskTimer/index';
 import CallControlConsultComponent from '../CallControl/CallControlCustom/call-control-consult';
-import {MEDIA_CHANNEL as MediaChannelType, CallControlComponentProps, CallAssociatedDataMap} from '../task.types';
+import {
+  MEDIA_CHANNEL as MediaChannelType,
+  CallControlComponentProps,
+  CallAssociatedDataMap,
+  getCallerIdentifier,
+  CallAssociatedDataMap,
+} from '../task.types';
+import {getAgentViewableGlobalVariables} from '../Task/task.utils';
 import {getAgentViewableGlobalVariables} from '../Task/task.utils';
 
 import {getMediaTypeInfo} from '../../../utils';
@@ -73,10 +80,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
     currentTask?.data?.interaction?.callProcessingDetails?.dnis;
   const displayNumber = isOutdial ? dnis || ani : ani;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const callAssociatedData = (currentTask?.data?.interaction as any)?.callAssociatedData as
-    | CallAssociatedDataMap
-    | undefined;
+  const callAssociatedData = currentTask?.data?.interaction?.callAssociatedData as CallAssociatedDataMap | undefined;
   const globalVariables = getAgentViewableGlobalVariables(callAssociatedData);
 
   // Create unique IDs for tooltips
@@ -84,6 +88,12 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
   const customerNameTooltipId = `customer-name-tooltip-${currentTask.data.interaction.interactionId}`;
   const phoneNumberTriggerId = `phone-number-trigger-${currentTask.data.interaction.interactionId}`;
   const phoneNumberTooltipId = `phone-number-tooltip-${currentTask.data.interaction.interactionId}`;
+
+  // For telephony calls, ani is the originating number and dn is the destination.
+  // Inbound: ani = caller's number, dn = entry point dialed by caller
+  // Outdial: ani = agent's originating number (entry point), dn = customer's dialed number
+  const outboundType = currentTask?.data?.interaction?.outboundType;
+  const callerNumber = getCallerIdentifier(ani, dn, outboundType);
 
   const renderCustomerName = () => {
     const customerText = isSocial ? customerName || NO_CUSTOMER_NAME : displayNumber || NO_CALLER_ID;
@@ -123,7 +133,11 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
   };
 
   const renderPhoneNumber = () => {
-    const phoneText = isSocial ? customerName || NO_CUSTOMER_NAME : ani || NO_PHONE_NUMBER;
+    const phoneText = isSocial
+      ? customerName || NO_CUSTOMER_NAME
+      : isTelephony
+        ? ani || NO_PHONE_NUMBER
+        : ani || NO_PHONE_NUMBER;
     const labelText = isSocial ? CUSTOMER_NAME : PHONE_NUMBER;
 
     const textComponent = (

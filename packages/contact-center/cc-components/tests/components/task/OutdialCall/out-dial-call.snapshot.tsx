@@ -152,10 +152,7 @@ describe('Outdial Call Component', () => {
   it('sets selected ani when an option is selected', async () => {
     const {container} = render(<OutdialCallComponent {...props} />);
     const select = await screen.findByTestId('outdial-ani-option-select');
-    fireEvent.click(select);
-    const option = await screen.findByText('name 1');
-    expect(option).toBeInTheDocument();
-    fireEvent.click(option);
+    fireEvent(select, new CustomEvent('change', {detail: {value: '1'}}));
     // Remove IDs to avoid snapshot issues with dynamic IDs
     container.querySelectorAll('[id^="mdc-input"]').forEach((el) => el.removeAttribute('id'));
     expect(container).toMatchSnapshot();

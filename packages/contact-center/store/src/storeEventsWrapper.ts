@@ -22,6 +22,7 @@ import {
   Profile,
   AgentLoginProfile,
   ERROR_TRIGGERING_IDLE_CODES,
+  RealTimeTranscriptionEventPayload,
 } from './store.types';
 import Store from './store';
 import {
@@ -41,6 +42,7 @@ class StoreWrapper implements IStoreWrapper {
   onTaskAssigned?: (task: ITask) => void;
   onTaskSelected?: (task: ITask, isClicked: boolean) => void;
   onErrorCallback?: (widgetName: string, error: Error) => void;
+  private realtimeTranscriptionListeners: Record<string, (payload: RealTimeTranscriptionEventPayload) => void> = {};
 
   constructor() {
     this.store = Store.getInstance();
@@ -144,6 +146,10 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.dataCenter;
   }
 
+  get realtimeTranscriptionData() {
+    return this.store.realtimeTranscriptionData;
+  }
+
   setDataCenter = (value: string): void => {
     this.store.dataCenter = value;
   };
@@ -235,7 +241,7 @@ class StoreWrapper implements IStoreWrapper {
     if (isIncomingTask(task, this.agentId)) return;
 
     runInAction(() => {
-      // Determine if the new task is the same as the current task
+      // Determine if the new task is the same as the current task.
       let isSameTask = false;
       if (task && this.currentTask) {
         isSameTask = task.data.interactionId === this.currentTask.data.interactionId;
@@ -433,6 +439,11 @@ class StoreWrapper implements IStoreWrapper {
 
   handleTaskRemove = (taskToRemove: ITask) => {
     if (taskToRemove) {
+      const taskId = taskToRemove.data?.interactionId;
+      if (taskId && this.realtimeTranscriptionListeners[taskId]) {
+        taskToRemove.off(TASK_EVENTS.REAL_TIME_TRANSCRIPTION, this.realtimeTranscriptionListeners[taskId]);
+        delete this.realtimeTranscriptionListeners[taskId];
+      }
       taskToRemove.off(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
       taskToRemove.off(TASK_EVENTS.TASK_END, this.handleTaskEnd);
       taskToRemove.off(TASK_EVENTS.TASK_REJECT, (reason) => this.handleTaskReject(taskToRemove, reason));
@@ -470,6 +481,12 @@ class StoreWrapper implements IStoreWrapper {
     }
 
     runInAction(() => {
+      if (taskToRemove) {
+        const removedTaskId = taskToRemove.data?.interactionId;
+        if (removedTaskId && this.store.currentTask?.data?.interactionId === removedTaskId) {
+          this.store.realtimeTranscriptionData = [];
+        }
+      }
       if (taskToRemove && this.store.currentTask?.data.interactionId === taskToRemove.data.interactionId) {
         this.setCurrentTask(null);
       }
@@ -632,6 +649,15 @@ class StoreWrapper implements IStoreWrapper {
     task.on(TASK_EVENTS.TASK_PARTICIPANT_LEFT_FAILED, this.refreshTaskList);
     task.on(TASK_EVENTS.TASK_CONFERENCE_TRANSFERRED, this.refreshTaskList);
     task.on(TASK_EVENTS.TASK_CONFERENCE_TRANSFER_FAILED, this.refreshTaskList);
+    task.on(TASK_EVENTS.TASK_POST_CALL_ACTIVITY, this.refreshTaskList);
+    const taskId = task.data?.interactionId;
+    if (taskId && !this.realtimeTranscriptionListeners[taskId]) {
+      this.realtimeTranscriptionListeners[taskId] = (payload: RealTimeTranscriptionEventPayload) =>
+        this.handleRealtimeTranscription(payload);
+    }
+    if (taskId && this.realtimeTranscriptionListeners[taskId]) {
+      task.on(TASK_EVENTS.REAL_TIME_TRANSCRIPTION, this.realtimeTranscriptionListeners[taskId]);
+    }
 
     if (this.deviceType === DEVICE_TYPE_BROWSER) {
       task.on(TASK_EVENTS.TASK_MEDIA, this.handleTaskMedia);
@@ -746,6 +772,39 @@ class StoreWrapper implements IStoreWrapper {
     }
   };
 
+  handleRealtimeTranscription = (payload: RealTimeTranscriptionEventPayload) => {
+    const transcriptData = payload.data;
+    if (!transcriptData?.messageId) return;
+
+    const content = transcriptData.content || '';
+    if (!content) return;
+
+    const role = transcriptData.role.toUpperCase();
+    const publishTimestampRaw = transcriptData.publishTimestamp;
+    const publishTimestamp =
+      typeof publishTimestampRaw === 'number'
+        ? publishTimestampRaw
+        : Number.parseInt(`${publishTimestampRaw || Date.now()}`, 10);
+    const normalizedPublishTimestamp = Number.isNaN(publishTimestamp) ? Date.now() : publishTimestamp;
+
+    runInAction(() => {
+      const transcriptLines = this.store.realtimeTranscriptionData || [];
+      const newTranscriptData = {
+        ...transcriptData,
+        role,
+        content,
+        publishTimestamp: normalizedPublishTimestamp,
+      };
+      const hasExistingLine = transcriptLines.some((line) => line.messageId === transcriptData.messageId);
+
+      this.store.realtimeTranscriptionData = hasExistingLine
+        ? transcriptLines.map((line) =>
+            line.messageId === transcriptData.messageId ? {...line, ...newTranscriptData} : line
+          )
+        : [...transcriptLines, newTranscriptData];
+    });
+  };
+
   getBuddyAgents = async (
     mediaType: string = this.currentTask.data.interaction.mediaType
   ): Promise<Array<BuddyDetails>> => {
@@ -842,6 +901,8 @@ class StoreWrapper implements IStoreWrapper {
       this.setConsultStartTimeStamp(undefined);
       this.setTeamId('');
       this.setDigitalChannelsInitialized(false);
+      this.store.realtimeTranscriptionData = [];
+      this.realtimeTranscriptionListeners = {};
       this.setLastConsultDestination(null);
     });
   };

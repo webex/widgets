@@ -8,6 +8,7 @@ import {
   CallControlCAD,
   store,
   OutdialCall,
+  RealTimeTranscript,
 } from '@webex/cc-widgets';
 import {StationLogoutResponse} from '@webex/contact-center';
 import {ERROR_TRIGGERING_IDLE_CODES} from '@webex/cc-store';
@@ -39,6 +40,7 @@ const defaultWidgets = {
   callControl: true,
   callControlCAD: true,
   outdialCall: true,
+  realtimeTranscript: true,
 };
 
 function App() {
@@ -485,10 +487,10 @@ function App() {
                       setLoginType(selectedType);
                     }}
                   >
-                    <Option data-testid="samples:login_option_token" key={1} value="token">
+                    <Option data-testid="samples:login_option_token" key={1} value="token" label="Access Token">
                       Access Token
                     </Option>
-                    <Option data-testid="samples:login_option_oauth" key={2} value="oauth">
+                    <Option data-testid="samples:login_option_oauth" key={2} value="oauth" label="Login with Webex">
                       Login with Webex
                     </Option>
                   </Select>
@@ -954,6 +956,16 @@ function App() {
                         </section>
                       </div>
                     )}
+                    {selectedWidgets.realtimeTranscript && store.currentTask && (
+                      <div className="box">
+                        <section className="section-box">
+                          <fieldset className="fieldset">
+                            <legend className="legend-box">Realtime Transcript</legend>
+                            <RealTimeTranscript />
+                          </fieldset>
+                        </section>
+                      </div>
+                    )}
                     {selectedWidgets.outdialCall && (
                       <div className="box">
                         <section className="section-box">
@@ -998,10 +1010,10 @@ function App() {
                   }}
                   data-testid="samples:rona-select-state"
                 >
-                  <Option key={1} value="Available" data-testid="samples:rona-option-available">
+                  <Option key={1} value="Available" label="Available" data-testid="samples:rona-option-available">
                     Available
                   </Option>
-                  <Option key={2} value="Idle" data-testid="samples:rona-option-idle">
+                  <Option key={2} value="Idle" label="Idle" data-testid="samples:rona-option-idle">
                     Idle
                   </Option>
                 </Select>

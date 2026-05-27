@@ -1,4 +1,4 @@
-import {MEDIA_CHANNEL, TaskListItemData} from '../task.types';
+import {MEDIA_CHANNEL, TaskListItemData, getCallerIdentifier} from '../task.types';
 import {isIncomingTask, ILogger, ITask} from '@webex/cc-store';
 /**
  * Extracts and processes data from a task for rendering in the task list
@@ -26,6 +26,7 @@ export const extractTaskListItemData = (
     const isOutdial = task?.data?.interaction?.outboundType === 'OUTDIAL';
     const dnis = callAssociationDetails?.dnis || task?.data?.interaction?.callProcessingDetails?.dnis;
     const ani = isOutdial ? dnis || callAssociationDetails?.ani : callAssociationDetails?.ani;
+    const dn = callAssociationDetails?.dn;
     const customerName = callAssociationDetails?.customerName;
     const virtualTeamName = callAssociationDetails?.virtualTeamName;
 
@@ -52,7 +53,8 @@ export const extractTaskListItemData = (
     const declineText = decline.isVisible && isTaskIncoming ? 'Decline' : undefined;
 
     // Compute title based on media type
-    const title = isSocial ? customerName : ani;
+    const outboundType = task?.data?.interaction?.outboundType;
+    const title = isSocial ? customerName : getCallerIdentifier(ani, dn, outboundType);
 
     const disableAccept = !accept.isEnabled;
     const disableDecline = !decline.isEnabled;
