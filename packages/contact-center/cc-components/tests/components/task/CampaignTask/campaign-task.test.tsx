@@ -66,8 +66,8 @@ const createDefaultProps = (overrides: Partial<CampaignTaskProps> = {}): Campaig
   ...overrides,
 });
 
-const renderComponent = (overrides: Partial<CampaignTaskProps> = {}) =>
-  render(<CampaignTask {...createDefaultProps(overrides)} />);
+const renderComponent = async (overrides: Partial<CampaignTaskProps> = {}) =>
+  await render(<CampaignTask {...createDefaultProps(overrides)} />);
 
 describe('CampaignTask', () => {
   beforeEach(() => {
@@ -78,28 +78,28 @@ describe('CampaignTask', () => {
   // ── Initial rendering ──────────────────────────────────────────────
 
   it('should render the campaign task section', async () => {
-    renderComponent();
+    await renderComponent();
     expect(await screen.findByTestId('campaign-task')).toBeInTheDocument();
   });
 
   it('should render the task list item with title', async () => {
-    renderComponent();
+    await renderComponent();
     expect(await screen.findByTestId('campaign-task-title')).toHaveTextContent('Jane Smith');
   });
 
   it('should render action buttons in initial state', async () => {
-    renderComponent();
+    await renderComponent();
     expect(await screen.findByTestId('campaign-task-accept-button')).toBeInTheDocument();
     expect(await screen.findByTestId('campaign-task-skip-button')).toBeInTheDocument();
     expect(await screen.findByTestId('campaign-task-remove-button')).toBeInTheDocument();
   });
 
-  it('should render the countdown in initial state', () => {
-    renderComponent();
+  it('should render the countdown in initial state', async () => {
+    await renderComponent();
     expect(screen.getByTestId('mock-countdown')).toBeInTheDocument();
   });
 
-  it('should render the variables panel', () => {
+  it('should render the variables panel', async () => {
     const task = makeMockCampaignTask({
       interaction: {
         callAssociatedData: {
@@ -118,19 +118,19 @@ describe('CampaignTask', () => {
         },
       },
     });
-    renderComponent({task});
+    await renderComponent({task});
     expect(screen.getByTestId('global-variables-panel')).toBeInTheDocument();
   });
 
   // ── Cancel button (Browser mode) ──────────────────────────────────
 
-  it('should render Cancel button when isBrowser is true', () => {
-    renderComponent({isBrowser: true});
+  it('should render Cancel button when isBrowser is true', async () => {
+    await renderComponent({isBrowser: true});
     expect(screen.getByTestId('campaign-task-cancel-button')).toBeInTheDocument();
   });
 
-  it('should NOT render Cancel button when isBrowser is false', () => {
-    renderComponent({isBrowser: false});
+  it('should NOT render Cancel button when isBrowser is false', async () => {
+    await renderComponent({isBrowser: false});
     expect(screen.queryByTestId('campaign-task-cancel-button')).not.toBeInTheDocument();
   });
 
@@ -138,7 +138,7 @@ describe('CampaignTask', () => {
 
   it('should show Connecting button and keep Skip/Remove visible after Accept is clicked', async () => {
     const acceptPreviewContact = jest.fn().mockResolvedValue(undefined);
-    renderComponent({acceptPreviewContact});
+    await renderComponent({acceptPreviewContact});
 
     await act(async () => {
       fireEvent.click(screen.getByTestId('campaign-task-accept-button'));
@@ -155,7 +155,7 @@ describe('CampaignTask', () => {
 
   it('should keep Cancel button visible after Accept is clicked (browser mode)', async () => {
     const acceptPreviewContact = jest.fn().mockResolvedValue(undefined);
-    renderComponent({isBrowser: true, acceptPreviewContact});
+    await renderComponent({isBrowser: true, acceptPreviewContact});
 
     await act(async () => {
       fireEvent.click(screen.getByTestId('campaign-task-accept-button'));
@@ -167,7 +167,7 @@ describe('CampaignTask', () => {
 
   it('should keep countdown visible after Accept is clicked (hidden only when backend confirms)', async () => {
     const acceptPreviewContact = jest.fn().mockResolvedValue(undefined);
-    renderComponent({acceptPreviewContact});
+    await renderComponent({acceptPreviewContact});
 
     await act(async () => {
       fireEvent.click(screen.getByTestId('campaign-task-accept-button'));
@@ -179,7 +179,7 @@ describe('CampaignTask', () => {
 
   it('should show error dialog when accept fails', async () => {
     const acceptPreviewContact = jest.fn().mockRejectedValue(new Error('Network error'));
-    renderComponent({acceptPreviewContact});
+    await renderComponent({acceptPreviewContact});
 
     await act(async () => {
       fireEvent.click(screen.getByTestId('campaign-task-accept-button'));
@@ -193,7 +193,7 @@ describe('CampaignTask', () => {
 
   it('should re-enable buttons when accept fails', async () => {
     const acceptPreviewContact = jest.fn().mockRejectedValue(new Error('fail'));
-    renderComponent({acceptPreviewContact});
+    await renderComponent({acceptPreviewContact});
 
     await act(async () => {
       fireEvent.click(screen.getByTestId('campaign-task-accept-button'));
@@ -210,7 +210,7 @@ describe('CampaignTask', () => {
 
   it('should call skipPreviewContact and disable buttons when Skip is clicked', async () => {
     const skipPreviewContact = jest.fn().mockResolvedValue(undefined);
-    renderComponent({skipPreviewContact});
+    await renderComponent({skipPreviewContact});
 
     await act(async () => {
       fireEvent.click(screen.getByTestId('campaign-task-skip-button'));
@@ -223,7 +223,7 @@ describe('CampaignTask', () => {
 
   it('should show error dialog when skip fails', async () => {
     const skipPreviewContact = jest.fn().mockRejectedValue(new Error('fail'));
-    renderComponent({skipPreviewContact});
+    await renderComponent({skipPreviewContact});
 
     await act(async () => {
       fireEvent.click(screen.getByTestId('campaign-task-skip-button'));
@@ -234,10 +234,10 @@ describe('CampaignTask', () => {
     });
   });
 
-  it('should not call skipPreviewContact when Skip is disabled', () => {
+  it('should not call skipPreviewContact when Skip is disabled', async () => {
     const skipPreviewContact = jest.fn();
     const task = makeMockCampaignTask({cpd: {campaignPreviewSkipDisabled: 'true'}});
-    renderComponent({task, skipPreviewContact});
+    await renderComponent({task, skipPreviewContact});
 
     fireEvent.click(screen.getByTestId('campaign-task-skip-button'));
     expect(skipPreviewContact).not.toHaveBeenCalled();
@@ -247,7 +247,7 @@ describe('CampaignTask', () => {
 
   it('should call removePreviewContact when Remove is clicked', async () => {
     const removePreviewContact = jest.fn().mockResolvedValue(undefined);
-    renderComponent({removePreviewContact});
+    await renderComponent({removePreviewContact});
 
     await act(async () => {
       fireEvent.click(screen.getByTestId('campaign-task-remove-button'));
@@ -258,7 +258,7 @@ describe('CampaignTask', () => {
 
   it('should show error dialog when remove fails', async () => {
     const removePreviewContact = jest.fn().mockRejectedValue(new Error('fail'));
-    renderComponent({removePreviewContact});
+    await renderComponent({removePreviewContact});
 
     await act(async () => {
       fireEvent.click(screen.getByTestId('campaign-task-remove-button'));
@@ -269,10 +269,10 @@ describe('CampaignTask', () => {
     });
   });
 
-  it('should not call removePreviewContact when Remove is disabled', () => {
+  it('should not call removePreviewContact when Remove is disabled', async () => {
     const removePreviewContact = jest.fn();
     const task = makeMockCampaignTask({cpd: {campaignPreviewRemoveDisabled: 'true'}});
-    renderComponent({task, removePreviewContact});
+    await renderComponent({task, removePreviewContact});
 
     fireEvent.click(screen.getByTestId('campaign-task-remove-button'));
     expect(removePreviewContact).not.toHaveBeenCalled();
@@ -282,7 +282,7 @@ describe('CampaignTask', () => {
 
   it('should call cancelPreviewContact when Cancel is clicked', async () => {
     const cancelPreviewContact = jest.fn().mockResolvedValue(undefined);
-    renderComponent({isBrowser: true, cancelPreviewContact});
+    await renderComponent({isBrowser: true, cancelPreviewContact});
 
     await act(async () => {
       fireEvent.click(screen.getByTestId('campaign-task-cancel-button'));
@@ -293,7 +293,7 @@ describe('CampaignTask', () => {
 
   it('should show error dialog when cancel fails', async () => {
     const cancelPreviewContact = jest.fn().mockRejectedValue(new Error('fail'));
-    renderComponent({isBrowser: true, cancelPreviewContact});
+    await renderComponent({isBrowser: true, cancelPreviewContact});
 
     await act(async () => {
       fireEvent.click(screen.getByTestId('campaign-task-cancel-button'));
@@ -308,7 +308,7 @@ describe('CampaignTask', () => {
 
   it('should dismiss error dialog when close button is clicked', async () => {
     const acceptPreviewContact = jest.fn().mockRejectedValue(new Error('fail'));
-    renderComponent({acceptPreviewContact});
+    await renderComponent({acceptPreviewContact});
 
     await act(async () => {
       fireEvent.click(screen.getByTestId('campaign-task-accept-button'));
@@ -330,7 +330,7 @@ describe('CampaignTask', () => {
   it('should hide buttons and show handle time once isAccepted becomes true', async () => {
     const acceptPreviewContact = jest.fn().mockResolvedValue(undefined);
     const task = makeMockCampaignTask();
-    const {rerender} = render(<CampaignTask {...createDefaultProps({acceptPreviewContact, task})} />);
+    const {rerender} = await render(<CampaignTask {...createDefaultProps({acceptPreviewContact, task})} />);
 
     // Accept the campaign
     await act(async () => {
@@ -355,10 +355,10 @@ describe('CampaignTask', () => {
 
   // ── State reset on new contact after skip/remove ───────────────────
 
-  it('should reset buttons when a new contact is offered (timeout changes while not accepted)', () => {
+  it('should reset buttons when a new contact is offered (timeout changes while not accepted)', async () => {
     const task1 = makeMockCampaignTask({cpd: {campaignPreviewOfferTimeout: '1000'}});
     const props = createDefaultProps({task: task1});
-    const {rerender} = render(<CampaignTask {...props} />);
+    const {rerender} = await render(<CampaignTask {...props} />);
 
     // Buttons should be visible initially
     expect(screen.getByTestId('campaign-task-accept-button')).toBeInTheDocument();
@@ -377,7 +377,7 @@ describe('CampaignTask', () => {
 
   it('should not call acceptPreviewContact when Accept is already disabled', async () => {
     const acceptPreviewContact = jest.fn().mockResolvedValue(undefined);
-    renderComponent({acceptPreviewContact});
+    await renderComponent({acceptPreviewContact});
 
     // Click accept to disable it
     await act(async () => {
@@ -390,14 +390,14 @@ describe('CampaignTask', () => {
 
   // ── Caller identifier fallback ─────────────────────────────────────
 
-  it('should use ANI as title when customerName is not available', () => {
+  it('should use ANI as title when customerName is not available', async () => {
     const task = makeMockCampaignTask({
       interaction: {
         callAssociatedDetails: {ani: '+14085550001', dn: '', customerName: undefined},
         callAssociatedData: {},
       },
     });
-    renderComponent({task});
+    await renderComponent({task});
     expect(screen.getByTestId('campaign-task-title')).toHaveTextContent('+14085550001');
   });
 
@@ -406,7 +406,7 @@ describe('CampaignTask', () => {
   describe('handleTimeout — consistent with Agent Desktop', () => {
     it('should NOT call acceptPreviewContact when countdown expires with ACCEPT autoAction', async () => {
       const acceptPreviewContact = jest.fn().mockResolvedValue(undefined);
-      renderComponent({acceptPreviewContact});
+      await renderComponent({acceptPreviewContact});
 
       // Trigger timeout via the captured callback
       expect(capturedOnTimeout).toBeDefined();
@@ -424,7 +424,7 @@ describe('CampaignTask', () => {
     it('should NOT call skipPreviewContact when countdown expires with SKIP autoAction', async () => {
       const skipPreviewContact = jest.fn().mockResolvedValue(undefined);
       const task = makeMockCampaignTask({cpd: {campaignPreviewAutoAction: 'SKIP'}});
-      renderComponent({task, skipPreviewContact});
+      await renderComponent({task, skipPreviewContact});
 
       expect(capturedOnTimeout).toBeDefined();
       await act(async () => {
@@ -442,7 +442,7 @@ describe('CampaignTask', () => {
     it('should NOT call removePreviewContact when countdown expires with REMOVE autoAction', async () => {
       const removePreviewContact = jest.fn().mockResolvedValue(undefined);
       const task = makeMockCampaignTask({cpd: {campaignPreviewAutoAction: 'REMOVE'}});
-      renderComponent({task, removePreviewContact});
+      await renderComponent({task, removePreviewContact});
 
       expect(capturedOnTimeout).toBeDefined();
       await act(async () => {
@@ -456,7 +456,7 @@ describe('CampaignTask', () => {
     });
 
     it('should show Connecting button and disable Skip/Remove on timeout for ACCEPT autoAction', async () => {
-      renderComponent();
+      await renderComponent();
 
       expect(capturedOnTimeout).toBeDefined();
       await act(async () => {
@@ -479,7 +479,7 @@ describe('CampaignTask', () => {
         trace: jest.fn(),
       };
       const task = makeMockCampaignTask({cpd: {campaignPreviewAutoAction: ''}});
-      renderComponent({task, logger});
+      await renderComponent({task, logger});
 
       expect(capturedOnTimeout).toBeDefined();
       await act(async () => {
@@ -495,14 +495,14 @@ describe('CampaignTask', () => {
 
   // ── Accessibility ──────────────────────────────────────────────────
 
-  it('should have correct aria-label on the section', () => {
-    renderComponent();
+  it('should have correct aria-label on the section', async () => {
+    await renderComponent();
     expect(screen.getByTestId('campaign-task')).toHaveAttribute('aria-label', 'Campaign preview contact');
   });
 
   it('should set aria-busy to true when accept is clicked', async () => {
     const acceptPreviewContact = jest.fn().mockResolvedValue(undefined);
-    renderComponent({acceptPreviewContact});
+    await renderComponent({acceptPreviewContact});
 
     await act(async () => {
       fireEvent.click(screen.getByTestId('campaign-task-accept-button'));

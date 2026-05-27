@@ -36,8 +36,8 @@ const defaultProps: CampaignTaskPopoverProps = {
   handleTimestamp: undefined,
 };
 
-const renderComponent = (overrides: Partial<CampaignTaskPopoverProps> = {}) =>
-  render(<CampaignTaskPopover {...defaultProps} {...overrides} />);
+const renderComponent = async (overrides: Partial<CampaignTaskPopoverProps> = {}) =>
+  await render(<CampaignTaskPopover {...defaultProps} {...overrides} />);
 
 describe('CampaignTaskPopover', () => {
   beforeEach(() => {
@@ -47,33 +47,33 @@ describe('CampaignTaskPopover', () => {
   // ── Rendering ──────────────────────────────────────────────────────
 
   it('should render the popover', async () => {
-    renderComponent();
+    await renderComponent();
     expect(await screen.findByTestId('campaign-task-popover')).toBeInTheDocument();
   });
 
   it('should render the list item with campaign-popover testIdPrefix', async () => {
-    renderComponent();
+    await renderComponent();
     expect(await screen.findByTestId('campaign-popover-list-item')).toBeInTheDocument();
     expect(await screen.findByTestId('campaign-popover-title')).toHaveTextContent('Jane Smith');
   });
 
-  it('should render the variables panel with two-column layout', () => {
-    renderComponent();
+  it('should render the variables panel with two-column layout', async () => {
+    await renderComponent();
     const panel = screen.getByTestId('global-variables-panel');
     expect(panel).toBeInTheDocument();
     expect(panel.className).toContain('global-variables-panel--two-column');
   });
 
-  it('should render global variables inside the panel', () => {
-    renderComponent();
+  it('should render global variables inside the panel', async () => {
+    await renderComponent();
     expect(screen.getByText('Campaign:')).toBeInTheDocument();
     expect(screen.getByText('Test Campaign')).toBeInTheDocument();
   });
 
   // ── panelBackground prop ───────────────────────────────────────────
 
-  it('should set the variables panel background to background-primary-hover', () => {
-    renderComponent();
+  it('should set the variables panel background to background-primary-hover', async () => {
+    await renderComponent();
     // JSDOM cannot parse CSS custom properties (var()), so the style
     // attribute is completely stripped.  Verify the panel renders with the
     // correct two-column layout — the actual CSS value is validated in
@@ -85,23 +85,23 @@ describe('CampaignTaskPopover', () => {
 
   // ── Action buttons visibility ──────────────────────────────────────
 
-  it('should render action buttons when not accepted', () => {
-    renderComponent({isAcceptClicked: false});
+  it('should render action buttons when not accepted', async () => {
+    await renderComponent({isAcceptClicked: false});
     expect(screen.getByTestId('campaign-popover-accept-button')).toBeInTheDocument();
     expect(screen.getByTestId('campaign-popover-skip-button')).toBeInTheDocument();
     expect(screen.getByTestId('campaign-popover-remove-button')).toBeInTheDocument();
   });
 
-  it('should show Connecting button and disabled Skip/Remove when accept clicked but not confirmed', () => {
-    renderComponent({isAcceptClicked: true, isAccepted: false});
+  it('should show Connecting button and disabled Skip/Remove when accept clicked but not confirmed', async () => {
+    await renderComponent({isAcceptClicked: true, isAccepted: false});
     expect(screen.queryByTestId('campaign-popover-accept-button')).not.toBeInTheDocument();
     expect(screen.getByTestId('campaign-popover-connecting-button')).toBeInTheDocument();
     expect(screen.getByTestId('campaign-popover-skip-button')).toBeInTheDocument();
     expect(screen.getByTestId('campaign-popover-remove-button')).toBeInTheDocument();
   });
 
-  it('should hide all action buttons when accepted by backend', () => {
-    renderComponent({isAcceptClicked: true, isAccepted: true, handleTimestamp: Date.now()});
+  it('should hide all action buttons when accepted by backend', async () => {
+    await renderComponent({isAcceptClicked: true, isAccepted: true, handleTimestamp: Date.now()});
     expect(screen.queryByTestId('campaign-popover-accept-button')).not.toBeInTheDocument();
     expect(screen.queryByTestId('campaign-popover-skip-button')).not.toBeInTheDocument();
     expect(screen.queryByTestId('campaign-popover-remove-button')).not.toBeInTheDocument();
@@ -109,21 +109,21 @@ describe('CampaignTaskPopover', () => {
 
   // ── Countdown / Handle timer ───────────────────────────────────────
 
-  it('should render countdown when not accepted', () => {
-    renderComponent({isAcceptClicked: false});
+  it('should render countdown when not accepted', async () => {
+    await renderComponent({isAcceptClicked: false});
     expect(screen.getByTestId('mock-countdown')).toBeInTheDocument();
   });
 
-  it('should render handle time timer when accepted by backend', () => {
-    renderComponent({isAcceptClicked: true, isAccepted: true, handleTimestamp: Date.now()});
+  it('should render handle time timer when accepted by backend', async () => {
+    await renderComponent({isAcceptClicked: true, isAccepted: true, handleTimestamp: Date.now()});
     expect(screen.queryByTestId('mock-countdown')).not.toBeInTheDocument();
     expect(screen.getByTestId('mock-task-timer')).toBeInTheDocument();
   });
 
   // ── Phone number ───────────────────────────────────────────────────
 
-  it('should show phone number when different from customer name', () => {
-    renderComponent();
+  it('should show phone number when different from customer name', async () => {
+    await renderComponent();
     expect(screen.getByTestId('campaign-popover-phone')).toBeInTheDocument();
   });
 });

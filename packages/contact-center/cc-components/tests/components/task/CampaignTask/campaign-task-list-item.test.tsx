@@ -41,8 +41,8 @@ const defaultProps: CampaignTaskListItemProps = {
   logger: undefined,
 };
 
-const renderComponent = (overrides: Partial<CampaignTaskListItemProps> = {}) =>
-  render(<CampaignTaskListItem {...defaultProps} {...overrides} />);
+const renderComponent = async (overrides: Partial<CampaignTaskListItemProps> = {}) =>
+  await render(<CampaignTaskListItem {...defaultProps} {...overrides} />);
 
 describe('CampaignTaskListItem', () => {
   beforeEach(() => {
@@ -52,27 +52,27 @@ describe('CampaignTaskListItem', () => {
   // ── Rendering ──────────────────────────────────────────────────────
 
   it('should render the title', async () => {
-    renderComponent();
+    await renderComponent();
     expect(await screen.findByTestId('campaign-task-title')).toHaveTextContent('John Doe');
   });
 
   it('should render the phone number when customerName and phoneNumber differ', async () => {
-    renderComponent({customerName: 'John Doe', phoneNumber: '+1-408-555-0002'});
+    await renderComponent({customerName: 'John Doe', phoneNumber: '+1-408-555-0002'});
     expect(await screen.findByTestId('campaign-task-phone')).toHaveTextContent('+1-408-555-0002');
   });
 
-  it('should NOT render phone when phoneNumber equals customerName', () => {
-    renderComponent({customerName: 'John Doe', phoneNumber: 'John Doe'});
+  it('should NOT render phone when phoneNumber equals customerName', async () => {
+    await renderComponent({customerName: 'John Doe', phoneNumber: 'John Doe'});
     expect(screen.queryByTestId('campaign-task-phone')).not.toBeInTheDocument();
   });
 
-  it('should NOT render phone when customerName is undefined', () => {
-    renderComponent({customerName: undefined});
+  it('should NOT render phone when customerName is undefined', async () => {
+    await renderComponent({customerName: undefined});
     expect(screen.queryByTestId('campaign-task-phone')).not.toBeInTheDocument();
   });
 
   it('should render the campaign avatar', async () => {
-    const {container} = renderComponent();
+    const {container} = await renderComponent();
     const avatar = container.querySelector('[slot="leading-controls"]');
     expect(avatar).toBeInTheDocument();
   });
@@ -80,39 +80,39 @@ describe('CampaignTaskListItem', () => {
   // ── Countdown / Handle Timer toggle ────────────────────────────────
 
   it('should render countdown when not accepted', async () => {
-    renderComponent({isAcceptClicked: false});
+    await renderComponent({isAcceptClicked: false});
     expect(await screen.findByTestId('mock-countdown')).toBeInTheDocument();
   });
 
   it('should still render countdown when accept clicked but not yet confirmed by backend', async () => {
-    renderComponent({isAcceptClicked: true, isAccepted: false});
+    await renderComponent({isAcceptClicked: true, isAccepted: false});
     expect(await screen.findByTestId('mock-countdown')).toBeInTheDocument();
   });
 
-  it('should NOT render countdown when accepted by backend', () => {
-    renderComponent({isAcceptClicked: true, isAccepted: true, handleTimestamp: Date.now()});
+  it('should NOT render countdown when accepted by backend', async () => {
+    await renderComponent({isAcceptClicked: true, isAccepted: true, handleTimestamp: Date.now()});
     expect(screen.queryByTestId('mock-countdown')).not.toBeInTheDocument();
   });
 
   it('should render handle time timer when accepted by backend with handleTimestamp', async () => {
-    renderComponent({isAcceptClicked: true, isAccepted: true, handleTimestamp: Date.now()});
+    await renderComponent({isAcceptClicked: true, isAccepted: true, handleTimestamp: Date.now()});
     expect(await screen.findByTestId('mock-task-timer')).toBeInTheDocument();
   });
 
-  it('should NOT render handle time timer when not accepted', () => {
-    renderComponent({isAcceptClicked: false});
+  it('should NOT render handle time timer when not accepted', async () => {
+    await renderComponent({isAcceptClicked: false});
     expect(screen.queryByTestId('mock-task-timer')).not.toBeInTheDocument();
   });
 
-  it('should NOT render handle time timer when handleTimestamp is undefined', () => {
-    renderComponent({isAcceptClicked: true, handleTimestamp: undefined});
+  it('should NOT render handle time timer when handleTimestamp is undefined', async () => {
+    await renderComponent({isAcceptClicked: true, handleTimestamp: undefined});
     expect(screen.queryByTestId('mock-task-timer')).not.toBeInTheDocument();
   });
 
   // ── Action buttons visibility ──────────────────────────────────────
 
   it('should render Accept, Skip, and Remove buttons when not accepted', async () => {
-    renderComponent({isAcceptClicked: false});
+    await renderComponent({isAcceptClicked: false});
     expect(await screen.findByTestId('campaign-task-actions')).toBeInTheDocument();
     expect(await screen.findByTestId('campaign-task-accept-button')).toBeInTheDocument();
     expect(await screen.findByTestId('campaign-task-skip-button')).toBeInTheDocument();
@@ -120,7 +120,7 @@ describe('CampaignTaskListItem', () => {
   });
 
   it('should show Connecting button and disabled Skip/Remove when accept clicked but not confirmed', async () => {
-    renderComponent({isAcceptClicked: true, isAccepted: false});
+    await renderComponent({isAcceptClicked: true, isAccepted: false});
     expect(await screen.findByTestId('campaign-task-actions')).toBeInTheDocument();
     expect(screen.queryByTestId('campaign-task-accept-button')).not.toBeInTheDocument();
     const connectingBtn = await screen.findByTestId('campaign-task-connecting-button');
@@ -130,8 +130,8 @@ describe('CampaignTaskListItem', () => {
     expect(await screen.findByTestId('campaign-task-remove-button')).toBeInTheDocument();
   });
 
-  it('should NOT render any action buttons when campaign is accepted by backend', () => {
-    renderComponent({isAcceptClicked: true, isAccepted: true, handleTimestamp: Date.now()});
+  it('should NOT render any action buttons when campaign is accepted by backend', async () => {
+    await renderComponent({isAcceptClicked: true, isAccepted: true, handleTimestamp: Date.now()});
     expect(screen.queryByTestId('campaign-task-actions')).not.toBeInTheDocument();
     expect(screen.queryByTestId('campaign-task-accept-button')).not.toBeInTheDocument();
     expect(screen.queryByTestId('campaign-task-skip-button')).not.toBeInTheDocument();
@@ -141,19 +141,19 @@ describe('CampaignTaskListItem', () => {
   // ── Button disabled states ─────────────────────────────────────────
 
   it('should pass disabled prop to Accept button when isAcceptDisabled is true', async () => {
-    renderComponent({isAcceptDisabled: true});
+    await renderComponent({isAcceptDisabled: true});
     const button = await screen.findByTestId('campaign-task-accept-button');
     expect(button).toHaveProperty('disabled', true);
   });
 
   it('should pass disabled prop to Skip button when isSkipDisabled is true', async () => {
-    renderComponent({isSkipDisabled: true});
+    await renderComponent({isSkipDisabled: true});
     const button = await screen.findByTestId('campaign-task-skip-button');
     expect(button).toHaveProperty('disabled', true);
   });
 
   it('should pass disabled prop to Remove button when isRemoveDisabled is true', async () => {
-    renderComponent({isRemoveDisabled: true});
+    await renderComponent({isRemoveDisabled: true});
     const button = await screen.findByTestId('campaign-task-remove-button');
     expect(button).toHaveProperty('disabled', true);
   });
@@ -162,21 +162,21 @@ describe('CampaignTaskListItem', () => {
 
   it('should call onAccept when Accept button is clicked', async () => {
     const onAccept = jest.fn();
-    renderComponent({onAccept});
+    await renderComponent({onAccept});
     fireEvent.click(await screen.findByTestId('campaign-task-accept-button'));
     expect(onAccept).toHaveBeenCalledTimes(1);
   });
 
   it('should call onSkip when Skip button is clicked', async () => {
     const onSkip = jest.fn();
-    renderComponent({onSkip});
+    await renderComponent({onSkip});
     fireEvent.click(await screen.findByTestId('campaign-task-skip-button'));
     expect(onSkip).toHaveBeenCalledTimes(1);
   });
 
   it('should call onRemove when Remove button is clicked', async () => {
     const onRemove = jest.fn();
-    renderComponent({onRemove});
+    await renderComponent({onRemove});
     fireEvent.click(await screen.findByTestId('campaign-task-remove-button'));
     expect(onRemove).toHaveBeenCalledTimes(1);
   });
@@ -184,12 +184,12 @@ describe('CampaignTaskListItem', () => {
   // ── Accessibility ──────────────────────────────────────────────────
 
   it('should set correct aria-label on the actions container', async () => {
-    renderComponent();
+    await renderComponent();
     expect(await screen.findByTestId('campaign-task-actions')).toHaveAttribute('aria-label', CAMPAIGN_ACTIONS_LABEL);
   });
 
   it('should set correct aria-labels on action buttons', async () => {
-    renderComponent();
+    await renderComponent();
     expect(await screen.findByTestId('campaign-task-accept-button')).toHaveAttribute('aria-label', CAMPAIGN_ACCEPT);
     expect(await screen.findByTestId('campaign-task-skip-button')).toHaveAttribute('aria-label', CAMPAIGN_SKIP);
     expect(await screen.findByTestId('campaign-task-remove-button')).toHaveAttribute('aria-label', CAMPAIGN_REMOVE);
@@ -198,7 +198,7 @@ describe('CampaignTaskListItem', () => {
   // ── Custom testIdPrefix ────────────────────────────────────────────
 
   it('should use custom testIdPrefix for data-testid attributes', async () => {
-    renderComponent({testIdPrefix: 'campaign-popover'});
+    await renderComponent({testIdPrefix: 'campaign-popover'});
     expect(await screen.findByTestId('campaign-popover-list-item')).toBeInTheDocument();
     expect(await screen.findByTestId('campaign-popover-title')).toBeInTheDocument();
     expect(await screen.findByTestId('campaign-popover-accept-button')).toBeInTheDocument();
@@ -206,8 +206,8 @@ describe('CampaignTaskListItem', () => {
 
   // ── No timeout timestamp ───────────────────────────────────────────
 
-  it('should NOT render countdown when timeoutTimestamp is undefined', () => {
-    renderComponent({timeoutTimestamp: undefined, isAcceptClicked: false});
+  it('should NOT render countdown when timeoutTimestamp is undefined', async () => {
+    await renderComponent({timeoutTimestamp: undefined, isAcceptClicked: false});
     expect(screen.queryByTestId('mock-countdown')).not.toBeInTheDocument();
   });
 });

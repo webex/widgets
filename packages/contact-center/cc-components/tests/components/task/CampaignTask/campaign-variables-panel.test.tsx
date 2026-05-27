@@ -28,20 +28,20 @@ const sampleVariables: CADVariable[] = [
 describe('GlobalVariablesPanel', () => {
   // ── Empty state ────────────────────────────────────────────────────
 
-  it('should return null when variables array is empty', () => {
-    const {container} = render(<GlobalVariablesPanel variables={[]} />);
+  it('should return null when variables array is empty', async () => {
+    const {container} = await render(<GlobalVariablesPanel variables={[]} />);
     expect(container.firstChild).toBeNull();
   });
 
   // ── Rendering variables ────────────────────────────────────────────
 
-  it('should render the panel with variables', () => {
-    render(<GlobalVariablesPanel variables={sampleVariables} />);
+  it('should render the panel with variables', async () => {
+    await render(<GlobalVariablesPanel variables={sampleVariables} />);
     expect(screen.getByTestId('global-variables-panel')).toBeInTheDocument();
   });
 
-  it('should render all variable labels and values', () => {
-    render(<GlobalVariablesPanel variables={sampleVariables} />);
+  it('should render all variable labels and values', async () => {
+    await render(<GlobalVariablesPanel variables={sampleVariables} />);
     expect(screen.getByText('Campaign ID:')).toBeInTheDocument();
     expect(screen.getByText('CM_Predictive_201004')).toBeInTheDocument();
     expect(screen.getByText('LCM Key:')).toBeInTheDocument();
@@ -50,17 +50,17 @@ describe('GlobalVariablesPanel', () => {
     expect(screen.getByText('Design')).toBeInTheDocument();
   });
 
-  it('should skip variables with no value', () => {
+  it('should skip variables with no value', async () => {
     const vars: CADVariable[] = [makeVariable('HasValue', 'yes'), {...makeVariable('NoValue', ''), value: ''}];
-    render(<GlobalVariablesPanel variables={vars} />);
+    await render(<GlobalVariablesPanel variables={vars} />);
     expect(screen.getByText('HasValue:')).toBeInTheDocument();
     expect(screen.queryByText('NoValue:')).not.toBeInTheDocument();
   });
 
   // ── Accessibility ──────────────────────────────────────────────────
 
-  it('should render the definition list with correct aria-label', () => {
-    render(<GlobalVariablesPanel variables={sampleVariables} />);
+  it('should render the definition list with correct aria-label', async () => {
+    await render(<GlobalVariablesPanel variables={sampleVariables} />);
     const panel = screen.getByTestId('global-variables-panel');
     const dl = panel.querySelector('dl');
     expect(dl).toHaveAttribute('aria-label', GLOBAL_VARIABLES_LABEL);
@@ -68,29 +68,29 @@ describe('GlobalVariablesPanel', () => {
 
   // ── Layout modes ───────────────────────────────────────────────────
 
-  it('should apply single-column layout by default', () => {
-    render(<GlobalVariablesPanel variables={sampleVariables} />);
+  it('should apply single-column layout by default', async () => {
+    await render(<GlobalVariablesPanel variables={sampleVariables} />);
     const panel = screen.getByTestId('global-variables-panel');
     expect(panel.className).toContain('global-variables-panel');
     expect(panel.className).not.toContain('global-variables-panel--two-column');
   });
 
-  it('should apply two-column layout class when layout="two-column"', () => {
-    render(<GlobalVariablesPanel variables={sampleVariables} layout="two-column" />);
+  it('should apply two-column layout class when layout="two-column"', async () => {
+    await render(<GlobalVariablesPanel variables={sampleVariables} layout="two-column" />);
     const panel = screen.getByTestId('global-variables-panel');
     expect(panel.className).toContain('global-variables-panel--two-column');
   });
 
   // ── panelBackground prop ───────────────────────────────────────────
 
-  it('should NOT set inline background style when panelBackground is not provided', () => {
-    render(<GlobalVariablesPanel variables={sampleVariables} />);
+  it('should NOT set inline background style when panelBackground is not provided', async () => {
+    await render(<GlobalVariablesPanel variables={sampleVariables} />);
     const panel = screen.getByTestId('global-variables-panel');
     expect(panel.style.background).toBe('');
   });
 
   it('should set inline background style when panelBackground is provided', async () => {
-    render(
+    await render(
       <GlobalVariablesPanel
         variables={sampleVariables}
         panelBackground="var(--mds-color-theme-background-primary-hover)"
@@ -105,14 +105,14 @@ describe('GlobalVariablesPanel', () => {
 
   // ── className prop ─────────────────────────────────────────────────
 
-  it('should apply additional className when provided', () => {
-    render(<GlobalVariablesPanel variables={sampleVariables} className="custom-class" />);
+  it('should apply additional className when provided', async () => {
+    await render(<GlobalVariablesPanel variables={sampleVariables} className="custom-class" />);
     const panel = screen.getByTestId('global-variables-panel');
     expect(panel.className).toContain('custom-class');
   });
 
-  it('should not add trailing spaces when className is not provided', () => {
-    render(<GlobalVariablesPanel variables={sampleVariables} />);
+  it('should not add trailing spaces when className is not provided', async () => {
+    await render(<GlobalVariablesPanel variables={sampleVariables} />);
     const panel = screen.getByTestId('global-variables-panel');
     expect(panel.className).not.toMatch(/\s$/);
   });
