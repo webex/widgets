@@ -1,5 +1,6 @@
 import type {
   ITask,
+  Interaction,
   Profile,
   TaskData,
   TaskResponse,
@@ -199,6 +200,127 @@ const mockTask: ITask = {
   exitConference: jest.fn(),
   toggleMute: jest.fn(),
 };
+
+interface MakeMockTaskOverrides {
+  data?: Partial<TaskData> & {
+    interaction?: Partial<Interaction>;
+  };
+}
+
+const makeMockTask = (overrides?: MakeMockTaskOverrides): ITask => {
+  const interactionOverrides = overrides?.data?.interaction ?? {};
+  const dataOverrides = overrides?.data ?? {};
+
+  return {
+    ...mockTask,
+    data: {
+      ...mockTask.data,
+      ...dataOverrides,
+      interaction: {
+        ...mockTask.data.interaction,
+        ...interactionOverrides,
+      },
+    } as unknown as TaskData,
+    on: jest.fn(),
+    off: jest.fn(),
+    emit: jest.fn(),
+    addListener: jest.fn(),
+    once: jest.fn(),
+    removeListener: jest.fn(),
+    removeAllListeners: jest.fn(),
+    setMaxListeners: jest.fn(),
+    getMaxListeners: jest.fn().mockReturnValue(10),
+    listeners: jest.fn().mockReturnValue([]),
+    rawListeners: jest.fn().mockReturnValue([]),
+    listenerCount: jest.fn().mockReturnValue(0),
+    prependListener: jest.fn(),
+    prependOnceListener: jest.fn(),
+    eventNames: jest.fn().mockReturnValue([]),
+    cancelAutoWrapupTimer: jest.fn(),
+    unregisterWebCallListeners: jest.fn(),
+    updateTaskData: jest.fn().mockReturnValue({} as ITask),
+    accept: jest.fn().mockResolvedValue({} as TaskResponse),
+    decline: jest.fn().mockResolvedValue({} as TaskResponse),
+    hold: jest.fn().mockResolvedValue({} as TaskResponse),
+    resume: jest.fn().mockResolvedValue({} as TaskResponse),
+    end: jest.fn().mockResolvedValue({} as TaskResponse),
+    wrapup: jest.fn().mockResolvedValue({} as TaskResponse),
+    pauseRecording: jest.fn().mockResolvedValue({} as TaskResponse),
+    resumeRecording: jest.fn().mockResolvedValue({} as TaskResponse),
+    consult: jest.fn().mockResolvedValue({} as TaskResponse),
+    transfer: jest.fn().mockResolvedValue({} as TaskResponse),
+    consultTransfer: jest.fn().mockResolvedValue({} as TaskResponse),
+    endConsult: jest.fn().mockResolvedValue({} as TaskResponse),
+    consultConference: jest.fn(),
+    transferConference: jest.fn(),
+    exitConference: jest.fn(),
+    toggleMute: jest.fn(),
+  };
+};
+
+/** Default campaign preview call processing details. */
+const mockCampaignCpd: Record<string, string> = {
+  campaignPreviewSkipDisabled: 'false',
+  campaignPreviewRemoveDisabled: 'false',
+  campaignPreviewAutoAction: 'ACCEPT',
+  campaignPreviewOfferTimeout: String(Date.now() + 30000),
+};
+
+/** A mock task shaped as a campaign preview interaction. */
+const mockCampaignTask: ITask = {
+  ...mockTask,
+  data: {
+    ...mockTask.data,
+    interactionId: 'interaction-1',
+    interaction: {
+      ...mockTask.data.interaction,
+      callProcessingDetails: mockCampaignCpd,
+      callAssociatedDetails: {
+        ani: '+14085550001',
+        dn: '+14085550002',
+        customerName: 'Jane Smith',
+      },
+      callAssociatedData: {
+        Global_Campaign: {
+          name: 'Global_Campaign',
+          displayName: 'Campaign',
+          value: 'Test Campaign',
+          type: 'STRING',
+          agentEditable: false,
+          agentViewable: true,
+          global: true,
+          isSecure: false,
+          secureKeyId: '',
+          secureKeyVersion: 0,
+        },
+      },
+      outboundType: 'OUTDIAL',
+    } as unknown as Interaction,
+  } as unknown as TaskData,
+};
+
+interface IMakeMockCampaignTaskOverrides {
+  cpd?: Record<string, unknown>;
+  interaction?: Record<string, unknown>;
+  data?: Record<string, unknown>;
+}
+
+/** Factory that creates a campaign preview mock task with deep overrides. */
+const makeMockCampaignTask = (overrides: IMakeMockCampaignTaskOverrides = {}): ITask => ({
+  ...mockCampaignTask,
+  data: {
+    ...mockCampaignTask.data,
+    ...overrides.data,
+    interaction: {
+      ...mockCampaignTask.data.interaction,
+      callProcessingDetails: {
+        ...mockCampaignCpd,
+        ...overrides.cpd,
+      },
+      ...overrides.interaction,
+    },
+  } as unknown as TaskData,
+});
 
 const mockQueueDetails = [
   {
@@ -512,6 +634,9 @@ const mockCC: IContactCenter = {
   setAgentState: jest.fn().mockResolvedValue({}),
   getOutdialAniEntries: jest.fn().mockResolvedValue({entries: []}),
   getAccessToken: jest.fn().mockResolvedValue('mock-access-token'),
+  acceptPreviewContact: jest.fn().mockResolvedValue({}),
+  skipPreviewContact: jest.fn().mockResolvedValue({}),
+  removePreviewContact: jest.fn().mockResolvedValue({}),
 };
 
 const mockCallAssociatedData: Record<
@@ -583,6 +708,10 @@ export {
   mockProfile,
   mockCC,
   mockTask,
+  makeMockTask,
+  mockCampaignCpd,
+  mockCampaignTask,
+  makeMockCampaignTask,
   mockQueueDetails,
   mockAgents,
   mockEntryPointsResponse,

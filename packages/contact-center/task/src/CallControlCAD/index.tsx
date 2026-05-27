@@ -6,6 +6,7 @@ import store from '@webex/cc-store';
 import {useCallControl} from '../helper';
 import {CallControlProps} from '../task.types';
 import {CallControlCADComponent} from '@webex/cc-components';
+import {isUnacceptedCampaignPreview} from '../Utils/task-util';
 
 const CallControlCADInternal: React.FunctionComponent<CallControlProps> = observer(
   ({
@@ -30,22 +31,34 @@ const CallControlCADInternal: React.FunctionComponent<CallControlProps> = observ
       deviceType,
       isMuted,
       agentId,
+      acceptedCampaignIds,
     } = store;
+
+    const callControlProps = useCallControl({
+      currentTask,
+      onHoldResume,
+      onEnd,
+      onWrapUp,
+      onRecordingToggle,
+      onToggleMute,
+      logger,
+      deviceType,
+      featureFlags,
+      isMuted,
+      conferenceEnabled,
+      agentId,
+    });
+
+    if (!currentTask) {
+      return <></>;
+    }
+
+    if (isUnacceptedCampaignPreview(currentTask, acceptedCampaignIds)) {
+      return <></>;
+    }
+
     const result = {
-      ...useCallControl({
-        currentTask,
-        onHoldResume,
-        onEnd,
-        onWrapUp,
-        onRecordingToggle,
-        onToggleMute,
-        logger,
-        deviceType,
-        featureFlags,
-        isMuted,
-        conferenceEnabled,
-        agentId,
-      }),
+      ...callControlProps,
       wrapupCodes,
       consultStartTimeStamp,
       callControlAudio,

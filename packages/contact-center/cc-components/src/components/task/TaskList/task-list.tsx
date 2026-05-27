@@ -1,18 +1,35 @@
 import React from 'react';
-import {TaskListComponentProps, MEDIA_CHANNEL} from '../task.types';
+import {ErrorBoundary} from 'react-error-boundary';
+import {withMetrics} from '@webex/cc-ui-logging';
+import {TaskListComponentProps, MEDIA_CHANNEL, CampaignCallProcessingDetails} from '../task.types';
 import Task from '../Task';
+import CampaignTask from '../CampaignTask/campaign-task';
 import {
   extractTaskListItemData,
   isTaskListEmpty,
   getTasksArray,
   createTaskSelectHandler,
   isCurrentTaskSelected,
+  isCampaignPreviewTask,
+  hasAgentJoinedTask,
+  getActiveCampaignPreviewId,
 } from './task-list.utils';
 import './styles.scss';
-import {withMetrics} from '@webex/cc-ui-logging';
 
 const TaskListComponent: React.FunctionComponent<TaskListComponentProps> = (props) => {
-  const {currentTask, taskList, acceptTask, declineTask, isBrowser, onTaskSelect, logger, agentId} = props;
+  const {
+    currentTask,
+    taskList,
+    acceptTask,
+    declineTask,
+    isBrowser,
+    onTaskSelect,
+    logger,
+    agentId,
+    cc,
+    hasCampaignPreviewEnabled = true,
+    acceptedCampaignIds,
+  } = props;
 
   // Early return for empty task list
   if (isTaskListEmpty(taskList)) {
@@ -21,6 +38,10 @@ const TaskListComponent: React.FunctionComponent<TaskListComponentProps> = (prop
 
   // Get tasks as array for mapping
   const tasks = getTasksArray(taskList!);
+
+  // Only one campaign preview should appear — pick the most recent active one
+  const activeCampaignId = hasCampaignPreviewEnabled ? getActiveCampaignPreviewId(tasks, agentId) : null;
+
   return (
     <ul className="task-list" data-testid="task-list">
       {tasks.map((task, index) => {
@@ -32,6 +53,41 @@ const TaskListComponent: React.FunctionComponent<TaskListComponentProps> = (prop
           module: 'task-list.tsx',
           method: 'renderItem',
         });
+
+        // Campaign preview handling: render only the active one, skip stale duplicates
+        if (hasCampaignPreviewEnabled && isCampaignPreviewTask(task) && hasAgentJoinedTask(task, agentId)) {
+          if (task.data.interactionId !== activeCampaignId) {
+            return null; // skip stale campaign preview
+          }
+          const interactionId = task.data.interactionId;
+          const cpd = task.data.interaction.callProcessingDetails as unknown as
+            | CampaignCallProcessingDetails
+            | undefined;
+          const campaignId = cpd?.campaignId ?? '';
+
+          return (
+            <ErrorBoundary
+              key={interactionId}
+              fallbackRender={() => <></>}
+              onError={(error: Error) => {
+                logger?.error?.('CampaignTask crashed', {error});
+              }}
+            >
+              <CampaignTask
+                task={task}
+                acceptPreviewContact={() => cc.acceptPreviewContact({interactionId, campaignId}).then(() => {})}
+                skipPreviewContact={() => cc.skipPreviewContact({interactionId, campaignId}).then(() => {})}
+                removePreviewContact={() => cc.removePreviewContact({interactionId, campaignId}).then(() => {})}
+                cancelPreviewContact={() => task.end().then(() => {})}
+                isBrowser={isBrowser}
+                logger={logger}
+                isAccepted={acceptedCampaignIds?.has(interactionId) ?? false}
+                agentId={agentId}
+              />
+            </ErrorBoundary>
+          );
+        }
+
         return (
           <Task
             interactionId={task.data.interactionId}

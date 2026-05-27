@@ -95,6 +95,7 @@ describe('CallControl Component', () => {
       stateTimerTimestamp: 0,
       consultTimerLabel: 'Consulting',
       consultTimerTimestamp: 0,
+      isCampaignCall: false,
     });
 
     render(

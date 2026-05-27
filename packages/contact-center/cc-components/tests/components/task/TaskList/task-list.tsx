@@ -1,7 +1,7 @@
 import React from 'react';
 import {render, fireEvent} from '@testing-library/react';
 import '@testing-library/jest-dom';
-import {mockTask, mockTaskData} from '@webex/test-fixtures';
+import {mockTask, mockTaskData, mockCC} from '@webex/test-fixtures';
 import TaskListComponent from '../../../../src/components/task/TaskList/task-list';
 import {TaskListComponentProps, MEDIA_CHANNEL} from '../../../../src/components/task/task.types';
 import type {ILogger} from '@webex/cc-store';
@@ -50,6 +50,7 @@ describe('TaskListComponent', () => {
     onTaskSelect: mockOnTaskSelect,
     logger: mockLogger,
     agentId: '',
+    cc: mockCC,
   };
 
   // Utility function spies

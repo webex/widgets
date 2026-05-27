@@ -13,6 +13,8 @@ import {
   BuddyDetails,
   ENGAGED_LABEL,
   ENGAGED_USERNAME,
+  RESERVED_LABEL,
+  RESERVED_USERNAME,
   ContactServiceQueue,
   ContactServiceQueueSearchParams,
   EntryPointListResponse,
@@ -30,6 +32,8 @@ import {
   MEDIA_TYPE_TELEPHONY_LOWER,
   MEDIA_TYPE_TELEPHONY_UPPER,
   AGENT_STATE_AVAILABLE,
+  CAMPAIGN_PREVIEW_OUTBOUND_TYPES,
+  CAMPAIGN_PREVIEW_CAMPAIGN_TYPES,
 } from './store.types';
 import {runInAction} from 'mobx';
 import {isIncomingTask} from './task-utils';
@@ -150,6 +154,10 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.realtimeTranscriptionData;
   }
 
+  get acceptedCampaignIds() {
+    return this.store.acceptedCampaignIds;
+  }
+
   setDataCenter = (value: string): void => {
     this.store.dataCenter = value;
   };
@@ -235,6 +243,28 @@ class StoreWrapper implements IStoreWrapper {
   setCurrentTask = (task: ITask | null, isClicked: boolean = false): void => {
     // Don't assign the task as current task is incoming
     if (isIncomingTask(task, this.agentId)) return;
+
+    // Don't promote a pending campaign preview as the current task.
+    // The agent has joined the telephony reservation but hasn't accepted the
+    // campaign preview yet (Accept/Skip/Remove buttons still showing).
+    // CallControl should only render after the preview is explicitly accepted.
+    // Allow accepted previews through even if the SDK hasn't transitioned the
+    // state from 'new' yet — acceptedCampaignIds is the source of truth.
+    // Clear currentTask so stale call-control state doesn't linger, but skip
+    // the onTaskSelected callback to preserve its ITask contract.
+    const isPendingPreview =
+      task &&
+      this.isCampaignPreview(task) &&
+      task.data.interaction.state === 'new' &&
+      !this.store.acceptedCampaignIds.has(task.data.interactionId);
+
+    if (isPendingPreview) {
+      runInAction(() => {
+        this.store.currentTask = null;
+      });
+
+      return;
+    }
 
     runInAction(() => {
       // Determine if the new task is the same as the current task.
@@ -426,6 +456,12 @@ class StoreWrapper implements IStoreWrapper {
   handleTaskRemove = (taskToRemove: ITask) => {
     if (taskToRemove) {
       const taskId = taskToRemove.data?.interactionId;
+      // Clean up accepted/dismissed campaign tracking now that the task is
+      // fully removed (after wrapup).  This is safe because the task will
+      // no longer render in any component.
+      if (taskId && this.store.acceptedCampaignIds.has(taskId)) {
+        this.removeAcceptedCampaign(taskId);
+      }
       if (taskId && this.realtimeTranscriptionListeners[taskId]) {
         taskToRemove.off(TASK_EVENTS.REAL_TIME_TRANSCRIPTION, this.realtimeTranscriptionListeners[taskId]);
         delete this.realtimeTranscriptionListeners[taskId];
@@ -456,6 +492,8 @@ class StoreWrapper implements IStoreWrapper {
       taskToRemove.off(TASK_EVENTS.TASK_CONFERENCE_TRANSFERRED, this.handleConferenceEnded);
       taskToRemove.off(TASK_EVENTS.TASK_CONFERENCE_TRANSFER_FAILED, this.refreshTaskList);
       taskToRemove.off(TASK_EVENTS.TASK_POST_CALL_ACTIVITY, this.refreshTaskList);
+      taskToRemove.off(TASK_EVENTS.TASK_CAMPAIGN_PREVIEW_RESERVATION, this.handleCampaignPreviewReservation);
+      taskToRemove.off(TASK_EVENTS.TASK_CAMPAIGN_CONTACT_UPDATED, this.refreshTaskList);
       if (this.deviceType === DEVICE_TYPE_BROWSER) {
         taskToRemove.off(TASK_EVENTS.TASK_MEDIA, this.handleTaskMedia);
         this.setCallControlAudio(null);
@@ -490,8 +528,61 @@ class StoreWrapper implements IStoreWrapper {
     }
   };
 
+  /**
+   * Checks if a task is a campaign preview interaction.
+   * Matches agent desktop logic that checks both outboundType and campaignType.
+   */
+  private isCampaignPreview = (task: ITask): boolean => {
+    const outboundType = task.data.interaction.outboundType ?? '';
+    const cpd = task.data.interaction.callProcessingDetails as unknown as
+      | Record<string, string | undefined>
+      | undefined;
+    const campaignType = cpd?.campaignType ?? '';
+
+    return (
+      CAMPAIGN_PREVIEW_OUTBOUND_TYPES.includes(outboundType) || CAMPAIGN_PREVIEW_CAMPAIGN_TYPES.includes(campaignType)
+    );
+  };
+
+  /**
+   * Handles the campaign preview reservation event (agent accepted the preview).
+   * Transitions state from RESERVED to ENGAGED, matching agent desktop behavior.
+   */
+  addAcceptedCampaign = (interactionId: string): void => {
+    runInAction(() => {
+      this.store.acceptedCampaignIds = new Set(this.store.acceptedCampaignIds).add(interactionId);
+    });
+  };
+
+  removeAcceptedCampaign = (interactionId: string): void => {
+    runInAction(() => {
+      const next = new Set(this.store.acceptedCampaignIds);
+      next.delete(interactionId);
+      this.store.acceptedCampaignIds = next;
+    });
+  };
+
+  handleCampaignPreviewReservation = (event: ITask) => {
+    // Only track accepted campaign IDs for actual preview campaigns.
+    // Predictive/progressive campaigns don't need preview-accept tracking.
+    if (this.isCampaignPreview(event)) {
+      const interactionId = event?.data?.interactionId;
+      if (interactionId) {
+        this.addAcceptedCampaign(interactionId);
+      }
+    }
+    runInAction(() => {
+      this.setState({
+        developerName: ENGAGED_LABEL,
+        name: ENGAGED_USERNAME,
+      });
+    });
+    this.refreshTaskList();
+  };
+
   handleTaskEnd = () => {
     this.setIsDeclineButtonEnabled(false);
+
     this.refreshTaskList();
   };
 
@@ -502,10 +593,25 @@ class StoreWrapper implements IStoreWrapper {
     }
     runInAction(() => {
       this.setCurrentTask(task);
-      this.setState({
-        developerName: ENGAGED_LABEL,
-        name: ENGAGED_USERNAME,
-      });
+      // Campaign preview that is still pending acceptance (state 'new')
+      // keeps the agent in RESERVED.  Once the agent accepts the preview
+      // the interaction state transitions away from 'new' and the agent
+      // moves to ENGAGED — matching Agent Desktop behaviour.
+      if (this.isCampaignPreview(task) && task.data.interaction.state === 'new') {
+        this.setState({
+          developerName: RESERVED_LABEL,
+          name: RESERVED_USERNAME,
+        });
+      } else {
+        // Campaign preview with state !== 'new' means it was accepted.
+        if (this.isCampaignPreview(task)) {
+          this.addAcceptedCampaign(task.data.interactionId);
+        }
+        this.setState({
+          developerName: ENGAGED_LABEL,
+          name: ENGAGED_USERNAME,
+        });
+      }
     });
   };
 
@@ -616,6 +722,11 @@ class StoreWrapper implements IStoreWrapper {
     task.on(TASK_EVENTS.TASK_CONFERENCE_TRANSFERRED, this.refreshTaskList);
     task.on(TASK_EVENTS.TASK_CONFERENCE_TRANSFER_FAILED, this.refreshTaskList);
     task.on(TASK_EVENTS.TASK_POST_CALL_ACTIVITY, this.refreshTaskList);
+
+    // Campaign preview: transition RESERVED → ENGAGED when the agent accepts
+    task.on(TASK_EVENTS.TASK_CAMPAIGN_PREVIEW_RESERVATION, this.handleCampaignPreviewReservation);
+    task.on(TASK_EVENTS.TASK_CAMPAIGN_CONTACT_UPDATED, this.refreshTaskList);
+
     const taskId = task.data?.interactionId;
     if (taskId && !this.realtimeTranscriptionListeners[taskId]) {
       this.realtimeTranscriptionListeners[taskId] = (payload: RealTimeTranscriptionEventPayload) =>
@@ -645,6 +756,39 @@ class StoreWrapper implements IStoreWrapper {
     }
 
     // We should update the task list in the store after sending the incoming task callback
+    this.refreshTaskList();
+  };
+
+  /**
+   * Handles the initial arrival of a campaign task.
+   * The SDK emits TASK_CAMPAIGN_PREVIEW_RESERVATION for all campaign types.
+   * Only standard and direct preview campaigns should enter RESERVED state
+   * (the agent must explicitly accept/skip the preview contact).
+   * Predictive and progressive campaigns go straight to the regular flow —
+   * they will transition directly to ENGAGED via handleTaskAssigned.
+   */
+  handleIncomingCampaignPreview = (event: ITask) => {
+    const task: ITask = event;
+
+    this.registerTaskEventListeners(task);
+
+    if (this.onIncomingTask && !this.taskList[task.data.interactionId]) {
+      this.onIncomingTask({task});
+      this.handleTaskMuteState(task);
+    }
+
+    // Only standard/direct preview campaigns enter RESERVED state.
+    // Predictive and progressive campaigns skip RESERVED and will
+    // transition to ENGAGED when handleTaskAssigned fires.
+    if (this.isCampaignPreview(task)) {
+      runInAction(() => {
+        this.setState({
+          developerName: RESERVED_LABEL,
+          name: RESERVED_USERNAME,
+        });
+      });
+    }
+
     this.refreshTaskList();
   };
 
@@ -694,7 +838,19 @@ class StoreWrapper implements IStoreWrapper {
       this.setConsultStartTimeStamp(Date.now());
     }
 
-    if (
+    if (this.isCampaignPreview(task) && task.data.interaction.state === 'new') {
+      this.setState({
+        developerName: RESERVED_LABEL,
+        name: RESERVED_USERNAME,
+      });
+    } else if (this.isCampaignPreview(task)) {
+      // Hydrating an accepted campaign preview — restore accepted state.
+      this.addAcceptedCampaign(task.data.interactionId);
+      this.setState({
+        developerName: ENGAGED_LABEL,
+        name: ENGAGED_USERNAME,
+      });
+    } else if (
       (['wrapUp', 'connected'].includes(task.data.interaction.state) && !task.data.isConsulted) ||
       task.data.wrapUpRequired
     ) {
@@ -860,6 +1016,7 @@ class StoreWrapper implements IStoreWrapper {
       this.setTeamId('');
       this.setDigitalChannelsInitialized(false);
       this.store.realtimeTranscriptionData = [];
+      this.store.acceptedCampaignIds = new Set();
       this.realtimeTranscriptionListeners = {};
     });
   };
@@ -886,6 +1043,7 @@ class StoreWrapper implements IStoreWrapper {
       ccSDK.on(TASK_EVENTS.TASK_HYDRATE, this.handleTaskHydrate);
       ccSDK.on(CC_EVENTS.AGENT_STATE_CHANGE, this.handleStateChange);
       ccSDK.on(TASK_EVENTS.TASK_INCOMING, this.handleIncomingTask);
+      ccSDK.on(TASK_EVENTS.TASK_CAMPAIGN_PREVIEW_RESERVATION, this.handleIncomingCampaignPreview);
       ccSDK.on(TASK_EVENTS.TASK_MERGED, this.handleTaskMerged);
       ccSDK.on(CC_EVENTS.AGENT_MULTI_LOGIN, this.handleMultiLoginCloseSession);
       ccSDK.on(CC_EVENTS.AGENT_LOGOUT_SUCCESS, handleLogOut);
@@ -899,6 +1057,7 @@ class StoreWrapper implements IStoreWrapper {
       ccSDK.off(TASK_EVENTS.TASK_HYDRATE, this.handleTaskHydrate);
       ccSDK.off(CC_EVENTS.AGENT_STATE_CHANGE, this.handleStateChange);
       ccSDK.off(TASK_EVENTS.TASK_INCOMING, this.handleIncomingTask);
+      ccSDK.off(TASK_EVENTS.TASK_CAMPAIGN_PREVIEW_RESERVATION, this.handleIncomingCampaignPreview);
       ccSDK.off(TASK_EVENTS.TASK_MERGED, this.handleTaskMerged);
       ccSDK.off(CC_EVENTS.AGENT_MULTI_LOGIN, this.handleMultiLoginCloseSession);
       ccSDK.off(CC_EVENTS.AGENT_LOGOUT_SUCCESS, handleLogOut);

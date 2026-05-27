@@ -38,3 +38,17 @@ export const PHONE_NUMBER = 'Phone Number:';
 export const CUSTOMER_NAME = 'Customer Name';
 export const RONA = 'RONA:';
 export const TIME_LEFT = 'Time left:';
+// Campaign preview task constants
+export const CAMPAIGN_ACCEPT = 'Accept';
+export const CAMPAIGN_CONNECTING = 'Connecting...';
+export const CAMPAIGN_SKIP = 'Skip';
+export const CAMPAIGN_SKIP_TOOLTIP = 'Skip this contact';
+export const CAMPAIGN_SKIP_DISABLED_TOOLTIP = "Can't skip this contact";
+export const CAMPAIGN_REMOVE = 'Remove';
+export const CAMPAIGN_REMOVE_TOOLTIP = 'Remove this contact';
+export const CAMPAIGN_REMOVE_DISABLED_TOOLTIP = "Can't remove this contact";
+export const CAMPAIGN_TASK_REGION_LABEL = 'Campaign preview contact';
+export const GLOBAL_VARIABLES_LABEL = 'Contact details';
+export const CAMPAIGN_ACTIONS_LABEL = 'Campaign actions';
+export const HANDLE_TIME = 'Handle Time:';
+export const CAMPAIGN_CALL = 'Campaign call';
