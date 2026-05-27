@@ -54,7 +54,7 @@ const mockProfile: Profile = {
   isAgentAvailableAfterOutdial: false,
   isCampaignManagementEnabled: true,
   outDialEp: '',
-  isEndCallEnabled: true,
+  isEndTaskEnabled: true,
   isEndConsultEnabled: true,
   agentDbId: 'agentDb123',
   allowConsultToQueue: true,
@@ -71,7 +71,6 @@ const mockProfile: Profile = {
   lastStateAuxCodeId: 'auxCodeId',
   lastStateChangeTimestamp: 123456789,
   lastIdleCodeChangeTimestamp: 123456789,
-  environment: 'produs1',
 };
 
 const mockEntryPointsResponse: EntryPointListResponse = {
@@ -111,7 +110,7 @@ const makeMockAddressBook = (getEntriesMock?: AddressBook['getEntries']): Addres
 
 const mockAddressBook = makeMockAddressBook();
 
-const mockTask: ITask = {
+const mockTask = {
   data: {
     interaction: {
       mediaType: 'telephony',
@@ -120,6 +119,7 @@ const mockTask: ITask = {
       callProcessingDetails: {
         relationshipType: 'primary',
         parentInteractionId: null,
+        pauseResumeEnabled: true,
       },
       participants: {
         agent1: {
@@ -198,7 +198,7 @@ const mockTask: ITask = {
   transferConference: jest.fn(),
   exitConference: jest.fn(),
   toggleMute: jest.fn(),
-};
+} as unknown as ITask;
 
 const mockQueueDetails = [
   {

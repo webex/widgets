@@ -2,7 +2,12 @@ import React from 'react';
 import {render} from '@testing-library/react';
 import CallControlCADComponent from '../../../../src/components/task/CallControlCAD/call-control-cad';
 import {CallControlComponentProps, TARGET_TYPE} from '../../../../src/components/task/task.types';
-import {mockTask} from '@webex/test-fixtures';
+import {
+  mockTask,
+  createEnabledMainTaskUIControls,
+  createMockTaskUIControls,
+  enabledControl,
+} from '@webex/test-fixtures';
 import {BuddyDetails} from '@webex/cc-store';
 import '@testing-library/jest-dom';
 
@@ -82,35 +87,7 @@ describe('CallControlCADComponent', () => {
     } as BuddyDetails,
   ];
 
-  const mockControlVisibility = {
-    accept: {isVisible: true, isEnabled: true},
-    decline: {isVisible: true, isEnabled: true},
-    end: {isVisible: true, isEnabled: true},
-    muteUnmute: {isVisible: true, isEnabled: true},
-    muteUnmuteConsult: {isVisible: true, isEnabled: true},
-    holdResume: {isVisible: true, isEnabled: true},
-    consult: {isVisible: true, isEnabled: true},
-    transfer: {isVisible: true, isEnabled: true},
-    conference: {isVisible: true, isEnabled: true},
-    wrapup: {isVisible: false, isEnabled: false},
-    pauseResumeRecording: {isVisible: true, isEnabled: true},
-    endConsult: {isVisible: true, isEnabled: true},
-    recordingIndicator: {isVisible: true, isEnabled: true},
-    exitConference: {isVisible: false, isEnabled: false},
-    mergeConference: {isVisible: false, isEnabled: false},
-    mergeConferenceConsult: {isVisible: false, isEnabled: false},
-    consultTransfer: {isVisible: false, isEnabled: false},
-    consultTransferConsult: {isVisible: false, isEnabled: false},
-    switchToMainCall: {isVisible: false, isEnabled: false},
-    switchToConsult: {isVisible: false, isEnabled: false},
-    isConferenceInProgress: false,
-    isConsultInitiated: false,
-    isConsultInitiatedAndAccepted: false,
-    isConsultInitiatedOrAccepted: false,
-    isConsultReceived: false,
-    isHeld: false,
-    consultCallHeld: false,
-  };
+  const mockControls = createEnabledMainTaskUIControls();
 
   const defaultProps: CallControlComponentProps = {
     currentTask: mockCurrentTask,
@@ -144,7 +121,9 @@ describe('CallControlCADComponent', () => {
     allowConsultToQueue: true,
     lastTargetType: TARGET_TYPE.AGENT,
     setLastTargetType: jest.fn(),
-    controlVisibility: mockControlVisibility,
+    isHeld: false,
+    conferenceEnabled: true,
+    controls: mockControls,
     logger: mockLogger,
     secondsUntilAutoWrapup: undefined,
     cancelAutoWrapup: jest.fn(),
@@ -190,10 +169,7 @@ describe('CallControlCADComponent', () => {
     // Test held state with hold time
     const heldProps = {
       ...defaultProps,
-      controlVisibility: {
-        ...mockControlVisibility,
-        isHeld: true,
-      },
+      isHeld: true,
       holdTime: 65,
     };
     const heldScreen = render(<CallControlCADComponent {...heldProps} />);
@@ -234,10 +210,17 @@ describe('CallControlCADComponent', () => {
     const consultProps = {
       ...defaultProps,
       consultAgentName: 'Consult Agent',
-      controlVisibility: {
-        ...mockControlVisibility,
-        isConsultInitiatedOrAccepted: true,
-      },
+      controls: createMockTaskUIControls({
+        main: {endConsult: enabledControl},
+        consult: {
+          mute: enabledControl,
+          switch: enabledControl,
+          transfer: enabledControl,
+          mergeToConference: enabledControl,
+          endConsult: enabledControl,
+        },
+        activeLeg: 'consult',
+      }),
     };
     const consultScreen = render(<CallControlCADComponent {...consultProps} />);
     const consultContainer = consultScreen.container.querySelector('.call-control-consult-container');
@@ -269,11 +252,8 @@ describe('CallControlCADComponent', () => {
     // Test wrapup mode hides elements
     const wrapupProps = {
       ...defaultProps,
-      controlVisibility: {
-        ...mockControlVisibility,
-        wrapup: {isVisible: true, isEnabled: true},
-        isHeld: true,
-      },
+      controls: createEnabledMainTaskUIControls({wrapup: enabledControl}),
+      isHeld: true,
       isRecording: true,
     };
     const screen = render(<CallControlCADComponent {...wrapupProps} />);
@@ -306,13 +286,10 @@ describe('CallControlCADComponent', () => {
     expect(noDataScreen.getByText('No Phone Number')).toBeInTheDocument();
     noDataScreen.unmount();
 
-    // Test controlVisibility hiding recording indicator
+    // Test wrapup mode hiding recording indicator
     const noRecordingProps = {
       ...defaultProps,
-      controlVisibility: {
-        ...mockControlVisibility,
-        recordingIndicator: false,
-      },
+      controls: createEnabledMainTaskUIControls({wrapup: enabledControl}),
     };
     const noRecordingScreen = render(<CallControlCADComponent {...noRecordingProps} />);
     const hiddenRecordingIndicator = noRecordingScreen.container.querySelector('.recording-indicator');
@@ -324,15 +301,82 @@ describe('CallControlCADComponent', () => {
       ...defaultProps,
       callControlClassName: 'custom-call-control',
       callControlConsultClassName: 'custom-consult-control',
-      controlVisibility: {
-        ...mockControlVisibility,
-        isConsultInitiatedOrAccepted: true,
-      },
+      controls: createMockTaskUIControls({
+        main: {endConsult: enabledControl},
+        consult: {
+          mute: enabledControl,
+          switch: enabledControl,
+          transfer: enabledControl,
+          mergeToConference: enabledControl,
+          endConsult: enabledControl,
+        },
+        activeLeg: 'consult',
+      }),
     };
     const customScreen = render(<CallControlCADComponent {...customProps} />);
     const container = customScreen.container.querySelector('.call-control-container');
     expect(container).toHaveClass('custom-call-control');
     const customConsultContainer = customScreen.container.querySelector('.call-control-consult-container');
     expect(customConsultContainer).toHaveClass('custom-consult-control');
+  });
+
+  describe('on hold banner visibility', () => {
+    const baseControls = {
+      main: {
+        wrapup: {isVisible: false, isEnabled: false},
+        endConsult: {isVisible: false, isEnabled: false},
+        exitConference: {isVisible: false, isEnabled: false},
+      },
+      consult: {
+        endConsult: {isVisible: false, isEnabled: false},
+      },
+      activeLeg: 'main',
+    };
+
+    it('shows On hold banner when isHeld is true', () => {
+      const screen = render(
+        <CallControlCADComponent
+          {...defaultProps}
+          isHeld={true}
+          holdTime={65}
+          controls={baseControls as unknown as CallControlComponentProps['controls']}
+        />
+      );
+
+      expect(screen.getByText(/On hold/)).toBeInTheDocument();
+      expect(screen.getByText(/01:05/)).toBeInTheDocument();
+    });
+
+    it('hides On hold banner when isHeld is false', () => {
+      const screen = render(
+        <CallControlCADComponent
+          {...defaultProps}
+          isHeld={false}
+          controls={baseControls as unknown as CallControlComponentProps['controls']}
+        />
+      );
+
+      expect(screen.queryByText(/On hold/)).not.toBeInTheDocument();
+    });
+
+    it('hides On hold banner during wrapup even if isHeld is true', () => {
+      const wrapupControls = {
+        ...baseControls,
+        main: {
+          ...baseControls.main,
+          wrapup: {isVisible: true, isEnabled: true},
+        },
+      };
+
+      const screen = render(
+        <CallControlCADComponent
+          {...defaultProps}
+          isHeld={true}
+          controls={wrapupControls as unknown as CallControlComponentProps['controls']}
+        />
+      );
+
+      expect(screen.queryByText(/On hold/)).not.toBeInTheDocument();
+    });
   });
 });

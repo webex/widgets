@@ -7,7 +7,7 @@ import {
   createTaskSelectHandler,
 } from '../../../../src/components/task/TaskList/task-list.utils';
 import {MEDIA_CHANNEL, TaskListItemData} from '../../../../src/components/task/task.types';
-import {mockTask} from '@webex/test-fixtures';
+import {mockTask, createEnabledMainTaskUIControls, enabledControl, disabledControl} from '@webex/test-fixtures';
 
 // Mock the store with a mockable isIncomingTask function
 jest.mock('@webex/cc-store', () => ({
@@ -47,8 +47,11 @@ describe('task-list.utils', () => {
         };
         mockTask.data.wrapUpRequired = false;
         mockTask.data.interaction.mediaType = MEDIA_CHANNEL.TELEPHONY;
+        mockTask.uiControls = createEnabledMainTaskUIControls({
+          accept: {isVisible: false, isEnabled: true},
+        });
 
-        const result = extractTaskListItemData(mockTask, true, mockTask.data.agentId);
+        const result = extractTaskListItemData(mockTask, mockTask.data.agentId, undefined, undefined, true);
 
         expect(result.ani).toBe('1234567890');
         expect(result.customerName).toBe('John Doe');
@@ -89,7 +92,7 @@ describe('task-list.utils', () => {
         mockTask.data.interaction.mediaType = MEDIA_CHANNEL.SOCIAL;
         mockTask.data.interaction.mediaChannel = 'facebook';
 
-        const result = extractTaskListItemData(mockTask, true, mockTask.data.agentId);
+        const result = extractTaskListItemData(mockTask, mockTask.data.agentId, undefined, undefined, true);
 
         expect(result.title).toBe('Alice Johnson'); // Customer name for social
         expect(result.isSocial).toBe(true);
@@ -126,10 +129,12 @@ describe('task-list.utils', () => {
         };
         mockTask.data.wrapUpRequired = false;
         mockTask.data.interaction.mediaType = MEDIA_CHANNEL.TELEPHONY;
+        mockTask.uiControls = createEnabledMainTaskUIControls({
+          accept: enabledControl,
+          decline: enabledControl,
+        });
 
-        const result = extractTaskListItemData(mockTask, true, mockTask.data.agentId);
-
-        expect(result.ani).toBe('9876543210');
+        const result = extractTaskListItemData(mockTask, mockTask.data.agentId, undefined, undefined, true);
         expect(result.ronaTimeout).toBe(60); // Shows RONA timeout for incoming tasks
         expect(result.taskState).toBe('new');
         expect(result.isIncomingTask).toBe(true);
@@ -160,8 +165,11 @@ describe('task-list.utils', () => {
         };
         mockTask.data.wrapUpRequired = true;
         mockTask.data.interaction.mediaType = MEDIA_CHANNEL.TELEPHONY;
+        mockTask.uiControls = createEnabledMainTaskUIControls({
+          accept: {isVisible: false, isEnabled: true},
+        });
 
-        const result = extractTaskListItemData(mockTask, true, mockTask.data.agentId);
+        const result = extractTaskListItemData(mockTask, mockTask.data.agentId, undefined, undefined, true);
 
         expect(result.ani).toBe('9876543210');
         expect(result.ronaTimeout).toBeNull(); // Active tasks don't show RONA timeout
@@ -196,8 +204,12 @@ describe('task-list.utils', () => {
         };
         mockTask.data.wrapUpRequired = false;
         mockTask.data.interaction.mediaType = MEDIA_CHANNEL.TELEPHONY;
+        mockTask.uiControls = createEnabledMainTaskUIControls({
+          accept: {isVisible: true, isEnabled: false},
+          decline: disabledControl,
+        });
 
-        const result = extractTaskListItemData(mockTask, false, mockTask.data.agentId);
+        const result = extractTaskListItemData(mockTask, mockTask.data.agentId, undefined, undefined, false);
 
         expect(result.acceptText).toBe('Ringing...');
         expect(result.declineText).toBeUndefined();
@@ -228,8 +240,12 @@ describe('task-list.utils', () => {
         };
         mockTask.data.wrapUpRequired = false;
         mockTask.data.interaction.mediaType = MEDIA_CHANNEL.SOCIAL;
+        mockTask.uiControls = createEnabledMainTaskUIControls({
+          accept: enabledControl,
+          decline: disabledControl,
+        });
 
-        const result = extractTaskListItemData(mockTask, true, mockTask.data.agentId);
+        const result = extractTaskListItemData(mockTask, mockTask.data.agentId, undefined, undefined, true);
 
         expect(result.acceptText).toBe('Accept');
         expect(result.declineText).toBeUndefined(); // No decline for social

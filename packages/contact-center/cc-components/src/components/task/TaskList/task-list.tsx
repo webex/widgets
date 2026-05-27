@@ -12,7 +12,17 @@ import './styles.scss';
 import {withMetrics} from '@webex/cc-ui-logging';
 
 const TaskListComponent: React.FunctionComponent<TaskListComponentProps> = (props) => {
-  const {currentTask, taskList, acceptTask, declineTask, isBrowser, onTaskSelect, logger, agentId} = props;
+  const {
+    currentTask,
+    taskList,
+    acceptTask,
+    declineTask,
+    onTaskSelect,
+    logger,
+    agentId,
+    isDeclineButtonEnabled,
+    isBrowser,
+  } = props;
 
   // Early return for empty task list
   if (isTaskListEmpty(taskList)) {
@@ -25,7 +35,7 @@ const TaskListComponent: React.FunctionComponent<TaskListComponentProps> = (prop
     <ul className="task-list" data-testid="task-list">
       {tasks.map((task, index) => {
         // Extract all task data using the utility function
-        const taskData = extractTaskListItemData(task, isBrowser, agentId, logger);
+        const taskData = extractTaskListItemData(task, agentId, logger, isDeclineButtonEnabled, isBrowser);
 
         // Log task rendering
         logger.info('CC-Widgets: TaskList: rendering task list', {

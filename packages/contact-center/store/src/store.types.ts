@@ -17,6 +17,12 @@ import {
   ContactServiceQueuesResponse,
   ContactServiceQueueSearchParams,
   AddressBook,
+  TASK_EVENTS,
+  TaskUIControls,
+  TaskUIControlState,
+  InteractionUIControls,
+  TaskUILeg,
+  getDefaultUIControls,
 } from '@webex/contact-center';
 import {
   OutdialAniEntriesResponse,
@@ -119,6 +125,7 @@ interface IStore {
   isQueueConsultInProgress: boolean;
   isDeclineButtonEnabled: boolean;
   currentConsultQueueId: string;
+  lastConsultDestination: {to: string; destinationType: DestinationType} | null;
   consultStartTimeStamp?: number;
   callControlAudio: MediaStream | null;
   isEndConsultEnabled: boolean;
@@ -167,47 +174,7 @@ interface IWrapupCode {
   name: string;
 }
 
-enum TASK_EVENTS {
-  TASK_INCOMING = 'task:incoming',
-  TASK_ASSIGNED = 'task:assigned',
-  TASK_MEDIA = 'task:media',
-  TASK_HOLD = 'task:hold',
-  TASK_UNHOLD = 'task:unhold',
-  TASK_CONSULT = 'task:consult',
-  TASK_CONSULT_END = 'task:consultEnd',
-  TASK_CONSULT_ACCEPTED = 'task:consultAccepted',
-  TASK_PAUSE = 'task:pause',
-  TASK_RESUME = 'task:resume',
-  TASK_END = 'task:end',
-  TASK_WRAPUP = 'task:wrapup',
-  TASK_REJECT = 'task:rejected',
-  TASK_HYDRATE = 'task:hydrate',
-  TASK_CONSULTING = 'task:consulting',
-  TASK_CONSULT_QUEUE_CANCELLED = 'task:consultQueueCancelled',
-  AGENT_CONTACT_ASSIGNED = 'AgentContactAssigned',
-  CONTACT_RECORDING_PAUSED = 'ContactRecordingPaused',
-  CONTACT_RECORDING_RESUMED = 'ContactRecordingResumed',
-  AGENT_WRAPPEDUP = 'AgentWrappedUp',
-  AGENT_OFFER_CONTACT = 'AgentOfferContact',
-  AGENT_CONSULT_CREATED = 'AgentConsultCreated',
-  TASK_RECORDING_PAUSED = 'task:recordingPaused',
-  TASK_RECORDING_RESUMED = 'task:recordingResumed',
-  TASK_OFFER_CONSULT = 'task:offerConsult',
-  TASK_AUTO_ANSWERED = 'task:autoAnswered',
-  TASK_CONFERENCE_ESTABLISHING = 'task:conferenceEstablishing',
-  TASK_CONFERENCE_STARTED = 'task:conferenceStarted',
-  TASK_CONFERENCE_FAILED = 'task:conferenceFailed',
-  TASK_CONFERENCE_ENDED = 'task:conferenceEnded',
-  TASK_PARTICIPANT_JOINED = 'task:participantJoined',
-  TASK_PARTICIPANT_LEFT = 'task:participantLeft',
-  TASK_CONFERENCE_TRANSFERRED = 'task:conferenceTransferred',
-  TASK_CONFERENCE_TRANSFER_FAILED = 'task:conferenceTransferFailed',
-  TASK_CONFERENCE_END_FAILED = 'task:conferenceEndFailed',
-  TASK_PARTICIPANT_LEFT_FAILED = 'task:participantLeftFailed',
-  TASK_MERGED = 'task:merged',
-  TASK_POST_CALL_ACTIVITY = 'task:postCallActivity',
-  TASK_OUTDIAL_FAILED = 'task:outdialFailed',
-} // TODO: remove this once cc sdk exports this enum
+// TASK_EVENTS is now imported from @webex/contact-center SDK
 
 // Events that are received on the contact center SDK
 // TODO: Export & Import these constants from SDK
@@ -246,6 +213,7 @@ type AgentLoginProfile = {
     social: number;
     telephony: number;
   };
+  agentProfileID?: string;
 };
 
 // Generic pagination params for list-fetching APIs
@@ -319,6 +287,10 @@ export type {
   PaginatedListParams,
   FetchPaginatedList,
   TransformPaginatedData,
+  TaskUIControls,
+  TaskUIControlState,
+  InteractionUIControls,
+  TaskUILeg,
 };
 
 export {
@@ -335,18 +307,10 @@ export {
   AGENT_STATE_AVAILABLE,
   LoginOptions,
   ERROR_TRIGGERING_IDLE_CODES,
+  getDefaultUIControls,
 };
 
-export enum ConsultStatus {
-  NO_CONSULTATION_IN_PROGRESS = 'No consultation in progress',
-  BEING_CONSULTED = 'beingConsulted',
-  CONSULT_INITIATED = 'consultInitiated',
-  BEING_CONSULTED_ACCEPTED = 'beingConsultedAccepted',
-  CONSULT_ACCEPTED = 'consultAccepted',
-  CONNECTED = 'connected',
-  CONFERENCE = 'conference',
-  CONSULT_COMPLETED = 'consultCompleted',
-}
+// ConsultStatus enum removed — use task.data.consultStatus from SDK instead
 
 export type Participant = {
   id: string;
