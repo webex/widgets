@@ -923,6 +923,13 @@ class StoreWrapper implements IStoreWrapper {
         // @ts-expect-error To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         this.setTeamId(payload.teamId);
       });
+      // CAI-7899: Ensure CC SDK listeners (incl. agent:stateChange) are attached even when
+      // Mobius registration is skipped (non-WebRTC tabs e.g. Epic Hyperspace secondary windows,
+      // or Extension/AgentDN logins) and silent relogin doesn't run.
+      if (!listenersAdded) {
+        addEventListeners();
+        listenersAdded = true;
+      }
     };
 
     ccSDK.on(CC_EVENTS.AGENT_STATION_LOGIN_SUCCESS, handleLogin);
