@@ -6,6 +6,7 @@ import store from '@webex/cc-store';
 import {useCallControl} from '../helper';
 import {CallControlProps} from '../task.types';
 import {CallControlComponent} from '@webex/cc-components';
+import {isUnacceptedCampaignPreview} from '../Utils/task-util';
 
 const CallControlInternal: React.FunctionComponent<CallControlProps> = observer(
   ({onHoldResume, onEnd, onWrapUp, onRecordingToggle, onToggleMute, consultTransferOptions, conferenceEnabled}) => {
@@ -18,21 +19,37 @@ const CallControlInternal: React.FunctionComponent<CallControlProps> = observer(
       allowConsultToQueue,
       isMuted,
       agentId,
+      acceptedCampaignIds,
     } = store;
 
+    const callControlProps = useCallControl({
+      currentTask,
+      onHoldResume,
+      onEnd,
+      onWrapUp,
+      onRecordingToggle,
+      onToggleMute,
+      logger,
+      deviceType,
+      featureFlags,
+      isMuted,
+      conferenceEnabled,
+      agentId,
+    });
+
+    if (!currentTask) {
+      return <></>;
+    }
+
+    // Hide call control when the current task is a campaign preview that
+    // the agent has not yet accepted.  Matches agent desktop behavior where
+    // call controls are only shown after the preview contact is accepted.
+    if (isUnacceptedCampaignPreview(currentTask, acceptedCampaignIds)) {
+      return <></>;
+    }
+
     const result = {
-      ...useCallControl({
-        currentTask,
-        onHoldResume,
-        onEnd,
-        onWrapUp,
-        onRecordingToggle,
-        onToggleMute,
-        logger,
-        isMuted,
-        agentId,
-        conferenceEnabled,
-      }),
+      ...callControlProps,
       wrapupCodes,
       consultStartTimeStamp,
       callControlAudio,

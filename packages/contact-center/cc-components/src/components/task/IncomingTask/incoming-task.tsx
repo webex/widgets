@@ -11,7 +11,9 @@ const IncomingTaskComponent: React.FunctionComponent<IncomingTaskComponentProps>
     return <></>; // hidden component
   }
 
-  // Extract all task data using the utility function
+  // All incoming tasks (including campaign preview) render the standard Task
+  // with Answer/Decline buttons. The CampaignTask UI (Accept/Skip/Remove)
+  // is only shown in the TaskList after the agent has accepted.
   const taskData = extractIncomingTaskData(
     incomingTask,
     logger,

@@ -26,8 +26,8 @@ const taskListCheckbox = document.getElementById('taskListCheckbox');
 const callControlCheckbox = document.getElementById('callControlCheckbox');
 const callControlCADCheckbox = document.getElementById('callControlCADCheckbox');
 const outdialCallCheckbox = document.getElementById('outdialCallCheckbox');
-
 let isMultiLoginEnabled = false;
+let hasCampaignPreviewEnabled = true;
 let integrationEnv = false;
 
 // Load integration environment setting from localStorage on page load
@@ -85,6 +85,15 @@ function changeLoginType() {
 function enableMultiLogin() {
   if (isMultiLoginEnabled) isMultiLoginEnabled = false;
   else isMultiLoginEnabled = true;
+}
+
+function toggleCampaignPreview(event) {
+  hasCampaignPreviewEnabled = event.target.checked;
+  // Sync both checkboxes
+  document.querySelectorAll('.campaign-preview-checkbox').forEach(function (cb) {
+    cb.checked = hasCampaignPreviewEnabled;
+  });
+  ccTaskList.hasCampaignPreviewEnabled = hasCampaignPreviewEnabled;
 }
 
 function doOAuthLogin() {
@@ -193,6 +202,7 @@ function initWidgets() {
       ccIncomingTask.onDeclined = onDeclined;
       ccTaskList.onTaskAccepted = onTaskAccepted;
       ccTaskList.onTaskDeclined = onTaskDeclined;
+      ccTaskList.hasCampaignPreviewEnabled = hasCampaignPreviewEnabled;
       ccCallControl.onHoldResume = onHoldResume;
       ccCallControl.onEnd = onEnd;
       ccCallControl.onWrapUp = onWrapUp;
@@ -239,7 +249,19 @@ function loginSuccess() {
   }
   if (taskListCheckbox.checked) {
     ccTaskList.classList.remove('disabled');
-    widgetsContainer.appendChild(ccTaskList);
+
+    const taskListContainer = document.createElement('div');
+    taskListContainer.className = 'box';
+    taskListContainer.innerHTML = `
+      <section class="section-box">
+        <fieldset class="fieldset">
+          <legend class="legend-box">Task List</legend>
+        </fieldset>
+      </section>
+    `;
+
+    taskListContainer.querySelector('fieldset').appendChild(ccTaskList);
+    widgetsContainer.appendChild(taskListContainer);
   }
   if (callControlCheckbox.checked) {
     ccCallControl.classList.remove('disabled');

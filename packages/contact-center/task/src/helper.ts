@@ -33,6 +33,7 @@ import {
   TIMER_LABEL_CONSULT_REQUESTED,
   TIMER_LABEL_CONSULT_ON_HOLD,
   TIMER_LABEL_WRAP_UP,
+  isCampaignPreviewTask,
 } from './Utils/constants';
 import {calculateStateTimerData, calculateConsultTimerData, findLatestConsultMedia} from './Utils/timer-utils';
 import {useHoldTimer} from './Utils/useHoldTimer';
@@ -1227,6 +1228,8 @@ export const useCallControl = (props: useCallControlProps) => {
     }
   }, [currentTask, controls, agentId, consultMediaIsHold, consultMediaId, participantConsultState]);
 
+  const isCampaignCall = currentTask ? isCampaignPreviewTask(currentTask) : false;
+
   return {
     currentTask,
     isHeld,
@@ -1267,6 +1270,7 @@ export const useCallControl = (props: useCallControlProps) => {
     getAddressBookEntries,
     getEntryPoints,
     getQueuesFetcher,
+    isCampaignCall,
   };
 };
 

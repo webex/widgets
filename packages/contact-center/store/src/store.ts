@@ -54,6 +54,7 @@ class Store implements IStore {
   isDigitalChannelsInitialized: boolean = false;
   dataCenter: string = '';
   realtimeTranscriptionData: Partial<RealTimeTranscriptionData>[] = [];
+  acceptedCampaignIds: Set<string> = new Set();
 
   constructor() {
     makeAutoObservable(this, {

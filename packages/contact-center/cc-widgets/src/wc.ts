@@ -24,6 +24,7 @@ const WebTaskList = r2wc(TaskList, {
     onTaskAccepted: 'function',
     onTaskDeclined: 'function',
     onTaskSelected: 'function',
+    hasCampaignPreviewEnabled: 'boolean',
   },
 });
 
