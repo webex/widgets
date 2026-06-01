@@ -63,6 +63,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
   const isTelephony = mediaChannel === MediaChannelType.TELEPHONY;
   const participantsCount = conferenceParticipants?.length || 1;
   const participantsLabel = participantsCount === 1 ? 'Participant' : 'Participants';
+  const shouldShowParticipantsList = (conferenceParticipants?.length || 0) > 1;
 
   const customerName = currentTask?.data?.interaction?.callAssociatedDetails?.customerName;
 
@@ -188,7 +189,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
                     </>
                   )}
                 </Text>
-                {controls?.main?.exitConference?.isVisible && !controls?.main?.wrapup?.isVisible && (
+                {shouldShowParticipantsList && !controls?.main?.wrapup?.isVisible && (
                   <>
                     <div className="vertical-divider"></div>
                     <div className="participants-section">
