@@ -322,6 +322,9 @@ export const useCallControl = (props: useCallControlProps) => {
   const prevIsConsultingRef = useRef(
     !!(initialControls?.consult?.endConsult?.isVisible || initialControls?.main?.endConsult?.isVisible)
   );
+  const consultVisibilityRef = useRef(
+    !!(initialControls?.consult?.endConsult?.isVisible || initialControls?.main?.endConsult?.isVisible)
+  );
   const [lastTargetType, setLastTargetType] = useState<TargetType>(TARGET_TYPE.AGENT);
   const [conferenceParticipants, setConferenceParticipants] = useState<Participant[]>([]);
   const lastWrapupAuxCodeIdRef = useRef<string | null>(null);
@@ -416,6 +419,24 @@ export const useCallControl = (props: useCallControlProps) => {
   const holdTime = useHoldTimer(currentTask, controls);
 
   useEffect(() => {
+    const isConsulting = !!(controls?.consult?.endConsult?.isVisible || controls?.main?.endConsult?.isVisible);
+    const wasConsulting = consultVisibilityRef.current;
+
+    if (wasConsulting && !isConsulting) {
+      setConsultAgentName('Consult Agent');
+      setConsultTimerLabel(TIMER_LABEL_CONSULTING);
+      setConsultTimerTimestamp(0);
+      setLastTargetType(TARGET_TYPE.AGENT);
+      store.setIsQueueConsultInProgress(false);
+      store.setCurrentConsultQueueId(null);
+      store.setLastConsultDestination(null);
+      store.setConsultStartTimeStamp(null);
+    }
+
+    consultVisibilityRef.current = isConsulting;
+  }, [controls?.consult?.endConsult?.isVisible, controls?.main?.endConsult?.isVisible]);
+
+  useEffect(() => {
     if (currentTask && store?.cc?.agentConfig?.agentId) {
       const participants = getConferenceParticipants(currentTask, store.cc.agentConfig.agentId);
       setConferenceParticipants(participants);
@@ -424,9 +445,13 @@ export const useCallControl = (props: useCallControlProps) => {
   // Function to extract consulting agent information
   const extractConsultingAgent = useCallback(() => {
     try {
-      if (!currentTask?.data?.interaction?.participants) return;
+      // currentTask.data can briefly lag behind the freshest state-machine snapshot.
+      // Prefer the latest taskData so consult UI always reflects the newest consult leg.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const latestTaskData = (currentTask as any)?.state?.context?.taskData;
+      const interaction = latestTaskData?.interaction ?? currentTask?.data?.interaction;
+      if (!interaction?.participants) return;
 
-      const {interaction} = currentTask.data;
       const myAgentId = store.cc.agentConfig?.agentId;
       const currentDestination = store.lastConsultDestination;
       const destinationType = currentDestination?.destinationType;
