@@ -379,4 +379,33 @@ describe('CallControlCADComponent', () => {
       expect(screen.queryByText(/On hold/)).not.toBeInTheDocument();
     });
   });
+
+  describe('conference participants list visibility', () => {
+    it('shows participants list when there are more than two participants total', () => {
+      const screen = render(
+        <CallControlCADComponent
+          {...defaultProps}
+          controls={createEnabledMainTaskUIControls({exitConference: {isVisible: false, isEnabled: false}})}
+          conferenceParticipants={[
+            {id: 'agent-2', name: 'Agent Two', pType: 'Agent'},
+            {id: 'agent-3', name: 'Agent Three', pType: 'Agent'},
+          ]}
+        />
+      );
+
+      expect(screen.getByTestId('call-control:participants-trigger')).toBeInTheDocument();
+    });
+
+    it('hides participants list when two or fewer participants are present in total', () => {
+      const screen = render(
+        <CallControlCADComponent
+          {...defaultProps}
+          controls={createEnabledMainTaskUIControls({exitConference: {isVisible: true, isEnabled: true}})}
+          conferenceParticipants={[{id: 'agent-2', name: 'Agent Two', pType: 'Agent'}]}
+        />
+      );
+
+      expect(screen.queryByTestId('call-control:participants-trigger')).not.toBeInTheDocument();
+    });
+  });
 });

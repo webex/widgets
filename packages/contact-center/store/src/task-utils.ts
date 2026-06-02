@@ -109,13 +109,49 @@ export const setmTypeForEPDN = (task: ITask, mType: string) => {
   return mType;
 };
 export const findMediaResourceId = (task: ITask, mType: string) => {
-  for (const key in task.data.interaction.media) {
-    if (task.data.interaction.media[key].mType === mType) {
-      return task.data.interaction.media[key].mediaResourceId;
-    }
+  if (!task?.data?.interaction?.media) {
+    return '';
   }
 
-  return '';
+  const matchingMedia = Object.values(task.data.interaction.media).filter((media) => media.mType === mType);
+
+  if (matchingMedia.length === 0) {
+    return '';
+  }
+
+  if (matchingMedia.length === 1) {
+    return matchingMedia[0].mediaResourceId;
+  }
+
+  // In some consult flows, stale consult legs are retained in media. Prefer the
+  // latest snapshot to avoid resolving an older consulted agent.
+  const getMediaRecencyScore = (media: Record<string, unknown>, fallbackIndex: number): number => {
+    const candidateTimestamps = [
+      media.lastUpdated,
+      media.joinTimestamp,
+      media.consultTimestamp,
+      media.holdTimestamp,
+      media.eventTime,
+      media.createdAt,
+    ];
+
+    for (const value of candidateTimestamps) {
+      if (typeof value === 'number' && Number.isFinite(value) && value > 0) {
+        return value;
+      }
+    }
+
+    // Fall back to the object traversal order if no timestamp exists.
+    return fallbackIndex;
+  };
+
+  const latestMedia = matchingMedia.reduce((latest, media, index) => {
+    const latestScore = getMediaRecencyScore(latest as Record<string, unknown>, index - 1);
+    const currentScore = getMediaRecencyScore(media as Record<string, unknown>, index);
+    return currentScore >= latestScore ? media : latest;
+  });
+
+  return latestMedia.mediaResourceId || '';
 };
 
 /**
