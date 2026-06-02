@@ -381,7 +381,19 @@ describe('CallControlCADComponent', () => {
   });
 
   describe('conference participants list visibility', () => {
-    it('shows participants list when there are more than two participants total', () => {
+    it('shows participants list when conference is active and other agents are present', () => {
+      const screen = render(
+        <CallControlCADComponent
+          {...defaultProps}
+          controls={createEnabledMainTaskUIControls({exitConference: {isVisible: true, isEnabled: true}})}
+          conferenceParticipants={[{id: 'agent-2', name: 'Agent Two', pType: 'Agent'}]}
+        />
+      );
+
+      expect(screen.getByTestId('call-control:participants-trigger')).toBeInTheDocument();
+    });
+
+    it('hides participants list when exitConference is not visible and conference is not in progress', () => {
       const screen = render(
         <CallControlCADComponent
           {...defaultProps}
@@ -393,15 +405,73 @@ describe('CallControlCADComponent', () => {
         />
       );
 
+      expect(screen.queryByTestId('call-control:participants-trigger')).not.toBeInTheDocument();
+    });
+
+    it('shows participants list during nested consult when interaction state is conference', () => {
+      const conferenceTask = {
+        ...defaultProps.currentTask,
+        data: {
+          ...defaultProps.currentTask.data,
+          isConferenceInProgress: false,
+          interaction: {
+            ...defaultProps.currentTask.data.interaction,
+            state: 'conference',
+          },
+        },
+      };
+
+      const screen = render(
+        <CallControlCADComponent
+          {...defaultProps}
+          currentTask={conferenceTask}
+          controls={createEnabledMainTaskUIControls({exitConference: {isVisible: false, isEnabled: false}})}
+          conferenceParticipants={[{id: 'agent-2', name: 'Agent Two', pType: 'Agent'}]}
+        />
+      );
+
       expect(screen.getByTestId('call-control:participants-trigger')).toBeInTheDocument();
     });
 
-    it('hides participants list when two or fewer participants are present in total', () => {
+    it('hides participants list for consult-only secondary agents even when participants exist', () => {
+      const consultTask = {
+        ...defaultProps.currentTask,
+        data: {
+          ...defaultProps.currentTask.data,
+          isConferenceInProgress: false,
+          interaction: {
+            ...defaultProps.currentTask.data.interaction,
+            state: 'consult',
+            interactionId: 'child-interaction-id',
+            callProcessingDetails: {
+              relationshipType: 'consult',
+              parentInteractionId: 'parent-interaction-id',
+            },
+          },
+        },
+      };
+
+      const screen = render(
+        <CallControlCADComponent
+          {...defaultProps}
+          currentTask={consultTask}
+          controls={createEnabledMainTaskUIControls({exitConference: {isVisible: true, isEnabled: true}})}
+          conferenceParticipants={[
+            {id: 'agent-2', name: 'Agent Two', pType: 'Agent'},
+            {id: 'agent-3', name: 'Agent Three', pType: 'Agent'},
+          ]}
+        />
+      );
+
+      expect(screen.queryByTestId('call-control:participants-trigger')).not.toBeInTheDocument();
+    });
+
+    it('hides participants list when conference is active but no other agents are present', () => {
       const screen = render(
         <CallControlCADComponent
           {...defaultProps}
           controls={createEnabledMainTaskUIControls({exitConference: {isVisible: true, isEnabled: true}})}
-          conferenceParticipants={[{id: 'agent-2', name: 'Agent Two', pType: 'Agent'}]}
+          conferenceParticipants={[]}
         />
       );
 

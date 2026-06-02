@@ -1,15 +1,6 @@
 import {act, renderHook, waitFor} from '@testing-library/react';
 import {useHoldTimer} from '../../src/Utils/useHoldTimer';
-import {ITask} from '@webex/cc-store';
-import {createEnabledMainTaskUIControls, createMockTaskUIControls, enabledControl} from '@webex/test-fixtures';
-
-jest.mock('../../src/Utils/task-util', () => ({
-  findHoldTimestamp: jest.fn(),
-}));
-
-import {findHoldTimestamp} from '../../src/Utils/task-util';
-
-const mockFindHoldTimestamp = findHoldTimestamp as jest.MockedFunction<typeof findHoldTimestamp>;
+import {clearHoldAnchor, getHoldAnchorStorageKey, readHoldAnchor, writeHoldAnchor} from '../../src/Utils/task-util';
 
 interface WorkerMessage {
   type: string;
@@ -54,256 +45,94 @@ class MockWorker {
 global.Worker = MockWorker as unknown as typeof Worker;
 global.URL.createObjectURL = jest.fn(() => 'mock-url');
 
-const defaultControls = createEnabledMainTaskUIControls();
-
 describe('useHoldTimer', () => {
+  const interactionId = 'interaction-123';
+
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useFakeTimers();
+    clearHoldAnchor(interactionId);
   });
 
   afterEach(() => {
+    clearHoldAnchor(interactionId);
     act(() => {
       jest.runOnlyPendingTimers();
     });
     jest.useRealTimers();
   });
 
-  it('should return 0 when currentTask is null', () => {
-    mockFindHoldTimestamp.mockReturnValue(null);
-
-    const {result} = renderHook(() => useHoldTimer(null, defaultControls));
+  it('should return 0 when mainCallOnHold is false', () => {
+    const {result} = renderHook(() => useHoldTimer(false, null));
 
     expect(result.current).toBe(0);
   });
 
-  it('should return 0 when no hold timestamp found', () => {
-    mockFindHoldTimestamp.mockReturnValue(null);
+  it('should set initial hold time when hold timestamp is provided', () => {
+    const holdTimestampMs = Date.now() - 5000;
 
-    const mockTask = {
-      data: {
-        interaction: {
-          media: {},
-        },
-      },
-    } as unknown as ITask;
-
-    const {result} = renderHook(() => useHoldTimer(mockTask, defaultControls));
-
-    expect(result.current).toBe(0);
-  });
-
-  it('should set initial hold time when call is on hold', () => {
-    const holdTimestamp = Date.now() - 5000;
-    mockFindHoldTimestamp.mockImplementation((_task, mType) => {
-      if (mType === 'consult') return null;
-      if (mType === 'mainCall') return holdTimestamp;
-      return null;
-    });
-
-    const mockTask = {
-      data: {
-        interaction: {
-          media: {
-            'main-id': {
-              mType: 'mainCall',
-              isHold: true,
-              holdTimestamp: holdTimestamp,
-            },
-          },
-          participants: {
-            customer1: {pType: 'Customer', hasLeft: false},
-          },
-        },
-      },
-    } as unknown as ITask;
-
-    const {result} = renderHook(() => useHoldTimer(mockTask, defaultControls));
+    const {result} = renderHook(() => useHoldTimer(true, holdTimestampMs, 0, interactionId));
 
     expect(result.current).toBeGreaterThanOrEqual(4);
     expect(result.current).toBeLessThanOrEqual(6);
   });
 
-  it('should show hold timer on main call while consulting when activeLeg is consult', () => {
-    const mainCallHoldTimestamp = Date.now() - 3000;
+  it('should reuse session anchor on refresh when backend timestamp is missing', () => {
+    const anchorMs = Date.now() - 12000;
+    writeHoldAnchor(interactionId, anchorMs);
 
-    mockFindHoldTimestamp.mockImplementation((_task, mType) => {
-      if (mType === 'mainCall') return mainCallHoldTimestamp;
-      return null;
-    });
+    const {result} = renderHook(() => useHoldTimer(true, null, 0, interactionId));
 
-    const mockTask = {
-      data: {
-        interaction: {
-          media: {
-            'main-id': {
-              mType: 'mainCall',
-              isHold: false,
-              holdTimestamp: mainCallHoldTimestamp,
-            },
-          },
-          participants: {
-            customer1: {pType: 'Customer', hasLeft: false},
-          },
-        },
-      },
-    } as unknown as ITask;
-
-    const controls = createMockTaskUIControls({
-      activeLeg: 'consult',
-      main: {endConsult: enabledControl},
-      consult: {endConsult: enabledControl},
-    });
-
-    const {result} = renderHook(() => useHoldTimer(mockTask, controls));
-
-    expect(result.current).toBeGreaterThanOrEqual(2);
-    expect(result.current).toBeLessThanOrEqual(4);
+    expect(result.current).toBeGreaterThanOrEqual(11);
+    expect(result.current).toBeLessThanOrEqual(13);
+    expect(readHoldAnchor(interactionId)).toBe(anchorMs);
   });
 
-  it('should handle timestamp in seconds and convert to milliseconds', () => {
-    const timestampInSeconds = Math.floor(Date.now() / 1000) - 7;
-    mockFindHoldTimestamp.mockImplementation((_task, mType) => {
-      if (mType === 'mainCall') return timestampInSeconds;
-      return null;
-    });
+  it('should persist a new anchor when hold starts without backend timestamp', () => {
+    const now = Date.now();
+    jest.setSystemTime(now);
 
-    const mockTask = {
-      data: {
-        interaction: {
-          media: {
-            'main-id': {
-              mType: 'mainCall',
-              isHold: true,
-              holdTimestamp: timestampInSeconds,
-            },
-          },
-          participants: {
-            customer1: {pType: 'Customer', hasLeft: false},
-          },
-        },
-      },
-    } as unknown as ITask;
+    renderHook(() => useHoldTimer(true, null, 0, interactionId));
 
-    const {result} = renderHook(() => useHoldTimer(mockTask, defaultControls));
-
-    expect(result.current).toBeGreaterThanOrEqual(6);
-    expect(result.current).toBeLessThanOrEqual(8);
+    expect(readHoldAnchor(interactionId)).toBe(now);
   });
 
-  it('should update hold time when currentTask changes', async () => {
-    const initialHoldTimestamp = Date.now() - 5000;
-    mockFindHoldTimestamp.mockImplementation((_task, mType) => {
-      if (mType === 'mainCall') return initialHoldTimestamp;
-      return null;
-    });
+  it('should reset to 0 and clear anchor when mainCallOnHold becomes false', async () => {
+    const holdTimestampMs = Date.now() - 5000;
+    writeHoldAnchor(interactionId, holdTimestampMs);
 
-    const mockTask1 = {
-      data: {
-        interaction: {
-          media: {
-            'main-id': {
-              mType: 'mainCall',
-              isHold: true,
-              holdTimestamp: initialHoldTimestamp,
-            },
-          },
-          participants: {
-            customer1: {pType: 'Customer', hasLeft: false},
-          },
-        },
-      },
-    } as unknown as ITask;
-
-    const {result, rerender} = renderHook(({task}) => useHoldTimer(task, defaultControls), {
-      initialProps: {task: mockTask1},
-    });
-
-    const initialHoldTime = result.current;
-    expect(initialHoldTime).toBeGreaterThan(0);
-
-    const newHoldTimestamp = Date.now() - 10000;
-    mockFindHoldTimestamp.mockImplementation((_task, mType) => {
-      if (mType === 'mainCall') return newHoldTimestamp;
-      return null;
-    });
-
-    const mockTask2 = {
-      data: {
-        interaction: {
-          media: {
-            'main-id': {
-              mType: 'mainCall',
-              isHold: true,
-              holdTimestamp: newHoldTimestamp,
-            },
-          },
-          participants: {
-            customer1: {pType: 'Customer', hasLeft: false},
-          },
-        },
-      },
-    } as unknown as ITask;
-
-    rerender({task: mockTask2});
-
-    await waitFor(() => {
-      expect(result.current).toBeGreaterThan(initialHoldTime);
-    });
-  });
-
-  it('should reset to 0 when call is resumed', async () => {
-    const holdTimestamp = Date.now() - 5000;
-    mockFindHoldTimestamp.mockImplementation((_task, mType) => {
-      if (mType === 'mainCall') return holdTimestamp;
-      return null;
-    });
-
-    const mockTask1 = {
-      data: {
-        interaction: {
-          media: {
-            'main-id': {
-              mType: 'mainCall',
-              isHold: true,
-              holdTimestamp: holdTimestamp,
-            },
-          },
-          participants: {
-            customer1: {pType: 'Customer', hasLeft: false},
-          },
-        },
-      },
-    } as unknown as ITask;
-
-    const {result, rerender} = renderHook(({task}) => useHoldTimer(task, defaultControls), {
-      initialProps: {task: mockTask1},
-    });
+    const {result, rerender} = renderHook(
+      ({onHold, timestampMs}) => useHoldTimer(onHold, timestampMs, 0, interactionId),
+      {initialProps: {onHold: true, timestampMs: holdTimestampMs}}
+    );
 
     expect(result.current).toBeGreaterThan(0);
 
-    mockFindHoldTimestamp.mockReturnValue(null);
-
-    const mockTask2 = {
-      data: {
-        interaction: {
-          media: {
-            'main-id': {
-              mType: 'mainCall',
-              isHold: false,
-            },
-          },
-          participants: {
-            customer1: {pType: 'Customer', hasLeft: false},
-          },
-        },
-      },
-    } as unknown as ITask;
-
-    rerender({task: mockTask2});
+    rerender({onHold: false, timestampMs: null});
 
     await waitFor(() => {
       expect(result.current).toBe(0);
     });
+    expect(readHoldAnchor(interactionId)).toBeNull();
+  });
+
+  it('should restart timer when holdDataVersion bumps', async () => {
+    const holdTimestampMs = Date.now() - 3000;
+
+    const {result, rerender} = renderHook(({version}) => useHoldTimer(true, holdTimestampMs, version, interactionId), {
+      initialProps: {version: 0},
+    });
+
+    expect(result.current).toBeGreaterThan(0);
+
+    rerender({version: 1});
+
+    await waitFor(() => {
+      expect(result.current).toBeGreaterThan(0);
+    });
+  });
+
+  it('uses expected session storage key', () => {
+    expect(getHoldAnchorStorageKey(interactionId)).toBe(`cc-widget-hold-anchor:${interactionId}`);
   });
 });

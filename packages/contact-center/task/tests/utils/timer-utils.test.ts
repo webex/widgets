@@ -7,7 +7,12 @@ import {
   TIMER_LABEL_CONSULT_REQUESTED,
 } from '../../src/Utils/constants';
 import {ITask} from '@webex/cc-store';
-import {createEnabledMainTaskUIControls, disabledControl, enabledControl} from '@webex/test-fixtures';
+import {
+  createEnabledMainTaskUIControls,
+  createMockTaskUIControls,
+  disabledControl,
+  enabledControl,
+} from '@webex/test-fixtures';
 
 const defaultControls = createEnabledMainTaskUIControls();
 const wrapUpControls = createEnabledMainTaskUIControls({wrapup: enabledControl});
@@ -216,7 +221,7 @@ describe('timer-utils', () => {
               'consult-id': {
                 mType: 'consult',
                 isHold: true,
-                holdTimestamp: 5000,
+                holdTimestamp: 1700000005000,
                 mediaResourceId: 'consult-id',
                 participants: ['agent1'],
               },
@@ -232,13 +237,15 @@ describe('timer-utils', () => {
 
       const result = calculateConsultTimerData(mockTask, defaultControls, 'agent1');
       expect(result.label).toBe(TIMER_LABEL_CONSULT_ON_HOLD);
-      expect(result.timestamp).toBe(5000);
+      expect(result.timestamp).toBe(1700000005000);
     });
 
-    it('should fallback to consulting when consult hold timestamp is 0', () => {
+    it('should return Consult on Hold when consult is held without holdTimestamp (EP/DN lag)', () => {
+      const before = Date.now();
       const mockTask = {
         data: {
           interaction: {
+            interactionId: 'epdn-interaction-1',
             media: {
               'consult-id': {
                 mType: 'consult',
@@ -258,8 +265,96 @@ describe('timer-utils', () => {
       } as unknown as ITask;
 
       const result = calculateConsultTimerData(mockTask, defaultControls, 'agent1');
-      expect(result.label).toBe(TIMER_LABEL_CONSULTING);
-      expect(result.timestamp).toBe(2000);
+      expect(result.label).toBe(TIMER_LABEL_CONSULT_ON_HOLD);
+      expect(result.timestamp).toBeGreaterThanOrEqual(before);
+    });
+
+    it('should return Consult on Hold when initiator switches to main before consult media isHold (EP/DN)', () => {
+      const mockTask = {
+        data: {
+          interaction: {
+            interactionId: 'epdn-interaction-2',
+            media: {
+              'consult-id': {
+                mType: 'consult',
+                isHold: false,
+                mediaResourceId: 'consult-id',
+                participants: ['agent1'],
+              },
+            },
+            participants: {
+              agent1: {
+                consultTimestamp: 2000,
+              },
+            },
+          },
+        },
+        state: {
+          context: {
+            taskData: {
+              interaction: {
+                interactionId: 'epdn-interaction-2',
+                media: {
+                  'consult-id': {
+                    mType: 'consult',
+                    isHold: true,
+                    holdTimestamp: 1700000005000,
+                    mediaResourceId: 'consult-id',
+                    participants: ['agent1'],
+                  },
+                },
+                participants: {
+                  agent1: {
+                    consultTimestamp: 2000,
+                  },
+                },
+              },
+            },
+          },
+        },
+      } as unknown as ITask;
+
+      const controls = createMockTaskUIControls({
+        activeLeg: 'main',
+        consult: {endConsult: enabledControl},
+      });
+
+      const result = calculateConsultTimerData(mockTask, controls, 'agent1');
+      expect(result.label).toBe(TIMER_LABEL_CONSULT_ON_HOLD);
+      expect(result.timestamp).toBe(1700000005000);
+    });
+
+    it('should return Consult on Hold via activeLeg main when consult media lags (EP/DN switch-to-main)', () => {
+      const before = Date.now();
+      const mockTask = {
+        data: {
+          interaction: {
+            interactionId: 'epdn-interaction-3',
+            media: {
+              'consult-id': {
+                mType: 'consult',
+                isHold: false,
+                mediaResourceId: 'consult-id',
+                participants: ['agent1'],
+              },
+            },
+            participants: {
+              agent1: {
+                consultTimestamp: 2000,
+              },
+            },
+          },
+        },
+      } as unknown as ITask;
+
+      const controls = createMockTaskUIControls({
+        activeLeg: 'main',
+        main: {endConsult: enabledControl},
+      });
+
+      const result = calculateConsultTimerData(mockTask, controls, 'agent1');
+      expect(result.label).toBe(TIMER_LABEL_CONSULT_ON_HOLD);
+      expect(result.timestamp).toBeGreaterThanOrEqual(before);
     });
 
     it('should return default when no consult timestamp available', () => {
