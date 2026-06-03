@@ -1,3 +1,8 @@
+---
+description: Full lifecycle - fetch JIRA tickets, create worktrees, implement fixes, create PRs, poll review
+argument-hint: "[TICKET-ID...]"
+---
+
 # Fix Tickets Command
 
 ## Description
@@ -115,9 +120,9 @@ Launch ALL workers in a **single message** with multiple `Task()` calls for true
 
 ```
 Task({
-  subagent_type: "ticket-worker",
+  subagent_type: "cypher:ticket-worker",
   description: "Fix ticket {TICKET_ID}",
-  prompt: `You are a ticket-worker agent. Follow the instructions in .claude/agents/ticket-worker.md.
+  prompt: `You are a ticket-worker agent. Follow the instructions in .claude/agents/cypher/ticket-worker.md.
 
 TICKET_ID: {TICKET_ID}
 WORKTREE_PATH: /tmp/claude-widgets/{TICKET_ID}
@@ -137,7 +142,7 @@ Priority: {priority}
 
 Dependencies are already installed and packages are already built in the worktree.
 
-Read .claude/agents/ticket-worker.md for your full workflow. Use systematic debugging to understand the root cause, apply TDD (write failing test first, then implement fix), verify all tests pass, stage changes (NO commit), and return result JSON.`,
+Read .claude/agents/cypher/ticket-worker.md for your full workflow. Use systematic debugging to understand the root cause, apply TDD (write failing test first, then implement fix), verify all tests pass, stage changes (NO commit), and return result JSON.`,
   run_in_background: true
 })
 ```
