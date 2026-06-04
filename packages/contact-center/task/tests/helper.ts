@@ -1045,6 +1045,85 @@ describe('useCallControl', () => {
       });
     });
 
+    it('sets isHeld=false on AgentContactUnheld resume when state-machine snapshot lags at AgentConsultEnded (conference consult)', async () => {
+      // Customer + Agent1 + Agent2 in conference; Agent1 consulted a DN, ended the consult, then
+      // resumed. currentTask.data is fresh (AgentContactUnheld, main not held) because TaskManager
+      // refreshes it on every event, but the state-machine snapshot still lags at AgentConsultEnded
+      // with main on hold. The On-hold chip/timer and Pause toggle must follow the resume.
+      const freshUnheldInteraction = {
+        ...mockCurrentTask.data.interaction,
+        state: 'conference',
+        callProcessingDetails: {
+          ...mockCurrentTask.data.interaction.callProcessingDetails,
+        },
+        media: {
+          main: {
+            mType: 'mainCall',
+            isHold: false,
+            holdTimestamp: null,
+            mediaResourceId: 'main',
+            participants: ['agent1'],
+          },
+        },
+      };
+      const staleHeldInteraction = {
+        ...mockCurrentTask.data.interaction,
+        state: 'conference',
+        callProcessingDetails: {
+          ...mockCurrentTask.data.interaction.callProcessingDetails,
+        },
+        media: {
+          main: {
+            mType: 'mainCall',
+            isHold: true,
+            holdTimestamp: 1780580229282,
+            mediaResourceId: 'main',
+            participants: ['agent1'],
+          },
+        },
+      };
+
+      const task = {
+        ...mockCurrentTask,
+        data: {
+          ...mockCurrentTask.data,
+          type: 'AgentContactUnheld',
+          interaction: freshUnheldInteraction,
+        },
+        state: {
+          context: {
+            taskData: {type: 'AgentConsultEnded', interaction: staleHeldInteraction},
+          },
+        },
+        uiControls: {
+          main: {
+            ...mockCurrentTask.uiControls?.main,
+            hold: {isVisible: true, isEnabled: false},
+            endConsult: {isVisible: false, isEnabled: false},
+          },
+          consult: {
+            ...mockCurrentTask.uiControls?.consult,
+            endConsult: {isVisible: false, isEnabled: false},
+          },
+          activeLeg: 'main',
+        },
+      };
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: task as unknown as ITask,
+          logger: mockLogger,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'agent1',
+        })
+      );
+
+      await waitFor(() => {
+        expect(result.current.isHeld).toBe(false);
+      });
+    });
+
     it('sets isHeld=false for consulted agent (Agent 2) in simple consult when only consult media is on hold', async () => {
       const consultMediaId = '21a53d3d-db4c-4684-8aec-8ad619da63c0';
       const agentId = '9eab6238-d8f4-4a09-a26f-92efa647dbb0';

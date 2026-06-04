@@ -86,10 +86,22 @@ export function deriveMainCadHoldState({
 
   const isInConference = (snapInteraction?.state ?? dataInteraction?.state) === 'conference';
 
-  // Consulted agents: task.data is freshest on AgentContactHeld/Unheld (simple consult + conference).
-  const interaction = isConsulted ? (dataInteraction ?? snapInteraction) : (snapInteraction ?? dataInteraction);
+  // Explicit AgentContactHeld/AgentContactUnheld events are the authoritative signal for the MAIN
+  // leg hold state. TaskManager refreshes currentTask.data for every event (before the state-machine
+  // transition runs), so on a resume the data view carries AgentContactUnheld even when the
+  // state-machine snapshot still lags one transition behind (e.g. it stayed on AgentConsultEnded with
+  // main still held after ending a consult inside a conference). Trust the data view for these events
+  // so the On-hold chip/timer and Pause/Resume toggle don't get stuck after resuming a conference
+  // consult. Non-hold events keep the existing snapshot-first preference (conference lag handling).
+  const dataEventType = currentTask?.data?.type;
+  const dataIsExplicitHoldEvent = dataEventType === 'AgentContactHeld' || dataEventType === 'AgentContactUnheld';
+  const preferDataForHold = !isConsulted && dataIsExplicitHoldEvent;
 
-  const taskEventType = latestTaskData?.type ?? currentTask?.data?.type;
+  // Consulted agents: task.data is freshest on AgentContactHeld/Unheld (simple consult + conference).
+  const interaction =
+    isConsulted || preferDataForHold ? (dataInteraction ?? snapInteraction) : (snapInteraction ?? dataInteraction);
+
+  const taskEventType = preferDataForHold ? dataEventType : (latestTaskData?.type ?? currentTask?.data?.type);
   const isExplicitUnheldEvent = taskEventType === 'AgentContactUnheld';
   const isExplicitHeldEvent = taskEventType === 'AgentContactHeld';
   const currentCallProcessingDetails = interaction?.callProcessingDetails as Record<string, unknown> | undefined;
