@@ -210,6 +210,12 @@ export const buildCallControlButtons = (
     const isTransferVisible = mainCtrl?.transfer?.isVisible ?? false;
     const isTransferEnabled = mainCtrl?.transfer?.isEnabled ?? false;
     const isConsulting = (controls?.consult?.endConsult?.isVisible || controls?.main?.endConsult?.isVisible) ?? false;
+    // Consult requested: main leg shows transfer menu only (no hold/resume, no transferConsult duplicate).
+    const isConsultPendingOnMain =
+      isConsulting &&
+      isTransferVisible &&
+      (controls?.consult?.switch?.isVisible ?? false) &&
+      !(controls?.consult?.switch?.isEnabled ?? false);
     const shouldPrioritizeTransferConference = isTransferConferenceVisible;
     return [
       {
@@ -240,7 +246,7 @@ export const buildCallControlButtons = (
         tooltip: isHeld ? RESUME_CALL : HOLD_CALL,
         className: 'call-control-button',
         disabled: !(mainCtrl?.hold?.isEnabled ?? false),
-        isVisible: mainCtrl?.hold?.isVisible ?? false,
+        isVisible: (mainCtrl?.hold?.isVisible ?? false) && !isConsulting,
         dataTestId: 'call-control:hold-toggle',
       },
       {
@@ -260,7 +266,11 @@ export const buildCallControlButtons = (
         onClick: onTransferConsult || (() => {}),
         className: 'call-control-button',
         disabled: shouldPrioritizeTransferConference ? !isTransferConferenceEnabled : !isTransferEnabled,
-        isVisible: (isTransferVisible || shouldPrioritizeTransferConference) && isConsulting && !!onTransferConsult,
+        isVisible:
+          (isTransferVisible || shouldPrioritizeTransferConference) &&
+          isConsulting &&
+          !isConsultPendingOnMain &&
+          !!onTransferConsult,
       },
       {
         id: 'conference',
@@ -324,23 +334,61 @@ export const buildCallControlButtons = (
   }
 };
 
+export type ConsultFilterPhase = 'none' | 'pending' | 'active';
+
 /**
- * Filters buttons based on consultation state
- * During consulting:
- * - Hide: hold, consult, and blind transfer buttons
- * - Respect SDK enabled/disabled state for consulting buttons (transferConsult, conference)
- *   They will be enabled when on main call, disabled when on consult call
- * - Show as-is: mute, switchToConsult, recording, exitConference, end
+ * Distinguishes consult-requested (destination not joined) from active consult.
+ * Do not use endConsult visibility alone — it spans both phases.
+ */
+export const getConsultFilterPhase = (
+  currentTask: ITask | null | undefined,
+  controls: TaskUIControls | undefined
+): ConsultFilterPhase => {
+  const endConsultVisible = controls?.consult?.endConsult?.isVisible || controls?.main?.endConsult?.isVisible;
+  if (!endConsultVisible) {
+    return 'none';
+  }
+
+  const agentId = currentTask?.data?.agentId;
+  const selfConsultState = agentId && currentTask?.data?.interaction?.participants?.[agentId]?.consultState;
+
+  if (currentTask?.data?.consultStatus === 'consultInitiated') {
+    return 'pending';
+  }
+  if (selfConsultState === 'consultInitiated') {
+    return 'pending';
+  }
+
+  // Pending: main transfer stays visible (disabled) while consult leg controls are not ready.
+  if (
+    controls?.main?.transfer?.isVisible &&
+    controls?.consult?.switch?.isVisible &&
+    !controls?.consult?.switch?.isEnabled
+  ) {
+    return 'pending';
+  }
+
+  return 'active';
+};
+
+/**
+ * Filters buttons based on consultation phase.
+ * Pending (consult requested): hide hold/consult/record; keep transfer on main (Stable Prod parity).
+ * Active (destination joined): also hide blind transfer on main.
  */
 export const filterButtonsForConsultation = (
   buttons: CallControlButton[],
-  consultInitiated: boolean,
+  consultPhase: ConsultFilterPhase,
   isTelephony: boolean,
-  logger?
+  logger?: ILogger
 ): CallControlButton[] => {
   try {
-    if (!consultInitiated || !isTelephony) {
+    if (!isTelephony || consultPhase === 'none') {
       return buttons;
+    }
+
+    if (consultPhase === 'pending') {
+      return buttons.filter((button) => !['hold', 'consult', 'record'].includes(button.id));
     }
 
     return buttons.filter((button) => !['hold', 'consult', 'transfer', 'record'].includes(button.id));
@@ -350,7 +398,6 @@ export const filterButtonsForConsultation = (
       method: 'filterButtonsForConsultation',
       error: error.message,
     });
-    // Return original buttons as safe fallback
     return buttons || [];
   }
 };

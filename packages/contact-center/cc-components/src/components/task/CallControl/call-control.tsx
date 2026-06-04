@@ -22,6 +22,7 @@ import {
   isTelephonyMediaType,
   buildCallControlButtons,
   filterButtonsForConsultation,
+  getConsultFilterPhase,
   updateCallStateFromTask,
 } from './call-control.utils';
 import {withMetrics} from '@webex/cc-ui-logging';
@@ -144,8 +145,8 @@ function CallControlComponent(props: CallControlComponentProps) {
     conferenceEnabled
   );
 
-  const isConsulting = (controls?.consult?.endConsult?.isVisible || controls?.main?.endConsult?.isVisible) ?? false;
-  const filteredButtons = filterButtonsForConsultation(buttons, isConsulting, isTelephony, logger);
+  const consultFilterPhase = getConsultFilterPhase(currentTask, controls);
+  const filteredButtons = filterButtonsForConsultation(buttons, consultFilterPhase, isTelephony, logger);
 
   if (!currentTask) return null;
 
