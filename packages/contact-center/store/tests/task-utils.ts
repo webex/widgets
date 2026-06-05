@@ -493,6 +493,112 @@ describe('getConferenceParticipants', () => {
       name: 'agent2',
     });
   });
+
+  it('should resolve mainCall media by mType when interactionId points to consult leg', () => {
+    const mainCallMediaId = '4da1b819-f461-444b-b817-0c983f235cde';
+    const consultMediaId = '8d18e6c0-4377-4431-8b9d-ed22cdde94cb';
+
+    const task = createMockTask({
+      interactionId: consultMediaId,
+      interaction: createPartialInteraction({
+        state: 'conference',
+        media: {
+          [mainCallMediaId]: {
+            mType: 'mainCall',
+            mediaResourceId: mainCallMediaId,
+            participants: ['agent1', 'agent2', 'customer1'],
+          },
+          [consultMediaId]: {
+            mType: 'consult',
+            mediaResourceId: consultMediaId,
+            participants: ['agent1', 'agent3'],
+          },
+        },
+        participants: {
+          agent1: {id: 'agent1', pType: 'Agent', name: 'Agent One', hasLeft: false},
+          agent2: {id: 'agent2', pType: 'Agent', name: 'Agent Two', hasLeft: false},
+          agent3: {id: 'agent3', pType: 'Agent', name: 'Agent Three', hasLeft: false},
+          customer1: {id: 'customer1', pType: 'Customer', name: 'Customer One', hasLeft: false},
+        },
+      }),
+    });
+
+    const result = getConferenceParticipants(task, currentAgentId);
+
+    expect(result).toEqual([
+      {
+        id: 'agent2',
+        pType: 'Agent',
+        name: 'Agent Two',
+      },
+    ]);
+  });
+
+  it('should return empty array for consult-only secondary agents not in conference', () => {
+    const task = createMockTask({
+      interactionId: 'child-interaction',
+      interaction: createPartialInteraction({
+        state: 'consult',
+        interactionId: 'child-interaction',
+        callProcessingDetails: {
+          relationshipType: 'consult',
+          parentInteractionId: 'parent-interaction',
+        },
+        media: {
+          main: {
+            mType: 'mainCall',
+            mediaResourceId: 'main',
+            participants: ['agent3', 'agent1', 'agent2'],
+          },
+        },
+        participants: {
+          agent1: {id: 'agent1', pType: 'Agent', name: 'Agent One', hasLeft: false},
+          agent2: {id: 'agent2', pType: 'Agent', name: 'Agent Two', hasLeft: false},
+          agent3: {id: 'agent3', pType: 'Agent', name: 'Agent Three', hasLeft: false},
+        },
+      }),
+    });
+
+    expect(getConferenceParticipants(task, 'agent3')).toEqual([]);
+  });
+
+  it('should return empty array for agent-name consulted agent during conference nested consult', () => {
+    const mainCallMediaId = 'b3629886-1f6b-4de9-b037-8f09667abac8';
+    const consultMediaId = '10bd2a1e-fc74-4c2c-af61-4f82de268cf7';
+
+    const task = createMockTask({
+      interactionId: consultMediaId,
+      interaction: createPartialInteraction({
+        state: 'conference',
+        interactionId: mainCallMediaId,
+        media: {
+          [mainCallMediaId]: {
+            mType: 'mainCall',
+            mediaResourceId: mainCallMediaId,
+            participants: ['customer1', 'agent1', 'agent2', 'dn1'],
+          },
+          [consultMediaId]: {
+            mType: 'consult',
+            mediaResourceId: consultMediaId,
+            participants: ['agent3', 'agent1'],
+          },
+        },
+        participants: {
+          agent1: {id: 'agent1', pType: 'Agent', name: 'Agent One', hasLeft: false, isConsulted: false},
+          agent2: {id: 'agent2', pType: 'Agent', name: 'Agent Two', hasLeft: false, isConsulted: false},
+          agent3: {id: 'agent3', pType: 'Agent', name: 'Agent Three', hasLeft: false, isConsulted: true},
+          customer1: {id: 'customer1', pType: 'Customer', name: 'Customer', hasLeft: false},
+          dn1: {id: 'dn1', pType: 'DN', name: 'DN', hasLeft: false},
+        },
+      }),
+    });
+
+    expect(getConferenceParticipants(task, 'agent3')).toEqual([]);
+    expect(getConferenceParticipants(task, 'agent1')).toEqual([
+      {id: 'agent2', pType: 'Agent', name: 'Agent Two'},
+      {id: 'dn1', pType: 'DN', name: 'DN'},
+    ]);
+  });
 });
 
 describe('findHoldTimestamp', () => {

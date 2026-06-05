@@ -1,5 +1,11 @@
 import {mockTask} from '@webex/test-fixtures';
-import {findHoldTimestamp} from '../../src/Utils/task-util';
+import {
+  clearHoldAnchor,
+  findHoldTimestamp,
+  normalizeHoldTimestampMs,
+  resolveMainCadHoldTimestampMs,
+  writeHoldAnchor,
+} from '../../src/Utils/task-util';
 import {getConferenceParticipants} from '@webex/cc-store';
 import {ITask, TaskData, Interaction} from '@webex/contact-center';
 
@@ -52,13 +58,13 @@ describe('findHoldTimestamp', () => {
     expect(findHoldTimestamp(interaction, 'mainCall')).toBeNull();
   });
 
-  it('returns 0 if holdTimestamp is 0', () => {
+  it('returns null if holdTimestamp is 0', () => {
     const interaction = {
       media: {
         main: {mType: 'mainCall', holdTimestamp: 0},
       },
     } as unknown as Interaction;
-    expect(findHoldTimestamp(interaction, 'mainCall')).toBe(0);
+    expect(findHoldTimestamp(interaction, 'mainCall')).toBeNull();
   });
 
   it('works with extra unknown properties', () => {
@@ -69,6 +75,69 @@ describe('findHoldTimestamp', () => {
       extra: 123,
     } as unknown as Interaction;
     expect(findHoldTimestamp(interaction, 'mainCall')).toBe(42);
+  });
+
+  it('returns retained holdTimestamp when isHold is false (consulted agent hydrate)', () => {
+    const interaction = {
+      media: {
+        main: {
+          mType: 'mainCall',
+          isHold: false,
+          holdTimestamp: 1780382271896,
+        },
+      },
+    } as unknown as Interaction;
+
+    expect(findHoldTimestamp(interaction, 'mainCall')).toBe(1780382271896);
+  });
+});
+
+describe('resolveMainCadHoldTimestampMs', () => {
+  const interactionId = 'child-interaction-id';
+
+  beforeEach(() => {
+    clearHoldAnchor(interactionId);
+  });
+
+  afterEach(() => {
+    clearHoldAnchor(interactionId);
+  });
+
+  it('returns null when not held', () => {
+    const interaction = {
+      interactionId,
+      media: {
+        main: {mType: 'mainCall', isHold: false, holdTimestamp: 1780382271896},
+      },
+    } as unknown as Interaction;
+
+    expect(resolveMainCadHoldTimestampMs(interaction, false, interactionId)).toBeNull();
+  });
+
+  it('normalizes media holdTimestamp to milliseconds', () => {
+    const interaction = {
+      interactionId,
+      media: {
+        main: {mType: 'mainCall', isHold: true, holdTimestamp: 1780382271896},
+      },
+    } as unknown as Interaction;
+
+    expect(resolveMainCadHoldTimestampMs(interaction, true, interactionId)).toBe(1780382271896);
+    expect(normalizeHoldTimestampMs(1780382271)).toBe(1780382271000);
+  });
+
+  it('falls back to session anchor when media timestamp is missing', () => {
+    const anchorMs = Date.now() - 8000;
+    writeHoldAnchor(interactionId, anchorMs);
+
+    const interaction = {
+      interactionId,
+      media: {
+        main: {mType: 'mainCall', isHold: false, holdTimestamp: null},
+      },
+    } as unknown as Interaction;
+
+    expect(resolveMainCadHoldTimestampMs(interaction, true, interactionId)).toBe(anchorMs);
   });
 });
 

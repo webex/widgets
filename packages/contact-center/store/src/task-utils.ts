@@ -26,13 +26,17 @@ export const isIncomingTask = (task: ITask, agentId: string): boolean => {
  * @returns {boolean} True if this is a secondary agent (consulted party)
  */
 export function isSecondaryAgent(task: ITask): boolean {
-  const interaction = task.data.interaction;
+  const interaction = task?.data?.interaction;
+  const callProcessingDetails = interaction?.callProcessingDetails;
+
+  if (!callProcessingDetails) {
+    return false;
+  }
 
   return (
-    !!interaction.callProcessingDetails &&
-    interaction.callProcessingDetails.relationshipType === RELATIONSHIP_TYPE_CONSULT &&
-    interaction.callProcessingDetails.parentInteractionId &&
-    interaction.callProcessingDetails.parentInteractionId !== interaction.interactionId
+    callProcessingDetails.relationshipType === RELATIONSHIP_TYPE_CONSULT &&
+    Boolean(callProcessingDetails.parentInteractionId) &&
+    callProcessingDetails.parentInteractionId !== interaction?.interactionId
   );
 }
 
@@ -41,8 +45,40 @@ export function isSecondaryAgent(task: ITask): boolean {
  * This is specifically for telephony consultations to external numbers/entry points.
  */
 export function isSecondaryEpDnAgent(task: ITask): boolean {
-  return task.data.interaction.mediaType === MEDIA_TYPE_TELEPHONY_LOWER && isSecondaryAgent(task);
+  return task?.data?.interaction?.mediaType === MEDIA_TYPE_TELEPHONY_LOWER && isSecondaryAgent(task);
 }
+
+const isMainCallMedia = (mType: string | undefined): boolean => mType === 'mainCall' || mType === 'main';
+
+/**
+ * Resolves the main-call media leg for conference participant lookup.
+ * During nested consult, task.data.interactionId can point at the consult leg;
+ * conference participants remain on the mainCall media entry.
+ */
+const getMainCallMediaEntry = (task: ITask) => {
+  const media = task?.data?.interaction?.media;
+  if (!media) {
+    return undefined;
+  }
+
+  const mainCallMediaId = findMediaResourceId(task, 'mainCall');
+  if (mainCallMediaId && media[mainCallMediaId]) {
+    return media[mainCallMediaId];
+  }
+
+  const typedMainCallMedia = Object.values(media).find((entry) => isMainCallMedia(entry.mType));
+  if (typedMainCallMedia) {
+    return typedMainCallMedia;
+  }
+
+  // Legacy payloads map interactionId directly to main-call media and may omit mType.
+  const interactionMedia = task.data.interactionId ? media[task.data.interactionId] : undefined;
+  if (interactionMedia && interactionMedia.mType !== 'consult') {
+    return interactionMedia;
+  }
+
+  return undefined;
+};
 
 /**
  * Retrieves the list of active conference participants excluding the current agent
@@ -55,13 +91,24 @@ export function isSecondaryEpDnAgent(task: ITask): boolean {
 export const getConferenceParticipants = (task: ITask, agentId: string): Participant[] => {
   const participantsList: Participant[] = [];
 
-  // Early return if required data is missing
-  if (!task?.data?.interaction?.media || !task?.data?.interactionId) {
+  if (!task?.data?.interaction?.media) {
     return participantsList;
   }
 
-  const mediaMainCall = task.data.interaction.media?.[task.data.interactionId];
+  // Consult-only child tasks (EP-DN) inherit parent data but are not conference members.
+  if (isSecondaryAgent(task)) {
+    return participantsList;
+  }
+
+  const mediaMainCall = getMainCallMediaEntry(task);
   const participantsInMainCall = new Set(mediaMainCall?.participants ?? []);
+
+  // Nested consult during conference: consulted agent inherits parent interaction state
+  // and mainCall media, but is only joined on the consult leg — not a conference member.
+  if (agentId && !participantsInMainCall.has(agentId)) {
+    return participantsList;
+  }
+
   const participants = task.data.interaction.participants ?? {};
 
   if (participantsInMainCall.size > 0 && participants) {

@@ -20,6 +20,7 @@ import {
   CUSTOMER_NAME,
 } from '../constants';
 import {withMetrics} from '@webex/cc-ui-logging';
+import {isSecondaryAgent} from '@webex/cc-store';
 
 const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => {
   const {
@@ -63,7 +64,14 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
   const isTelephony = mediaChannel === MediaChannelType.TELEPHONY;
   const participantsCount = conferenceParticipants?.length || 1;
   const participantsLabel = participantsCount === 1 ? 'Participant' : 'Participants';
-  const shouldShowParticipantsList = (conferenceParticipants?.length || 0) > 1;
+  const interactionState = currentTask?.data?.interaction?.state;
+  const isConferenceActive =
+    controls?.main?.exitConference?.isVisible ||
+    currentTask?.data?.isConferenceInProgress === true ||
+    interactionState === 'conference';
+  const isConsultOnlyAgent = isSecondaryAgent(currentTask);
+  const shouldShowParticipantsList =
+    isConferenceActive && !isConsultOnlyAgent && (conferenceParticipants?.length ?? 0) > 0;
 
   const customerName = currentTask?.data?.interaction?.callAssociatedDetails?.customerName;
 

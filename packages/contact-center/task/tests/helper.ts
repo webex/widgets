@@ -826,8 +826,8 @@ describe('useCallControl', () => {
       })
     );
 
-    // 7 store callbacks + TASK_UI_CONTROLS_UPDATED on task
-    expect(onSpy).toHaveBeenCalledTimes(8);
+    // 7 store callbacks + TASK_UI_CONTROLS_UPDATED + TASK_SWITCH_CALL + TASK_HOLD + TASK_RESUME on task
+    expect(onSpy).toHaveBeenCalledTimes(11);
 
     // Unmount the component
     act(() => {
@@ -875,6 +875,7 @@ describe('useCallControl', () => {
   });
 
   it('should call onHoldResume with hold=true and handle success', async () => {
+    const setTaskCallbackSpy = jest.spyOn(store, 'setTaskCallback');
     const {result} = renderHook(() =>
       useCallControl({
         currentTask: mockCurrentTask,
@@ -890,14 +891,17 @@ describe('useCallControl', () => {
 
     await act(async () => {
       await result.current.toggleHold(true);
-      mockCurrentTask.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_HOLD)?.[1]();
+      const holdCallback = setTaskCallbackSpy.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_HOLD)?.[1];
+      holdCallback?.();
     });
 
     expect(mockCurrentTask.hold).toHaveBeenCalled();
     expect(mockOnHoldResume).toHaveBeenCalledWith({isHeld: true, task: mockCurrentTask});
+    setTaskCallbackSpy.mockRestore();
   });
 
   it('should call onHoldResume with hold=false and handle success', async () => {
+    const setTaskCallbackSpy = jest.spyOn(store, 'setTaskCallback');
     const {result} = renderHook(() =>
       useCallControl({
         currentTask: mockCurrentTask,
@@ -913,11 +917,13 @@ describe('useCallControl', () => {
 
     await act(async () => {
       await result.current.toggleHold(false);
-      mockCurrentTask.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_RESUME)?.[1]();
+      const resumeCallback = setTaskCallbackSpy.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_RESUME)?.[1];
+      resumeCallback?.();
     });
 
     expect(mockCurrentTask.resume).toHaveBeenCalled();
     expect(mockOnHoldResume).toHaveBeenCalledWith({isHeld: false, task: mockCurrentTask});
+    setTaskCallbackSpy.mockRestore();
   });
 
   describe('conference hold precedence', () => {
@@ -1037,6 +1043,1066 @@ describe('useCallControl', () => {
       await waitFor(() => {
         expect(result.current.isHeld).toBe(true);
       });
+    });
+
+    it('sets isHeld=false on AgentContactUnheld resume when state-machine snapshot lags at AgentConsultEnded (conference consult)', async () => {
+      // Customer + Agent1 + Agent2 in conference; Agent1 consulted a DN, ended the consult, then
+      // resumed. currentTask.data is fresh (AgentContactUnheld, main not held) because TaskManager
+      // refreshes it on every event, but the state-machine snapshot still lags at AgentConsultEnded
+      // with main on hold. The On-hold chip/timer and Pause toggle must follow the resume.
+      const freshUnheldInteraction = {
+        ...mockCurrentTask.data.interaction,
+        state: 'conference',
+        callProcessingDetails: {
+          ...mockCurrentTask.data.interaction.callProcessingDetails,
+        },
+        media: {
+          main: {
+            mType: 'mainCall',
+            isHold: false,
+            holdTimestamp: null,
+            mediaResourceId: 'main',
+            participants: ['agent1'],
+          },
+        },
+      };
+      const staleHeldInteraction = {
+        ...mockCurrentTask.data.interaction,
+        state: 'conference',
+        callProcessingDetails: {
+          ...mockCurrentTask.data.interaction.callProcessingDetails,
+        },
+        media: {
+          main: {
+            mType: 'mainCall',
+            isHold: true,
+            holdTimestamp: 1780580229282,
+            mediaResourceId: 'main',
+            participants: ['agent1'],
+          },
+        },
+      };
+
+      const task = {
+        ...mockCurrentTask,
+        data: {
+          ...mockCurrentTask.data,
+          type: 'AgentContactUnheld',
+          interaction: freshUnheldInteraction,
+        },
+        state: {
+          context: {
+            taskData: {type: 'AgentConsultEnded', interaction: staleHeldInteraction},
+          },
+        },
+        uiControls: {
+          main: {
+            ...mockCurrentTask.uiControls?.main,
+            hold: {isVisible: true, isEnabled: false},
+            endConsult: {isVisible: false, isEnabled: false},
+          },
+          consult: {
+            ...mockCurrentTask.uiControls?.consult,
+            endConsult: {isVisible: false, isEnabled: false},
+          },
+          activeLeg: 'main',
+        },
+      };
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: task as unknown as ITask,
+          logger: mockLogger,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'agent1',
+        })
+      );
+
+      await waitFor(() => {
+        expect(result.current.isHeld).toBe(false);
+      });
+    });
+
+    it('sets isHeld=false for consulted agent (Agent 2) in simple consult when only consult media is on hold', async () => {
+      const consultMediaId = '21a53d3d-db4c-4684-8aec-8ad619da63c0';
+      const agentId = '9eab6238-d8f4-4a09-a26f-92efa647dbb0';
+      const interaction = {
+        ...mockCurrentTask.data.interaction,
+        state: 'consulting',
+        media: {
+          '23e77b4e-bc34-4a8d-8852-75f94b062a3b': {
+            mType: 'mainCall',
+            isHold: false,
+            mediaResourceId: '23e77b4e-bc34-4a8d-8852-75f94b062a3b',
+          },
+          [consultMediaId]: {
+            mType: 'consult',
+            isHold: true,
+            holdTimestamp: 1780382174932,
+            mediaResourceId: consultMediaId,
+          },
+        },
+        participants: {
+          '+14696762938': {pType: 'Customer', hasLeft: false},
+          [agentId]: {pType: 'Agent', isConsulted: true},
+        },
+      };
+
+      const task = {
+        ...mockCurrentTask,
+        data: {
+          ...mockCurrentTask.data,
+          type: 'AgentContactHeld',
+          mediaResourceId: consultMediaId,
+          interaction,
+        },
+        state: {
+          context: {
+            taskData: {
+              type: 'AgentContactHeld',
+              mediaResourceId: consultMediaId,
+              interaction,
+            },
+          },
+        },
+        uiControls: createMockTaskUIControls({
+          activeLeg: 'consult',
+          consult: {endConsult: enabledControl},
+        }),
+      };
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: task as unknown as ITask,
+          logger: mockLogger,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId,
+        })
+      );
+
+      await waitFor(() => {
+        expect(result.current.isHeld).toBe(false);
+      });
+    });
+
+    it('sets isHeld=false for consulted agent (Agent 2) when activeLeg is main and consult is parked', async () => {
+      const consultMediaId = '21a53d3d-db4c-4684-8aec-8ad619da63c0';
+      const agentId = '9eab6238-d8f4-4a09-a26f-92efa647dbb0';
+      const interaction = {
+        ...mockCurrentTask.data.interaction,
+        state: 'consulting',
+        media: {
+          '23e77b4e-bc34-4a8d-8852-75f94b062a3b': {
+            mType: 'mainCall',
+            isHold: false,
+            mediaResourceId: '23e77b4e-bc34-4a8d-8852-75f94b062a3b',
+          },
+          [consultMediaId]: {
+            mType: 'consult',
+            isHold: false,
+            mediaResourceId: consultMediaId,
+          },
+        },
+        participants: {
+          '+14696762938': {pType: 'Customer', hasLeft: false},
+          [agentId]: {pType: 'Agent', isConsulted: true},
+        },
+      };
+
+      const task = {
+        ...mockCurrentTask,
+        data: {
+          ...mockCurrentTask.data,
+          type: 'AgentContactHeld',
+          mediaResourceId: consultMediaId,
+          interaction,
+        },
+        uiControls: createMockTaskUIControls({
+          activeLeg: 'main',
+          consult: {endConsult: enabledControl},
+        }),
+      };
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: task as unknown as ITask,
+          logger: mockLogger,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId,
+        })
+      );
+
+      await waitFor(() => {
+        expect(result.current.isHeld).toBe(false);
+      });
+    });
+
+    it('sets isHeld=true for consulted agent (Agent 2) in simple consult when mainCall is on hold', async () => {
+      const consultMediaId = '21a53d3d-db4c-4684-8aec-8ad619da63c0';
+      const agentId = '9eab6238-d8f4-4a09-a26f-92efa647dbb0';
+      const interaction = {
+        ...mockCurrentTask.data.interaction,
+        state: 'consulting',
+        media: {
+          '23e77b4e-bc34-4a8d-8852-75f94b062a3b': {
+            mType: 'mainCall',
+            isHold: true,
+            holdTimestamp: 1780382271896,
+            mediaResourceId: '23e77b4e-bc34-4a8d-8852-75f94b062a3b',
+          },
+          [consultMediaId]: {
+            mType: 'consult',
+            isHold: false,
+            mediaResourceId: consultMediaId,
+          },
+        },
+        participants: {
+          '+14696762938': {pType: 'Customer', hasLeft: false},
+          [agentId]: {pType: 'Agent', isConsulted: true},
+        },
+      };
+
+      const task = {
+        ...mockCurrentTask,
+        data: {
+          ...mockCurrentTask.data,
+          type: 'AgentContactUnheld',
+          mediaResourceId: consultMediaId,
+          interaction,
+        },
+        state: {
+          context: {
+            taskData: {
+              type: 'AgentContactUnheld',
+              mediaResourceId: consultMediaId,
+              interaction,
+            },
+          },
+        },
+        uiControls: createMockTaskUIControls({
+          activeLeg: 'main',
+          consult: {endConsult: enabledControl},
+        }),
+      };
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: task as unknown as ITask,
+          logger: mockLogger,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId,
+        })
+      );
+
+      await waitFor(() => {
+        expect(result.current.isHeld).toBe(true);
+      });
+    });
+
+    it('updates isHeld for Agent 2 when TASK_HOLD fires after consult parked (AgentContactHeld)', async () => {
+      const consultMediaId = '21a53d3d-db4c-4684-8aec-8ad619da63c0';
+      const agentId = '9eab6238-d8f4-4a09-a26f-92efa647dbb0';
+      const heldInteraction = {
+        ...mockCurrentTask.data.interaction,
+        state: 'consulting',
+        media: {
+          '23e77b4e-bc34-4a8d-8852-75f94b062a3b': {
+            mType: 'mainCall',
+            isHold: true,
+            holdTimestamp: 1780381977056,
+            mediaResourceId: '23e77b4e-bc34-4a8d-8852-75f94b062a3b',
+          },
+          [consultMediaId]: {
+            mType: 'consult',
+            isHold: false,
+            mediaResourceId: consultMediaId,
+          },
+        },
+        participants: {
+          '+14696762938': {pType: 'Customer', hasLeft: false},
+          [agentId]: {pType: 'Agent', isConsulted: true},
+        },
+      };
+      const parkedInteraction = {
+        ...heldInteraction,
+        media: {
+          '23e77b4e-bc34-4a8d-8852-75f94b062a3b': {
+            mType: 'mainCall',
+            isHold: false,
+            mediaResourceId: '23e77b4e-bc34-4a8d-8852-75f94b062a3b',
+          },
+          [consultMediaId]: {
+            mType: 'consult',
+            isHold: true,
+            holdTimestamp: 1780382174932,
+            mediaResourceId: consultMediaId,
+          },
+        },
+      };
+
+      const initialTask = {
+        ...mockCurrentTask,
+        data: {
+          ...mockCurrentTask.data,
+          type: 'AgentConsulting',
+          interaction: heldInteraction,
+        },
+        state: {
+          context: {
+            taskData: {
+              type: 'AgentConsulting',
+              interaction: heldInteraction,
+            },
+          },
+        },
+        uiControls: createMockTaskUIControls({
+          activeLeg: 'consult',
+          main: {endConsult: enabledControl},
+          consult: {endConsult: disabledControl},
+        }),
+        on: jest.fn(),
+        off: jest.fn(),
+      };
+
+      const {result, rerender} = renderHook(
+        ({task}) =>
+          useCallControl({
+            currentTask: task as unknown as ITask,
+            logger: mockLogger,
+            isMuted: false,
+            conferenceEnabled: true,
+            agentId,
+          }),
+        {initialProps: {task: initialTask}}
+      );
+
+      await waitFor(() => {
+        expect(result.current.isHeld).toBe(true);
+      });
+
+      const parkedTask = {
+        ...initialTask,
+        data: {
+          ...initialTask.data,
+          type: 'AgentContactHeld',
+          mediaResourceId: consultMediaId,
+          interaction: parkedInteraction,
+        },
+        state: {
+          context: {
+            taskData: {
+              type: 'AgentContactHeld',
+              mediaResourceId: consultMediaId,
+              interaction: parkedInteraction,
+            },
+          },
+        },
+      };
+
+      rerender({task: parkedTask});
+
+      const holdListener = (parkedTask.on as jest.Mock).mock.calls.find(
+        (call) => call[0] === TASK_EVENTS.TASK_HOLD
+      )?.[1];
+
+      act(() => {
+        holdListener?.();
+      });
+
+      await waitFor(() => {
+        expect(result.current.isHeld).toBe(false);
+      });
+    });
+
+    it('sets isHeld=false for consulted agent (Agent 3) in conference when only consult media is on hold', async () => {
+      const consultMediaId = '8d18e6c0-4377-4431-8b9d-ed22cdde94cb';
+      const interaction = {
+        ...mockCurrentTask.data.interaction,
+        state: 'conference',
+        callProcessingDetails: {
+          ...mockCurrentTask.data.interaction.callProcessingDetails,
+          conferenceHoldParticipant: 'true',
+        },
+        media: {
+          '4da1b819-f461-444b-b817-0c983f235cde': {
+            mType: 'mainCall',
+            isHold: false,
+            mediaResourceId: '4da1b819-f461-444b-b817-0c983f235cde',
+          },
+          [consultMediaId]: {
+            mType: 'consult',
+            isHold: true,
+            holdTimestamp: Date.now() - 5000,
+            mediaResourceId: consultMediaId,
+          },
+        },
+        participants: {
+          customer1: {pType: 'Customer', hasLeft: false},
+        },
+      };
+
+      const task = {
+        ...mockCurrentTask,
+        data: {
+          ...mockCurrentTask.data,
+          isConsulted: true,
+          type: 'AgentContactHeld',
+          mediaResourceId: consultMediaId,
+          interaction,
+        },
+        state: {
+          context: {
+            taskData: {
+              type: 'AgentContactHeld',
+              mediaResourceId: consultMediaId,
+              interaction,
+            },
+          },
+        },
+        uiControls: createMockTaskUIControls({
+          activeLeg: 'consult',
+          consult: {endConsult: enabledControl},
+        }),
+      };
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: task as unknown as ITask,
+          logger: mockLogger,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'agent3',
+        })
+      );
+
+      await waitFor(() => {
+        expect(result.current.isHeld).toBe(false);
+      });
+    });
+
+    it('sets isHeld=true for consulted agent (Agent 3) when mainCall is held in conference', async () => {
+      const consultMediaId = '50fa138f-d9fc-4204-9db1-7d7140061ec8';
+      const interaction = {
+        ...mockCurrentTask.data.interaction,
+        state: 'conference',
+        media: {
+          'e6ccf577-db2b-4137-b0b3-2a1756dfee29': {
+            mType: 'mainCall',
+            isHold: true,
+            holdTimestamp: Date.now() - 3000,
+            mediaResourceId: 'e6ccf577-db2b-4137-b0b3-2a1756dfee29',
+          },
+          [consultMediaId]: {
+            mType: 'consult',
+            isHold: false,
+            mediaResourceId: consultMediaId,
+          },
+        },
+        participants: {
+          customer1: {pType: 'Customer', hasLeft: false},
+        },
+      };
+
+      const task = {
+        ...mockCurrentTask,
+        data: {
+          ...mockCurrentTask.data,
+          isConsulted: true,
+          interaction,
+        },
+        uiControls: createMockTaskUIControls({
+          activeLeg: 'consult',
+          consult: {endConsult: enabledControl},
+        }),
+      };
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: task as unknown as ITask,
+          logger: mockLogger,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'agent3',
+        })
+      );
+
+      await waitFor(() => {
+        expect(result.current.isHeld).toBe(true);
+      });
+    });
+
+    it('sets isHeld=true for consulted agent on consult unhold when activeLeg is consult (media lag)', async () => {
+      const consultMediaId = '50fa138f-d9fc-4204-9db1-7d7140061ec8';
+      const interaction = {
+        ...mockCurrentTask.data.interaction,
+        state: 'conference',
+        media: {
+          'e6ccf577-db2b-4137-b0b3-2a1756dfee29': {
+            mType: 'mainCall',
+            isHold: false,
+            mediaResourceId: 'e6ccf577-db2b-4137-b0b3-2a1756dfee29',
+          },
+          [consultMediaId]: {
+            mType: 'consult',
+            isHold: false,
+            mediaResourceId: consultMediaId,
+          },
+        },
+        participants: {
+          customer1: {pType: 'Customer', hasLeft: false},
+        },
+      };
+
+      const task = {
+        ...mockCurrentTask,
+        data: {
+          ...mockCurrentTask.data,
+          isConsulted: true,
+          type: 'AgentContactUnheld',
+          mediaResourceId: consultMediaId,
+          interaction,
+        },
+        state: {
+          context: {
+            taskData: {
+              type: 'AgentContactUnheld',
+              mediaResourceId: consultMediaId,
+              interaction,
+            },
+          },
+        },
+        uiControls: createMockTaskUIControls({
+          activeLeg: 'consult',
+          consult: {endConsult: enabledControl},
+        }),
+      };
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: task as unknown as ITask,
+          logger: mockLogger,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'agent3',
+        })
+      );
+
+      await waitFor(() => {
+        expect(result.current.isHeld).toBe(true);
+      });
+    });
+
+    it('sets isHeld=true for consulted agent when mainCall held despite stale AgentContactHeld type', async () => {
+      const consultMediaId = '8d18e6c0-4377-4431-8b9d-ed22cdde94cb';
+      const holdTimestamp = Date.now() - 4000;
+      const interaction = {
+        ...mockCurrentTask.data.interaction,
+        state: 'conference',
+        media: {
+          '4da1b819-f461-444b-b817-0c983f235cde': {
+            mType: 'mainCall',
+            isHold: true,
+            holdTimestamp,
+            mediaResourceId: '4da1b819-f461-444b-b817-0c983f235cde',
+          },
+          [consultMediaId]: {
+            mType: 'consult',
+            isHold: false,
+            mediaResourceId: consultMediaId,
+          },
+        },
+        participants: {
+          customer1: {pType: 'Customer', hasLeft: false},
+        },
+      };
+
+      const task = {
+        ...mockCurrentTask,
+        data: {
+          ...mockCurrentTask.data,
+          isConsulted: true,
+          type: 'AgentContactHeld',
+          mediaResourceId: consultMediaId,
+          interaction,
+        },
+        uiControls: createMockTaskUIControls({
+          activeLeg: 'consult',
+          consult: {endConsult: enabledControl},
+        }),
+      };
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: task as unknown as ITask,
+          logger: mockLogger,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'agent3',
+        })
+      );
+
+      await waitFor(() => {
+        expect(result.current.isHeld).toBe(true);
+      });
+    });
+
+    it('sets isHeld=true for conference participant (Agent 2) when mainCall is held during nested consult', async () => {
+      const task = {
+        ...buildConferenceTask({
+          eventType: 'AgentConsultConferenced',
+          conferenceHoldParticipant: false,
+          mainCallIsHold: true,
+        }),
+        uiControls: createMockTaskUIControls({
+          activeLeg: 'consult',
+          main: {endConsult: enabledControl},
+          consult: {endConsult: enabledControl},
+        }),
+      };
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: task as unknown as ITask,
+          logger: mockLogger,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'agent2',
+        })
+      );
+
+      await waitFor(() => {
+        expect(result.current.isHeld).toBe(true);
+      });
+    });
+
+    it('sets isHeld=false for conference participant (Agent 2) when only consult media is on hold during nested consult', async () => {
+      const consultMediaId = '8d18e6c0-4377-4431-8b9d-ed22cdde94cb';
+      const interaction = {
+        ...mockCurrentTask.data.interaction,
+        state: 'conference',
+        callProcessingDetails: {
+          ...mockCurrentTask.data.interaction.callProcessingDetails,
+          conferenceHoldParticipant: 'true',
+        },
+        media: {
+          '4da1b819-f461-444b-b817-0c983f235cde': {
+            mType: 'mainCall',
+            isHold: false,
+            mediaResourceId: '4da1b819-f461-444b-b817-0c983f235cde',
+          },
+          [consultMediaId]: {
+            mType: 'consult',
+            isHold: true,
+            holdTimestamp: Date.now() - 5000,
+            mediaResourceId: consultMediaId,
+          },
+        },
+        participants: {
+          customer1: {pType: 'Customer', hasLeft: false},
+        },
+      };
+
+      const task = {
+        ...mockCurrentTask,
+        data: {
+          ...mockCurrentTask.data,
+          type: 'AgentContactHeld',
+          mediaResourceId: consultMediaId,
+          interaction,
+        },
+        state: {
+          context: {
+            taskData: {
+              type: 'AgentContactHeld',
+              mediaResourceId: consultMediaId,
+              interaction,
+            },
+          },
+        },
+        uiControls: createMockTaskUIControls({
+          activeLeg: 'consult',
+          main: {endConsult: enabledControl},
+          consult: {endConsult: enabledControl},
+        }),
+      };
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: task as unknown as ITask,
+          logger: mockLogger,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'agent2',
+        })
+      );
+
+      await waitFor(() => {
+        expect(result.current.isHeld).toBe(false);
+      });
+    });
+
+    it('sets isHeld=false for EP/DN consulted agent when own mainCall leg is parked', async () => {
+      const agentId = '9eab6238-d8f4-4a09-a26f-92efa647dbb0';
+      const interaction = {
+        ...mockCurrentTask.data.interaction,
+        state: 'connected',
+        interactionId: '492c08c1-a5ff-4b90-bf39-454608082dc5',
+        mediaType: 'telephony',
+        callProcessingDetails: {
+          relationshipType: 'consult',
+          parentInteractionId: 'bf252a79-8d29-4710-ba9e-d93e9ab232e0',
+        },
+        media: {
+          '492c08c1-a5ff-4b90-bf39-454608082dc5': {
+            mType: 'mainCall',
+            isHold: true,
+            holdTimestamp: 1780387247498,
+            mediaResourceId: '492c08c1-a5ff-4b90-bf39-454608082dc5',
+            participants: ['+14696762938', agentId],
+          },
+        },
+        participants: {
+          '+14696762938': {pType: 'Customer', hasLeft: false},
+          [agentId]: {pType: 'Agent', hasJoined: true, isConsulted: false},
+        },
+      };
+
+      const task = {
+        ...mockCurrentTask,
+        data: {
+          ...mockCurrentTask.data,
+          type: 'AgentContactHeld',
+          mediaResourceId: '492c08c1-a5ff-4b90-bf39-454608082dc5',
+          interaction,
+        },
+        state: {
+          context: {
+            taskData: {
+              type: 'AgentContactHeld',
+              mediaResourceId: '492c08c1-a5ff-4b90-bf39-454608082dc5',
+              interaction,
+            },
+          },
+        },
+        uiControls: createMockTaskUIControls({
+          activeLeg: 'main',
+          main: {endConsult: enabledControl},
+          consult: {endConsult: disabledControl},
+        }),
+      };
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: task as unknown as ITask,
+          logger: mockLogger,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId,
+        })
+      );
+
+      await waitFor(() => {
+        expect(result.current.isHeld).toBe(false);
+      });
+    });
+
+    it('sets isHeld=true for EP/DN consulted agent on accept when activeLeg is main', async () => {
+      const agentId = '9eab6238-d8f4-4a09-a26f-92efa647dbb0';
+      const interaction = {
+        ...mockCurrentTask.data.interaction,
+        state: 'connected',
+        interactionId: '492c08c1-a5ff-4b90-bf39-454608082dc5',
+        mediaType: 'telephony',
+        callProcessingDetails: {
+          relationshipType: 'consult',
+          parentInteractionId: 'bf252a79-8d29-4710-ba9e-d93e9ab232e0',
+        },
+        media: {
+          '492c08c1-a5ff-4b90-bf39-454608082dc5': {
+            mType: 'mainCall',
+            isHold: false,
+            holdTimestamp: null,
+            mediaResourceId: '492c08c1-a5ff-4b90-bf39-454608082dc5',
+            participants: ['+14696762938', agentId],
+          },
+        },
+        participants: {
+          '+14696762938': {pType: 'Customer', hasLeft: false},
+          [agentId]: {pType: 'Agent', hasJoined: true, isConsulted: false},
+        },
+      };
+
+      const task = {
+        ...mockCurrentTask,
+        data: {
+          ...mockCurrentTask.data,
+          type: 'AgentContactAssigned',
+          mediaResourceId: '492c08c1-a5ff-4b90-bf39-454608082dc5',
+          interaction,
+        },
+        uiControls: createMockTaskUIControls({
+          activeLeg: 'main',
+          main: {endConsult: enabledControl},
+          consult: {endConsult: disabledControl},
+        }),
+      };
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: task as unknown as ITask,
+          logger: mockLogger,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId,
+        })
+      );
+
+      await waitFor(() => {
+        expect(result.current.isHeld).toBe(true);
+      });
+    });
+
+    it('sets isHeld=true for EP/DN consulted agent after AgentContactUnheld when activeLeg is main', async () => {
+      const agentId = '9eab6238-d8f4-4a09-a26f-92efa647dbb0';
+      const interaction = {
+        ...mockCurrentTask.data.interaction,
+        state: 'connected',
+        interactionId: '492c08c1-a5ff-4b90-bf39-454608082dc5',
+        mediaType: 'telephony',
+        callProcessingDetails: {
+          relationshipType: 'consult',
+          parentInteractionId: 'bf252a79-8d29-4710-ba9e-d93e9ab232e0',
+        },
+        media: {
+          '492c08c1-a5ff-4b90-bf39-454608082dc5': {
+            mType: 'mainCall',
+            isHold: false,
+            holdTimestamp: null,
+            mediaResourceId: '492c08c1-a5ff-4b90-bf39-454608082dc5',
+            participants: ['+14696762938', agentId],
+          },
+        },
+        participants: {
+          '+14696762938': {pType: 'Customer', hasLeft: false},
+          [agentId]: {pType: 'Agent', hasJoined: true, isConsulted: false},
+        },
+      };
+
+      const task = {
+        ...mockCurrentTask,
+        data: {
+          ...mockCurrentTask.data,
+          type: 'AgentContactUnheld',
+          mediaResourceId: '492c08c1-a5ff-4b90-bf39-454608082dc5',
+          interaction,
+        },
+        state: {
+          context: {
+            taskData: {
+              type: 'AgentContactUnheld',
+              mediaResourceId: '492c08c1-a5ff-4b90-bf39-454608082dc5',
+              interaction,
+            },
+          },
+        },
+        uiControls: createMockTaskUIControls({
+          activeLeg: 'main',
+          main: {endConsult: enabledControl},
+          consult: {endConsult: disabledControl},
+        }),
+      };
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: task as unknown as ITask,
+          logger: mockLogger,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId,
+        })
+      );
+
+      await waitFor(() => {
+        expect(result.current.isHeld).toBe(true);
+      });
+    });
+
+    it('sets isHeld=true for EP/DN consulted agent when initiator holds customer on consult leg', async () => {
+      const agentId = 'epdn-agent-2';
+      const interaction = {
+        ...mockCurrentTask.data.interaction,
+        state: 'consulting',
+        interactionId: 'child-interaction-id',
+        mediaType: 'telephony',
+        callProcessingDetails: {
+          relationshipType: 'consult',
+          parentInteractionId: 'parent-interaction-id',
+        },
+        media: {
+          'epdn-main-id': {
+            mType: 'mainCall',
+            isHold: false,
+            mediaResourceId: 'epdn-main-id',
+            participants: [agentId],
+          },
+        },
+        participants: {
+          customer1: {pType: 'Customer', hasLeft: false},
+          [agentId]: {pType: 'Agent', hasJoined: true},
+        },
+      };
+
+      const task = {
+        ...mockCurrentTask,
+        data: {
+          ...mockCurrentTask.data,
+          type: 'AgentContactUnheld',
+          mediaResourceId: 'epdn-main-id',
+          interaction,
+        },
+        state: {
+          context: {
+            taskData: {
+              type: 'AgentContactUnheld',
+              mediaResourceId: 'epdn-main-id',
+              interaction: {
+                ...interaction,
+                media: {
+                  'epdn-main-id': {
+                    ...interaction.media['epdn-main-id'],
+                    isHold: false,
+                  },
+                },
+              },
+            },
+          },
+        },
+        uiControls: createMockTaskUIControls({
+          activeLeg: 'main',
+          main: {endConsult: enabledControl},
+          consult: {endConsult: disabledControl},
+        }),
+      };
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: task as unknown as ITask,
+          logger: mockLogger,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId,
+        })
+      );
+
+      await waitFor(() => {
+        expect(result.current.isHeld).toBe(true);
+      });
+    });
+
+    it('sets isHeld=true for EP/DN consulted agent detected via main.endConsult uiControls only', async () => {
+      const agentId = '9eab6238-d8f4-4a09-a26f-92efa647dbb0';
+      const interaction = {
+        ...mockCurrentTask.data.interaction,
+        state: 'connected',
+        interactionId: '492c08c1-a5ff-4b90-bf39-454608082dc5',
+        mediaType: 'telephony',
+        media: {
+          '492c08c1-a5ff-4b90-bf39-454608082dc5': {
+            mType: 'mainCall',
+            isHold: false,
+            holdTimestamp: null,
+            mediaResourceId: '492c08c1-a5ff-4b90-bf39-454608082dc5',
+            participants: ['+14696762938', agentId],
+          },
+        },
+        participants: {
+          '+14696762938': {pType: 'Customer', hasLeft: false},
+          [agentId]: {pType: 'Agent', hasJoined: true, isConsulted: false},
+        },
+      };
+
+      const task = {
+        ...mockCurrentTask,
+        data: {
+          ...mockCurrentTask.data,
+          type: 'AgentContactAssigned',
+          mediaResourceId: '492c08c1-a5ff-4b90-bf39-454608082dc5',
+          interaction,
+        },
+        uiControls: createMockTaskUIControls({
+          activeLeg: 'main',
+          main: {endConsult: enabledControl},
+          consult: {endConsult: disabledControl},
+        }),
+      };
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: task as unknown as ITask,
+          logger: mockLogger,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId,
+        })
+      );
+
+      await waitFor(() => {
+        expect(result.current.isHeld).toBe(true);
+      });
+    });
+  });
+
+  it('sets isHeld=false for consulted agent when only consult media is on hold', async () => {
+    const consultedTask = {
+      ...mockCurrentTask,
+      data: {
+        ...mockCurrentTask.data,
+        isConsulted: true,
+        interaction: {
+          ...mockCurrentTask.data.interaction,
+          state: 'consulting',
+          media: {
+            'main-id': {
+              mType: 'mainCall',
+              isHold: false,
+            },
+            'consult-id': {
+              mType: 'consult',
+              isHold: true,
+              holdTimestamp: Date.now() - 5000,
+            },
+          },
+          participants: {
+            customer1: {pType: 'Customer', hasLeft: false},
+          },
+        },
+      },
+      uiControls: createMockTaskUIControls({
+        activeLeg: 'consult',
+        main: {endConsult: enabledControl},
+        consult: {endConsult: enabledControl},
+      }),
+    };
+
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: consultedTask as unknown as ITask,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+        isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
+      })
+    );
+
+    await waitFor(() => {
+      expect(result.current.isHeld).toBe(false);
     });
   });
 
@@ -3297,8 +4363,12 @@ describe('useCallControl', () => {
     const onToggleMute = jest.fn();
     const logger = mockCC.LoggerProxy;
 
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
     it('should handle errors in extractConsultingAgent', () => {
-      jest.spyOn(logger, 'info').mockImplementation(() => {
+      const infoSpy = jest.spyOn(logger, 'info').mockImplementation(() => {
         throw new Error('Participants access error');
       });
       const problematicTask = {
@@ -3358,6 +4428,8 @@ describe('useCallControl', () => {
           method: 'extractConsultingAgent',
         }
       );
+
+      infoSpy.mockRestore();
     });
 
     it('should handle errors in holdCallback', () => {
@@ -3399,6 +4471,7 @@ describe('useCallControl', () => {
     });
 
     it('should handle errors in toggleHold', () => {
+      jest.spyOn(logger, 'info').mockImplementation(() => {});
       const mockErrorTask = {
         ...taskMock,
         hold: jest.fn().mockImplementation(() => {
@@ -3425,7 +4498,7 @@ describe('useCallControl', () => {
         result.current.toggleHold(true);
       });
 
-      expect(logger.error).toHaveBeenCalledWith('CC-Widgets: Task: Error in toggleHold - Participants access error', {
+      expect(logger.error).toHaveBeenCalledWith('CC-Widgets: Task: Error in toggleHold - Hold method error', {
         module: 'useCallControl',
         method: 'toggleHold',
       });
@@ -3592,7 +4665,7 @@ describe('useCallControl', () => {
               'consult-id': {
                 mType: 'consult',
                 isHold: true,
-                holdTimestamp: 5000,
+                holdTimestamp: 1700000005000,
                 mediaResourceId: 'consult-id',
                 participants: ['agent1'],
               },
@@ -3620,7 +4693,7 @@ describe('useCallControl', () => {
 
       await waitFor(() => {
         expect(result.current.consultTimerLabel).toBe(TIMER_LABEL_CONSULT_ON_HOLD);
-        expect(result.current.consultTimerTimestamp).toBe(5000);
+        expect(result.current.consultTimerTimestamp).toBe(1700000005000);
       });
     });
 
@@ -4128,7 +5201,7 @@ describe('useCallControl', () => {
               'consult-id': {
                 mType: 'consult',
                 isHold: true,
-                holdTimestamp: 5000,
+                holdTimestamp: 1700000005000,
                 mediaResourceId: 'consult-id',
                 participants: ['agent1'],
               },
@@ -4161,7 +5234,7 @@ describe('useCallControl', () => {
       );
 
       await waitFor(() => {
-        expect(result.current.consultTimerTimestamp).toBe(5000);
+        expect(result.current.consultTimerTimestamp).toBe(1700000005000);
       });
 
       // Resume from hold
