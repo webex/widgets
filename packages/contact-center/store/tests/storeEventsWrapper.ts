@@ -130,6 +130,8 @@ const mockAgentProfile = {
   roles: ['agent'],
   orgId: 'mockOrgId',
   profileType: 'BLENDED',
+  isTimeoutDesktopInactivityEnabled: true,
+  timeoutDesktopInactivityMins: 30,
 };
 
 const mockAgentProfilePayload = {

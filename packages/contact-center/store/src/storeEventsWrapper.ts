@@ -418,6 +418,8 @@ class StoreWrapper implements IStoreWrapper {
         orgId: profile.orgId || undefined,
         roles: profile.roles || undefined,
         deviceType: profile.deviceType || undefined,
+        isTimeoutDesktopInactivityEnabled: profile.isTimeoutDesktopInactivityEnabled,
+        timeoutDesktopInactivityMins: profile.timeoutDesktopInactivityMins,
       };
     });
   };
