@@ -120,7 +120,7 @@ Launch ALL workers in a **single message** with multiple `Task()` calls for true
 
 ```
 Task({
-  subagent_type: "cypher:ticket-worker",
+  subagent_type: "ticket-worker",
   description: "Fix ticket {TICKET_ID}",
   prompt: `You are a ticket-worker agent. Follow the instructions in .claude/agents/cypher/ticket-worker.md.
 
