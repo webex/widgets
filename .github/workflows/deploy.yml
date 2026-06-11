@@ -5,6 +5,7 @@ on:
   push:
     branches: # Allow list of deployable tags and branches. Note that all allow-listed branches cannot include any `/` characters
       - next
+      - task-refactor
 
 env:
   rid: ${{ github.run_id }}-${{ github.run_number }}
@@ -151,6 +152,7 @@ jobs:
     name: Publish - Documentation
     needs: [publish-npm,analyze-changes]
     runs-on: ubuntu-latest
+    if: github.ref_name == 'next'
 
     steps:
       - name: Documentation Deploy Steps
