@@ -152,6 +152,7 @@ jobs:
     name: Publish - Documentation
     needs: [publish-npm,analyze-changes]
     runs-on: ubuntu-latest
+    if: github.ref_name == 'next'
 
     steps:
       - name: Documentation Deploy Steps
