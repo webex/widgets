@@ -4,7 +4,7 @@ run-name: ${{ github.actor }} is running Deploy CD
 on:
   push:
     branches: # Allow list of deployable tags and branches. Note that all allow-listed branches cannot include any `/` characters
-      - next
+      - next # primary deploy branch
 
 env:
   rid: ${{ github.run_id }}-${{ github.run_number }}
