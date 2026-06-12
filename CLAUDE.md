@@ -61,6 +61,21 @@ corepack enable                                 # If yarn is unavailable
 Inter-stage state passes via **Jira comments** (durable, human-visible). Each stage reads previous stage's comments.
 Jira labels track progress: `scrubbed` → `prioritize`/`followup`/`dolater` → `triaged` → `fixing` → `fixed`.
 
+### Development Phase Harness
+
+| Command | Stage | Agent | Purpose |
+|---------|-------|-------|---------|
+| `/dev-start` | Intake + Plan | planner | DoR gate, worktree, spec.md, implementation plan |
+| `/dev-implement` | Implement | dev-implementer | TDD implementation per spec.md |
+| `/dev-verify` | Verify | parent (+ E2E) | Build, unit tests, Playwright E2E |
+| `/dev-review` | Review | cross-verifier | Independent diff review vs spec.md |
+| `/dev-pr` | PR | cross-verifier + git-pr | Guardrails + draft PR |
+| `/dev-post-merge` | Post-merge | post-merge | Usage spec, microservices-delta, troubleshooting |
+
+Jira labels: `dev-ready` → `dev-in-progress` → `dev-pr-open` → `dev-merged` → `sec-input-ready`
+
+Full architecture: [ai-docs/harness/development-phase-plan.md](ai-docs/harness/development-phase-plan.md)
+
 ### Other Commands
 
 | Command | Purpose |
@@ -68,6 +83,8 @@ Jira labels track progress: `scrubbed` → `prioritize`/`followup`/`dolater` →
 | `/fix-tickets` | Full lifecycle: fetch Jira tickets → worktree → implement → PR (uses superpowers skills) |
 | `/submit-pr` | Commit + push + create PR for a worktree. Runs in main conversation (no subagents) |
 | `/cleanup-worktrees` | List, inspect, and remove worktrees in `/tmp/claude-widgets/` |
+| `/spec-drift` | Full ai-docs vs code scan |
+| `/spec-drift-changed` | Scoped spec-drift check before commit |
 
 ## Subagent Constraints
 
@@ -123,6 +140,8 @@ Invoke these skills at the right workflow stage — they enforce discipline that
 | Bug fix template | `ai-docs/templates/existing-widget/bug-fix.md` |
 | Feature enhancement template | `ai-docs/templates/existing-widget/feature-enhancement.md` |
 | Playwright E2E template (4-step) | `ai-docs/templates/playwright/` |
+| Development phase harness | `ai-docs/harness/development-phase-plan.md` |
+| Development phase templates | `ai-docs/templates/development-phase/` |
 | SDK API reference (TypeDoc JSON) | `contact-centre-sdk-apis/contact-center.json` |
 | Per-package architecture & agent docs | `packages/contact-center/{pkg}/ai-docs/` |
 

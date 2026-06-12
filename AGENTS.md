@@ -4,7 +4,7 @@
 
 This is the main orchestrator for AI assistants working on this repository. It routes you to the correct templates and documentation based on the developer's task.
 
-**For every developer request:** (1) Identify task type (A–F below). (2) If the work is in an existing package, widget, or test framework scope, load that scope's ai-docs (see [Package and widget ai-docs reference](#package-and-widget-ai-docs-reference)) and follow its AGENTS.md. (3) Open the template for that type and complete its mandatory pre-steps (see [Mandatory pre-steps by task type](#mandatory-pre-steps-by-task-type)). (4) Then follow the rest of this guide and the template.
+**For every developer request:** (1) Identify task type (A–G below). (2) If the work is in an existing package, widget, or test framework scope, load that scope's ai-docs (see [Package and widget ai-docs reference](#package-and-widget-ai-docs-reference)) and follow its AGENTS.md. (3) Open the template for that type and complete its mandatory pre-steps (see [Mandatory pre-steps by task type](#mandatory-pre-steps-by-task-type)). (4) Then follow the rest of this guide and the template.
 
 ---
 
@@ -62,6 +62,14 @@ If the developer's message contains multiple distinct task types (for example, "
 - **Route to:** [templates/playwright/00-master.md](./ai-docs/templates/playwright/00-master.md)
 - **Follow:** Playwright template workflow (pre-questions → implementation → validation)
 - **⚠️ MANDATORY FIRST STEP:** Complete pre-questions in [templates/playwright/01-pre-questions.md](./ai-docs/templates/playwright/01-pre-questions.md)
+
+**G. Development Phase Harness**
+- Jira dev ticket handed off from Discovery (DoR complete); full lifecycle from intake through merge and post-merge artifacts
+- **Route to:** [harness/development-phase-plan.md](./ai-docs/harness/development-phase-plan.md)
+- **Follow:** [templates/development-phase/00-master.md](./ai-docs/templates/development-phase/00-master.md) (intake → plan → implement → verify → PR → post-merge)
+- **⚠️ MANDATORY FIRST STEP:** Complete DoR intake gate in [templates/development-phase/01-intake.md](./ai-docs/templates/development-phase/01-intake.md)
+- **Claude Code commands:** `/dev-start`, `/dev-implement`, `/dev-verify`, `/dev-review`, `/dev-pr`, `/dev-post-merge` (see [CLAUDE.md](./CLAUDE.md))
+- **Also routes to:** Task types A/B/C/F templates based on `taskType` in intake JSON
 
 ---
 
@@ -176,6 +184,7 @@ Before generating or changing any code, you MUST complete the **pre-step section
 | **D. Documentation only** | documentation templates | Optional: confirm scope with developer (no code change) |
 | **E. Understanding** | Package ai-docs | None (read-only) |
 | **F. Playwright E2E Test Work** | [playwright/00-master.md](./ai-docs/templates/playwright/00-master.md) | [Pre-Questions](./ai-docs/templates/playwright/01-pre-questions.md) (scope, scenarios, setup/utilities, stability expectations) |
+| **G. Development Phase Harness** | [harness/development-phase-plan.md](./ai-docs/harness/development-phase-plan.md) | [DoR Intake Gate](./ai-docs/templates/development-phase/01-intake.md) (Discovery artifacts, spec.md, Jira epic/ticket readiness) |
 
 ---
 
@@ -210,6 +219,7 @@ Before generating or changing any code, you MUST complete the **pre-step section
 | **ui-logging** | [packages/contact-center/ui-logging/ai-docs/AGENTS.md](packages/contact-center/ui-logging/ai-docs/AGENTS.md) | Same folder |
 | **samples-cc-react-app** | [widgets-samples/cc/samples-cc-react-app/ai-docs/AGENTS.md](widgets-samples/cc/samples-cc-react-app/ai-docs/AGENTS.md) | Same folder if present |
 | **playwright framework** | [playwright/ai-docs/AGENTS.md](playwright/ai-docs/AGENTS.md) | [playwright/ai-docs/ARCHITECTURE.md](playwright/ai-docs/ARCHITECTURE.md) |
+| **Development phase harness** | [ai-docs/harness/development-phase-plan.md](ai-docs/harness/development-phase-plan.md) | [ai-docs/harness/guardrails-pr-tdd.md](ai-docs/harness/guardrails-pr-tdd.md) |
 
 **Task package note:** The task package has multiple widgets (CallControl, IncomingTask, OutdialCall, TaskList). When working on one of them, use that widget's ai-docs path above, not a generic task path.
 
