@@ -286,6 +286,8 @@ type AgentLoginProfile = {
     social: number;
     telephony: number;
   };
+  isTimeoutDesktopInactivityEnabled?: boolean;
+  timeoutDesktopInactivityMins?: number;
 };
 
 // Generic pagination params for list-fetching APIs
