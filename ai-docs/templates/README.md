@@ -11,7 +11,8 @@ templates/
 ├── new-widget/          # Widget generation (7 modules)
 ├── existing-widget/     # Bug fixes, features (2 modules)
 ├── documentation/       # Documentation generation (2 modules, reusable for all packages)
-└── playwright/          # Playwright E2E templates
+├── playwright/          # Playwright E2E templates
+└── development-phase/   # Development phase harness (6 modules + artifact templates)
 ```
 
 ## Templates
@@ -58,6 +59,24 @@ templates/
 - [03-framework-and-doc-updates.md](./playwright/03-framework-and-doc-updates.md) - Shared framework/docs updates
 - [04-validation.md](./playwright/04-validation.md) - Validation checklist
 
+### 5. Development Phase Harness
+
+**Directory:** [development-phase/](./development-phase/)
+
+**Orchestrator:** [../harness/development-phase-plan.md](../harness/development-phase-plan.md)
+
+**Modules:**
+- [00-master.md](./development-phase/00-master.md) - Phase orchestrator
+- [01-intake.md](./development-phase/01-intake.md) - DoR gate + spec.md
+- [02-implementation.md](./development-phase/02-implementation.md) - TDD loop
+- [03-verification.md](./development-phase/03-verification.md) - Build, unit, E2E gates
+- [04-pr-and-review.md](./development-phase/04-pr-and-review.md) - Cross-review + PR
+- [05-post-merge.md](./development-phase/05-post-merge.md) - Security/Beta/GTM handoffs
+
+**Artifact templates:**
+- [spec.md.template](./development-phase/spec.md.template)
+- [microservices-delta.md.template](./development-phase/microservices-delta.md.template)
+
 ---
 
 ## Usage
@@ -72,6 +91,8 @@ templates/
 
 **Playwright E2E Work:** Start with [playwright/00-master.md](./playwright/00-master.md)
 
+**Development Phase (Discovery handoff):** Start with [development-phase/00-master.md](./development-phase/00-master.md) and [harness/development-phase-plan.md](../harness/development-phase-plan.md)
+
 ## Pattern References
 
 - [TypeScript Patterns](../patterns/typescript-patterns.md)
@@ -82,4 +103,4 @@ templates/
 
 ---
 
-_Last Updated: 2026-03-04_
+_Last Updated: 2026-06-10_

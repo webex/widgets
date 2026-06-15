@@ -1,0 +1,26 @@
+# Development Phase Harness
+
+When working on Jira dev tickets from Discovery handoff, follow the Development phase harness.
+
+## Primary Reference
+
+- [ai-docs/harness/development-phase-plan.md](../../ai-docs/harness/development-phase-plan.md)
+
+## Workflow
+
+1. Complete DoR intake: [01-intake.md](../../ai-docs/templates/development-phase/01-intake.md)
+2. Follow phase modules: [00-master.md](../../ai-docs/templates/development-phase/00-master.md)
+
+## Claude Code Commands
+
+`/dev-start` → `/dev-implement` → `/dev-verify` → `/dev-review` → `/dev-pr` → (after merge) `/dev-post-merge`
+
+## Cursor
+
+- Orchestrator runs in main agent with Jira/GitHub MCP
+- Spawn subagents via Task tool: planner, dev-implementer, cross-verifier, git-pr, post-merge
+- Parent prefetches Jira; pass JSON to subagents (no raw MCP dumps)
+
+## Guardrails
+
+[guardrails-pr-tdd.md](../../ai-docs/harness/guardrails-pr-tdd.md)

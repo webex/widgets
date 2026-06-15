@@ -1,0 +1,118 @@
+# Ticket Spec: {TICKET_ID}
+
+> Normalized from DoR deck + Jira spec delta. Generated at intake.
+
+---
+
+## Metadata
+
+| Field | Value |
+|-------|-------|
+| **Ticket** | {TICKET_ID} |
+| **Epic** | {EPIC_KEY} |
+| **Task type** | A \| B \| C \| F |
+| **Scope packages** | {PACKAGE_LIST} |
+| **Author (Discovery)** | {NAME} |
+| **Date** | {ISO_DATE} |
+
+---
+
+## Summary
+
+{One paragraph English description from Jira}
+
+---
+
+## Business Use Cases
+
+1. {Use case 1}
+2. {Use case 2}
+
+---
+
+## Acceptance Criteria
+
+- [ ] {Criterion 1 — testable}
+- [ ] {Criterion 2 — testable}
+
+---
+
+## Spec Delta
+
+### Added
+
+- {New behavior, API, component}
+
+### Updated
+
+- {Changed behavior}
+
+### Removed
+
+- {Deprecated/removed items, or "None"}
+
+---
+
+## Design
+
+### Architecture Notes
+
+{High-level component communication from DoR}
+
+### API Details
+
+| Method / Prop | Type | Description |
+|---------------|------|-------------|
+| | | |
+
+**SDK methods** (verify in contact-center.json):
+
+- `store.cc.{methodName}()` — {purpose}
+
+### Error Scenarios
+
+| Scenario | Expected behavior |
+|----------|-------------------|
+| | |
+
+### Limitations
+
+- {Known limitation}
+
+### Open Questions
+
+| Question | Status | Owner |
+|----------|--------|-------|
+| | Resolved / Deferred | |
+
+---
+
+## Test Plan
+
+### Unit Tests
+
+| Scenario | Package | File (planned) |
+|----------|---------|----------------|
+| | @webex/{pkg} | tests/... |
+
+### E2E Tests
+
+| Scenario | Playwright file / SET | Required |
+|----------|----------------------|----------|
+| | SET_N | Yes / No |
+
+---
+
+## Dependencies
+
+- **Jira:** {linked tickets}
+- **Repos:** {repo paths}
+- **CH flags / SKU:** {if applicable}
+
+---
+
+## References
+
+- DoR deck: {link}
+- Figma / design: {link}
+- OpenAPI: {link}

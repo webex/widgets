@@ -1,0 +1,106 @@
+# Microservices Delta: {TICKET_ID}
+
+> Post-merge artifact for Security & Compliance phase. Generated after PR merge.
+
+---
+
+## Metadata
+
+| Field | Value |
+|-------|-------|
+| **Ticket** | {TICKET_ID} |
+| **PR** | {PR_URL} |
+| **Merge commit** | {SHA} |
+| **Date** | {ISO_DATE} |
+| **Author** | {DEVELOPER_OR_AGENT} |
+
+---
+
+## Summary of Change
+
+{One paragraph: what changed at a system/security perspective}
+
+---
+
+## Services / Components Affected
+
+| Component | Path | Change type |
+|-----------|------|-------------|
+| | packages/contact-center/... | Added \| Updated \| Removed |
+
+---
+
+## API Surface Changes
+
+### New Endpoints / SDK Methods
+
+| Name | Type | Auth | Data sensitivity |
+|------|------|------|------------------|
+| | REST / SDK | | PII / None |
+
+### Changed Contracts
+
+| Name | Before | After | Breaking |
+|------|--------|-------|----------|
+| | | | Yes / No |
+
+---
+
+## Data Flow
+
+```mermaid
+flowchart LR
+  UI[Widget UI] --> Store[MobX Store]
+  Store --> SDK[Contact Center SDK]
+  SDK --> Backend[Backend Service]
+```
+
+Describe any new data collected, stored, or transmitted:
+
+- {Data element — classification}
+
+---
+
+## Dependencies (Third-Party)
+
+| Package | Version change | License | TPS notes |
+|---------|----------------|---------|-----------|
+| | | | |
+
+---
+
+## Security Considerations
+
+- [ ] Authentication / authorization impact
+- [ ] PII handling change
+- [ ] Logging change (no credentials/PII)
+- [ ] New external network calls
+- [ ] Error messages leak sensitive info
+
+**Notes:**
+
+{Free text for Security team}
+
+---
+
+## Threat Model Delta
+
+| Threat | Mitigation | New exposure |
+|--------|------------|--------------|
+| | | Yes / No |
+
+---
+
+## Testing Evidence
+
+- Unit tests: {paths}
+- E2E: {paths or N/A}
+- Manual security testing: {notes}
+
+---
+
+## References
+
+- PR diff: {link}
+- Usage spec: {link}
+- Threat model (if updated): {link}
