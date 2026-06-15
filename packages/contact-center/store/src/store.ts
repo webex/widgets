@@ -93,7 +93,7 @@ class Store implements IStore {
           module: 'cc-store#store.ts',
           method: 'registerCC',
         });
-        // Wire up logger into feature‐flag extraction.
+        // wire up logger into feature‐flag extraction.
         this.featureFlags = getFeatureFlags(response);
         //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         this.teams = response.teams;
