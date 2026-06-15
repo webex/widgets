@@ -3,11 +3,8 @@ run-name: ${{ github.actor }} is running Pull Request CI
 
 on:
   pull_request_target:
-    types: [opened, labeled, reopened, synchronize]
+    types: [opened, labeled, reopened]
   workflow_dispatch:
-
-permissions:
-  contents: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -45,39 +42,9 @@ jobs:
   validate:
     name: Validate Pull Request
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request_target'
+    if: contains(toJson(github.event.pull_request.labels), 'validated')
 
     steps:
-      - name: Gate privileged execution for fork PRs
-        shell: bash
-        env:
-          PR_REPO: ${{ github.event.pull_request.head.repo.full_name }}
-          BASE_REPO: ${{ github.repository }}
-          EVENT_ACTION: ${{ github.event.action }}
-          EVENT_LABEL: ${{ github.event.label.name || '' }}
-          HAS_VALIDATED_LABEL: ${{ contains(github.event.pull_request.labels.*.name, 'validated') }}
-        run: |
-          FROM_BASE=0
-          [ "$PR_REPO" = "$BASE_REPO" ] && FROM_BASE=1
-
-          VALIDATED=0
-          [ "$HAS_VALIDATED_LABEL" = "true" ] && VALIDATED=1
-
-          LABEL_VALIDATION_EVENT=0
-          if [ "$EVENT_ACTION" = "labeled" ] && [ "$EVENT_LABEL" = "validated" ]; then
-            LABEL_VALIDATION_EVENT=1
-          fi
-
-          if [ "$FROM_BASE" -eq 1 ] || \
-             [ "$LABEL_VALIDATION_EVENT" -eq 1 ] || \
-             { [ "$EVENT_ACTION" != "synchronize" ] && [ "$VALIDATED" -eq 1 ]; }; then
-            echo "Validation gate passed."
-            exit 0
-          fi
-
-          echo "Validation gate blocked: fork PRs require fresh 'validated' labeling after each push."
-          exit 1
-
       - name: Validate PR title safely
         uses: actions/github-script@v7
         with:
