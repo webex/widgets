@@ -28,6 +28,7 @@ import {ITask} from '@webex/contact-center';
 import {
   mockCC,
   mockTask as mockTaskFixture,
+  makeMockTask,
   mockEntryPointsResponse,
   mockAddressBookEntriesResponse,
   mockQueueDetails,
@@ -103,6 +104,7 @@ jest.mock('../src/store', () => ({
     allowConsultToQueue: false,
     isDeclineButtonEnabled: false,
     isDigitalChannelsInitialized: false,
+    acceptedCampaignIds: new Set<string>(),
     setShowMultipleLoginAlert: jest.fn(),
     setCurrentState: jest.fn(),
     setLastStateChangeTimestamp: jest.fn(),
@@ -128,6 +130,8 @@ const mockAgentProfile = {
   roles: ['agent'],
   orgId: 'mockOrgId',
   profileType: 'BLENDED',
+  isTimeoutDesktopInactivityEnabled: true,
+  timeoutDesktopInactivityMins: 30,
 };
 
 const mockAgentProfilePayload = {
@@ -174,7 +178,7 @@ describe('storeEventsWrapper', () => {
     it('should proxy currentTask', () => {
       // Set the store's agentId to match the task's agentId
       storeWrapper['store'].agentId = 'agent1';
-      const mockCurrentTask = {
+      const mockCurrentTask = makeMockTask({
         data: {
           interactionId: 'mockInteractionId',
           interaction: {
@@ -187,7 +191,7 @@ describe('storeEventsWrapper', () => {
           },
           agentId: 'agent1',
         },
-      } as ITask;
+      });
       storeWrapper.setCurrentTask(mockCurrentTask);
       expect(storeWrapper.currentTask).toEqual(mockCurrentTask);
     });
@@ -512,7 +516,7 @@ describe('storeEventsWrapper', () => {
   });
 
   describe('storeEventsWrapper', () => {
-    const mockTask: ITask = {
+    const mockTask = makeMockTask({
       data: {
         interactionId: 'interaction1',
         interaction: {
@@ -525,9 +529,7 @@ describe('storeEventsWrapper', () => {
         },
         agentId: 'agent1',
       },
-      on: jest.fn(),
-      off: jest.fn(),
-    } as unknown as ITask;
+    });
 
     beforeEach(() => {
       jest.clearAllMocks();
@@ -560,7 +562,7 @@ describe('storeEventsWrapper', () => {
       const mockIncomingTaskCallback = jest.fn();
       storeWrapper.setIncomingTaskCb(mockIncomingTaskCallback);
       // Ensure mockTask is properly set up
-      const mockTask2: ITask = {
+      const mockTask2 = makeMockTask({
         data: {
           interactionId: 'interaction1',
           interaction: {
@@ -569,9 +571,7 @@ describe('storeEventsWrapper', () => {
           agentId: 'agent1',
           // Note: mockTask2 doesn't have hasJoined: true to simulate an incoming task
         },
-        on: jest.fn(),
-        off: jest.fn(),
-      } as unknown as ITask;
+      });
 
       // Set up mockTask with hasJoined: true so it can be set as current task
       const mockTaskWithJoined = {
@@ -618,16 +618,14 @@ describe('storeEventsWrapper', () => {
       const mockIncomingTaskCallback = jest.fn();
       storeWrapper.setIncomingTaskCb(mockIncomingTaskCallback);
       // Ensure mockTask is properly set up
-      const mockTask: ITask = {
+      const mockTask = makeMockTask({
         data: {
           interactionId: 'interaction1',
           interaction: {
             state: 'connected',
           },
         },
-        on: jest.fn(),
-        off: jest.fn(),
-      } as unknown as ITask;
+      });
 
       storeWrapper['store'].cc.taskManager.getAllTasks = jest
         .fn()
@@ -657,16 +655,14 @@ describe('storeEventsWrapper', () => {
       const mockIncomingTaskCallback = jest.fn();
       storeWrapper.setIncomingTaskCb(undefined);
       // Ensure mockTask is properly set up
-      const mockTask: ITask = {
+      const mockTask = makeMockTask({
         data: {
           interactionId: 'interaction1',
           interaction: {
             state: 'connected',
           },
         },
-        on: jest.fn(),
-        off: jest.fn(),
-      } as unknown as ITask;
+      });
 
       // Add the mock task to the task list
       storeWrapper['store'].taskList = {interaction1: mockTask};
@@ -1075,16 +1071,14 @@ describe('storeEventsWrapper', () => {
   });
 
   describe('storeEventsWrapper events reactions', () => {
-    const mockTask: ITask = {
+    const mockTask = makeMockTask({
       data: {
         interactionId: 'interaction1',
         interaction: {
           state: 'connected',
         },
       },
-      on: jest.fn(),
-      off: jest.fn(),
-    } as unknown as ITask;
+    });
 
     const options = {
       webex: {
@@ -1204,7 +1198,7 @@ describe('storeEventsWrapper', () => {
 
       //  The call is answered and the task is assigned to the agent
       act(() => {
-        mockTaskOnSpy.mock.calls[1][1]();
+        mockTaskOnSpy.mock.calls[1][1](mockTask);
       });
 
       waitFor(() => {
@@ -1214,7 +1208,7 @@ describe('storeEventsWrapper', () => {
 
       //  Task end stage: the task is completed
       act(() => {
-        mockTaskOnSpy.mock.calls[0][1]({wrapupRequired: true});
+        mockTaskOnSpy.mock.calls[0][1](mockTask);
       });
 
       waitFor(() => {
@@ -1731,11 +1725,9 @@ describe('storeEventsWrapper', () => {
     });
 
     it('should handle task rejection event and call onTaskRejected with the provided reason', () => {
-      const rejectTask: ITask = {
+      const rejectTask = makeMockTask({
         data: {interactionId: 'rejectTest', interaction: {state: 'connected'}},
-        on: jest.fn(),
-        off: jest.fn(),
-      } as unknown as ITask;
+      });
 
       const rejectTaskOnSpy = jest.spyOn(rejectTask, 'on');
       const onTaskRejectedMock = jest.fn();
@@ -1773,11 +1765,9 @@ describe('storeEventsWrapper', () => {
     });
 
     it('should handle task rejection event and call onTaskRejected with no reason', () => {
-      const rejectTask: ITask = {
+      const rejectTask = makeMockTask({
         data: {interactionId: 'rejectTest', interaction: {state: 'connected'}},
-        on: jest.fn(),
-        off: jest.fn(),
-      } as unknown as ITask;
+      });
       const rejectTaskOnSpy = jest.spyOn(rejectTask, 'on');
 
       const onTaskRejectedMock = jest.fn();
@@ -1828,11 +1818,9 @@ describe('storeEventsWrapper', () => {
     });
 
     it('should handle outdial failed event and call onOutdialFailed with the provided reason', () => {
-      const outdialTask: ITask = {
+      const outdialTask = makeMockTask({
         data: {interactionId: 'outdialTest', interaction: {state: 'connected'}},
-        on: jest.fn(),
-        off: jest.fn(),
-      } as unknown as ITask;
+      });
 
       const outdialTaskOnSpy = jest.spyOn(outdialTask, 'on');
       const onOutdialFailedMock = jest.fn();
@@ -1867,16 +1855,14 @@ describe('storeEventsWrapper', () => {
     });
 
     it('should register TASK_CONSULT_QUEUE_CANCELLED handler on incoming task', () => {
-      const mockTask: ITask = {
+      const mockTask = makeMockTask({
         data: {
           interactionId: 'interaction1',
           interaction: {
             state: 'connected',
           },
         },
-        on: jest.fn(),
-        off: jest.fn(),
-      } as unknown as ITask;
+      });
 
       storeWrapper['store'].taskList = {};
       storeWrapper.handleIncomingTask(mockTask);
@@ -1886,16 +1872,14 @@ describe('storeEventsWrapper', () => {
     });
 
     it('should register TASK_AUTO_ANSWERED handler on incoming task', () => {
-      const mockTask: ITask = {
+      const mockTask = makeMockTask({
         data: {
           interactionId: 'interaction1',
           interaction: {
             state: 'connected',
           },
         },
-        on: jest.fn(),
-        off: jest.fn(),
-      } as unknown as ITask;
+      });
 
       storeWrapper['store'].taskList = {};
       storeWrapper.handleIncomingTask(mockTask);
@@ -1905,11 +1889,9 @@ describe('storeEventsWrapper', () => {
     });
 
     it('should handle auto answer event and enable decline button', () => {
-      const autoAnswerTask: ITask = {
+      const autoAnswerTask = makeMockTask({
         data: {interactionId: 'autoAnswerTest', interaction: {state: 'connected'}},
-        on: jest.fn(),
-        off: jest.fn(),
-      } as unknown as ITask;
+      });
 
       const autoAnswerTaskOnSpy = jest.spyOn(autoAnswerTask, 'on');
       const setIsDeclineButtonEnabledSpy = jest.spyOn(storeWrapper, 'setIsDeclineButtonEnabled');
@@ -1935,16 +1917,14 @@ describe('storeEventsWrapper', () => {
   });
 
   describe('task:media conditionally attached based on deviceType', () => {
-    const mockTask: ITask = {
+    const mockTask = makeMockTask({
       data: {
         interactionId: 'interaction1',
         interaction: {
           state: 'connected',
         },
       },
-      on: jest.fn(),
-      off: jest.fn(),
-    } as unknown as ITask;
+    });
 
     beforeEach(() => {
       jest.clearAllMocks();
@@ -2153,7 +2133,7 @@ describe('storeEventsWrapper', () => {
     beforeEach(() => {
       // Set the store's agentId to match the tasks' agentId
       storeWrapper['store'].agentId = 'agent1';
-      mockTaskA = {
+      mockTaskA = makeMockTask({
         data: {
           interactionId: 'taskA',
           interaction: {
@@ -2166,8 +2146,8 @@ describe('storeEventsWrapper', () => {
           },
           agentId: 'agent1',
         },
-      } as ITask;
-      mockTaskB = {
+      });
+      mockTaskB = makeMockTask({
         data: {
           interactionId: 'taskB',
           interaction: {
@@ -2180,7 +2160,7 @@ describe('storeEventsWrapper', () => {
           },
           agentId: 'agent1',
         },
-      } as ITask;
+      });
       storeWrapper['store'].isQueueConsultInProgress = true;
       storeWrapper['store'].currentConsultQueueId = 'queue1';
       storeWrapper['store'].consultStartTimeStamp = 123;
@@ -2227,16 +2207,16 @@ describe('storeEventsWrapper', () => {
       expect(storeWrapper.currentTask).toEqual(mockTaskA);
 
       // Create an incoming task (without hasJoined: true)
-      const incomingTask: ITask = {
+      const incomingTask = makeMockTask({
         data: {
           interactionId: 'incomingTask',
           interaction: {
             state: 'new',
-            // Note: no participants or hasJoined property to simulate incoming task
+            participants: {},
           },
           agentId: 'agent1',
         },
-      } as ITask;
+      });
 
       // Try to set the incoming task as current task
       storeWrapper.setCurrentTask(incomingTask);
@@ -2252,7 +2232,7 @@ describe('storeEventsWrapper', () => {
       expect(storeWrapper.currentTask).toEqual(mockTaskA);
 
       // Create a task with explicitly hasJoined: false
-      const taskWithoutJoined: ITask = {
+      const taskWithoutJoined = makeMockTask({
         data: {
           interactionId: 'taskWithoutJoined',
           interaction: {
@@ -2265,7 +2245,7 @@ describe('storeEventsWrapper', () => {
           },
           agentId: 'agent1',
         },
-      } as ITask;
+      });
 
       // Try to set the task without joined as current task
       storeWrapper.setCurrentTask(taskWithoutJoined);
@@ -2273,6 +2253,287 @@ describe('storeEventsWrapper', () => {
       // Current task should remain unchanged (still mockTaskA)
       expect(storeWrapper.currentTask).toEqual(mockTaskA);
       expect(storeWrapper.currentTask).not.toEqual(taskWithoutJoined);
+    });
+  });
+
+  describe('campaign preview task lifecycle', () => {
+    const createCampaignPreviewTask = (interactionId: string): ITask =>
+      makeMockTask({
+        data: {
+          interactionId,
+          interaction: {
+            state: 'new',
+            outboundType: 'STANDARD_PREVIEW_CAMPAIGN',
+            callProcessingDetails: {
+              campaignType: 'preview_standard',
+            },
+          },
+        },
+      });
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      storeWrapper['store'].acceptedCampaignIds = new Set<string>();
+      storeWrapper['store'].taskList = {};
+      storeWrapper['store'].currentTask = null;
+    });
+
+    describe('handleTaskEnd — campaign preview (unaccepted)', () => {
+      it('should call refreshTaskList and let the backend drive task removal', () => {
+        const task = createCampaignPreviewTask('campaign-1');
+        storeWrapper['store'].taskList = {'campaign-1': task};
+        storeWrapper['store'].currentTask = task;
+        // SDK still returns the task — refreshTaskList will keep it in taskList
+        storeWrapper['store'].cc.taskManager.getAllTasks = jest.fn().mockReturnValue({'campaign-1': task});
+
+        const refreshSpy = jest.spyOn(storeWrapper, 'refreshTaskList');
+
+        storeWrapper.handleTaskEnd();
+
+        // refreshTaskList should be called (normal path, no force cleanup)
+        expect(refreshSpy).toHaveBeenCalled();
+      });
+    });
+
+    describe('handleTaskEnd — accepted campaign preview', () => {
+      it('should call refreshTaskList for accepted campaign', () => {
+        const task = createCampaignPreviewTask('campaign-accepted');
+        storeWrapper['store'].acceptedCampaignIds = new Set(['campaign-accepted']);
+        storeWrapper['store'].taskList = {'campaign-accepted': task};
+        storeWrapper['store'].currentTask = task;
+        storeWrapper['store'].cc.taskManager.getAllTasks = jest.fn().mockReturnValue({'campaign-accepted': task});
+
+        const refreshSpy = jest.spyOn(storeWrapper, 'refreshTaskList');
+
+        storeWrapper.handleTaskEnd();
+
+        // acceptedCampaignIds should NOT be cleaned up here (deferred to handleTaskRemove)
+        expect(storeWrapper['store'].acceptedCampaignIds.has('campaign-accepted')).toBe(true);
+        // refreshTaskList SHOULD be called (normal path)
+        expect(refreshSpy).toHaveBeenCalled();
+      });
+    });
+
+    describe('handleTaskRemove — campaign ID cleanup', () => {
+      it('should remove interactionId from acceptedCampaignIds on task removal', () => {
+        const task = createCampaignPreviewTask('campaign-remove');
+        storeWrapper['store'].acceptedCampaignIds = new Set(['campaign-remove']);
+        storeWrapper['store'].taskList = {'campaign-remove': task};
+        storeWrapper['store'].currentTask = task;
+        storeWrapper['store'].cc.taskManager.getAllTasks = jest.fn().mockReturnValue({});
+
+        storeWrapper.handleTaskRemove(task);
+
+        expect(storeWrapper['store'].acceptedCampaignIds.has('campaign-remove')).toBe(false);
+      });
+
+      it('should not affect acceptedCampaignIds when task is not an accepted campaign', () => {
+        const task = createCampaignPreviewTask('campaign-notaccepted');
+        storeWrapper['store'].acceptedCampaignIds = new Set(['some-other-id']);
+        storeWrapper['store'].taskList = {'campaign-notaccepted': task};
+        storeWrapper['store'].currentTask = task;
+        storeWrapper['store'].cc.taskManager.getAllTasks = jest.fn().mockReturnValue({});
+
+        storeWrapper.handleTaskRemove(task);
+
+        // The other accepted campaign should remain
+        expect(storeWrapper['store'].acceptedCampaignIds.has('some-other-id')).toBe(true);
+      });
+    });
+
+    describe('handleTaskEnd — non-campaign tasks', () => {
+      it('should call refreshTaskList for a regular (non-campaign) task', () => {
+        const regularTask = makeMockTask({
+          data: {
+            interactionId: 'regular-1',
+            interaction: {
+              state: 'connected',
+              outboundType: 'OUTDIAL',
+            },
+          },
+        });
+
+        storeWrapper['store'].taskList = {'regular-1': regularTask};
+        storeWrapper['store'].currentTask = regularTask;
+        storeWrapper['store'].cc.taskManager.getAllTasks = jest.fn().mockReturnValue({'regular-1': regularTask});
+
+        const refreshSpy = jest.spyOn(storeWrapper, 'refreshTaskList');
+
+        storeWrapper.handleTaskEnd();
+
+        // Should call refreshTaskList normally
+        expect(refreshSpy).toHaveBeenCalled();
+        // taskList should still contain the task (SDK still returns it)
+        expect(storeWrapper['store'].taskList['regular-1']).toBeDefined();
+      });
+    });
+
+    describe('handleIncomingCampaignPreview — campaign type branching', () => {
+      it('should set RESERVED state for standard preview campaign', () => {
+        const task = createCampaignPreviewTask('preview-standard-1');
+        const setStateSpy = jest.spyOn(storeWrapper, 'setState');
+
+        storeWrapper.handleIncomingCampaignPreview(task);
+
+        expect(setStateSpy).toHaveBeenCalledWith({
+          developerName: 'RESERVED',
+          name: 'Reserved',
+        });
+      });
+
+      it('should set RESERVED state for direct preview campaign', () => {
+        const task = makeMockTask({
+          data: {
+            interactionId: 'preview-direct-1',
+            interaction: {
+              state: 'new',
+              outboundType: 'DIRECT_PREVIEW_CAMPAIGN',
+              callProcessingDetails: {
+                campaignType: 'preview_direct',
+              },
+            },
+          },
+        });
+        const setStateSpy = jest.spyOn(storeWrapper, 'setState');
+
+        storeWrapper.handleIncomingCampaignPreview(task);
+
+        expect(setStateSpy).toHaveBeenCalledWith({
+          developerName: 'RESERVED',
+          name: 'Reserved',
+        });
+      });
+
+      it('should NOT set RESERVED state for predictive campaign', () => {
+        const task = makeMockTask({
+          data: {
+            interactionId: 'predictive-1',
+            interaction: {
+              state: 'new',
+              outboundType: 'PREDICTIVE_CAMPAIGN',
+              callProcessingDetails: {
+                campaignType: 'predictive',
+              },
+            },
+          },
+        });
+        const setStateSpy = jest.spyOn(storeWrapper, 'setState');
+
+        storeWrapper.handleIncomingCampaignPreview(task);
+
+        expect(setStateSpy).not.toHaveBeenCalledWith({
+          developerName: 'RESERVED',
+          name: 'Reserved',
+        });
+      });
+
+      it('should NOT set RESERVED state for progressive campaign', () => {
+        const task = makeMockTask({
+          data: {
+            interactionId: 'progressive-1',
+            interaction: {
+              state: 'new',
+              outboundType: 'PROGRESSIVE_CAMPAIGN',
+              callProcessingDetails: {
+                campaignType: 'progressive',
+              },
+            },
+          },
+        });
+        const setStateSpy = jest.spyOn(storeWrapper, 'setState');
+
+        storeWrapper.handleIncomingCampaignPreview(task);
+
+        expect(setStateSpy).not.toHaveBeenCalledWith({
+          developerName: 'RESERVED',
+          name: 'Reserved',
+        });
+      });
+
+      it('should still call refreshTaskList for non-preview campaigns', () => {
+        const task = makeMockTask({
+          data: {
+            interactionId: 'progressive-2',
+            interaction: {
+              state: 'new',
+              outboundType: 'PROGRESSIVE_CAMPAIGN',
+            },
+          },
+        });
+        const refreshSpy = jest.spyOn(storeWrapper, 'refreshTaskList');
+
+        storeWrapper.handleIncomingCampaignPreview(task);
+
+        expect(refreshSpy).toHaveBeenCalled();
+      });
+    });
+
+    describe('handleCampaignPreviewReservation — campaign type branching', () => {
+      it('should add to acceptedCampaignIds for standard preview campaign', () => {
+        const task = createCampaignPreviewTask('preview-accept-1');
+
+        storeWrapper.handleCampaignPreviewReservation(task);
+
+        expect(storeWrapper['store'].acceptedCampaignIds.has('preview-accept-1')).toBe(true);
+      });
+
+      it('should NOT add to acceptedCampaignIds for predictive campaign', () => {
+        const task = makeMockTask({
+          data: {
+            interactionId: 'predictive-accept-1',
+            interaction: {
+              state: 'new',
+              outboundType: 'PREDICTIVE_CAMPAIGN',
+              callProcessingDetails: {
+                campaignType: 'predictive',
+              },
+            },
+          },
+        });
+
+        storeWrapper.handleCampaignPreviewReservation(task);
+
+        expect(storeWrapper['store'].acceptedCampaignIds.has('predictive-accept-1')).toBe(false);
+      });
+
+      it('should NOT add to acceptedCampaignIds for progressive campaign', () => {
+        const task = makeMockTask({
+          data: {
+            interactionId: 'progressive-accept-1',
+            interaction: {
+              state: 'new',
+              outboundType: 'PROGRESSIVE_CAMPAIGN',
+              callProcessingDetails: {
+                campaignType: 'progressive',
+              },
+            },
+          },
+        });
+
+        storeWrapper.handleCampaignPreviewReservation(task);
+
+        expect(storeWrapper['store'].acceptedCampaignIds.has('progressive-accept-1')).toBe(false);
+      });
+
+      it('should still set ENGAGED state for all campaign types', () => {
+        const predictiveTask = makeMockTask({
+          data: {
+            interactionId: 'predictive-engaged-1',
+            interaction: {
+              state: 'new',
+              outboundType: 'PREDICTIVE_CAMPAIGN',
+            },
+          },
+        });
+        const setStateSpy = jest.spyOn(storeWrapper, 'setState');
+
+        storeWrapper.handleCampaignPreviewReservation(predictiveTask);
+
+        expect(setStateSpy).toHaveBeenCalledWith({
+          developerName: 'ENGAGED',
+          name: 'Engaged',
+        });
+      });
     });
   });
 });

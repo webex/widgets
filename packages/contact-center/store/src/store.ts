@@ -53,6 +53,7 @@ class Store implements IStore {
   isDigitalChannelsInitialized: boolean = false;
   dataCenter: string = '';
   realtimeTranscriptionData: Partial<RealTimeTranscriptionData>[] = [];
+  acceptedCampaignIds: Set<string> = new Set();
 
   constructor() {
     makeAutoObservable(this, {
@@ -115,6 +116,8 @@ class Store implements IStore {
         this.isAddressBookEnabled = Boolean(response.addressBookId);
         this.allowConsultToQueue = response.allowConsultToQueue;
         this.agentProfile.agentName = response.agentName;
+        this.agentProfile.isTimeoutDesktopInactivityEnabled = response.isTimeoutDesktopInactivityEnabled;
+        this.agentProfile.timeoutDesktopInactivityMins = response.timeoutDesktopInactivityMins;
         this.dataCenter = (response as {environment?: string}).environment || '';
       })
       .catch((error) => {

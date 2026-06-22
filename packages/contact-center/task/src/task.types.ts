@@ -15,7 +15,14 @@ export type UseTaskListProps = Pick<TaskProps, 'cc' | 'taskList' | 'deviceType' 
 
 export type IncomingTaskProps = Pick<TaskProps, 'incomingTask'> & Partial<Pick<TaskProps, 'onAccepted' | 'onRejected'>>;
 
-export type TaskListProps = Partial<Pick<TaskProps, 'onTaskAccepted' | 'onTaskDeclined' | 'onTaskSelected'>>;
+export type TaskListProps = Partial<Pick<TaskProps, 'onTaskAccepted' | 'onTaskDeclined' | 'onTaskSelected'>> & {
+  /**
+   * Flag to enable campaign preview task rendering.
+   * When true and the task is a campaign preview, CampaignTask is rendered.
+   * Defaults to true.
+   */
+  hasCampaignPreviewEnabled?: boolean;
+};
 
 export type RealTimeTranscriptProps = Pick<RealTimeTranscriptComponentProps, 'liveTranscriptEntries' | 'className'>;
 
@@ -46,6 +53,9 @@ export type useCallControlProps = Pick<
   Partial<Pick<ControlProps, 'onHoldResume' | 'onEnd' | 'onWrapUp' | 'onRecordingToggle' | 'onToggleMute'>>;
 
 export type useOutdialCallProps = Pick<OutdialCallProps, 'cc' | 'logger'>;
+
+// Re-exported from store — single source of truth.
+export {CAMPAIGN_PREVIEW_OUTBOUND_TYPES, CAMPAIGN_PREVIEW_CAMPAIGN_TYPES} from '@webex/cc-store';
 
 export type {RealTimeTranscriptEntry};
 export interface OutdialProps {

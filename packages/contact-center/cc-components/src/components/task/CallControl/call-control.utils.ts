@@ -358,7 +358,7 @@ export const updateCallStateFromTask = (
 
     if (callProcessingDetails) {
       const {isPaused} = callProcessingDetails;
-      setIsRecording(!isPaused);
+      setIsRecording(isPaused !== 'true');
     }
   } catch (error) {
     logger?.error('CC-Widgets: CallControl: Error in updateCallStateFromTask', {

@@ -21,7 +21,7 @@ import store, {
   MEDIA_TYPE_TELEPHONY_LOWER,
   RealTimeTranscriptionData,
 } from '@webex/cc-store';
-import {getControlsVisibility} from './Utils/task-util';
+import {getControlsVisibility, isCampaignPreviewTask} from './Utils/task-util';
 import {TIMER_LABEL_CONSULTING} from './Utils/constants';
 import {calculateStateTimerData, calculateConsultTimerData} from './Utils/timer-utils';
 import {useHoldTimer} from './Utils/useHoldTimer';
@@ -1031,6 +1031,8 @@ export const useCallControl = (props: useCallControlProps) => {
     setConsultTimerTimestamp(consultTimerData.timestamp);
   }, [currentTask, controlVisibility, agentId]);
 
+  const isCampaignCall = currentTask ? isCampaignPreviewTask(currentTask) : false;
+
   return {
     currentTask,
     endCall,
@@ -1069,6 +1071,7 @@ export const useCallControl = (props: useCallControlProps) => {
     getAddressBookEntries,
     getEntryPoints,
     getQueuesFetcher,
+    isCampaignCall,
   };
 };
 

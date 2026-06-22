@@ -394,34 +394,34 @@ describe('CallControlCADComponent', () => {
     it('should render agent-viewable global variables', () => {
       const screen = render(<CallControlCADComponent {...makePropsWithCallAssociatedData(mockCallAssociatedData)} />);
 
-      const globalVarsContainer = screen.getByTestId('cc-cad:global-variables');
+      const globalVarsContainer = screen.getByTestId('global-variables-panel');
       expect(globalVarsContainer).toBeInTheDocument();
 
-      expect(screen.getByTestId('cc-cad:global-var-Global_Language')).toBeInTheDocument();
-      expect(screen.getByText('Customer Language')).toBeInTheDocument();
+      expect(screen.getByText('Customer Language:')).toBeInTheDocument();
       expect(screen.getByText('English')).toBeInTheDocument();
 
-      expect(screen.getByTestId('cc-cad:global-var-Global_FeedbackSurveyOptIn')).toBeInTheDocument();
-      expect(screen.getByText('Post Call Survey Opt-in')).toBeInTheDocument();
+      expect(screen.getByText('Post Call Survey Opt-in:')).toBeInTheDocument();
       expect(screen.getByText('true')).toBeInTheDocument();
     });
 
     it('should not render non-global variables (e.g. system CAD like ani)', () => {
       const screen = render(<CallControlCADComponent {...makePropsWithCallAssociatedData(mockCallAssociatedData)} />);
 
-      expect(screen.queryByTestId('cc-cad:global-var-ani')).not.toBeInTheDocument();
+      // ani is a system CAD key, filtered out by getAgentViewableGlobalVariables
+      expect(screen.queryByText('ani:')).not.toBeInTheDocument();
     });
 
     it('should not render global variables where agentViewable is false', () => {
       const screen = render(<CallControlCADComponent {...makePropsWithCallAssociatedData(mockCallAssociatedData)} />);
 
-      expect(screen.queryByTestId('cc-cad:global-var-Global_Hidden')).not.toBeInTheDocument();
+      // Global_Hidden has agentViewable: false
+      expect(screen.queryByText('Hidden Variable:')).not.toBeInTheDocument();
     });
 
     it('should not render global variables section when no global variables exist', () => {
       const screen = render(<CallControlCADComponent {...defaultProps} />);
 
-      expect(screen.queryByTestId('cc-cad:global-variables')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('global-variables-panel')).not.toBeInTheDocument();
     });
 
     it('should not render global variables section when callAssociatedData is undefined', () => {
@@ -439,7 +439,7 @@ describe('CallControlCADComponent', () => {
       };
       const screen = render(<CallControlCADComponent {...propsWithNoData} />);
 
-      expect(screen.queryByTestId('cc-cad:global-variables')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('global-variables-panel')).not.toBeInTheDocument();
     });
 
     it('should use variable name as label when displayName is empty', () => {
@@ -459,7 +459,7 @@ describe('CallControlCADComponent', () => {
       };
       const screen = render(<CallControlCADComponent {...makePropsWithCallAssociatedData(dataWithEmptyDisplayName)} />);
 
-      expect(screen.getByText('Global_NoDisplay')).toBeInTheDocument();
+      expect(screen.getByText('Global_NoDisplay:')).toBeInTheDocument();
       expect(screen.getByText('some value')).toBeInTheDocument();
     });
   });

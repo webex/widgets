@@ -34,7 +34,8 @@ exports[`CallControlCADComponent Snapshots should handle edge cases and control 
               data-testid="cc-cad:call-timer"
             >
               Voice
-               - 
+               -
+               
               <span
                 data-testid="TaskTimer"
               >
@@ -329,7 +330,8 @@ exports[`CallControlCADComponent Snapshots should handle edge cases and control 
             data-testid="cc-cad:call-timer"
           >
             Voice
-             - 
+             -
+             
             <span
               data-testid="TaskTimer"
             >
@@ -417,7 +419,8 @@ exports[`CallControlCADComponent Snapshots should handle edge cases and control 
             data-testid="cc-cad:call-timer"
           >
             Voice
-             - 
+             -
+             
             <span
               data-testid="TaskTimer"
             >
@@ -688,7 +691,8 @@ exports[`CallControlCADComponent Snapshots should render basic call states and m
             data-testid="cc-cad:call-timer"
           >
             Chat
-             - 
+             -
+             
             <span
               data-testid="TaskTimer"
             >
@@ -959,7 +963,8 @@ exports[`CallControlCADComponent Snapshots should render basic call states and m
             data-testid="cc-cad:call-timer"
           >
             Voice
-             - 
+             -
+             
             <span
               data-testid="TaskTimer"
             >
@@ -1219,7 +1224,8 @@ exports[`CallControlCADComponent Snapshots should render basic call states and m
             data-testid="cc-cad:call-timer"
           >
             Voice
-             - 
+             -
+             
             <span
               data-testid="TaskTimer"
             >
@@ -1490,7 +1496,8 @@ exports[`CallControlCADComponent Snapshots should render basic call states and m
             data-testid="cc-cad:call-timer"
           >
             Social
-             - 
+             -
+             
             <span
               data-testid="TaskTimer"
             >
@@ -1762,7 +1769,8 @@ exports[`CallControlCADComponent Snapshots should render consultation and wrapup
               data-testid="cc-cad:call-timer"
             >
               Voice
-               - 
+               -
+               
               <span
                 data-testid="TaskTimer"
               >
@@ -2057,7 +2065,8 @@ exports[`CallControlCADComponent Snapshots should render consultation and wrapup
             data-testid="cc-cad:call-timer"
           >
             Voice
-             - 
+             -
+             
             <span
               data-testid="TaskTimer"
             >
@@ -2262,7 +2271,8 @@ exports[`CallControlCADComponent Snapshots should render consultation and wrapup
               data-testid="cc-cad:call-timer"
             >
               Voice
-               - 
+               -
+               
               <span
                 data-testid="TaskTimer"
               >
@@ -2523,7 +2533,8 @@ exports[`CallControlCADComponent Snapshots should render consultation and wrapup
             data-testid="cc-cad:call-timer"
           >
             Voice
-             - 
+             -
+             
             <span
               data-testid="TaskTimer"
             >
