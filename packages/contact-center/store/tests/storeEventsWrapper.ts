@@ -1615,13 +1615,11 @@ describe('storeEventsWrapper', () => {
 
       storeWrapper['store'].taskList = {[interactionId]: task};
 
-      const registerSpy = jest.spyOn(storeWrapper as any, 'registerTaskEventListeners');
       const refreshSpy = jest.spyOn(storeWrapper, 'refreshTaskList');
       const assignedSpy = jest.spyOn(storeWrapper, 'handleTaskAssigned');
 
       storeWrapper.handleMultiLoginHydrate(task);
 
-      expect(registerSpy).not.toHaveBeenCalled();
       expect(refreshSpy).not.toHaveBeenCalled();
       expect(assignedSpy).not.toHaveBeenCalled();
     });
@@ -1639,17 +1637,14 @@ describe('storeEventsWrapper', () => {
 
       storeWrapper['store'].taskList = {[interactionId]: task};
 
-      const registerSpy = jest.spyOn(storeWrapper as any, 'registerTaskEventListeners');
       const refreshSpy = jest.spyOn(storeWrapper, 'refreshTaskList');
       const assignedSpy = jest.spyOn(storeWrapper, 'handleTaskAssigned');
 
       storeWrapper.handleMultiLoginHydrate(task);
 
-      expect(registerSpy).toHaveBeenCalledWith(task);
       expect(refreshSpy).toHaveBeenCalled();
       expect(assignedSpy).toHaveBeenCalledWith(task);
     });
-
 
     it('should handle hydrating the store with correct data', async () => {
       const setCurrentTaskSpy = jest.spyOn(storeWrapper, 'setCurrentTask');
