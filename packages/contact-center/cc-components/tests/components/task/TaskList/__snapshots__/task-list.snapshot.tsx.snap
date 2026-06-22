@@ -22,6 +22,7 @@ exports[`TaskListComponent Actions should call acceptTask when accept button is 
         data-position="start"
       >
         <mdc-avatar
+          aria-hidden="true"
           class="telephony"
           icon-name="handset-filled"
           size="32"
@@ -139,6 +140,7 @@ exports[`TaskListComponent Actions should call acceptTask when accept button is 
         data-position="start"
       >
         <mdc-avatar
+          aria-hidden="true"
           class="telephony"
           icon-name="handset-filled"
           size="32"
@@ -256,6 +258,7 @@ exports[`TaskListComponent Actions should call declineTask when decline button i
         data-position="start"
       >
         <mdc-avatar
+          aria-hidden="true"
           class="telephony"
           icon-name="handset-filled"
           size="32"
@@ -373,6 +376,7 @@ exports[`TaskListComponent Actions should call declineTask when decline button i
         data-position="start"
       >
         <mdc-avatar
+          aria-hidden="true"
           class="telephony"
           icon-name="handset-filled"
           size="32"
@@ -490,6 +494,7 @@ exports[`TaskListComponent Actions should call onTaskSelect when task is clicked
         data-position="start"
       >
         <mdc-avatar
+          aria-hidden="true"
           class="telephony"
           icon-name="handset-filled"
           size="32"
@@ -568,6 +573,7 @@ exports[`TaskListComponent Actions should call onTaskSelect when task is clicked
         data-position="start"
       >
         <mdc-avatar
+          aria-hidden="true"
           class="telephony"
           icon-name="handset-filled"
           size="32"
@@ -646,6 +652,7 @@ exports[`TaskListComponent Actions should handle task selection between multiple
         data-position="start"
       >
         <mdc-avatar
+          aria-hidden="true"
           class="telephony"
           icon-name="handset-filled"
           size="32"
@@ -753,6 +760,7 @@ exports[`TaskListComponent Actions should handle task selection between multiple
         data-position="start"
       >
         <mdc-avatar
+          aria-hidden="true"
           class="chat"
           icon-name="chat-filled"
           size="32"
@@ -765,7 +773,6 @@ exports[`TaskListComponent Actions should handle task selection between multiple
           class="task-details"
         >
           <mdc-text
-            aria-describedby="tooltip-unselected-chat-task"
             class="md-text-wrapper task-digital-title"
             data-testid="task:title"
             id="tooltip-trigger-unselected-chat-task"
@@ -775,18 +782,22 @@ exports[`TaskListComponent Actions should handle task selection between multiple
             Unselected Chat Customer
           </mdc-text>
           <mdc-tooltip
-            append-to=""
+            boundary="clippingAncestors"
+            boundary-root="viewport"
             class="task-tooltip"
             color="contrast"
             delay="0,0"
             disable-aria-expanded=""
-            flip=""
             hide-on-blur=""
             hide-on-escape=""
             id="tooltip-unselected-chat-task"
+            is-backdrop-invisible=""
             offset="4"
             placement="top-start"
             role="tooltip"
+            should-focus-trap-wrap=""
+            stack-group-name=""
+            strategy="absolute"
             style="z-index: 1000;"
             tooltip-type="description"
             trigger="mouseenter focusin"
@@ -854,6 +865,7 @@ exports[`TaskListComponent Actions should handle task selection between multiple
         data-position="start"
       >
         <mdc-avatar
+          aria-hidden="true"
           class="telephony"
           icon-name="handset-filled"
           size="32"
@@ -961,6 +973,7 @@ exports[`TaskListComponent Actions should handle task selection between multiple
         data-position="start"
       >
         <mdc-avatar
+          aria-hidden="true"
           class="chat"
           icon-name="chat-filled"
           size="32"
@@ -973,7 +986,6 @@ exports[`TaskListComponent Actions should handle task selection between multiple
           class="task-details"
         >
           <mdc-text
-            aria-describedby="tooltip-unselected-chat-task"
             class="md-text-wrapper task-digital-title"
             data-testid="task:title"
             id="tooltip-trigger-unselected-chat-task"
@@ -983,18 +995,22 @@ exports[`TaskListComponent Actions should handle task selection between multiple
             Unselected Chat Customer
           </mdc-text>
           <mdc-tooltip
-            append-to=""
+            boundary="clippingAncestors"
+            boundary-root="viewport"
             class="task-tooltip"
             color="contrast"
             delay="0,0"
             disable-aria-expanded=""
-            flip=""
             hide-on-blur=""
             hide-on-escape=""
             id="tooltip-unselected-chat-task"
+            is-backdrop-invisible=""
             offset="4"
             placement="top-start"
             role="tooltip"
+            should-focus-trap-wrap=""
+            stack-group-name=""
+            strategy="absolute"
             style="z-index: 1000;"
             tooltip-type="description"
             trigger="mouseenter focusin"
@@ -1068,6 +1084,7 @@ exports[`TaskListComponent Rendering with Tasks should render digital incoming t
         data-position="start"
       >
         <mdc-avatar
+          aria-hidden="true"
           class="chat"
           icon-name="chat-filled"
           size="32"
@@ -1080,7 +1097,6 @@ exports[`TaskListComponent Rendering with Tasks should render digital incoming t
           class="task-details"
         >
           <mdc-text
-            aria-describedby="tooltip-incoming-chat-task"
             class="md-text-wrapper incoming-digital-task-title"
             data-testid="task:title"
             id="tooltip-trigger-incoming-chat-task"
@@ -1090,18 +1106,22 @@ exports[`TaskListComponent Rendering with Tasks should render digital incoming t
             Chat Customer
           </mdc-text>
           <mdc-tooltip
-            append-to=""
+            boundary="clippingAncestors"
+            boundary-root="viewport"
             class="task-tooltip"
             color="contrast"
             delay="0,0"
             disable-aria-expanded=""
-            flip=""
             hide-on-blur=""
             hide-on-escape=""
             id="tooltip-incoming-chat-task"
+            is-backdrop-invisible=""
             offset="4"
             placement="top-start"
             role="tooltip"
+            should-focus-trap-wrap=""
+            stack-group-name=""
+            strategy="absolute"
             style="z-index: 1000;"
             tooltip-type="description"
             trigger="mouseenter focusin"
@@ -1189,6 +1209,7 @@ exports[`TaskListComponent Rendering with Tasks should render multiple tasks wit
         data-position="start"
       >
         <mdc-avatar
+          aria-hidden="true"
           class="telephony"
           icon-name="handset-filled"
           size="32"
@@ -1257,6 +1278,7 @@ exports[`TaskListComponent Rendering with Tasks should render multiple tasks wit
         data-position="start"
       >
         <mdc-avatar
+          aria-hidden="true"
           class="chat"
           icon-name="chat-filled"
           size="32"
@@ -1269,7 +1291,6 @@ exports[`TaskListComponent Rendering with Tasks should render multiple tasks wit
           class="task-details"
         >
           <mdc-text
-            aria-describedby="tooltip-chat-task"
             class="md-text-wrapper task-digital-title"
             data-testid="task:title"
             id="tooltip-trigger-chat-task"
@@ -1279,18 +1300,22 @@ exports[`TaskListComponent Rendering with Tasks should render multiple tasks wit
             Chat Customer
           </mdc-text>
           <mdc-tooltip
-            append-to=""
+            boundary="clippingAncestors"
+            boundary-root="viewport"
             class="task-tooltip"
             color="contrast"
             delay="0,0"
             disable-aria-expanded=""
-            flip=""
             hide-on-blur=""
             hide-on-escape=""
             id="tooltip-chat-task"
+            is-backdrop-invisible=""
             offset="4"
             placement="top-start"
             role="tooltip"
+            should-focus-trap-wrap=""
+            stack-group-name=""
+            strategy="absolute"
             style="z-index: 1000;"
             tooltip-type="description"
             trigger="mouseenter focusin"
@@ -1363,7 +1388,6 @@ exports[`TaskListComponent Rendering with Tasks should render multiple tasks wit
           class="task-details"
         >
           <mdc-text
-            aria-describedby="tooltip-social-task"
             class="md-text-wrapper task-digital-title"
             data-testid="task:title"
             id="tooltip-trigger-social-task"
@@ -1373,18 +1397,22 @@ exports[`TaskListComponent Rendering with Tasks should render multiple tasks wit
             Facebook Customer
           </mdc-text>
           <mdc-tooltip
-            append-to=""
+            boundary="clippingAncestors"
+            boundary-root="viewport"
             class="task-tooltip"
             color="contrast"
             delay="0,0"
             disable-aria-expanded=""
-            flip=""
             hide-on-blur=""
             hide-on-escape=""
             id="tooltip-social-task"
+            is-backdrop-invisible=""
             offset="4"
             placement="top-start"
             role="tooltip"
+            should-focus-trap-wrap=""
+            stack-group-name=""
+            strategy="absolute"
             style="z-index: 1000;"
             tooltip-type="description"
             trigger="mouseenter focusin"
@@ -1452,6 +1480,7 @@ exports[`TaskListComponent Rendering with Tasks should render telephony incoming
         data-position="start"
       >
         <mdc-avatar
+          aria-hidden="true"
           class="telephony"
           icon-name="handset-filled"
           size="32"
@@ -1569,6 +1598,7 @@ exports[`TaskListComponent Rendering with Tasks should render telephony incoming
         data-position="start"
       >
         <mdc-avatar
+          aria-hidden="true"
           class="telephony"
           icon-name="handset-filled"
           size="32"
@@ -1667,6 +1697,7 @@ exports[`TaskListComponent Rendering with Tasks should show selected state with 
         data-position="start"
       >
         <mdc-avatar
+          aria-hidden="true"
           class="telephony"
           icon-name="handset-filled"
           size="32"

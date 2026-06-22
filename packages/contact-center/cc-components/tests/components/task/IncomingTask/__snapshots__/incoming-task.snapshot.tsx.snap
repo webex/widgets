@@ -18,6 +18,7 @@ exports[`IncomingTaskComponent Actions should call acceptTask when accept button
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="telephony"
         icon-name="handset-filled"
         size="32"
@@ -130,6 +131,7 @@ exports[`IncomingTaskComponent Actions should call acceptTask when accept button
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="telephony"
         icon-name="handset-filled"
         size="32"
@@ -242,6 +244,7 @@ exports[`IncomingTaskComponent Actions should call declineTask when decline butt
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="telephony"
         icon-name="handset-filled"
         size="32"
@@ -354,6 +357,7 @@ exports[`IncomingTaskComponent Actions should call declineTask when decline butt
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="telephony"
         icon-name="handset-filled"
         size="32"
@@ -470,6 +474,7 @@ exports[`IncomingTaskComponent Rendering with Incoming Tasks should render digit
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="chat"
         icon-name="chat-filled"
         size="32"
@@ -482,7 +487,6 @@ exports[`IncomingTaskComponent Rendering with Incoming Tasks should render digit
         class="task-details"
       >
         <mdc-text
-          aria-describedby="tooltip-incoming-chat-task"
           class="md-text-wrapper incoming-digital-task-title"
           data-testid="task:title"
           id="tooltip-trigger-incoming-chat-task"
@@ -492,18 +496,22 @@ exports[`IncomingTaskComponent Rendering with Incoming Tasks should render digit
           Chat Customer
         </mdc-text>
         <mdc-tooltip
-          append-to=""
+          boundary="clippingAncestors"
+          boundary-root="viewport"
           class="task-tooltip"
           color="contrast"
           delay="0,0"
           disable-aria-expanded=""
-          flip=""
           hide-on-blur=""
           hide-on-escape=""
           id="tooltip-incoming-chat-task"
+          is-backdrop-invisible=""
           offset="4"
           placement="top-start"
           role="tooltip"
+          should-focus-trap-wrap=""
+          stack-group-name=""
+          strategy="absolute"
           style="z-index: 1000;"
           tooltip-type="description"
           trigger="mouseenter focusin"
@@ -586,6 +594,7 @@ exports[`IncomingTaskComponent Rendering with Incoming Tasks should render multi
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="telephony"
         icon-name="handset-filled"
         size="32"
@@ -698,6 +707,7 @@ exports[`IncomingTaskComponent Rendering with Incoming Tasks should render multi
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="telephony"
         icon-name="handset-filled"
         size="32"
@@ -791,6 +801,7 @@ exports[`IncomingTaskComponent Rendering with Incoming Tasks should render multi
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="chat"
         icon-name="chat-filled"
         size="32"
@@ -803,7 +814,6 @@ exports[`IncomingTaskComponent Rendering with Incoming Tasks should render multi
         class="task-details"
       >
         <mdc-text
-          aria-describedby="tooltip-chat-task"
           class="md-text-wrapper incoming-digital-task-title"
           data-testid="task:title"
           id="tooltip-trigger-chat-task"
@@ -813,18 +823,22 @@ exports[`IncomingTaskComponent Rendering with Incoming Tasks should render multi
           Chat Customer
         </mdc-text>
         <mdc-tooltip
-          append-to=""
+          boundary="clippingAncestors"
+          boundary-root="viewport"
           class="task-tooltip"
           color="contrast"
           delay="0,0"
           disable-aria-expanded=""
-          flip=""
           hide-on-blur=""
           hide-on-escape=""
           id="tooltip-chat-task"
+          is-backdrop-invisible=""
           offset="4"
           placement="top-start"
           role="tooltip"
+          should-focus-trap-wrap=""
+          stack-group-name=""
+          strategy="absolute"
           style="z-index: 1000;"
           tooltip-type="description"
           trigger="mouseenter focusin"
@@ -922,7 +936,6 @@ exports[`IncomingTaskComponent Rendering with Incoming Tasks should render multi
         class="task-details"
       >
         <mdc-text
-          aria-describedby="tooltip-social-task"
           class="md-text-wrapper incoming-digital-task-title"
           data-testid="task:title"
           id="tooltip-trigger-social-task"
@@ -932,18 +945,22 @@ exports[`IncomingTaskComponent Rendering with Incoming Tasks should render multi
           Social Customer
         </mdc-text>
         <mdc-tooltip
-          append-to=""
+          boundary="clippingAncestors"
+          boundary-root="viewport"
           class="task-tooltip"
           color="contrast"
           delay="0,0"
           disable-aria-expanded=""
-          flip=""
           hide-on-blur=""
           hide-on-escape=""
           id="tooltip-social-task"
+          is-backdrop-invisible=""
           offset="4"
           placement="top-start"
           role="tooltip"
+          should-focus-trap-wrap=""
+          stack-group-name=""
+          strategy="absolute"
           style="z-index: 1000;"
           tooltip-type="description"
           trigger="mouseenter focusin"
@@ -1026,6 +1043,7 @@ exports[`IncomingTaskComponent Rendering with Incoming Tasks should render telep
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="telephony"
         icon-name="handset-filled"
         size="32"
@@ -1138,6 +1156,7 @@ exports[`IncomingTaskComponent Rendering with Incoming Tasks should render telep
       data-position="start"
     >
       <mdc-avatar
+        aria-hidden="true"
         class="telephony"
         icon-name="handset-filled"
         size="32"

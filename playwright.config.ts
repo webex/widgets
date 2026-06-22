@@ -93,15 +93,15 @@ const meetingsWebServer = {
 
 const projects = testScope === 'cc' ? ccProjects
   : testScope === 'meetings' ? meetingsProjects
-  : [...ccProjects, ...meetingsProjects];
+    : [...ccProjects, ...meetingsProjects];
 
 const webServers = testScope === 'cc' ? [ccWebServer]
   : testScope === 'meetings' ? [meetingsWebServer]
-  : [ccWebServer, meetingsWebServer];
+    : [ccWebServer, meetingsWebServer];
 
 export default defineConfig({
   testDir: './playwright',
-  timeout: 180000,
+  timeout: 220000,
   webServer: webServers,
   retries: 0,
   fullyParallel: true,

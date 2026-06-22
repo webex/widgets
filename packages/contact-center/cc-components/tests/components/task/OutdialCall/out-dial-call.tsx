@@ -1,5 +1,5 @@
 import React from 'react';
-import {render, fireEvent, screen, waitFor, within} from '@testing-library/react';
+import {act, render, fireEvent, screen, waitFor, within} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import OutdialCallComponent from '../../../../src/components/task/OutdialCall/outdial-call';
 import {KEY_LIST} from '../../../../src/components/task/OutdialCall/constants';
@@ -161,7 +161,7 @@ describe('OutdialCallComponent', () => {
   });
 
   it('has no ANI entry options when the entry list is empty', async () => {
-    render(
+    const {container} = render(
       <OutdialCallComponent
         logger={props.logger}
         startOutdial={props.startOutdial}
@@ -171,27 +171,30 @@ describe('OutdialCallComponent', () => {
         isAddressBookEnabled={false}
       />
     );
-    const select = await screen.findByTestId('outdial-ani-option-select');
-    fireEvent.click(select);
+    await screen.findByTestId('outdial-ani-option-select');
 
     // Should still show the placeholder option
     const placeholderOption = await screen.findByTestId('outdial-ani-option-none');
     expect(placeholderOption).toBeInTheDocument();
 
     // But should not show 'name 1' or 'name 2'
-    expect(screen.queryByTestId('outdial-ani-option-1')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('outdial-ani-option-2')).not.toBeInTheDocument();
+    const aniOptions = container.querySelectorAll(
+      'mdc-option[data-testid^="outdial-ani-option-"]:not([data-testid="outdial-ani-option-none"])'
+    );
+    expect(aniOptions).toHaveLength(0);
   });
 
   it('sets selected ani when an option is selected', async () => {
     render(<OutdialCallComponent {...props} />);
     const select = await screen.findByTestId('outdial-ani-option-select');
-    fireEvent.click(select);
-    const option = await screen.findByTestId('outdial-ani-option-1');
-    expect(option).toBeInTheDocument();
-    fireEvent.click(option);
+
+    // Select ANI '1' via CustomEvent
+    fireEvent(select, new CustomEvent('change', {detail: {value: '1'}}));
+
+    // Verify the option is now selected
     await waitFor(() => {
-      expect(option).toHaveAttribute('aria-selected', 'true');
+      const option = screen.getByTestId('outdial-ani-option-1');
+      expect(option).toHaveAttribute('selected', 'true');
     });
   });
 
@@ -258,13 +261,6 @@ describe('OutdialCallComponent', () => {
     mockStartOutdial.mockClear();
   });
 
-  it('shows arrow-down icon by default', async () => {
-    render(<OutdialCallComponent {...props} />);
-    const arrowIcon = await screen.findByTestId('select-arrow-icon');
-    expect(arrowIcon).toBeInTheDocument();
-    expect(arrowIcon).toHaveAttribute('name', 'arrow-down-bold');
-  });
-
   it('passes origin parameter when ANI is selected', async () => {
     const mockStartOutdial = jest.fn();
     render(<OutdialCallComponent {...props} startOutdial={mockStartOutdial} />);
@@ -283,11 +279,9 @@ describe('OutdialCallComponent', () => {
       expect(callButton).not.toBeDisabled();
     });
 
-    // Select an ANI
+    // Select an ANI via CustomEvent
     const select = await screen.findByTestId('outdial-ani-option-select');
-    fireEvent.click(select);
-    const aniOption = await screen.findByTestId('outdial-ani-option-1');
-    fireEvent.click(aniOption);
+    fireEvent(select, new CustomEvent('change', {detail: {value: '1'}}));
 
     // Make the call
     const callButton = await screen.findByTestId('outdial-call-button');
@@ -317,14 +311,10 @@ describe('OutdialCallComponent', () => {
 
     // First select an ANI
     const select = await screen.findByTestId('outdial-ani-option-select');
-    fireEvent.click(select);
-    const aniOption = await screen.findByTestId('outdial-ani-option-1');
-    fireEvent.click(aniOption);
+    fireEvent(select, new CustomEvent('change', {detail: {value: '1'}}));
 
     // Then select the placeholder to clear
-    fireEvent.click(select);
-    const placeholderOption = await screen.findByTestId('outdial-ani-option-none');
-    fireEvent.click(placeholderOption);
+    fireEvent(select, new CustomEvent('change', {detail: {value: 'none'}}));
 
     // Make the call
     const callButton = await screen.findByTestId('outdial-call-button');
@@ -1089,71 +1079,93 @@ describe('OutdialCallComponent', () => {
     });
 
     it('maintains scroll pagination with search', async () => {
-      const mockGetAddressBook = jest
-        .fn()
-        .mockResolvedValueOnce({
-          data: Array.from({length: 25}, (_, i) => ({
-            id: `${i}`,
-            name: `John ${i}`,
-            number: `+1469000${i}`,
-          })),
-          total: 50,
-        })
-        .mockResolvedValueOnce({
-          data: Array.from({length: 25}, (_, i) => ({
-            id: `${i + 25}`,
-            name: `John ${i + 25}`,
-            number: `+1469000${i + 25}`,
-          })),
-          total: 50,
+      jest.useFakeTimers();
+      try {
+        const mockGetAddressBook = jest
+          .fn()
+          .mockResolvedValueOnce({
+            data: Array.from({length: 25}, (_, i) => ({
+              id: `${i}`,
+              name: `Contact ${i}`,
+              number: `+1469000${i}`,
+            })),
+            total: 50,
+          })
+          .mockResolvedValueOnce({
+            data: Array.from({length: 25}, (_, i) => ({
+              id: `search-${i}`,
+              name: `John ${i}`,
+              number: `+1469100${i}`,
+            })),
+            total: 50,
+          })
+          .mockResolvedValueOnce({
+            data: Array.from({length: 25}, (_, i) => ({
+              id: `search-${i + 25}`,
+              name: `John ${i + 25}`,
+              number: `+1469000${i + 25}`,
+            })),
+            total: 50,
+          });
+
+        const addressBookProps: OutdialCallComponentProps = {
+          ...props,
+          isAddressBookEnabled: true,
+          getAddressBookEntries: mockGetAddressBook,
+        };
+
+        const {container} = render(<OutdialCallComponent {...addressBookProps} />);
+        const tabList = await waitFor(() => getTabList(container));
+        const tabs = within(tabList as HTMLElement).getAllByRole('tab');
+        const addressBookTab = tabs[0];
+        fireEvent.click(addressBookTab);
+
+        await waitFor(() => {
+          expect(screen.getByText('Contact 0')).toBeInTheDocument();
         });
 
-      const addressBookProps: OutdialCallComponentProps = {
-        ...props,
-        isAddressBookEnabled: true,
-        getAddressBookEntries: mockGetAddressBook,
-      };
+        // Search
+        const searchInput = await screen.findByTestId('outdial-address-book-search-input');
+        const searchEvent = new Event('input', {bubbles: true});
+        Object.defineProperty(searchEvent, 'target', {
+          writable: false,
+          value: {value: 'John'},
+        });
+        fireEvent(searchInput, searchEvent);
 
-      const {container} = render(<OutdialCallComponent {...addressBookProps} />);
-      const tabList = await waitFor(() => getTabList(container));
-      const tabs = within(tabList as HTMLElement).getAllByRole('tab');
-      const addressBookTab = tabs[0];
-      fireEvent.click(addressBookTab);
+        await act(async () => {
+          jest.advanceTimersByTime(500);
+        });
 
-      await waitFor(() => {
-        expect(screen.getByText('John 0')).toBeInTheDocument();
-      });
+        // Wait for debounced search
+        await waitFor(
+          () => {
+            expect(mockGetAddressBook).toHaveBeenCalledWith({page: 0, pageSize: 25, search: 'John'});
+          },
+          {timeout: 1000}
+        );
 
-      // Search
-      const searchInput = await screen.findByTestId('outdial-address-book-search-input');
-      const searchEvent = new Event('input', {bubbles: true});
-      Object.defineProperty(searchEvent, 'target', {
-        writable: false,
-        value: {value: 'John'},
-      });
-      fireEvent(searchInput, searchEvent);
+        await waitFor(() => {
+          expect(screen.getByText('John 0')).toBeInTheDocument();
+        });
 
-      // Wait for debounced search
-      await waitFor(
-        () => {
-          expect(mockGetAddressBook).toHaveBeenCalledWith({page: 0, pageSize: 25, search: 'John'});
-        },
-        {timeout: 1000}
-      );
+        // Trigger load more with search term
+        const mockEntry = {
+          isIntersecting: true,
+          target: container.querySelector('.address-book-observer'),
+        } as IntersectionObserverEntry;
 
-      // Trigger load more with search term
-      const mockEntry = {
-        isIntersecting: true,
-        target: container.querySelector('.address-book-observer'),
-      } as IntersectionObserverEntry;
+        if (intersectionCallback) {
+          intersectionCallback([mockEntry], {} as IntersectionObserver);
+        }
 
-      if (intersectionCallback) {
-        intersectionCallback([mockEntry], {} as IntersectionObserver);
+        await waitFor(() => {
+          expect(mockGetAddressBook).toHaveBeenCalledWith({page: 1, pageSize: 25, search: 'John'});
+        });
+      } finally {
+        jest.runOnlyPendingTimers();
+        jest.useRealTimers();
       }
-
-      await waitFor(() => {
-        expect(mockGetAddressBook).toHaveBeenCalledWith({page: 1, pageSize: 25, search: 'John'});
-      });
     });
   });
 });

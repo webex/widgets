@@ -92,4 +92,58 @@ describe('DigitalChannelsComponent', () => {
     expect(engageWidget).toHaveAttribute('data-conversation-id', 'test-conv-123');
     expect(engageWidget).toHaveAttribute('data-visual-rebrand', 'true');
   });
+
+  it('should render dark theme when currentTheme is lowercase "dark"', () => {
+    const {container, getByTestId} = render(
+      <DigitalChannelsComponent
+        conversationId="conversation-id"
+        jwtToken="jwt-token"
+        dataCenter="produs1"
+        currentTheme="dark"
+      />
+    );
+
+    const mdTheme = container.querySelector('md-theme#app-theme');
+    expect(mdTheme).toBeInTheDocument();
+    expect(mdTheme).toHaveAttribute('darktheme');
+
+    const engageWidget = getByTestId('engage-widget');
+    expect(engageWidget).toHaveAttribute('data-theme', 'dark');
+  });
+
+  it('should render dark theme when currentTheme is mixed-case "Dark"', () => {
+    const {container, getByTestId} = render(
+      <DigitalChannelsComponent
+        conversationId="conversation-id"
+        jwtToken="jwt-token"
+        dataCenter="produs1"
+        currentTheme="Dark"
+      />
+    );
+
+    const mdTheme = container.querySelector('md-theme#app-theme');
+    expect(mdTheme).toBeInTheDocument();
+    expect(mdTheme).toHaveAttribute('darktheme');
+
+    const engageWidget = getByTestId('engage-widget');
+    expect(engageWidget).toHaveAttribute('data-theme', 'dark');
+  });
+
+  it('should render light theme when currentTheme is lowercase "light"', () => {
+    const {container, getByTestId} = render(
+      <DigitalChannelsComponent
+        conversationId="conversation-id"
+        jwtToken="jwt-token"
+        dataCenter="produs1"
+        currentTheme="light"
+      />
+    );
+
+    const mdTheme = container.querySelector('md-theme#app-theme');
+    expect(mdTheme).toBeInTheDocument();
+    expect(mdTheme).toHaveAttribute('lighttheme');
+
+    const engageWidget = getByTestId('engage-widget');
+    expect(engageWidget).toHaveAttribute('data-theme', 'light');
+  });
 });

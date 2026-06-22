@@ -22,6 +22,10 @@
   }
 }
 
+.cad-global-variables {
+  margin-top: 0.5rem;
+}
+
 /* On-hold chip styling */
 .on-hold {
   display: flex;
@@ -43,7 +47,6 @@
     color: var(--mds-color-theme-avatar-yellow);
   }
 }
-
 
 .recording-indicator {
   position: absolute;
@@ -143,8 +146,6 @@
   transform: rotate(180deg);
 }
 
-
-
 .call-status {
   display: flex;
   align-items: center;
@@ -177,6 +178,11 @@
   .media-icon.chat {
     color: var(--mds-color-theme-indicator-secure);
   }
+
+  .campaign-call-avatar {
+    --mdc-avatar-default-background-color: var(--mds-color-theme-avatar-campaign);
+    --mdc-avatar-default-foreground-color: var(--mds-color-theme-indicator-stable);
+  }
 }
 .call-control-task-tooltip::part(popover-content) {
   white-space: normal;
@@ -200,11 +206,11 @@
 }
 
 .digital-customer-name {
-   width: auto;
+  width: auto;
 }
 
 .digital-phone-number {
-   width: auto;
+  width: auto;
 }
 
 @media (min-width: 64.0625rem) and (max-width: 75rem) {
@@ -230,8 +236,8 @@
     max-width: 15rem;
   }
   .call-control-task-tooltip {
-   width: 50%;
-   text-align: center;
+    width: 50%;
+    text-align: center;
   }
 }
 
@@ -246,8 +252,8 @@
     max-width: 13rem;
   }
   .call-control-task-tooltip {
-   width: 50%;
-   text-align: center;
+    width: 50%;
+    text-align: center;
   }
 }
 
@@ -262,12 +268,12 @@
     max-width: 12rem;
   }
   .call-control-task-tooltip {
-   width: 50%;
-   text-align: center;
+    width: 50%;
+    text-align: center;
   }
 }
 
-@media (min-width: 15.625rem) and (max-width: 20rem){
+@media (min-width: 15.625rem) and (max-width: 20rem) {
   .call-control-task-tooltip {
     width: 50%;
     text-align: center;
@@ -275,14 +281,14 @@
 }
 
 .participants-popover {
-  background: var(--mds-color-theme-background-solid-primary-normal, #FFFFFF) !important;
+  background: var(--mds-color-theme-background-solid-primary-normal, #ffffff) !important;
   align-items: normal;
   width: 100%;
   padding: 0 !important;
   border: var(--mds-color-theme-outline-secondary-normal);
 
   &::part(popover-content) {
-    background: var(--mds-color-theme-background-solid-primary-normal, #FFFFFF);
+    background: var(--mds-color-theme-background-solid-primary-normal, #ffffff);
     border-radius: 0.75rem;
     border: 1px solid var(--mds-color-theme-outline-secondary-normal);
     box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.08);
@@ -307,7 +313,7 @@
     padding: 0.4rem 0.6rem;
     font-size: 0.875rem;
     cursor: pointer;
-    color: var(--mds-color-theme-text-primary-normal, #000000F2);
+    color: var(--mds-color-theme-text-primary-normal, #000000f2);
     border-radius: 0.5rem;
     min-width: 0;
     max-width: 100%;

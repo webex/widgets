@@ -1,0 +1,103 @@
+.global-variables-panel {
+  background: var(--mds-color-theme-background-glass-overlay-normal);
+  border-radius: 0.5rem;
+  overflow-y: auto;
+  max-height: 7.5rem;
+  min-height: 0;
+  width: 100%;
+  scrollbar-color: var(--mds-color-theme-scrollbar-button-normal) transparent;
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 0.75rem;
+    margin: 0;
+  }
+
+  // Single-column: horizontal key-value rows (40%/60% split with ellipsis)
+  &__row {
+    display: flex;
+    align-items: baseline;
+    width: 100%;
+    padding-bottom: 0.25rem;
+
+    &:last-child {
+      padding-bottom: 0;
+    }
+
+    dt,
+    dd {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    dt {
+      width: 40%;
+      flex-shrink: 0;
+    }
+
+    dd {
+      width: 60%;
+    }
+  }
+
+  &__label {
+    color: var(--mds-color-theme-text-primary-normal);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__value {
+    color: var(--mds-color-theme-text-secondary-normal);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  // Two-column grid layout used in the popover (matches Figma design)
+  &--two-column {
+    max-height: 20rem;
+    flex-shrink: 1;
+    overflow-y: auto;
+
+    .global-variables-panel__list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem 0.75rem;
+    }
+
+    .global-variables-panel__row {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.125rem;
+      padding-bottom: 0;
+
+      dt,
+      dd {
+        width: 100%;
+        white-space: normal;
+        overflow: visible;
+        text-overflow: unset;
+      }
+    }
+
+    .global-variables-panel__label {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .global-variables-panel__value {
+      white-space: normal;
+      overflow-wrap: break-word;
+      word-break: break-word;
+      overflow: visible;
+      text-overflow: unset;
+    }
+  }
+}

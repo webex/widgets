@@ -4,6 +4,9 @@
   "engines": {
     "node": ">=20.13.1"
   },
+  "installConfig": {
+    "hoistingLimits": "dependencies"
+  },
   "main": "dist/webexWidgets.mjs",
   "module": "dist/webexWidgets.mjs",
   "scripts": {
@@ -17,6 +20,7 @@
     "release:debug": "semantic-release --debug",
     "release:dry-run": "semantic-release --dry-run",
     "start": "yarn run demo:serve",
+    "test:unit": "jest --config jest.config.js --coverage",
     "test:e2e": "yarn run build:src && cd ../../.. && yarn run test:e2e:meetings",
     "test:eslint": "echo 'Broken eslint tests'",
     "test:eslint:broken": "eslint src/"
@@ -52,12 +56,18 @@
     "@babel/plugin-transform-runtime": "^7.16.0",
     "@babel/preset-env": "^7.8.4",
     "@babel/preset-react": "^7.8.3",
+    "@babel/register": "^7.25.9",
     "@commitlint/cli": "^8.3.5",
     "@commitlint/config-conventional": "^8.3.4",
+    "@momentum-ui/core": "19.16.0",
+    "@momentum-ui/icons": "8.28.5",
     "@momentum-ui/react": "^23.21.4",
     "@playwright/test": "1.51.1",
     "@semantic-release/changelog": "^6.0.0",
     "@semantic-release/git": "^10.0.0",
+    "@testing-library/dom": "10.4.0",
+    "@testing-library/jest-dom": "6.6.2",
+    "@testing-library/react": "16.0.1",
     "babel-eslint": "^10.0.3",
     "babel-loader": "^8.0.6",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
@@ -105,7 +115,7 @@
     "prop-types": "^15.7.2",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "webex": "2.60.2"
+    "webex": "2.60.4"
   },
   "babel": {
     "presets": [

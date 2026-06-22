@@ -4,7 +4,7 @@
 
 This is the main orchestrator for AI assistants working on this repository. It routes you to the correct templates and documentation based on the developer's task.
 
-**For every developer request:** (1) Identify task type (A–E below). (2) If the work is in an existing package or widget, load that scope's ai-docs (see [Package and widget ai-docs reference](#package-and-widget-ai-docs-reference)) and follow its AGENTS.md. (3) Open the template for that type and complete its mandatory pre-steps (see [Mandatory pre-steps by task type](#mandatory-pre-steps-by-task-type)). (4) Then follow the rest of this guide and the template.
+**For every developer request:** (1) Identify task type (A–F below). (2) If the work is in an existing package, widget, or test framework scope, load that scope's ai-docs (see [Package and widget ai-docs reference](#package-and-widget-ai-docs-reference)) and follow its AGENTS.md. (3) Open the template for that type and complete its mandatory pre-steps (see [Mandatory pre-steps by task type](#mandatory-pre-steps-by-task-type)). (4) Then follow the rest of this guide and the template.
 
 ---
 
@@ -55,7 +55,13 @@ If the developer's message contains multiple distinct task types (for example, "
 **E. Understanding Architecture**
 - Developer needs to understand how something works
 - **Read:** That scope's `ai-docs/AGENTS.md` (usage) and `ai-docs/ARCHITECTURE.md` (technical details); use [Package and widget ai-docs reference](#package-and-widget-ai-docs-reference) to find the path.
-- **Available for:** station-login, user-state, store, cc-components, cc-widgets, ui-logging, test-fixtures; for task package use per-widget ai-docs (CallControl, IncomingTask, OutdialCall, TaskList).
+- **Available for:** station-login, user-state, store, cc-components, cc-widgets, ui-logging, test-fixtures, playwright; for task package use per-widget ai-docs (CallControl, IncomingTask, OutdialCall, TaskList).
+
+**F. Playwright E2E Test Work**
+- Developer wants to add/update/stabilize Playwright tests, suites, sets, or test framework docs
+- **Route to:** [templates/playwright/00-master.md](./ai-docs/templates/playwright/00-master.md)
+- **Follow:** Playwright template workflow (pre-questions → implementation → validation)
+- **⚠️ MANDATORY FIRST STEP:** Complete pre-questions in [templates/playwright/01-pre-questions.md](./ai-docs/templates/playwright/01-pre-questions.md)
 
 ---
 
@@ -169,6 +175,7 @@ Before generating or changing any code, you MUST complete the **pre-step section
 | **C. Add Feature** | [existing-widget/feature-enhancement.md](./ai-docs/templates/existing-widget/feature-enhancement.md) | [Pre-Enhancement Questions](./ai-docs/templates/existing-widget/feature-enhancement.md) (feature info, requirements, compatibility, design input) |
 | **D. Documentation only** | documentation templates | Optional: confirm scope with developer (no code change) |
 | **E. Understanding** | Package ai-docs | None (read-only) |
+| **F. Playwright E2E Test Work** | [playwright/00-master.md](./ai-docs/templates/playwright/00-master.md) | [Pre-Questions](./ai-docs/templates/playwright/01-pre-questions.md) (scope, scenarios, setup/utilities, stability expectations) |
 
 ---
 
@@ -202,6 +209,7 @@ Before generating or changing any code, you MUST complete the **pre-step section
 | **cc-widgets** | [packages/contact-center/cc-widgets/ai-docs/AGENTS.md](packages/contact-center/cc-widgets/ai-docs/AGENTS.md) | Same folder |
 | **ui-logging** | [packages/contact-center/ui-logging/ai-docs/AGENTS.md](packages/contact-center/ui-logging/ai-docs/AGENTS.md) | Same folder |
 | **samples-cc-react-app** | [widgets-samples/cc/samples-cc-react-app/ai-docs/AGENTS.md](widgets-samples/cc/samples-cc-react-app/ai-docs/AGENTS.md) | Same folder if present |
+| **playwright framework** | [playwright/ai-docs/AGENTS.md](playwright/ai-docs/AGENTS.md) | [playwright/ai-docs/ARCHITECTURE.md](playwright/ai-docs/ARCHITECTURE.md) |
 
 **Task package note:** The task package has multiple widgets (CallControl, IncomingTask, OutdialCall, TaskList). When working on one of them, use that widget's ai-docs path above, not a generic task path.
 
@@ -211,6 +219,11 @@ Before generating or changing any code, you MUST complete the **pre-step section
 - Scan: [contact-centre-sdk-apis/contact-center.json](./contact-centre-sdk-apis/contact-center.json)
 - Find available methods, events, types
 - Check method signatures before using
+
+**If working on Playwright tests/framework:**
+- Read: `playwright/ai-docs/AGENTS.md`
+- Read: `playwright/ai-docs/ARCHITECTURE.md`
+- Use: `ai-docs/templates/playwright/00-master.md` and complete `01-pre-questions.md` before implementation
 
 ---
 
@@ -479,6 +492,11 @@ yarn build
 **If architecture changed:**
 - Update: Relevant architecture documentation as needed
 
+**If Playwright E2E framework/docs changed:**
+- Update: `playwright/ai-docs/AGENTS.md`
+- Update: `playwright/ai-docs/ARCHITECTURE.md`
+- Update relevant modules in: `ai-docs/templates/playwright/`
+
 ---
 
 ## Step 7: Validation & Review
@@ -514,6 +532,7 @@ yarn build
 ```
 ccWidgets/
 ├── packages/contact-center/
+│   ├── ai-docs/migration/      # Task refactor migration docs (old → new)
 │   ├── station-login/          # Widget with ai-docs/
 │   ├── user-state/             # Widget with ai-docs/
 │   ├── task/                   # Widget package
@@ -595,6 +614,7 @@ ccWidgets/
 
 - **Repository Rules:** [RULES.md](./RULES.md)
 - **Templates Overview:** [templates/README.md](./ai-docs/templates/README.md)
+- **Task Refactor Migration (Contact Center):** [packages/contact-center/ai-docs/migration/migration-overview.md](./packages/contact-center/ai-docs/migration/migration-overview.md) — overview and entry point for CC SDK task-refactor migration docs
 
 ---
 

@@ -13,8 +13,32 @@ import {
   AddressBookEntrySearchParams,
   AddressBookEntriesResponse,
 } from '@webex/cc-store';
+import {CampaignErrorType} from './CampaignErrorDialog/campaign-error-dialog.types';
 
 type Enum<T extends Record<string, unknown>> = T[keyof T];
+
+/**
+ * Represents a single Call Associated Data (CAD) variable on an interaction.
+ * Global variables have `global: true` and are set by flow control.
+ */
+export interface CADVariable {
+  name: string;
+  displayName: string;
+  value: string;
+  type: string;
+  agentEditable: boolean;
+  agentViewable: boolean;
+  global: boolean;
+  isSecure: boolean;
+  secureKeyId: string;
+  secureKeyVersion: number;
+}
+
+/**
+ * Record of CAD variables keyed by variable name.
+ * This is the shape of `callAssociatedData` on the interaction at runtime.
+ */
+export type CallAssociatedDataMap = Record<string, CADVariable>;
 
 /**
  * Target types for consult/transfer operations
@@ -142,6 +166,21 @@ export interface TaskProps {
    * Flag to enable decline button on incoming task component
    */
   isDeclineButtonEnabled?: boolean;
+
+  /**
+   * Flag to enable campaign preview task rendering.
+   * When true and the task is a campaign preview interaction,
+   * the CampaignTask component is rendered instead of the normal Task.
+   * Defaults to true.
+   */
+  hasCampaignPreviewEnabled?: boolean;
+
+  /**
+   * Set of interaction IDs for campaign previews that have been accepted.
+   * Managed by the store — survives component remounts caused by
+   * transient task-list updates during the accept transition.
+   */
+  acceptedCampaignIds?: Set<string>;
 }
 
 export type IncomingTaskComponentProps = Pick<TaskProps, 'isBrowser' | 'accept' | 'reject' | 'logger'> &
@@ -149,9 +188,26 @@ export type IncomingTaskComponentProps = Pick<TaskProps, 'isBrowser' | 'accept' 
 
 export type TaskListComponentProps = Pick<
   TaskProps,
-  'isBrowser' | 'acceptTask' | 'declineTask' | 'onTaskSelect' | 'logger' | 'agentId'
+  'isBrowser' | 'acceptTask' | 'declineTask' | 'onTaskSelect' | 'logger' | 'agentId' | 'cc'
 > &
-  Partial<Pick<TaskProps, 'currentTask' | 'taskList'>>;
+  Partial<Pick<TaskProps, 'currentTask' | 'taskList' | 'hasCampaignPreviewEnabled' | 'acceptedCampaignIds'>>;
+
+export interface RealTimeTranscriptEntry {
+  id: string;
+  speaker: string;
+  message: string;
+  timestamp: number;
+  displayTime?: string;
+  event?: string;
+  isCustomer?: boolean;
+  avatarUrl?: string;
+  initials?: string;
+}
+
+export interface RealTimeTranscriptComponentProps {
+  liveTranscriptEntries?: RealTimeTranscriptEntry[];
+  className?: string;
+}
 
 /**
  * Interface representing the properties for control actions on a task.
@@ -518,7 +574,14 @@ export type CallControlComponentProps = Pick<
   | 'getEntryPoints'
   | 'getQueuesFetcher'
   | 'consultTransferOptions'
->;
+> & {
+  /**
+   * Whether the current task is an accepted campaign preview call.
+   * When `true`, the header renders the campaign icon and
+   * "Campaign call" label instead of the standard media type.
+   */
+  isCampaignCall?: boolean;
+};
 
 export type OutdialAniEntry = {
   /** Unique identifier for the ANI entry */
@@ -771,6 +834,19 @@ export interface TaskListItemData {
   displayState: string;
 }
 
+export enum OUTBOUND_TYPE {
+  OUTDIAL = 'OUTDIAL',
+  CALLBACK = 'CALLBACK',
+}
+
+/**
+ * Returns the appropriate caller identifier based on outbound type.
+ * For outdial calls, the customer's number is in `dn`; for all others it's in `ani`.
+ */
+export const getCallerIdentifier = (ani: string, dn: string, outboundType?: string): string => {
+  return outboundType === OUTBOUND_TYPE.OUTDIAL ? dn || ani : ani;
+};
+
 export enum TaskState {
   NEW = 'new',
   ACTIVE = 'active',
@@ -846,4 +922,258 @@ export interface ButtonConfig {
   className: string;
   disabled?: boolean;
   isVisible: boolean;
+}
+
+// ==================== GLOBAL VARIABLES PANEL TYPES ====================
+
+/**
+ * Properties for the GlobalVariablesPanel component.
+ */
+export interface GlobalVariablesPanelProps {
+  /**
+   * List of agent-viewable global variables to display.
+   */
+  variables: CADVariable[];
+
+  /**
+   * Optional CSS class name for additional styling.
+   */
+  className?: string;
+
+  /**
+   * Layout mode for the variables grid.
+   * - `single-column`: one variable per row (used in the inline card)
+   * - `two-column`: two variables per row (used in the popover)
+   * @default 'single-column'
+   */
+  layout?: 'single-column' | 'two-column';
+
+  /**
+   * CSS background value for the panel container.
+   * @default 'var(--mds-color-theme-background-glass-normal)'
+   */
+  panelBackground?: string;
+}
+
+// ==================== CAMPAIGN TYPES ====================
+
+/**
+ * Auto-action to perform when the campaign preview offer times out.
+ * Matches the values from callProcessingDetails.campaignPreviewAutoAction.
+ */
+export type CampaignAutoAction = 'ACCEPT' | 'SKIP' | 'REMOVE';
+
+/**
+ * Maps a CampaignAutoAction to the corresponding CampaignErrorType
+ * used when the auto-action or manual action fails.
+ */
+export const CAMPAIGN_ACTION_ERROR_MAP: Record<CampaignAutoAction, CampaignErrorType> = {
+  ACCEPT: 'ACCEPT_FAILED',
+  SKIP: 'SKIP_FAILED',
+  REMOVE: 'REMOVE_FAILED',
+};
+
+/**
+ * Keys of CAMPAIGN_ACTION_ERROR_MAP — used to type the error handler in CampaignTask.
+ */
+export type CampaignErrorActionType = keyof typeof CAMPAIGN_ACTION_ERROR_MAP;
+
+/**
+ * Campaign-specific fields on `callProcessingDetails`.
+ *
+ * These fields are present at runtime on campaign preview reservation
+ * events but are not yet part of the installed SDK type definitions.
+ * This bridge type can be removed once the SDK package is updated.
+ */
+export interface CampaignCallProcessingDetails {
+  /** Campaign name (not UUID) */
+  campaignId?: string;
+  /** Campaign type (e.g. 'preview_standard', 'preview_direct') */
+  campaignType?: string;
+  /** Indicates if the skip action is disabled for campaign preview contacts */
+  campaignPreviewSkipDisabled?: string;
+  /** Indicates if the remove action is disabled for campaign preview contacts */
+  campaignPreviewRemoveDisabled?: string;
+  /** Auto-action to perform when campaign preview offer times out (ACCEPT, SKIP, REMOVE) */
+  campaignPreviewAutoAction?: string;
+  /** Timestamp (ms) when the campaign preview offer expires */
+  campaignPreviewOfferTimeout?: string;
+}
+
+/**
+ * Properties for the CampaignTask component.
+ *
+ * The component renders campaign preview contact details, action buttons
+ * (Accept / Skip / Remove), a countdown timer, and an error dialog.
+ * When the countdown expires the configured auto-action is triggered.
+ *
+ * Following the pattern used by the Task component, SDK operations are
+ * passed in as callback props rather than passing the cc instance directly.
+ */
+export interface CampaignTaskProps {
+  /**
+   * The campaign preview task (AgentOfferCampaignReservation).
+   * Campaign metadata is read from `task.data.interaction.callProcessingDetails`.
+   */
+  task: ITask;
+
+  /**
+   * Accepts the campaign preview contact and initiates the outbound call.
+   * Wraps `cc.acceptPreviewContact({ interactionId, campaignId })`.
+   */
+  acceptPreviewContact: () => Promise<void>;
+
+  /**
+   * Skips the campaign preview contact and moves to the next one.
+   * Wraps `cc.skipPreviewContact({ interactionId, campaignId })`.
+   */
+  skipPreviewContact: () => Promise<void>;
+
+  /**
+   * Removes the campaign preview contact from the campaign list.
+   * Wraps `cc.removePreviewContact({ interactionId, campaignId })`.
+   */
+  removePreviewContact: () => Promise<void>;
+
+  /**
+   * Cancels the campaign preview call by ending the task.
+   * Wraps `task.end()`.
+   */
+  cancelPreviewContact: () => Promise<void>;
+
+  /**
+   * Whether the agent is logged in with a Browser (WebRTC) device.
+   * When true the Cancel button is rendered so the agent can end the
+   * WebRTC call.  For AGENT_DN the phone handles hangup, so the Cancel
+   * button is hidden — consistent with Agent Desktop behaviour.
+   */
+  isBrowser?: boolean;
+
+  /**
+   * Logger instance for logging purposes.
+   */
+  logger?: ILogger;
+
+  /**
+   * Whether this campaign preview has been accepted.
+   * Driven by the store's `acceptedCampaignIds` set — survives component
+   * remounts caused by transient task-list updates during the accept
+   * transition.  When `true`, action buttons and countdown are hidden
+   * and the handle-time timer is shown instead.
+   */
+  isAccepted?: boolean;
+
+  /**
+   * The logged-in agent's ID.  Used to look up the agent's participant
+   * entry when reading `joinTimestamp` for the handle-time timer.
+   */
+  agentId?: string;
+}
+
+/**
+ * Properties for the CampaignTaskPopover component.
+ *
+ * Displays a hover popover over the campaign preview task with the
+ * ListItem row (avatar, title, phone, countdown, action buttons)
+ * and a two-column scrollable data panel of global variables.
+ */
+export interface CampaignTaskPopoverProps {
+  /** The campaign preview task. */
+  task: ITask;
+
+  /** Logger instance for logging purposes. */
+  logger?: ILogger;
+
+  /** ID of the trigger element that opens the popover on hover. */
+  triggerId: string;
+
+  /** Whether the Accept button has been clicked (shows "Connecting..." state). */
+  isAcceptClicked: boolean;
+
+  /** Whether the campaign preview has been accepted by the backend (call controls visible). */
+  isAccepted: boolean;
+
+  /** Whether the Accept button is disabled. */
+  isAcceptDisabled: boolean;
+
+  /** Whether the Skip button is disabled. */
+  isSkipDisabled: boolean;
+
+  /** Whether the Remove button is disabled. */
+  isRemoveDisabled: boolean;
+
+  /** Handler for Accept button click. */
+  onAccept: () => void;
+
+  /** Handler for Skip button click. */
+  onSkip: () => void;
+
+  /** Handler for Remove button click. */
+  onRemove: () => void;
+
+  /** Handler for countdown timeout. */
+  onTimeout: () => void;
+
+  /** Timestamp (ms) when the campaign call was accepted — used for the handle time timer. */
+  handleTimestamp?: number;
+}
+
+/**
+ * Properties for the CampaignTaskListItem component.
+ *
+ * Renders the ListItem row shared between the CampaignTask card
+ * and CampaignTaskPopover: avatar, title, phone, countdown, and
+ * Accept / Skip / Remove action buttons.
+ */
+export interface CampaignTaskListItemProps {
+  /** Display title (customer name or caller identifier). */
+  title: string;
+
+  /** Phone number to show as secondary label. */
+  phoneNumber?: string;
+
+  /** Customer name — used to decide whether to show phone as secondary label. */
+  customerName?: string;
+
+  /** Campaign preview offer timeout timestamp (ms string). */
+  timeoutTimestamp?: string;
+
+  /** Whether the Accept button has been clicked (shows "Connecting..." state). */
+  isAcceptClicked: boolean;
+
+  /** Whether the campaign preview has been accepted by the backend (call controls visible). */
+  isAccepted: boolean;
+
+  /** Whether the Accept button is disabled. */
+  isAcceptDisabled: boolean;
+
+  /** Whether the Skip button is disabled. */
+  isSkipDisabled: boolean;
+
+  /** Whether the Remove button is disabled. */
+  isRemoveDisabled: boolean;
+
+  /** Handler for Accept button click. */
+  onAccept: () => void;
+
+  /** Handler for Skip button click. */
+  onSkip: () => void;
+
+  /** Handler for Remove button click. */
+  onRemove: () => void;
+
+  /** Handler for countdown timeout. */
+  onTimeout: () => void;
+
+  /** Timestamp (ms) when the campaign call was accepted — used for the handle time timer. */
+  handleTimestamp?: number;
+
+  /** Logger instance. */
+  logger?: ILogger;
+
+  /** Optional CSS class name applied to the ListItem. */
+  className?: string;
+
+  /** Optional test ID prefix for data-testid attributes. */
+  testIdPrefix?: string;
 }

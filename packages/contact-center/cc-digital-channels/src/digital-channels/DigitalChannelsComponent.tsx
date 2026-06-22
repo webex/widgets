@@ -20,7 +20,7 @@ const DigitalChannelsComponent: React.FunctionComponent<DigitalChannelsComponent
     return `${conversationId}-${jwtToken.slice(-8)}-${dataCenter}`;
   }, [conversationId, jwtToken, dataCenter]);
 
-  const isDarkTheme = currentTheme === 'DARK';
+  const isDarkTheme = currentTheme?.toUpperCase() === 'DARK';
 
   return (
     <div>

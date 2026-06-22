@@ -2,7 +2,7 @@ import r2wc from '@r2wc/react-to-web-component';
 import {StationLogin} from '@webex/cc-station-login';
 import {UserState} from '@webex/cc-user-state';
 import store from '@webex/cc-store';
-import {TaskList, IncomingTask, CallControl, CallControlCAD, OutdialCall} from '@webex/cc-task';
+import {TaskList, IncomingTask, CallControl, CallControlCAD, OutdialCall, RealTimeTranscript} from '@webex/cc-task';
 import {DigitalChannels} from '@webex/cc-digital-channels';
 
 const WebUserState = r2wc(UserState, {
@@ -24,6 +24,7 @@ const WebTaskList = r2wc(TaskList, {
     onTaskAccepted: 'function',
     onTaskDeclined: 'function',
     onTaskSelected: 'function',
+    hasCampaignPreviewEnabled: 'boolean',
   },
 });
 
@@ -53,12 +54,14 @@ const WebCallControlCAD = r2wc(CallControlCAD, {
 });
 
 const WebOutdialCall = r2wc(OutdialCall, {});
-
-const WebDigitalChannels = r2wc(DigitalChannels, {
+const WebRealTimeTranscript = r2wc(RealTimeTranscript, {
   props: {
-    currentTheme: 'string',
+    liveTranscriptEntries: 'json',
+    className: 'string',
   },
 });
+
+const WebDigitalChannels = r2wc(DigitalChannels, {});
 
 // Whenever there is a new component, add the name of the component
 // and the web-component to the components object
@@ -70,6 +73,7 @@ const components = [
   {name: 'widget-cc-call-control', component: WebCallControl},
   {name: 'widget-cc-outdial-call', component: WebOutdialCall},
   {name: 'widget-cc-call-control-cad', component: WebCallControlCAD},
+  {name: 'widget-cc-realtime-transcript', component: WebRealTimeTranscript},
   {name: 'widget-cc-digital-channels', component: WebDigitalChannels},
 ];
 

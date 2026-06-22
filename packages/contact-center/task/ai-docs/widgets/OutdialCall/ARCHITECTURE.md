@@ -130,6 +130,81 @@ sequenceDiagram
     end
 ```
 
+### Post-Dial Flow by Login Mode
+
+After `cc.startOutdial()` succeeds, the platform establishes a first-leg call to the agent before dialing the customer (second leg). How the first leg connects depends on the agent's login mode.
+
+#### Desktop Mode -- Customer Rings Directly
+
+In Desktop mode, the agent is auto-connected. The customer's phone rings immediately, and once the customer answers, the agent reaches ENGAGED state.
+
+```mermaid
+sequenceDiagram
+    participant A as Agent
+    participant W as Widget / Store
+    participant P as CC Platform
+    participant C as Customer
+
+    A->>W: Click dial button
+    W->>P: cc.startOutdial(destination, origin)
+    P-->>W: TaskResponse
+    P->>C: Customer's phone rings (second leg)
+    C->>P: Customer answers
+    P->>W: Agent auto-connects → ENGAGED
+```
+
+The agent never needs to accept the incoming task. The Accept button is visible but disabled during the brief popup.
+
+#### Extension Mode -- Manual Answer Required
+
+The first-leg call rings on the agent's Webex Calling extension. The agent must answer it before the platform dials the customer.
+
+```mermaid
+sequenceDiagram
+    participant A as Agent
+    participant W as Widget / Store
+    participant E as Webex Calling Extension
+    participant P as CC Platform
+    participant C as Customer
+
+    A->>W: Click dial button
+    W->>P: cc.startOutdial(destination, origin)
+    P-->>W: TaskResponse
+    P->>E: First-leg rings on extension
+    Note over E: Answer button becomes enabled
+    A->>E: Answer call on extension
+    P->>C: Customer's phone rings (second leg)
+    C->>P: Customer answers
+    P->>W: Agent state → ENGAGED
+```
+
+The agent must answer the extension call before the customer is dialed.
+
+#### Dial Number (DN) Mode -- Manual Answer Required
+
+The first-leg call rings on the agent's DN phone. The agent must answer it before the platform dials the customer.
+
+```mermaid
+sequenceDiagram
+    participant A as Agent
+    participant W as Widget / Store
+    participant D as Agent DN Phone
+    participant P as CC Platform
+    participant C as Customer
+
+    A->>W: Click dial button
+    W->>P: cc.startOutdial(destination, origin)
+    P-->>W: TaskResponse
+    P->>D: First-leg rings on DN phone
+    Note over D: Answer button becomes enabled
+    A->>D: Answer call on DN phone
+    P->>C: Customer's phone rings (second leg)
+    C->>P: Customer answers
+    P->>W: Agent state → ENGAGED
+```
+
+The agent must answer the DN phone call before the customer is dialed.
+
 ### Number Validation
 
 ```mermaid

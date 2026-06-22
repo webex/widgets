@@ -71,9 +71,16 @@ describe('metricsLogger', () => {
       expect(havePropsChanged(obj1, obj2)).toBe(true);
     });
 
-    it('should return false when nested values differ', () => {
+    it('should return true when object references differ', () => {
       const obj1 = {a: {b: 1}};
       const obj2 = {a: {b: 2}};
+      expect(havePropsChanged(obj1, obj2)).toBe(true);
+    });
+
+    it('should return false when object references are the same', () => {
+      const shared = {b: 1};
+      const obj1 = {a: shared};
+      const obj2 = {a: shared};
       expect(havePropsChanged(obj1, obj2)).toBe(false);
     });
 

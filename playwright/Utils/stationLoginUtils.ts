@@ -6,6 +6,7 @@ import {
   AWAIT_TIMEOUT,
   DROPDOWN_SETTLE_TIMEOUT,
   OPERATION_TIMEOUT,
+  STATION_LOGOUT_UNREGISTER_SETTLE_TIMEOUT,
 } from '../constants';
 import {handleStrayTasks} from './helperUtils';
 
@@ -124,6 +125,15 @@ export const dialLogin = async (page: Page, dialNumber?: string): Promise<void> 
  * ```
  */
 export const stationLogout = async (page: Page, throwOnFailure: boolean = true): Promise<void> => {
+  const waitForPostLogoutSettle = async (): Promise<void> => {
+    // Wait until station-login controls are back, then wait for SDK unregister to settle.
+    await page
+      .getByTestId('login-button')
+      .waitFor({state: 'visible', timeout: OPERATION_TIMEOUT})
+      .catch(() => {});
+    await page.waitForTimeout(STATION_LOGOUT_UNREGISTER_SETTLE_TIMEOUT);
+  };
+
   // Wait for the logout button to be visible before clicking
   const logoutButton = page.getByTestId('samples:station-logout-button');
   const isVisible = await logoutButton
@@ -162,13 +172,16 @@ export const stationLogout = async (page: Page, throwOnFailure: boolean = true):
       if (!isLogoutSuccessfulAfterRetry && throwOnFailure) {
         throw new Error('Station logout button is still visible after retry attempt');
       }
+      if (isLogoutSuccessfulAfterRetry) {
+        await waitForPostLogoutSettle();
+      }
     } catch (e) {
       if (throwOnFailure) {
         throw new Error(`Station logout failed: ${e instanceof Error ? e.message : 'Unknown error'}`);
       }
     }
   } else {
-    await page.waitForTimeout(2000);
+    await waitForPostLogoutSettle();
   }
 };
 
@@ -276,4 +289,7 @@ export async function verifyDesktopOptionVisibility(page: Page, shouldBeVisible:
   } else {
     await expect(desktopOption).not.toBeVisible();
   }
+
+  // Close the dropdown to prevent the mdc-select popover from intercepting pointer events on other elements
+  await page.keyboard.press('Escape');
 }

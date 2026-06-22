@@ -3,10 +3,7 @@ run-name: ${{ github.actor }} is running Pull Request CI
 
 on:
   pull_request_target:
-    branches:
-      - next
-
-    types: [opened, labeled, reopened, synchronize]
+    types: [opened, labeled, reopened]
   workflow_dispatch:
 
 concurrency:
@@ -26,6 +23,10 @@ env:
   PW_ENTRY_POINT6: ${{ secrets.PW_ENTRY_POINT6 }}
   PW_ENTRY_POINT7: ${{ secrets.PW_ENTRY_POINT7 }}
   PW_ENTRY_POINT8: ${{ secrets.PW_ENTRY_POINT8 }}
+  PW_ENTRY_POINT9: ${{ secrets.PW_ENTRY_POINT9 }}
+  PW_ENTRY_POINT10: ${{ secrets.PW_ENTRY_POINT10 }}
+  PW_ENTRY_POINT11: ${{ secrets.PW_ENTRY_POINT11 }}
+  PW_ENTRY_POINT12: ${{ secrets.PW_ENTRY_POINT12 }}
   PW_SENDER_EMAIL: ${{ secrets.PW_SENDER_EMAIL }}
   PW_CHAT_URL: ${{ secrets.PW_CHAT_URL }}
   PW_DIAL_NUMBER_LOGIN_USERNAME: ${{ secrets.PW_DIAL_NUMBER_LOGIN_USERNAME }}
@@ -44,20 +45,38 @@ jobs:
     if: contains(toJson(github.event.pull_request.labels), 'validated')
 
     steps:
-      - name: Validate PR title
-        run: |
-          TITLE="${{ github.event.pull_request.title }}"
-          echo "PR Title is: '$TITLE'"
+      - name: Validate PR title safely
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = (context.payload.pull_request?.title ?? "").normalize("NFC");
 
-          regex="^(fix|feat|chore|docs)\([^()]+\): .+"
+            // 1) Required
+            if (!title.length) {
+              core.setFailed("PR title is empty.");
+              return;
+            }
 
-          if [[ $TITLE =~ $regex ]]; then
-            echo "PR title is valid."
-          else
-            echo "Error: PR title does NOT follow the required convention."
-            echo "Expected format: fix|feat|chore(some-text): description..."
-            exit 1
-          fi
+            // 2) Length guard
+            if (title.length > 200) {
+              core.setFailed("PR title is too long (max 200 chars).");
+              return;
+            }
+
+            // 3) Hardened control-char guard (all Unicode control/invisible chars)
+            if (/[\p{C}]/u.test(title)) {
+              core.setFailed("PR title contains disallowed control/invisible characters.");
+              return;
+            }
+
+            // 4) Enforce convention (scope is optional)
+            const regex = /^(fix|feat|chore|docs)(\([^()\s][^()]{0,78}[^()\s]?\))?: [^\s].*$/u;
+            if (!regex.test(title)) {
+              core.setFailed("PR title must follow: fix|feat|chore|docs(scope): description OR fix|feat|chore|docs: description");
+              return;
+            }
+
+            core.info(`PR title is valid: "${title}"`);
 
   install:
     runs-on: ubuntu-latest
@@ -67,6 +86,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -104,6 +124,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -138,6 +159,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -163,12 +185,16 @@ jobs:
     continue-on-error: true
     needs: [install, build]
     if: contains(toJson(github.event.pull_request.labels), 'run_e2e')
+    concurrency:
+      group: e2e-meetings
+      cancel-in-progress: false
 
     steps:
       - name: Checkout Project
         uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -200,12 +226,16 @@ jobs:
     runs-on: ubuntu-latest
     needs: [install, build]
     if: contains(toJson(github.event.pull_request.labels), 'run_e2e')
+    concurrency:
+      group: e2e-cc-widgets
+      cancel-in-progress: false
 
     steps:
       - name: Checkout Project
         uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -255,6 +285,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -280,3 +311,6 @@ jobs:
 
       - name: Test CC Widgets
         run: yarn run test:cc-widgets
+
+      - name: Test Meetings Widget
+        run: yarn run test:meetings-widget

@@ -30,6 +30,8 @@ module.exports = merge(baseConfig, {
   externals: {
     react: 'react',
     'react-dom': 'react-dom',
+    'react/jsx-runtime': 'react/jsx-runtime',
+    'react/jsx-dev-runtime': 'react/jsx-dev-runtime',
     '@webex/cc-store': '@webex/cc-store',
     '@momentum-ui/react-collaboration': '@momentum-ui/react-collaboration',
     '@momentum-ui/web-components': '@momentum-ui/web-components',

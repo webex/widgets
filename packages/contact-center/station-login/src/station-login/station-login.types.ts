@@ -28,5 +28,6 @@ export type StationLoginProps = Pick<IStationLoginProps, 'profileMode'> &
       | 'teamId'
       | 'doStationLogout'
       | 'hideDesktopLogin'
+      | 'allowInternationalDn'
     >
   >;

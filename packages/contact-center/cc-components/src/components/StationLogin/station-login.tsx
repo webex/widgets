@@ -16,6 +16,7 @@ import {
   saveConfirmCancelClicked,
   updateDialNumberLabel,
   handleCCSignoutKeyDown,
+  INTERNATIONAL_DIAL_NUMBER_REGEX,
 } from './station-login.utils';
 import {withMetrics} from '@webex/cc-ui-logging';
 
@@ -49,7 +50,14 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
     dialNumberValue,
     setSelectedTeamId,
     hideDesktopLogin,
+    allowInternationalDn,
   } = props;
+
+  // Determine the regex to use for dial number validation:
+  // 1. If allowInternationalDn is true, use international regex
+  // 2. Otherwise, use dialNumberRegex from agentConfig (if provided)
+  // 3. If dialNumberRegex is null/undefined, validateDialNumber will fall back to US regex
+  const resolvedDialNumberRegex = allowInternationalDn ? INTERNATIONAL_DIAL_NUMBER_REGEX : dialNumberRegex;
 
   const [dialNumberLabel, setDialNumberLabel] = useState<string>('');
 
@@ -227,8 +235,6 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
                 }}
                 value={selectedDeviceType}
                 className="station-login-select"
-                selectedValue={selectedDeviceType}
-                selectedValueText={LoginOptions[selectedDeviceType]}
               >
                 {Object.keys(LoginOptions).map((option: string, index: number) => {
                   // only show loginOptions provided by store and filtered by hideDesktopLogin
@@ -238,6 +244,7 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
                         selected={option === selectedDeviceType}
                         key={index}
                         value={option}
+                        label={LoginOptions[option]}
                         data-testid={`login-option-${LoginOptions[option]}`}
                       >
                         {LoginOptions[option]}
@@ -262,7 +269,7 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
                   setDialNumber,
                   setShowDNError,
                   setDNErrorText,
-                  dialNumberRegex,
+                  resolvedDialNumberRegex,
                   setCurrentLoginOptions,
                   selectedDeviceType,
                   logger
@@ -284,7 +291,6 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
               }}
               className="station-login-select"
               placeholder={StationLoginLabels.YOUR_TEAM}
-              selectedValueText={teams.find((team) => team.id === selectedTeamId)?.name}
             >
               {teams.map((team: {id: string; name: string}, index: number) => {
                 return (
@@ -292,6 +298,7 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
                     selected={team.id === selectedTeamId}
                     key={index}
                     value={team.id}
+                    label={team.name}
                     data-testid={`teams-dropdown-${team.name}`}
                   >
                     {team.name}
@@ -330,7 +337,14 @@ const StationLoginComponent: React.FunctionComponent<StationLoginComponentProps>
               </Button>
             )}
             {!isAgentLoggedIn && (
-              <Button onClick={login} disabled={showDNError} data-testid="login-button">
+              <Button
+                onClick={login}
+                disabled={
+                  !selectedTeamId ||
+                  (selectedDeviceType !== DESKTOP && (dialNumberValue.trim().length === 0 || showDNError))
+                }
+                data-testid="login-button"
+              >
                 {StationLoginLabels.SAVE_AND_CONTINUE}
               </Button>
             )}

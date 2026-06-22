@@ -1,5 +1,42 @@
-import type {MEDIA_CHANNEL as MediaChannelType, TaskComponentData} from '../task.types';
+import type {
+  MEDIA_CHANNEL as MediaChannelType,
+  TaskComponentData,
+  CADVariable,
+  CallAssociatedDataMap,
+} from '../task.types';
 import {getMediaTypeInfo} from '../../../utils';
+
+/** System CAD variable keys that are already displayed elsewhere in the UI. */
+export const SYSTEM_CAD_KEYS = new Set([
+  'ani',
+  'dn',
+  'customerName',
+  'virtualTeamName',
+  'ronaTimeout',
+  'FC-DESKTOP-VIEW',
+]);
+
+/**
+ * Returns agent-viewable global variables from a callAssociatedData map,
+ * excluding system variables that are already rendered elsewhere.
+ */
+export const getAgentViewableGlobalVariables = (
+  callAssociatedData: CallAssociatedDataMap | undefined
+): CADVariable[] => {
+  if (!callAssociatedData || typeof callAssociatedData !== 'object') {
+    return [];
+  }
+
+  return Object.entries(callAssociatedData)
+    .filter(([key, cadVar]) => {
+      if (!cadVar || !cadVar.name) return false;
+      if (cadVar.agentViewable === false) return false;
+      if (!cadVar.global) return false;
+      if (SYSTEM_CAD_KEYS.has(key)) return false;
+      return true;
+    })
+    .map(([, cadVar]) => cadVar);
+};
 
 /**
  * Capitalizes the first word of a string

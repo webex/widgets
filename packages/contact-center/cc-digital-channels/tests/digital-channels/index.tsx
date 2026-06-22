@@ -70,6 +70,7 @@ jest.mock('@webex/cc-store', () => {
     currentTask = mockCurrentTaskWithConversationId;
     isDigitalChannelsInitialized = false;
     dataCenter = mockDataCenter;
+    currentTheme = 'LIGHT';
     onErrorCallback = jest.fn();
 
     constructor() {
@@ -85,6 +86,12 @@ jest.mock('@webex/cc-store', () => {
       });
     });
 
+    setCurrentTheme = jest.fn((theme: string) => {
+      runInAction(() => {
+        this.currentTheme = theme;
+      });
+    });
+
     getAccessToken = jest.fn().mockResolvedValue(mockJwtToken);
   }
 
@@ -94,7 +101,6 @@ jest.mock('@webex/cc-store', () => {
 import {DigitalChannels} from '../../src/digital-channels';
 import {mockTask as mockTaskFixture} from '@webex/test-fixtures';
 
-const mockProps = {};
 let mockShouldThrow = false;
 
 jest.mock('../../src/digital-channels/DigitalChannelsComponent', () => {
@@ -117,7 +123,7 @@ describe('DigitalChannels Component - Integration Tests with Real Components', (
   });
 
   it('should successfully load and initialize real Engage component without errors', async () => {
-    const screen = render(<DigitalChannels {...mockProps} />);
+    const screen = render(<DigitalChannels />);
 
     // Wait for the widget to be loaded in the DOM
     await waitFor(
@@ -155,8 +161,16 @@ describe('DigitalChannels Component - Integration Tests with Real Components', (
     expect(engageWidget).toHaveAttribute('data-visual-rebrand', 'true');
   });
 
-  it('should render with dark theme when currentTheme is DARK', async () => {
-    const screen = render(<DigitalChannels currentTheme="DARK" />);
+  it('should render with dark theme when currentTheme is DARK in store', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const storeModule = require('@webex/cc-store');
+
+    // Set dark theme in store before rendering
+    runInAction(() => {
+      storeModule.default.currentTheme = 'DARK';
+    });
+
+    const screen = render(<DigitalChannels />);
 
     // Wait for the widget to be loaded in the DOM
     await waitFor(
@@ -179,6 +193,14 @@ describe('DigitalChannels Component - Integration Tests with Real Components', (
     const engageWidget = screen.getByTestId('engage-widget');
     expect(engageWidget).toBeInTheDocument();
     expect(engageWidget).toHaveAttribute('data-theme', 'dark');
+
+    // Unmount the component before resetting theme to avoid act() warning
+    screen.unmount();
+
+    // Reset theme to default for other tests
+    runInAction(() => {
+      storeModule.default.currentTheme = 'LIGHT';
+    });
   });
 
   it('should have proper store integration', async () => {
@@ -194,7 +216,7 @@ describe('DigitalChannels Component - Integration Tests with Real Components', (
     expect(storeModule.default.onErrorCallback).toBeDefined();
 
     // Component should be able to access store without issues
-    const screen = render(<DigitalChannels {...mockProps} />);
+    const screen = render(<DigitalChannels />);
 
     // Wait for the widget to appear in the DOM, proving store integration works
     await waitFor(
@@ -231,7 +253,7 @@ describe('DigitalChannels Component - Integration Tests with Real Components', (
       });
     });
 
-    const screen = render(<DigitalChannels {...mockProps} />);
+    const screen = render(<DigitalChannels />);
 
     // Verify nothing is rendered when currentTask is null
     expect(screen.container.querySelector('md-theme')).toBeNull();
@@ -295,7 +317,7 @@ describe('DigitalChannels Component - Integration Tests with Real Components', (
     });
 
     it('should not render', async () => {
-      const screen = render(<DigitalChannels {...mockProps} />);
+      const screen = render(<DigitalChannels />);
 
       // Wait for any async updates to complete
       await waitFor(() => {
@@ -333,7 +355,7 @@ describe('DigitalChannels Component - Integration Tests with Real Components', (
     });
 
     it('should not render', async () => {
-      const screen = render(<DigitalChannels {...mockProps} />);
+      const screen = render(<DigitalChannels />);
 
       // Wait for any async updates to complete
       await waitFor(() => {
@@ -369,7 +391,7 @@ describe('DigitalChannels ErrorBoundary', () => {
 
     mockShouldThrow = true;
 
-    const screen = render(<DigitalChannels {...mockProps} />);
+    const screen = render(<DigitalChannels />);
 
     await waitFor(() => {
       expect(onErrorCallback).toHaveBeenCalledWith('DigitalChannels', expect.any(Error));
@@ -392,7 +414,7 @@ describe('DigitalChannels ErrorBoundary', () => {
     mockShouldThrow = true;
 
     // Render should not throw when onErrorCallback is undefined
-    const screen = render(<DigitalChannels {...mockProps} />);
+    const screen = render(<DigitalChannels />);
 
     // Wait for error boundary to catch and handle the error
     await waitFor(() => {
