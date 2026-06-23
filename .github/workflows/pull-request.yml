@@ -181,6 +181,7 @@ jobs:
         run: yarn run test:styles
 
   e2e_test_meetings:
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     continue-on-error: true
     needs: [install, build]
