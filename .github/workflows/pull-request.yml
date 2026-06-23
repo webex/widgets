@@ -220,7 +220,7 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: Test E2E
-        run: yarn workspace @webex/widgets run test:e2e
+        run: yarn run test:e2e:meetings
 
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
@@ -276,7 +276,7 @@ jobs:
             echo "PLAYWRIGHT_PASSWORD=\"${{ secrets.PLAYWRIGHT_PASSWORD }}\"" >> ./.env
 
       - name: Run Playwright tests
-        run: yarn run test:e2e
+        run: yarn run test:e2e:cc
 
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
