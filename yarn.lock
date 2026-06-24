@@ -4914,7 +4914,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@playwright/test@npm:^1.60.0":
+"@playwright/test@npm:^1.61.1":
   version: 1.61.1
   resolution: "@playwright/test@npm:1.61.1"
   dependencies:
@@ -34538,7 +34538,7 @@ __metadata:
     "@babel/preset-typescript": "npm:7.25.9"
     "@momentum-design/brand-visuals": "npm:^0.30.0"
     "@momentum-design/illustrations": "npm:^0.3.0"
-    "@playwright/test": "npm:^1.60.0"
+    "@playwright/test": "npm:^1.61.1"
     "@semantic-release/changelog": "npm:^6.0.3"
     "@semantic-release/exec": "npm:^6.0.3"
     "@semantic-release/git": "npm:^10.0.1"
