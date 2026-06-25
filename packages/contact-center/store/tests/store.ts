@@ -91,6 +91,8 @@ describe('Store', () => {
         lastStateChangeTimestamp: date,
         agentName: mockAgentName,
         environment: 'produs1',
+        isTimeoutDesktopInactivityEnabled: true,
+        timeoutDesktopInactivityMins: 15,
       };
       mockWebex.cc.register.mockResolvedValue(mockResponse);
 
@@ -104,7 +106,11 @@ describe('Store', () => {
       expect(storeInstance.deviceType).toEqual(mockResponse.deviceType);
       expect(storeInstance.currentState).toEqual(mockResponse.lastStateAuxCodeId);
       expect(storeInstance.lastStateChangeTimestamp).toEqual(date);
-      expect(storeInstance.agentProfile).toEqual({agentName: mockAgentName});
+      expect(storeInstance.agentProfile).toEqual({
+        agentName: mockAgentName,
+        isTimeoutDesktopInactivityEnabled: true,
+        timeoutDesktopInactivityMins: 15,
+      });
       expect(storeInstance.dataCenter).toEqual(mockResponse.environment);
     });
 

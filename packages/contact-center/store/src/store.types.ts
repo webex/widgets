@@ -251,6 +251,8 @@ type AgentLoginProfile = {
     telephony: number;
   };
   agentProfileID?: string;
+  isTimeoutDesktopInactivityEnabled?: boolean;
+  timeoutDesktopInactivityMins?: number;
 };
 
 // Generic pagination params for list-fetching APIs
