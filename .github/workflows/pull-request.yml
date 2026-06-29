@@ -183,7 +183,7 @@ jobs:
   e2e_test_meetings:
     runs-on: ubuntu-latest
     env:
-     DOTENV_CONFIG_QUIET: true
+      DOTENV_CONFIG_QUIET: true
     continue-on-error: true
     needs: [install, build]
     if: contains(toJson(github.event.pull_request.labels), 'run_e2e')
