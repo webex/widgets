@@ -39,6 +39,7 @@ reports/
 #Local stuff
 *.json
 !docs/changelog/logs/*.json
+!.sdd/manifest.json
 .env*
 !.env.default
 !package.json

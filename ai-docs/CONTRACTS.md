@@ -1,0 +1,45 @@
+# Contracts Catalog — webex-widgets (Contact Center)
+
+> Start here → root [`AGENTS.md`](../AGENTS.md) (agent entry) · router [`SPEC_INDEX.md`](SPEC_INDEX.md) · system [`ARCHITECTURE.md`](ARCHITECTURE.md). Then this root contract index; detailed contracts live with owning modules, feature designs, or canonical schema files. Machine source `.sdd/manifest.json`.
+> Context-efficiency: link to canonical docs — don't duplicate them; load on demand, not upfront.
+
+> Read before adding any public-facing surface — check here first. Machine source of truth: `.sdd/manifest.json`.
+
+This repo is consumed as libraries: its public surface is the package **exports**, the **r2wc custom elements** registered by `cc-widgets`, and the **widget event/callback props** — not HTTP routes. There are no HTTP endpoints, no message broker, and no CLI; those template sections are dropped.
+
+### Exported API & Types
+
+The aggregator package `@webex/cc-widgets` re-exports every widget plus the `store` singleton (`packages/contact-center/cc-widgets/src/index.ts:8-19`). When imported via the bundled `wc.ts` entry, each widget is also registered as a custom element (tag names below).
+
+| Contract ID | Owner module/package | Symbol | Signature | Stability / deprecation | Schema / detail link | Defined at |
+|---|---|---|---|---|---|---|
+| cc-widgets.StationLogin | `@webex/cc-station-login` | `StationLogin` | React component; custom element `widget-cc-station-login`; props `onLogin`, `onLogout` (functions) | stable semver; tag name is breaking surface | `packages/contact-center/station-login/ai-docs/station-login-spec.md` | `packages/contact-center/station-login/src/index.ts` |
+| cc-widgets.UserState | `@webex/cc-user-state` | `UserState` | React component; custom element `widget-cc-user-state`; prop `onStateChange` (function) | stable semver | `packages/contact-center/user-state/ai-docs/user-state-spec.md` | `packages/contact-center/user-state/src/index.ts` |
+| cc-widgets.IncomingTask | `@webex/cc-task` | `IncomingTask` | React component; custom element `widget-cc-incoming-task`; props `incomingTask` (json), `onAccepted`, `onRejected` (functions) | stable semver | `packages/contact-center/task/ai-docs/task-spec.md` | `packages/contact-center/task/src/index.ts` |
+| cc-widgets.CallControl | `@webex/cc-task` | `CallControl` | React component; custom element `widget-cc-call-control`; props `onHoldResume`, `onEnd`, `onWrapUp`, `onRecordingToggle` (functions) | stable semver | `packages/contact-center/task/ai-docs/task-spec.md` | `packages/contact-center/task/src/index.ts` |
+| cc-widgets.CallControlCAD | `@webex/cc-task` | `CallControlCAD` | React component; custom element `widget-cc-call-control-cad`; props `onHoldResume`, `onEnd`, `onWrapUp`, `onRecordingToggle` (functions) | stable semver | `packages/contact-center/task/ai-docs/task-spec.md` | `packages/contact-center/task/src/index.ts` |
+| cc-widgets.TaskList | `@webex/cc-task` | `TaskList` | React component; custom element `widget-cc-task-list`; props `onTaskAccepted`, `onTaskDeclined`, `onTaskSelected` (functions), `hasCampaignPreviewEnabled` (boolean) | stable semver | `packages/contact-center/task/ai-docs/task-spec.md` | `packages/contact-center/task/src/index.ts` |
+| cc-widgets.OutdialCall | `@webex/cc-task` | `OutdialCall` | React component; custom element `widget-cc-outdial-call`; no declared props | stable semver | `packages/contact-center/task/ai-docs/task-spec.md` | `packages/contact-center/task/src/index.ts` |
+| cc-widgets.RealTimeTranscript | `@webex/cc-task` | `RealTimeTranscript` | React component; custom element `widget-cc-realtime-transcript`; props `liveTranscriptEntries` (json), `className` (string) | stable semver | `packages/contact-center/task/ai-docs/task-spec.md` | `packages/contact-center/task/src/index.ts` |
+| cc-widgets.DigitalChannels | `@webex/cc-digital-channels` | `DigitalChannels` | React component; custom element `widget-cc-digital-channels`; no declared props | stable semver | `packages/contact-center/cc-widgets/ai-docs/cc-widgets-spec.md` | `packages/contact-center/cc-digital-channels/src/index.tsx` |
+| cc-widgets.store | `@webex/cc-store` | `store` | MobX singleton (`Store.getInstance()`); `init(options: InitParams, setupEventListeners): Promise<void>`; sole SDK access point via `store.cc.*` | stable semver | `packages/contact-center/store/ai-docs/store-spec.md` | `packages/contact-center/store/src/index.ts:1,4` |
+| store.types | `@webex/cc-store` | Type re-exports (`IContactCenter`, `ITask`, `Profile`, `Team`, `AgentLogin`, `IStore`, `ILogger`, `InitParams`, `IWebex`, `RealTimeTranscriptionData`, plus ~20 more) | TypeScript `type`/`interface` exports describing the SDK-backed domain surface | stable semver; SDK-shaped types track SDK | `contact-centre-sdk-apis/contact-center.json` (SDK source); `packages/contact-center/store/ai-docs/store-spec.md` | `packages/contact-center/store/src/store.types.ts:334-366` |
+| store.constants | `@webex/cc-store` | Value/enum re-exports (`CC_EVENTS`, `TASK_EVENTS`, `LoginOptions`, `ConsultStatus`, `CAMPAIGN_PREVIEW_OUTBOUND_TYPES`, `DESKTOP`, `EXTENSION`, etc.) | Exported consts/enums for event names and login/consult/campaign domain values | stable semver | `packages/contact-center/store/ai-docs/store-spec.md` | `packages/contact-center/store/src/store.types.ts:368-403` |
+| store.task-utils | `@webex/cc-store` | Pure task helpers (`isIncomingTask`, `getTaskStatus`, `getConsultStatus`, `getConferenceParticipants`, `isInteractionOnHold`, `findHoldStatus`, etc.) | `(task: ITask, agentId?: string) => boolean \| string \| number \| Participant[]` selectors over SDK task objects | stable semver | `packages/contact-center/store/ai-docs/store-spec.md` | `packages/contact-center/store/src/task-utils.ts` |
+
+## Requires — what this repo depends on
+| Dependency (service / package / datastore) | What is consumed | Schema / detail link | Availability assumption | Fallback on failure | Version floor |
+|---|---|---|---|---|---|
+| `@webex/contact-center` SDK | The entire CC runtime: `Webex.init()`, `webex.cc.*` methods, CC/task event stream, agent `Profile`, `webex.credentials.getUserToken()` | `contact-centre-sdk-apis/contact-center.json` (TypeDoc); consumed only via the store (`packages/contact-center/store/src/storeEventsWrapper.ts`) | Host establishes the authenticated Webex session; SDK assumed reachable | `Store.init()` rejects after a 6s init timeout; widgets stay inert and surface error UI (`packages/contact-center/store/src/store.ts:140-142`) | Pinned by the SDK dependency in each package's `package.json` |
+| `react` / `react-dom` (18) | Component runtime; consumer peer dependency | React docs | Provided by host or bundled | N/A (build-time/runtime peer) | React 18 |
+| `mobx` / `mobx-react-lite` | Store reactivity (`runInAction`, `observer`) | MobX docs | Bundled with store package | N/A | per `package.json` |
+| `@r2wc/react-to-web-component` | Wraps React widgets as custom elements (`packages/contact-center/cc-widgets/src/wc.ts:1`) | r2wc docs | Bundled with `cc-widgets` | N/A | per `package.json` |
+
+## Compatibility & Deprecation Policy
+- **Breaking-change rule:** Semver. A breaking change requires a major version bump. The breaking surface is: the named **package exports** above, the **custom-element tag names** (`widget-cc-*` in `packages/contact-center/cc-widgets/src/wc.ts:68-78`), and the **declared widget event/callback prop names**. Renaming/removing any of these, or changing a callback signature, is breaking. Adding a new widget, export, or optional prop is additive (minor).
+- **Deprecation:** Releases are cut by `semantic-release` (`package.json`, `.releaserc`); commit type drives the version bump (`fix` → patch, `feat` → minor, breaking footer → major). Deprecated surfaces are kept for at least one minor release with a JSDoc `@deprecated` note before removal in a major.
+
+## Maintenance
+- When a public surface is added/changed/removed, update this catalog, the owning module spec summary, the SDK detail source where relevant, and `.sdd/manifest.json` in the same change.
+- For incompatible changes, include the consumer transition/deprecation plan in the owning module spec and summarize it in the Compatibility / deprecation column.
+- Cross-reference: security posture → [`SECURITY.md`](SECURITY.md); current dependencies/flags → [`SERVICE_STATE.md`](SERVICE_STATE.md).
