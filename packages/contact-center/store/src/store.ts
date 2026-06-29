@@ -13,6 +13,7 @@ import {
   AgentLoginProfile,
   LoginOptions,
   WithWebex,
+  SuggestedResponsePayload,
 } from './store.types';
 
 import {getFeatureFlags} from './util';
@@ -52,6 +53,7 @@ class Store implements IStore {
   isMuted: boolean = false;
   isDigitalChannelsInitialized: boolean = false;
   dataCenter: string = '';
+  suggestedResponses: Record<string, SuggestedResponsePayload[]> = {};
 
   constructor() {
     makeAutoObservable(this, {

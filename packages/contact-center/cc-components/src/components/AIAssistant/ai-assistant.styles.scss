@@ -1,0 +1,339 @@
+.ai-assistant {
+  // Inset the widget contents so the launcher and panel never sit flush
+  // against the host container's edge (e.g. behind a `<legend>` line).
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  padding: 0.75rem 0.5rem;
+  width: 100%;
+}
+
+.ai-assistant__launcher {
+  align-items: center;
+  align-self: flex-start;
+  background: transparent;
+  border: none;
+  border-radius: 100px;
+  box-shadow: none;
+  cursor: pointer;
+  display: inline-flex;
+  flex-direction: row;
+  height: 50px;
+  isolation: isolate;
+  justify-content: center;
+  padding: 9px;
+  width: 50px;
+
+  &:hover {
+    background: var(--mds-color-theme-background-secondary-hover, rgba(0, 0, 0, 0.04));
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--mds-color-theme-outline-focus-default, #0087ea);
+    outline-offset: 2px;
+  }
+}
+
+// Default chrome: small floating card with border + shadow.
+.ai-assistant__panel {
+  background: var(--mds-color-theme-background-primary-normal);
+  border: 1px solid var(--mds-color-theme-outline-secondary-normal);
+  border-radius: 0.75rem;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  height: 32rem;
+  max-height: 90vh;
+  max-width: 28rem;
+  overflow: hidden;
+  width: 100%;
+}
+
+.ai-assistant__panel--minimized {
+  border: 1px solid var(--mds-color-theme-outline-secondary-normal);
+  border-radius: 0.5rem;
+  box-shadow: none;
+  height: auto;
+  max-height: none;
+  max-width: 22rem;
+  min-height: 0;
+  overflow: visible;
+}
+
+.ai-assistant__header,
+.ai-assistant__minimized-bar {
+  align-items: center;
+  border-bottom: 1px solid var(--mds-color-theme-outline-secondary-normal);
+  display: flex;
+  gap: 0.75rem;
+  justify-content: space-between;
+  padding: 0.75rem 1.125rem;
+}
+
+.ai-assistant__minimized-bar {
+  border-bottom: none;
+}
+
+.ai-assistant__title {
+  color: var(--mds-color-theme-text-primary-normal);
+  margin: 0;
+}
+
+.ai-assistant__header-actions {
+  align-items: center;
+  display: flex;
+  gap: 0.25rem;
+}
+
+.ai-assistant__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 1rem;
+  overflow-y: auto;
+  padding: 1rem 1.125rem;
+  row-gap: 1.25rem;
+}
+
+.ai-assistant__body-empty,
+.ai-assistant__body-listening,
+.ai-assistant__body-error,
+.ai-assistant__body-ready {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+// "Get Suggestions" pill button — Figma Button/Pill spec: 134x28, rounded.
+.ai-assistant__pill-button {
+  align-items: center;
+  align-self: flex-start;
+  background: transparent;
+  border: 1px solid rgba(0, 0, 0, 0.5);
+  border-radius: 100px;
+  box-sizing: border-box;
+  color: var(--mds-color-theme-text-primary-normal);
+  cursor: pointer;
+  display: inline-flex;
+  flex: none;
+  flex-direction: row;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  gap: 6px;
+  height: 28px;
+  isolation: isolate;
+  padding: 4px 12px;
+  width: 134px;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.04);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--mds-color-theme-outline-focus-default, #0087ea);
+    outline-offset: 2px;
+  }
+}
+
+.ai-assistant__body-listening,
+.ai-assistant__body-empty {
+  color: var(--mds-color-theme-text-secondary-normal);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.ai-assistant__chat {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 1rem;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
+
+.ai-assistant__chat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ai-assistant__chat-item--user {
+  align-items: flex-end;
+}
+
+.ai-assistant__user-bubble {
+  background: #000;
+  border-radius: 1rem;
+  color: #fff;
+  font-size: 0.9375rem;
+  line-height: 1.4;
+  max-width: 85%;
+  padding: 0.625rem 1rem;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.ai-assistant__chat-item--assistant {
+  gap: 0.5rem;
+}
+
+.ai-assistant__assistant-header {
+  align-items: center;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.ai-assistant__assistant-icon {
+  align-items: center;
+  display: inline-flex;
+  flex-shrink: 0;
+  height: 25px;
+  justify-content: center;
+  width: 25px;
+
+  svg {
+    display: block;
+    height: 100%;
+    width: 100%;
+  }
+}
+
+.ai-assistant__suggestion-updating {
+  color: var(--mds-color-theme-text-secondary-normal);
+  font-size: 0.875rem;
+  font-style: italic;
+  margin: 0;
+}
+
+.ai-assistant__suggestion-title {
+  color: var(--mds-color-theme-text-primary-normal);
+  margin: 0;
+}
+
+.ai-assistant__suggestion-summary {
+  color: var(--mds-color-theme-text-secondary-normal);
+  margin: 0;
+}
+
+.ai-assistant__card {
+  background: #f1f3f5;
+  border-radius: 0.75rem;
+  padding: 0.875rem 1rem;
+}
+
+// Scoped overrides for elements emitted by the adaptivecards renderer.
+.ai-assistant__card-host {
+  // Force primary text color — backend ships accent/attention TextBlocks we don't want as alerts.
+  &,
+  .ac-textBlock,
+  .ac-richTextBlock {
+    color: var(--mds-color-theme-text-primary-normal) !important;
+  }
+
+  button,
+  .ac-pushButton,
+  .ac-action-showCard,
+  .ac-actionSet button {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0.25rem;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.05);
+      border: none;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--mds-color-theme-outline-focus-default, #0087ea);
+      outline-offset: 2px;
+    }
+
+    // Enlarge the like/dislike/copy glyphs from the card's default 16x16.
+    img {
+      height: 22px !important;
+      width: 22px !important;
+    }
+  }
+
+  // Source disclosure row: flatten the toggle button.
+  .ac-action-toggleVisibility,
+  [aria-expanded] {
+    background: transparent;
+    border: none;
+  }
+
+  // Copy confirmation pill — green circle, white check.
+  [data-copied='true'] {
+    background: var(--mds-color-theme-background-success-normal, #2eb872) !important;
+    border-radius: 999px !important;
+    transition: background 0.15s ease-out;
+
+    img {
+      filter: brightness(0) invert(1);
+    }
+  }
+}
+
+.ai-assistant__card-error {
+  color: var(--mds-color-theme-text-error-normal);
+  font-size: 0.875rem;
+}
+
+.ai-assistant__card-fallback {
+  color: var(--mds-color-theme-text-primary-normal);
+  font-size: 0.9375rem;
+  line-height: 1.4;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.ai-assistant__chat-listening {
+  align-items: center;
+  color: var(--mds-color-theme-text-primary-normal);
+  display: flex;
+  font-weight: 600;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+}
+
+.ai-assistant__chat-listening-dot {
+  background: linear-gradient(135deg, #4dbef0 0%, #5b6cff 100%);
+  border-radius: 50%;
+  height: 0.625rem;
+  width: 0.625rem;
+}
+
+.ai-assistant__footer {
+  border-top: 1px solid var(--mds-color-theme-outline-secondary-normal);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem 1.125rem;
+}
+
+.ai-assistant__disclaimer {
+  color: var(--mds-color-theme-text-secondary-normal);
+  font-size: 0.8125rem;
+  margin: 0;
+  text-align: center;
+}
+
+.ai-assistant__context {
+  align-items: center;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.ai-assistant__context-input {
+  border-radius: 1.5rem;
+  flex: 1;
+
+  &::part(mdc-input-base-container) {
+    border-radius: 1.5rem;
+  }
+
+  &::part(mdc-input) {
+    border-radius: 1.5rem;
+  }
+}

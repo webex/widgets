@@ -22,6 +22,7 @@ import {
   Profile,
   AgentLoginProfile,
   ERROR_TRIGGERING_IDLE_CODES,
+  SuggestedResponsePayload,
 } from './store.types';
 import Store from './store';
 import {
@@ -33,6 +34,10 @@ import {
 import {runInAction} from 'mobx';
 import {isIncomingTask} from './task-utils';
 
+// Mirrored from the SDK's CC_TASK_EVENTS — importing the runtime const breaks
+// our jest transform setup.
+const SUGGESTED_RESPONSE_EVENT = 'SUGGESTED_RESPONSE';
+
 class StoreWrapper implements IStoreWrapper {
   store: IStore;
   onIncomingTask: ({task}: {task: ITask}) => void;
@@ -41,6 +46,7 @@ class StoreWrapper implements IStoreWrapper {
   onTaskAssigned?: (task: ITask) => void;
   onTaskSelected?: (task: ITask, isClicked: boolean) => void;
   onErrorCallback?: (widgetName: string, error: Error) => void;
+  private suggestedResponseListeners: Record<string, (payload: SuggestedResponsePayload) => void> = {};
 
   constructor() {
     this.store = Store.getInstance();
@@ -142,6 +148,10 @@ class StoreWrapper implements IStoreWrapper {
 
   get dataCenter() {
     return this.store.dataCenter;
+  }
+
+  get suggestedResponses() {
+    return this.store.suggestedResponses;
   }
 
   setDataCenter = (value: string): void => {
@@ -467,6 +477,19 @@ class StoreWrapper implements IStoreWrapper {
         taskToRemove.off(TASK_EVENTS.TASK_MEDIA, this.handleTaskMedia);
         this.setCallControlAudio(null);
       }
+
+      const taskId = taskToRemove.data?.interactionId;
+      if (taskId && this.suggestedResponseListeners[taskId]) {
+        taskToRemove.off(SUGGESTED_RESPONSE_EVENT, this.suggestedResponseListeners[taskId]);
+        delete this.suggestedResponseListeners[taskId];
+      }
+      if (taskId && this.store.suggestedResponses && this.store.suggestedResponses[taskId]) {
+        runInAction(() => {
+          const next = {...this.store.suggestedResponses};
+          delete next[taskId];
+          this.store.suggestedResponses = next;
+        });
+      }
     }
 
     runInAction(() => {
@@ -513,6 +536,117 @@ class StoreWrapper implements IStoreWrapper {
   handleTaskMedia = (track) => {
     this.setCallControlAudio(new MediaStream([track]));
   };
+
+  handleSuggestedResponse = (interactionId: string, payload: SuggestedResponsePayload) => {
+    if (!interactionId || !payload?.data) return;
+    runInAction(() => {
+      const current = (this.store.suggestedResponses && this.store.suggestedResponses[interactionId]) || [];
+      this.store.suggestedResponses = {
+        ...(this.store.suggestedResponses || {}),
+        [interactionId]: [...current, payload],
+      };
+    });
+  };
+
+  clearSuggestedResponse = (interactionId: string): void => {
+    if (!interactionId) return;
+    runInAction(() => {
+      if (this.store.suggestedResponses?.[interactionId]) {
+        const next = {...this.store.suggestedResponses};
+        delete next[interactionId];
+        this.store.suggestedResponses = next;
+      }
+    });
+  };
+
+  /** POSTs a `SUGGESTED_RESPONSES_USER_ACTION` event for like/dislike/copy clicks. */
+  sendSuggestionFeedback = async (params: {
+    interactionId: string;
+    adaptiveCardId?: string;
+    trackingId?: string;
+    languageCode?: string;
+    actionId: string;
+    actionType?: string;
+  }): Promise<void> => {
+    const {interactionId, adaptiveCardId, trackingId, languageCode, actionId, actionType} = params;
+    if (!interactionId || !actionId) return;
+    try {
+      // @ts-expect-error - cc.webex not exposed on the typed IContactCenter
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const webex = this.store.cc?.webex as any;
+      if (!webex?.request) return;
+
+      const baseUrl = this.resolveAiAssistantBaseUrl();
+      if (!baseUrl) return;
+
+      await webex.request({
+        uri: `${baseUrl}/event`,
+        method: 'POST',
+        addAuthHeader: true,
+        body: {
+          agentId: this.agentId,
+          orgId: this.agentProfile?.orgId,
+          eventType: 'CUSTOM_EVENT',
+          eventName: 'SUGGESTED_RESPONSES_USER_ACTION',
+          eventDetails: {
+            data: {
+              interactionId,
+              adaptiveCardId,
+              trackingId,
+              actionTimeStamp: Date.now(),
+              languageCode: languageCode || 'en',
+              userAction: {
+                actionType: actionType || 'Action.Submit',
+                actionId,
+              },
+            },
+          },
+        },
+      });
+    } catch (err) {
+      this.store.logger?.error(`CC-Widgets: sendSuggestionFeedback failed - ${err}`, {
+        module: 'storeEventsWrapper.ts',
+        method: 'sendSuggestionFeedback',
+      });
+    }
+  };
+
+  /** Resolve the AI Assistant base URL from the same WCC gateway lookup the SDK uses. */
+  private resolveAiAssistantBaseUrl(): string | null {
+    try {
+      // @ts-expect-error - cc.webex not exposed on the typed IContactCenter
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const webex = this.store.cc?.webex as any;
+      const gateway = webex?.internal?.services?.get?.('wcc-api-gateway') || '';
+      if (!gateway) return null;
+      let hostname = '';
+      try {
+        hostname = new URL(gateway).hostname.toLowerCase();
+      } catch {
+        hostname = String(gateway).toLowerCase();
+      }
+      // Mirrors AI_ASSISTANT_ENV_MAP from @webex/contact-center; keep in sync
+      // when the SDK adds regions until we route this event through a typed
+      // SDK method (see PR follow-up).
+      const map: Record<string, string> = {
+        'api.intgus1.ciscoccservice.com': 'intgus1',
+        'api.qaus1.ciscoccservice.com': 'qaus1',
+        'api.wxcc-us1.cisco.com': 'produs1',
+        'api.wxcc-eu1.cisco.com': 'prodeu1',
+        'api.wxcc-eu2.cisco.com': 'prodeu2',
+        'api.wxcc-anz1.cisco.com': 'prodanz1',
+        'api.wxcc-ca1.cisco.com': 'prodca1',
+        'api.wxcc-jp1.cisco.com': 'prodjp1',
+        'api.wxcc-sg1.cisco.com': 'prodsg1',
+        'api.wxcc-in1.cisco.com': 'prodin1',
+        'api.loadus1.cisco.com': 'loadus1',
+      };
+      const env = map[hostname];
+      return env ? `https://api-ai-assistant.${env}.ciscoccservice.com` : null;
+    } catch {
+      return null;
+    }
+  }
 
   // Case to handle multi session
   handleConsultCreated = () => {
@@ -635,6 +769,15 @@ class StoreWrapper implements IStoreWrapper {
 
     if (this.deviceType === DEVICE_TYPE_BROWSER) {
       task.on(TASK_EVENTS.TASK_MEDIA, this.handleTaskMedia);
+    }
+
+    const taskId = task.data?.interactionId;
+    // Guard against duplicate registration when this method is re-entered via
+    // task:hydrate / task:merged for the same interaction.
+    if (taskId && !this.suggestedResponseListeners[taskId]) {
+      const listener = (payload: SuggestedResponsePayload) => this.handleSuggestedResponse(taskId, payload);
+      this.suggestedResponseListeners[taskId] = listener;
+      task.on(SUGGESTED_RESPONSE_EVENT, listener);
     }
   };
 
@@ -843,6 +986,8 @@ class StoreWrapper implements IStoreWrapper {
       this.setTeamId('');
       this.setDigitalChannelsInitialized(false);
       this.setLastConsultDestination(null);
+      this.store.suggestedResponses = {};
+      this.suggestedResponseListeners = {};
     });
   };
 

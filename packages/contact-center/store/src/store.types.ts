@@ -24,6 +24,7 @@ import {
   TaskUILeg,
   getDefaultUIControls,
 } from '@webex/contact-center';
+import type {SuggestedResponseParams} from 'node_modules/@webex/contact-center/dist/types/types';
 import {
   OutdialAniEntriesResponse,
   OutdialAniParams,
@@ -66,7 +67,29 @@ interface IContactCenter {
   setAgentState(data: StateChange): Promise<SetStateResponse>;
   getOutdialAniEntries(params: OutdialAniParams): Promise<OutdialAniEntriesResponse>;
   getAccessToken(): Promise<string>;
+  apiAIAssistant?: {
+    getSuggestedResponse(params: SuggestedResponseParams & {actionTimeStamp?: number}): Promise<unknown>;
+  };
 }
+
+type SuggestedResponsePayload = {
+  agentId?: string;
+  data: {
+    adaptiveCard: unknown;
+    adaptiveCardId?: string;
+    title?: string;
+    suggestion?: string;
+    conversationId?: string;
+    trackingId?: string;
+    publishTimestamp?: number | string;
+    [key: string]: unknown;
+  };
+  notifDetails?: {
+    actionEvent?: string;
+  };
+  notifType?: string;
+  orgId?: string;
+};
 //  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
 type IWebex = {
   cc: IContactCenter;
@@ -135,6 +158,7 @@ interface IStore {
   isAddressBookEnabled: boolean;
   isDigitalChannelsInitialized: boolean;
   dataCenter: string;
+  suggestedResponses: Record<string, SuggestedResponsePayload[]>;
   init(params: InitParams, callback: (ccSDK: IContactCenter) => void): Promise<void>;
   registerCC(webex?: WithWebex['webex']): Promise<void>;
 }
@@ -167,6 +191,15 @@ interface IStoreWrapper extends IStore {
   setOnError(callback: (widgetName: string, error: Error) => void): void;
   setDataCenter(value: string): void;
   getAccessToken(): Promise<string>;
+  clearSuggestedResponse(interactionId: string): void;
+  sendSuggestionFeedback(params: {
+    interactionId: string;
+    adaptiveCardId?: string;
+    trackingId?: string;
+    languageCode?: string;
+    actionId: string;
+    actionType?: string;
+  }): Promise<void>;
 }
 
 interface IWrapupCode {
@@ -291,6 +324,8 @@ export type {
   TaskUIControlState,
   InteractionUIControls,
   TaskUILeg,
+  SuggestedResponsePayload,
+  SuggestedResponseParams,
 };
 
 export {

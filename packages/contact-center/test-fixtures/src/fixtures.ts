@@ -512,6 +512,9 @@ const mockCC: IContactCenter = {
   setAgentState: jest.fn().mockResolvedValue({}),
   getOutdialAniEntries: jest.fn().mockResolvedValue({entries: []}),
   getAccessToken: jest.fn().mockResolvedValue('mock-access-token'),
+  apiAIAssistant: {
+    getSuggestedResponse: jest.fn().mockResolvedValue({}),
+  },
 };
 
 export {

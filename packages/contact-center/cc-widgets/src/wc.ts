@@ -4,6 +4,7 @@ import {UserState} from '@webex/cc-user-state';
 import store from '@webex/cc-store';
 import {TaskList, IncomingTask, CallControl, CallControlCAD, OutdialCall} from '@webex/cc-task';
 import {DigitalChannels} from '@webex/cc-digital-channels';
+import {AIAssistant} from '@webex/cc-ai-assistant';
 
 const WebUserState = r2wc(UserState, {
   props: {
@@ -58,6 +59,19 @@ const WebOutdialCall = r2wc(OutdialCall, {});
 
 const WebDigitalChannels = r2wc(DigitalChannels, {});
 
+const WebAIAssistant = r2wc(AIAssistant, {
+  props: {
+    onOpen: 'function',
+    onMinimize: 'function',
+    onRestore: 'function',
+    onClose: 'function',
+    onClearChat: 'function',
+    onFullScreenToggle: 'function',
+    onSuggestionReceived: 'function',
+    className: 'string',
+  },
+});
+
 // Whenever there is a new component, add the name of the component
 // and the web-component to the components object
 const components = [
@@ -69,6 +83,7 @@ const components = [
   {name: 'widget-cc-outdial-call', component: WebOutdialCall},
   {name: 'widget-cc-call-control-cad', component: WebCallControlCAD},
   {name: 'widget-cc-digital-channels', component: WebDigitalChannels},
+  {name: 'widget-cc-ai-assistant', component: WebAIAssistant},
 ];
 
 components.forEach(({name, component}) => {
