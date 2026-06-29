@@ -40,20 +40,16 @@ export const useAiAssistant = ({
   const [userMessages, setUserMessages] = useState<UserMessage[]>([]);
 
   const lastSeenCountRef = useRef(0);
-  // Refs let the effect read the latest values of these without re-running
-  // when they change — we only want to react to suggestions growing.
+  // Stash these in refs so the suggestion effect can read the latest values
+  // without re-running on every change (it only reacts to `suggestions`).
   const pendingRequestRef = useRef(pendingRequest);
   const requestStatusRef = useRef(requestStatus);
   const onSuggestionReceivedRef = useRef(onSuggestionReceived);
   useEffect(() => {
     pendingRequestRef.current = pendingRequest;
-  }, [pendingRequest]);
-  useEffect(() => {
     requestStatusRef.current = requestStatus;
-  }, [requestStatus]);
-  useEffect(() => {
     onSuggestionReceivedRef.current = onSuggestionReceived;
-  }, [onSuggestionReceived]);
+  });
 
   useEffect(() => {
     const len = suggestions.length;
@@ -78,16 +74,6 @@ export const useAiAssistant = ({
     setChrome('open');
     onOpen?.();
   }, [onOpen]);
-
-  const resetSessionState = useCallback(() => {
-    setRequestStatus('idle');
-    setErrorMessage(undefined);
-    setContextDraft('');
-    setPendingRequest(false);
-    setHasFiredInitialRequest(false);
-    setUserMessages([]);
-    lastSeenCountRef.current = 0;
-  }, []);
 
   // close preserves chat state so reopening continues the session; clearChat resets it.
   const close = useCallback(() => {
@@ -115,12 +101,18 @@ export const useAiAssistant = ({
   }, [onFullScreenToggle]);
 
   const clearChat = useCallback(() => {
-    resetSessionState();
+    setRequestStatus('idle');
+    setErrorMessage(undefined);
+    setContextDraft('');
+    setPendingRequest(false);
+    setHasFiredInitialRequest(false);
+    setUserMessages([]);
+    lastSeenCountRef.current = 0;
     if (interactionId) {
       store.clearSuggestedResponse?.(interactionId);
     }
     onClearChat?.();
-  }, [interactionId, onClearChat, resetSessionState]);
+  }, [interactionId, onClearChat]);
 
   const requestSuggestion = useCallback(
     async (context?: string) => {

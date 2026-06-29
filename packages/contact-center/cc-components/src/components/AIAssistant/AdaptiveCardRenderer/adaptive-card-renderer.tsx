@@ -54,14 +54,6 @@ const detectIconKind = (element: Element): IconKind => {
   return null;
 };
 
-const swapIcon = (element: Element, newName: string): string | null => {
-  const img = element.querySelector('img');
-  if (!img) return null;
-  const previous = img.getAttribute('src');
-  img.setAttribute('src', `${MOMENTUM_ICON_CDN}${newName}`);
-  return previous;
-};
-
 const AdaptiveCardRenderer: React.FC<AdaptiveCardRendererProps> = ({
   card,
   fallbackText,
@@ -73,22 +65,17 @@ const AdaptiveCardRenderer: React.FC<AdaptiveCardRendererProps> = ({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [renderFailed, setRenderFailed] = useState(false);
 
-  // Stash callbacks in refs so the effect only re-runs when the card itself
-  // changes — not on every parent re-render that hands us a fresh inline
-  // function.  Without this, re-renders re-parse the card and the browser
-  // re-fetches every image (including any failing icon).
+  // Stash callbacks in refs so the render effect only re-runs when the card
+  // itself changes — fresh inline parent callbacks would otherwise force a
+  // full re-parse and re-fetch of every image on each render.
   const onFeedbackRef = useRef(onFeedback);
   const onActionRef = useRef(onAction);
   const suggestionTextRef = useRef(suggestionText);
   useEffect(() => {
     onFeedbackRef.current = onFeedback;
-  }, [onFeedback]);
-  useEffect(() => {
     onActionRef.current = onAction;
-  }, [onAction]);
-  useEffect(() => {
     suggestionTextRef.current = suggestionText;
-  }, [suggestionText]);
+  });
 
   useEffect(() => {
     preloadIcons();
@@ -115,15 +102,14 @@ const AdaptiveCardRenderer: React.FC<AdaptiveCardRendererProps> = ({
           document.execCommand('copy');
           document.body.removeChild(ta);
         }
-        if (sourceEl) {
-          const previousSrc = swapIcon(sourceEl, 'check-circle-filled.svg');
+        const img = sourceEl?.querySelector('img');
+        if (sourceEl && img) {
+          const previousSrc = img.getAttribute('src');
+          img.setAttribute('src', `${MOMENTUM_ICON_CDN}check-circle-filled.svg`);
           sourceEl.setAttribute('data-copied', 'true');
           setTimeout(() => {
             sourceEl.removeAttribute('data-copied');
-            if (previousSrc) {
-              const img = sourceEl.querySelector('img');
-              img?.setAttribute('src', previousSrc);
-            }
+            if (previousSrc) img.setAttribute('src', previousSrc);
           }, 1500);
         }
       } catch (err) {
