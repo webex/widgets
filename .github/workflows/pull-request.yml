@@ -220,7 +220,7 @@ jobs:
 
   e2e_test_cc_widgets:
     timeout-minutes: 50
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-4-core
     needs: [install, build]
     if: contains(toJson(github.event.pull_request.labels), 'run_e2e')
     concurrency:
