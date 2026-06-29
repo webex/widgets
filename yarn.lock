@@ -11401,7 +11401,6 @@ __metadata:
     "@momentum-ui/core": "npm:19.16.0"
     "@momentum-ui/icons": "npm:8.28.5"
     "@momentum-ui/react": "npm:^23.21.4"
-    "@playwright/test": "npm:^1.51.1"
     "@semantic-release/changelog": "npm:^6.0.0"
     "@semantic-release/git": "npm:^10.0.0"
     "@testing-library/dom": "npm:10.4.0"
