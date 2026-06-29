@@ -62,7 +62,6 @@
     "@momentum-ui/core": "19.16.0",
     "@momentum-ui/icons": "8.28.5",
     "@momentum-ui/react": "^23.21.4",
-    "@playwright/test": "1.51.1",
     "@semantic-release/changelog": "^6.0.0",
     "@semantic-release/git": "^10.0.0",
     "@testing-library/dom": "10.4.0",
