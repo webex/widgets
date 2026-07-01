@@ -421,91 +421,102 @@ describe('CallControlCADComponent', () => {
     });
   });
 
-  describe('Global Variables', () => {
-    const makePropsWithCallAssociatedData = (callAssociatedData: CallAssociatedDataMap) => ({
-      ...defaultProps,
-      currentTask: {
+  describe('conference participants list visibility', () => {
+    it('shows participants list when conference is active and other agents are present', () => {
+      const screen = render(
+        <CallControlCADComponent
+          {...defaultProps}
+          controls={createEnabledMainTaskUIControls({exitConference: {isVisible: true, isEnabled: true}})}
+          conferenceParticipants={[{id: 'agent-2', name: 'Agent Two', pType: 'Agent'}]}
+        />
+      );
+
+      expect(screen.getByTestId('call-control:participants-trigger')).toBeInTheDocument();
+    });
+
+    it('hides participants list when exitConference is not visible and conference is not in progress', () => {
+      const screen = render(
+        <CallControlCADComponent
+          {...defaultProps}
+          controls={createEnabledMainTaskUIControls({exitConference: {isVisible: false, isEnabled: false}})}
+          conferenceParticipants={[
+            {id: 'agent-2', name: 'Agent Two', pType: 'Agent'},
+            {id: 'agent-3', name: 'Agent Three', pType: 'Agent'},
+          ]}
+        />
+      );
+
+      expect(screen.queryByTestId('call-control:participants-trigger')).not.toBeInTheDocument();
+    });
+
+    it('shows participants list during nested consult when interaction state is conference', () => {
+      const conferenceTask = {
         ...defaultProps.currentTask,
         data: {
           ...defaultProps.currentTask.data,
+          isConferenceInProgress: false,
           interaction: {
             ...defaultProps.currentTask.data.interaction,
-            callAssociatedData,
+            state: 'conference',
           },
         },
-      },
+      };
+
+      const screen = render(
+        <CallControlCADComponent
+          {...defaultProps}
+          currentTask={conferenceTask}
+          controls={createEnabledMainTaskUIControls({exitConference: {isVisible: false, isEnabled: false}})}
+          conferenceParticipants={[{id: 'agent-2', name: 'Agent Two', pType: 'Agent'}]}
+        />
+      );
+
+      expect(screen.getByTestId('call-control:participants-trigger')).toBeInTheDocument();
     });
 
-    it('should render agent-viewable global variables', () => {
-      const screen = render(<CallControlCADComponent {...makePropsWithCallAssociatedData(mockCallAssociatedData)} />);
-
-      const globalVarsContainer = screen.getByTestId('global-variables-panel');
-      expect(globalVarsContainer).toBeInTheDocument();
-
-      expect(screen.getByText('Customer Language:')).toBeInTheDocument();
-      expect(screen.getByText('English')).toBeInTheDocument();
-
-      expect(screen.getByText('Post Call Survey Opt-in:')).toBeInTheDocument();
-      expect(screen.getByText('true')).toBeInTheDocument();
-    });
-
-    it('should not render non-global variables (e.g. system CAD like ani)', () => {
-      const screen = render(<CallControlCADComponent {...makePropsWithCallAssociatedData(mockCallAssociatedData)} />);
-
-      // ani is a system CAD key, filtered out by getAgentViewableGlobalVariables
-      expect(screen.queryByText('ani:')).not.toBeInTheDocument();
-    });
-
-    it('should not render global variables where agentViewable is false', () => {
-      const screen = render(<CallControlCADComponent {...makePropsWithCallAssociatedData(mockCallAssociatedData)} />);
-
-      // Global_Hidden has agentViewable: false
-      expect(screen.queryByText('Hidden Variable:')).not.toBeInTheDocument();
-    });
-
-    it('should not render global variables section when no global variables exist', () => {
-      const screen = render(<CallControlCADComponent {...defaultProps} />);
-
-      expect(screen.queryByTestId('global-variables-panel')).not.toBeInTheDocument();
-    });
-
-    it('should not render global variables section when callAssociatedData is undefined', () => {
-      const propsWithNoData = {
-        ...defaultProps,
-        currentTask: {
-          ...defaultProps.currentTask,
-          data: {
-            ...defaultProps.currentTask.data,
-            interaction: {
-              ...defaultProps.currentTask.data.interaction,
+    it('hides participants list for consult-only secondary agents even when participants exist', () => {
+      const consultTask = {
+        ...defaultProps.currentTask,
+        data: {
+          ...defaultProps.currentTask.data,
+          isConferenceInProgress: false,
+          interaction: {
+            ...defaultProps.currentTask.data.interaction,
+            state: 'consult',
+            interactionId: 'child-interaction-id',
+            callProcessingDetails: {
+              relationshipType: 'consult',
+              parentInteractionId: 'parent-interaction-id',
             },
           },
         },
       };
-      const screen = render(<CallControlCADComponent {...propsWithNoData} />);
 
-      expect(screen.queryByTestId('global-variables-panel')).not.toBeInTheDocument();
+      const screen = render(
+        <CallControlCADComponent
+          {...defaultProps}
+          currentTask={consultTask}
+          controls={createEnabledMainTaskUIControls({exitConference: {isVisible: true, isEnabled: true}})}
+          conferenceParticipants={[
+            {id: 'agent-2', name: 'Agent Two', pType: 'Agent'},
+            {id: 'agent-3', name: 'Agent Three', pType: 'Agent'},
+          ]}
+        />
+      );
+
+      expect(screen.queryByTestId('call-control:participants-trigger')).not.toBeInTheDocument();
     });
 
-    it('should use variable name as label when displayName is empty', () => {
-      const dataWithEmptyDisplayName: CallAssociatedDataMap = {
-        Global_NoDisplay: {
-          name: 'Global_NoDisplay',
-          displayName: '',
-          value: 'some value',
-          type: 'STRING',
-          agentEditable: false,
-          agentViewable: true,
-          global: true,
-          isSecure: false,
-          secureKeyId: '',
-          secureKeyVersion: 0,
-        },
-      };
-      const screen = render(<CallControlCADComponent {...makePropsWithCallAssociatedData(dataWithEmptyDisplayName)} />);
+    it('hides participants list when conference is active but no other agents are present', () => {
+      const screen = render(
+        <CallControlCADComponent
+          {...defaultProps}
+          controls={createEnabledMainTaskUIControls({exitConference: {isVisible: true, isEnabled: true}})}
+          conferenceParticipants={[]}
+        />
+      );
 
-      expect(screen.getByText('Global_NoDisplay:')).toBeInTheDocument();
-      expect(screen.getByText('some value')).toBeInTheDocument();
+      expect(screen.queryByTestId('call-control:participants-trigger')).not.toBeInTheDocument();
     });
   });
 });

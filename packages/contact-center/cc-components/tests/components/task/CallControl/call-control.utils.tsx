@@ -11,6 +11,7 @@ import {
   isTelephonyMediaType,
   buildCallControlButtons,
   filterButtonsForConsultation,
+  getConsultFilterPhase,
   updateCallStateFromTask,
   handleCloseButtonPress,
   handleWrapupReasonChange,
@@ -689,6 +690,47 @@ describe('CallControl Utils', () => {
       expect(muteButton?.disabled).toBe(true);
     });
 
+    it('should hide hold and transferConsult but keep transfer menu during consult requested', () => {
+      const consultRequestedControls = {
+        activeLeg: 'consult',
+        main: {
+          hold: {isVisible: true, isEnabled: true},
+          transfer: {isVisible: true, isEnabled: false},
+          conference: {isVisible: true, isEnabled: false},
+          end: {isVisible: true, isEnabled: false},
+        },
+        consult: {
+          endConsult: {isVisible: true, isEnabled: true},
+          switch: {isVisible: true, isEnabled: false},
+        },
+      };
+
+      const buttons = buildCallControlButtons(
+        false,
+        false,
+        false,
+        mockMediaTypeInfo,
+        consultRequestedControls as never,
+        true,
+        mockFunctions.handleMuteToggleFunc,
+        mockFunctions.handleToggleHoldFunc,
+        mockFunctions.toggleRecording,
+        mockFunctions.endCall,
+        mockFunctions.exitConference,
+        mockFunctions.switchToConsult,
+        jest.fn(),
+        jest.fn()
+      );
+
+      const holdButton = buttons.find((b) => b.id === 'hold');
+      const transferButton = buttons.find((b) => b.id === 'transfer');
+      const transferConsultButton = buttons.find((b) => b.id === 'transferConsult');
+
+      expect(holdButton?.isVisible).toBe(false);
+      expect(transferButton?.isVisible).toBe(true);
+      expect(transferConsultButton?.isVisible).toBe(false);
+    });
+
     it('should prioritize transferConference over transfer on main leg', () => {
       const nestedControls = {
         activeLeg: 'main',
@@ -759,6 +801,54 @@ describe('CallControl Utils', () => {
     });
   });
 
+  describe('getConsultFilterPhase', () => {
+    it('returns none when endConsult is not visible', () => {
+      expect(getConsultFilterPhase(null, {main: {}, consult: {}} as never)).toBe('none');
+    });
+
+    it('returns pending when self participant is consultInitiated', () => {
+      const task = {
+        data: {
+          agentId: 'agent-1',
+          interaction: {
+            participants: {
+              'agent-1': {consultState: 'consultInitiated'},
+            },
+          },
+        },
+      } as never;
+
+      expect(
+        getConsultFilterPhase(task, {
+          consult: {endConsult: {isVisible: true, isEnabled: true}},
+        } as never)
+      ).toBe('pending');
+    });
+
+    it('returns active when consult destination has joined controls', () => {
+      const task = {
+        data: {
+          agentId: 'agent-1',
+          interaction: {
+            participants: {
+              'agent-1': {consultState: 'consulting'},
+            },
+          },
+        },
+      } as never;
+
+      expect(
+        getConsultFilterPhase(task, {
+          main: {transfer: {isVisible: true, isEnabled: true}},
+          consult: {
+            endConsult: {isVisible: true, isEnabled: true},
+            switch: {isVisible: true, isEnabled: true},
+          },
+        } as never)
+      ).toBe('active');
+    });
+  });
+
   describe('filterButtonsForConsultation', () => {
     const mockButtons = [
       {id: 'mute', icon: '', tooltip: '', className: '', disabled: false, isVisible: true},
@@ -769,29 +859,27 @@ describe('CallControl Utils', () => {
       {id: 'end', icon: '', tooltip: '', className: '', disabled: false, isVisible: true},
     ];
 
-    it('should filter out hold and consult buttons when consultation is initiated and telephony', () => {
-      const result = filterButtonsForConsultation(mockButtons, true, true);
+    it('should filter hold and consult but keep transfer during pending consult', () => {
+      const result = filterButtonsForConsultation(mockButtons, 'pending', true);
 
-      expect(result).toHaveLength(2);
+      expect(result.map((b) => b.id)).toEqual(['mute', 'transfer', 'end']);
+    });
+
+    it('should filter hold, consult, and transfer during active consult', () => {
+      const result = filterButtonsForConsultation(mockButtons, 'active', true);
+
       expect(result.map((b) => b.id)).toEqual(['mute', 'end']);
     });
 
-    it('should not filter buttons when consultation is not initiated', () => {
-      const result = filterButtonsForConsultation(mockButtons, false, true);
+    it('should not filter buttons when consult phase is none', () => {
+      const result = filterButtonsForConsultation(mockButtons, 'none', true);
 
       expect(result).toHaveLength(6);
       expect(result).toBe(mockButtons);
     });
 
     it('should not filter buttons when not telephony', () => {
-      const result = filterButtonsForConsultation(mockButtons, true, false);
-
-      expect(result).toHaveLength(6);
-      expect(result).toBe(mockButtons);
-    });
-
-    it('should not filter buttons when neither consultation initiated nor telephony', () => {
-      const result = filterButtonsForConsultation(mockButtons, false, false);
+      const result = filterButtonsForConsultation(mockButtons, 'active', false);
 
       expect(result).toHaveLength(6);
       expect(result).toBe(mockButtons);

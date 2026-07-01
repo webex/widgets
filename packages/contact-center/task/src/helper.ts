@@ -24,7 +24,6 @@ import store, {
   getConferenceParticipants,
   Participant,
   findMediaResourceId,
-  isInteractionOnHold,
   MEDIA_TYPE_TELEPHONY_LOWER,
   RealTimeTranscriptionData,
 } from '@webex/cc-store';
@@ -36,6 +35,8 @@ import {
 } from './Utils/constants';
 import {isCampaignPreviewTask} from './Utils/task-util';
 import {calculateStateTimerData, calculateConsultTimerData, findLatestConsultMedia} from './Utils/timer-utils';
+import {deriveMainCadHoldState} from './Utils/main-cad-hold.util';
+import {writeConsultHoldAnchor, clearConsultHoldAnchor} from './Utils/task-util';
 import {useHoldTimer} from './Utils/useHoldTimer';
 import {OutdialAniEntriesResponse} from '@webex/contact-center/dist/types/services/config/types';
 
@@ -353,7 +354,7 @@ export const useCallControl = (props: useCallControlProps) => {
   } = props;
   const [isRecording, setIsRecording] = useState(true);
   const [controls, setControls] = useState<TaskUIControls>(currentTask?.uiControls ?? getDefaultUIControls());
-  const [isHeld, setIsHeld] = useState<boolean>(() => (currentTask ? isInteractionOnHold(currentTask) : false));
+  const [holdDataVersion, setHoldDataVersion] = useState(0);
   const [buddyAgents, setBuddyAgents] = useState<BuddyDetails[]>([]);
   const [loadingBuddyAgents, setLoadingBuddyAgents] = useState(false);
   const [consultAgentName, setConsultAgentName] = useState<string>('Consult Agent');
@@ -371,6 +372,9 @@ export const useCallControl = (props: useCallControlProps) => {
   const prevIsConsultingRef = useRef(
     !!(initialControls?.consult?.endConsult?.isVisible || initialControls?.main?.endConsult?.isVisible)
   );
+  const consultVisibilityRef = useRef(
+    !!(initialControls?.consult?.endConsult?.isVisible || initialControls?.main?.endConsult?.isVisible)
+  );
   const [lastTargetType, setLastTargetType] = useState<TargetType>(TARGET_TYPE.AGENT);
   const [conferenceParticipants, setConferenceParticipants] = useState<Participant[]>([]);
   const lastWrapupAuxCodeIdRef = useRef<string | null>(null);
@@ -386,83 +390,61 @@ export const useCallControl = (props: useCallControlProps) => {
       setControls(updatedControls);
     };
     currentTask.on(TASK_EVENTS.TASK_UI_CONTROLS_UPDATED, onControlsUpdated);
+    const bumpHoldDataVersion = () => setHoldDataVersion((version) => version + 1);
+    // Agent 2 receives AgentContactHeld/Unheld (TASK_HOLD/TASK_RESUME), not TASK_SWITCH_CALL.
+    currentTask.on(TASK_EVENTS.TASK_SWITCH_CALL, bumpHoldDataVersion);
+    currentTask.on(TASK_EVENTS.TASK_HOLD, bumpHoldDataVersion);
+    currentTask.on(TASK_EVENTS.TASK_RESUME, bumpHoldDataVersion);
     return () => {
       currentTask.off(TASK_EVENTS.TASK_UI_CONTROLS_UPDATED, onControlsUpdated);
+      currentTask.off(TASK_EVENTS.TASK_SWITCH_CALL, bumpHoldDataVersion);
+      currentTask.off(TASK_EVENTS.TASK_HOLD, bumpHoldDataVersion);
+      currentTask.off(TASK_EVENTS.TASK_RESUME, bumpHoldDataVersion);
     };
   }, [currentTask]);
 
+  // MobX — read task.data media during render so hold updates without TASK_* events.
+  void (
+    currentTask?.data?.interaction?.media &&
+    Object.values(currentTask.data.interaction.media).some(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (media: any) => (media?.mType === 'mainCall' || media?.mType === 'main') && media?.isHold === true
+    )
+  );
+  void (
+    currentTask?.data?.interaction?.media &&
+    Object.values(currentTask.data.interaction.media).some(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (media: any) => media?.mType === 'consult' && media?.isHold === true
+    )
+  );
+  void holdDataVersion;
+
+  const {isHeld, interaction, holdTimestampMs} = deriveMainCadHoldState({
+    currentTask,
+    controls,
+    agentId,
+    holdDataVersion,
+  });
+  const holdTime = useHoldTimer(isHeld, holdTimestampMs, holdDataVersion, interaction?.interactionId);
+
   useEffect(() => {
-    // Prefer the latest state-machine taskData snapshot when available.
-    // currentTask.data can lag one event behind in conference transitions.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const latestTaskData = (currentTask as any)?.state?.context?.taskData;
-    const interaction = latestTaskData?.interaction ?? currentTask?.data?.interaction;
-    const isInConference = interaction?.state === 'conference';
-    const taskEventType = latestTaskData?.type ?? currentTask?.data?.type;
-    const isExplicitUnheldEvent = taskEventType === 'AgentContactUnheld';
-    const isExplicitHeldEvent = taskEventType === 'AgentContactHeld';
-    const currentCallProcessingDetails = interaction?.callProcessingDetails as Record<string, unknown> | undefined;
-    const latestCallProcessingDetails = latestTaskData?.interaction?.callProcessingDetails as
-      | Record<string, unknown>
-      | undefined;
-    const conferenceHoldParticipant =
-      currentCallProcessingDetails?.conferenceHoldParticipant ?? latestCallProcessingDetails?.conferenceHoldParticipant;
-    const conferenceHoldKnown =
-      conferenceHoldParticipant === true ||
-      conferenceHoldParticipant === false ||
-      conferenceHoldParticipant === 'true' ||
-      conferenceHoldParticipant === 'false';
-    const isConferenceParticipantHeld = conferenceHoldParticipant === true || conferenceHoldParticipant === 'true';
+    const isConsulting = !!(controls?.consult?.endConsult?.isVisible || controls?.main?.endConsult?.isVisible);
+    const wasConsulting = consultVisibilityRef.current;
 
-    // During consulting, derive hold state from activeLeg (set synchronously
-    // by the SDK on switch). Raw media data has a timing gap — the backend
-    // hold/unhold response arrives after the switch event, so media.isHold
-    // is stale at the time the controls update.
-    const isConsulting = controls?.consult?.endConsult?.isVisible || controls?.main?.endConsult?.isVisible;
-    if (isInConference) {
-      // Event type is the strongest signal for hold/unhold transitions in
-      // conference flows and should override stale callProcessingDetails.
-      if (isExplicitUnheldEvent) {
-        setIsHeld(false);
-        return;
-      }
-      if (isExplicitHeldEvent) {
-        setIsHeld(true);
-        return;
-      }
-
-      // In conference, hold can be represented either by main leg media hold
-      // or by callProcessingDetails.conferenceHoldParticipant.
-      const mainCallHeld = interaction?.media
-        ? Object.values(interaction.media).some(
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (media: any) => (media?.mType === 'mainCall' || media?.mType === 'main') && media?.isHold === true
-          )
-        : false;
-      if (conferenceHoldKnown) {
-        setIsHeld(mainCallHeld || isConferenceParticipantHeld);
-      } else {
-        // No explicit conference hold signal -> trust current media hold only.
-        // This avoids stale "Resume"/On Hold UI when previous snapshots were held.
-        setIsHeld(mainCallHeld);
-      }
-    } else if (isConsulting) {
-      setIsHeld(controls?.activeLeg === 'consult');
-    } else {
-      const mainCallHeld = interaction?.media
-        ? Object.values(interaction.media).some(
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (media: any) => (media?.mType === 'mainCall' || media?.mType === 'main') && media?.isHold === true
-          )
-        : currentTask
-          ? isInteractionOnHold(currentTask)
-          : false;
-      setIsHeld(mainCallHeld);
+    if (wasConsulting && !isConsulting) {
+      setConsultAgentName('Consult Agent');
+      setConsultTimerLabel(TIMER_LABEL_CONSULTING);
+      setConsultTimerTimestamp(0);
+      setLastTargetType(TARGET_TYPE.AGENT);
+      store.setIsQueueConsultInProgress(false);
+      store.setCurrentConsultQueueId(null);
+      store.setLastConsultDestination(null);
+      store.setConsultStartTimeStamp(null);
     }
-  }, [currentTask, controls]);
 
-  // Use custom hook for hold timer management
-  const holdTime = useHoldTimer(currentTask, controls);
+    consultVisibilityRef.current = isConsulting;
+  }, [controls?.consult?.endConsult?.isVisible, controls?.main?.endConsult?.isVisible]);
 
   useEffect(() => {
     if (currentTask && store?.cc?.agentConfig?.agentId) {
@@ -473,9 +455,13 @@ export const useCallControl = (props: useCallControlProps) => {
   // Function to extract consulting agent information
   const extractConsultingAgent = useCallback(() => {
     try {
-      if (!currentTask?.data?.interaction?.participants) return;
+      // currentTask.data can briefly lag behind the freshest state-machine snapshot.
+      // Prefer the latest taskData so consult UI always reflects the newest consult leg.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const latestTaskData = (currentTask as any)?.state?.context?.taskData;
+      const interaction = latestTaskData?.interaction ?? currentTask?.data?.interaction;
+      if (!interaction?.participants) return;
 
-      const {interaction} = currentTask.data;
       const myAgentId = store.cc.agentConfig?.agentId;
       const currentDestination = store.lastConsultDestination;
       const destinationType = currentDestination?.destinationType;
@@ -654,7 +640,6 @@ export const useCallControl = (props: useCallControlProps) => {
 
   const holdCallback = () => {
     try {
-      setIsHeld(true);
       if (onHoldResume) {
         onHoldResume({
           isHeld: true,
@@ -671,7 +656,6 @@ export const useCallControl = (props: useCallControlProps) => {
 
   const resumeCallback = () => {
     try {
-      setIsHeld(false);
       if (onHoldResume) {
         onHoldResume({
           isHeld: false,
@@ -1218,13 +1202,23 @@ export const useCallControl = (props: useCallControlProps) => {
 
     const consultTimerData = calculateConsultTimerData(currentTask, controls, agentId);
     const justBecameConsulting = isConsulting && !wasConsulting;
+    const interactionId = currentTask?.data?.interaction?.interactionId;
 
-    if (justBecameConsulting && consultTimerData.label === TIMER_LABEL_CONSULT_ON_HOLD) {
+    const nextConsultLabel = consultTimerData.label;
+    const nextConsultTimestamp = consultTimerData.timestamp;
+
+    if (nextConsultLabel === TIMER_LABEL_CONSULT_ON_HOLD) {
+      writeConsultHoldAnchor(interactionId, nextConsultTimestamp);
+    } else {
+      clearConsultHoldAnchor(interactionId);
+    }
+
+    if (justBecameConsulting && nextConsultLabel === TIMER_LABEL_CONSULT_ON_HOLD) {
       setConsultTimerLabel(TIMER_LABEL_CONSULT_REQUESTED);
       setConsultTimerTimestamp(0);
     } else {
-      setConsultTimerLabel(consultTimerData.label);
-      setConsultTimerTimestamp(consultTimerData.timestamp);
+      setConsultTimerLabel(nextConsultLabel);
+      setConsultTimerTimestamp(nextConsultTimestamp);
     }
   }, [currentTask, controls, agentId, consultMediaIsHold, consultMediaId, participantConsultState]);
 

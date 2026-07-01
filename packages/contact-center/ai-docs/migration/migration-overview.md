@@ -269,5 +269,79 @@ const controls = currentTask?.uiControls ?? getDefaultUIControls();
 
 ---
 
+### 2026-06-04 — Consult button disabled after consult ends/fails before consultee answers (multi-login)
+
+**Issue:** On the initiating agent (Agent 1), after a consult to Agent 2 ends or fails before Agent 2 answers (RONA `AgentConsultFailed`, or `AgentConsultEnded` from either Stable Prod or Task Refactor), the held main leg showed `main.consult` visible but disabled, blocking a new consult.
+
+**Root cause:**
+- `CONSULT_END`/`CONSULT_FAILED` were not wired on all states the initiator can be in when the consult ends externally (`HELD`, `CONNECTED`, `CONSULT_INITIATING`), so `clearConsultState`/`handleConsultFailed` did not run and consult context flags stayed stale.
+- `getIsConsultInProgressForConferenceControls` treated a RONA consultee (`isConsulted: true`, `consultState: consultReserved`, `hasJoined: false`) as an active consult, keeping `consultInProgress` true.
+
+**Fix (SDK, kesari-aligned at the wiring/action layers):**
+- `TaskStateMachine.ts`: wire `CONSULT_END` on `HELD` / `CONNECTED` / `CONSULT_INITIATING` and `CONSULT_FAILED` at root, reusing existing `clearConsultState` / `handleConsultFailed` actions and `isPrimaryMediaOnHold` guard.
+- `actions.ts`: `deriveTaskDataUpdates` clears consult flags on terminal events; `clearConsultState` recomputes `uiControls`.
+- `TaskUtils.ts`: `getIsConsultInProgressForConferenceControls` ignores RONA-pending consultees (`consultReserved` + `!hasJoined`).
+- Tests: `uiControlsComputer.ts`, `TaskStateMachine.ts`, `TaskUtils.ts` (149 passing). Widgets consume `task.uiControls.main.consult` — no widget code change.
+
+**Known deviation / planned follow-up (kesari principle 3 & 4):** `uiControlsComputer.ts` currently re-derives consult-ended state from `taskData` (`isConsultEndedForSelf` + `effectiveConsult*` shadow flags, the `isConsultUnansweredFailure` early-return, the consult retry path, and `getVoiceLegState` main-state inference). This duplicates flag-clearing already done in `actions.ts` and is UI-layer inference the principles discourage. Follow-up: remove these blocks and let `uiControlsComputer` read only the cleared context flags + `state`, relying on the existing `canFromConnected` path; keep all current tests green to confirm behavior is unchanged. The 4th touched SDK file (`TaskUtils.ts`) exceeds the 3-file guidance but is a shared selector, so the location is justified.
+
+#### 2026-06-04 (follow-up) — Same button still disabled live, but enabled after refresh: stale consult media in merged `task.data`
+
+**Symptom refinement:** After the wiring/action fixes above, the live consult button was still disabled when Agent 1 ended the consult before Agent 2 answered, yet a page refresh enabled it. A runtime diagnostic marker proved the fresh SDK was loaded and that `Task.computeUIControls()` (not just the state-machine action path) produces the final `uiControls` the widget consumes — computed with `this.data`, not the raw event payload.
+
+**Root cause (data layer):** `Task.reconcileData` (`Task.ts`) is a recursive deep-merge that **never deletes keys**. `AgentConsultCreated` adds the consult-media entry (and consultee participant) into `task.data.interaction.media`/`participants`. The subsequent `AgentConsultEnded` payload contains only the main media, but the merge **retains** the stale consult-media key. `computeUIControls` then sees `hasConsultMedia === true` and the consult-enable branches (`isConsultUnansweredFailure`, the held-main consult retry path) — both gated on `!hasConsultMedia` — fail, leaving consult disabled. Refresh works because hydration overwrites `this.data` cleanly (no stale consult media).
+
+**Fix (SDK, minimal, scoped to consult-ended):** In `uiControlsComputer.ts`, added `effectiveHasConsultMedia = isConsultEndedForSelf ? false : hasConsultMedia` (mirrors the existing `effectiveConsult*` shadow-flag pattern) and used it in the two consult-enable branches. A consult that has ended for self no longer counts its lingering media as active. No change to `reconcileData` (kesari principle 3 — avoid new/changed task-data merge layers and broad blast radius).
+
+**Tests:** `uiControlsComputer.ts` now has a regression test that feeds the **reconciled** `this.data` (stale consult media + stale consultee participant retained) and asserts `main.consult` enabled (43 passing). The earlier end-before-answer test used the clean payload and therefore did not catch this.
+
+**Note on kesari adherence:** This fix extends the same `uiControlsComputer` `taskData`-inference deviation already flagged above (it remains UI-layer compensation for a data-layer merge quirk). The architecturally clean fix is to make `reconcileData` treat the backend `interaction.media`/`participants` snapshot as authoritative (drop removed keys), which would let the `effectiveHasConsultMedia`/`isConsultUnansweredFailure` compensations be deleted — folded into the existing planned follow-up.
+
+#### 2026-06-04 (root-cause fix) — Stale consult media/participant persists across subsequent events (consult disabled after resume)
+
+**Symptom:** With the UI-layer gate above, consult was correctly enabled on the held main leg right after the consult ended. But on the **next** event — Agent 1 resumes the call (`AgentContactUnheld`, a clean snapshot: main media only, `consultState: null`) — the consult button went disabled again. The UI gate (`effectiveHasConsultMedia`) only applies on the consult-end/fail tick (`isConsultEndedForSelf`), so it no longer fired, while the stale consult media still lingered in `this.data`.
+
+**Root cause (the real one, data layer):** `Task.reconcileData` deep-merges and never deletes keys. `interaction.media` and `interaction.participants` are **complete snapshots** from the backend, but the merge keeps consult-leg entries the backend already dropped. So every event after the consult ends still sees a stale consult-media key → `hasConsultMedia === true` → consult blocked. Refresh worked only because hydration overwrites `this.data` cleanly.
+
+**Fix (SDK, `Task.ts`, scoped):** Added `pruneStaleInteractionMaps(incoming)`, called from `updateTaskData` only on the merge path (`shouldOverwrite === false`). It makes **only** `interaction.media` and `interaction.participants` authoritative to the incoming payload (removes keys absent from the incoming snapshot **when** that snapshot provides the map). Every other field stays on the existing generic deep-merge (CAD and other partial updates merge exactly as before — covered by a test). This removes the whack-a-mole: the stale consult leg is gone for resume, transfer, next-consult, and all later events.
+
+**Why both fixes stay:** `pruneStaleInteractionMaps` handles events where the backend already dropped the consult media; `effectiveHasConsultMedia` still handles the consult-end/fail tick where the payload itself can still carry consult media (e.g. `AgentConsultFailed` RONA). They are complementary, not redundant.
+
+**Tests:** `Task.ts` gains two tests — (1) stale consult media + consultee participant are pruned on a clean resume snapshot while CAD merge is preserved; (2) a partial update that omits the interaction maps does **not** prune them. Full task suite green: `Task`, `uiControlsComputer`, `TaskStateMachine`, `TaskUtils`, `TaskManager`, `Voice` — **285 passing**.
+
+**Kesari note:** Fixing the existing `reconcileData` snapshot semantics (rather than adding UI heuristics) is the correct, root-cause layer. It is scoped to the two snapshot maps to avoid disturbing the intended partial-merge behavior, and it is the change that makes the earlier `uiControlsComputer` compensations eventually removable (still tracked as the planned follow-up).
+
+#### 2026-06-04 (regression fix) — Initiator's task cleared on RONA when consult fails while in CONSULTING
+
+**Issue:** When Agent 1 consults Agent 2 and Agent 2 does not answer (RONA), Agent 1's task was **cleared entirely** instead of returning to the main leg with call controls. The widget crashed with `Cannot read properties of null (reading 'uiControls')` because the task was removed from the collection.
+
+**Backend sequence (Agent 1):** `AgentConsultFailed` (`reason: RONA_TIMER_EXPIRED`, interaction `state: consult`, main media `isHold: true`) immediately followed by `AgentConsultEnded` (interaction `state: connected`, only main media remaining).
+
+**Root cause (state machine, `TaskStateMachine.ts`):** When `AgentConsulting` arrives during consult ringing, the initiator moves `CONSULT_INITIATING → CONSULTING` before the consultee answers. The `CONSULTING` state had **no `CONSULT_FAILED` handler**, so `AgentConsultFailed` fell through to the root `CONSULT_FAILED` handler, which runs `handleConsultFailed` (sets `consultInitiator = false`) **without leaving `CONSULTING`**. The trailing `AgentConsultEnded` then hit the `CONSULTING` `CONSULT_END` transitions: the initiator branch (`consultInitiator === true → HELD`) no longer matched (it had just been cleared), so it fell through to the final "consulted agent" branch → `TaskState.TERMINATED`, whose `entry: ['cleanupResources']` removes the task from the collection.
+
+**Fix (SDK, `TaskStateMachine.ts`, scoped):** Added a `CONSULT_FAILED` handler to the `CONSULTING` state mirroring `CONSULT_INITIATING`: `consultFromConference → CONFERENCING`, else `isPrimaryMediaOnHold → HELD`, else `→ CONNECTED` (all with `updateTaskData` + `handleConsultFailed`). Now the initiator leaves `CONSULTING` for the held main leg on `AgentConsultFailed`, and the trailing `AgentConsultEnded` is handled safely by `HELD`'s `CONSULT_END` (stays on the main leg, clears consult state). The consultee (Agent 2) path is untouched: a RONA consultee is in `OFFERED`, whose `CONSULT_FAILED → TERMINATED + emitTaskReject` still correctly clears their incoming notification.
+
+**Tests:** Added a `TaskStateMachine` regression test driving the initiator through `HELD → CONSULT → CONSULT_INITIATING → CONSULT_SUCCESS → CONSULTING`, then `CONSULT_FAILED` (asserts `HELD`, not `CONSULTING`) and `CONSULT_END` (asserts final state `HELD`, never `TERMINATED`, `consultInitiator === false`, `activeLeg === 'main'`, `main.consult` enabled). Full `TaskStateMachine` suite green — **46 passing**.
+
+**Kesari note:** Fix lives in the state-machine layer (the authoritative owner of lifecycle transitions), mirrors the existing sibling-state handler rather than introducing a new heuristic, and does not touch `uiControlsComputer` (read-only) or `actions.ts` (context-only). The consultee `OFFERED` path is left as-is.
+
+#### 2026-06-04 (widget fix) — Resume shows disabled Resume button + On-hold timer after a conference consult is ended
+
+**Issue:** Customer + Agent 1 + Agent 2 are in a conference. Agent 1 consults a DN (Agent 3), ends the consult, then clicks Resume. After the resume, the main CAD card showed a **disabled Resume button and an On-hold timer**. Expected: a **disabled Pause button and no On-hold timer**. The SDK `uiControls` were already correct (`main.hold = {isVisible: true, isEnabled: false}`); the defect was purely the widget's `isHeld` derivation.
+
+**Root cause (widget, `task/src/Utils/main-cad-hold.util.ts`):** Both the Pause/Resume icon and the On-hold timer are driven by `isHeld` from `deriveMainCadHoldState`. For a non-consulted agent it preferred the state-machine snapshot (`currentTask.state.context.taskData`) over `currentTask.data`. `TaskManager` refreshes `currentTask.data` on **every** event, but the snapshot only updates when the state machine runs a matching transition. After the conference consult ended, `currentTask.data` was the fresh `AgentContactUnheld` (main `isHold: false`), while the snapshot lagged at `AgentConsultEnded` (main `isHold: true`). `getMainCadHold` short-circuits at `if (mainCallMediaHeld) return true;` (reading the stale snapshot) **before** the conference `isExplicitUnheldEvent` branch could run → `isHeld: true` → Resume icon + `resolveMainCadHoldTimestampMs` returns a non-null timestamp (timer shown).
+
+**Fix (widget, scoped):** Explicit `AgentContactHeld`/`AgentContactUnheld` events are the authoritative signal for the main leg hold state, and `currentTask.data` is always refreshed for them. For these events (non-consulted only), `deriveMainCadHoldState` now sources both `interaction` and `taskEventType` from `currentTask.data` instead of the snapshot. All other event types keep the existing snapshot-first preference (so the original conference media-lag handling is untouched).
+
+**Tests:** Added a `helper.ts` regression test — conference + DN consult ended, `currentTask.data` = `AgentContactUnheld` (main not held) while the snapshot lags at `AgentConsultEnded` (main held) → asserts `isHeld === false`. Existing hold tests (`AgentContactHeld` forces held, `AgentContactUnheld` + stale `conferenceHoldParticipant` forces not-held, all consulted-agent cases) remain green — full `helper.ts` suite **186 passing**.
+
+**Kesari note:** Fix is confined to the widget hold-derivation utility (no SDK change needed; `uiControls` were already correct). It narrows an existing heuristic to trust the authoritative data view for explicit hold/unhold events rather than adding a new special case, and leaves the consulted-agent and non-hold-event paths unchanged.
+
+---
+
 _Created: 2026-03-09_
 _Updated: 2026-05-20 (migration complete reference; per-leg TaskUIControls; SDK→store→widgets flow; outdial fix log; popup model)_
+_Updated: 2026-06-04 (consult-button-disabled-after-end-before-answer fix log + kesari deviation follow-up note)_
+_Updated: 2026-06-04 (stale-consult-media-in-reconciled-task-data root cause + effectiveHasConsultMedia fix + regression test)_
+_Updated: 2026-06-04 (root-cause data-layer fix: Task.pruneStaleInteractionMaps makes interaction.media/participants authoritative; fixes consult disabled after resume; 285 task tests green)_
+_Updated: 2026-06-04 (regression fix: CONSULTING gains CONSULT_FAILED handler so initiator returns to main leg on RONA instead of TERMINATED clearing the task; 46 TaskStateMachine tests green)_

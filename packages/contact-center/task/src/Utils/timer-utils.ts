@@ -1,4 +1,5 @@
 import {ITask, TaskUIControls} from '@webex/cc-store';
+import {Interaction} from '@webex/contact-center';
 import {
   TIMER_LABEL_WRAP_UP,
   TIMER_LABEL_POST_CALL,
@@ -6,6 +7,7 @@ import {
   TIMER_LABEL_CONSULT_REQUESTED,
   TIMER_LABEL_CONSULTING,
 } from './constants';
+import {resolveConsultHoldTimestampMs} from './task-util';
 
 /**
  * Timer data structure containing label and timestamp
@@ -15,25 +17,120 @@ export interface TimerData {
   timestamp: number;
 }
 
+type MediaEntry = {
+  mType?: string;
+  isHold?: boolean;
+  holdTimestamp?: number | null;
+  lastUpdated?: number;
+  joinTimestamp?: number;
+  eventTime?: number;
+  createdAt?: number;
+  mediaResourceId?: string;
+  participants?: string[];
+};
+
+type InteractionParticipant = {
+  consultTimestamp?: number;
+  lastUpdated?: number;
+  consultState?: string;
+  isConsulted?: boolean;
+  isWrapUp?: boolean;
+  wrapUpTimestamp?: number | null;
+  currentState?: string | null;
+  currentStateTimestamp?: number | null;
+};
+
+type InteractionWithMedia = Interaction & {
+  media?: Record<string, MediaEntry>;
+  participants?: Record<string, InteractionParticipant>;
+};
+
+type TaskStateSnapshot = {
+  interaction?: InteractionWithMedia;
+};
+
+type TaskWithStateSnapshot = ITask & {
+  state?: {
+    context?: {
+      taskData?: TaskStateSnapshot;
+    };
+  };
+};
+
+const getMediaEntries = (media: InteractionWithMedia['media']): MediaEntry[] =>
+  media ? (Object.values(media) as MediaEntry[]) : [];
+
+const getMediaRecencyScore = (media: MediaEntry, fallbackIndex = 0): number => {
+  const candidateTimestamps = [
+    media.lastUpdated,
+    media.holdTimestamp,
+    media.joinTimestamp,
+    media.eventTime,
+    media.createdAt,
+  ];
+
+  for (const value of candidateTimestamps) {
+    if (typeof value === 'number' && Number.isFinite(value) && value > 0) {
+      return value;
+    }
+  }
+
+  return fallbackIndex;
+};
+
 /**
  * Find the latest (most recently added) consult media from the interaction.
  *
  * After transfer → re-consult the backend may leave the OLD consult media
- * in the interaction alongside the NEW one.  Using Array.find() would return
- * the first (stale) entry; we need the last one which is the active consult.
+ * in the interaction alongside the NEW one. Prefer held consult entries when
+ * present (switch-to-main), otherwise pick the most recent consult leg.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function findLatestConsultMedia(interaction: any): any {
-  if (!interaction?.media) return null;
-  const allMedia = Object.values(interaction.media);
-  let latest = null;
-  for (const m of allMedia) {
-    if ((m as {mType: string}).mType === 'consult') {
-      latest = m;
-    }
+export function findLatestConsultMedia(interaction: InteractionWithMedia | undefined): MediaEntry | null {
+  if (!interaction?.media) {
+    return null;
   }
-  return latest;
+
+  const consultEntries = getMediaEntries(interaction.media).filter((media) => media.mType === 'consult');
+
+  if (consultEntries.length === 0) {
+    return null;
+  }
+
+  if (consultEntries.length === 1) {
+    return consultEntries[0];
+  }
+
+  const heldEntries = consultEntries.filter((media) => media.isHold === true);
+  const candidates = heldEntries.length > 0 ? heldEntries : consultEntries;
+
+  return candidates.reduce((latest, current, index) => {
+    const latestScore = getMediaRecencyScore(latest, index - 1);
+    const currentScore = getMediaRecencyScore(current, index);
+    return currentScore >= latestScore ? current : latest;
+  });
 }
+
+const resolveConsultInteraction = (
+  currentTask: ITask,
+  agentId: string
+): {
+  interaction: InteractionWithMedia | undefined;
+  participant: InteractionParticipant | undefined;
+  isConsultedAgent: boolean;
+} => {
+  const taskWithSnapshot = currentTask as TaskWithStateSnapshot;
+  const latestTaskData = taskWithSnapshot.state?.context?.taskData;
+  const snapInteraction = latestTaskData?.interaction;
+  const dataInteraction = currentTask.data?.interaction as InteractionWithMedia | undefined;
+  const participant = dataInteraction?.participants?.[agentId] ?? snapInteraction?.participants?.[agentId];
+
+  const isConsultedAgent = Boolean(currentTask.data?.isConsulted || participant?.isConsulted === true);
+
+  // Initiator (Agent 1): snapshot is fresher on switch-to-main. Consulted (Agent 2): task.data is fresher.
+  const interaction = isConsultedAgent ? (dataInteraction ?? snapInteraction) : (snapInteraction ?? dataInteraction);
+
+  return {interaction, participant, isConsultedAgent};
+};
 
 /**
  * Calculate state timer label and timestamp based on task state.
@@ -50,7 +147,7 @@ export function calculateStateTimerData(
     return defaultTimer;
   }
 
-  const interaction = currentTask.data?.interaction;
+  const interaction = currentTask.data?.interaction as InteractionWithMedia | undefined;
   const participant = interaction?.participants?.[agentId];
 
   if (!participant) {
@@ -93,11 +190,8 @@ export function calculateStateTimerData(
  * Calculate consult timer label and timestamp based on consult state.
  * Handles consult on hold vs active consulting states.
  *
- * Approach mirrors the original next-branch pattern: derive consultCallHeld
- * from the consult media's isHold flag (task data), NOT from SDK uiControls
- * properties like activeLeg or switch button visibility.  Those UI properties
- * have different lifecycle timing and broader semantics that cause false
- * positives (e.g., switch.isVisible is true during CONSULT_INITIATING).
+ * Derives consult on hold from consult media isHold (not uiControls alone).
+ * EP/DN and agent-name: isHold may be true before holdTimestamp arrives — still show Consult on Hold.
  */
 export function calculateConsultTimerData(
   currentTask: ITask | null,
@@ -110,10 +204,9 @@ export function calculateConsultTimerData(
     return defaultTimer;
   }
 
-  const interaction = currentTask.data?.interaction;
-  const participant = interaction?.participants?.[agentId];
+  const {interaction, participant, isConsultedAgent} = resolveConsultInteraction(currentTask, agentId);
 
-  if (!participant) {
+  if (!participant || !interaction) {
     return defaultTimer;
   }
 
@@ -128,34 +221,37 @@ export function calculateConsultTimerData(
     return defaultTimer;
   }
 
-  // Use the LATEST consult media, not the first. After transfer → re-consult
-  // the backend keeps the old consult media (with stale isHold=true) alongside
-  // the new one. Array.find() would return the old stale entry.
   let consultMedia = findLatestConsultMedia(interaction);
 
-  // Consulted agent (Agent 2): their call is mType "mainCall" not "consult".
-  // When the initiator switches away, Agent 2's mainCall is put on hold.
-  if (!consultMedia && interaction?.media) {
-    const mainMedia = Object.values(interaction.media).find((m) => (m as {mType: string}).mType === 'mainCall');
+  // Consulted agent (Agent 2 EP/DN): single mainCall leg — only when no consult media exists.
+  if (!consultMedia && isConsultedAgent && interaction.media) {
+    const mainMedia = getMediaEntries(interaction.media).find((media) => media.mType === 'mainCall');
     if (mainMedia) {
       consultMedia = mainMedia;
     }
   }
 
   const isConsultMediaHeld = consultMedia?.isHold === true;
-  const consultHoldTimestamp = consultMedia?.holdTimestamp ?? null;
-  const consultCallHeld = isConsultMediaHeld && consultHoldTimestamp !== null && consultHoldTimestamp > 0;
+  const isConsultInitiated =
+    participant.consultState === 'consultInitiated' || currentTask.data?.consultStatus === 'consultInitiated';
+  const consultAccepted = !isConsultInitiated && Boolean(participant.consultTimestamp);
 
-  if (consultCallHeld) {
+  // Initiator parked on main before media catches up (common in EP/DN switch-to-main).
+  const consultParkedByActiveLeg =
+    !isConsultedAgent &&
+    consultAccepted &&
+    controls.activeLeg === 'main' &&
+    Boolean(controls.consult?.endConsult?.isVisible || controls.main?.endConsult?.isVisible);
+
+  const isConsultOnHold = isConsultMediaHeld || consultParkedByActiveLeg;
+
+  if (isConsultOnHold) {
     return {
       label: TIMER_LABEL_CONSULT_ON_HOLD,
-      timestamp: consultHoldTimestamp,
+      timestamp: resolveConsultHoldTimestampMs(consultMedia, interaction.interactionId),
     };
   }
 
-  // Distinguish "Consult Requested" from "Consulting" using participant data.
-  const isConsultInitiated =
-    participant?.consultState === 'consultInitiated' || currentTask.data?.consultStatus === 'consultInitiated';
   const label = isConsultInitiated ? TIMER_LABEL_CONSULT_REQUESTED : TIMER_LABEL_CONSULTING;
 
   return {
