@@ -82,14 +82,16 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
   const callAssociatedData = currentTask?.data?.interaction?.callAssociatedData as CallAssociatedDataMap | undefined;
   const latestGlobalVariables = getAgentViewableGlobalVariables(callAssociatedData);
 
-  // Persist global variables across task updates — some store refreshes
-  // replace currentTask with a snapshot that omits callAssociatedData,
-  // which causes getAgentViewableGlobalVariables to return [].
-  // We intentionally keep the previous values when length === 0 because
-  // an empty array indicates missing data, not a legitimate clearing of
-  // variables.  Variables are never cleared mid-call by the backend.
-  // Reset when the interaction changes so stale CAD from a previous task
-  // is never shown on a new call.
+  // Persist and accumulate global variables across task updates.
+  // Each websocket event may only carry a subset of the full
+  // callAssociatedData, so we merge new variables into the ref by name
+  // instead of replacing the whole array.  This ensures all global
+  // variables seen during the interaction are displayed — matching the
+  // regular desktop behaviour.
+  // When length === 0 we keep previous values (missing data, not a
+  // legitimate clearing — variables are never cleared mid-call).
+  // Reset when the interaction changes so stale CAD from a previous
+  // task is never shown on a new call.
   const interactionId = currentTask.data.interaction.interactionId;
   const globalVariablesRef = useRef(latestGlobalVariables);
   const prevInteractionIdRef = useRef(interactionId);
@@ -97,7 +99,9 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
     prevInteractionIdRef.current = interactionId;
     globalVariablesRef.current = latestGlobalVariables;
   } else if (latestGlobalVariables.length > 0) {
-    globalVariablesRef.current = latestGlobalVariables;
+    const existingMap = new Map(globalVariablesRef.current.map((v) => [v.name, v]));
+    latestGlobalVariables.forEach((v) => existingMap.set(v.name, v));
+    globalVariablesRef.current = Array.from(existingMap.values());
   }
   const globalVariables = globalVariablesRef.current;
 
