@@ -1,3 +1,12 @@
+<!-- ───────────────────────────────
+  Template:     Rule (example)
+  Template-ID:  rule
+  Generates:    ai-docs/rules/<name>.md
+  Description:  One enforceable repo rule — the rule, its rationale, how to follow it, and how it's enforced.
+  Library ver:  0.1.0-draft
+  Last updated: 2026-06-18
+─────────────────────────────── -->
+
 # Rule: Access the SDK only through the store
 
 > Start here → repo root [`AGENTS.md`](../../AGENTS.md) (agent entry, carries the critical rules) · router [`SPEC_INDEX.md`](../SPEC_INDEX.md). This is an `ai-docs/rules/` fill-in; the folder README explains generic-vs-per-language routing; the repo-wide rules digest is `../RULES.md`.

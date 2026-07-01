@@ -32,7 +32,7 @@ This repo is a client-side React/Web-Component widget library. It hosts no netwo
 |---|---|---|---|---|
 | Auth credential | `access_token` (host-supplied), SDK user token | Never persisted; passed to SDK only, held transiently in memory | Never log — confirmed: only error/status strings are logged in token paths, never the token value (`packages/contact-center/store/src/storeEventsWrapper.ts:994-998`) | Carried by the SDK over its own HTTPS transport; not handled by this repo |
 | Agent/customer PII | Caller name, phone number (DNIS/ANI), task/interaction data, transcript text, address-book entries | Held in memory as MobX observables only; no datastore in this repo | Never log raw PII; widget log lines carry `{module, method}` context, not payloads | SDK-owned HTTPS |
-| Telemetry props | Widget metrics props passed to `metricsLogger` | Not persisted by this repo | **Risk: props are NOT sanitized today** — `metricsLogger` documents this explicitly (`packages/contact-center/ui-logging/src/metricsLogger.ts:73-76`). Do not pass PII-bearing objects as metrics props; see Known Sensitive Areas | Telemetry sink owned by host/SDK |
+| Telemetry props | Widget metrics props passed to `metricsLogger` | Not persisted by this repo | **Risk: props are NOT sanitized today** — noted in the `havePropsChanged` JSDoc `@remarks` ("we dont sanitize our props right now"), `packages/contact-center/ui-logging/src/metricsLogger.ts:73-76`. Do not pass PII-bearing objects as metrics props; see Known Sensitive Areas | Telemetry sink owned by host/SDK |
 
 ## Input Validation & Output Encoding Posture
 - Untrusted input enters only via host-supplied custom-element props/events (type-coerced by r2wc — `packages/contact-center/cc-widgets/src/wc.ts`) and via SDK event payloads (typed through `store.types`). Rendered output goes through React, which escapes interpolated text by sink; widget render paths use no `dangerouslySetInnerHTML`. There are no SQL/shell/query sinks in this client library, so parameterization is N/A.
@@ -40,7 +40,7 @@ This repo is a client-side React/Web-Component widget library. It hosts no netwo
 ## Known Sensitive Areas & Accepted Risks
 | Area | Risk | Mitigation / why accepted | Owner |
 |---|---|---|---|
-| `ui-logging` metrics props | Widget props are logged without sanitization (`metricsLogger.ts:73-76`) | Callers must not pass PII-bearing objects as metrics props; sanitization is a documented future enhancement | cc-ui-logging maintainers |
+| `ui-logging` metrics props | Widget props are logged without sanitization — acknowledged in the `havePropsChanged` JSDoc `@remarks` (`metricsLogger.ts:73-76`) | Callers must not pass PII-bearing objects as metrics props; sanitization is noted as a future enhancement | cc-ui-logging maintainers |
 | `getAccessToken()` SDK gap | `webex.credentials.getUserToken()` is `@ts-expect-error`-typed (SDK API not yet typed) (`storeEventsWrapper.ts:990-992`) | Token value is returned to the caller and never logged; failures log only an error message | cc-store maintainers |
 
 ## Reporting & Review

@@ -1,6 +1,6 @@
 # Glossary — webex-widgets
 
-> Start here → root [`AGENTS.md`](../AGENTS.md) (agent entry) · router [`SPEC_INDEX.md`](SPEC_INDEX.md) · system [`ARCHITECTURE.md`](ARCHITECTURE.md). Then this doc; related module specs are indexed in `SPEC_INDEX.md`.
+> Start here → root [`AGENTS.md`](../AGENTS.md) (agent entry) · router [`SPEC_INDEX.md`](SPEC_INDEX.md) · system [`ARCHITECTURE.md`](ARCHITECTURE.md). Then this doc; related: [`CONTRACTS.md`](CONTRACTS.md); module specs indexed in `SPEC_INDEX.md`.
 > Context-efficiency: link to canonical docs — don't duplicate them; load on demand, not upfront.
 
 > Read this before naming anything. Use the canonical name exactly; never introduce a synonym. Find a term
@@ -55,4 +55,4 @@
 
 ## Maintenance
 - When a new domain concept is introduced (new entity, event, state), add it here in the same change.
-- Cross-reference: module specs → `SPEC_INDEX.md`; SDK surface → `contact-centre-sdk-apis/contact-center.json`.
+- Cross-reference: module specs → `SPEC_INDEX.md`; contracts → [`CONTRACTS.md`](CONTRACTS.md); SDK surface → `@webex/contact-center` types (`node_modules/@webex/contact-center/dist/types/index.d.ts`).

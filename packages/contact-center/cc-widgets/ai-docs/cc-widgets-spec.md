@@ -11,7 +11,7 @@
 | Doc kind | Module spec |
 | Coverage score | Pending coverage assessment |
 | Generated from | `module-spec` @ SDLC template library `0.1.0-draft` |
-| generated_by / approved_by / updated_at | generated_by `migration agent` / approved_by `[NEEDS HUMAN INPUT]` / updated_at `2026-06-29` |
+| generated_by / approved_by / updated_at | generated_by `migration agent` / approved_by `pending` / updated_at `2026-06-29` |
 | Validation status | not-run |
 
 ## Evidence Rules

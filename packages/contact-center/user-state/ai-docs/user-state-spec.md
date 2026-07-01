@@ -11,7 +11,7 @@
 | Doc kind | Module spec |
 | Coverage score | Pending coverage assessment |
 | Generated from | `module-spec` @ SDLC template library `0.1.0-draft` |
-| generated_by / approved_by / updated_at | migration agent / [NEEDS HUMAN INPUT] / 2026-06-29 |
+| generated_by / approved_by / updated_at | migration agent / pending / 2026-06-29 |
 | Validation status | not-run |
 
 Coverage score: `Pending coverage assessment` before the first report; after assessment, replace with `<0-100%>` plus the report path/evidence. Keep manifest coverage state outside the rendered module doc metadata.
@@ -246,7 +246,7 @@ classDiagram
 - **UC-3 Rejected state change:** SDK rejects → `currentState` reverts to the previous value, error logged, loading flag cleared. Evidence: `src/helper.ts`, `tests/helper.ts` "should handle errors from setAgentState and revert state".
 - **UC-4 External/custom state applied:** Store `customState` set with a `developerName` (e.g. RONA) → `customState` effect fires `onStateChange(customState)` directly. Evidence: `src/helper.ts`, `tests/helper.ts` "should call onStateChange with customState if provided".
 
-### UI Flow (per use case)
+## UI Flow
 - Primary surface is a single state dropdown rendered by `UserStateComponent`: lists Available plus the store's `idleCodes`. While a change is in flight, `isSettingAgentStatus` is `true` (loading). The state-duration timer shows `elapsedTime` (seconds, clamped ≥ 0); the idle-code timer shows `lastIdleStateChangeElapsedTime` and is hidden when that value is `-1` (Available). On a render error the widget shows nothing (empty fragment). Detailed presentation belongs to `cc-components` (`UserStateComponent`).
 
 ## State Model

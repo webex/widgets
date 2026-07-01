@@ -1,6 +1,6 @@
 # AGENTS.md — webex-widgets (Contact Center)
 
-> You are the agent entry point — read first. Next: router [`SPEC_INDEX.md`](ai-docs/SPEC_INDEX.md) · system [`ARCHITECTURE.md`](ai-docs/ARCHITECTURE.md). Load this + `SPEC_INDEX.md` first; pull module/standing docs on demand.
+> You are the agent entry point — read first. Next: router [`SPEC_INDEX.md`](ai-docs/SPEC_INDEX.md) · system [`ARCHITECTURE.md`](ai-docs/ARCHITECTURE.md). Load this + `SPEC_INDEX.md` first; pull module/standing docs on demand. (Multi-repo: a workspace-level `AGENTS.md` may sit above this one.)
 > Context-efficiency: link to canonical docs — don't duplicate them; keep this file under ~200 lines.
 
 > Cross-tool context file. Auto-loaded by AI coding agents. A module's high-level design lives in its
@@ -40,6 +40,7 @@ packages/contact-center/
 ├── store/          # @webex/cc-store — MobX singleton; sole SDK access point
 ├── cc-components/  # @webex/cc-components — shared presentational React primitives
 ├── cc-widgets/     # @webex/cc-widgets — r2wc Web Component wrappers (aggregator)
+├── cc-digital-channels/  # @webex/cc-digital-channels — digital channels (chat/email/social) widget
 ├── station-login/  # @webex/cc-station-login — agent login widget
 ├── user-state/     # @webex/cc-user-state — agent state widget
 ├── task/           # @webex/cc-task — CallControl, IncomingTask, OutdialCall, TaskList, CallControlCAD
@@ -53,7 +54,7 @@ playwright/               # E2E suites
 
 ## Critical Rules
 1. **Code is the source of truth.** Never invent an SDK method, event, path, flag, or constant — read the
-   real file (SDK surface: `contact-centre-sdk-apis/contact-center.json`).
+   real file (SDK surface: `@webex/contact-center` package types at `node_modules/@webex/contact-center/dist/types/index.d.ts`).
 2. **Ask before coding.** Present a plan / Spec Summary; wait for confirmation before non-trivial changes.
 3. **One-directional dependency flow.** `cc-widgets → widgets → cc-components → store → SDK`. Never import
    upstream (cc-components must not import widget packages; widgets must not import cc-widgets).
@@ -98,7 +99,7 @@ Always use `yarn workspace` commands for tests — never `npx jest` directly. Wo
 |---|---|---|---|
 | ticket-tracker | Jira (`jira-eng-*`) | MCP connector / REST | STOP and ask — never guess |
 | source-host | GitHub `webex/widgets` | `gh` CLI | STOP and ask |
-| SDK reference | `contact-centre-sdk-apis/contact-center.json` | local file (TypeDoc) | STOP and ask — never invent an API |
+| SDK reference | `@webex/contact-center` types (`node_modules/@webex/contact-center/dist/types/index.d.ts`) | installed package `.d.ts` | STOP and ask — never invent an API |
 
 ---
 **SDD coverage:** this repo's per-module coverage state lives in `.sdd/manifest.json` (human mirror in

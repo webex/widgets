@@ -1,3 +1,12 @@
+<!-- ───────────────────────────────
+  Template:     ADR (example)
+  Template-ID:  adr
+  Generates:    ai-docs/adr/NNNN-<kebab-title>.md
+  Description:  Standing architecture decision record — context, decision, alternatives rejected, consequences.
+  Library ver:  0.1.0-draft
+  Last updated: 2026-06-18
+─────────────────────────────── -->
+
 # ADR-0001 — One-directional dependency flow with a single SDK boundary
 
 > Start here → repo root [`AGENTS.md`](../../AGENTS.md) (agent entry) · router [`SPEC_INDEX.md`](../SPEC_INDEX.md) · system [`ARCHITECTURE.md`](../ARCHITECTURE.md). This is a standing `ai-docs/adr/` decision record; the folder README explains numbering/supersession.

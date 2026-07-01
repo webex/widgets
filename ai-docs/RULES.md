@@ -1,6 +1,6 @@
 # Rules — webex-widgets
 
-> Start here → root [`AGENTS.md`](../AGENTS.md) (agent entry, carries the critical rules) · router [`SPEC_INDEX.md`](SPEC_INDEX.md) · system [`ARCHITECTURE.md`](ARCHITECTURE.md). Then this doc; per-language detail in `patterns/`.
+> Start here → root [`AGENTS.md`](../AGENTS.md) (agent entry, carries the critical rules) · router [`SPEC_INDEX.md`](SPEC_INDEX.md) · system [`ARCHITECTURE.md`](ARCHITECTURE.md). Then this doc; per-language detail in `patterns/`, individual enforceable rules in `rules/`.
 > Context-efficiency: link to canonical docs — don't duplicate them; load on demand, not upfront.
 
 > These rules are checkable. Every MUST rule records its source requirement/risk, verification path,
@@ -15,6 +15,7 @@ Coverage state is mirrored from `.sdd/manifest.json`. Every module is currently 
 | `store` (`@webex/cc-store`, `packages/contact-center/store`) | DRAFT | Tier-1, sole SDK access point (`store.ts` `getInstance`). Spec `store/ai-docs/store-spec.md` is unvalidated — verify observables/SDK proxying against `store/src/store.ts` and `store/src/storeEventsWrapper.ts`. |
 | `cc-components` (`@webex/cc-components`, `packages/contact-center/cc-components`) | DRAFT | Tier-1 presentational primitives. Verify prop contracts against `cc-components/src/` before trusting the spec. |
 | `cc-widgets` (`@webex/cc-widgets`, `packages/contact-center/cc-widgets`) | DRAFT | Tier-1 r2wc aggregator. The custom-element registry lives in `cc-widgets/src/wc.ts` — cross-check element names/attrs there. |
+| `cc-digital-channels` (`@webex/cc-digital-channels`, `packages/contact-center/cc-digital-channels`) | DRAFT | Tier-1 digital-channels widget (`widget-cc-digital-channels`). Verify against `cc-digital-channels/src/`. |
 | `station-login` (`@webex/cc-station-login`, `packages/contact-center/station-login`) | DRAFT | Tier-1 widget. Verify against `station-login/src/`. |
 | `user-state` (`@webex/cc-user-state`, `packages/contact-center/user-state`) | DRAFT | Tier-1 widget. Verify state/idle-code logic against `user-state/src/helper.ts`. |
 | `task` (`@webex/cc-task`, `packages/contact-center/task`) | DRAFT | Tier-1 bundle of sub-widgets CallControl, CallControlCAD, IncomingTask, OutdialCall, TaskList. Verify per-widget behavior against `task/src/{Widget}/index.tsx` and `task/src/helper.ts`. |

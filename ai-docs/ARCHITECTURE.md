@@ -70,7 +70,6 @@ re-render. Grounded in `packages/contact-center/store/src/store.ts` and `storeEv
 | `@r2wc/react-to-web-component` | external | React→Web Component wrapping (cc-widgets only) | Per package.json |
 
 ## State Model
-<!-- Include if: the repo holds client-side state [condition-id: repo.holds_client_state] -->
 The store holds the client-side session model: agent profile/state, login options (teams, device type),
 task map and per-task lifecycle, and fetched lists (queues, entry points, buddy agents, address book).
 Transitions are driven by user-invoked `store.cc.*` methods and by SDK events the store proxies; all
@@ -88,7 +87,24 @@ must mount in both React hosts and framework-agnostic hosts (via r2wc). Prefer m
 to avoid unnecessary re-renders. Backward compatibility of exported surfaces and custom-element names is a
 release concern (see `CONTRACTS.md`).
 
-<!-- Include if: the repo is a monorepo [condition-id: repo.is_monorepo] -->
+## Dependency / Interaction Topology
+The who-calls-whom call graph and the SDK event topology. Calls are synchronous (React render / hook →
+store method); events are asynchronous (SDK → store observables → observing widgets). Grounded in
+`packages/contact-center/store/src/storeEventsWrapper.ts` (event wiring) and each package's `helper.ts`.
+```
+Host ──call──> Widget(observer) ──call──> Hook(helper.ts) ──call──> Store ──call──> @webex/contact-center SDK
+SDK  ──event(CC_EVENTS/TASK_EVENTS)──> Store(runInAction) ──observable change──> Widget(observer) re-render
+Hook ──call──> cc-components (props) ──call──> ui-logging(withMetrics)
+```
+| From | To | Kind | Purpose |
+|---|---|---|---|
+| Widget (observer) | Custom hook (`helper.ts`) | call | Read derived state, obtain action callbacks |
+| Custom hook | Store (`store.cc.*`, mutators) | call | Invoke SDK operations; mutate observables via `runInAction` |
+| Store | `@webex/contact-center` SDK | call | All telephony/agent/task operations (sole SDK boundary) |
+| `@webex/contact-center` SDK | Store | event | `CC_EVENTS` / `TASK_EVENTS` proxied into observables (`storeEventsWrapper.ts`) |
+| Store observables | Widget (observer) | event | MobX reactivity re-renders observing widgets |
+| Widget / component | `ui-logging` (`withMetrics`) | call | Emit mount/unmount/error telemetry |
+
 ## Package Map & Inter-Package Dependencies
 - **Workspace tooling:** Yarn 4.5.1 (PnP). Workspace globs: `packages/**/*`, `packages/contact-center/*`,
   `widgets-samples/**/**`.
@@ -109,13 +125,11 @@ store        ──> (no internal CC deps) ──> @webex/contact-center SDK
 - **Different-kind package:** `packages/@webex/widgets` is the legacy **meetings** widget family — it does
   not participate in the CC dependency flow or share the CC store.
 
-<!-- Include if: the repo is published/consumed as a package [condition-id: repo.published_package] -->
 ## Release & Versioning
 - Published as `@webex/*` packages; release driven by `semantic-release` (`yarn release:widgets`).
 - Public surfaces (exports, custom-element tag names, events) follow semver; breaking changes need a major
   bump and a consumer transition note. See `CONTRACTS.md` for the compatibility policy.
 
-<!-- Include if: the repo is embedded into a host application [condition-id: repo.embedded_in_host] -->
 ## Host Integration & Theming
 - Widgets mount in two ways: React components (import from the widget package or `cc-widgets`) and custom
   elements (r2wc, registered by `cc-widgets`). Hosts must load Momentum UI CSS
@@ -131,3 +145,13 @@ store        ──> (no internal CC deps) ──> @webex/contact-center SDK
 | Architecture decisions | `adr/` | To understand why major design choices were made and what alternatives were rejected |
 | Repo patterns | `patterns/` | To follow established implementation conventions (TypeScript, React, MobX, testing) |
 | Enforceable rules | `RULES.md` + `rules/` | To understand constraints every architecture-affecting change must obey |
+
+## WS6 References
+N/A — this repository has no WS6 / platform / enterprise-architecture specs. It is a self-contained UI
+library over the `@webex/contact-center` SDK; the SDK's own contract (`node_modules/@webex/contact-center/dist/types/index.d.ts`)
+is the only upstream architecture reference, and it is already cited in `CONTRACTS.md` and the store spec.
+Add rows here if a WS6 spec is later published for this component.
+
+| WS6 artifact | Relevance to this repo | Link |
+|---|---|---|
+| _none_ | — | — |

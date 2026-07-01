@@ -11,7 +11,7 @@
 | Doc kind | Module spec |
 | Coverage score | Pending coverage assessment |
 | Generated from | `module-spec` @ SDLC template library `0.1.0-draft` |
-| generated_by / approved_by / updated_at | generated_by: migration agent / approved_by: [NEEDS HUMAN INPUT] / updated_at: 2026-06-29 |
+| generated_by / approved_by / updated_at | generated_by: migration agent / approved_by: pending / updated_at: 2026-06-29 |
 | Validation status | not-run |
 
 Coverage score: `Pending coverage assessment` before the first report; after assessment, replace with
@@ -31,7 +31,7 @@ as approved unknowns only when the human explicitly defers or does not know.
 |---|---|---|---|
 | `ai-docs/_archive/pre-sdlc-migration/packages/contact-center/store/ai-docs/AGENTS.md` | overview / API / usage | migrated | Overview, Purpose, Public Surface, Use Cases; usage snippets condensed to behavior. |
 | `ai-docs/_archive/pre-sdlc-migration/packages/contact-center/store/ai-docs/ARCHITECTURE.md` | architecture / sequence diagrams | reconciled | Design Overview, Data Flow, Sequence Diagram(s), Pitfalls. Diagrams re-derived from current `store.ts` / `storeEventsWrapper.ts`; see Conflicts note below for drift corrected. |
-| `contact-centre-sdk-apis/contact-center.json` | SDK API reference (TypeDoc) | reference-only | Linked as the authoritative source for SDK-shaped types/methods consumed via `store.cc.*`. |
+| `@webex/contact-center` package types (`node_modules/@webex/contact-center/dist/types/index.d.ts`) | SDK API reference (installed `.d.ts`) | reference-only | Linked as the authoritative source for SDK-shaped types/methods consumed via `store.cc.*`. |
 
 ## Overview
 `@webex/cc-store` is the single shared MobX store for every Webex Contact Center widget. It is the sole boundary between widgets and the `@webex/contact-center` SDK: widgets never import the SDK directly — they read observables and call methods on the store, which proxies to `store.cc.*`. The package is structured in two layers. `Store` (`src/store.ts`) is a `makeAutoObservable` singleton (`Store.getInstance()`) that holds raw observable state and owns initialization/registration with the SDK. `StoreWrapper` (`src/storeEventsWrapper.ts`) is the default export — it wraps the singleton, getter-proxies every observable, owns all SDK event wiring (CC + task events), exposes mutators (all writes funnel through `runInAction`), list-fetch helpers, callback registration, and task-lifecycle handling.
@@ -73,8 +73,8 @@ This module is consumed as an imported SDK/code API (the `@webex/cc-store` packa
 
 | Contract ID | Type | Surface | Purpose | Compatibility / deprecation | Schema / detail link | Root index |
 |---|---|---|---|---|---|---|
-| `cc-widgets.store` | SDK | default export `store` (StoreWrapper singleton); `init(options, setupEventListeners)`, `registerCC(webex?)`, observable getters, mutators, `getBuddyAgents/getQueues/getEntryPoints/getAddressBookEntries`, `setOnError`, `setCCCallback/removeCCCallback`, `setTaskCallback/removeTaskCallback` | Sole SDK access point and shared reactive state for all CC widgets | stable semver; observable getter set is additive | `packages/contact-center/store/src/storeEventsWrapper.ts`, `src/store.ts` | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
-| `store.types` | SDK | type re-exports (`IContactCenter`, `ITask`, `Profile`, `Team`, `IStore`, `IStoreWrapper`, `InitParams`, `RealTimeTranscriptionData`, ~20 more) | Typed domain surface for widget code | stable semver; SDK-shaped types track the SDK | `packages/contact-center/store/src/store.types.ts:334-366`; SDK: `contact-centre-sdk-apis/contact-center.json` | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
+| `store.instance` | SDK | default export `store` (StoreWrapper singleton); `init(options, setupEventListeners)`, `registerCC(webex?)`, observable getters, mutators, `getBuddyAgents/getQueues/getEntryPoints/getAddressBookEntries`, `setOnError`, `setCCCallback/removeCCCallback`, `setTaskCallback/removeTaskCallback` | Sole SDK access point and shared reactive state for all CC widgets | stable semver; observable getter set is additive | `packages/contact-center/store/src/storeEventsWrapper.ts`, `src/store.ts` | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
+| `store.types` | SDK | type re-exports (`IContactCenter`, `ITask`, `Profile`, `Team`, `IStore`, `IStoreWrapper`, `InitParams`, `RealTimeTranscriptionData`, ~20 more) | Typed domain surface for widget code | stable semver; SDK-shaped types track the SDK | `packages/contact-center/store/src/store.types.ts:334-366`; SDK: `@webex/contact-center` types (`node_modules/@webex/contact-center/dist/types/index.d.ts`) | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
 | `store.constants` | SDK | value/enum exports (`CC_EVENTS`, `TASK_EVENTS`, `ConsultStatus`, `LoginOptions`, `CAMPAIGN_PREVIEW_*`, `DESKTOP`/`EXTENSION`/`DIAL_NUMBER`) | Event names + domain enums for widgets | stable semver | `packages/contact-center/store/src/store.types.ts:368-403` | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
 | `store.task-utils` | SDK | pure selectors (`isIncomingTask`, `getTaskStatus`, `getConsultStatus`, `getConferenceParticipants`, `getConferenceParticipantsCount`, `isInteractionOnHold`, `findHoldStatus`, `findHoldTimestamp`, etc.) | Read-only derivations over `ITask` | stable semver | `packages/contact-center/store/src/task-utils.ts` | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
 

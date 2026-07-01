@@ -123,7 +123,7 @@ Invoke these skills at the right workflow stage — they enforce discipline that
 | Bug fix template | `ai-docs/templates/existing-widget/bug-fix.md` |
 | Feature enhancement template | `ai-docs/templates/existing-widget/feature-enhancement.md` |
 | Playwright E2E template (4-step) | `ai-docs/templates/playwright/` |
-| SDK API reference (TypeDoc JSON) | `contact-centre-sdk-apis/contact-center.json` |
+| SDK API reference (installed `.d.ts`) | `node_modules/@webex/contact-center/dist/types/index.d.ts` |
 | Per-package architecture & agent docs | `packages/contact-center/{pkg}/ai-docs/` |
 
 When working in a specific package, always read that package's `ai-docs/AGENTS.md` and `ai-docs/ARCHITECTURE.md` first.

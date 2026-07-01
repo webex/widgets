@@ -12,7 +12,7 @@
 | Doc kind | Module spec |
 | Coverage score | Pending coverage assessment |
 | Generated from | `module-spec` @ SDLC template library `0.1.0-draft` |
-| generated_by / approved_by / updated_at | migration agent / [NEEDS HUMAN INPUT] / 2026-06-29 |
+| generated_by / approved_by / updated_at | migration agent / pending / 2026-06-29 |
 | Validation status | not-run |
 
 Coverage score: `Pending coverage assessment` before the first report; after assessment, replace with `<0-100%>` plus the report path/evidence. Keep manifest coverage state outside the rendered module doc metadata.
@@ -65,26 +65,26 @@ test-fixtures/src/
 ## Public Surface
 Internal Surface — consumed only by other packages' Jest tests in this monorepo. There is no network/event/CLI contract; the contract is the set of TypeScript exports below, all re-exported through `src/index.ts`. Each is summarized here — read the source file for the exact object shape.
 
-| Contract ID | Type | Surface | Purpose | Compatibility / deprecation | Schema / detail link | Root index |
+| Contract ID | Type | Surface | Purpose | Compatibility / deprecation | Schema / detail link | Entry point |
 |---|---|---|---|---|---|---|
-| `test-fixtures.mockCC` | SDK export | `mockCC: IContactCenter` | Mock SDK instance; methods are `jest.fn()` so tests can spy/override | Shape must track `IContactCenter`; removing a mocked method may break consumer tests | `src/fixtures.ts` | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
-| `test-fixtures.mockProfile` | SDK export | `mockProfile: Profile` | Full agent profile (teams, idle/wrapup codes, dial plan, flags) | Track `Profile`; additive fields safe | `src/fixtures.ts` | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
-| `test-fixtures.mockTask` | SDK export | `mockTask: ITask` | Connected telephony task with nested `interaction`; methods are `jest.fn()` | Track `ITask` | `src/fixtures.ts` | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
-| `test-fixtures.makeMockTask` | SDK export | `makeMockTask(overrides?): ITask` | Factory producing a fresh task with deep `data`/`interaction` overrides and fresh `jest.fn()`s | Override shape `MakeMockTaskOverrides` | `src/fixtures.ts` | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
-| `test-fixtures.mockCampaignTask` | SDK export | `mockCampaignTask: ITask` | Campaign-preview-shaped task (CPD + outbound details) | Track `ITask` + campaign CPD keys | `src/fixtures.ts` | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
-| `test-fixtures.makeMockCampaignTask` | SDK export | `makeMockCampaignTask(overrides?): ITask` | Factory for campaign-preview task with `cpd`/`interaction`/`data` overrides | Override shape `IMakeMockCampaignTaskOverrides` | `src/fixtures.ts` | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
-| `test-fixtures.mockCampaignCpd` | data export | `mockCampaignCpd: Record<string,string>` | Default campaign-preview call-processing-detail values | Additive keys safe | `src/fixtures.ts` | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
-| `test-fixtures.mockQueueDetails` | data export | `mockQueueDetails` | Two fully-populated queue config objects for transfer/queue tests | Additive fields safe | `src/fixtures.ts` | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
-| `test-fixtures.mockAgents` | data export | `mockAgents` | Buddy-agent list for transfer/consult tests | Additive fields safe | `src/fixtures.ts` | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
-| `test-fixtures.mockEntryPointsResponse` | data export | `mockEntryPointsResponse: EntryPointListResponse` | Outdial entry-points response | Track `EntryPointListResponse` | `src/fixtures.ts` | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
-| `test-fixtures.mockAddressBookEntriesResponse` | data export | `mockAddressBookEntriesResponse: AddressBookEntriesResponse` | Address-book entries response | Track `AddressBookEntriesResponse` | `src/fixtures.ts` | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
-| `test-fixtures.makeMockAddressBook` | SDK export | `makeMockAddressBook(getEntriesMock?): AddressBook` | Factory for an `AddressBook` mock; default `getEntries` resolves the entries response | Track `AddressBook` | `src/fixtures.ts` | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
-| `test-fixtures.mockCallAssociatedData` | data export | `mockCallAssociatedData` | Call-associated-data variants (global, viewable/hidden, secure) | Additive keys safe | `src/fixtures.ts` | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
-| `test-fixtures.mockIncomingTaskData` | data export | `mockIncomingTaskData` | Incoming-task UI data keyed `webRTC`/`extension`/`social`/`chat` | Additive scenario keys safe | `src/incomingTaskFixtures.ts` | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
-| `test-fixtures.mockTaskData` | data export | `mockTaskData` | Task-list UI data keyed `active`/`incoming`/`action`/`selection` | Additive scenario keys safe | `src/taskListFixtures.ts` | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
-| `test-fixtures.mockOutdialCallProps` | data export | `mockOutdialCallProps` | `mockCC` spread + `startOutdial`/`getOutdialANIEntries` jest mocks | Spread of `mockCC` | `src/components/task/outdialCallFixtures.ts` | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
-| `test-fixtures.mockAniEntries` | data export | `mockAniEntries` | Outdial ANI entry list | Additive fields safe | `src/components/task/outdialCallFixtures.ts` | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
-| `test-fixtures.mockCCWithAni` | data export | `mockCCWithAni` | `mockCC` + `agentConfig.outdialANIId` + ANI-resolving `getOutdialAniEntries` | Spread of `mockCC` | `src/components/task/outdialCallFixtures.ts` | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
+| `test-fixtures.mockCC` | SDK export | `mockCC: IContactCenter` | Mock SDK instance; methods are `jest.fn()` so tests can spy/override | Shape must track `IContactCenter`; removing a mocked method may break consumer tests | `src/fixtures.ts` | internal (`src/index.ts`) |
+| `test-fixtures.mockProfile` | SDK export | `mockProfile: Profile` | Full agent profile (teams, idle/wrapup codes, dial plan, flags) | Track `Profile`; additive fields safe | `src/fixtures.ts` | internal (`src/index.ts`) |
+| `test-fixtures.mockTask` | SDK export | `mockTask: ITask` | Connected telephony task with nested `interaction`; methods are `jest.fn()` | Track `ITask` | `src/fixtures.ts` | internal (`src/index.ts`) |
+| `test-fixtures.makeMockTask` | SDK export | `makeMockTask(overrides?): ITask` | Factory producing a fresh task with deep `data`/`interaction` overrides and fresh `jest.fn()`s | Override shape `MakeMockTaskOverrides` | `src/fixtures.ts` | internal (`src/index.ts`) |
+| `test-fixtures.mockCampaignTask` | SDK export | `mockCampaignTask: ITask` | Campaign-preview-shaped task (CPD + outbound details) | Track `ITask` + campaign CPD keys | `src/fixtures.ts` | internal (`src/index.ts`) |
+| `test-fixtures.makeMockCampaignTask` | SDK export | `makeMockCampaignTask(overrides?): ITask` | Factory for campaign-preview task with `cpd`/`interaction`/`data` overrides | Override shape `IMakeMockCampaignTaskOverrides` | `src/fixtures.ts` | internal (`src/index.ts`) |
+| `test-fixtures.mockCampaignCpd` | data export | `mockCampaignCpd: Record<string,string>` | Default campaign-preview call-processing-detail values | Additive keys safe | `src/fixtures.ts` | internal (`src/index.ts`) |
+| `test-fixtures.mockQueueDetails` | data export | `mockQueueDetails` | Two fully-populated queue config objects for transfer/queue tests | Additive fields safe | `src/fixtures.ts` | internal (`src/index.ts`) |
+| `test-fixtures.mockAgents` | data export | `mockAgents` | Buddy-agent list for transfer/consult tests | Additive fields safe | `src/fixtures.ts` | internal (`src/index.ts`) |
+| `test-fixtures.mockEntryPointsResponse` | data export | `mockEntryPointsResponse: EntryPointListResponse` | Outdial entry-points response | Track `EntryPointListResponse` | `src/fixtures.ts` | internal (`src/index.ts`) |
+| `test-fixtures.mockAddressBookEntriesResponse` | data export | `mockAddressBookEntriesResponse: AddressBookEntriesResponse` | Address-book entries response | Track `AddressBookEntriesResponse` | `src/fixtures.ts` | internal (`src/index.ts`) |
+| `test-fixtures.makeMockAddressBook` | SDK export | `makeMockAddressBook(getEntriesMock?): AddressBook` | Factory for an `AddressBook` mock; default `getEntries` resolves the entries response | Track `AddressBook` | `src/fixtures.ts` | internal (`src/index.ts`) |
+| `test-fixtures.mockCallAssociatedData` | data export | `mockCallAssociatedData` | Call-associated-data variants (global, viewable/hidden, secure) | Additive keys safe | `src/fixtures.ts` | internal (`src/index.ts`) |
+| `test-fixtures.mockIncomingTaskData` | data export | `mockIncomingTaskData` | Incoming-task UI data keyed `webRTC`/`extension`/`social`/`chat` | Additive scenario keys safe | `src/incomingTaskFixtures.ts` | internal (`src/index.ts`) |
+| `test-fixtures.mockTaskData` | data export | `mockTaskData` | Task-list UI data keyed `active`/`incoming`/`action`/`selection` | Additive scenario keys safe | `src/taskListFixtures.ts` | internal (`src/index.ts`) |
+| `test-fixtures.mockOutdialCallProps` | data export | `mockOutdialCallProps` | `mockCC` spread + `startOutdial`/`getOutdialANIEntries` jest mocks | Spread of `mockCC` | `src/components/task/outdialCallFixtures.ts` | internal (`src/index.ts`) |
+| `test-fixtures.mockAniEntries` | data export | `mockAniEntries` | Outdial ANI entry list | Additive fields safe | `src/components/task/outdialCallFixtures.ts` | internal (`src/index.ts`) |
+| `test-fixtures.mockCCWithAni` | data export | `mockCCWithAni` | `mockCC` + `agentConfig.outdialANIId` + ANI-resolving `getOutdialAniEntries` | Spread of `mockCC` | `src/components/task/outdialCallFixtures.ts` | internal (`src/index.ts`) |
 
 Compatibility notes:
 - Adding a new fixture export or an additive field on existing data fixtures is non-breaking. Removing or renaming an export, or removing a method on `mockCC`/`mockTask`, can break consumer test files that reference it — grep consumers before changing.

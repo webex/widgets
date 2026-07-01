@@ -41,7 +41,7 @@ Feature flags are not owned or defaulted by this repo — they are read from the
 
 ## Compliance / Certifications
 - FedRAMP: PR template (`.github/PULL_REQUEST_TEMPLATE.md`) compliance is mandatory and must not be regressed (COMPLETES, Change Type, test scenarios, GAI Policy, Checklist sections).
-- PII: agent/customer PII (names, phone numbers, task/transcript data) passes through widgets at runtime and must never be logged or persisted — see [`SECURITY.md`](SECURITY.md). Metrics props are not yet sanitized (`packages/contact-center/ui-logging/src/metricsLogger.ts:73-76`); do not pass PII-bearing objects to `metricsLogger`.
+- PII: agent/customer PII (names, phone numbers, task/transcript data) passes through widgets at runtime and must never be logged or persisted — see [`SECURITY.md`](SECURITY.md). Metrics props are not yet sanitized — noted in the `havePropsChanged` JSDoc `@remarks` (`packages/contact-center/ui-logging/src/metricsLogger.ts:73-76`); do not pass PII-bearing objects to `metricsLogger`.
 
 ## Maintenance
 - Update the relevant row in the same change that adds/changes/removes a surface, dependency, limit, or flag (e.g. add a flag here when `getFeatureFlags()` in `util.ts` gains a key).

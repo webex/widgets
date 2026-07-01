@@ -11,7 +11,7 @@
 | Doc kind | Module spec |
 | Coverage score | Pending coverage assessment |
 | Generated from | `module-spec` @ SDLC template library `0.1.0-draft` |
-| generated_by / approved_by / updated_at | migration agent / [NEEDS HUMAN INPUT] / 2026-06-29 |
+| generated_by / approved_by / updated_at | migration agent / pending / 2026-06-29 |
 | Validation status | not-run |
 
 Coverage score: `Pending coverage assessment` before the first report; after assessment, replace with
@@ -108,7 +108,7 @@ plain React component. The authoritative prop contract is `WebexMeetingsWidget.p
 
 | Contract ID | Type | Surface | Purpose | Compatibility / deprecation | Schema / detail link | Root index |
 |---|---|---|---|---|---|---|
-| `meetings-widgets.WebexMeetingsWidget` | SDK (React component export) | `import {WebexMeetingsWidget} from '@webex/widgets'` | Embed a full Webex meeting experience in a React host | Public; export name + required props are the breaking surface (semver) | `packages/@webex/widgets/src/index.js:1`; props in `packages/@webex/widgets/src/widgets/WebexMeetings/WebexMeetings.jsx:231-255` | Not catalogued in `../../../../ai-docs/CONTRACTS.md` (CC-only) — see Source Material Register `[NEEDS HUMAN INPUT]` |
+| `meetings-widgets.WebexMeetingsWidget` | SDK (React component export) | `import {WebexMeetingsWidget} from '@webex/widgets'` | Embed a full Webex meeting experience in a React host | Public; export name + required props are the breaking surface (semver) | `packages/@webex/widgets/src/index.js:1`; props in `packages/@webex/widgets/src/widgets/WebexMeetings/WebexMeetings.jsx:231-255` | Not catalogued in `../../../../ai-docs/CONTRACTS.md` (CC-only; this is the legacy meetings family) |
 
 Props (from `WebexMeetings.jsx:231-255`):
 

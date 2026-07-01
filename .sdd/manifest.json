@@ -55,6 +55,15 @@
       "tier": 1
     },
     {
+      "id": "cc-digital-channels",
+      "package": "@webex/cc-digital-channels",
+      "path": "packages/contact-center/cc-digital-channels",
+      "spec": "packages/contact-center/cc-digital-channels/ai-docs/cc-digital-channels-spec.md",
+      "responsibility": "Digital channels (chat/email/social) widget; embeds the digital-interactions experience via the store.",
+      "coverageState": "DRAFT",
+      "tier": 1
+    },
+    {
       "id": "station-login",
       "package": "@webex/cc-station-login",
       "path": "packages/contact-center/station-login",
@@ -112,6 +121,19 @@
   ],
   "contracts": {
     "index": "ai-docs/CONTRACTS.md",
-    "sdkApiReference": "contact-centre-sdk-apis/contact-center.json"
+    "sdkApiReference": "node_modules/@webex/contact-center/dist/types/index.d.ts"
+  },
+  "standingDocs": {
+    "AGENTS.md": "AGENTS.md",
+    "ARCHITECTURE.md": "ai-docs/ARCHITECTURE.md",
+    "SPEC_INDEX.md": "ai-docs/SPEC_INDEX.md",
+    "RULES.md": "ai-docs/RULES.md",
+    "GLOSSARY.md": "ai-docs/GLOSSARY.md",
+    "SECURITY.md": "ai-docs/SECURITY.md",
+    "CONTRACTS.md": "ai-docs/CONTRACTS.md",
+    "SERVICE_STATE.md": "ai-docs/SERVICE_STATE.md",
+    "GETTING_STARTED.md": "ai-docs/GETTING_STARTED.md",
+    "REVIEW_CHECKLIST.md": "ai-docs/REVIEW_CHECKLIST.md",
+    "DATA_MODEL.md": "N/A — repo owns no persistent datastore; all domain data is fetched from the @webex/contact-center SDK at runtime."
   }
 }

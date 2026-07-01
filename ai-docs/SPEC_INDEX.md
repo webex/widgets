@@ -12,6 +12,7 @@
 | `store/` | MobX singleton; global CC state; proxies SDK events; sole SDK access point | DRAFT | `packages/contact-center/store/ai-docs/store-spec.md` |
 | `cc-components/` | Shared presentational React UI primitives | DRAFT | `packages/contact-center/cc-components/ai-docs/cc-components-spec.md` |
 | `cc-widgets/` | r2wc Web Component wrappers (aggregator) | DRAFT | `packages/contact-center/cc-widgets/ai-docs/cc-widgets-spec.md` |
+| `cc-digital-channels/` | Digital channels (chat/email/social) widget | DRAFT | `packages/contact-center/cc-digital-channels/ai-docs/cc-digital-channels-spec.md` |
 | `station-login/` | Agent login: team + device selection | DRAFT | `packages/contact-center/station-login/ai-docs/station-login-spec.md` |
 | `user-state/` | Agent state: state, idle codes, timer | DRAFT | `packages/contact-center/user-state/ai-docs/user-state-spec.md` |
 | `task/` | Task widget bundle: CallControl, IncomingTask, OutdialCall, TaskList, CallControlCAD | DRAFT | `packages/contact-center/task/ai-docs/task-spec.md` |
@@ -24,7 +25,7 @@
 |---|---|
 | Understanding the system | `ARCHITECTURE.md` |
 | Working in a module | that module's `<module>-spec.md` (see registry); load only the relevant section |
-| Changing the store / SDK access | `store-spec.md` + `ARCHITECTURE.md` Component Interaction; check `contact-centre-sdk-apis/contact-center.json` |
+| Changing the store / SDK access | `store-spec.md` + `ARCHITECTURE.md` Component Interaction; check `@webex/contact-center` types (`node_modules/@webex/contact-center/dist/types/index.d.ts`) |
 | Adding/changing a public surface (export, custom element, event) | `CONTRACTS.md` first, then the owning module spec |
 | A UI/component change | `cc-components-spec.md` + `patterns/react-patterns.md` |
 | A new widget | new-widget templates (`ai-docs/templates/new-widget/`); create the module spec as part of the change |
@@ -64,6 +65,6 @@ The intake record confirms scope/modules **against the code** and sets the chang
 | Getting started | `ai-docs/GETTING_STARTED.md` | Clone/build/test loop, workspace layout |
 | Decision records | `ai-docs/adr/` | Standing ADRs — why the architecture is the way it is |
 | Review catalog | `ai-docs/REVIEW_CHECKLIST.md` | 6-core + 4-coverage + 3-cross-cutting review checks |
-| SDK reference | `contact-centre-sdk-apis/contact-center.json` | TypeDoc of `@webex/contact-center` — verify every SDK call |
+| SDK reference | `@webex/contact-center` types (`node_modules/@webex/contact-center/dist/types/index.d.ts`) | installed SDK `.d.ts` surface — verify every SDK call |
 
 _No `DATA_MODEL.md`: this repo owns no persistent datastore (all domain data comes from the SDK at runtime)._
