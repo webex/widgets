@@ -181,6 +181,7 @@ jobs:
         run: yarn run test:styles
 
   e2e_test_meetings:
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     continue-on-error: true
     needs: [install, build]
@@ -215,8 +216,20 @@ jobs:
           path: '**/dist'
           key: dist-${{ env.rid }}
 
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
       - name: Test E2E
-        run: yarn workspace @webex/widgets run test:e2e
+        run: yarn run test:e2e:meetings
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: meetings-report
+          path: |
+            **/playwright-report/**
+            **/test-results/**
+          retention-days: 10
 
   e2e_test_cc_widgets:
     timeout-minutes: 50
@@ -263,7 +276,7 @@ jobs:
             echo "PLAYWRIGHT_PASSWORD=\"${{ secrets.PLAYWRIGHT_PASSWORD }}\"" >> ./.env
 
       - name: Run Playwright tests
-        run: yarn run test:e2e
+        run: yarn run test:e2e:cc
 
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
