@@ -104,6 +104,12 @@ describe('CampaignTaskListItem', () => {
     expect(screen.queryByTestId('mock-task-timer')).not.toBeInTheDocument();
   });
 
+  it('should render handle time timer when timerDisplayMode is handle-time', async () => {
+    await renderComponent({isAcceptClicked: false, handleTimestamp: Date.now(), timerDisplayMode: 'handle-time'});
+    expect(await screen.findByTestId('mock-task-timer')).toBeInTheDocument();
+    expect(screen.queryByTestId('mock-countdown')).not.toBeInTheDocument();
+  });
+
   it('should NOT render handle time timer when handleTimestamp is undefined', async () => {
     await renderComponent({isAcceptClicked: true, handleTimestamp: undefined});
     expect(screen.queryByTestId('mock-task-timer')).not.toBeInTheDocument();

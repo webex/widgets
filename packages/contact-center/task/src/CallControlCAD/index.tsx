@@ -40,8 +40,6 @@ const CallControlCADInternal: React.FunctionComponent<CallControlProps> = observ
       onRecordingToggle,
       onToggleMute,
       logger,
-      deviceType,
-      featureFlags,
       isMuted,
       conferenceEnabled,
       agentId,

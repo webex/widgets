@@ -41,13 +41,20 @@ const TaskListComponent: React.FunctionComponent<TaskListComponentProps> = (prop
   const tasks = getTasksArray(taskList!);
 
   // Only one campaign preview should appear — pick the most recent active one
-  const activeCampaignId = hasCampaignPreviewEnabled ? getActiveCampaignPreviewId(tasks, agentId) : null;
+  const activeCampaignId = hasCampaignPreviewEnabled ? getActiveCampaignPreviewId(tasks) : null;
 
   return (
     <ul className="task-list" data-testid="task-list">
       {tasks.map((task, index) => {
         // Extract all task data using the utility function
         const taskData = extractTaskListItemData(task, agentId, logger, isDeclineButtonEnabled, isBrowser);
+        const cpd = task.data.interaction.callProcessingDetails as unknown as CampaignCallProcessingDetails | undefined;
+        const isCampaignPreview = isCampaignPreviewTask(task);
+        const agentJoined = hasAgentJoinedTask(task, agentId);
+        const shouldRenderCampaignAsHandleTime = hasCampaignPreviewEnabled && isCampaignPreview;
+        const startTimeStamp = shouldRenderCampaignAsHandleTime
+          ? (taskData.startTimeStamp ?? task.data.interaction.createdTimestamp ?? Date.now())
+          : taskData.startTimeStamp;
 
         // Log task rendering
         logger.info('CC-Widgets: TaskList: rendering task list', {
@@ -56,14 +63,11 @@ const TaskListComponent: React.FunctionComponent<TaskListComponentProps> = (prop
         });
 
         // Campaign preview handling: render only the active one, skip stale duplicates
-        if (hasCampaignPreviewEnabled && isCampaignPreviewTask(task) && hasAgentJoinedTask(task, agentId)) {
+        if (hasCampaignPreviewEnabled && isCampaignPreview && agentJoined) {
           if (task.data.interactionId !== activeCampaignId) {
             return null; // skip stale campaign preview
           }
           const interactionId = task.data.interactionId;
-          const cpd = task.data.interaction.callProcessingDetails as unknown as
-            | CampaignCallProcessingDetails
-            | undefined;
           const campaignId = cpd?.campaignId ?? '';
 
           return (
@@ -94,14 +98,14 @@ const TaskListComponent: React.FunctionComponent<TaskListComponentProps> = (prop
             interactionId={task.data.interactionId}
             title={taskData.title}
             state={taskData.displayState}
-            startTimeStamp={taskData.startTimeStamp}
+            startTimeStamp={startTimeStamp}
             selected={isCurrentTaskSelected(task, currentTask)}
             key={index}
-            isIncomingTask={taskData.isIncomingTask}
+            isIncomingTask={shouldRenderCampaignAsHandleTime ? false : taskData.isIncomingTask}
             queue={taskData.virtualTeamName}
             acceptTask={() => acceptTask(task)}
             declineTask={() => declineTask(task)}
-            ronaTimeout={taskData.ronaTimeout}
+            ronaTimeout={shouldRenderCampaignAsHandleTime ? undefined : taskData.ronaTimeout}
             onTaskSelect={createTaskSelectHandler(task, currentTask, onTaskSelect, agentId)}
             acceptText={taskData.acceptText}
             disableAccept={taskData.disableAccept}

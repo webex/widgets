@@ -1,5 +1,11 @@
 import {MEDIA_CHANNEL, TaskListItemData, getCallerIdentifier, CampaignCallProcessingDetails} from '../task.types';
-import {isIncomingTask, ILogger, ITask, CAMPAIGN_PREVIEW_CAMPAIGN_TYPES} from '@webex/cc-store';
+import {
+  isIncomingTask,
+  ILogger,
+  ITask,
+  CAMPAIGN_PREVIEW_CAMPAIGN_TYPES,
+  CAMPAIGN_PREVIEW_OUTBOUND_TYPES,
+} from '@webex/cc-store';
 
 interface ParticipantWithJoin {
   hasJoined?: boolean;
@@ -73,11 +79,12 @@ export const hasAgentJoinedTask = (task: ITask, agentId: string | undefined): bo
   return participants?.[agentId]?.hasJoined === true;
 };
 /**
- * Returns the interactionId of the most recent active campaign preview task
- * that the agent has joined. Only one campaign preview should be visible at a time.
+ * Returns the interactionId of the most recent campaign preview task.
+ * Only one campaign preview should be visible at a time; a newer incoming
+ * offer supersedes an older hydrated preview.
  */
-export const getActiveCampaignPreviewId = (tasks: ITask[], agentId: string | undefined): string | null => {
-  const activePreviews = tasks.filter((t) => isCampaignPreviewTask(t) && hasAgentJoinedTask(t, agentId));
+export const getActiveCampaignPreviewId = (tasks: ITask[]): string | null => {
+  const activePreviews = tasks.filter((t) => isCampaignPreviewTask(t));
   if (activePreviews.length === 0) return null;
   // Pick the most recent by createdTimestamp
   activePreviews.sort(

@@ -67,6 +67,7 @@ function CallControlComponent(props: CallControlComponentProps) {
     getQueuesFetcher,
     consultTransferOptions,
     conferenceEnabled = true,
+    isCampaignCall,
   } = props;
 
   useEffect(() => {

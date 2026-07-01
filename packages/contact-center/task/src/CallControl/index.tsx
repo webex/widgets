@@ -30,8 +30,6 @@ const CallControlInternal: React.FunctionComponent<CallControlProps> = observer(
       onRecordingToggle,
       onToggleMute,
       logger,
-      deviceType,
-      featureFlags,
       isMuted,
       conferenceEnabled,
       agentId,

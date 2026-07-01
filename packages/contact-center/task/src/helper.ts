@@ -33,8 +33,8 @@ import {
   TIMER_LABEL_CONSULT_REQUESTED,
   TIMER_LABEL_CONSULT_ON_HOLD,
   TIMER_LABEL_WRAP_UP,
-  isCampaignPreviewTask,
 } from './Utils/constants';
+import {isCampaignPreviewTask} from './Utils/task-util';
 import {calculateStateTimerData, calculateConsultTimerData, findLatestConsultMedia} from './Utils/timer-utils';
 import {useHoldTimer} from './Utils/useHoldTimer';
 import {OutdialAniEntriesResponse} from '@webex/contact-center/dist/types/services/config/types';

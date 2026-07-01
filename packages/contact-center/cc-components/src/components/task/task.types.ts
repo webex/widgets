@@ -1160,6 +1160,13 @@ export interface CampaignTaskListItemProps {
   /** Timestamp (ms) when the campaign call was accepted — used for the handle time timer. */
   handleTimestamp?: number;
 
+  /**
+   * Controls which timer is rendered in the list item.
+   * - `auto`: countdown before accept, handle time after accept
+   * - `handle-time`: always render handle time when a timestamp is available
+   */
+  timerDisplayMode?: 'auto' | 'handle-time';
+
   /** Logger instance. */
   logger?: ILogger;
 

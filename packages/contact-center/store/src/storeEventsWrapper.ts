@@ -583,19 +583,20 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   handleCampaignPreviewReservation = (event: ITask) => {
-    // Only track accepted campaign IDs for actual preview campaigns.
-    // Predictive/progressive campaigns don't need preview-accept tracking.
-    if (this.isCampaignPreview(event)) {
-      const interactionId = event?.data?.interactionId;
-      if (interactionId) {
-        this.addAcceptedCampaign(interactionId);
-      }
-    }
+    const isCampaignPreview = this.isCampaignPreview(event);
+
     runInAction(() => {
-      this.setState({
-        developerName: ENGAGED_LABEL,
-        name: ENGAGED_USERNAME,
-      });
+      if (isCampaignPreview) {
+        this.setState({
+          developerName: RESERVED_LABEL,
+          name: RESERVED_USERNAME,
+        });
+      } else {
+        this.setState({
+          developerName: ENGAGED_LABEL,
+          name: ENGAGED_USERNAME,
+        });
+      }
     });
     this.refreshTaskList();
   };
