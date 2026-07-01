@@ -5,8 +5,9 @@ const fs = require('fs');
 const path = require('path');
 
 const ENV_PATH = path.resolve(__dirname, '../.env');
-const OAUTH_BATCH_SIZE = 4;
+const OAUTH_BATCH_SIZE = 2;
 const OAUTH_SET_GROUP_SIZE = 2;
+const OAUTH_BATCH_DELAY_MS = 3000;
 
 type EnvUpdateMap = Record<string, string>;
 
@@ -117,6 +118,10 @@ const collectTokensInBatches = async (browser: Browser, tasks: OAuthTask[]): Pro
     batch.forEach((task, batchIndex) => {
       tokenUpdates[task.envKey] = batchTokens[batchIndex];
     });
+
+    if (index + OAUTH_BATCH_SIZE < tasks.length) {
+      await new Promise((resolve) => setTimeout(resolve, OAUTH_BATCH_DELAY_MS));
+    }
   }
 
   return tokenUpdates;

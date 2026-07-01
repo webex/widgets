@@ -205,7 +205,7 @@ OAuth setup behavior (`playwright/global.setup.ts`):
 - expands `USER_SETS` into set-scoped env keys
 - builds OAuth set groups dynamically from `USER_SETS` (chunk size `2`)
 - runs one parallel OAuth worker per generated group
-- each group uses `OAUTH_BATCH_SIZE=4` internally
+- each group uses `OAUTH_BATCH_SIZE=2` internally (with 3s delay between batches)
 - with current 9 sets this resolves to 5 groups: `[SET_1,SET_2]`, `[SET_3,SET_4]`, `[SET_5,SET_6]`, `[SET_7,SET_8]`, `[SET_9]`
 - optionally collects dial-number token
 - writes all token/env updates in one final upsert pass

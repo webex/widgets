@@ -108,7 +108,7 @@ yarn test:e2e --project=SET_1
   - `[SET_5, SET_6]`
   - `[SET_7, SET_8]`
   - `[SET_9]`
-- Each group uses batch size 4 internally (`OAUTH_BATCH_SIZE=4`).
+- Each group uses batch size 2 internally (`OAUTH_BATCH_SIZE=2`) with a 3s delay between batches.
 - Dial-number token is collected when configured.
 - All env/token updates are written once via single `.env` upsert.
 

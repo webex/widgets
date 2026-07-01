@@ -1,6 +1,6 @@
 import {Page, expect, BrowserContext} from '@playwright/test';
 import dotenv from 'dotenv';
-import {BASE_URL, AWAIT_TIMEOUT, WIDGET_INIT_TIMEOUT, UI_SETTLE_TIMEOUT} from '../constants';
+import {BASE_URL, AWAIT_TIMEOUT, NETWORK_OPERATION_TIMEOUT, WIDGET_INIT_TIMEOUT, UI_SETTLE_TIMEOUT} from '../constants';
 
 dotenv.config();
 
@@ -67,10 +67,11 @@ export const oauthLogin = async (page: Page, username: string, customPassword?: 
   await page.locator('#select-base-triggerid').getByText('Access Token').click({timeout: AWAIT_TIMEOUT});
   await page.getByTestId('samples:login_option_oauth').getByText('Login with Webex').click({timeout: AWAIT_TIMEOUT});
   await page.getByTestId('samples:login_with_webex_button').click({timeout: AWAIT_TIMEOUT});
-  await page.getByRole('textbox', {name: 'name@example.com'}).fill(username, {timeout: AWAIT_TIMEOUT});
-  await page.getByRole('link', {name: 'Sign in'}).click({timeout: AWAIT_TIMEOUT});
-  await page.getByRole('textbox', {name: 'Password'}).fill(password, {timeout: AWAIT_TIMEOUT});
-  await page.getByRole('button', {name: 'Sign in'}).click({timeout: AWAIT_TIMEOUT});
+  await page.waitForURL(/idbroker.*\.webex\.com/, {timeout: NETWORK_OPERATION_TIMEOUT});
+  await page.getByRole('textbox', {name: 'name@example.com'}).fill(username, {timeout: NETWORK_OPERATION_TIMEOUT});
+  await page.getByRole('link', {name: 'Sign in'}).click({timeout: NETWORK_OPERATION_TIMEOUT});
+  await page.getByRole('textbox', {name: 'Password'}).fill(password, {timeout: NETWORK_OPERATION_TIMEOUT});
+  await page.getByRole('button', {name: 'Sign in'}).click({timeout: NETWORK_OPERATION_TIMEOUT});
 };
 
 /**

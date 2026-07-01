@@ -18,6 +18,7 @@ import {
 } from '../Utils/taskControlUtils';
 import {submitWrapup} from '../Utils/wrapupUtils';
 import {USER_STATES, TASK_TYPES, WRAPUP_REASONS, ACCEPT_TASK_TIMEOUT} from '../constants';
+import {handleStrayTasks, waitForState} from '../Utils/helperUtils';
 import {TestManager} from '../test-manager';
 
 // Extract test functions for cleaner syntax
@@ -34,6 +35,7 @@ export default function createCallTaskControlsTests() {
     const projectName = testInfo.project.name;
     testManager = new TestManager(projectName);
     await testManager.setupForIncomingTaskDesktop(browser);
+    await handleStrayTasks(testManager.agent1Page);
   });
 
   afterAll(async () => {
@@ -55,8 +57,9 @@ export default function createCallTaskControlsTests() {
 
   test('Call task - create call and verify all control buttons are visible', async () => {
     // Ensure routable state before creating call task.
+    await handleStrayTasks(testManager.agent1Page);
     await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
-    await verifyCurrentState(testManager.agent1Page, USER_STATES.AVAILABLE);
+    await waitForState(testManager.agent1Page, USER_STATES.AVAILABLE);
 
     // Create call task
     await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);

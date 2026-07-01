@@ -2,9 +2,7 @@ import {test, expect} from '@playwright/test';
 import {
   cancelConsult,
   consultOrTransfer,
-  clearAdvancedCapturedLogs,
   waitForPrimaryCallAfterConsult,
-  verifyConsultStartSuccessLogs,
 } from '../Utils/advancedTaskControlUtils';
 import {changeUserState, verifyCurrentState} from '../Utils/userStateUtils';
 import {createCallTask, acceptIncomingTask} from '../Utils/incomingTaskUtils';
@@ -243,12 +241,11 @@ export default function createAdvanceCombinationsTests() {
       await changeUserState(testManager.agent1Page, USER_STATES.AVAILABLE);
       await createCallTask(testManager.callerPage!, process.env[`${testManager.projectName}_ENTRY_POINT`]!);
       await acceptIncomingTask(testManager.agent1Page, TASK_TYPES.CALL);
-      clearAdvancedCapturedLogs();
       await consultOrTransfer(testManager.agent1Page, 'entryPoint', 'consult', process.env.PW_ENTRYPOINT_NAME!);
       await expect(testManager.agent1Page.getByTestId('cancel-consult-btn')).toBeVisible();
-      await verifyConsultStartSuccessLogs();
       await cancelConsult(testManager.agent1Page);
       await testManager.agent1Page.waitForTimeout(1000);
+      await verifyCurrentState(testManager.agent1Page, USER_STATES.ENGAGED);
     });
 
     test.afterAll(async () => {

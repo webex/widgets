@@ -1,5 +1,5 @@
 import {test, expect} from '@playwright/test';
-import {agentRelogin} from '../Utils/initUtils';
+import {agentRelogin, enableMultiLogin} from '../Utils/initUtils';
 import {stationLogout, telephonyLogin} from '../Utils/stationLoginUtils';
 import {
   getCurrentState,
@@ -19,6 +19,7 @@ export default function createUserStateTests() {
     const projectName = testInfo.project.name;
     testManager = new TestManager(projectName);
     await testManager.basicSetup(browser);
+    await enableMultiLogin(testManager.agent1Page);
     // Handle the station login manually like in the original
     const loginButtonExists = await testManager.agent1Page
       .getByTestId('login-button')
@@ -115,16 +116,13 @@ export default function createUserStateTests() {
   });
 
   test('should test multi-session synchronization', async () => {
-    // Create multi-session page since basicSetup doesn't include it
-    if (!testManager.multiSessionAgent1Page) {
-      if (!testManager.multiSessionContext) {
-        testManager.multiSessionContext = await testManager.agent1Context.browser()!.newContext();
-      }
-      testManager.multiSessionAgent1Page = await testManager.multiSessionContext.newPage();
+    const browser = testManager.agent1Page.context().browser();
+    if (!browser) {
+      throw new Error('Browser not available for multi-session setup');
     }
-
-    await testManager.setupMultiSessionPage();
+    await testManager.ensureMultiSessionPage(browser);
     const multiSessionPage = testManager.multiSessionAgent1Page!;
+    await expect(multiSessionPage.getByTestId('state-select')).toBeVisible();
 
     await changeUserState(testManager.agent1Page, USER_STATES.MEETING);
     await verifyCurrentState(testManager.agent1Page, USER_STATES.MEETING);

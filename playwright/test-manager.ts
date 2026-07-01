@@ -638,13 +638,19 @@ export class TestManager {
     }
 
     const envTokens = this.getEnvTokens();
+    await this.setupPageWithWidgets(this.multiSessionAgent1Page, envTokens.agent1AccessToken);
+  }
 
-    // Setup multi-session page with widgets - only called when needed for multi-session tests
-    await loginViaAccessToken(this.multiSessionAgent1Page, envTokens.agent1AccessToken);
+  async ensureMultiSessionPage(browser: Browser): Promise<void> {
+    if (this.multiSessionAgent1Page) {
+      return;
+    }
 
-    await Promise.all([enableMultiLogin(this.multiSessionAgent1Page), enableAllWidgets(this.multiSessionAgent1Page)]);
-
-    await initialiseWidgets(this.multiSessionAgent1Page);
+    const envTokens = this.getEnvTokens();
+    this.multiSessionContext = await browser.newContext({ignoreHTTPSErrors: true});
+    this.multiSessionAgent1Page = await this.multiSessionContext.newPage();
+    await enableMultiLogin(this.agent1Page);
+    await this.setupPageWithWidgets(this.multiSessionAgent1Page, envTokens.agent1AccessToken);
   }
 
   // Specific setup methods that use the universal setup
