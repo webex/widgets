@@ -421,7 +421,7 @@ describe('task-list.utils', () => {
         mockTask.data.interaction.outboundType = originalOutboundType;
       });
 
-      it.skip('should extract correct button states for incoming outdial telephony on non-browser', () => {
+      it('should extract correct button states for incoming outdial telephony on non-browser', () => {
         // Mock isIncomingTask to return true for this test
         (isIncomingTask as jest.Mock).mockReturnValueOnce(true);
 
@@ -442,6 +442,10 @@ describe('task-list.utils', () => {
           virtualTeamName: 'Outbound Team',
           ronaTimeout: '30',
         };
+        mockTask.uiControls = createEnabledMainTaskUIControls({
+          accept: {isVisible: true, isEnabled: false},
+          decline: disabledControl,
+        });
 
         const result = extractTaskListItemData(mockTask, mockTask.data.agentId, undefined, undefined, false);
 

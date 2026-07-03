@@ -41,7 +41,7 @@ const TaskListComponent: React.FunctionComponent<TaskListComponentProps> = (prop
   const tasks = getTasksArray(taskList!);
 
   // Only one campaign preview should appear — pick the most recent active one
-  const activeCampaignId = hasCampaignPreviewEnabled ? getActiveCampaignPreviewId(tasks) : null;
+  const activeCampaignId = hasCampaignPreviewEnabled ? getActiveCampaignPreviewId(tasks, agentId) : null;
 
   return (
     <ul className="task-list" data-testid="task-list">

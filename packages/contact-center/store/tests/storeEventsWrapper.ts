@@ -2476,7 +2476,7 @@ describe('storeEventsWrapper', () => {
     });
 
     describe('handleCampaignPreviewReservation — campaign type branching', () => {
-      it.skip('should add to acceptedCampaignIds for standard preview campaign', () => {
+      it('should add to acceptedCampaignIds for standard preview campaign', () => {
         const task = createCampaignPreviewTask('preview-accept-1');
 
         storeWrapper.handleCampaignPreviewReservation(task);
@@ -2484,7 +2484,7 @@ describe('storeEventsWrapper', () => {
         expect(storeWrapper['store'].acceptedCampaignIds.has('preview-accept-1')).toBe(true);
       });
 
-      it.skip('should NOT add to acceptedCampaignIds for predictive campaign', () => {
+      it('should NOT add to acceptedCampaignIds for predictive campaign', () => {
         const task = makeMockTask({
           data: {
             interactionId: 'predictive-accept-1',

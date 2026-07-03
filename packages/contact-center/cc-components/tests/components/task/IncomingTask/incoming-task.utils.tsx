@@ -249,7 +249,7 @@ describe('incoming-task.utils', () => {
         mockTask.data.interaction.outboundType = originalOutboundType;
       });
 
-      it.skip('should extract correct button states for outdial telephony on non-browser', () => {
+      it('should extract correct button states for outdial telephony on non-browser', () => {
         const originalMediaType = mockTask.data.interaction.mediaType;
         const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
         const originalOutboundType = mockTask.data.interaction.outboundType;
@@ -266,7 +266,7 @@ describe('incoming-task.utils', () => {
           ronaTimeout: '30',
         };
 
-        const result = extractIncomingTaskData(mockTask, false);
+        const result = extractIncomingTaskData(mockTask, logger, visibleDisabledAccept, disabledControl, false, false);
 
         expect(result.title).toBe('+14155559876');
         expect(result.acceptText).toBe('Ringing...');

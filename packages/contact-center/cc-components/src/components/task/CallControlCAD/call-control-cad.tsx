@@ -5,7 +5,12 @@ import {Avatar, Brandvisual, Icon, Tooltip, Button} from '@momentum-design/compo
 import './call-control-cad.styles.scss';
 import TaskTimer from '../TaskTimer/index';
 import CallControlConsultComponent from '../CallControl/CallControlCustom/call-control-consult';
-import {MEDIA_CHANNEL as MediaChannelType, CallControlComponentProps, CallAssociatedDataMap} from '../task.types';
+import {
+  MEDIA_CHANNEL as MediaChannelType,
+  CallControlComponentProps,
+  getCallerIdentifier,
+  CallAssociatedDataMap,
+} from '../task.types';
 import {getAgentViewableGlobalVariables} from '../Task/task.utils';
 import GlobalVariablesPanel from '../GlobalVariablesPanel/global-variables-panel';
 
@@ -79,11 +84,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
   const customerName = currentTask?.data?.interaction?.callAssociatedDetails?.customerName;
 
   const ani = currentTask?.data?.interaction?.callAssociatedDetails?.ani;
-  const isOutdial = currentTask?.data?.interaction?.outboundType === 'OUTDIAL';
-  const dnis =
-    currentTask?.data?.interaction?.callAssociatedDetails?.dnis ||
-    currentTask?.data?.interaction?.callProcessingDetails?.dnis;
-  const displayNumber = isOutdial ? dnis || ani : ani;
+  const dn = currentTask?.data?.interaction?.callAssociatedDetails?.dn;
 
   const callAssociatedData = currentTask?.data?.interaction?.callAssociatedData as CallAssociatedDataMap | undefined;
   const latestGlobalVariables = getAgentViewableGlobalVariables(callAssociatedData);
@@ -116,8 +117,11 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
   // For telephony calls, ani is the originating number and dn is the destination.
   // Inbound: ani = caller's number, dn = entry point dialed by caller
   // Outdial: ani = agent's originating number (entry point), dn = customer's dialed number
+  const outboundType = currentTask?.data?.interaction?.outboundType;
+  const callerNumber = getCallerIdentifier(ani, dn, outboundType);
+
   const renderCustomerName = () => {
-    const customerText = isSocial ? customerName || NO_CUSTOMER_NAME : displayNumber || NO_CALLER_ID;
+    const customerText = isSocial ? customerName || NO_CUSTOMER_NAME : callerNumber || NO_CALLER_ID;
 
     const textComponent = (
       <Text

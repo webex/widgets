@@ -1,9 +1,15 @@
 import React from 'react';
 import {render} from '@testing-library/react';
 import CallControlCADComponent from '../../../../src/components/task/CallControlCAD/call-control-cad';
-import {CallControlComponentProps, TARGET_TYPE, OUTBOUND_TYPE} from '../../../../src/components/task/task.types';
+import {
+  CallControlComponentProps,
+  TARGET_TYPE,
+  OUTBOUND_TYPE,
+  CallAssociatedDataMap,
+} from '../../../../src/components/task/task.types';
 import {
   mockTask,
+  mockCallAssociatedData,
   createEnabledMainTaskUIControls,
   createMockTaskUIControls,
   enabledControl,
@@ -249,7 +255,7 @@ describe('CallControlCADComponent', () => {
     chatConsultScreen.unmount();
   });
 
-  it.skip('should display correct phone number for inbound vs outdial calls', () => {
+  it('should display correct phone number for inbound vs outdial calls', () => {
     // Inbound call: caller ID = ani, phone number = ani
     const inboundScreen = render(<CallControlCADComponent {...defaultProps} />);
     // ani (555-123-4567) should appear as both caller ID and phone number
@@ -511,6 +517,94 @@ describe('CallControlCADComponent', () => {
       );
 
       expect(screen.queryByTestId('call-control:participants-trigger')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Global Variables', () => {
+    const makePropsWithCallAssociatedData = (callAssociatedData: CallAssociatedDataMap) => ({
+      ...defaultProps,
+      currentTask: {
+        ...defaultProps.currentTask,
+        data: {
+          ...defaultProps.currentTask.data,
+          interaction: {
+            ...defaultProps.currentTask.data.interaction,
+            callAssociatedData,
+          },
+        },
+      },
+    });
+
+    it('should render agent-viewable global variables', () => {
+      const screen = render(<CallControlCADComponent {...makePropsWithCallAssociatedData(mockCallAssociatedData)} />);
+
+      const globalVarsContainer = screen.getByTestId('global-variables-panel');
+      expect(globalVarsContainer).toBeInTheDocument();
+
+      expect(screen.getByText('Customer Language:')).toBeInTheDocument();
+      expect(screen.getByText('English')).toBeInTheDocument();
+
+      expect(screen.getByText('Post Call Survey Opt-in:')).toBeInTheDocument();
+      expect(screen.getByText('true')).toBeInTheDocument();
+    });
+
+    it('should not render non-global variables (e.g. system CAD like ani)', () => {
+      const screen = render(<CallControlCADComponent {...makePropsWithCallAssociatedData(mockCallAssociatedData)} />);
+
+      // ani is a system CAD key, filtered out by getAgentViewableGlobalVariables
+      expect(screen.queryByText('ani:')).not.toBeInTheDocument();
+    });
+
+    it('should not render global variables where agentViewable is false', () => {
+      const screen = render(<CallControlCADComponent {...makePropsWithCallAssociatedData(mockCallAssociatedData)} />);
+
+      // Global_Hidden has agentViewable: false
+      expect(screen.queryByText('Hidden Variable:')).not.toBeInTheDocument();
+    });
+
+    it('should not render global variables section when no global variables exist', () => {
+      const screen = render(<CallControlCADComponent {...defaultProps} />);
+
+      expect(screen.queryByTestId('global-variables-panel')).not.toBeInTheDocument();
+    });
+
+    it('should not render global variables section when callAssociatedData is undefined', () => {
+      const propsWithNoData = {
+        ...defaultProps,
+        currentTask: {
+          ...defaultProps.currentTask,
+          data: {
+            ...defaultProps.currentTask.data,
+            interaction: {
+              ...defaultProps.currentTask.data.interaction,
+            },
+          },
+        },
+      };
+      const screen = render(<CallControlCADComponent {...propsWithNoData} />);
+
+      expect(screen.queryByTestId('global-variables-panel')).not.toBeInTheDocument();
+    });
+
+    it('should use variable name as label when displayName is empty', () => {
+      const dataWithEmptyDisplayName: CallAssociatedDataMap = {
+        Global_NoDisplay: {
+          name: 'Global_NoDisplay',
+          displayName: '',
+          value: 'some value',
+          type: 'STRING',
+          agentEditable: false,
+          agentViewable: true,
+          global: true,
+          isSecure: false,
+          secureKeyId: '',
+          secureKeyVersion: 0,
+        },
+      };
+      const screen = render(<CallControlCADComponent {...makePropsWithCallAssociatedData(dataWithEmptyDisplayName)} />);
+
+      expect(screen.getByText('Global_NoDisplay:')).toBeInTheDocument();
+      expect(screen.getByText('some value')).toBeInTheDocument();
     });
   });
 });
