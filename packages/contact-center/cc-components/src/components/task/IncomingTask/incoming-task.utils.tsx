@@ -1,4 +1,4 @@
-import {MEDIA_CHANNEL} from '../task.types';
+import {MEDIA_CHANNEL, getCallerIdentifier} from '../task.types';
 import {ITask} from '@webex/cc-store';
 
 export interface IncomingTaskData {
@@ -46,6 +46,7 @@ export const extractIncomingTaskData = (
     const isOutdial = incomingTask?.data?.interaction?.outboundType === 'OUTDIAL';
     const dnis = callAssociationDetails?.dnis || incomingTask?.data?.interaction?.callProcessingDetails?.dnis;
     const ani = isOutdial ? dnis || callAssociationDetails?.ani : callAssociationDetails?.ani;
+    const dn = callAssociationDetails?.dn;
     const customerName = callAssociationDetails?.customerName;
     const virtualTeamName = callAssociationDetails?.virtualTeamName;
     const ronaTimeout = callAssociationDetails?.ronaTimeout ? Number(callAssociationDetails?.ronaTimeout) : null;
@@ -67,7 +68,8 @@ export const extractIncomingTaskData = (
     const declineText = decline.isVisible ? 'Decline' : undefined;
 
     // Compute title based on media type
-    const title = isSocial ? customerName : ani;
+    const outboundType = incomingTask?.data?.interaction?.outboundType;
+    const title = isSocial ? customerName : getCallerIdentifier(ani, dn, outboundType);
 
     const disableAccept = !accept.isEnabled;
     const disableDecline = !decline.isEnabled;

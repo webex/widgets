@@ -8,7 +8,9 @@ exports[`CallControlConsultComponent Snapshots Interactions should call mockEndC
     class="consult-header"
   >
     <mdc-avatar
+      aria-hidden="true"
       class="task-avatar"
+      icon-name="handset-filled"
       size="32"
     />
     <div>
@@ -190,7 +192,9 @@ exports[`CallControlConsultComponent Snapshots Interactions should call mockOnTo
     class="consult-header"
   >
     <mdc-avatar
+      aria-hidden="true"
       class="task-avatar"
+      icon-name="handset-filled"
       size="32"
     />
     <div>
@@ -372,7 +376,9 @@ exports[`CallControlConsultComponent Snapshots Interactions should call mockOnTr
     class="consult-header"
   >
     <mdc-avatar
+      aria-hidden="true"
       class="task-avatar"
+      icon-name="handset-filled"
       size="32"
     />
     <div>
@@ -554,7 +560,9 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
     class="consult-header"
   >
     <mdc-avatar
+      aria-hidden="true"
       class="task-avatar"
+      icon-name="handset-filled"
       size="32"
     />
     <div>
@@ -731,7 +739,9 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
     class="consult-header"
   >
     <mdc-avatar
+      aria-hidden="true"
       class="task-avatar"
+      icon-name="handset-filled"
       size="32"
     />
     <div>
@@ -908,7 +918,9 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
     class="consult-header"
   >
     <mdc-avatar
+      aria-hidden="true"
       class="task-avatar"
+      icon-name="handset-filled"
       size="32"
     />
     <div>
@@ -1086,7 +1098,9 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
     class="consult-header"
   >
     <mdc-avatar
+      aria-hidden="true"
       class="task-avatar"
+      icon-name="handset-filled"
       size="32"
     />
     <div>
@@ -1263,7 +1277,9 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
     class="consult-header"
   >
     <mdc-avatar
+      aria-hidden="true"
       class="task-avatar"
+      icon-name="handset-filled"
       size="32"
     />
     <div>
@@ -1413,7 +1429,9 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
     class="consult-header"
   >
     <mdc-avatar
+      aria-hidden="true"
       class="task-avatar"
+      icon-name="handset-filled"
       size="32"
     />
     <div>
@@ -1590,7 +1608,9 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
     class="consult-header"
   >
     <mdc-avatar
+      aria-hidden="true"
       class="task-avatar"
+      icon-name="handset-filled"
       size="32"
     />
     <div>
@@ -1740,7 +1760,9 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
     class="consult-header"
   >
     <mdc-avatar
+      aria-hidden="true"
       class="task-avatar"
+      icon-name="handset-filled"
       size="32"
     />
     <div>
@@ -1917,7 +1939,9 @@ exports[`CallControlConsultComponent Snapshots State Management should handle co
     class="consult-header"
   >
     <mdc-avatar
+      aria-hidden="true"
       class="task-avatar"
+      icon-name="handset-filled"
       size="32"
     />
     <div>
@@ -2067,7 +2091,9 @@ exports[`CallControlConsultComponent Snapshots State Management should handle ed
     class="consult-header"
   >
     <mdc-avatar
+      aria-hidden="true"
       class="task-avatar"
+      icon-name="handset-filled"
       size="32"
     />
     <div>
@@ -2242,7 +2268,9 @@ exports[`CallControlConsultComponent Snapshots State Management should update wh
     class="consult-header"
   >
     <mdc-avatar
+      aria-hidden="true"
       class="task-avatar"
+      icon-name="handset-filled"
       size="32"
     />
     <div>
@@ -2419,7 +2447,9 @@ exports[`CallControlConsultComponent Snapshots State Management should update wh
     class="consult-header"
   >
     <mdc-avatar
+      aria-hidden="true"
       class="task-avatar"
+      icon-name="handset-filled"
       size="32"
     />
     <div>

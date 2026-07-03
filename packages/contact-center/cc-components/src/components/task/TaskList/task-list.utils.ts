@@ -1,5 +1,98 @@
-import {MEDIA_CHANNEL, TaskListItemData} from '../task.types';
-import {isIncomingTask, ILogger, ITask} from '@webex/cc-store';
+import {MEDIA_CHANNEL, TaskListItemData, getCallerIdentifier, CampaignCallProcessingDetails} from '../task.types';
+import {
+  isIncomingTask,
+  ILogger,
+  ITask,
+  CAMPAIGN_PREVIEW_CAMPAIGN_TYPES,
+  CAMPAIGN_PREVIEW_OUTBOUND_TYPES,
+} from '@webex/cc-store';
+
+interface ParticipantWithJoin {
+  hasJoined?: boolean;
+  joinTimestamp?: number;
+}
+
+/**
+ * Extract the agent's joinTimestamp from the task participants.
+ * Looks up the agent by `agentId` so that we always read the correct
+ * participant even when multiple participants have joined.
+ * Returns `undefined` when the agent hasn't joined yet.
+ */
+export const getAgentJoinTimestamp = (task: ITask, agentId?: string): number | undefined => {
+  const participants = task.data.interaction.participants as Record<string, ParticipantWithJoin> | undefined;
+
+  if (!participants) return undefined;
+
+  if (agentId && participants[agentId]) {
+    const agent = participants[agentId];
+    return agent.hasJoined && agent.joinTimestamp ? agent.joinTimestamp : undefined;
+  }
+
+  // Fallback: if agentId is not provided or not found, use first joined participant
+  for (const participant of Object.values(participants)) {
+    if (participant.hasJoined && participant.joinTimestamp) {
+      return participant.joinTimestamp;
+    }
+  }
+
+  return undefined;
+};
+
+/**
+ * Safely extracts campaign-specific call processing details from a task.
+ * Returns an empty object when `cpd` is undefined.
+ */
+export const getCampaignCpd = (cpd: Record<string, unknown> | undefined): CampaignCallProcessingDetails => {
+  if (!cpd) return {};
+  return cpd as CampaignCallProcessingDetails;
+};
+
+/**
+ * Determines whether a task is a campaign preview interaction.
+ *
+ * Consistent with the agent desktop logic that checks both
+ * `interaction.outboundType` and `callProcessingDetails.campaignType`.
+ */
+export const isCampaignPreviewTask = (task: ITask): boolean => {
+  const outboundType = task.data.interaction.outboundType ?? '';
+  const cpd = task.data.interaction.callProcessingDetails as unknown as Record<string, string | undefined>;
+  const campaignType = cpd?.campaignType ?? '';
+
+  return (
+    CAMPAIGN_PREVIEW_OUTBOUND_TYPES.includes(outboundType) || CAMPAIGN_PREVIEW_CAMPAIGN_TYPES.includes(campaignType)
+  );
+};
+
+/**
+ * Determines whether the agent has joined the interaction.
+ *
+ * Matches the agent desktop logic:
+ * `taskMap[id]?.interaction.participants[agentId]?.hasJoined`
+ *
+ * The SDK types `participants` as `any`; at runtime it is
+ * `Record<string, { hasJoined?: boolean; ... }>`.
+ */
+export const hasAgentJoinedTask = (task: ITask, agentId: string | undefined): boolean => {
+  if (!agentId) return false;
+  const participants = task.data.interaction.participants as Record<string, {hasJoined?: boolean}> | undefined;
+
+  return participants?.[agentId]?.hasJoined === true;
+};
+/**
+ * Returns the interactionId of the most recent campaign preview task.
+ * Only one campaign preview should be visible at a time; a newer incoming
+ * offer supersedes an older hydrated preview.
+ */
+export const getActiveCampaignPreviewId = (tasks: ITask[]): string | null => {
+  const activePreviews = tasks.filter((t) => isCampaignPreviewTask(t));
+  if (activePreviews.length === 0) return null;
+  // Pick the most recent by createdTimestamp
+  activePreviews.sort(
+    (a, b) => (b.data.interaction.createdTimestamp ?? 0) - (a.data.interaction.createdTimestamp ?? 0)
+  );
+  return activePreviews[0].data.interactionId;
+};
+
 /**
  * Extracts and processes data from a task for rendering in the task list
  * @param task - The task object
@@ -26,6 +119,7 @@ export const extractTaskListItemData = (
     const isOutdial = task?.data?.interaction?.outboundType === 'OUTDIAL';
     const dnis = callAssociationDetails?.dnis || task?.data?.interaction?.callProcessingDetails?.dnis;
     const ani = isOutdial ? dnis || callAssociationDetails?.ani : callAssociationDetails?.ani;
+    const dn = callAssociationDetails?.dn;
     const customerName = callAssociationDetails?.customerName;
     const virtualTeamName = callAssociationDetails?.virtualTeamName;
 
@@ -52,7 +146,8 @@ export const extractTaskListItemData = (
     const declineText = decline.isVisible && isTaskIncoming ? 'Decline' : undefined;
 
     // Compute title based on media type
-    const title = isSocial ? customerName : ani;
+    const outboundType = task?.data?.interaction?.outboundType;
+    const title = isSocial ? customerName : getCallerIdentifier(ani, dn, outboundType);
 
     const disableAccept = !accept.isEnabled;
     const disableDecline = !decline.isEnabled;

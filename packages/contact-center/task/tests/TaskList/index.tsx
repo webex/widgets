@@ -7,8 +7,8 @@ import store from '@webex/cc-store';
 
 // Mock `@webex/cc-store`.
 const taskListMock = [
-  {id: 1, data: {interaction: {callAssociatedDetails: {ani: '1234567890'}}}},
-  {id: 2, data: {interaction: {callAssociatedDetails: {ani: '9876543210'}}}},
+  {id: 1, data: {interaction: {callAssociatedDetails: {ani: '1234567890'}, callProcessingDetails: {}}}},
+  {id: 2, data: {interaction: {callAssociatedDetails: {ani: '9876543210'}, callProcessingDetails: {}}}},
 ];
 jest.mock('@webex/cc-store', () => ({
   cc: {},
@@ -21,6 +21,9 @@ jest.mock('@webex/cc-store', () => ({
   setTaskRejected: jest.fn(),
   setTaskSelected: jest.fn(),
   isIncomingTask: jest.fn(),
+  acceptedCampaignIds: new Set(),
+  CAMPAIGN_PREVIEW_OUTBOUND_TYPES: ['STANDARD_PREVIEW_CAMPAIGN', 'DIRECT_PREVIEW_CAMPAIGN'],
+  CAMPAIGN_PREVIEW_CAMPAIGN_TYPES: ['preview_standard', 'preview_direct'],
   logger: {
     log: jest.fn(),
     error: jest.fn(),

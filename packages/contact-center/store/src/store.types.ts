@@ -23,12 +23,16 @@ import {
   InteractionUIControls,
   TaskUILeg,
   getDefaultUIControls,
+  TaskResponse,
 } from '@webex/contact-center';
 import {
   OutdialAniEntriesResponse,
   OutdialAniParams,
 } from 'node_modules/@webex/contact-center/dist/types/services/config/types';
-import {DestinationType} from 'node_modules/@webex/contact-center/dist/types/services/task/types';
+import {
+  DestinationType,
+  PreviewContactPayload,
+} from 'node_modules/@webex/contact-center/dist/types/services/task/types';
 import {
   AgentProfileUpdate,
   LogContext,
@@ -66,6 +70,9 @@ interface IContactCenter {
   setAgentState(data: StateChange): Promise<SetStateResponse>;
   getOutdialAniEntries(params: OutdialAniParams): Promise<OutdialAniEntriesResponse>;
   getAccessToken(): Promise<string>;
+  acceptPreviewContact(payload: PreviewContactPayload): Promise<TaskResponse>;
+  skipPreviewContact(payload: PreviewContactPayload): Promise<TaskResponse>;
+  removePreviewContact(payload: PreviewContactPayload): Promise<TaskResponse>;
 }
 //  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
 type IWebex = {
@@ -99,6 +106,29 @@ type IdleCode = {
   id: string;
   isSystem: boolean;
   isDefault: boolean;
+};
+
+type RealTimeTranscriptionData = {
+  content: string;
+  conversationId: string;
+  isFinal: boolean;
+  languageCode?: string;
+  messageId: string;
+  orgId: string;
+  publishTimestamp: number | string;
+  role: string;
+  trackingId: string;
+  utteranceId: string;
+};
+
+type RealTimeTranscriptionEventPayload = {
+  agentId: string;
+  data: RealTimeTranscriptionData;
+  notifDetails: {
+    actionEvent?: string;
+  };
+  notifType: string;
+  orgId: string;
 };
 
 interface IStore {
@@ -135,6 +165,8 @@ interface IStore {
   isAddressBookEnabled: boolean;
   isDigitalChannelsInitialized: boolean;
   dataCenter: string;
+  realtimeTranscriptionData: Partial<RealTimeTranscriptionData>[];
+  acceptedCampaignIds: Set<string>;
   init(params: InitParams, callback: (ccSDK: IContactCenter) => void): Promise<void>;
   registerCC(webex?: WithWebex['webex']): Promise<void>;
 }
@@ -167,6 +199,8 @@ interface IStoreWrapper extends IStore {
   setOnError(callback: (widgetName: string, error: Error) => void): void;
   setDataCenter(value: string): void;
   getAccessToken(): Promise<string>;
+  addAcceptedCampaign(interactionId: string): void;
+  removeAcceptedCampaign(interactionId: string): void;
 }
 
 interface IWrapupCode {
@@ -186,6 +220,7 @@ enum CC_EVENTS {
   AGENT_STATE_CHANGE = 'agent:stateChange',
   AGENT_RELOGIN_SUCCESS = 'agent:reloginSuccess',
   AGENT_OFFER_CONSULT = 'AgentOfferConsult',
+  REAL_TIME_TRANSCRIPTION = 'REAL_TIME_TRANSCRIPTION',
 }
 
 interface ICustomStateSet {
@@ -201,6 +236,9 @@ type ICustomState = ICustomStateSet | ICustomStateReset;
 const ENGAGED_LABEL = 'ENGAGED';
 const ENGAGED_USERNAME = 'Engaged';
 
+const RESERVED_LABEL = 'RESERVED';
+const RESERVED_USERNAME = 'Reserved';
+
 type AgentLoginProfile = {
   agentName?: string;
   orgId?: string;
@@ -214,6 +252,8 @@ type AgentLoginProfile = {
     telephony: number;
   };
   agentProfileID?: string;
+  isTimeoutDesktopInactivityEnabled?: boolean;
+  timeoutDesktopInactivityMins?: number;
 };
 
 // Generic pagination params for list-fetching APIs
@@ -291,6 +331,8 @@ export type {
   TaskUIControlState,
   InteractionUIControls,
   TaskUILeg,
+  RealTimeTranscriptionData,
+  RealTimeTranscriptionEventPayload,
 };
 
 export {
@@ -298,6 +340,8 @@ export {
   TASK_EVENTS,
   ENGAGED_LABEL,
   ENGAGED_USERNAME,
+  RESERVED_LABEL,
+  RESERVED_USERNAME,
   DIAL_NUMBER,
   EXTENSION,
   DESKTOP,
@@ -317,3 +361,9 @@ export type Participant = {
   pType: 'Customer' | 'Agent' | string;
   name?: string;
 };
+
+/** Outbound type values that identify a campaign preview task. */
+export const CAMPAIGN_PREVIEW_OUTBOUND_TYPES = ['STANDARD_PREVIEW_CAMPAIGN', 'DIRECT_PREVIEW_CAMPAIGN'];
+
+/** Campaign type values (from callProcessingDetails) that identify a campaign preview task. */
+export const CAMPAIGN_PREVIEW_CAMPAIGN_TYPES = ['preview_standard', 'preview_direct'];

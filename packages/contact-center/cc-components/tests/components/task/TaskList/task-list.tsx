@@ -1,7 +1,7 @@
 import React from 'react';
 import {render, fireEvent} from '@testing-library/react';
 import '@testing-library/jest-dom';
-import {mockTask, mockTaskData} from '@webex/test-fixtures';
+import {mockTask, mockTaskData, mockCC, makeMockCampaignTask} from '@webex/test-fixtures';
 import TaskListComponent from '../../../../src/components/task/TaskList/task-list';
 import {TaskListComponentProps, MEDIA_CHANNEL} from '../../../../src/components/task/task.types';
 import type {ILogger} from '@webex/cc-store';
@@ -50,6 +50,7 @@ describe('TaskListComponent', () => {
     onTaskSelect: mockOnTaskSelect,
     logger: mockLogger,
     agentId: '',
+    cc: mockCC,
   };
 
   // Utility function spies
@@ -265,7 +266,7 @@ describe('TaskListComponent', () => {
       const chatTitle = chatTaskElement.querySelector('.task-digital-title') as HTMLElement;
       expect(chatTitle).toHaveTextContent('Chat Customer');
       expect(chatTitle).toHaveAttribute('type', 'body-large-medium');
-      expect(chatTitle).toHaveAttribute('aria-describedby', 'tooltip-chat-task');
+      // aria-describedby is set dynamically by mdc-tooltip connectedCallback (doesn't run in JSDOM)
       expect(chatTitle).toHaveAttribute('id', 'tooltip-trigger-chat-task');
 
       // Verify chat tooltip
@@ -290,7 +291,7 @@ describe('TaskListComponent', () => {
       const socialTitle = socialTaskElement.querySelector('.task-digital-title') as HTMLElement;
       expect(socialTitle).toHaveTextContent('Facebook Customer');
       expect(socialTitle).toHaveAttribute('type', 'body-large-medium');
-      expect(socialTitle).toHaveAttribute('aria-describedby', 'tooltip-social-task');
+      // aria-describedby is set dynamically by mdc-tooltip connectedCallback (doesn't run in JSDOM)
       expect(socialTitle).toHaveAttribute('id', 'tooltip-trigger-social-task');
 
       // Verify social tooltip
@@ -407,6 +408,25 @@ describe('TaskListComponent', () => {
       expect(taskTextElements[1]).toHaveTextContent('Time Left:'); // Incoming task timing
     });
 
+    it('should render handle time instead of time left for campaign preview tasks in task list fallback', async () => {
+      const campaignTask = makeMockCampaignTask({
+        cpd: {campaignType: 'preview_standard'},
+        data: {interactionId: 'campaign-task-123'},
+      });
+      extractTaskListItemDataSpy.mockReturnValue(mockTaskData.incoming.webrtcTelephony);
+
+      const screen = await render(
+        <TaskListComponent
+          {...defaultProps}
+          taskList={{'campaign-task-123': campaignTask}}
+          hasCampaignPreviewEnabled={true}
+        />
+      );
+
+      expect(screen.getByTestId('campaign-task-123-handle-time')).toBeInTheDocument();
+      expect(screen.queryByTestId('campaign-task-123-time-left')).not.toBeInTheDocument();
+    });
+
     it('should render telephony incoming task with disabled Accept button in Extension mode', async () => {
       extractTaskListItemDataSpy.mockReturnValue(mockTaskData.incoming.extensionTelephony);
 
@@ -487,7 +507,7 @@ describe('TaskListComponent', () => {
       // Verify digital incoming task uses specific class name for incoming digital tasks
       const digitalTitle = screen.container.querySelector('.incoming-digital-task-title') as HTMLElement;
       expect(digitalTitle).toHaveTextContent('Chat Customer');
-      expect(digitalTitle).toHaveAttribute('aria-describedby', 'tooltip-incoming-chat-task');
+      // aria-describedby is set dynamically by mdc-tooltip connectedCallback (doesn't run in JSDOM)
       expect(digitalTitle).toHaveAttribute('id', 'tooltip-trigger-incoming-chat-task');
       expect(digitalTitle).toHaveAttribute('type', 'body-large-medium');
 

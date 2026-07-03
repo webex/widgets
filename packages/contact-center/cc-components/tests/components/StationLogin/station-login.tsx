@@ -261,7 +261,7 @@ describe('Station Login Component', () => {
       props.loginOptions.forEach((option, idx) => {
         expect(loginOptions[idx]).toHaveTextContent(LoginOptions[option]);
         expect(loginOptions[idx]).toHaveValue(option);
-        if (option === 'EXTENSION') expect(loginOptions[idx]).toHaveAttribute('selected', '');
+        if (option === 'EXTENSION') expect(loginOptions[idx]).toHaveAttribute('selected', 'true');
         expect(loginOptions[idx]).toHaveAttribute('data-testid', `login-option-${LoginOptions[option]}`);
       });
 
@@ -280,7 +280,7 @@ describe('Station Login Component', () => {
       const teamOptions = teamsSelect.childNodes;
       props.teams.forEach((team, idx) => {
         if (team.id === props.selectedTeamId) {
-          expect(teamOptions[idx]).toHaveAttribute('selected', '');
+          expect(teamOptions[idx]).toHaveAttribute('selected', 'true');
         } else {
           expect(teamOptions[idx]).not.toHaveAttribute('selected');
         }
@@ -330,7 +330,7 @@ describe('Station Login Component', () => {
         expect(loginOptions[idx]).toHaveAttribute('data-testid', `login-option-${LoginOptions[option]}`);
 
         if (option === 'EXTENSION') {
-          expect(loginOptions[idx]).toHaveAttribute('selected', '');
+          expect(loginOptions[idx]).toHaveAttribute('selected', 'true');
         }
       });
 
@@ -349,7 +349,7 @@ describe('Station Login Component', () => {
       const teamOptions = teamsSelect.childNodes;
       props.teams.forEach((team, idx) => {
         if (team.id === props.selectedTeamId) {
-          expect(teamOptions[idx]).toHaveAttribute('selected', '');
+          expect(teamOptions[idx]).toHaveAttribute('selected', 'true');
         } else {
           expect(teamOptions[idx]).not.toHaveAttribute('selected');
         }

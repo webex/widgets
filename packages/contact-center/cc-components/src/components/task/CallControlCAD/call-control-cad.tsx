@@ -1,12 +1,13 @@
-import React from 'react';
+import React, {useRef} from 'react';
 import CallControlComponent from '../CallControl/call-control';
 import {Text, PopoverNext} from '@momentum-ui/react-collaboration';
-import {Brandvisual, Icon, Tooltip, Button} from '@momentum-design/components/dist/react';
+import {Avatar, Brandvisual, Icon, Tooltip, Button} from '@momentum-design/components/dist/react';
 import './call-control-cad.styles.scss';
 import TaskTimer from '../TaskTimer/index';
 import CallControlConsultComponent from '../CallControl/CallControlCustom/call-control-consult';
 import {MEDIA_CHANNEL as MediaChannelType, CallControlComponentProps, CallAssociatedDataMap} from '../task.types';
 import {getAgentViewableGlobalVariables} from '../Task/task.utils';
+import GlobalVariablesPanel from '../GlobalVariablesPanel/global-variables-panel';
 
 import {getMediaTypeInfo} from '../../../utils';
 import {
@@ -18,6 +19,7 @@ import {
   QUEUE,
   PHONE_NUMBER,
   CUSTOMER_NAME,
+  CAMPAIGN_CALL,
 } from '../constants';
 import {withMetrics} from '@webex/cc-ui-logging';
 import {isSecondaryAgent} from '@webex/cc-store';
@@ -46,6 +48,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
     toggleMute,
     conferenceParticipants,
     conferenceEnabled = true,
+    isCampaignCall = false,
   } = props;
 
   const formatTime = (time: number): string => {
@@ -82,11 +85,27 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
     currentTask?.data?.interaction?.callProcessingDetails?.dnis;
   const displayNumber = isOutdial ? dnis || ani : ani;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const callAssociatedData = (currentTask?.data?.interaction as any)?.callAssociatedData as
-    | CallAssociatedDataMap
-    | undefined;
-  const globalVariables = getAgentViewableGlobalVariables(callAssociatedData);
+  const callAssociatedData = currentTask?.data?.interaction?.callAssociatedData as CallAssociatedDataMap | undefined;
+  const latestGlobalVariables = getAgentViewableGlobalVariables(callAssociatedData);
+
+  // Persist global variables across task updates — some store refreshes
+  // replace currentTask with a snapshot that omits callAssociatedData,
+  // which causes getAgentViewableGlobalVariables to return [].
+  // We intentionally keep the previous values when length === 0 because
+  // an empty array indicates missing data, not a legitimate clearing of
+  // variables.  Variables are never cleared mid-call by the backend.
+  // Reset when the interaction changes so stale CAD from a previous task
+  // is never shown on a new call.
+  const interactionId = currentTask.data.interaction.interactionId;
+  const globalVariablesRef = useRef(latestGlobalVariables);
+  const prevInteractionIdRef = useRef(interactionId);
+  if (prevInteractionIdRef.current !== interactionId) {
+    prevInteractionIdRef.current = interactionId;
+    globalVariablesRef.current = latestGlobalVariables;
+  } else if (latestGlobalVariables.length > 0) {
+    globalVariablesRef.current = latestGlobalVariables;
+  }
+  const globalVariables = globalVariablesRef.current;
 
   // Create unique IDs for tooltips
   const customerNameTriggerId = `customer-name-trigger-${currentTask.data.interaction.interactionId}`;
@@ -94,6 +113,9 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
   const phoneNumberTriggerId = `phone-number-trigger-${currentTask.data.interaction.interactionId}`;
   const phoneNumberTooltipId = `phone-number-tooltip-${currentTask.data.interaction.interactionId}`;
 
+  // For telephony calls, ani is the originating number and dn is the destination.
+  // Inbound: ani = caller's number, dn = entry point dialed by caller
+  // Outdial: ani = agent's originating number (entry point), dn = customer's dialed number
   const renderCustomerName = () => {
     const customerText = isSocial ? customerName || NO_CUSTOMER_NAME : displayNumber || NO_CALLER_ID;
 
@@ -132,7 +154,11 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
   };
 
   const renderPhoneNumber = () => {
-    const phoneText = isSocial ? customerName || NO_CUSTOMER_NAME : ani || NO_PHONE_NUMBER;
+    const phoneText = isSocial
+      ? customerName || NO_CUSTOMER_NAME
+      : isTelephony
+        ? ani || NO_PHONE_NUMBER
+        : ani || NO_PHONE_NUMBER;
     const labelText = isSocial ? CUSTOMER_NAME : PHONE_NUMBER;
 
     const textComponent = (
@@ -177,7 +203,9 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
         {/* Caller Information */}
         <div className="caller-info">
           <div className="call-icon-background">
-            {currentMediaType.isBrandVisual ? (
+            {isCampaignCall ? (
+              <Avatar icon-name="campaign-management-bold" className="campaign-call-avatar" />
+            ) : currentMediaType.isBrandVisual ? (
               <Brandvisual name={currentMediaType.iconName} className={`media-icon ${currentMediaType.className}`} />
             ) : (
               <Icon name={currentMediaType.iconName} size={1} className={`media-icon ${currentMediaType.className}`} />
@@ -189,7 +217,8 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
             <div className="call-details">
               <div className="call-details-row">
                 <Text className="call-timer" type="body-secondary" tagName={'small'} data-testid="cc-cad:call-timer">
-                  {currentMediaType.labelName} - <TaskTimer startTimeStamp={startTimestamp} />
+                  {isCampaignCall ? CAMPAIGN_CALL : currentMediaType.labelName} -{' '}
+                  <TaskTimer startTimeStamp={startTimestamp} />
                   {stateTimerLabel && stateTimerTimestamp && (
                     <>
                       {' '}
@@ -275,24 +304,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
           </Text>
           {renderPhoneNumber()}
         </div>
-        {globalVariables.length > 0 && (
-          <div className="global-variables" data-testid="cc-cad:global-variables">
-            {globalVariables.map((variable) => (
-              <div
-                key={variable.name}
-                className="global-variable-item"
-                data-testid={`cc-cad:global-var-${variable.name}`}
-              >
-                <Text type="body-secondary" tagName={'small'}>
-                  {variable.displayName || variable.name}
-                </Text>
-                <Text type="body-secondary" tagName={'small'}>
-                  {variable.value || ''}
-                </Text>
-              </div>
-            ))}
-          </div>
-        )}
+        <GlobalVariablesPanel variables={globalVariables} className="cad-global-variables" />
       </div>
       {(controls?.consult?.endConsult?.isVisible || controls?.main?.endConsult?.isVisible) &&
         !controls?.main?.wrapup?.isVisible && (

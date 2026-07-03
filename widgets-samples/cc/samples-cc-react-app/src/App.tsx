@@ -8,6 +8,7 @@ import {
   CallControlCAD,
   store,
   OutdialCall,
+  RealTimeTranscript,
 } from '@webex/cc-widgets';
 import {StationLogoutResponse} from '@webex/contact-center';
 import {ERROR_TRIGGERING_IDLE_CODES} from '@webex/cc-store';
@@ -30,6 +31,7 @@ import EngageWidget from './EngageWidget';
 // This is not to be included to a production app.
 // Have added here for debugging purposes
 window['store'] = store;
+
 const defaultWidgets = {
   stationLogin: true,
   stationLoginProfile: false,
@@ -39,6 +41,7 @@ const defaultWidgets = {
   callControl: true,
   callControlCAD: true,
   outdialCall: true,
+  realtimeTranscript: true,
 };
 
 function App() {
@@ -63,6 +66,7 @@ function App() {
   const [showOutdialFailedModal, setShowOutdialFailedModal] = useState(false);
   const [outdialFailedReason, setOutdialFailedReason] = useState('');
   const [isAddressBookEnabled, setIsAddressBookEnabled] = useState(true);
+  const [hasCampaignPreviewEnabled, setHasCampaignPreviewEnabled] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [incomingTasks, setIncomingTasks] = useState([]);
   const [loginType, setLoginType] = useState('token');
@@ -551,10 +555,10 @@ function App() {
                       setLoginType(selectedType);
                     }}
                   >
-                    <Option data-testid="samples:login_option_token" key={1} value="token">
+                    <Option data-testid="samples:login_option_token" key={1} value="token" label="Access Token">
                       Access Token
                     </Option>
-                    <Option data-testid="samples:login_option_oauth" key={2} value="oauth">
+                    <Option data-testid="samples:login_option_oauth" key={2} value="oauth" label="Login with Webex">
                       Login with Webex
                     </Option>
                   </Select>
@@ -963,52 +967,54 @@ function App() {
                       </div>
                     )}
 
-                    <div className="box">
-                      <section className="section-box">
-                        <fieldset className="fieldset">
-                          <legend className="legend-box">&nbsp;Call Control and Call Control with CAD&nbsp;</legend>
-                          <Checkbox
-                            checked={conferenceEnabled}
-                            aria-label="onference enabled checkbox"
-                            id="conference-enabled-checkbox"
-                            label="Enable Conference Feature"
-                            // @ts-expect-error: TODO: https://github.com/momentum-design/momentum-design/pull/1118
-                            onchange={() => {
-                              setConferenceEnabled(!conferenceEnabled);
-                            }}
-                          />
-                          {selectedWidgets.callControl && store.currentTask && (
-                            <fieldset className="fieldset">
-                              <legend className="legend-box">Call Control</legend>
+                    <Checkbox
+                      checked={conferenceEnabled}
+                      aria-label="conference enabled checkbox"
+                      id="conference-enabled-checkbox"
+                      label="Enable Conference Feature"
+                      // @ts-expect-error: TODO: https://github.com/momentum-design/momentum-design/pull/1118
+                      onchange={() => {
+                        setConferenceEnabled(!conferenceEnabled);
+                      }}
+                    />
 
-                              <CallControl
-                                onHoldResume={onHoldResume}
-                                onEnd={onEnd}
-                                onWrapUp={onWrapUp}
-                                onRecordingToggle={onRecordingToggle}
-                                onToggleMute={onToggleMute}
-                                conferenceEnabled={conferenceEnabled}
-                              />
-                            </fieldset>
-                          )}
-                          {selectedWidgets.callControlCAD && store.currentTask && (
-                            <fieldset className="fieldset">
-                              <legend className="legend-box">Call Control with Call Associated Data (CAD)</legend>
-                              <CallControlCAD
-                                onHoldResume={onHoldResume}
-                                onEnd={onEnd}
-                                onWrapUp={onWrapUp}
-                                onRecordingToggle={onRecordingToggle}
-                                callControlClassName={'call-control-outer'}
-                                callControlConsultClassName={'call-control-consult-outer'}
-                                onToggleMute={onToggleMute}
-                                conferenceEnabled={conferenceEnabled}
-                              />
-                            </fieldset>
-                          )}
-                        </fieldset>
-                      </section>
-                    </div>
+                    {selectedWidgets.callControl && (
+                      <div className="box">
+                        <section className="section-box">
+                          <fieldset className="fieldset">
+                            <legend className="legend-box">Call Control</legend>
+                            <CallControl
+                              onHoldResume={onHoldResume}
+                              onEnd={onEnd}
+                              onWrapUp={onWrapUp}
+                              onRecordingToggle={onRecordingToggle}
+                              onToggleMute={onToggleMute}
+                              conferenceEnabled={conferenceEnabled}
+                            />
+                          </fieldset>
+                        </section>
+                      </div>
+                    )}
+
+                    {selectedWidgets.callControlCAD && (
+                      <div className="box">
+                        <section className="section-box">
+                          <fieldset className="fieldset">
+                            <legend className="legend-box">Call Control with Call Associated Data (CAD)</legend>
+                            <CallControlCAD
+                              onHoldResume={onHoldResume}
+                              onEnd={onEnd}
+                              onWrapUp={onWrapUp}
+                              onRecordingToggle={onRecordingToggle}
+                              callControlClassName={'call-control-outer'}
+                              callControlConsultClassName={'call-control-consult-outer'}
+                              onToggleMute={onToggleMute}
+                              conferenceEnabled={conferenceEnabled}
+                            />
+                          </fieldset>
+                        </section>
+                      </div>
+                    )}
 
                     {selectedWidgets.incomingTask && (
                       <>
@@ -1051,11 +1057,32 @@ function App() {
                         <section className="section-box">
                           <fieldset className="fieldset">
                             <legend className="legend-box">Task List</legend>
+                            <Checkbox
+                              checked={hasCampaignPreviewEnabled}
+                              aria-label="campaign preview enabled checkbox"
+                              id="task-list-campaign-preview-checkbox"
+                              label="Enable Campaign Preview"
+                              className="margin-bottom-1rem"
+                              data-testid="samples:task-list-campaign-preview-checkbox"
+                              // @ts-expect-error: TODO: https://github.com/momentum-design/momentum-design/pull/1118
+                              onchange={() => setHasCampaignPreviewEnabled(!hasCampaignPreviewEnabled)}
+                            />
                             <TaskList
                               onTaskAccepted={onTaskAccepted}
                               onTaskDeclined={onTaskDeclined}
                               onTaskSelected={onTaskSelected}
+                              hasCampaignPreviewEnabled={hasCampaignPreviewEnabled}
                             />
+                          </fieldset>
+                        </section>
+                      </div>
+                    )}
+                    {selectedWidgets.realtimeTranscript && store.currentTask && (
+                      <div className="box">
+                        <section className="section-box">
+                          <fieldset className="fieldset">
+                            <legend className="legend-box">Realtime Transcript</legend>
+                            <RealTimeTranscript />
                           </fieldset>
                         </section>
                       </div>
@@ -1104,10 +1131,10 @@ function App() {
                   }}
                   data-testid="samples:rona-select-state"
                 >
-                  <Option key={1} value="Available" data-testid="samples:rona-option-available">
+                  <Option key={1} value="Available" label="Available" data-testid="samples:rona-option-available">
                     Available
                   </Option>
-                  <Option key={2} value="Idle" data-testid="samples:rona-option-idle">
+                  <Option key={2} value="Idle" label="Idle" data-testid="samples:rona-option-idle">
                     Idle
                   </Option>
                 </Select>
