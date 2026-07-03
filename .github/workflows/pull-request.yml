@@ -42,11 +42,31 @@ jobs:
   validate:
     name: Validate Pull Request
     runs-on: ubuntu-latest
-    if: contains(toJson(github.event.pull_request.labels), 'validated')
 
     steps:
+      - name: Validate Labels
+        run: |
+          HEAD_REPO=${{ github.event.pull_request.head.repo.full_name }}
+          BASE_REPO=${{ github.event.pull_request.base.repo.full_name }}
+          FROM_BASE=0; [ "$HEAD_REPO" == "$BASE_REPO" ] && FROM_BASE=1
+
+          HAS_VALIDATED_LABEL=${{ contains(github.event.pull_request.labels.*.name, 'validated') }}
+          VALIDATED=0; [ "$HAS_VALIDATED_LABEL" == "true" ] && VALIDATED=1
+
+          echo from base $FROM_BASE
+          echo validated $VALIDATED
+
+          if [[ $FROM_BASE == 1 || $VALIDATED == 1 ]]
+          then
+            echo 'pull request is validated, running tests'
+            exit 0
+          else
+            echo 'pull request is not validated, exiting'
+            exit 1
+          fi
+
       - name: Validate PR title safely
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const title = (context.payload.pull_request?.title ?? "").normalize("NFC");
@@ -78,101 +98,31 @@ jobs:
 
             core.info(`PR title is valid: "${title}"`);
 
-  install:
+  linter:
     runs-on: ubuntu-latest
     needs: validate
     steps:
       - name: Checkout Project
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           persist-credentials: false
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version-file: '.nvmrc'
           registry-url: 'https://registry.npmjs.org'
           cache: 'yarn'
 
-      - id: validate-dependencies
-        name: Validate Dependencies
-        uses: actions/cache@v4
+      - name: Restore Dependencies
+        uses: actions/cache/restore@v5
         with:
           path: '**/node_modules'
           key: node-modules-${{ hashFiles('./yarn.lock') }}
-
-      - id: lock-hash
-        name: Store Lock Hash
-        run: echo "hash=$(echo ${{ hashFiles('./yarn.lock') }})" >> $GITHUB_OUTPUT
 
       - name: Install Dependencies
         run: yarn
-
-      - name: Cache Dependencies
-        uses: actions/cache@v4
-        if: steps.validate-dependencies.outputs.cache-hit != 'true'
-        with:
-          path: '**/node_modules'
-          key: node-modules-${{ hashFiles('./yarn.lock') }}
-
-  build:
-    runs-on: ubuntu-latest
-    needs: install
-    steps:
-      - name: Checkout Project
-        uses: actions/checkout@v3
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-          persist-credentials: false
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: '.nvmrc'
-          registry-url: 'https://registry.npmjs.org'
-          cache: 'yarn'
-
-      - name: Uncache Dependencies
-        uses: actions/cache@v4
-        with:
-          path: '**/node_modules'
-          key: node-modules-${{ hashFiles('./yarn.lock') }}
-
-      - name: Build meetings widget
-        run: yarn workspace @webex/widgets run build:src
-
-      - name: Build cc widgets
-        run: yarn run build
-
-      - name: Cache Distributables
-        uses: actions/cache@v4
-        with:
-          path: '**/dist'
-          key: dist-${{ env.rid }}
-
-  linter:
-    runs-on: ubuntu-latest
-    needs: install
-    steps:
-      - name: Checkout Project
-        uses: actions/checkout@v3
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-          persist-credentials: false
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: '.nvmrc'
-          registry-url: 'https://registry.npmjs.org'
-          cache: 'yarn'
-
-      - name: Uncache Dependencies
-        uses: actions/cache@v4
-        with:
-          path: '**/node_modules'
-          key: node-modules-${{ hashFiles('./yarn.lock') }}
 
       - name: Test linting in meetings widget
         run: yarn workspace @webex/widgets run test:eslint
@@ -184,7 +134,7 @@ jobs:
     timeout-minutes: 10
     runs-on: ubuntu-latest
     continue-on-error: true
-    needs: [install, build]
+    needs: validate
     if: contains(toJson(github.event.pull_request.labels), 'run_e2e')
     concurrency:
       group: e2e-meetings
@@ -192,29 +142,32 @@ jobs:
 
     steps:
       - name: Checkout Project
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           persist-credentials: false
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version-file: '.nvmrc'
           registry-url: 'https://registry.npmjs.org'
           cache: 'yarn'
 
-      - name: Uncache Dependencies
-        uses: actions/cache@v4
+      - name: Restore Dependencies
+        uses: actions/cache/restore@v5
         with:
           path: '**/node_modules'
           key: node-modules-${{ hashFiles('./yarn.lock') }}
 
-      - name: Uncache Distributables
-        uses: actions/cache@v4
-        with:
-          path: '**/dist'
-          key: dist-${{ env.rid }}
+      - name: Install Dependencies
+        run: yarn
+
+      - name: Build meetings widget
+        run: yarn workspace @webex/widgets run build:src
+
+      - name: Build cc widgets
+        run: yarn run build
 
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
@@ -222,7 +175,7 @@ jobs:
       - name: Test E2E
         run: yarn run test:e2e:meetings
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
           name: meetings-report
@@ -234,7 +187,7 @@ jobs:
   e2e_test_cc_widgets:
     timeout-minutes: 50
     runs-on: ubuntu-latest
-    needs: [install, build]
+    needs: validate
     if: contains(toJson(github.event.pull_request.labels), 'run_e2e')
     concurrency:
       group: e2e-cc-widgets
@@ -242,32 +195,35 @@ jobs:
 
     steps:
       - name: Checkout Project
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           persist-credentials: false
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version-file: '.nvmrc'
           registry-url: 'https://registry.npmjs.org'
           cache: 'yarn'
 
-      - name: Uncache Dependencies
-        uses: actions/cache@v4
+      - name: Restore Dependencies
+        uses: actions/cache/restore@v5
         with:
           path: '**/node_modules'
           key: node-modules-${{ hashFiles('./yarn.lock') }}
 
+      - name: Install Dependencies
+        run: yarn
+
+      - name: Build meetings widget
+        run: yarn workspace @webex/widgets run build:src
+
+      - name: Build cc widgets
+        run: yarn run build
+
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
-
-      - name: Uncache Distributables
-        uses: actions/cache@v4
-        with:
-          path: '**/dist'
-          key: dist-${{ env.rid }}
 
       - name: Write Environment Variables
         run: |
@@ -278,7 +234,7 @@ jobs:
       - name: Run Playwright tests
         run: yarn run test:e2e:cc
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
           name: playwright-report
@@ -289,32 +245,35 @@ jobs:
 
   unit_tests:
     runs-on: ubuntu-latest
-    needs: [install, build]
+    needs: validate
     steps:
       - name: Checkout Project
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           persist-credentials: false
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version-file: '.nvmrc'
           registry-url: 'https://registry.npmjs.org'
           cache: 'yarn'
 
-      - name: Uncache Dependencies
-        uses: actions/cache@v4
+      - name: Restore Dependencies
+        uses: actions/cache/restore@v5
         with:
           path: '**/node_modules'
           key: node-modules-${{ hashFiles('./yarn.lock') }}
 
-      - name: Uncache Distributables
-        uses: actions/cache@v4
-        with:
-          path: '**/dist'
-          key: dist-${{ env.rid }}
+      - name: Install Dependencies
+        run: yarn
+
+      - name: Build meetings widget
+        run: yarn workspace @webex/widgets run build:src
+
+      - name: Build cc widgets
+        run: yarn run build
 
       - name: Test Tooling
         run: yarn run test:tooling
