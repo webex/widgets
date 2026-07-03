@@ -479,7 +479,7 @@ class StoreWrapper implements IStoreWrapper {
         this.removeAcceptedCampaign(taskId);
       }
       if (taskId && this.realtimeTranscriptionListeners[taskId]) {
-        taskToRemove.off(TASK_EVENTS.REAL_TIME_TRANSCRIPTION, this.realtimeTranscriptionListeners[taskId]);
+        taskToRemove.off(CC_EVENTS.REAL_TIME_TRANSCRIPTION, this.realtimeTranscriptionListeners[taskId]);
         delete this.realtimeTranscriptionListeners[taskId];
       }
       taskToRemove.off(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
@@ -770,7 +770,7 @@ class StoreWrapper implements IStoreWrapper {
         this.handleRealtimeTranscription(payload);
     }
     if (taskId && this.realtimeTranscriptionListeners[taskId]) {
-      task.on(TASK_EVENTS.REAL_TIME_TRANSCRIPTION, this.realtimeTranscriptionListeners[taskId]);
+      task.on(CC_EVENTS.REAL_TIME_TRANSCRIPTION, this.realtimeTranscriptionListeners[taskId]);
     }
 
     if (this.deviceType === DEVICE_TYPE_BROWSER) {

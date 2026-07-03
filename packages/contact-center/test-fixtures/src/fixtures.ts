@@ -223,19 +223,8 @@ const makeMockTask = (overrides?: MakeMockTaskOverrides): ITask => {
     } as unknown as TaskData,
     on: jest.fn(),
     off: jest.fn(),
-    emit: jest.fn(),
-    addListener: jest.fn(),
     once: jest.fn(),
-    removeListener: jest.fn(),
-    removeAllListeners: jest.fn(),
-    setMaxListeners: jest.fn(),
-    getMaxListeners: jest.fn().mockReturnValue(10),
-    listeners: jest.fn().mockReturnValue([]),
-    rawListeners: jest.fn().mockReturnValue([]),
-    listenerCount: jest.fn().mockReturnValue(0),
-    prependListener: jest.fn(),
-    prependOnceListener: jest.fn(),
-    eventNames: jest.fn().mockReturnValue([]),
+    emit: jest.fn(),
     cancelAutoWrapupTimer: jest.fn(),
     unregisterWebCallListeners: jest.fn(),
     updateTaskData: jest.fn().mockReturnValue({} as ITask),
@@ -255,7 +244,7 @@ const makeMockTask = (overrides?: MakeMockTaskOverrides): ITask => {
     transferConference: jest.fn(),
     exitConference: jest.fn(),
     toggleMute: jest.fn(),
-  };
+  } as unknown as ITask;
 };
 
 /** Default campaign preview call processing details. */

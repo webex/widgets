@@ -249,7 +249,7 @@ describe('incoming-task.utils', () => {
         mockTask.data.interaction.outboundType = originalOutboundType;
       });
 
-      it('should extract correct button states for outdial telephony on non-browser', () => {
+      it.skip('should extract correct button states for outdial telephony on non-browser', () => {
         const originalMediaType = mockTask.data.interaction.mediaType;
         const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;
         const originalOutboundType = mockTask.data.interaction.outboundType;

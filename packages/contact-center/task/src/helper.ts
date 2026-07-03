@@ -1284,7 +1284,9 @@ export const useOutdialCall = (props: useOutdialCallProps) => {
       }
 
       // Check if any task in the list is a telephony task
-      return Object.values(taskList).some((task) => task?.data?.interaction?.mediaType === MEDIA_TYPE_TELEPHONY_LOWER);
+      return Object.values(taskList).some(
+        (task: ITask) => task?.data?.interaction?.mediaType === MEDIA_TYPE_TELEPHONY_LOWER
+      );
     } catch (error) {
       logger?.error(`CC-Widgets: Task: Error checking telephony task - ${error.message}`, {
         module: 'useOutdialCall',
@@ -1305,7 +1307,6 @@ export const useOutdialCall = (props: useOutdialCallProps) => {
       // Only pass origin if it's defined and not empty
       const outdialArgs = origin ? [destination, origin] : [destination];
 
-      // @ts-expect-error To be fixed in SDK typings - CAI-6762
       cc.startOutdial(...outdialArgs)
         .then((response) => {
           logger.info('Outdial call started', response);

@@ -38,7 +38,6 @@ const CampaignTask: React.FC<CampaignTaskProps> = ({
   const timeoutTimestamp = campaignCpd.campaignPreviewOfferTimeout;
   const autoAction = (campaignCpd.campaignPreviewAutoAction ?? '') as CampaignAutoAction | '';
 
-  // @ts-expect-error callAssociatedDetails not yet typed in SDK
   const callAssociatedDetails = task.data.interaction.callAssociatedDetails;
   const ani = callAssociatedDetails?.ani ?? '';
   const dn = callAssociatedDetails?.dn ?? '';

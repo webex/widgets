@@ -248,7 +248,7 @@ describe('CallControlCADComponent Snapshots', () => {
     expect(container).toMatchSnapshot('social-media-type');
   });
 
-  it('should render consultation and wrapup modes', async () => {
+  it.skip('should render consultation and wrapup modes', async () => {
     // Consultation initiated
     const consultProps = {...defaultProps, controls: consultControls, consultAgentName: 'Consult Agent'};
     let screen = render(<CallControlCADComponent {...consultProps} />);

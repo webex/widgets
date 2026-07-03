@@ -184,7 +184,7 @@ export type IncomingTaskComponentProps = Pick<TaskProps, 'accept' | 'reject' | '
 
 export type TaskListComponentProps = Pick<
   TaskProps,
-  'isBrowser' | 'acceptTask' | 'declineTask' | 'onTaskSelect' | 'logger' | 'agentId' | 'cc'
+  'acceptTask' | 'declineTask' | 'onTaskSelect' | 'logger' | 'agentId' | 'cc'
 > &
   Partial<Pick<TaskProps, 'currentTask' | 'taskList' | 'hasCampaignPreviewEnabled' | 'acceptedCampaignIds'>> & {
     isDeclineButtonEnabled?: boolean;

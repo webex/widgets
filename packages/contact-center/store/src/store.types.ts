@@ -220,6 +220,7 @@ enum CC_EVENTS {
   AGENT_STATE_CHANGE = 'agent:stateChange',
   AGENT_RELOGIN_SUCCESS = 'agent:reloginSuccess',
   AGENT_OFFER_CONSULT = 'AgentOfferConsult',
+  REAL_TIME_TRANSCRIPTION = 'REAL_TIME_TRANSCRIPTION',
 }
 
 interface ICustomStateSet {
