@@ -38,6 +38,8 @@ import {
 import {runInAction} from 'mobx';
 import {isIncomingTask} from './task-utils';
 
+const TASK_MULTI_LOGIN_HYDRATE = 'task:multiLoginHydrate';
+
 class StoreWrapper implements IStoreWrapper {
   store: IStore;
   onIncomingTask: ({task}: {task: ITask}) => void;
@@ -274,7 +276,7 @@ class StoreWrapper implements IStoreWrapper {
       // Determine if the new task is the same as the current task.
       let isSameTask = false;
       if (task && this.currentTask) {
-        isSameTask = task.data.interactionId === this.currentTask.data.interactionId;
+        isSameTask = this.getTaskInteractionId(task) === this.getTaskInteractionId(this.currentTask);
       }
 
       // Update the current task
@@ -867,6 +869,46 @@ class StoreWrapper implements IStoreWrapper {
     this.refreshTaskList();
   };
 
+  private getTaskInteractionId = (task: ITask | null | undefined): string | undefined => {
+    return (
+      task?.data?.interactionId ??
+      // SDK task-class mode compatibility
+      (task as ITask & {getInteractionId?: () => string})?.getInteractionId?.() ??
+      (task as ITask & {getInteraction?: () => {id?: string}})?.getInteraction?.()?.id
+    );
+  };
+
+  private getTaskInteractionState = (task: ITask | null | undefined): string | undefined => {
+    return (
+      task?.data?.interaction?.state ??
+      // SDK task-class mode compatibility
+      (task as ITask & {getInteractionState?: () => string})?.getInteractionState?.() ??
+      (task as ITask & {getInteraction?: () => {state?: string}})?.getInteraction?.()?.state
+    );
+  };
+
+  handleMultiLoginHydrate = (event) => {
+    const task = event as ITask;
+    if (!task) {
+      this.store.logger.warn('CC-Widgets: handleMultiLoginHydrate(): task payload missing', {
+        module: 'storeEventsWrapper.ts',
+        method: 'handleMultiLoginHydrate',
+      });
+      return;
+    }
+
+    const interactionId = this.getTaskInteractionId(task);
+    const interactionState = this.getTaskInteractionState(task);
+
+    if (interactionId && this.store.taskList[interactionId] && interactionState === 'new') {
+      return;
+    }
+
+    this.registerTaskEventListeners(task);
+    this.refreshTaskList();
+    this.handleTaskAssigned(task);
+  };
+
   handleTaskHydrate = (event) => {
     const task = event;
 
@@ -1087,6 +1129,7 @@ class StoreWrapper implements IStoreWrapper {
         method: 'setupIncomingTaskHandler#addEventListeners',
       });
       ccSDK.on(TASK_EVENTS.TASK_HYDRATE, this.handleTaskHydrate);
+      ccSDK.on(TASK_MULTI_LOGIN_HYDRATE, this.handleMultiLoginHydrate);
       ccSDK.on(CC_EVENTS.AGENT_STATE_CHANGE, this.handleStateChange);
       ccSDK.on(TASK_EVENTS.TASK_INCOMING, this.handleIncomingTask);
       ccSDK.on(TASK_EVENTS.TASK_CAMPAIGN_PREVIEW_RESERVATION, this.handleIncomingCampaignPreview);
@@ -1101,6 +1144,7 @@ class StoreWrapper implements IStoreWrapper {
         method: 'setupIncomingTaskHandler#removeEventListeners',
       });
       ccSDK.off(TASK_EVENTS.TASK_HYDRATE, this.handleTaskHydrate);
+      ccSDK.off(TASK_MULTI_LOGIN_HYDRATE, this.handleMultiLoginHydrate);
       ccSDK.off(CC_EVENTS.AGENT_STATE_CHANGE, this.handleStateChange);
       ccSDK.off(TASK_EVENTS.TASK_INCOMING, this.handleIncomingTask);
       ccSDK.off(TASK_EVENTS.TASK_CAMPAIGN_PREVIEW_RESERVATION, this.handleIncomingCampaignPreview);
