@@ -27,27 +27,33 @@ jobs:
 
     steps:
       - name: Checkout Project
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0 # Fetch all history for package comparison
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version-file: ".nvmrc"
           registry-url: "https://registry.npmjs.org"
           cache: "yarn"
 
-      - name: Install Dependencies
-        uses: actions/cache@v4
-        id: cache-dependencies
+      - id: restore-dependencies
+        name: Restore Dependencies
+        uses: actions/cache/restore@v5
         with:
           path: "**/node_modules"
           key: node-modules-${{ hashFiles('./yarn.lock') }}
 
-      - name: Install if cache miss
-        if: steps.cache-dependencies.outputs.cache-hit != 'true'
-        run: yarn install --immutable
+      - name: Install Dependencies
+        run: yarn
+
+      - name: Cache Dependencies
+        uses: actions/cache/save@v5
+        if: steps.restore-dependencies.outputs.cache-hit != 'true'
+        with:
+          path: "**/node_modules"
+          key: ${{ steps.restore-dependencies.outputs.cache-primary-key }}
 
       # Generate package matrix for changed packages
       - id: generate-package-matrix-node-changed
@@ -84,17 +90,17 @@ jobs:
 
     steps:
       - name: Checkout Project
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version-file: ".nvmrc"
           registry-url: "https://registry.npmjs.org"
           cache: "yarn"
 
       - name: Restore Dependencies Cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: "**/node_modules"
           key: node-modules-${{ hashFiles('./yarn.lock') }}
@@ -142,7 +148,7 @@ jobs:
 
       - name: Cache Built Distributables
         if: steps.check-changes.outputs.has_changes == 'true'
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         with:
           path: "**/dist"
           key: dist-${{ env.rid }}
@@ -163,25 +169,25 @@ jobs:
         run: echo "Documentation Deploy Steps"
 
       - name: Checkout Project
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version-file: '.nvmrc'
           registry-url: 'https://registry.npmjs.org'
           cache: 'yarn'
 
       - name: Restore Dependencies Cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: '**/node_modules'
           key: node-modules-${{ hashFiles('./yarn.lock') }}
 
       - name: Restore Distributables Cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: '**/dist'
           key: dist-${{ env.rid }}
@@ -228,25 +234,25 @@ jobs:
 
     steps:
       - name: Checkout Project
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version-file: ".nvmrc"
           registry-url: "https://registry.npmjs.org"
           cache: "yarn"
 
       - name: Restore Dependencies Cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: "**/node_modules"
           key: node-modules-${{ hashFiles('./yarn.lock') }}
 
       - name: Restore Distributables Cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: "**/dist"
           key: dist-${{ env.rid }}
@@ -369,7 +375,7 @@ jobs:
     steps:
       - name: Get PR Number
         id: get-pr
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const deploySha = context.sha;
@@ -393,7 +399,7 @@ jobs:
       - name: Post Release Comment on PR
         id: post-comment
         if: steps.get-pr.outputs.pr_number != ''
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const prNumber = parseInt('${{ steps.get-pr.outputs.pr_number }}');
