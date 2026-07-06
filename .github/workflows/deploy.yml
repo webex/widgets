@@ -4,12 +4,7 @@ run-name: ${{ github.actor }} is running Deploy CD
 on:
   push:
     branches: # Allow list of deployable tags and branches. Note that all allow-listed branches cannot include any `/` characters
-<<<<<<< next-in-task-refactor
       - next # primary deploy branch
-=======
-      - next
-      - task-refactor
->>>>>>> task-refactor
 
 env:
   rid: ${{ github.run_id }}-${{ github.run_number }}
@@ -39,15 +34,15 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v6
         with:
-          node-version-file: ".nvmrc"
-          registry-url: "https://registry.npmjs.org"
-          cache: "yarn"
+          node-version-file: '.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'yarn'
 
       - id: restore-dependencies
         name: Restore Dependencies
         uses: actions/cache/restore@v5
         with:
-          path: "**/node_modules"
+          path: '**/node_modules'
           key: node-modules-${{ hashFiles('./yarn.lock') }}
 
       - name: Install Dependencies
@@ -57,7 +52,7 @@ jobs:
         uses: actions/cache/save@v5
         if: steps.restore-dependencies.outputs.cache-hit != 'true'
         with:
-          path: "**/node_modules"
+          path: '**/node_modules'
           key: ${{ steps.restore-dependencies.outputs.cache-primary-key }}
 
       # Generate package matrix for changed packages
@@ -100,14 +95,14 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v6
         with:
-          node-version-file: ".nvmrc"
-          registry-url: "https://registry.npmjs.org"
-          cache: "yarn"
+          node-version-file: '.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'yarn'
 
       - name: Restore Dependencies Cache
         uses: actions/cache/restore@v5
         with:
-          path: "**/node_modules"
+          path: '**/node_modules'
           key: node-modules-${{ hashFiles('./yarn.lock') }}
 
       - name: Check for Changed Packages
@@ -155,7 +150,7 @@ jobs:
         if: steps.check-changes.outputs.has_changes == 'true'
         uses: actions/cache/save@v5
         with:
-          path: "**/dist"
+          path: '**/dist'
           key: dist-${{ env.rid }}
 
       - name: Deploy Packages
@@ -166,7 +161,7 @@ jobs:
 
   publish-documentation:
     name: Publish - Documentation
-    needs: [publish-npm,analyze-changes]
+    needs: [publish-npm, analyze-changes]
     runs-on: ubuntu-latest
     if: github.ref_name == 'next'
 
@@ -247,20 +242,20 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v6
         with:
-          node-version-file: ".nvmrc"
-          registry-url: "https://registry.npmjs.org"
-          cache: "yarn"
+          node-version-file: '.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'yarn'
 
       - name: Restore Dependencies Cache
         uses: actions/cache/restore@v5
         with:
-          path: "**/node_modules"
+          path: '**/node_modules'
           key: node-modules-${{ hashFiles('./yarn.lock') }}
 
       - name: Restore Distributables Cache
         uses: actions/cache/restore@v5
         with:
-          path: "**/dist"
+          path: '**/dist'
           key: dist-${{ env.rid }}
 
       - name: Synchronize Packages
