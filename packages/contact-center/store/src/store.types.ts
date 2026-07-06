@@ -216,6 +216,7 @@ enum TASK_EVENTS {
   TASK_WRAPUP = 'task:wrapup',
   TASK_REJECT = 'task:rejected',
   TASK_HYDRATE = 'task:hydrate',
+  TASK_MULTI_LOGIN_HYDRATE = 'task:multiLoginHydrate',
   TASK_CONSULTING = 'task:consulting',
   TASK_CONSULT_QUEUE_CANCELLED = 'task:consultQueueCancelled',
   AGENT_CONTACT_ASSIGNED = 'AgentContactAssigned',

@@ -1176,6 +1176,7 @@ describe('storeEventsWrapper', () => {
       });
 
       expect(onSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_HYDRATE, expect.any(Function));
+      expect(onSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_MULTI_LOGIN_HYDRATE, expect.any(Function));
       expect(onSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_INCOMING, expect.any(Function));
       expect(onSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_MERGED, expect.any(Function));
       expect(onSpy).toHaveBeenCalledWith(CC_EVENTS.AGENT_STATE_CHANGE, expect.any(Function));
@@ -1601,6 +1602,50 @@ describe('storeEventsWrapper', () => {
       });
     });
 
+    it('should skip multiLoginHydrate when interaction already exists in taskList with new state', () => {
+      const interactionId = 'multi-hydrate-skip-1';
+      const task = {
+        data: {
+          interactionId,
+          interaction: {state: 'new'},
+        },
+        on: jest.fn(),
+        off: jest.fn(),
+      } as unknown as ITask;
+
+      storeWrapper['store'].taskList = {[interactionId]: task};
+
+      const refreshSpy = jest.spyOn(storeWrapper, 'refreshTaskList');
+      const assignedSpy = jest.spyOn(storeWrapper, 'handleTaskAssigned');
+
+      storeWrapper.handleMultiLoginHydrate(task);
+
+      expect(refreshSpy).not.toHaveBeenCalled();
+      expect(assignedSpy).not.toHaveBeenCalled();
+    });
+
+    it('should process multiLoginHydrate when interaction state is connected', () => {
+      const interactionId = 'multi-hydrate-connected-1';
+      const task = {
+        data: {
+          interactionId,
+          interaction: {state: 'connected'},
+        },
+        on: jest.fn(),
+        off: jest.fn(),
+      } as unknown as ITask;
+
+      storeWrapper['store'].taskList = {[interactionId]: task};
+
+      const refreshSpy = jest.spyOn(storeWrapper, 'refreshTaskList');
+      const assignedSpy = jest.spyOn(storeWrapper, 'handleTaskAssigned');
+
+      storeWrapper.handleMultiLoginHydrate(task);
+
+      expect(refreshSpy).toHaveBeenCalled();
+      expect(assignedSpy).toHaveBeenCalledWith(task);
+    });
+
     it('should handle hydrating the store with correct data', async () => {
       const setCurrentTaskSpy = jest.spyOn(storeWrapper, 'setCurrentTask');
       const refreshTaskListSpy = jest.spyOn(storeWrapper, 'refreshTaskList');
@@ -1665,6 +1710,7 @@ describe('storeEventsWrapper', () => {
       });
 
       expect(storeWrapper['cc'].off).toHaveBeenCalledWith(TASK_EVENTS.TASK_HYDRATE, expect.any(Function));
+      expect(storeWrapper['cc'].off).toHaveBeenCalledWith(TASK_EVENTS.TASK_MULTI_LOGIN_HYDRATE, expect.any(Function));
       expect(storeWrapper['cc'].off).toHaveBeenCalledWith(TASK_EVENTS.TASK_INCOMING, expect.any(Function));
       expect(storeWrapper['cc'].off).toHaveBeenCalledWith(TASK_EVENTS.TASK_MERGED, expect.any(Function));
       expect(storeWrapper['cc'].off).toHaveBeenCalledWith(CC_EVENTS.AGENT_STATE_CHANGE, expect.any(Function));

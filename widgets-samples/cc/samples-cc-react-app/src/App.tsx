@@ -92,6 +92,14 @@ function App() {
     const savedAllowInternationalDn = window.localStorage.getItem('allowInternationalDn');
     return savedAllowInternationalDn === 'true';
   });
+  const [disableWebRTCRegistration, setDisableWebRTCRegistration] = useState(() => {
+    const savedDisableWebRTCRegistration = window.localStorage.getItem('disableWebRTCRegistration');
+    return savedDisableWebRTCRegistration === 'true';
+  });
+
+  const WEBRTC_DEPENDENT_WIDGETS = ['incomingTask', 'taskList', 'callControl', 'callControlCAD'];
+  const isWidgetDisabledByWebRTC = (widget: string) =>
+    disableWebRTCRegistration && WEBRTC_DEPENDENT_WIDGETS.includes(widget);
 
   const handleSaveStart = () => {
     setShowLoader(true);
@@ -140,6 +148,7 @@ function App() {
     },
     cc: {
       allowMultiLogin: isMultiLoginEnabled,
+      disableWebRTCRegistration,
     },
     ...(integrationEnv && {
       services: {
@@ -223,6 +232,17 @@ function App() {
       setIsMultiLoginEnabled(false);
     } else {
       setIsMultiLoginEnabled(true);
+    }
+  };
+
+  const toggleDisableWebRTCRegistration = () => {
+    const newValue = !disableWebRTCRegistration;
+    setDisableWebRTCRegistration(newValue);
+    if (newValue) {
+      setSelectedWidgets((prev) => ({
+        ...prev,
+        ...WEBRTC_DEPENDENT_WIDGETS.reduce((acc, w) => ({...acc, [w]: false}), {}),
+      }));
     }
   };
 
@@ -330,6 +350,9 @@ function App() {
           redirect_uri: redirectUri,
           scope: requestedScopes,
         },
+        cc: {
+          disableWebRTCRegistration,
+        },
       },
     };
 
@@ -367,6 +390,9 @@ function App() {
   useEffect(() => {
     window.localStorage.setItem('hideDesktopLogin', JSON.stringify(hideDesktopLogin));
   }, [hideDesktopLogin]);
+  useEffect(() => {
+    window.localStorage.setItem('disableWebRTCRegistration', JSON.stringify(disableWebRTCRegistration));
+  }, [disableWebRTCRegistration]);
 
   useEffect(() => {
     store.setIncomingTaskCb(onIncomingTaskCB);
@@ -528,6 +554,7 @@ function App() {
                               name={widget}
                               checked={selectedWidgets[widget]}
                               onChange={handleCheckboxChange}
+                              disabled={isWidgetDisabledByWebRTC(widget)}
                               data-testid={`samples:widget-${widget}`}
                             />
                             &nbsp;
@@ -635,11 +662,50 @@ function App() {
                         <Text>
                           <div
                             className="warning-note"
-                            style={{color: 'var(--mds-color-theme-text-error-normal)', marginBottom: '10px'}}
+                            style={{
+                              color: 'var(--mds-color-theme-text-error-normal)',
+                              marginBottom: '10px',
+                              maxWidth: '320px',
+                            }}
                           >
                             <strong>Note:</strong> The "Enable Multi Login" option must be set before initializing the
                             SDK. Changes to this setting after SDK initialization will not take effect. Please ensure
                             you configure this option before clicking the "Init Widgets" button.
+                          </div>
+                        </Text>
+                      </PopoverNext>
+                    </label>
+                    <label style={{display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop: '10px'}}>
+                      <input
+                        data-testid="samples:disable-webrtc-registration-checkbox"
+                        type="checkbox"
+                        id="disableWebRTCRegistrationFlag"
+                        name="disableWebRTCRegistrationFlag"
+                        onChange={toggleDisableWebRTCRegistration}
+                        checked={disableWebRTCRegistration}
+                      />{' '}
+                      &nbsp; Disable WebRTC Registration
+                      <PopoverNext
+                        trigger="mouseenter"
+                        triggerComponent={<Icon name="info-badge-filled" />}
+                        placement="auto-end"
+                        closeButtonPlacement="top-left"
+                        closeButtonProps={{'aria-label': 'Close'}}
+                      >
+                        <Text>
+                          <div
+                            className="warning-note"
+                            style={{
+                              color: 'var(--mds-color-theme-text-error-normal)',
+                              marginBottom: '10px',
+                              maxWidth: '320px',
+                            }}
+                          >
+                            <strong>Note:</strong> Disabling WebRTC registration prevents browser-based calling. When
+                            enabled, the "Incoming Task", "Task List", "Call Control", and "Call Control with CAD"
+                            widgets will be unchecked and disabled because they depend on call handling. Set this
+                            option before clicking the "Init Widgets" button — changes after SDK initialization will
+                            not take effect.
                           </div>
                         </Text>
                       </PopoverNext>

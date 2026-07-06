@@ -824,6 +824,27 @@ class StoreWrapper implements IStoreWrapper {
     this.refreshTaskList();
   };
 
+  handleMultiLoginHydrate = (event) => {
+    const task = event as ITask;
+    const interactionId = task?.data?.interactionId;
+    const interactionState = task?.data?.interaction?.state;
+    if (interactionId && this.store.taskList[interactionId] && interactionState === 'new') {
+      return;
+    }
+
+    if (!task) {
+      this.store.logger.warn('CC-Widgets: handleMultiLoginHydrate(): task payload missing', {
+        module: 'storeEventsWrapper.ts',
+        method: 'handleMultiLoginHydrate',
+      });
+      return;
+    }
+
+    this.registerTaskEventListeners(task);
+    this.refreshTaskList();
+    this.handleTaskAssigned(task);
+  };
+
   handleTaskHydrate = (event) => {
     const task = event;
 
@@ -1043,6 +1064,7 @@ class StoreWrapper implements IStoreWrapper {
         method: 'setupIncomingTaskHandler#addEventListeners',
       });
       ccSDK.on(TASK_EVENTS.TASK_HYDRATE, this.handleTaskHydrate);
+      ccSDK.on(TASK_EVENTS.TASK_MULTI_LOGIN_HYDRATE, this.handleMultiLoginHydrate);
       ccSDK.on(CC_EVENTS.AGENT_STATE_CHANGE, this.handleStateChange);
       ccSDK.on(TASK_EVENTS.TASK_INCOMING, this.handleIncomingTask);
       ccSDK.on(TASK_EVENTS.TASK_CAMPAIGN_PREVIEW_RESERVATION, this.handleIncomingCampaignPreview);
@@ -1057,6 +1079,7 @@ class StoreWrapper implements IStoreWrapper {
         method: 'setupIncomingTaskHandler#removeEventListeners',
       });
       ccSDK.off(TASK_EVENTS.TASK_HYDRATE, this.handleTaskHydrate);
+      ccSDK.off(TASK_EVENTS.TASK_MULTI_LOGIN_HYDRATE, this.handleMultiLoginHydrate);
       ccSDK.off(CC_EVENTS.AGENT_STATE_CHANGE, this.handleStateChange);
       ccSDK.off(TASK_EVENTS.TASK_INCOMING, this.handleIncomingTask);
       ccSDK.off(TASK_EVENTS.TASK_CAMPAIGN_PREVIEW_RESERVATION, this.handleIncomingCampaignPreview);
