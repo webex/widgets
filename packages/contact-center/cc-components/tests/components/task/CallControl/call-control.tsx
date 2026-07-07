@@ -4,7 +4,7 @@ import '@testing-library/jest-dom';
 import CallControlComponent from '../../../../src/components/task/CallControl/call-control';
 import {CallControlComponentProps, CallControlMenuType, TARGET_TYPE} from '../../../../src/components/task/task.types';
 import * as callControlUtils from '../../../../src/components/task/CallControl/call-control.utils';
-import {mockTask} from '@webex/test-fixtures';
+import {mockTask, createEnabledMainTaskUIControls, disabledControl, enabledControl} from '@webex/test-fixtures';
 
 // Mock MediaStream for testing
 Object.defineProperty(window, 'MediaStream', {
@@ -62,35 +62,7 @@ describe('CallControlComponent', () => {
     },
   ];
 
-  const mockControlVisibility = {
-    accept: {isVisible: true, isEnabled: true},
-    decline: {isVisible: true, isEnabled: true},
-    end: {isVisible: true, isEnabled: true},
-    muteUnmute: {isVisible: true, isEnabled: true},
-    muteUnmuteConsult: {isVisible: true, isEnabled: true},
-    holdResume: {isVisible: true, isEnabled: true},
-    consult: {isVisible: true, isEnabled: true},
-    transfer: {isVisible: true, isEnabled: true},
-    conference: {isVisible: true, isEnabled: true},
-    wrapup: {isVisible: false, isEnabled: false}, // Set to false by default to show buttons
-    pauseResumeRecording: {isVisible: true, isEnabled: true},
-    endConsult: {isVisible: true, isEnabled: true},
-    recordingIndicator: {isVisible: true, isEnabled: true},
-    exitConference: {isVisible: false, isEnabled: false},
-    mergeConference: {isVisible: false, isEnabled: false},
-    mergeConferenceConsult: {isVisible: false, isEnabled: false},
-    consultTransfer: {isVisible: false, isEnabled: false},
-    consultTransferConsult: {isVisible: false, isEnabled: false},
-    switchToMainCall: {isVisible: false, isEnabled: false},
-    switchToConsult: {isVisible: false, isEnabled: false},
-    isConferenceInProgress: false,
-    isConsultInitiated: false,
-    isConsultInitiatedAndAccepted: false,
-    isConsultInitiatedOrAccepted: false,
-    isConsultReceived: false,
-    isHeld: false,
-    consultCallHeld: false,
-  };
+  const mockControls = createEnabledMainTaskUIControls();
 
   const defaultProps: CallControlComponentProps = {
     currentTask: mockCurrentTask,
@@ -124,7 +96,9 @@ describe('CallControlComponent', () => {
     allowConsultToQueue: true,
     lastTargetType: TARGET_TYPE.AGENT,
     setLastTargetType: jest.fn(),
-    controlVisibility: mockControlVisibility,
+    isHeld: false,
+    conferenceEnabled: true,
+    controls: mockControls,
     logger: mockLogger,
     secondsUntilAutoWrapup: null,
     cancelAutoWrapup: jest.fn(),
@@ -192,11 +166,6 @@ describe('CallControlComponent', () => {
         ...defaultProps,
         isMuted: false,
         isHeld: false,
-        controlVisibility: {
-          ...mockControlVisibility,
-          muteUnmute: true,
-          holdResume: true,
-        },
       };
 
       const screen = render(<CallControlComponent {...modifiedProps} />);
@@ -222,11 +191,8 @@ describe('CallControlComponent', () => {
       const modifiedProps = {
         ...defaultProps,
         isMuted: true,
-        controlVisibility: {
-          ...mockControlVisibility,
-          wrapup: {isVisible: true, isEnabled: true},
-          isHeld: true,
-        },
+        isHeld: true,
+        controls: createEnabledMainTaskUIControls({wrapup: enabledControl}),
       };
 
       const screen = await render(<CallControlComponent {...modifiedProps} />);
@@ -339,15 +305,6 @@ describe('CallControlComponent', () => {
       // Use the default buildCallControlButtons to ensure mute and hold buttons are rendered
       const modifiedProps = {
         ...defaultProps,
-        consultInitiated: false,
-        controlVisibility: {
-          ...mockControlVisibility,
-          wrapup: false,
-          consult: true,
-          transfer: true,
-          muteUnmute: true,
-          holdResume: true,
-        },
         buddyAgents: mockBuddyAgents,
       };
 
@@ -390,12 +347,6 @@ describe('CallControlComponent', () => {
     it('handles various user interaction patterns on consultation buttons', async () => {
       const modifiedProps = {
         ...defaultProps,
-        consultInitiated: false,
-        controlVisibility: {
-          ...mockControlVisibility,
-          wrapup: false,
-          consult: true,
-        },
         buddyAgents: mockBuddyAgents,
       };
 
@@ -469,12 +420,6 @@ describe('CallControlComponent', () => {
 
       const modifiedProps = {
         ...defaultProps,
-        consultInitiated: false,
-        controlVisibility: {
-          ...mockControlVisibility,
-          wrapup: false,
-          consult: true,
-        },
         buddyAgents: mockBuddyAgents,
       };
 
@@ -522,7 +467,7 @@ describe('CallControlComponent', () => {
       const screen = await render(
         <CallControlComponent
           {...defaultProps}
-          controlVisibility={{...mockControlVisibility, consult: true, transfer: false}}
+          controls={createEnabledMainTaskUIControls({transfer: disabledControl})}
           consultTransferOptions={{showDialNumberTab: false}}
         />
       );
@@ -555,7 +500,7 @@ describe('CallControlComponent', () => {
       const screen = await render(
         <CallControlComponent
           {...defaultProps}
-          controlVisibility={{...mockControlVisibility, consult: true, transfer: false}}
+          controls={createEnabledMainTaskUIControls({transfer: disabledControl})}
         />
       );
 

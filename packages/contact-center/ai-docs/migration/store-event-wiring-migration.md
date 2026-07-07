@@ -2,13 +2,45 @@
 
 ## Summary
 
-The store's `storeEventsWrapper.ts` currently registers 27 individual task event handlers via `registerTaskEventListeners()` that manually call `refreshTaskList()` and update observables. A companion method `handleTaskRemove()` unregisters them. With the SDK task-refactor, the SDK handles state transitions internally via a state machine. The core migration is:
+**Status: Done.** The store's [`storeEventsWrapper.ts`](../../store/src/storeEventsWrapper.ts) registers per-task SDK event handlers via `registerTaskEventListeners()`. The SDK state machine owns transitions and `task.uiControls`; the store mirrors task inventory through `refreshTaskList()` and fires optional host callbacks.
 
-1. **Switch event names** — use SDK `TASK_EVENTS` enum (delete local copy)
-2. **Keep `refreshTaskList()`** — the store does not observe `task.data` directly; `refreshTaskList()` is needed so the store re-syncs observables and the UI re-renders
-3. **Add `TASK_UI_CONTROLS_UPDATED`** subscription to trigger widget re-renders
-4. **Replace `isDeclineButtonEnabled`** store property with `task.uiControls.decline.isEnabled`
-5. **Fix `TASK_CONSULT_END` wiring** — wire the existing (dead) `handleConsultEnd` method
+Core behaviors implemented:
+
+1. **SDK `TASK_EVENTS` enum** — imported via `@webex/cc-store` (local enum removed)
+2. **`refreshTaskList()`** — kept in handlers; re-syncs MobX `taskList` / `currentTask`
+3. **`TASK_UI_CONTROLS_UPDATED`** — `handleUIControlsUpdated` → `refreshTaskList()`
+4. **`handleConsultEnd`** — wired to `TASK_CONSULT_END` (no longer dead code)
+5. **`TASK_SWITCH_CALL`** — `handleSwitchCall` → `refreshTaskList()`
+6. **Legacy bridge:** `handleAutoAnswer` still sets `isDeclineButtonEnabled`; widgets also read `task.uiControls.main.decline.isEnabled`
+
+---
+
+## Current Implementation
+
+Entry point: `registerTaskEventListeners(task)` in `storeEventsWrapper.ts`. Cleanup: `handleTaskRemove(taskToRemove)`.
+
+### Lifecycle and host callbacks
+
+| Event | Handler | Behavior |
+|-------|---------|----------|
+| `TASK_END` | `handleTaskEnd` | `setIsDeclineButtonEnabled(false)` + `refreshTaskList()` |
+| `TASK_ASSIGNED` | `handleTaskAssigned` | Set ENGAGED state, `setCurrentTask`, `onTaskAssigned` |
+| `TASK_REJECT` | `handleTaskReject` | `onTaskRejected(task, reason)` + `refreshTaskList()` |
+| `TASK_OUTDIAL_FAILED` | `handleOutdialFailed` | `onOutdialFailed(reason)` only — **no** `refreshTaskList()` in handler |
+| `TASK_UI_CONTROLS_UPDATED` | `handleUIControlsUpdated` | `refreshTaskList()` |
+
+### Outdial event flow
+
+| SDK event | Store handler | Host / widget effect |
+|-----------|---------------|----------------------|
+| `TASK_OUTDIAL_FAILED` | `handleOutdialFailed` | Host failure modal via `setOutdialFailed(reason)` |
+| `TASK_OUTDIAL_FAILED` | (widget) `taskRejectCallback` | IncomingTask dismiss via `setTaskCallback` in `useIncomingTask` |
+| `TASK_REJECT` | `handleTaskReject` | Host "Task Rejected" popup via `setTaskRejected` |
+| `TASK_END` | `handleTaskEnd` | Cleanup + refresh — **no** rejection popup |
+
+**Double-popup context:** SDK uses `emitTaskEnd` (not `emitTaskReject`) on `OUTBOUND_FAILED` so only `TASK_OUTDIAL_FAILED` shows the failure modal. A planned widgets-side dedup exists if SDK reverts to `emitTaskReject`.
+
+CC-level handlers (after agent login): `TASK_INCOMING` → `handleIncomingTask`, `TASK_HYDRATE`, `TASK_MERGED`.
 
 ---
 
@@ -417,10 +449,10 @@ handleAutoAnswer = () => {
 };
 ```
 
-#### After
+#### Current (legacy bridge retained)
 ```typescript
 handleAutoAnswer = () => {
-  // setIsDeclineButtonEnabled removed — use task.uiControls.decline.isEnabled instead.
+  this.setIsDeclineButtonEnabled(true); // Legacy bridge — widgets also use uiControls.main.decline.isEnabled
   this.refreshTaskList();
 };
 ```
@@ -429,18 +461,26 @@ handleAutoAnswer = () => {
 
 ## Validation Criteria
 
-- [ ] All event names switched to SDK `TASK_EVENTS` enum (`TASK_WRAPPEDUP`, `TASK_CONSULT_CREATED`, `TASK_OFFER_CONTACT`, `TASK_RECORDING_PAUSED`, `TASK_RECORDING_RESUMED`)
-- [ ] Local `TASK_EVENTS` enum deleted from `store.types.ts`; imported from `@webex/contact-center`
-- [ ] `refreshTaskList()` still called in all existing handlers (no removal in this migration)
-- [ ] `TASK_UI_CONTROLS_UPDATED` handler added; triggers widget re-renders
-- [ ] `handleConsultEnd` is properly wired to `TASK_CONSULT_END` and resets consult state
-- [ ] `handleAutoAnswer` no longer calls `setIsDeclineButtonEnabled` — widget layer uses `task.uiControls.decline.isEnabled`
-- [ ] `handleConsultAccepted` still registers `TASK_MEDIA` listener on consult task (browser)
-- [ ] Task list stays in sync on all lifecycle events (incoming, assigned, end, reject, wrapup)
-- [ ] No regression in consult/conference/hold flows
-- [ ] `handleTaskRemove` unregisters all listeners correctly (no listener leaks)
-- [ ] Task-layer consumers (`task/src/helper.ts`) updated to use SDK event names
+| Criterion | Status |
+|-----------|--------|
+| SDK `TASK_EVENTS` enum used (`TASK_WRAPPEDUP`, `TASK_CONSULT_CREATED`, etc.) | **Done** |
+| Local `TASK_EVENTS` removed; imported from SDK via `@webex/cc-store` | **Done** |
+| `refreshTaskList()` retained in handlers | **Done** |
+| `TASK_UI_CONTROLS_UPDATED` → `handleUIControlsUpdated` | **Done** |
+| `handleConsultEnd` wired to `TASK_CONSULT_END` | **Done** |
+| `handleAutoAnswer` uses only `uiControls.decline.isEnabled` | **Legacy** — store flag still set; widgets OR with SDK control |
+| `handleConsultAccepted` registers `TASK_MEDIA` (browser) | **Done** |
+| Task list sync on lifecycle events | **Done** |
+| Consult/conference/hold flows | **Done** |
+| `handleTaskRemove` listener cleanup | **Open** — `TASK_CONFERENCE_TRANSFERRED` `.off()` uses wrong handler ref (listener leak) |
+| Task-layer SDK event names in `helper.ts` | **Done** |
 
 ---
 
-_Parent: [migration-overview.md](./migration-overview.md) — overview doc is added in PR 1/4; link resolves once that PR is merged._
+## Known Issues (Open)
+
+- **`handleTaskRemove` listener mismatch:** `registerTaskEventListeners` wires `TASK_CONFERENCE_TRANSFERRED → refreshTaskList`, but `handleTaskRemove` calls `.off(TASK_CONFERENCE_TRANSFERRED, handleConferenceEnded)` — listener never removed.
+
+---
+
+_Parent: [migration-overview.md](./migration-overview.md)_

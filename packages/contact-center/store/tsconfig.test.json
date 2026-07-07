@@ -5,6 +5,6 @@
   "exclude": ["node_modules"],
   "compilerOptions": {
     "noEmit": true ,// Don't output any files
-    "types": ["jest"],  
+    "types": ["jest", "node"],
   }
 }

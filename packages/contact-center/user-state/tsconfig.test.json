@@ -4,6 +4,7 @@
   "include": ["./tests"],
   "exclude": ["**/node_modules/**"],
   "compilerOptions": {
-    "noEmit": true // Don't output any files
+    "noEmit": true,
+    "types": ["jest", "node"]
   }
 }

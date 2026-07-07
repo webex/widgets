@@ -41,7 +41,7 @@ exports[`CallControlConsultComponent Snapshots Interactions should call mockEndC
     class="consult-buttons consult-buttons-container"
   >
     <button
-      aria-describedby="react-aria-:r1h:"
+      aria-describedby="react-aria-:r1g:"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -61,14 +61,14 @@ exports[`CallControlConsultComponent Snapshots Interactions should call mockEndC
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r1h:"
+      id="react-aria-:r1g:"
     >
       <p>
         Mute
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r1i:"
+      aria-describedby="react-aria-:r1h:"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -88,14 +88,14 @@ exports[`CallControlConsultComponent Snapshots Interactions should call mockEndC
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r1i:"
+      id="react-aria-:r1h:"
     >
       <p>
         Switch to Call
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r1j:"
+      aria-describedby="react-aria-:r1i:"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -115,14 +115,14 @@ exports[`CallControlConsultComponent Snapshots Interactions should call mockEndC
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r1j:"
+      id="react-aria-:r1i:"
     >
       <p>
         Transfer
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r1k:"
+      aria-describedby="react-aria-:r1j:"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -142,14 +142,14 @@ exports[`CallControlConsultComponent Snapshots Interactions should call mockEndC
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r1k:"
+      id="react-aria-:r1j:"
     >
       <p>
         Merge
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r1l:"
+      aria-describedby="react-aria-:r1k:"
       class="md-button-circle-wrapper call-control-consult-button-cancel md-button-simple-wrapper md-focus-ring-wrapper children"
       data-color="primary"
       data-disabled="false"
@@ -169,7 +169,7 @@ exports[`CallControlConsultComponent Snapshots Interactions should call mockEndC
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r1l:"
+      id="react-aria-:r1k:"
     >
       <p>
         End Consult
@@ -177,7 +177,7 @@ exports[`CallControlConsultComponent Snapshots Interactions should call mockEndC
     </div>
     <div
       data-tippy-root=""
-      id="tippy-54"
+      id="tippy-53"
       style="pointer-events: none; z-index: 9999; transition: none; position: absolute; left: 0px; top: 0px; margin: 0px;"
     />
   </div>
@@ -225,7 +225,7 @@ exports[`CallControlConsultComponent Snapshots Interactions should call mockOnTo
     class="consult-buttons consult-buttons-container"
   >
     <button
-      aria-describedby="react-aria-:r17:"
+      aria-describedby="react-aria-:r16:"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper md-focus-ring-wrapper children"
       data-color="primary"
       data-disabled="false"
@@ -245,14 +245,14 @@ exports[`CallControlConsultComponent Snapshots Interactions should call mockOnTo
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r17:"
+      id="react-aria-:r16:"
     >
       <p>
         Mute
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r18:"
+      aria-describedby="react-aria-:r17:"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -272,14 +272,14 @@ exports[`CallControlConsultComponent Snapshots Interactions should call mockOnTo
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r18:"
+      id="react-aria-:r17:"
     >
       <p>
         Switch to Call
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r19:"
+      aria-describedby="react-aria-:r18:"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -299,14 +299,14 @@ exports[`CallControlConsultComponent Snapshots Interactions should call mockOnTo
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r19:"
+      id="react-aria-:r18:"
     >
       <p>
         Transfer
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r1a:"
+      aria-describedby="react-aria-:r19:"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -326,14 +326,14 @@ exports[`CallControlConsultComponent Snapshots Interactions should call mockOnTo
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r1a:"
+      id="react-aria-:r19:"
     >
       <p>
         Merge
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r1b:"
+      aria-describedby="react-aria-:r1a:"
       class="md-button-circle-wrapper call-control-consult-button-cancel md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -353,7 +353,7 @@ exports[`CallControlConsultComponent Snapshots Interactions should call mockOnTo
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r1b:"
+      id="react-aria-:r1a:"
     >
       <p>
         End Consult
@@ -361,7 +361,7 @@ exports[`CallControlConsultComponent Snapshots Interactions should call mockOnTo
     </div>
     <div
       data-tippy-root=""
-      id="tippy-40"
+      id="tippy-39"
       style="pointer-events: none; z-index: 9999; transition: none; position: absolute; left: 0px; top: 0px; margin: 0px;"
     />
   </div>
@@ -409,7 +409,7 @@ exports[`CallControlConsultComponent Snapshots Interactions should call mockOnTr
     class="consult-buttons consult-buttons-container"
   >
     <button
-      aria-describedby="react-aria-:r1c:"
+      aria-describedby="react-aria-:r1b:"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -429,14 +429,14 @@ exports[`CallControlConsultComponent Snapshots Interactions should call mockOnTr
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r1c:"
+      id="react-aria-:r1b:"
     >
       <p>
         Mute
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r1d:"
+      aria-describedby="react-aria-:r1c:"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -456,14 +456,14 @@ exports[`CallControlConsultComponent Snapshots Interactions should call mockOnTr
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r1d:"
+      id="react-aria-:r1c:"
     >
       <p>
         Switch to Call
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r1e:"
+      aria-describedby="react-aria-:r1d:"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper md-focus-ring-wrapper children"
       data-color="primary"
       data-disabled="false"
@@ -483,14 +483,14 @@ exports[`CallControlConsultComponent Snapshots Interactions should call mockOnTr
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r1e:"
+      id="react-aria-:r1d:"
     >
       <p>
         Transfer
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r1f:"
+      aria-describedby="react-aria-:r1e:"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -510,14 +510,14 @@ exports[`CallControlConsultComponent Snapshots Interactions should call mockOnTr
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r1f:"
+      id="react-aria-:r1e:"
     >
       <p>
         Merge
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r1g:"
+      aria-describedby="react-aria-:r1f:"
       class="md-button-circle-wrapper call-control-consult-button-cancel md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -537,7 +537,7 @@ exports[`CallControlConsultComponent Snapshots Interactions should call mockOnTr
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r1g:"
+      id="react-aria-:r1f:"
     >
       <p>
         End Consult
@@ -545,7 +545,7 @@ exports[`CallControlConsultComponent Snapshots Interactions should call mockOnTr
     </div>
     <div
       data-tippy-root=""
-      id="tippy-47"
+      id="tippy-46"
       style="pointer-events: none; z-index: 9999; transition: none; position: absolute; left: 0px; top: 0px; margin: 0px;"
     />
   </div>
@@ -772,7 +772,7 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
     class="consult-buttons consult-buttons-container"
   >
     <button
-      aria-describedby="react-aria-:r12:"
+      aria-describedby="react-aria-:r11:"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -792,14 +792,14 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r12:"
+      id="react-aria-:r11:"
     >
       <p>
         Mute
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r13:"
+      aria-describedby="react-aria-:r12:"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -819,14 +819,14 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r13:"
+      id="react-aria-:r12:"
     >
       <p>
         Switch to Call
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r14:"
+      aria-describedby="react-aria-:r13:"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -846,14 +846,14 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r14:"
+      id="react-aria-:r13:"
     >
       <p>
         Transfer
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r15:"
+      aria-describedby="react-aria-:r14:"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -873,14 +873,14 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r15:"
+      id="react-aria-:r14:"
     >
       <p>
         Merge
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r16:"
+      aria-describedby="react-aria-:r15:"
       class="md-button-circle-wrapper call-control-consult-button-cancel md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -900,7 +900,7 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r16:"
+      id="react-aria-:r15:"
     >
       <p>
         End Consult
@@ -951,7 +951,7 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
     class="consult-buttons consult-buttons-container"
   >
     <button
-      aria-describedby="react-aria-:rp:"
+      aria-describedby="react-aria-:ro:"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -971,14 +971,14 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:rp:"
+      id="react-aria-:ro:"
     >
       <p>
         Mute
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:rq:"
+      aria-describedby="react-aria-:rp:"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -998,17 +998,17 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:rq:"
+      id="react-aria-:rp:"
     >
       <p>
         Switch to Call
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:rr:"
+      aria-describedby="react-aria-:rq:"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
-      data-disabled="false"
+      data-disabled="true"
       data-ghost="false"
       data-inverted="false"
       data-multiple-children="false"
@@ -1016,6 +1016,7 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
       data-shallow-disabled="false"
       data-size="40"
       data-testid="transfer-consult-btn"
+      disabled=""
       type="button"
     >
       <mdc-icon
@@ -1025,14 +1026,14 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:rr:"
+      id="react-aria-:rq:"
     >
       <p>
         Transfer
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:rs:"
+      aria-describedby="react-aria-:rr:"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -1052,14 +1053,14 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:rs:"
+      id="react-aria-:rr:"
     >
       <p>
         Merge
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:rt:"
+      aria-describedby="react-aria-:rs:"
       class="md-button-circle-wrapper call-control-consult-button-cancel md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -1079,7 +1080,7 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:rt:"
+      id="react-aria-:rs:"
     >
       <p>
         End Consult
@@ -1130,7 +1131,7 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
     class="consult-buttons consult-buttons-container"
   >
     <button
-      aria-describedby="react-aria-:rk:"
+      aria-describedby="react-aria-:rj:"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -1150,14 +1151,14 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:rk:"
+      id="react-aria-:rj:"
     >
       <p>
         Mute
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:rl:"
+      aria-describedby="react-aria-:rk:"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -1177,14 +1178,14 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:rl:"
+      id="react-aria-:rk:"
     >
       <p>
         Switch to Call
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:rm:"
+      aria-describedby="react-aria-:rl:"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -1204,14 +1205,14 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:rm:"
+      id="react-aria-:rl:"
     >
       <p>
         Transfer
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:rn:"
+      aria-describedby="react-aria-:rm:"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -1231,14 +1232,14 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:rn:"
+      id="react-aria-:rm:"
     >
       <p>
         Merge
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:ro:"
+      aria-describedby="react-aria-:rn:"
       class="md-button-circle-wrapper call-control-consult-button-cancel md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -1258,7 +1259,7 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:ro:"
+      id="react-aria-:rn:"
     >
       <p>
         End Consult
@@ -1309,7 +1310,7 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
     class="consult-buttons consult-buttons-container"
   >
     <button
-      aria-describedby="react-aria-:ru:"
+      aria-describedby="react-aria-:rt:"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -1329,14 +1330,14 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:ru:"
+      id="react-aria-:rt:"
     >
       <p>
         Mute
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:rv:"
+      aria-describedby="react-aria-:ru:"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -1356,14 +1357,14 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:rv:"
+      id="react-aria-:ru:"
     >
       <p>
         Switch to Call
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r10:"
+      aria-describedby="react-aria-:rv:"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -1383,14 +1384,14 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r10:"
+      id="react-aria-:rv:"
     >
       <p>
         Transfer
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r11:"
+      aria-describedby="react-aria-:r10:"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -1410,7 +1411,7 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r11:"
+      id="react-aria-:r10:"
     >
       <p>
         Merge
@@ -1650,33 +1651,6 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
       data-outline="false"
       data-shallow-disabled="false"
       data-size="40"
-      data-testid="mute-consult-btn"
-      type="button"
-    >
-      <mdc-icon
-        class="call-control-button-icon"
-        name="microphone-bold"
-      />
-    </button>
-    <div
-      class="md-tooltip-label"
-      id="react-aria-:ra:"
-    >
-      <p>
-        Mute
-      </p>
-    </div>
-    <button
-      aria-describedby="react-aria-:rb:"
-      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
-      data-color="primary"
-      data-disabled="false"
-      data-ghost="false"
-      data-inverted="false"
-      data-multiple-children="false"
-      data-outline="false"
-      data-shallow-disabled="false"
-      data-size="40"
       data-testid="switchToMainCall-consult-btn"
       type="button"
     >
@@ -1687,14 +1661,14 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:rb:"
+      id="react-aria-:ra:"
     >
       <p>
         Switch to Call
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:rc:"
+      aria-describedby="react-aria-:rb:"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -1714,14 +1688,14 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:rc:"
+      id="react-aria-:rb:"
     >
       <p>
         Transfer
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:rd:"
+      aria-describedby="react-aria-:rc:"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -1741,14 +1715,14 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:rd:"
+      id="react-aria-:rc:"
     >
       <p>
         Merge
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:re:"
+      aria-describedby="react-aria-:rd:"
       class="md-button-circle-wrapper call-control-consult-button-cancel md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -1768,7 +1742,7 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:re:"
+      id="react-aria-:rd:"
     >
       <p>
         End Consult
@@ -1819,7 +1793,7 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
     class="consult-buttons consult-buttons-container"
   >
     <button
-      aria-describedby="react-aria-:rf:"
+      aria-describedby="react-aria-:re:"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -1839,14 +1813,14 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:rf:"
+      id="react-aria-:re:"
     >
       <p>
         Mute
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:rg:"
+      aria-describedby="react-aria-:rf:"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -1866,14 +1840,14 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:rg:"
+      id="react-aria-:rf:"
     >
       <p>
         Switch to Call
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:rh:"
+      aria-describedby="react-aria-:rg:"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -1893,14 +1867,14 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:rh:"
+      id="react-aria-:rg:"
     >
       <p>
         Transfer
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:ri:"
+      aria-describedby="react-aria-:rh:"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -1920,14 +1894,14 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:ri:"
+      id="react-aria-:rh:"
     >
       <p>
         Merge
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:rj:"
+      aria-describedby="react-aria-:ri:"
       class="md-button-circle-wrapper call-control-consult-button-cancel md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -1947,7 +1921,7 @@ exports[`CallControlConsultComponent Snapshots Rendering - Tests for UI elements
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:rj:"
+      id="react-aria-:ri:"
     >
       <p>
         End Consult
@@ -1998,34 +1972,7 @@ exports[`CallControlConsultComponent Snapshots State Management should handle co
     class="consult-buttons consult-buttons-container"
   >
     <button
-      aria-describedby="react-aria-:r20:"
-      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
-      data-color="primary"
-      data-disabled="false"
-      data-ghost="false"
-      data-inverted="false"
-      data-multiple-children="false"
-      data-outline="false"
-      data-shallow-disabled="false"
-      data-size="40"
-      data-testid="mute-consult-btn"
-      type="button"
-    >
-      <mdc-icon
-        class="call-control-button-icon"
-        name="microphone-bold"
-      />
-    </button>
-    <div
-      class="md-tooltip-label"
-      id="react-aria-:r20:"
-    >
-      <p>
-        Mute
-      </p>
-    </div>
-    <button
-      aria-describedby="react-aria-:r21:"
+      aria-describedby="react-aria-:r1v:"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -2045,14 +1992,14 @@ exports[`CallControlConsultComponent Snapshots State Management should handle co
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r21:"
+      id="react-aria-:r1v:"
     >
       <p>
         Switch to Call
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r22:"
+      aria-describedby="react-aria-:r20:"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -2072,14 +2019,14 @@ exports[`CallControlConsultComponent Snapshots State Management should handle co
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r22:"
+      id="react-aria-:r20:"
     >
       <p>
         Transfer
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r23:"
+      aria-describedby="react-aria-:r21:"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -2099,14 +2046,14 @@ exports[`CallControlConsultComponent Snapshots State Management should handle co
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r23:"
+      id="react-aria-:r21:"
     >
       <p>
         Merge
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r24:"
+      aria-describedby="react-aria-:r22:"
       class="md-button-circle-wrapper call-control-consult-button-cancel md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -2126,7 +2073,7 @@ exports[`CallControlConsultComponent Snapshots State Management should handle co
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r24:"
+      id="react-aria-:r22:"
     >
       <p>
         End Consult
@@ -2175,7 +2122,7 @@ exports[`CallControlConsultComponent Snapshots State Management should handle ed
     class="consult-buttons consult-buttons-container"
   >
     <button
-      aria-describedby="react-aria-:r25:"
+      aria-describedby="react-aria-:r23:"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -2195,14 +2142,14 @@ exports[`CallControlConsultComponent Snapshots State Management should handle ed
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r25:"
+      id="react-aria-:r23:"
     >
       <p>
         Mute
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r26:"
+      aria-describedby="react-aria-:r24:"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -2222,14 +2169,14 @@ exports[`CallControlConsultComponent Snapshots State Management should handle ed
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r26:"
+      id="react-aria-:r24:"
     >
       <p>
         Switch to Call
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r27:"
+      aria-describedby="react-aria-:r25:"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -2249,14 +2196,14 @@ exports[`CallControlConsultComponent Snapshots State Management should handle ed
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r27:"
+      id="react-aria-:r25:"
     >
       <p>
         Transfer
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r28:"
+      aria-describedby="react-aria-:r26:"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -2276,14 +2223,14 @@ exports[`CallControlConsultComponent Snapshots State Management should handle ed
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r28:"
+      id="react-aria-:r26:"
     >
       <p>
         Merge
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r29:"
+      aria-describedby="react-aria-:r27:"
       class="md-button-circle-wrapper call-control-consult-button-cancel md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -2303,7 +2250,7 @@ exports[`CallControlConsultComponent Snapshots State Management should handle ed
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r29:"
+      id="react-aria-:r27:"
     >
       <p>
         End Consult
@@ -2354,7 +2301,7 @@ exports[`CallControlConsultComponent Snapshots State Management should update wh
     class="consult-buttons consult-buttons-container"
   >
     <button
-      aria-describedby="react-aria-:r1r:"
+      aria-describedby="react-aria-:r1q:"
       class="md-button-circle-wrapper call-control-button-muted md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -2374,14 +2321,14 @@ exports[`CallControlConsultComponent Snapshots State Management should update wh
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r1r:"
+      id="react-aria-:r1q:"
     >
       <p>
         Unmute
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r1s:"
+      aria-describedby="react-aria-:r1r:"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -2401,14 +2348,14 @@ exports[`CallControlConsultComponent Snapshots State Management should update wh
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r1s:"
+      id="react-aria-:r1r:"
     >
       <p>
         Switch to Call
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r1t:"
+      aria-describedby="react-aria-:r1s:"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -2428,14 +2375,14 @@ exports[`CallControlConsultComponent Snapshots State Management should update wh
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r1t:"
+      id="react-aria-:r1s:"
     >
       <p>
         Transfer
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r1u:"
+      aria-describedby="react-aria-:r1t:"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -2455,14 +2402,14 @@ exports[`CallControlConsultComponent Snapshots State Management should update wh
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r1u:"
+      id="react-aria-:r1t:"
     >
       <p>
         Merge
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r1v:"
+      aria-describedby="react-aria-:r1u:"
       class="md-button-circle-wrapper call-control-consult-button-cancel md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -2482,7 +2429,7 @@ exports[`CallControlConsultComponent Snapshots State Management should update wh
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r1v:"
+      id="react-aria-:r1u:"
     >
       <p>
         End Consult
@@ -2543,33 +2490,6 @@ exports[`CallControlConsultComponent Snapshots State Management should update wh
       data-outline="false"
       data-shallow-disabled="false"
       data-size="40"
-      data-testid="mute-consult-btn"
-      type="button"
-    >
-      <mdc-icon
-        class="call-control-button-icon"
-        name="microphone-bold"
-      />
-    </button>
-    <div
-      class="md-tooltip-label"
-      id="react-aria-:r1m:"
-    >
-      <p>
-        Mute
-      </p>
-    </div>
-    <button
-      aria-describedby="react-aria-:r1n:"
-      class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
-      data-color="primary"
-      data-disabled="false"
-      data-ghost="false"
-      data-inverted="false"
-      data-multiple-children="false"
-      data-outline="false"
-      data-shallow-disabled="false"
-      data-size="40"
       data-testid="switchToMainCall-consult-btn"
       type="button"
     >
@@ -2580,14 +2500,14 @@ exports[`CallControlConsultComponent Snapshots State Management should update wh
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r1n:"
+      id="react-aria-:r1m:"
     >
       <p>
         Switch to Call
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r1o:"
+      aria-describedby="react-aria-:r1n:"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -2607,14 +2527,14 @@ exports[`CallControlConsultComponent Snapshots State Management should update wh
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r1o:"
+      id="react-aria-:r1n:"
     >
       <p>
         Transfer
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r1p:"
+      aria-describedby="react-aria-:r1o:"
       class="md-button-circle-wrapper call-control-button md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -2634,14 +2554,14 @@ exports[`CallControlConsultComponent Snapshots State Management should update wh
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r1p:"
+      id="react-aria-:r1o:"
     >
       <p>
         Merge
       </p>
     </div>
     <button
-      aria-describedby="react-aria-:r1q:"
+      aria-describedby="react-aria-:r1p:"
       class="md-button-circle-wrapper call-control-consult-button-cancel md-button-simple-wrapper"
       data-color="primary"
       data-disabled="false"
@@ -2661,7 +2581,7 @@ exports[`CallControlConsultComponent Snapshots State Management should update wh
     </button>
     <div
       class="md-tooltip-label"
-      id="react-aria-:r1q:"
+      id="react-aria-:r1p:"
     >
       <p>
         End Consult

@@ -38,7 +38,10 @@ jest.mock('../../../../src/components/task/CampaignErrorDialog/campaign-error-di
 });
 
 jest.mock('../../../../src/components/task/CampaignTask/CampaignTaskPopover/campaign-task-popover', () => {
-  const MockPopover = () => <div data-testid="campaign-task-popover" />;
+  const MockPopover = ({onTimeout}: {onTimeout?: () => void}) => {
+    capturedOnTimeout = onTimeout;
+    return <div data-testid="campaign-task-popover" />;
+  };
   MockPopover.displayName = 'CampaignTaskPopover';
   return {__esModule: true, default: MockPopover};
 });
@@ -94,9 +97,10 @@ describe('CampaignTask', () => {
     expect(await screen.findByTestId('campaign-task-remove-button')).toBeInTheDocument();
   });
 
-  it('should render the countdown in initial state', async () => {
+  it('should render handle time in the task list initial state', async () => {
     await renderComponent();
-    expect(screen.getByTestId('mock-countdown')).toBeInTheDocument();
+    expect(screen.getByTestId('mock-task-timer')).toBeInTheDocument();
+    expect(screen.queryByTestId('mock-countdown')).not.toBeInTheDocument();
   });
 
   it('should render the variables panel', async () => {
@@ -165,7 +169,7 @@ describe('CampaignTask', () => {
     expect(screen.getByTestId('campaign-task-cancel-button')).toBeInTheDocument();
   });
 
-  it('should keep countdown visible after Accept is clicked (hidden only when backend confirms)', async () => {
+  it('should keep handle time visible after Accept is clicked', async () => {
     const acceptPreviewContact = jest.fn().mockResolvedValue(undefined);
     await renderComponent({acceptPreviewContact});
 
@@ -173,8 +177,8 @@ describe('CampaignTask', () => {
       fireEvent.click(screen.getByTestId('campaign-task-accept-button'));
     });
 
-    // Countdown still visible — handle timer only shown when isAccepted
-    expect(screen.getByTestId('mock-countdown')).toBeInTheDocument();
+    expect(screen.getByTestId('mock-task-timer')).toBeInTheDocument();
+    expect(screen.queryByTestId('mock-countdown')).not.toBeInTheDocument();
   });
 
   it('should show error dialog when accept fails', async () => {
@@ -416,9 +420,10 @@ describe('CampaignTask', () => {
 
       // Accept API should NOT be called — backend handles auto-accept
       expect(acceptPreviewContact).not.toHaveBeenCalled();
-      // UI shows Connecting state (accept clicked locally) — countdown still visible since !isAccepted
+      // UI shows Connecting state while the task-list row remains on handle time.
       expect(screen.getByTestId('campaign-task-connecting-button')).toBeInTheDocument();
-      expect(screen.getByTestId('mock-countdown')).toBeInTheDocument();
+      expect(screen.getByTestId('mock-task-timer')).toBeInTheDocument();
+      expect(screen.queryByTestId('mock-countdown')).not.toBeInTheDocument();
     });
 
     it('should NOT call skipPreviewContact when countdown expires with SKIP autoAction', async () => {

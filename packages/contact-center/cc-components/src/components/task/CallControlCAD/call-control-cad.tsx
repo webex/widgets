@@ -5,12 +5,7 @@ import {Avatar, Brandvisual, Icon, Tooltip, Button} from '@momentum-design/compo
 import './call-control-cad.styles.scss';
 import TaskTimer from '../TaskTimer/index';
 import CallControlConsultComponent from '../CallControl/CallControlCustom/call-control-consult';
-import {
-  MEDIA_CHANNEL as MediaChannelType,
-  CallControlComponentProps,
-  getCallerIdentifier,
-  CallAssociatedDataMap,
-} from '../task.types';
+import {MEDIA_CHANNEL as MediaChannelType, CallControlComponentProps, CallAssociatedDataMap} from '../task.types';
 import {getAgentViewableGlobalVariables} from '../Task/task.utils';
 import GlobalVariablesPanel from '../GlobalVariablesPanel/global-variables-panel';
 
@@ -27,11 +22,13 @@ import {
   CAMPAIGN_CALL,
 } from '../constants';
 import {withMetrics} from '@webex/cc-ui-logging';
+import {isSecondaryAgent} from '@webex/cc-store';
 
 const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => {
   const {
     currentTask,
     isRecording,
+    isHeld,
     holdTime,
     consultAgentName,
     consultTimerLabel,
@@ -45,11 +42,12 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
     startTimestamp,
     stateTimerLabel,
     stateTimerTimestamp,
-    controlVisibility,
+    controls,
     logger,
     isMuted,
     toggleMute,
     conferenceParticipants,
+    conferenceEnabled = true,
     isCampaignCall = false,
   } = props;
 
@@ -69,16 +67,24 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
   const isTelephony = mediaChannel === MediaChannelType.TELEPHONY;
   const participantsCount = conferenceParticipants?.length || 1;
   const participantsLabel = participantsCount === 1 ? 'Participant' : 'Participants';
+  const interactionState = currentTask?.data?.interaction?.state;
+  const isConferenceActive =
+    controls?.main?.exitConference?.isVisible ||
+    currentTask?.data?.isConferenceInProgress === true ||
+    interactionState === 'conference';
+  const isConsultOnlyAgent = isSecondaryAgent(currentTask);
+  const shouldShowParticipantsList =
+    isConferenceActive && !isConsultOnlyAgent && (conferenceParticipants?.length ?? 0) > 0;
 
-  //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
   const customerName = currentTask?.data?.interaction?.callAssociatedDetails?.customerName;
 
-  //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
   const ani = currentTask?.data?.interaction?.callAssociatedDetails?.ani;
-  //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
-  const dn = currentTask?.data?.interaction?.callAssociatedDetails?.dn;
+  const isOutdial = currentTask?.data?.interaction?.outboundType === 'OUTDIAL';
+  const dnis =
+    currentTask?.data?.interaction?.callAssociatedDetails?.dnis ||
+    currentTask?.data?.interaction?.callProcessingDetails?.dnis;
+  const displayNumber = isOutdial ? dnis || ani : ani;
 
-  //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
   const callAssociatedData = currentTask?.data?.interaction?.callAssociatedData as CallAssociatedDataMap | undefined;
   const latestGlobalVariables = getAgentViewableGlobalVariables(callAssociatedData);
 
@@ -110,11 +116,8 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
   // For telephony calls, ani is the originating number and dn is the destination.
   // Inbound: ani = caller's number, dn = entry point dialed by caller
   // Outdial: ani = agent's originating number (entry point), dn = customer's dialed number
-  const outboundType = currentTask?.data?.interaction?.outboundType;
-  const callerNumber = getCallerIdentifier(ani, dn, outboundType);
-
   const renderCustomerName = () => {
-    const customerText = isSocial ? customerName || NO_CUSTOMER_NAME : callerNumber || NO_CALLER_ID;
+    const customerText = isSocial ? customerName || NO_CUSTOMER_NAME : displayNumber || NO_CALLER_ID;
 
     const textComponent = (
       <Text
@@ -223,7 +226,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
                     </>
                   )}
                 </Text>
-                {controlVisibility.isConferenceInProgress && !controlVisibility.wrapup.isVisible && (
+                {shouldShowParticipantsList && !controls?.main?.wrapup?.isVisible && (
                   <>
                     <div className="vertical-divider"></div>
                     <div className="participants-section">
@@ -273,25 +276,22 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
                 )}
               </div>
               <div className="call-status">
-                {!controlVisibility.wrapup.isVisible &&
-                  controlVisibility.isHeld &&
-                  !controlVisibility.isConsultReceived &&
-                  !controlVisibility.consultCallHeld && (
-                    <>
-                      <span className="dot">•</span>
-                      <div className="on-hold">
-                        <Icon name="call-hold-filled" size={1} className="call-hold-filled-icon" />
-                        <span className="on-hold-chip-text">
-                          {ON_HOLD} {formatTime(holdTime)}
-                        </span>
-                      </div>
-                    </>
-                  )}
+                {!controls?.main?.wrapup?.isVisible && isHeld && (
+                  <>
+                    <span className="dot">•</span>
+                    <div className="on-hold">
+                      <Icon name="call-hold-filled" size={1} className="call-hold-filled-icon" />
+                      <span className="on-hold-chip-text">
+                        {ON_HOLD} {formatTime(holdTime)}
+                      </span>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
         </div>
-        {!controlVisibility.wrapup.isVisible && controlVisibility.recordingIndicator.isVisible && (
+        {!controls?.main?.wrapup?.isVisible && isTelephony && (
           <div className="recording-indicator">
             <Icon name={isRecording ? 'record-active-badge-filled' : 'record-paused-badge-filled'} size={1.3} />
           </div>
@@ -300,35 +300,31 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
         <div className="cad-variables">
           <Text className="queue" type="body-secondary" tagName={'small'}>
             <strong>{QUEUE}</strong>{' '}
-            <span>
-              {
-                //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
-
-                currentTask?.data?.interaction?.callAssociatedDetails?.virtualTeamName || NO_TEAM_NAME
-              }
-            </span>
+            <span>{currentTask?.data?.interaction?.callAssociatedDetails?.virtualTeamName || NO_TEAM_NAME}</span>
           </Text>
           {renderPhoneNumber()}
         </div>
         <GlobalVariablesPanel variables={globalVariables} className="cad-global-variables" />
       </div>
-      {controlVisibility.isConsultInitiatedOrAccepted && !controlVisibility.wrapup.isVisible && (
-        <div className={`call-control-consult-container ${callControlConsultClassName || ''}`}>
-          <CallControlConsultComponent
-            agentName={consultAgentName}
-            consultTimerLabel={consultTimerLabel}
-            consultTimerTimestamp={consultTimerTimestamp}
-            endConsultCall={endConsultCall}
-            consultTransfer={consultTransfer}
-            consultConference={consultConference}
-            switchToMainCall={switchToMainCall}
-            logger={logger}
-            isMuted={isMuted}
-            controlVisibility={controlVisibility}
-            toggleConsultMute={toggleMute}
-          />
-        </div>
-      )}
+      {(controls?.consult?.endConsult?.isVisible || controls?.main?.endConsult?.isVisible) &&
+        !controls?.main?.wrapup?.isVisible && (
+          <div className={`call-control-consult-container ${callControlConsultClassName || ''}`}>
+            <CallControlConsultComponent
+              agentName={consultAgentName}
+              consultTimerLabel={consultTimerLabel}
+              consultTimerTimestamp={consultTimerTimestamp}
+              endConsultCall={endConsultCall}
+              consultTransfer={consultTransfer}
+              consultConference={consultConference}
+              switchToMainCall={switchToMainCall}
+              logger={logger}
+              isMuted={isMuted}
+              controls={controls}
+              toggleConsultMute={toggleMute}
+              conferenceEnabled={conferenceEnabled}
+            />
+          </div>
+        )}
     </>
   );
 };

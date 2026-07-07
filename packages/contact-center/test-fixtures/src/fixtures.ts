@@ -55,7 +55,7 @@ const mockProfile: Profile = {
   isAgentAvailableAfterOutdial: false,
   isCampaignManagementEnabled: true,
   outDialEp: '',
-  isEndCallEnabled: true,
+  isEndTaskEnabled: true,
   isEndConsultEnabled: true,
   agentDbId: 'agentDb123',
   allowConsultToQueue: true,
@@ -72,7 +72,6 @@ const mockProfile: Profile = {
   lastStateAuxCodeId: 'auxCodeId',
   lastStateChangeTimestamp: 123456789,
   lastIdleCodeChangeTimestamp: 123456789,
-  environment: 'produs1',
 };
 
 const mockEntryPointsResponse: EntryPointListResponse = {
@@ -112,7 +111,7 @@ const makeMockAddressBook = (getEntriesMock?: AddressBook['getEntries']): Addres
 
 const mockAddressBook = makeMockAddressBook();
 
-const mockTask: ITask = {
+const mockTask = {
   data: {
     interaction: {
       mediaType: 'telephony',
@@ -121,6 +120,7 @@ const mockTask: ITask = {
       callProcessingDetails: {
         relationshipType: 'primary',
         parentInteractionId: null,
+        pauseResumeEnabled: true,
       },
       participants: {
         agent1: {
@@ -199,7 +199,7 @@ const mockTask: ITask = {
   transferConference: jest.fn(),
   exitConference: jest.fn(),
   toggleMute: jest.fn(),
-};
+} as unknown as ITask;
 
 interface MakeMockTaskOverrides {
   data?: Partial<TaskData> & {
@@ -223,19 +223,8 @@ const makeMockTask = (overrides?: MakeMockTaskOverrides): ITask => {
     } as unknown as TaskData,
     on: jest.fn(),
     off: jest.fn(),
-    emit: jest.fn(),
-    addListener: jest.fn(),
     once: jest.fn(),
-    removeListener: jest.fn(),
-    removeAllListeners: jest.fn(),
-    setMaxListeners: jest.fn(),
-    getMaxListeners: jest.fn().mockReturnValue(10),
-    listeners: jest.fn().mockReturnValue([]),
-    rawListeners: jest.fn().mockReturnValue([]),
-    listenerCount: jest.fn().mockReturnValue(0),
-    prependListener: jest.fn(),
-    prependOnceListener: jest.fn(),
-    eventNames: jest.fn().mockReturnValue([]),
+    emit: jest.fn(),
     cancelAutoWrapupTimer: jest.fn(),
     unregisterWebCallListeners: jest.fn(),
     updateTaskData: jest.fn().mockReturnValue({} as ITask),
@@ -255,7 +244,7 @@ const makeMockTask = (overrides?: MakeMockTaskOverrides): ITask => {
     transferConference: jest.fn(),
     exitConference: jest.fn(),
     toggleMute: jest.fn(),
-  };
+  } as unknown as ITask;
 };
 
 /** Default campaign preview call processing details. */

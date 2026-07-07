@@ -29,7 +29,6 @@ const CampaignTaskPopover: React.FC<CampaignTaskPopoverProps> = ({
   const campaignCpd = getCampaignCpd(cpd as unknown as Record<string, unknown>);
   const timeoutTimestamp = campaignCpd.campaignPreviewOfferTimeout;
 
-  // @ts-expect-error callAssociatedDetails not yet typed in SDK
   const callAssociatedDetails = task.data.interaction.callAssociatedDetails;
   const ani = callAssociatedDetails?.ani ?? '';
   const dn = callAssociatedDetails?.dn ?? '';

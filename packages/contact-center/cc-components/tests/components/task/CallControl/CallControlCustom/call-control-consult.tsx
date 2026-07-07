@@ -2,6 +2,7 @@ import React from 'react';
 import {render, fireEvent} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import CallControlConsultComponent from '../../../../../src/components/task/CallControl/CallControlCustom/call-control-consult';
+import {createMockTaskUIControls, disabledControl, enabledControl} from '@webex/test-fixtures';
 
 const loggerMock = {
   log: jest.fn(),
@@ -59,35 +60,16 @@ describe('CallControlConsultComponent', () => {
   const mockOnToggleConsultMute = jest.fn();
   const mockConsultConference = jest.fn();
 
-  const mockControlVisibility = {
-    accept: {isVisible: true, isEnabled: true},
-    decline: {isVisible: true, isEnabled: true},
-    end: {isVisible: true, isEnabled: true},
-    muteUnmute: {isVisible: true, isEnabled: true},
-    muteUnmuteConsult: {isVisible: true, isEnabled: true},
-    holdResume: {isVisible: true, isEnabled: true},
-    consult: {isVisible: true, isEnabled: true},
-    transfer: {isVisible: true, isEnabled: true},
-    conference: {isVisible: true, isEnabled: true},
-    wrapup: {isVisible: false, isEnabled: false},
-    pauseResumeRecording: {isVisible: true, isEnabled: true},
-    endConsult: {isVisible: true, isEnabled: true},
-    recordingIndicator: {isVisible: true, isEnabled: true},
-    exitConference: {isVisible: false, isEnabled: false},
-    mergeConference: {isVisible: true, isEnabled: true},
-    mergeConferenceConsult: {isVisible: true, isEnabled: true},
-    consultTransfer: {isVisible: true, isEnabled: true},
-    consultTransferConsult: {isVisible: true, isEnabled: true},
-    switchToMainCall: {isVisible: true, isEnabled: true},
-    switchToConsult: {isVisible: true, isEnabled: true},
-    isConferenceInProgress: false,
-    isConsultInitiated: false,
-    isConsultInitiatedAndAccepted: false,
-    isConsultInitiatedOrAccepted: false,
-    isConsultReceived: false,
-    isHeld: false,
-    consultCallHeld: false,
-  };
+  const mockConsultControls = createMockTaskUIControls({
+    activeLeg: 'consult',
+    consult: {
+      mute: enabledControl,
+      switch: enabledControl,
+      transfer: enabledControl,
+      mergeToConference: enabledControl,
+      endConsult: enabledControl,
+    },
+  });
 
   const defaultProps = {
     agentName: 'Alice',
@@ -100,7 +82,8 @@ describe('CallControlConsultComponent', () => {
     switchToMainCall: jest.fn(),
     logger: loggerMock,
     isMuted: false,
-    controlVisibility: mockControlVisibility,
+    controls: mockConsultControls,
+    conferenceEnabled: true,
   };
 
   beforeEach(() => {
@@ -196,10 +179,16 @@ describe('CallControlConsultComponent', () => {
   it('conditionally renders buttons based on props', async () => {
     const propsWithoutMute = {
       ...defaultProps,
-      controlVisibility: {
-        ...mockControlVisibility,
-        muteUnmuteConsult: {isVisible: false, isEnabled: false},
-      },
+      controls: createMockTaskUIControls({
+        activeLeg: 'consult',
+        consult: {
+          mute: disabledControl,
+          switch: enabledControl,
+          transfer: enabledControl,
+          mergeToConference: enabledControl,
+          endConsult: enabledControl,
+        },
+      }),
     };
     const screen = await render(<CallControlConsultComponent {...propsWithoutMute} />);
 
@@ -264,10 +253,16 @@ describe('CallControlConsultComponent', () => {
   it('tests button disabled states and tooltips', async () => {
     const propsWithIncompleteConsult = {
       ...defaultProps,
-      controlVisibility: {
-        ...mockControlVisibility,
-        consultTransferConsult: {isVisible: true, isEnabled: false},
-      },
+      controls: createMockTaskUIControls({
+        activeLeg: 'consult',
+        consult: {
+          mute: enabledControl,
+          switch: enabledControl,
+          transfer: {isVisible: true, isEnabled: false},
+          mergeToConference: enabledControl,
+          endConsult: enabledControl,
+        },
+      }),
     };
     const screen = await render(<CallControlConsultComponent {...propsWithIncompleteConsult} />);
 
