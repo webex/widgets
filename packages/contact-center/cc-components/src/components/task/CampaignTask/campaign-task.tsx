@@ -9,6 +9,7 @@ import {CampaignErrorType} from '../CampaignErrorDialog/campaign-error-dialog.ty
 import {
   CampaignTaskProps,
   CampaignAutoAction,
+  CampaignPendingAction,
   CAMPAIGN_ACTION_ERROR_MAP,
   CampaignErrorActionType,
   CallAssociatedDataMap,
@@ -65,6 +66,7 @@ const CampaignTask: React.FC<CampaignTaskProps> = ({
   const globalVariables = globalVariablesRef.current;
 
   const [isAcceptClicked, setIsAcceptClicked] = useState<boolean>(isAccepted);
+  const [pendingAction, setPendingAction] = useState<CampaignPendingAction>(isAccepted ? 'ACCEPT' : null);
   const [handleTimestamp, setHandleTimestamp] = useState<number | undefined>(
     isAccepted ? (getAgentJoinTimestamp(task, agentId) ?? Date.now()) : undefined
   );
@@ -122,6 +124,7 @@ const CampaignTask: React.FC<CampaignTaskProps> = ({
         method: 'useEffect[timeoutTimestamp]',
       });
       setIsAcceptClicked(false);
+      setPendingAction(null);
       setHandleTimestamp(undefined);
       setIsAcceptDisabled(false);
       setIsSkipButtonDisabled(campaignCpd.campaignPreviewSkipDisabled === 'true');
@@ -146,6 +149,7 @@ const CampaignTask: React.FC<CampaignTaskProps> = ({
 
   const resetButtons = useCallback((): void => {
     setIsAcceptClicked(false);
+    setPendingAction(null);
     setIsAcceptDisabled(false);
     setIsSkipButtonDisabled(campaignCpd.campaignPreviewSkipDisabled === 'true');
     setIsRemoveButtonDisabled(campaignCpd.campaignPreviewRemoveDisabled === 'true');
@@ -176,6 +180,7 @@ const CampaignTask: React.FC<CampaignTaskProps> = ({
     });
 
     setIsAcceptClicked(true);
+    setPendingAction('ACCEPT');
     setHandleTimestamp(Date.now());
     disableAllButtons();
 
@@ -190,6 +195,7 @@ const CampaignTask: React.FC<CampaignTaskProps> = ({
       method: 'handleSkip',
     });
 
+    setPendingAction('SKIP');
     disableAllButtons();
 
     skipPreviewContact().catch((error: unknown) => handleActionError('SKIP', 'handleSkip', error));
@@ -203,6 +209,7 @@ const CampaignTask: React.FC<CampaignTaskProps> = ({
       method: 'handleRemove',
     });
 
+    setPendingAction('REMOVE');
     disableAllButtons();
 
     removePreviewContact().catch((error: unknown) => handleActionError('REMOVE', 'handleRemove', error));
@@ -221,6 +228,7 @@ const CampaignTask: React.FC<CampaignTaskProps> = ({
     switch (autoAction) {
       case 'ACCEPT':
         setIsAcceptClicked(true);
+        setPendingAction('ACCEPT');
         setHandleTimestamp(Date.now());
         disableAllButtons();
         logger?.info('CC-Widgets: CampaignTask: Auto-accept UI state set, awaiting backend', {
@@ -230,6 +238,7 @@ const CampaignTask: React.FC<CampaignTaskProps> = ({
         break;
       case 'SKIP':
       case 'REMOVE':
+        setPendingAction(autoAction);
         disableAllButtons();
         logger?.info(`CC-Widgets: CampaignTask: Auto-${autoAction.toLowerCase()} UI state set, awaiting backend`, {
           module: LOG_MODULE,
@@ -298,6 +307,7 @@ const CampaignTask: React.FC<CampaignTaskProps> = ({
         logger={logger}
         triggerId={campaignTaskTriggerId}
         isAcceptClicked={isAcceptClicked}
+        pendingAction={pendingAction}
         isAccepted={isAccepted}
         isAcceptDisabled={isAcceptDisabled}
         isSkipDisabled={isSkipButtonDisabled}
@@ -314,6 +324,7 @@ const CampaignTask: React.FC<CampaignTaskProps> = ({
         customerName={customerName}
         timeoutTimestamp={timeoutTimestamp}
         isAcceptClicked={isAcceptClicked}
+        pendingAction={pendingAction}
         isAccepted={isAccepted}
         isAcceptDisabled={isAcceptDisabled}
         isSkipDisabled={isSkipButtonDisabled}

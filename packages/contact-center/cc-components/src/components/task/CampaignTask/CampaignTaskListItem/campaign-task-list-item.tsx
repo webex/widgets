@@ -2,10 +2,12 @@ import React from 'react';
 import {Avatar, Button, ListItem, Text, Tooltip} from '@momentum-design/components/dist/react';
 import CampaignCountdown from '../../CampaignCountdown/campaign-countdown';
 import TaskTimer from '../../TaskTimer/index';
-import {CampaignTaskListItemProps} from '../../task.types';
+import {CampaignTaskListItemProps, CampaignPendingAction} from '../../task.types';
 import {
   CAMPAIGN_ACCEPT,
   CAMPAIGN_CONNECTING,
+  CAMPAIGN_SKIPPING,
+  CAMPAIGN_REMOVING,
   CAMPAIGN_SKIP,
   CAMPAIGN_SKIP_TOOLTIP,
   CAMPAIGN_SKIP_DISABLED_TOOLTIP,
@@ -15,6 +17,13 @@ import {
   CAMPAIGN_ACTIONS_LABEL,
   HANDLE_TIME,
 } from '../../constants';
+
+/** Maps a pending action to its status button label. */
+const PENDING_ACTION_LABEL: Record<NonNullable<CampaignPendingAction>, string> = {
+  ACCEPT: CAMPAIGN_CONNECTING,
+  SKIP: CAMPAIGN_SKIPPING,
+  REMOVE: CAMPAIGN_REMOVING,
+};
 
 /**
  * CampaignTaskListItem renders the ListItem row shared between the
@@ -28,6 +37,7 @@ const CampaignTaskListItem: React.FC<CampaignTaskListItemProps> = ({
   customerName,
   timeoutTimestamp,
   isAcceptClicked,
+  pendingAction,
   isAccepted,
   isAcceptDisabled,
   isSkipDisabled,
@@ -85,7 +95,7 @@ const CampaignTaskListItem: React.FC<CampaignTaskListItemProps> = ({
           aria-label={CAMPAIGN_ACTIONS_LABEL}
           data-testid={`${testIdPrefix}-actions`}
         >
-          {!isAcceptClicked ? (
+          {!isAcceptClicked && !pendingAction ? (
             <Button
               variant="primary"
               color="positive"
@@ -102,10 +112,10 @@ const CampaignTaskListItem: React.FC<CampaignTaskListItemProps> = ({
               variant="secondary"
               size={28}
               disabled
-              aria-label={CAMPAIGN_CONNECTING}
+              aria-label={PENDING_ACTION_LABEL[pendingAction ?? 'ACCEPT']}
               data-testid={`${testIdPrefix}-connecting-button`}
             >
-              {CAMPAIGN_CONNECTING}
+              {PENDING_ACTION_LABEL[pendingAction ?? 'ACCEPT']}
             </Button>
           )}
 
