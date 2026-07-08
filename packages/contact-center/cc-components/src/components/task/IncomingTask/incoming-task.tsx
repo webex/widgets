@@ -5,7 +5,8 @@ import {withMetrics} from '@webex/cc-ui-logging';
 import {extractIncomingTaskData} from './incoming-task.utils';
 
 const IncomingTaskComponent: React.FunctionComponent<IncomingTaskComponentProps> = (props) => {
-  const {incomingTask, isBrowser, accept, reject, logger, isDeclineButtonEnabled} = props;
+  const {incomingTask, accept, reject, logger, acceptControl, declineControl, isDeclineButtonEnabled, isBrowser} =
+    props;
   if (!incomingTask) {
     return <></>; // hidden component
   }
@@ -13,7 +14,14 @@ const IncomingTaskComponent: React.FunctionComponent<IncomingTaskComponentProps>
   // All incoming tasks (including campaign preview) render the standard Task
   // with Answer/Decline buttons. The CampaignTask UI (Accept/Skip/Remove)
   // is only shown in the TaskList after the agent has accepted.
-  const taskData = extractIncomingTaskData(incomingTask, isBrowser, logger, isDeclineButtonEnabled);
+  const taskData = extractIncomingTaskData(
+    incomingTask,
+    logger,
+    acceptControl,
+    declineControl,
+    isDeclineButtonEnabled,
+    isBrowser
+  );
 
   return (
     <Task

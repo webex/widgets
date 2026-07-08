@@ -22,6 +22,7 @@ import {
   isTelephonyMediaType,
   buildCallControlButtons,
   filterButtonsForConsultation,
+  getConsultFilterPhase,
   updateCallStateFromTask,
 } from './call-control.utils';
 import {withMetrics} from '@webex/cc-ui-logging';
@@ -35,6 +36,7 @@ function CallControlComponent(props: CallControlComponentProps) {
 
   const {
     currentTask,
+    isHeld,
     toggleHold,
     toggleRecording,
     toggleMute,
@@ -57,7 +59,7 @@ function CallControlComponent(props: CallControlComponentProps) {
     setConsultAgentName,
     allowConsultToQueue,
     setLastTargetType,
-    controlVisibility,
+    controls,
     logger,
     secondsUntilAutoWrapup,
     cancelAutoWrapup,
@@ -65,6 +67,7 @@ function CallControlComponent(props: CallControlComponentProps) {
     getEntryPoints,
     getQueuesFetcher,
     consultTransferOptions,
+    conferenceEnabled = true,
   } = props;
 
   useEffect(() => {
@@ -72,7 +75,7 @@ function CallControlComponent(props: CallControlComponentProps) {
   }, [currentTask, logger]);
 
   const handletoggleHold = () => {
-    handleToggleHoldUtil(controlVisibility.isHeld, toggleHold, logger);
+    handleToggleHoldUtil(isHeld, toggleHold, logger);
   };
 
   const handleMuteToggle = () => {
@@ -128,7 +131,8 @@ function CallControlComponent(props: CallControlComponentProps) {
     isRecording,
     isMuteButtonDisabled,
     currentMediaType,
-    controlVisibility,
+    controls,
+    isHeld,
     handleMuteToggle,
     handletoggleHold,
     toggleRecording,
@@ -136,15 +140,13 @@ function CallControlComponent(props: CallControlComponentProps) {
     exitConference,
     switchToConsult,
     consultTransfer,
-    consultConference
+    consultConference,
+    logger,
+    conferenceEnabled
   );
 
-  const filteredButtons = filterButtonsForConsultation(
-    buttons,
-    controlVisibility.isConsultInitiatedOrAccepted,
-    isTelephony,
-    logger
-  );
+  const consultFilterPhase = getConsultFilterPhase(currentTask, controls);
+  const filteredButtons = filterButtonsForConsultation(buttons, consultFilterPhase, isTelephony, logger);
 
   if (!currentTask) return null;
 
@@ -156,7 +158,7 @@ function CallControlComponent(props: CallControlComponentProps) {
         autoPlay
       ></audio>
       <div className="call-control-container" data-testid="call-control-container">
-        {!controlVisibility.isConsultReceived && !controlVisibility.wrapup.isVisible && (
+        {!controls?.main?.wrapup?.isVisible && (
           <div className="button-group">
             {filteredButtons.map((button, index) => {
               if (!button.isVisible) return null;
@@ -249,7 +251,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                                 showEntryPointTab: false,
                               }
                         }
-                        isConferenceInProgress={controlVisibility.isConferenceInProgress}
+                        isConferenceInProgress={controls?.main?.exitConference?.isVisible ?? false}
                         logger={logger}
                       />
                     ) : null}
@@ -283,7 +285,7 @@ function CallControlComponent(props: CallControlComponentProps) {
             })}
           </div>
         )}
-        {controlVisibility.wrapup.isVisible && (
+        {controls?.main?.wrapup?.isVisible && (
           <div className="wrapup-group">
             <PopoverNext
               color="primary"

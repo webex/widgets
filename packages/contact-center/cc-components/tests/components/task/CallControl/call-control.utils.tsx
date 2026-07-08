@@ -1,5 +1,6 @@
 import '@testing-library/jest-dom';
 import {ITask} from '@webex/cc-store';
+import {createEnabledMainTaskUIControls, enabledControl} from '@webex/test-fixtures';
 import {
   handleToggleHold,
   handleMuteToggle,
@@ -10,6 +11,7 @@ import {
   isTelephonyMediaType,
   buildCallControlButtons,
   filterButtonsForConsultation,
+  getConsultFilterPhase,
   updateCallStateFromTask,
   handleCloseButtonPress,
   handleWrapupReasonChange,
@@ -60,35 +62,7 @@ describe('CallControl Utils', () => {
     },
   };
 
-  const mockControlVisibility = {
-    accept: {isVisible: true, isEnabled: true},
-    decline: {isVisible: true, isEnabled: true},
-    end: {isVisible: true, isEnabled: true},
-    muteUnmute: {isVisible: true, isEnabled: true},
-    muteUnmuteConsult: {isVisible: true, isEnabled: true},
-    holdResume: {isVisible: true, isEnabled: true},
-    consult: {isVisible: true, isEnabled: true},
-    transfer: {isVisible: true, isEnabled: true},
-    conference: {isVisible: true, isEnabled: true},
-    wrapup: {isVisible: true, isEnabled: true},
-    pauseResumeRecording: {isVisible: true, isEnabled: true},
-    endConsult: {isVisible: true, isEnabled: true},
-    recordingIndicator: {isVisible: true, isEnabled: true},
-    exitConference: {isVisible: false, isEnabled: false},
-    mergeConference: {isVisible: false, isEnabled: false},
-    mergeConferenceConsult: {isVisible: false, isEnabled: false},
-    consultTransfer: {isVisible: false, isEnabled: false},
-    consultTransferConsult: {isVisible: false, isEnabled: false},
-    switchToMainCall: {isVisible: false, isEnabled: false},
-    switchToConsult: {isVisible: false, isEnabled: false},
-    isConferenceInProgress: false,
-    isConsultInitiated: false,
-    isConsultInitiatedAndAccepted: false,
-    isConsultInitiatedOrAccepted: false,
-    isConsultReceived: false,
-    isHeld: false,
-    consultCallHeld: false,
-  };
+  const mockControls = createEnabledMainTaskUIControls({wrapup: enabledControl});
 
   const mockMediaTypeInfo = {
     labelName: 'Call',
@@ -459,7 +433,8 @@ describe('CallControl Utils', () => {
         true, // isRecording
         false, // isMuteButtonDisabled
         mockMediaTypeInfo,
-        mockControlVisibility,
+        mockControls,
+        false, // isHeld
         mockFunctions.handleMuteToggleFunc,
         mockFunctions.handleToggleHoldFunc,
         mockFunctions.toggleRecording,
@@ -500,17 +475,17 @@ describe('CallControl Utils', () => {
     });
 
     it('should build buttons with correct configuration when not muted and held', () => {
-      const heldControlVisibility = {
-        ...mockControlVisibility,
-        isHeld: true,
-        end: {isVisible: true, isEnabled: false}, // End button should be disabled when held
-      };
+      const heldControls = createEnabledMainTaskUIControls({
+        wrapup: enabledControl,
+        end: {isVisible: true, isEnabled: false},
+      });
       const buttons = buildCallControlButtons(
         false, // isMuted
         false, // isRecording
         true, // isMuteButtonDisabled
         mockMediaTypeInfo,
-        heldControlVisibility,
+        heldControls,
+        true, // isHeld
         mockFunctions.handleMuteToggleFunc,
         mockFunctions.handleToggleHoldFunc,
         mockFunctions.toggleRecording,
@@ -558,7 +533,8 @@ describe('CallControl Utils', () => {
         false,
         false,
         mockMediaTypeInfo,
-        mockControlVisibility,
+        mockControls,
+        false, // isHeld
         mockFunctions.handleMuteToggleFunc,
         mockFunctions.handleToggleHoldFunc,
         mockFunctions.toggleRecording,
@@ -601,7 +577,8 @@ describe('CallControl Utils', () => {
         true, // isRecording
         false,
         mockMediaTypeInfo,
-        mockControlVisibility,
+        mockControls,
+        false, // isHeld
         mockFunctions.handleMuteToggleFunc,
         mockFunctions.handleToggleHoldFunc,
         mockFunctions.toggleRecording,
@@ -622,7 +599,8 @@ describe('CallControl Utils', () => {
         false, // isRecording
         false,
         mockMediaTypeInfo,
-        mockControlVisibility,
+        mockControls,
+        false, // isHeld
         mockFunctions.handleMuteToggleFunc,
         mockFunctions.handleToggleHoldFunc,
         mockFunctions.toggleRecording,
@@ -639,17 +617,17 @@ describe('CallControl Utils', () => {
     });
 
     it('should build exit conference button when in conference', () => {
-      const conferenceControlVisibility = {
-        ...mockControlVisibility,
-        isConferenceInProgress: true,
-        exitConference: {isVisible: true, isEnabled: true},
-      };
+      const conferenceControls = createEnabledMainTaskUIControls({
+        wrapup: enabledControl,
+        exitConference: enabledControl,
+      });
       const buttons = buildCallControlButtons(
         false, // isMuted
         false, // isRecording
         false, // isMuteButtonDisabled
         mockMediaTypeInfo,
-        conferenceControlVisibility,
+        conferenceControls,
+        false, // isHeld
         mockFunctions.handleMuteToggleFunc,
         mockFunctions.handleToggleHoldFunc,
         mockFunctions.toggleRecording,
@@ -671,6 +649,204 @@ describe('CallControl Utils', () => {
         dataTestId: 'call-control:exit-conference',
       });
     });
+
+    it('should disable mute button when sdk marks main mute disabled', () => {
+      const nestedControls = {
+        main: {
+          mute: {isVisible: true, isEnabled: false},
+          hold: {isVisible: false, isEnabled: false},
+          consult: {isVisible: false, isEnabled: false},
+          transfer: {isVisible: false, isEnabled: false},
+          recording: {isVisible: false, isEnabled: false},
+          end: {isVisible: false, isEnabled: false},
+          conference: {isVisible: false, isEnabled: false},
+          switch: {isVisible: false, isEnabled: false},
+          exitConference: {isVisible: false, isEnabled: false},
+        },
+        consult: {
+          endConsult: {isVisible: false, isEnabled: false},
+        },
+      };
+
+      const buttons = buildCallControlButtons(
+        false,
+        false,
+        false,
+        mockMediaTypeInfo,
+        nestedControls as never,
+        false,
+        mockFunctions.handleMuteToggleFunc,
+        mockFunctions.handleToggleHoldFunc,
+        mockFunctions.toggleRecording,
+        mockFunctions.endCall,
+        mockFunctions.exitConference,
+        mockFunctions.switchToConsult,
+        jest.fn(),
+        jest.fn()
+      );
+
+      const muteButton = buttons.find((b) => b.id === 'mute');
+      expect(muteButton?.isVisible).toBe(true);
+      expect(muteButton?.disabled).toBe(true);
+    });
+
+    it('should hide hold and transferConsult but keep transfer menu during consult requested', () => {
+      const consultRequestedControls = {
+        activeLeg: 'consult',
+        main: {
+          hold: {isVisible: true, isEnabled: true},
+          transfer: {isVisible: true, isEnabled: false},
+          conference: {isVisible: true, isEnabled: false},
+          end: {isVisible: true, isEnabled: false},
+        },
+        consult: {
+          endConsult: {isVisible: true, isEnabled: true},
+          switch: {isVisible: true, isEnabled: false},
+        },
+      };
+
+      const buttons = buildCallControlButtons(
+        false,
+        false,
+        false,
+        mockMediaTypeInfo,
+        consultRequestedControls as never,
+        true,
+        mockFunctions.handleMuteToggleFunc,
+        mockFunctions.handleToggleHoldFunc,
+        mockFunctions.toggleRecording,
+        mockFunctions.endCall,
+        mockFunctions.exitConference,
+        mockFunctions.switchToConsult,
+        jest.fn(),
+        jest.fn()
+      );
+
+      const holdButton = buttons.find((b) => b.id === 'hold');
+      const transferButton = buttons.find((b) => b.id === 'transfer');
+      const transferConsultButton = buttons.find((b) => b.id === 'transferConsult');
+
+      expect(holdButton?.isVisible).toBe(false);
+      expect(transferButton?.isVisible).toBe(true);
+      expect(transferConsultButton?.isVisible).toBe(false);
+    });
+
+    it('should prioritize transferConference over transfer on main leg', () => {
+      const nestedControls = {
+        activeLeg: 'main',
+        main: {
+          accept: {isVisible: false, isEnabled: false},
+          decline: {isVisible: false, isEnabled: false},
+          hold: {isVisible: false, isEnabled: false},
+          mute: {isVisible: false, isEnabled: false},
+          end: {isVisible: true, isEnabled: true},
+          transfer: {isVisible: true, isEnabled: true},
+          consult: {isVisible: false, isEnabled: false},
+          consultTransfer: {isVisible: false, isEnabled: false},
+          endConsult: {isVisible: false, isEnabled: false},
+          recording: {isVisible: false, isEnabled: false},
+          conference: {isVisible: true, isEnabled: true},
+          wrapup: {isVisible: false, isEnabled: false},
+          exitConference: {isVisible: false, isEnabled: false},
+          transferConference: {isVisible: true, isEnabled: true},
+          mergeToConference: {isVisible: false, isEnabled: false},
+          switch: {isVisible: false, isEnabled: false},
+        },
+        consult: {
+          accept: {isVisible: false, isEnabled: false},
+          decline: {isVisible: false, isEnabled: false},
+          hold: {isVisible: false, isEnabled: false},
+          mute: {isVisible: false, isEnabled: false},
+          end: {isVisible: false, isEnabled: false},
+          transfer: {isVisible: false, isEnabled: false},
+          consult: {isVisible: true, isEnabled: false},
+          consultTransfer: {isVisible: false, isEnabled: false},
+          endConsult: {isVisible: true, isEnabled: true},
+          recording: {isVisible: false, isEnabled: false},
+          conference: {isVisible: true, isEnabled: false},
+          wrapup: {isVisible: false, isEnabled: false},
+          exitConference: {isVisible: false, isEnabled: false},
+          transferConference: {isVisible: false, isEnabled: false},
+          mergeToConference: {isVisible: true, isEnabled: false},
+          switch: {isVisible: false, isEnabled: false},
+        },
+      };
+
+      const onTransferConsult = jest.fn();
+      const buttons = buildCallControlButtons(
+        false,
+        false,
+        false,
+        mockMediaTypeInfo,
+        nestedControls as never,
+        false,
+        mockFunctions.handleMuteToggleFunc,
+        mockFunctions.handleToggleHoldFunc,
+        mockFunctions.toggleRecording,
+        mockFunctions.endCall,
+        mockFunctions.exitConference,
+        mockFunctions.switchToConsult,
+        onTransferConsult,
+        jest.fn()
+      );
+
+      const transferConsultButton = buttons.find((b) => b.id === 'transferConsult');
+      const transferMenuButton = buttons.find((b) => b.id === 'transfer');
+
+      expect(transferConsultButton?.isVisible).toBe(true);
+      expect(transferConsultButton?.tooltip).toBe('Transfer Conference');
+      expect(transferConsultButton?.disabled).toBe(false);
+
+      expect(transferMenuButton?.isVisible).toBe(false);
+    });
+  });
+
+  describe('getConsultFilterPhase', () => {
+    it('returns none when endConsult is not visible', () => {
+      expect(getConsultFilterPhase(null, {main: {}, consult: {}} as never)).toBe('none');
+    });
+
+    it('returns pending when self participant is consultInitiated', () => {
+      const task = {
+        data: {
+          agentId: 'agent-1',
+          interaction: {
+            participants: {
+              'agent-1': {consultState: 'consultInitiated'},
+            },
+          },
+        },
+      } as never;
+
+      expect(
+        getConsultFilterPhase(task, {
+          consult: {endConsult: {isVisible: true, isEnabled: true}},
+        } as never)
+      ).toBe('pending');
+    });
+
+    it('returns active when consult destination has joined controls', () => {
+      const task = {
+        data: {
+          agentId: 'agent-1',
+          interaction: {
+            participants: {
+              'agent-1': {consultState: 'consulting'},
+            },
+          },
+        },
+      } as never;
+
+      expect(
+        getConsultFilterPhase(task, {
+          main: {transfer: {isVisible: true, isEnabled: true}},
+          consult: {
+            endConsult: {isVisible: true, isEnabled: true},
+            switch: {isVisible: true, isEnabled: true},
+          },
+        } as never)
+      ).toBe('active');
+    });
   });
 
   describe('filterButtonsForConsultation', () => {
@@ -683,29 +859,27 @@ describe('CallControl Utils', () => {
       {id: 'end', icon: '', tooltip: '', className: '', disabled: false, isVisible: true},
     ];
 
-    it('should filter out hold and consult buttons when consultation is initiated and telephony', () => {
-      const result = filterButtonsForConsultation(mockButtons, true, true);
+    it('should filter hold and consult but keep transfer during pending consult', () => {
+      const result = filterButtonsForConsultation(mockButtons, 'pending', true);
 
-      expect(result).toHaveLength(4);
-      expect(result.map((b) => b.id)).toEqual(['mute', 'transfer', 'record', 'end']);
+      expect(result.map((b) => b.id)).toEqual(['mute', 'transfer', 'end']);
     });
 
-    it('should not filter buttons when consultation is not initiated', () => {
-      const result = filterButtonsForConsultation(mockButtons, false, true);
+    it('should filter hold, consult, and transfer during active consult', () => {
+      const result = filterButtonsForConsultation(mockButtons, 'active', true);
+
+      expect(result.map((b) => b.id)).toEqual(['mute', 'end']);
+    });
+
+    it('should not filter buttons when consult phase is none', () => {
+      const result = filterButtonsForConsultation(mockButtons, 'none', true);
 
       expect(result).toHaveLength(6);
       expect(result).toBe(mockButtons);
     });
 
     it('should not filter buttons when not telephony', () => {
-      const result = filterButtonsForConsultation(mockButtons, true, false);
-
-      expect(result).toHaveLength(6);
-      expect(result).toBe(mockButtons);
-    });
-
-    it('should not filter buttons when neither consultation initiated nor telephony', () => {
-      const result = filterButtonsForConsultation(mockButtons, false, false);
+      const result = filterButtonsForConsultation(mockButtons, 'active', false);
 
       expect(result).toHaveLength(6);
       expect(result).toBe(mockButtons);

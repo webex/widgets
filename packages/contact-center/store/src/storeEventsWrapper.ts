@@ -38,6 +38,8 @@ import {
 import {runInAction} from 'mobx';
 import {isIncomingTask} from './task-utils';
 
+const TASK_MULTI_LOGIN_HYDRATE = 'task:multiLoginHydrate';
+
 class StoreWrapper implements IStoreWrapper {
   store: IStore;
   onIncomingTask: ({task}: {task: ITask}) => void;
@@ -166,6 +168,10 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.currentConsultQueueId;
   }
 
+  get lastConsultDestination() {
+    return this.store.lastConsultDestination;
+  }
+
   get isEndConsultEnabled() {
     return this.store.isEndConsultEnabled;
   }
@@ -270,7 +276,7 @@ class StoreWrapper implements IStoreWrapper {
       // Determine if the new task is the same as the current task.
       let isSameTask = false;
       if (task && this.currentTask) {
-        isSameTask = task.data.interactionId === this.currentTask.data.interactionId;
+        isSameTask = this.getTaskInteractionId(task) === this.getTaskInteractionId(this.currentTask);
       }
 
       // Update the current task
@@ -311,6 +317,9 @@ class StoreWrapper implements IStoreWrapper {
         }
         this.setCurrentTask(null);
         this.setState({reset: true});
+        // Ensure agent state is set to Available (auxCodeId '0') when no tasks remain
+        // The backend should send AGENT_STATE_CHANGE, but in test environments it may not
+        this.setCurrentState('0');
       } else if (this.currentTask && this.store.taskList[this.currentTask.data.interactionId]) {
         this.setCurrentTask(this.store.taskList[this.currentTask?.data?.interactionId]);
       } else if (taskListKeys.length > 0) {
@@ -349,6 +358,12 @@ class StoreWrapper implements IStoreWrapper {
   setCurrentConsultQueueId = (queueId: string | null): void => {
     runInAction(() => {
       this.store.currentConsultQueueId = queueId;
+    });
+  };
+
+  setLastConsultDestination = (destination: {to: string; destinationType: string} | null): void => {
+    runInAction(() => {
+      this.store.lastConsultDestination = destination;
     });
   };
 
@@ -418,6 +433,7 @@ class StoreWrapper implements IStoreWrapper {
         orgId: profile.orgId || undefined,
         roles: profile.roles || undefined,
         deviceType: profile.deviceType || undefined,
+        agentProfileID: profile.agentProfileID || undefined,
         isTimeoutDesktopInactivityEnabled: profile.isTimeoutDesktopInactivityEnabled || undefined,
         timeoutDesktopInactivityMins: profile.timeoutDesktopInactivityMins || undefined,
       };
@@ -465,22 +481,26 @@ class StoreWrapper implements IStoreWrapper {
         this.removeAcceptedCampaign(taskId);
       }
       if (taskId && this.realtimeTranscriptionListeners[taskId]) {
-        taskToRemove.off(TASK_EVENTS.REAL_TIME_TRANSCRIPTION, this.realtimeTranscriptionListeners[taskId]);
+        taskToRemove.off(CC_EVENTS.REAL_TIME_TRANSCRIPTION, this.realtimeTranscriptionListeners[taskId]);
         delete this.realtimeTranscriptionListeners[taskId];
       }
       taskToRemove.off(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
       taskToRemove.off(TASK_EVENTS.TASK_END, this.handleTaskEnd);
       taskToRemove.off(TASK_EVENTS.TASK_REJECT, (reason) => this.handleTaskReject(taskToRemove, reason));
       taskToRemove.off(TASK_EVENTS.TASK_OUTDIAL_FAILED, (reason) => this.handleOutdialFailed(reason));
-      taskToRemove.off(TASK_EVENTS.AGENT_WRAPPEDUP, this.refreshTaskList);
+      taskToRemove.off(TASK_EVENTS.TASK_UI_CONTROLS_UPDATED, this.handleUIControlsUpdated);
+      taskToRemove.off(TASK_EVENTS.TASK_WRAPPEDUP, this.refreshTaskList);
+      taskToRemove.off(TASK_EVENTS.TASK_CONSULT_CREATED, this.handleConsultCreated);
+      taskToRemove.off(TASK_EVENTS.TASK_OFFER_CONTACT, this.refreshTaskList);
+      taskToRemove.off(TASK_EVENTS.TASK_CONSULT_END, this.handleConsultEnd);
+      taskToRemove.off(TASK_EVENTS.TASK_RECORDING_PAUSED, this.refreshTaskList);
+      taskToRemove.off(TASK_EVENTS.TASK_RECORDING_RESUMED, this.refreshTaskList);
       taskToRemove.off(TASK_EVENTS.TASK_CONSULTING, this.handleConsulting);
       taskToRemove.off(TASK_EVENTS.TASK_OFFER_CONSULT, this.handleConsultOffer);
       taskToRemove.off(TASK_EVENTS.TASK_AUTO_ANSWERED, this.handleAutoAnswer);
-      taskToRemove.off(TASK_EVENTS.TASK_CONSULT_END, this.refreshTaskList);
       taskToRemove.off(TASK_EVENTS.TASK_CONSULT_ACCEPTED, this.handleConsultAccepted);
-      taskToRemove.off(TASK_EVENTS.AGENT_CONSULT_CREATED, this.handleConsultCreated);
       taskToRemove.off(TASK_EVENTS.TASK_CONSULT_QUEUE_CANCELLED, this.handleConsultQueueCancelled);
-      taskToRemove.off(TASK_EVENTS.AGENT_OFFER_CONTACT, this.refreshTaskList);
+      taskToRemove.off(TASK_EVENTS.TASK_SWITCH_CALL, this.handleSwitchCall);
       taskToRemove.off(TASK_EVENTS.TASK_HOLD, this.refreshTaskList);
       taskToRemove.off(TASK_EVENTS.TASK_RESUME, this.refreshTaskList);
       taskToRemove.off(TASK_EVENTS.TASK_CONFERENCE_ENDED, this.handleConferenceEnded);
@@ -491,7 +511,7 @@ class StoreWrapper implements IStoreWrapper {
       taskToRemove.off(TASK_EVENTS.TASK_PARTICIPANT_LEFT, this.handleConferenceEnded);
       taskToRemove.off(TASK_EVENTS.TASK_PARTICIPANT_LEFT_FAILED, this.refreshTaskList);
       taskToRemove.off(TASK_EVENTS.TASK_CONFERENCE_STARTED, this.handleConferenceStarted);
-      taskToRemove.off(TASK_EVENTS.TASK_CONFERENCE_TRANSFERRED, this.handleConferenceEnded);
+      taskToRemove.off(TASK_EVENTS.TASK_CONFERENCE_TRANSFERRED, this.refreshTaskList);
       taskToRemove.off(TASK_EVENTS.TASK_CONFERENCE_TRANSFER_FAILED, this.refreshTaskList);
       taskToRemove.off(TASK_EVENTS.TASK_POST_CALL_ACTIVITY, this.refreshTaskList);
       taskToRemove.off(TASK_EVENTS.TASK_CAMPAIGN_PREVIEW_RESERVATION, this.handleCampaignPreviewReservation);
@@ -565,19 +585,20 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   handleCampaignPreviewReservation = (event: ITask) => {
-    // Only track accepted campaign IDs for actual preview campaigns.
-    // Predictive/progressive campaigns don't need preview-accept tracking.
-    if (this.isCampaignPreview(event)) {
-      const interactionId = event?.data?.interactionId;
-      if (interactionId) {
-        this.addAcceptedCampaign(interactionId);
-      }
-    }
+    const isCampaignPreview = this.isCampaignPreview(event);
+
     runInAction(() => {
-      this.setState({
-        developerName: ENGAGED_LABEL,
-        name: ENGAGED_USERNAME,
-      });
+      if (isCampaignPreview) {
+        this.setState({
+          developerName: RESERVED_LABEL,
+          name: RESERVED_USERNAME,
+        });
+      } else {
+        this.setState({
+          developerName: ENGAGED_LABEL,
+          name: ENGAGED_USERNAME,
+        });
+      }
     });
     this.refreshTaskList();
   };
@@ -635,6 +656,7 @@ class StoreWrapper implements IStoreWrapper {
   handleConsultEnd = () => {
     this.setIsQueueConsultInProgress(false);
     this.setCurrentConsultQueueId(null);
+    this.setLastConsultDestination(null);
     this.refreshTaskList();
     this.setConsultStartTimeStamp(null);
   };
@@ -666,6 +688,7 @@ class StoreWrapper implements IStoreWrapper {
   handleConsultQueueCancelled = () => {
     this.setIsQueueConsultInProgress(false);
     this.setCurrentConsultQueueId(null);
+    this.setLastConsultDestination(null);
     this.setConsultStartTimeStamp(null);
     this.refreshTaskList();
   };
@@ -674,6 +697,7 @@ class StoreWrapper implements IStoreWrapper {
     runInAction(() => {
       this.setIsQueueConsultInProgress(false);
       this.setCurrentConsultQueueId(null);
+      this.setLastConsultDestination(null);
       this.setConsultStartTimeStamp(null);
     });
     this.refreshTaskList();
@@ -687,40 +711,53 @@ class StoreWrapper implements IStoreWrapper {
    * Register all task event listeners
    * @param task - The task to register event listeners for
    */
+  handleUIControlsUpdated = () => {
+    this.refreshTaskList();
+  };
+
+  handleSwitchCall = () => {
+    this.refreshTaskList();
+  };
+
   private registerTaskEventListeners = (task: ITask): void => {
-    // Attach event listeners to the task
     task.on(TASK_EVENTS.TASK_END, this.handleTaskEnd);
-
-    // When we receive TASK_ASSIGNED the task was accepted by the agent and we need wrap up
     task.on(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
-    task.on(TASK_EVENTS.AGENT_OFFER_CONTACT, this.refreshTaskList);
-    task.on(TASK_EVENTS.AGENT_CONSULT_CREATED, this.handleConsultCreated);
-    task.on(TASK_EVENTS.TASK_CONSULT_QUEUE_CANCELLED, this.handleConsultQueueCancelled);
-
-    // When we receive TASK_REJECT sdk changes the agent status
-    // When we receive TASK_REJECT that means the task was not accepted by the agent and we wont need wrap up
     task.on(TASK_EVENTS.TASK_REJECT, (reason) => this.handleTaskReject(task, reason));
-
-    // When we receive TASK_OUTDIAL_FAILED the outdial call failed
     task.on(TASK_EVENTS.TASK_OUTDIAL_FAILED, (reason) => this.handleOutdialFailed(reason));
 
-    task.on(TASK_EVENTS.AGENT_WRAPPEDUP, this.refreshTaskList);
+    // SDK-computed UI control updates
+    task.on(TASK_EVENTS.TASK_UI_CONTROLS_UPDATED, this.handleUIControlsUpdated);
 
+    // Renamed events (SDK names)
+    task.on(TASK_EVENTS.TASK_WRAPPEDUP, this.refreshTaskList);
+    task.on(TASK_EVENTS.TASK_CONSULT_CREATED, this.handleConsultCreated);
+    task.on(TASK_EVENTS.TASK_OFFER_CONTACT, this.refreshTaskList);
+
+    // Fix: wire handleConsultEnd (was dead code — previously wired to refreshTaskList)
+    task.on(TASK_EVENTS.TASK_CONSULT_END, this.handleConsultEnd);
+
+    // Fix: correct event names
+    task.on(TASK_EVENTS.TASK_RECORDING_PAUSED, this.refreshTaskList);
+    task.on(TASK_EVENTS.TASK_RECORDING_RESUMED, this.refreshTaskList);
+
+    task.on(TASK_EVENTS.TASK_AUTO_ANSWERED, this.handleAutoAnswer);
     task.on(TASK_EVENTS.TASK_CONSULTING, this.handleConsulting);
     task.on(TASK_EVENTS.TASK_CONSULT_ACCEPTED, this.handleConsultAccepted);
+    task.on(TASK_EVENTS.TASK_CONSULT_QUEUE_CANCELLED, this.handleConsultQueueCancelled);
+    task.on(TASK_EVENTS.TASK_PARTICIPANT_JOINED, this.handleConferenceStarted);
+    task.on(TASK_EVENTS.TASK_CONFERENCE_STARTED, this.handleConferenceStarted);
+    task.on(TASK_EVENTS.TASK_CONFERENCE_ENDED, this.handleConferenceEnded);
+    task.on(TASK_EVENTS.TASK_PARTICIPANT_LEFT, this.handleConferenceEnded);
     task.on(TASK_EVENTS.TASK_OFFER_CONSULT, this.handleConsultOffer);
-    task.on(TASK_EVENTS.TASK_AUTO_ANSWERED, this.handleAutoAnswer);
-    task.on(TASK_EVENTS.TASK_CONSULT_END, this.refreshTaskList);
+
+    task.on(TASK_EVENTS.TASK_SWITCH_CALL, this.handleSwitchCall);
     task.on(TASK_EVENTS.TASK_HOLD, this.refreshTaskList);
     task.on(TASK_EVENTS.TASK_RESUME, this.refreshTaskList);
-    task.on(TASK_EVENTS.TASK_CONFERENCE_ENDED, this.handleConferenceEnded);
-    task.on(TASK_EVENTS.TASK_CONFERENCE_END_FAILED, this.refreshTaskList);
+    task.on(TASK_EVENTS.TASK_POST_CALL_ACTIVITY, this.refreshTaskList);
     task.on(TASK_EVENTS.TASK_CONFERENCE_ESTABLISHING, this.refreshTaskList);
     task.on(TASK_EVENTS.TASK_CONFERENCE_FAILED, this.refreshTaskList);
-    task.on(TASK_EVENTS.TASK_PARTICIPANT_JOINED, this.handleConferenceStarted);
-    task.on(TASK_EVENTS.TASK_PARTICIPANT_LEFT, this.handleConferenceEnded);
+    task.on(TASK_EVENTS.TASK_CONFERENCE_END_FAILED, this.refreshTaskList);
     task.on(TASK_EVENTS.TASK_PARTICIPANT_LEFT_FAILED, this.refreshTaskList);
-    task.on(TASK_EVENTS.TASK_CONFERENCE_STARTED, this.handleConferenceStarted);
     task.on(TASK_EVENTS.TASK_CONFERENCE_TRANSFERRED, this.refreshTaskList);
     task.on(TASK_EVENTS.TASK_CONFERENCE_TRANSFER_FAILED, this.refreshTaskList);
     task.on(TASK_EVENTS.TASK_POST_CALL_ACTIVITY, this.refreshTaskList);
@@ -735,10 +772,9 @@ class StoreWrapper implements IStoreWrapper {
         this.handleRealtimeTranscription(payload);
     }
     if (taskId && this.realtimeTranscriptionListeners[taskId]) {
-      task.on(TASK_EVENTS.REAL_TIME_TRANSCRIPTION, this.realtimeTranscriptionListeners[taskId]);
+      task.on(CC_EVENTS.REAL_TIME_TRANSCRIPTION, this.realtimeTranscriptionListeners[taskId]);
     }
 
-    // Register media event listener for browser devices
     if (this.deviceType === DEVICE_TYPE_BROWSER) {
       task.on(TASK_EVENTS.TASK_MEDIA, this.handleTaskMedia);
     }
@@ -814,6 +850,15 @@ class StoreWrapper implements IStoreWrapper {
       method: 'handleMultiLoginCloseSession',
     });
     if (data && typeof data === 'object' && data.type === 'AgentMultiLoginCloseSession') {
+      // Don't show the multi-login modal if there's an active task
+      // The modal blocks UI interactions and should not interfere with task handling
+      if (this.currentTask) {
+        this.store.logger.info('CC-Widgets: handleMultiLoginCloseSession(): skipping alert due to active task', {
+          module: 'storeEventsWrapper.ts',
+          method: 'handleMultiLoginCloseSession',
+        });
+        return;
+      }
       this.setShowMultipleLoginAlert(true);
     }
   };
@@ -822,6 +867,46 @@ class StoreWrapper implements IStoreWrapper {
     const task = event;
     this.registerTaskEventListeners(task);
     this.refreshTaskList();
+  };
+
+  private getTaskInteractionId = (task: ITask | null | undefined): string | undefined => {
+    return (
+      task?.data?.interactionId ??
+      // SDK task-class mode compatibility
+      (task as ITask & {getInteractionId?: () => string})?.getInteractionId?.() ??
+      (task as ITask & {getInteraction?: () => {id?: string}})?.getInteraction?.()?.id
+    );
+  };
+
+  private getTaskInteractionState = (task: ITask | null | undefined): string | undefined => {
+    return (
+      task?.data?.interaction?.state ??
+      // SDK task-class mode compatibility
+      (task as ITask & {getInteractionState?: () => string})?.getInteractionState?.() ??
+      (task as ITask & {getInteraction?: () => {state?: string}})?.getInteraction?.()?.state
+    );
+  };
+
+  handleMultiLoginHydrate = (event) => {
+    const task = event as ITask;
+    if (!task) {
+      this.store.logger.warn('CC-Widgets: handleMultiLoginHydrate(): task payload missing', {
+        module: 'storeEventsWrapper.ts',
+        method: 'handleMultiLoginHydrate',
+      });
+      return;
+    }
+
+    const interactionId = this.getTaskInteractionId(task);
+    const interactionState = this.getTaskInteractionState(task);
+
+    if (interactionId && this.store.taskList[interactionId] && interactionState === 'new') {
+      return;
+    }
+
+    this.registerTaskEventListeners(task);
+    this.refreshTaskList();
+    this.handleTaskAssigned(task);
   };
 
   handleTaskHydrate = (event) => {
@@ -1020,6 +1105,7 @@ class StoreWrapper implements IStoreWrapper {
       this.store.realtimeTranscriptionData = [];
       this.store.acceptedCampaignIds = new Set();
       this.realtimeTranscriptionListeners = {};
+      this.setLastConsultDestination(null);
     });
   };
 
@@ -1043,6 +1129,7 @@ class StoreWrapper implements IStoreWrapper {
         method: 'setupIncomingTaskHandler#addEventListeners',
       });
       ccSDK.on(TASK_EVENTS.TASK_HYDRATE, this.handleTaskHydrate);
+      ccSDK.on(TASK_MULTI_LOGIN_HYDRATE, this.handleMultiLoginHydrate);
       ccSDK.on(CC_EVENTS.AGENT_STATE_CHANGE, this.handleStateChange);
       ccSDK.on(TASK_EVENTS.TASK_INCOMING, this.handleIncomingTask);
       ccSDK.on(TASK_EVENTS.TASK_CAMPAIGN_PREVIEW_RESERVATION, this.handleIncomingCampaignPreview);
@@ -1057,6 +1144,7 @@ class StoreWrapper implements IStoreWrapper {
         method: 'setupIncomingTaskHandler#removeEventListeners',
       });
       ccSDK.off(TASK_EVENTS.TASK_HYDRATE, this.handleTaskHydrate);
+      ccSDK.off(TASK_MULTI_LOGIN_HYDRATE, this.handleMultiLoginHydrate);
       ccSDK.off(CC_EVENTS.AGENT_STATE_CHANGE, this.handleStateChange);
       ccSDK.off(TASK_EVENTS.TASK_INCOMING, this.handleIncomingTask);
       ccSDK.off(TASK_EVENTS.TASK_CAMPAIGN_PREVIEW_RESERVATION, this.handleIncomingCampaignPreview);

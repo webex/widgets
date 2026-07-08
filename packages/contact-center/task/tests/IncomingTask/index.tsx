@@ -34,8 +34,8 @@ describe('IncomingTask Component', () => {
       incomingTask: mockTask,
       accept: jest.fn(),
       reject: jest.fn(),
-      isBrowser: true,
-      isDeclineButtonEnabled: true,
+      acceptControl: {isVisible: true, isEnabled: true},
+      declineControl: {isVisible: true, isEnabled: true},
     });
 
     render(<IncomingTask incomingTask={mockTask} onAccepted={onAcceptedCb} onRejected={onRejectedCb} />);
@@ -43,9 +43,9 @@ describe('IncomingTask Component', () => {
     // Assert that the useIncomingTask hook is called with the correct arguments
     expect(useIncomingTaskSpy).toHaveBeenCalledWith({
       incomingTask: mockTask,
-      deviceType: store.deviceType,
       onAccepted: onAcceptedCb,
       onRejected: onRejectedCb,
+      logger: store.logger,
     });
   });
 

@@ -12,6 +12,7 @@ import {
   Participant,
   AddressBookEntrySearchParams,
   AddressBookEntriesResponse,
+  TaskUIControls,
 } from '@webex/cc-store';
 import {CampaignErrorType} from './CampaignErrorDialog/campaign-error-dialog.types';
 
@@ -129,11 +130,6 @@ export interface TaskProps {
    */
   onTaskSelect: (task: ITask) => void;
   /**
-   * Flag to determine if the user is logged in with a browser option
-   */
-  isBrowser: boolean;
-
-  /**
    * Flag to determine if the task is answered
    */
   isAnswered: boolean;
@@ -142,11 +138,6 @@ export interface TaskProps {
    * Flag to determine if the task is ended
    */
   isEnded: boolean;
-
-  /**
-   * Selected login option
-   */
-  deviceType: string;
 
   /**
    * List of tasks
@@ -183,14 +174,22 @@ export interface TaskProps {
   acceptedCampaignIds?: Set<string>;
 }
 
-export type IncomingTaskComponentProps = Pick<TaskProps, 'isBrowser' | 'accept' | 'reject' | 'logger'> &
-  Partial<Pick<TaskProps, 'incomingTask' | 'isDeclineButtonEnabled'>>;
+export type IncomingTaskComponentProps = Pick<TaskProps, 'accept' | 'reject' | 'logger'> &
+  Partial<Pick<TaskProps, 'incomingTask'>> & {
+    acceptControl?: {isVisible: boolean; isEnabled: boolean};
+    declineControl?: {isVisible: boolean; isEnabled: boolean};
+    isDeclineButtonEnabled?: boolean;
+    isBrowser?: boolean;
+  };
 
 export type TaskListComponentProps = Pick<
   TaskProps,
-  'isBrowser' | 'acceptTask' | 'declineTask' | 'onTaskSelect' | 'logger' | 'agentId' | 'cc'
+  'acceptTask' | 'declineTask' | 'onTaskSelect' | 'logger' | 'agentId' | 'cc'
 > &
-  Partial<Pick<TaskProps, 'currentTask' | 'taskList' | 'hasCampaignPreviewEnabled' | 'acceptedCampaignIds'>>;
+  Partial<Pick<TaskProps, 'currentTask' | 'taskList' | 'hasCampaignPreviewEnabled' | 'acceptedCampaignIds'>> & {
+    isDeclineButtonEnabled?: boolean;
+    isBrowser?: boolean;
+  };
 
 export interface RealTimeTranscriptEntry {
   id: string;
@@ -300,11 +299,6 @@ export interface ControlProps {
    * @param wrapupId - The ID associated with the wrap-up reason.
    */
   wrapupCall: (wrapupReason: string, wrapupId: string) => void;
-
-  /**
-   * Selected login option
-   */
-  deviceType: string;
 
   /**
    * Flag to determine if the task is held
@@ -440,11 +434,6 @@ export interface ControlProps {
   holdTime: number;
 
   /**
-   * Feature flags for the task.
-   */
-  featureFlags: {[key: string]: boolean};
-
-  /**
    * Custom CSS ClassName for CallControlCAD component.
    */
   callControlClassName?: string;
@@ -494,7 +483,7 @@ export interface ControlProps {
    */
   setLastTargetType: (targetType: TargetType) => void;
 
-  controlVisibility: ControlVisibility;
+  controls: TaskUIControls;
 
   secondsUntilAutoWrapup?: number;
 
@@ -531,6 +520,7 @@ export interface ControlProps {
 export type CallControlComponentProps = Pick<
   ControlProps,
   | 'currentTask'
+  | 'isHeld'
   | 'wrapupCodes'
   | 'toggleHold'
   | 'toggleRecording'
@@ -565,7 +555,7 @@ export type CallControlComponentProps = Pick<
   | 'allowConsultToQueue'
   | 'lastTargetType'
   | 'setLastTargetType'
-  | 'controlVisibility'
+  | 'controls'
   | 'logger'
   | 'secondsUntilAutoWrapup'
   | 'cancelAutoWrapup'
@@ -574,6 +564,7 @@ export type CallControlComponentProps = Pick<
   | 'getEntryPoints'
   | 'getQueuesFetcher'
   | 'consultTransferOptions'
+  | 'conferenceEnabled'
 > & {
   /**
    * Whether the current task is an accepted campaign preview call.
@@ -710,8 +701,9 @@ export interface CallControlConsultComponentsProps {
   switchToMainCall: () => void;
   logger: ILogger;
   isMuted: boolean;
-  controlVisibility: ControlVisibility;
+  controls: TaskUIControls;
   toggleConsultMute: () => void;
+  conferenceEnabled: boolean;
 }
 
 /**
@@ -1167,6 +1159,13 @@ export interface CampaignTaskListItemProps {
 
   /** Timestamp (ms) when the campaign call was accepted — used for the handle time timer. */
   handleTimestamp?: number;
+
+  /**
+   * Controls which timer is rendered in the list item.
+   * - `auto`: countdown before accept, handle time after accept
+   * - `handle-time`: always render handle time when a timestamp is available
+   */
+  timerDisplayMode?: 'auto' | 'handle-time';
 
   /** Logger instance. */
   logger?: ILogger;

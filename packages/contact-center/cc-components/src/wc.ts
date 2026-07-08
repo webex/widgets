@@ -80,7 +80,6 @@ if (!customElements.get('component-cc-call-control')) {
 const WebIncomingTask = r2wc(IncomingTaskComponent, {
   props: {
     incomingTask: 'json',
-    isBrowser: 'boolean',
     accept: 'function',
     reject: 'function',
   },
@@ -93,7 +92,6 @@ const WebTaskList = r2wc(TaskListComponent, {
   props: {
     currentTask: 'json',
     taskList: 'json',
-    isBrowser: 'boolean',
     acceptTask: 'function',
     declineTask: 'function',
     logger: 'function',

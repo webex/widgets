@@ -7,41 +7,20 @@ import {
   TIMER_LABEL_CONSULT_REQUESTED,
 } from '../../src/Utils/constants';
 import {ITask} from '@webex/cc-store';
+import {
+  createEnabledMainTaskUIControls,
+  createMockTaskUIControls,
+  disabledControl,
+  enabledControl,
+} from '@webex/test-fixtures';
 
-const mockControlVisibility = {
-  accept: {isVisible: true, isEnabled: true},
-  decline: {isVisible: true, isEnabled: true},
-  end: {isVisible: true, isEnabled: true},
-  muteUnmute: {isVisible: true, isEnabled: true},
-  muteUnmuteConsult: {isVisible: true, isEnabled: true},
-  holdResume: {isVisible: true, isEnabled: true},
-  consult: {isVisible: true, isEnabled: true},
-  transfer: {isVisible: true, isEnabled: true},
-  conference: {isVisible: true, isEnabled: true},
-  wrapup: {isVisible: true, isEnabled: true},
-  pauseResumeRecording: {isVisible: true, isEnabled: true},
-  endConsult: {isVisible: true, isEnabled: true},
-  recordingIndicator: {isVisible: true, isEnabled: true},
-  exitConference: {isVisible: false, isEnabled: false},
-  mergeConference: {isVisible: false, isEnabled: false},
-  mergeConferenceConsult: {isVisible: false, isEnabled: false},
-  consultTransfer: {isVisible: false, isEnabled: false},
-  consultTransferConsult: {isVisible: false, isEnabled: false},
-  switchToMainCall: {isVisible: false, isEnabled: false},
-  switchToConsult: {isVisible: false, isEnabled: false},
-  isConferenceInProgress: false,
-  isConsultInitiated: false,
-  isConsultInitiatedAndAccepted: false,
-  isConsultReceived: false,
-  isConsultInitiatedOrAccepted: false,
-  isHeld: false,
-  consultCallHeld: false,
-};
+const defaultControls = createEnabledMainTaskUIControls();
+const wrapUpControls = createEnabledMainTaskUIControls({wrapup: enabledControl});
 
 describe('timer-utils', () => {
   describe('calculateStateTimerData', () => {
     it('should return default when currentTask is null', () => {
-      const result = calculateStateTimerData(null, mockControlVisibility, 'agent1');
+      const result = calculateStateTimerData(null, defaultControls, 'agent1');
       expect(result).toEqual({label: null, timestamp: 0});
     });
 
@@ -74,7 +53,7 @@ describe('timer-utils', () => {
         },
       } as unknown as ITask;
 
-      const result = calculateStateTimerData(mockTask, mockControlVisibility, 'agent1');
+      const result = calculateStateTimerData(mockTask, wrapUpControls, 'agent1');
       expect(result.label).toBe(TIMER_LABEL_WRAP_UP);
       expect(result.timestamp).toBe(3000);
     });
@@ -93,7 +72,7 @@ describe('timer-utils', () => {
         },
       } as unknown as ITask;
 
-      const result = calculateStateTimerData(mockTask, mockControlVisibility, 'agent1');
+      const result = calculateStateTimerData(mockTask, wrapUpControls, 'agent1');
       expect(result.label).toBe(TIMER_LABEL_WRAP_UP);
       expect(result.timestamp).toBe(2500);
     });
@@ -113,12 +92,9 @@ describe('timer-utils', () => {
         },
       } as unknown as ITask;
 
-      const visibility = {
-        ...mockControlVisibility,
-        wrapup: {isVisible: false, isEnabled: false},
-      };
+      const controls = createEnabledMainTaskUIControls({wrapup: disabledControl});
 
-      const result = calculateStateTimerData(mockTask, visibility, 'agent1');
+      const result = calculateStateTimerData(mockTask, controls, 'agent1');
       expect(result.label).toBe(TIMER_LABEL_POST_CALL);
       expect(result.timestamp).toBe(4000);
     });
@@ -139,7 +115,7 @@ describe('timer-utils', () => {
         },
       } as unknown as ITask;
 
-      const result = calculateStateTimerData(mockTask, mockControlVisibility, 'agent1');
+      const result = calculateStateTimerData(mockTask, wrapUpControls, 'agent1');
       expect(result.label).toBe(TIMER_LABEL_WRAP_UP);
       expect(result.timestamp).toBe(3000);
     });
@@ -155,14 +131,14 @@ describe('timer-utils', () => {
         },
       } as unknown as ITask;
 
-      const result = calculateStateTimerData(mockTask, mockControlVisibility, 'agent1');
+      const result = calculateStateTimerData(mockTask, defaultControls, 'agent1');
       expect(result).toEqual({label: null, timestamp: 0});
     });
   });
 
   describe('calculateConsultTimerData', () => {
     it('should return default when currentTask is null', () => {
-      const result = calculateConsultTimerData(null, mockControlVisibility, 'agent1');
+      const result = calculateConsultTimerData(null, defaultControls, 'agent1');
       expect(result).toEqual({label: TIMER_LABEL_CONSULTING, timestamp: 0});
     });
 
@@ -194,7 +170,7 @@ describe('timer-utils', () => {
         },
       } as unknown as ITask;
 
-      const result = calculateConsultTimerData(mockTask, mockControlVisibility, 'agent1');
+      const result = calculateConsultTimerData(mockTask, defaultControls, 'agent1');
       expect(result.label).toBe(TIMER_LABEL_CONSULTING);
       expect(result.timestamp).toBe(2000);
     });
@@ -212,7 +188,7 @@ describe('timer-utils', () => {
         },
       } as unknown as ITask;
 
-      const result = calculateConsultTimerData(mockTask, mockControlVisibility, 'agent1');
+      const result = calculateConsultTimerData(mockTask, defaultControls, 'agent1');
       expect(result.label).toBe(TIMER_LABEL_CONSULTING);
       expect(result.timestamp).toBe(2500);
     });
@@ -220,23 +196,19 @@ describe('timer-utils', () => {
     it('should return Consult Requested label when consult is initiated', () => {
       const mockTask = {
         data: {
+          consultStatus: 'consultInitiated',
           interaction: {
             participants: {
               agent1: {
                 consultTimestamp: 2000,
+                consultState: 'consultInitiated',
               },
             },
           },
         },
       } as unknown as ITask;
 
-      const visibility = {
-        ...mockControlVisibility,
-        isConsultInitiated: true,
-        consultCallHeld: false,
-      };
-
-      const result = calculateConsultTimerData(mockTask, visibility, 'agent1');
+      const result = calculateConsultTimerData(mockTask, defaultControls, 'agent1');
       expect(result.label).toBe(TIMER_LABEL_CONSULT_REQUESTED);
       expect(result.timestamp).toBe(2000);
     });
@@ -249,7 +221,7 @@ describe('timer-utils', () => {
               'consult-id': {
                 mType: 'consult',
                 isHold: true,
-                holdTimestamp: 5000,
+                holdTimestamp: 1700000005000,
                 mediaResourceId: 'consult-id',
                 participants: ['agent1'],
               },
@@ -263,21 +235,26 @@ describe('timer-utils', () => {
         },
       } as unknown as ITask;
 
-      const visibility = {
-        ...mockControlVisibility,
-        consultCallHeld: true,
-      };
-
-      const result = calculateConsultTimerData(mockTask, visibility, 'agent1');
+      const result = calculateConsultTimerData(mockTask, defaultControls, 'agent1');
       expect(result.label).toBe(TIMER_LABEL_CONSULT_ON_HOLD);
-      expect(result.timestamp).toBe(5000);
+      expect(result.timestamp).toBe(1700000005000);
     });
 
-    it('should fallback to consultTimestamp if consultHoldTimestamp is 0', () => {
+    it('should return Consult on Hold when consult is held without holdTimestamp (EP/DN lag)', () => {
+      const before = Date.now();
       const mockTask = {
         data: {
           interaction: {
-            media: {},
+            interactionId: 'epdn-interaction-1',
+            media: {
+              'consult-id': {
+                mType: 'consult',
+                isHold: true,
+                holdTimestamp: 0,
+                mediaResourceId: 'consult-id',
+                participants: ['agent1'],
+              },
+            },
             participants: {
               agent1: {
                 consultTimestamp: 2000,
@@ -287,14 +264,97 @@ describe('timer-utils', () => {
         },
       } as unknown as ITask;
 
-      const visibility = {
-        ...mockControlVisibility,
-        consultCallHeld: true,
-      };
-
-      const result = calculateConsultTimerData(mockTask, visibility, 'agent1');
+      const result = calculateConsultTimerData(mockTask, defaultControls, 'agent1');
       expect(result.label).toBe(TIMER_LABEL_CONSULT_ON_HOLD);
-      expect(result.timestamp).toBe(2000);
+      expect(result.timestamp).toBeGreaterThanOrEqual(before);
+    });
+
+    it('should return Consult on Hold when initiator switches to main before consult media isHold (EP/DN)', () => {
+      const mockTask = {
+        data: {
+          interaction: {
+            interactionId: 'epdn-interaction-2',
+            media: {
+              'consult-id': {
+                mType: 'consult',
+                isHold: false,
+                mediaResourceId: 'consult-id',
+                participants: ['agent1'],
+              },
+            },
+            participants: {
+              agent1: {
+                consultTimestamp: 2000,
+              },
+            },
+          },
+        },
+        state: {
+          context: {
+            taskData: {
+              interaction: {
+                interactionId: 'epdn-interaction-2',
+                media: {
+                  'consult-id': {
+                    mType: 'consult',
+                    isHold: true,
+                    holdTimestamp: 1700000005000,
+                    mediaResourceId: 'consult-id',
+                    participants: ['agent1'],
+                  },
+                },
+                participants: {
+                  agent1: {
+                    consultTimestamp: 2000,
+                  },
+                },
+              },
+            },
+          },
+        },
+      } as unknown as ITask;
+
+      const controls = createMockTaskUIControls({
+        activeLeg: 'main',
+        consult: {endConsult: enabledControl},
+      });
+
+      const result = calculateConsultTimerData(mockTask, controls, 'agent1');
+      expect(result.label).toBe(TIMER_LABEL_CONSULT_ON_HOLD);
+      expect(result.timestamp).toBe(1700000005000);
+    });
+
+    it('should return Consult on Hold via activeLeg main when consult media lags (EP/DN switch-to-main)', () => {
+      const before = Date.now();
+      const mockTask = {
+        data: {
+          interaction: {
+            interactionId: 'epdn-interaction-3',
+            media: {
+              'consult-id': {
+                mType: 'consult',
+                isHold: false,
+                mediaResourceId: 'consult-id',
+                participants: ['agent1'],
+              },
+            },
+            participants: {
+              agent1: {
+                consultTimestamp: 2000,
+              },
+            },
+          },
+        },
+      } as unknown as ITask;
+
+      const controls = createMockTaskUIControls({
+        activeLeg: 'main',
+        main: {endConsult: enabledControl},
+      });
+
+      const result = calculateConsultTimerData(mockTask, controls, 'agent1');
+      expect(result.label).toBe(TIMER_LABEL_CONSULT_ON_HOLD);
+      expect(result.timestamp).toBeGreaterThanOrEqual(before);
     });
 
     it('should return default when no consult timestamp available', () => {
@@ -310,7 +370,7 @@ describe('timer-utils', () => {
         },
       } as unknown as ITask;
 
-      const result = calculateConsultTimerData(mockTask, mockControlVisibility, 'agent1');
+      const result = calculateConsultTimerData(mockTask, defaultControls, 'agent1');
       expect(result).toEqual({label: TIMER_LABEL_CONSULTING, timestamp: 0});
     });
 
@@ -325,7 +385,7 @@ describe('timer-utils', () => {
         },
       } as unknown as ITask;
 
-      const result = calculateConsultTimerData(mockTask, mockControlVisibility, 'agent1');
+      const result = calculateConsultTimerData(mockTask, defaultControls, 'agent1');
       expect(result).toEqual({label: TIMER_LABEL_CONSULTING, timestamp: 0});
     });
   });

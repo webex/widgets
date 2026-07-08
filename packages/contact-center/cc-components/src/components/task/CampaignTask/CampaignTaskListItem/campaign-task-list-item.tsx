@@ -37,6 +37,7 @@ const CampaignTaskListItem: React.FC<CampaignTaskListItemProps> = ({
   onRemove,
   onTimeout,
   handleTimestamp,
+  timerDisplayMode = 'auto',
   logger,
   className,
   testIdPrefix = 'campaign-task',
@@ -45,6 +46,8 @@ const CampaignTaskListItem: React.FC<CampaignTaskListItemProps> = ({
   const removeTooltipText = isRemoveDisabled ? CAMPAIGN_REMOVE_DISABLED_TOOLTIP : CAMPAIGN_REMOVE_TOOLTIP;
   const skipButtonId = `${testIdPrefix}-skip-btn`;
   const removeButtonId = `${testIdPrefix}-remove-btn`;
+  const shouldShowHandleTime = (timerDisplayMode === 'handle-time' || isAccepted) && !!handleTimestamp;
+  const shouldShowCountdown = timerDisplayMode === 'auto' && !isAccepted && !!timeoutTimestamp;
 
   return (
     <ListItem className={className} data-testid={`${testIdPrefix}-list-item`}>
@@ -58,12 +61,12 @@ const CampaignTaskListItem: React.FC<CampaignTaskListItemProps> = ({
           {phoneNumber}
         </Text>
       )}
-      {!isAccepted && timeoutTimestamp && (
+      {shouldShowCountdown && (
         <div slot="leading-text-tertiary-label">
           <CampaignCountdown timeoutTimestamp={timeoutTimestamp} onTimeout={onTimeout} logger={logger} />
         </div>
       )}
-      {isAccepted && handleTimestamp && (
+      {shouldShowHandleTime && (
         <Text
           slot="leading-text-tertiary-label"
           tagname="span"

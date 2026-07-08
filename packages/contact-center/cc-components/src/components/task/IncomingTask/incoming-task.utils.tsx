@@ -26,15 +26,26 @@ export interface IncomingTaskData {
  */
 export const extractIncomingTaskData = (
   incomingTask: ITask,
-  isBrowser: boolean,
   logger?,
-  isDeclineButtonEnabled?: boolean
+  acceptControl?: {isVisible: boolean; isEnabled: boolean},
+  declineControl?: {isVisible: boolean; isEnabled: boolean},
+  isDeclineButtonEnabled?: boolean,
+  isBrowser?: boolean
 ): IncomingTaskData => {
   try {
+    const accept = acceptControl ?? incomingTask?.uiControls?.main?.accept ?? {isVisible: false, isEnabled: false};
+    const sdkDecline = declineControl ??
+      incomingTask?.uiControls?.main?.decline ?? {isVisible: false, isEnabled: false};
+    const decline = {
+      ...sdkDecline,
+      isEnabled: sdkDecline.isEnabled || !!isDeclineButtonEnabled,
+    };
+
     // Extract basic data from task
-    //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
     const callAssociationDetails = incomingTask?.data?.interaction?.callAssociatedDetails;
-    const ani = callAssociationDetails?.ani;
+    const isOutdial = incomingTask?.data?.interaction?.outboundType === 'OUTDIAL';
+    const dnis = callAssociationDetails?.dnis || incomingTask?.data?.interaction?.callProcessingDetails?.dnis;
+    const ani = isOutdial ? dnis || callAssociationDetails?.ani : callAssociationDetails?.ani;
     const dn = callAssociationDetails?.dn;
     const customerName = callAssociationDetails?.customerName;
     const virtualTeamName = callAssociationDetails?.virtualTeamName;
@@ -48,24 +59,20 @@ export const extractIncomingTaskData = (
     const isSocial = mediaType === MEDIA_CHANNEL.SOCIAL;
 
     // Compute button text based on conditions
-    const acceptText = !incomingTask.data.wrapUpRequired
-      ? isTelephony && !isBrowser
-        ? 'Ringing...'
-        : 'Accept'
-      : undefined;
+    // Extension mode (any call): accept visible but disabled → show "Ringing..."
+    // Desktop/WebRTC outdial: accept visible but disabled → show "Accept" (auto-answer handles it)
+    // Desktop/WebRTC inbound: accept visible and enabled → show "Accept"
+    const showRinging = isTelephony && !accept.isEnabled && !(isBrowser && isOutdial);
+    const acceptText = accept.isVisible ? (showRinging ? 'Ringing...' : 'Accept') : undefined;
 
-    const declineText = !incomingTask.data.wrapUpRequired && isTelephony && isBrowser ? 'Decline' : undefined;
+    const declineText = decline.isVisible ? 'Decline' : undefined;
 
     // Compute title based on media type
     const outboundType = incomingTask?.data?.interaction?.outboundType;
     const title = isSocial ? customerName : getCallerIdentifier(ani, dn, outboundType);
 
-    // Compute disable state for accept button when auto-answering
-    const isAutoAnswering = incomingTask.data.isAutoAnswering || false;
-    // Compute disable state for accept button
-    const disableAccept = (isTelephony && !isBrowser) || isAutoAnswering;
-
-    const disableDecline = (isTelephony && !isBrowser) || (isAutoAnswering && !isDeclineButtonEnabled);
+    const disableAccept = !accept.isEnabled;
+    const disableDecline = !decline.isEnabled;
 
     return {
       ani,

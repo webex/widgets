@@ -2,247 +2,126 @@
 
 ## Summary
 
-The IncomingTask widget handles task offer/accept/reject flows. The state machine changes are minimal here since accept/decline SDK methods are unchanged. The main change is that the OFFERED → CONNECTED/TERMINATED transitions are now explicit state machine states, and `task.uiControls.accept`/`decline` can drive button visibility instead of widget-side logic.
+**Status: Done.** IncomingTask accept/decline visibility and enablement come from `task.uiControls.main.accept` and `task.uiControls.main.decline`. Widget-side `getAcceptButtonVisibility` / `getDeclineButtonVisibility` are removed.
+
+Host app shows the incoming popup via `store.setIncomingTaskCb`; widgets dismiss it via `onAccepted` / `onRejected` callbacks.
 
 ---
 
-## Old Approach
+## Current Implementation
 
-### Entry Point
-**File:** `packages/contact-center/task/src/helper.ts`
-**Hook:** `useIncomingTask(props: UseTaskProps)`
+### Entry points
 
-### How It Works (Old)
-1. Store sets `incomingTask` observable on `TASK_INCOMING` event
-2. Widget (observer) re-renders when `incomingTask` changes
-3. Hook registers per-task callbacks: `TASK_ASSIGNED`, `TASK_CONSULT_ACCEPTED`, `TASK_END`, `TASK_REJECT`, `TASK_CONSULT_END`
-4. Accept → `task.accept()` → SDK → `TASK_ASSIGNED` → `onAccepted` callback
-5. Reject → `task.decline()` → SDK → `TASK_REJECT` → `onRejected` callback
-6. Timer expiry (RONA) → `reject()` → `task.decline()`
-7. Accept/Decline button visibility computed by `getAcceptButtonVisibility()` / `getDeclineButtonVisibility()` in task-util.ts
+| Layer | File |
+|-------|------|
+| Hook | `task/src/helper.ts` — `useIncomingTask` |
+| Widget wrapper | `task/src/IncomingTask/index.tsx` |
+| Component | `cc-components/.../IncomingTask/incoming-task.tsx` |
+| Utils | `cc-components/.../IncomingTask/incoming-task.utils.tsx` |
 
----
+### Control source
 
-## New Approach
+```typescript
+// helper.ts — useIncomingTask
+const acceptControl = incomingTask?.uiControls?.main?.accept ?? {isVisible: false, isEnabled: false};
+const sdkDeclineControl = incomingTask?.uiControls?.main?.decline ?? {isVisible: false, isEnabled: false};
+const declineControl = {
+  ...sdkDeclineControl,
+  isEnabled: sdkDeclineControl.isEnabled || store.isDeclineButtonEnabled, // Legacy bridge
+};
+```
 
-### What Changes
-1. **Accept/Decline visibility** → now available via `task.uiControls.accept` / `task.uiControls.decline`
-2. **State machine states**: IDLE → OFFERED → (CONNECTED on accept | TERMINATED on reject/RONA)
-3. **SDK methods unchanged**: `task.accept()`, `task.decline()` still work the same
-4. **Events unchanged**: `TASK_ASSIGNED`, `TASK_REJECT` still emitted
+### Per-task event callbacks (dismiss popup)
 
-### Minimal Changes Required
-- Replace `getAcceptButtonVisibility()` / `getDeclineButtonVisibility()` with `task.uiControls.accept` / `task.uiControls.decline`
-- Optionally subscribe to `task:ui-controls-updated` for reactive updates
-- Fix callback registration to use **named callbacks** so `removeTaskCallback` (which calls `task.off`) gets the same function reference (see After example below)
+Registered via `store.setTaskCallback` with **named** callbacks (required for correct `.off()` cleanup):
+
+| Event | Callback | Effect |
+|-------|----------|--------|
+| `TASK_ASSIGNED` | `taskAssignCallback` | `onAccepted` — dismiss popup |
+| `TASK_CONSULT_ACCEPTED` | `taskAssignCallback` | Same |
+| `TASK_END` | `taskRejectCallback` | `onRejected` — dismiss popup |
+| `TASK_REJECT` | `taskRejectCallback` | Same |
+| `TASK_CONSULT_END` | `taskRejectCallback` | Same |
+| `TASK_OUTDIAL_FAILED` | `taskRejectCallback` | Dismiss popup on outdial failure |
+
+Actions unchanged: `incomingTask.accept()` → SDK → `TASK_ASSIGNED`; `incomingTask.decline()` → `TASK_REJECT`.
+
+### Outdial-specific UI (widgets layer)
+
+SDK sets accept disabled and decline `VISIBLE_DISABLED` for WebRTC outdial. Widgets add label text rules in `incoming-task.utils.tsx`:
+
+| Mode | Accept label | Condition |
+|------|--------------|-----------|
+| Desktop outdial | "Accept" (disabled) | `isBrowser && isOutdial && !accept.isEnabled` |
+| Extension outdial | "Ringing..." | `!isBrowser && isOutdial && !accept.isEnabled` |
+| Extension inbound | "Ringing..." | `!isBrowser && !accept.isEnabled` |
+| Desktop inbound | "Accept" | `accept.isVisible` |
+
+`isBrowser` comes from `store.deviceType === 'BROWSER'` in `IncomingTask/index.tsx` — used for **label text only**, not visibility gating.
+
+### Phone number display (outdial)
+
+In `extractIncomingTaskData`, for outdial tasks ANI shown uses `dnis` (destination) over `ani`:
+
+```typescript
+const isOutdial = incomingTask?.data?.interaction?.outboundType === 'OUTDIAL';
+const dnis = callAssociatedDetails?.dnis || callProcessingDetails?.dnis;
+const ani = isOutdial ? dnis || callAssociatedDetails?.ani : callAssociatedDetails?.ani;
+```
+
+CallControlCAD uses the same pattern for header title (see [component-layer-migration.md](./component-layer-migration.md)).
+
+### Host popup vs widget dismiss
+
+| Concern | Owner |
+|---------|-------|
+| Show incoming popup + sound | Host — `setIncomingTaskCb` |
+| Outdial failure modal | Host — `setOutdialFailed` |
+| Task rejected popup | Host — `setTaskRejected` |
+| Dismiss incoming notification | Widget — `onAccepted` / `onRejected` props |
 
 ---
 
 ## Old → New Mapping
 
-| Aspect | Old | New |
-|--------|-----|-----|
-| Accept visible | `getAcceptButtonVisibility(isBrowser, isPhone, webRtc, isCall, isDigital)` | `task.uiControls.accept.isVisible` |
-| Decline visible | `getDeclineButtonVisibility(isBrowser, webRtc, isCall)` | `task.uiControls.decline.isVisible` |
-| Accept action | `task.accept()` | `task.accept()` (unchanged) |
-| Decline action | `task.decline()` | `task.decline()` (unchanged) |
-| Task assigned event | `TASK_EVENTS.TASK_ASSIGNED` | `TASK_EVENTS.TASK_ASSIGNED` (unchanged) |
-| Task rejected event | `TASK_EVENTS.TASK_REJECT` | `TASK_EVENTS.TASK_REJECT` (unchanged) |
-| Timer/RONA | Widget-managed timer | Widget-managed timer (unchanged) |
-
----
-
-## Refactor Pattern
-
-### Before
-```typescript
-// In IncomingTask component or hook
-const { isBrowser, isPhoneDevice } = getDeviceTypeFlags(store.deviceType);
-const acceptVisibility = getAcceptButtonVisibility(
-  isBrowser, isPhoneDevice, webRtcEnabled, isCall, isDigitalChannel
-);
-const declineVisibility = getDeclineButtonVisibility(isBrowser, webRtcEnabled, isCall);
-```
-
-### After
-```typescript
-// In IncomingTask component or hook
-const task = store.incomingTask;
-const acceptVisibility = task?.uiControls?.accept ?? { isVisible: false, isEnabled: false };
-const declineVisibility = task?.uiControls?.decline ?? { isVisible: false, isEnabled: false };
-```
-
----
-
-## Full Before/After: `useIncomingTask` Hook
-
-### Before (current code in `helper.ts`)
-```typescript
-export const useIncomingTask = (props: UseTaskProps) => {
-  const {onAccepted, onRejected, deviceType, incomingTask, logger} = props;
-  const isBrowser = deviceType === 'BROWSER';
-  const isDeclineButtonEnabled = store.isDeclineButtonEnabled;
-
-  // Event callbacks registered per-task for accept/reject lifecycle
-  useEffect(() => {
-    if (!incomingTask) return;
-    store.setTaskCallback(TASK_EVENTS.TASK_ASSIGNED, () => {
-      if (onAccepted) onAccepted({task: incomingTask});
-    }, incomingTask.data.interactionId);
-    store.setTaskCallback(TASK_EVENTS.TASK_CONSULT_ACCEPTED, taskAssignCallback, incomingTask?.data.interactionId);
-    store.setTaskCallback(TASK_EVENTS.TASK_END, taskRejectCallback, incomingTask?.data.interactionId);
-    store.setTaskCallback(TASK_EVENTS.TASK_REJECT, taskRejectCallback, incomingTask?.data.interactionId);
-    store.setTaskCallback(TASK_EVENTS.TASK_CONSULT_END, taskRejectCallback, incomingTask?.data.interactionId);
-
-    return () => {
-      store.removeTaskCallback(TASK_EVENTS.TASK_ASSIGNED, taskAssignCallback, incomingTask?.data.interactionId);
-      store.removeTaskCallback(TASK_EVENTS.TASK_CONSULT_ACCEPTED, taskAssignCallback, incomingTask?.data.interactionId);
-      store.removeTaskCallback(TASK_EVENTS.TASK_END, taskRejectCallback, incomingTask?.data.interactionId);
-      store.removeTaskCallback(TASK_EVENTS.TASK_REJECT, taskRejectCallback, incomingTask?.data.interactionId);
-      store.removeTaskCallback(TASK_EVENTS.TASK_CONSULT_END, taskRejectCallback, incomingTask?.data.interactionId);
-    };
-  }, [incomingTask]);
-
-  const accept = () => {
-    if (!incomingTask?.data.interactionId) return;
-    incomingTask.accept().catch((error) => { /* log */ });
-  };
-
-  const reject = () => {
-    if (!incomingTask?.data.interactionId) return;
-    incomingTask.decline().catch((error) => { /* log */ });
-  };
-
-  return {
-    incomingTask,
-    accept,
-    reject,
-    isBrowser,           // Used to determine accept/decline button visibility
-    isDeclineButtonEnabled,  // Feature flag for decline button
-  };
-};
-```
-
-**Note:** The `isBrowser` and `isDeclineButtonEnabled` flags are passed to the component, which uses them to decide whether to show accept/decline buttons. This duplicates what `task.uiControls.accept/decline` now provides.
-
-### After (migrated)
-```typescript
-export const useIncomingTask = (props: UseTaskProps) => {
-  const {onAccepted, onRejected, incomingTask, logger} = props;
-
-  // NEW: Read accept/decline visibility from SDK
-  const acceptControl = incomingTask?.uiControls?.accept ?? {isVisible: false, isEnabled: false};
-  const declineControl = incomingTask?.uiControls?.decline ?? {isVisible: false, isEnabled: false};
-
-  // Event callbacks — use NAMED callbacks so removeTaskCallback(task.off) gets the same reference
-  const taskAssignCallback = useCallback(() => {
-    if (onAccepted) onAccepted({task: incomingTask});
-  }, [onAccepted, incomingTask]);
-
-  const taskRejectCallback = useCallback(() => {
-    if (onRejected) onRejected({task: incomingTask});
-  }, [onRejected, incomingTask]);
-
-  useEffect(() => {
-    if (!incomingTask) return;
-    store.setTaskCallback(TASK_EVENTS.TASK_ASSIGNED, taskAssignCallback, incomingTask.data.interactionId);
-    store.setTaskCallback(TASK_EVENTS.TASK_CONSULT_ACCEPTED, taskAssignCallback, incomingTask?.data.interactionId);
-    store.setTaskCallback(TASK_EVENTS.TASK_END, taskRejectCallback, incomingTask?.data.interactionId);
-    store.setTaskCallback(TASK_EVENTS.TASK_REJECT, taskRejectCallback, incomingTask?.data.interactionId);
-    store.setTaskCallback(TASK_EVENTS.TASK_CONSULT_END, taskRejectCallback, incomingTask?.data.interactionId);
-
-    return () => {
-      store.removeTaskCallback(TASK_EVENTS.TASK_ASSIGNED, taskAssignCallback, incomingTask?.data.interactionId);
-      store.removeTaskCallback(TASK_EVENTS.TASK_CONSULT_ACCEPTED, taskAssignCallback, incomingTask?.data.interactionId);
-      store.removeTaskCallback(TASK_EVENTS.TASK_END, taskRejectCallback, incomingTask?.data.interactionId);
-      store.removeTaskCallback(TASK_EVENTS.TASK_REJECT, taskRejectCallback, incomingTask?.data.interactionId);
-      store.removeTaskCallback(TASK_EVENTS.TASK_CONSULT_END, taskRejectCallback, incomingTask?.data.interactionId);
-    };
-  }, [incomingTask, taskAssignCallback, taskRejectCallback]);
-
-  // Actions — UNCHANGED
-  const accept = () => {
-    if (!incomingTask?.data.interactionId) return;
-    incomingTask.accept().catch((error) => { /* log */ });
-  };
-
-  const reject = () => {
-    if (!incomingTask?.data.interactionId) return;
-    incomingTask.decline().catch((error) => { /* log */ });
-  };
-
-  return {
-    incomingTask,
-    accept,
-    reject,
-    acceptControl,     // NEW: { isVisible, isEnabled } from SDK
-    declineControl,    // NEW: { isVisible, isEnabled } from SDK
-    // REMOVED: isBrowser, isDeclineButtonEnabled (no longer needed)
-  };
-};
-```
-
-### Component-Level Before/After
-
-#### Before (IncomingTaskComponent)
-```tsx
-// incoming-task.tsx — old approach
-const IncomingTaskComponent = ({ isBrowser, isDeclineButtonEnabled, onAccept, onReject, ... }) => {
-  // Widget computes visibility from device type and feature flags
-  const showAccept = isBrowser; // simplified — actual logic in getAcceptButtonVisibility()
-  const showDecline = isBrowser && isDeclineButtonEnabled;
-
-  return (
-    <div>
-      {showAccept && <Button onClick={onAccept}>Accept</Button>}
-      {showDecline && <Button onClick={onReject}>Decline</Button>}
-    </div>
-  );
-};
-```
-
-#### After (IncomingTaskComponent)
-```tsx
-// incoming-task.tsx — new approach
-// acceptControl/declineControl come from task.uiControls.accept / task.uiControls.decline
-const IncomingTaskComponent = ({ acceptControl, declineControl, onAccept, onReject, ... }) => {
-  return (
-    <div>
-      {acceptControl.isVisible && (
-        <Button onClick={onAccept} disabled={!acceptControl.isEnabled}>Accept</Button>
-      )}
-      {declineControl.isVisible && (
-        <Button onClick={onReject} disabled={!declineControl.isEnabled}>Decline</Button>
-      )}
-    </div>
-  );
-};
-```
-
----
-
-## Files to Modify
-
-| File | Action |
-|------|--------|
-| `task/src/helper.ts` (`useIncomingTask`) | Use `task.uiControls.accept/decline` instead of visibility functions |
-| `task/src/IncomingTask/index.tsx` | Minor: pass new control shape to component |
-| `cc-components/.../IncomingTask/incoming-task.tsx` | Update accept/decline prop names if needed |
-| `task/tests/IncomingTask/index.tsx` | Update tests |
+| Aspect | Old | New (current) |
+|--------|-----|---------------|
+| Accept visible | `getAcceptButtonVisibility(...)` | `task.uiControls.main.accept.isVisible` |
+| Decline visible | `getDeclineButtonVisibility(...)` | `task.uiControls.main.decline.isVisible` |
+| Decline enabled | `store.isDeclineButtonEnabled` only | SDK `decline.isEnabled` **OR** `store.isDeclineButtonEnabled` |
+| Accept action | `task.accept()` | Unchanged |
+| Decline action | `task.decline()` | Unchanged |
+| Device type for buttons | `isBrowser` gates visibility | `isBrowser` for outdial **label text** only |
 
 ---
 
 ## Validation Criteria
 
-- [ ] Accept button visible for WebRTC voice tasks
-- [ ] Accept button visible for digital channel tasks (chat/email)
-- [ ] Decline button visible for WebRTC voice tasks only
-- [ ] Accept action calls `task.accept()` and triggers `TASK_ASSIGNED`
-- [ ] Decline action calls `task.decline()` and triggers `TASK_REJECT`
-- [ ] RONA timer triggers reject correctly
-- [ ] Consult incoming (OFFER_CONSULT) shows accept/decline correctly
-- [ ] Cleanup on unmount removes callbacks
+| Criterion | Status |
+|-----------|--------|
+| Accept/decline from `uiControls.main` | **Done** |
+| Named callbacks for cleanup | **Done** |
+| `TASK_OUTDIAL_FAILED` dismisses popup | **Done** |
+| Outdial accept/decline labels (Desktop vs Extension) | **Done** |
+| Outdial ANI uses `dnis` | **Done** |
+| Legacy `isDeclineButtonEnabled` bridge | **Done** (pending full SDK-only decline enablement) |
+| RONA timer → `task.decline()` | **Done** |
+
+---
+
+## Migration Fix Log
+
+### Fix: Restore `isDeclineButtonEnabled` bridge
+
+Store `handleAutoAnswer` still sets `isDeclineButtonEnabled`. Hook and utils OR this with `uiControls.main.decline.isEnabled` so decline enables after auto-answer when SDK timing lags.
+
+### Fix: Outdial accept label and phone number
+
+- Desktop outdial: show "Accept" disabled (not "Ringing...")
+- Extension outdial: show "Ringing..."
+- Display customer number via `dnis` for outdial in incoming task header
 
 ---
 
 _Parent: [migration-overview.md](./migration-overview.md)_
+_Updated: 2026-05-20_

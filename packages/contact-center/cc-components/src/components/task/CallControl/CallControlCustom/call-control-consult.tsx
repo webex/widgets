@@ -15,8 +15,9 @@ const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> =
   switchToMainCall,
   logger,
   isMuted,
-  controlVisibility,
+  controls,
   toggleConsultMute,
+  conferenceEnabled = true,
 }) => {
   // Use the label and timestamp calculated in helper.ts
   // Stable key based on timestamp to prevent timer resets
@@ -27,13 +28,14 @@ const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> =
 
   const buttons = createConsultButtons(
     isMuted,
-    controlVisibility,
+    controls,
     consultTransfer,
     toggleConsultMute,
     endConsultCall,
     consultConference,
     switchToMainCall,
-    logger
+    logger,
+    conferenceEnabled
   );
 
   // Filter buttons that should be shown, then map them
