@@ -7,10 +7,10 @@ import {
 } from '@webex/cc-components';
 import {RealTimeTranscriptionData} from '@webex/cc-store';
 
-export type UseTaskProps = Pick<TaskProps, 'incomingTask' | 'deviceType' | 'logger'> &
+export type UseTaskProps = Pick<TaskProps, 'incomingTask' | 'logger'> &
   Partial<Pick<TaskProps, 'onAccepted' | 'onRejected'>>;
 
-export type UseTaskListProps = Pick<TaskProps, 'cc' | 'taskList' | 'deviceType' | 'logger'> &
+export type UseTaskListProps = Pick<TaskProps, 'cc' | 'taskList' | 'logger'> &
   Partial<Pick<TaskProps, 'onTaskAccepted' | 'onTaskDeclined' | 'onTaskSelected'>>;
 
 export type IncomingTaskProps = Pick<TaskProps, 'incomingTask'> & Partial<Pick<TaskProps, 'onAccepted' | 'onRejected'>>;
@@ -48,7 +48,7 @@ export type CallControlProps = Partial<
 
 export type useCallControlProps = Pick<
   ControlProps,
-  'currentTask' | 'logger' | 'deviceType' | 'featureFlags' | 'isMuted' | 'conferenceEnabled' | 'agentId'
+  'currentTask' | 'logger' | 'isMuted' | 'conferenceEnabled' | 'agentId'
 > &
   Partial<Pick<ControlProps, 'onHoldResume' | 'onEnd' | 'onWrapUp' | 'onRecordingToggle' | 'onToggleMute'>>;
 
@@ -64,15 +64,6 @@ export interface OutdialProps {
    * Defaults to true if not provided.
    */
   isAddressBookEnabled?: boolean;
-}
-
-/**
- * Helper interface for device type checks
- */
-export interface DeviceTypeFlags {
-  isBrowser: boolean;
-  isAgentDN: boolean;
-  isExtension: boolean;
 }
 
 /**

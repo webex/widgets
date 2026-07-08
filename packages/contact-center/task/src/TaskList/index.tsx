@@ -9,15 +9,17 @@ import {TaskListProps} from '../task.types';
 
 const TaskListInternal: React.FunctionComponent<TaskListProps> = observer(
   ({onTaskAccepted, onTaskDeclined, onTaskSelected, hasCampaignPreviewEnabled}) => {
-    const {cc, taskList, currentTask, deviceType, logger, agentId, acceptedCampaignIds} = store;
+    const {cc, taskList, currentTask, logger, agentId, acceptedCampaignIds, isDeclineButtonEnabled, deviceType} = store;
 
-    const result = useTaskList({cc, deviceType, logger, taskList, onTaskAccepted, onTaskDeclined, onTaskSelected});
+    const result = useTaskList({cc, logger, taskList, onTaskAccepted, onTaskDeclined, onTaskSelected});
     const props = {
       ...result,
       cc,
       currentTask,
       logger,
       agentId,
+      isDeclineButtonEnabled,
+      isBrowser: deviceType === 'BROWSER',
       hasCampaignPreviewEnabled,
       acceptedCampaignIds,
     };

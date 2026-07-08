@@ -1,12 +1,16 @@
-import {
-  isIncomingTask,
-  getIsConferenceInProgress,
-  getConferenceParticipants,
-  getConferenceParticipantsCount,
-  findHoldTimestamp,
-} from '../src/task-utils';
+import {isIncomingTask, getConferenceParticipants, findHoldTimestamp} from '../src/task-utils';
 import {mockTask} from '../../test-fixtures/src/fixtures';
 import {ITask} from '../src/store.types';
+
+const participant = (hasJoined: boolean) =>
+  ({
+    id: 'agent1',
+    pType: 'Agent',
+    type: 'agent',
+    hasJoined,
+    hasLeft: false,
+    isInPredial: false,
+  }) as ITask['data']['interaction']['participants'][string];
 
 describe('isIncomingTask', () => {
   let testTask: ITask;
@@ -29,9 +33,7 @@ describe('isIncomingTask', () => {
             ...testTask.data.interaction,
             state: state as string,
             participants: {
-              agent1: {
-                hasJoined: false,
-              },
+              agent1: participant(false),
             },
           },
         };
@@ -63,7 +65,7 @@ describe('isIncomingTask', () => {
         interaction: {
           ...testTask.data.interaction,
           state: 'new',
-          participants: {agent1: {hasJoined: false}},
+          participants: {agent1: participant(false)},
         },
       };
       expect(isIncomingTask(testTask, undefined as unknown as string)).toBe(true);
@@ -80,7 +82,7 @@ describe('isIncomingTask', () => {
         interaction: {
           ...testTask.data.interaction,
           state: 'new',
-          participants: {agent1: {hasJoined: false}},
+          participants: {agent1: participant(false)},
         },
       };
       expect(isIncomingTask(testTask, 'agent1')).toBe(false);
@@ -93,7 +95,7 @@ describe('isIncomingTask', () => {
         interaction: {
           ...testTask.data.interaction,
           state: 'new',
-          participants: {agent1: {hasJoined: true}},
+          participants: {agent1: participant(true)},
         },
       };
       expect(isIncomingTask(testTask, 'agent1')).toBe(false);
@@ -110,7 +112,7 @@ describe('isIncomingTask', () => {
           interaction: {
             ...testTask.data.interaction,
             state: state as string,
-            participants: {agent1: {hasJoined: false}},
+            participants: {agent1: participant(false)},
           },
         };
         expect(isIncomingTask(testTask, 'agent1')).toBe(false);
@@ -158,7 +160,7 @@ describe('isIncomingTask', () => {
         interaction: {
           ...testTask.data.interaction,
           state: 'new',
-          participants: {agent2: {hasJoined: true}},
+          participants: {agent2: participant(true)},
         },
       };
       expect(isIncomingTask(testTask, 'agent1')).toBe(true);
@@ -172,8 +174,8 @@ describe('isIncomingTask', () => {
           ...testTask.data.interaction,
           state: 'new',
           participants: {
-            agent1: {hasJoined: false}, // Current agent hasn't joined
-            agent2: {hasJoined: true}, // Other agent has joined
+            agent1: participant(false), // Current agent hasn't joined
+            agent2: participant(true), // Other agent has joined
           },
         },
       };
@@ -197,227 +199,6 @@ const createMockTask = (data: Partial<ITask['data']>): ITask => {
 const createPartialInteraction = (interaction: unknown): ITask['data']['interaction'] => {
   return interaction as ITask['data']['interaction'];
 };
-
-describe('getIsConferenceInProgress', () => {
-  it('should return false when task data is missing', () => {
-    const task = {} as Partial<ITask> as ITask;
-    expect(getIsConferenceInProgress(task)).toBe(false);
-  });
-
-  it('should return false when interaction media is missing', () => {
-    const task = createMockTask({
-      interactionId: 'main',
-      interaction: createPartialInteraction({}),
-    });
-    expect(getIsConferenceInProgress(task)).toBe(false);
-  });
-
-  it('should return false when interactionId is missing', () => {
-    const task = createMockTask({
-      interaction: createPartialInteraction({
-        media: {},
-      }),
-    });
-    expect(getIsConferenceInProgress(task)).toBe(false);
-  });
-
-  it('should return false when there are no participants', () => {
-    const task = createMockTask({
-      interactionId: 'main',
-      interaction: createPartialInteraction({
-        media: {
-          main: {
-            participants: [],
-          },
-        },
-        participants: {},
-      }),
-    });
-    expect(getIsConferenceInProgress(task)).toBe(false);
-  });
-
-  it('should return false when there is only one agent participant', () => {
-    const task = createMockTask({
-      interactionId: 'main',
-      interaction: createPartialInteraction({
-        media: {
-          main: {
-            participants: ['agent1'],
-          },
-        },
-        participants: {
-          agent1: {
-            id: 'agent1',
-            pType: 'Agent',
-            hasLeft: false,
-          },
-        },
-      }),
-    });
-    expect(getIsConferenceInProgress(task)).toBe(false);
-  });
-
-  it('should return true when there are two or more agent participants', () => {
-    const task = createMockTask({
-      interactionId: 'main',
-      interaction: createPartialInteraction({
-        media: {
-          main: {
-            participants: ['agent1', 'agent2'],
-          },
-        },
-        participants: {
-          agent1: {
-            id: 'agent1',
-            pType: 'Agent',
-            hasLeft: false,
-          },
-          agent2: {
-            id: 'agent2',
-            pType: 'Agent',
-            hasLeft: false,
-          },
-        },
-      }),
-    });
-    expect(getIsConferenceInProgress(task)).toBe(true);
-  });
-
-  it('should exclude customer participants from agent count', () => {
-    const task = createMockTask({
-      interactionId: 'main',
-      interaction: createPartialInteraction({
-        media: {
-          main: {
-            participants: ['agent1', 'customer1'],
-          },
-        },
-        participants: {
-          agent1: {
-            id: 'agent1',
-            pType: 'Agent',
-            hasLeft: false,
-          },
-          customer1: {
-            id: 'customer1',
-            pType: 'Customer',
-            hasLeft: false,
-          },
-        },
-      }),
-    });
-    expect(getIsConferenceInProgress(task)).toBe(false);
-  });
-
-  it('should exclude supervisor participants from agent count', () => {
-    const task = createMockTask({
-      interactionId: 'main',
-      interaction: createPartialInteraction({
-        media: {
-          main: {
-            participants: ['agent1', 'supervisor1'],
-          },
-        },
-        participants: {
-          agent1: {
-            id: 'agent1',
-            pType: 'Agent',
-            hasLeft: false,
-          },
-          supervisor1: {
-            id: 'supervisor1',
-            pType: 'Supervisor',
-            hasLeft: false,
-          },
-        },
-      }),
-    });
-    expect(getIsConferenceInProgress(task)).toBe(false);
-  });
-
-  it('should exclude VVA participants from agent count', () => {
-    const task = createMockTask({
-      interactionId: 'main',
-      interaction: createPartialInteraction({
-        media: {
-          main: {
-            participants: ['agent1', 'vva1'],
-          },
-        },
-        participants: {
-          agent1: {
-            id: 'agent1',
-            pType: 'Agent',
-            hasLeft: false,
-          },
-          vva1: {
-            id: 'vva1',
-            pType: 'VVA',
-            hasLeft: false,
-          },
-        },
-      }),
-    });
-    expect(getIsConferenceInProgress(task)).toBe(false);
-  });
-
-  it('should exclude participants who have left from agent count', () => {
-    const task = createMockTask({
-      interactionId: 'main',
-      interaction: createPartialInteraction({
-        media: {
-          main: {
-            participants: ['agent1', 'agent2'],
-          },
-        },
-        participants: {
-          agent1: {
-            id: 'agent1',
-            pType: 'Agent',
-            hasLeft: false,
-          },
-          agent2: {
-            id: 'agent2',
-            pType: 'Agent',
-            hasLeft: true,
-          },
-        },
-      }),
-    });
-    expect(getIsConferenceInProgress(task)).toBe(false);
-  });
-
-  it('should return true with three or more agent participants', () => {
-    const task = createMockTask({
-      interactionId: 'main',
-      interaction: createPartialInteraction({
-        media: {
-          main: {
-            participants: ['agent1', 'agent2', 'agent3'],
-          },
-        },
-        participants: {
-          agent1: {
-            id: 'agent1',
-            pType: 'Agent',
-            hasLeft: false,
-          },
-          agent2: {
-            id: 'agent2',
-            pType: 'Agent',
-            hasLeft: false,
-          },
-          agent3: {
-            id: 'agent3',
-            pType: 'Agent',
-            hasLeft: false,
-          },
-        },
-      }),
-    });
-    expect(getIsConferenceInProgress(task)).toBe(true);
-  });
-});
 
 describe('getConferenceParticipants', () => {
   const currentAgentId = 'agent1';
@@ -712,302 +493,111 @@ describe('getConferenceParticipants', () => {
       name: 'agent2',
     });
   });
-});
 
-describe('getConferenceParticipantsCount', () => {
-  it('should return 0 when task data is missing', () => {
-    const task = {} as Partial<ITask> as ITask;
-    expect(getConferenceParticipantsCount(task)).toBe(0);
-  });
+  it('should resolve mainCall media by mType when interactionId points to consult leg', () => {
+    const mainCallMediaId = '4da1b819-f461-444b-b817-0c983f235cde';
+    const consultMediaId = '8d18e6c0-4377-4431-8b9d-ed22cdde94cb';
 
-  it('should return 0 when interaction media is missing', () => {
     const task = createMockTask({
-      interactionId: 'main',
-      interaction: createPartialInteraction({}),
-    });
-    expect(getConferenceParticipantsCount(task)).toBe(0);
-  });
-
-  it('should return 0 when interactionId is missing', () => {
-    const task = createMockTask({
+      interactionId: consultMediaId,
       interaction: createPartialInteraction({
-        media: {},
-      }),
-    });
-    expect(getConferenceParticipantsCount(task)).toBe(0);
-  });
-
-  it('should return 0 when there are no participants', () => {
-    const task = createMockTask({
-      interactionId: 'main',
-      interaction: createPartialInteraction({
+        state: 'conference',
         media: {
-          main: {
-            participants: [],
-          },
-        },
-        participants: {},
-      }),
-    });
-    expect(getConferenceParticipantsCount(task)).toBe(0);
-  });
-
-  it('should return count of agent participants including current agent', () => {
-    const task = createMockTask({
-      interactionId: 'main',
-      interaction: createPartialInteraction({
-        media: {
-          main: {
-            participants: ['agent1', 'agent2', 'agent3'],
-          },
-        },
-        participants: {
-          agent1: {
-            id: 'agent1',
-            pType: 'Agent',
-            name: 'Agent One',
-            hasLeft: false,
-          },
-          agent2: {
-            id: 'agent2',
-            pType: 'Agent',
-            name: 'Agent Two',
-            hasLeft: false,
-          },
-          agent3: {
-            id: 'agent3',
-            pType: 'Agent',
-            name: 'Agent Three',
-            hasLeft: false,
-          },
-        },
-      }),
-    });
-
-    expect(getConferenceParticipantsCount(task)).toBe(3);
-  });
-
-  it('should exclude customer participants from count', () => {
-    const task = createMockTask({
-      interactionId: 'main',
-      interaction: createPartialInteraction({
-        media: {
-          main: {
+          [mainCallMediaId]: {
+            mType: 'mainCall',
+            mediaResourceId: mainCallMediaId,
             participants: ['agent1', 'agent2', 'customer1'],
           },
+          [consultMediaId]: {
+            mType: 'consult',
+            mediaResourceId: consultMediaId,
+            participants: ['agent1', 'agent3'],
+          },
         },
         participants: {
-          agent1: {
-            id: 'agent1',
-            pType: 'Agent',
-            name: 'Agent One',
-            hasLeft: false,
-          },
-          agent2: {
-            id: 'agent2',
-            pType: 'Agent',
-            name: 'Agent Two',
-            hasLeft: false,
-          },
-          customer1: {
-            id: 'customer1',
-            pType: 'Customer',
-            name: 'Customer One',
-            hasLeft: false,
-          },
+          agent1: {id: 'agent1', pType: 'Agent', name: 'Agent One', hasLeft: false},
+          agent2: {id: 'agent2', pType: 'Agent', name: 'Agent Two', hasLeft: false},
+          agent3: {id: 'agent3', pType: 'Agent', name: 'Agent Three', hasLeft: false},
+          customer1: {id: 'customer1', pType: 'Customer', name: 'Customer One', hasLeft: false},
         },
       }),
     });
 
-    expect(getConferenceParticipantsCount(task)).toBe(2);
+    const result = getConferenceParticipants(task, currentAgentId);
+
+    expect(result).toEqual([
+      {
+        id: 'agent2',
+        pType: 'Agent',
+        name: 'Agent Two',
+      },
+    ]);
   });
 
-  it('should exclude supervisor participants from count', () => {
+  it('should return empty array for consult-only secondary agents not in conference', () => {
     const task = createMockTask({
-      interactionId: 'main',
+      interactionId: 'child-interaction',
       interaction: createPartialInteraction({
+        state: 'consult',
+        interactionId: 'child-interaction',
+        callProcessingDetails: {
+          relationshipType: 'consult',
+          parentInteractionId: 'parent-interaction',
+        },
         media: {
           main: {
-            participants: ['agent1', 'agent2', 'supervisor1'],
+            mType: 'mainCall',
+            mediaResourceId: 'main',
+            participants: ['agent3', 'agent1', 'agent2'],
           },
         },
         participants: {
-          agent1: {
-            id: 'agent1',
-            pType: 'Agent',
-            name: 'Agent One',
-            hasLeft: false,
-          },
-          agent2: {
-            id: 'agent2',
-            pType: 'Agent',
-            name: 'Agent Two',
-            hasLeft: false,
-          },
-          supervisor1: {
-            id: 'supervisor1',
-            pType: 'Supervisor',
-            name: 'Supervisor One',
-            hasLeft: false,
-          },
+          agent1: {id: 'agent1', pType: 'Agent', name: 'Agent One', hasLeft: false},
+          agent2: {id: 'agent2', pType: 'Agent', name: 'Agent Two', hasLeft: false},
+          agent3: {id: 'agent3', pType: 'Agent', name: 'Agent Three', hasLeft: false},
         },
       }),
     });
 
-    expect(getConferenceParticipantsCount(task)).toBe(2);
+    expect(getConferenceParticipants(task, 'agent3')).toEqual([]);
   });
 
-  it('should exclude VVA participants from count', () => {
+  it('should return empty array for agent-name consulted agent during conference nested consult', () => {
+    const mainCallMediaId = 'b3629886-1f6b-4de9-b037-8f09667abac8';
+    const consultMediaId = '10bd2a1e-fc74-4c2c-af61-4f82de268cf7';
+
     const task = createMockTask({
-      interactionId: 'main',
+      interactionId: consultMediaId,
       interaction: createPartialInteraction({
+        state: 'conference',
+        interactionId: mainCallMediaId,
         media: {
-          main: {
-            participants: ['agent1', 'agent2', 'vva1'],
+          [mainCallMediaId]: {
+            mType: 'mainCall',
+            mediaResourceId: mainCallMediaId,
+            participants: ['customer1', 'agent1', 'agent2', 'dn1'],
+          },
+          [consultMediaId]: {
+            mType: 'consult',
+            mediaResourceId: consultMediaId,
+            participants: ['agent3', 'agent1'],
           },
         },
         participants: {
-          agent1: {
-            id: 'agent1',
-            pType: 'Agent',
-            name: 'Agent One',
-            hasLeft: false,
-          },
-          agent2: {
-            id: 'agent2',
-            pType: 'Agent',
-            name: 'Agent Two',
-            hasLeft: false,
-          },
-          vva1: {
-            id: 'vva1',
-            pType: 'VVA',
-            name: 'VVA One',
-            hasLeft: false,
-          },
+          agent1: {id: 'agent1', pType: 'Agent', name: 'Agent One', hasLeft: false, isConsulted: false},
+          agent2: {id: 'agent2', pType: 'Agent', name: 'Agent Two', hasLeft: false, isConsulted: false},
+          agent3: {id: 'agent3', pType: 'Agent', name: 'Agent Three', hasLeft: false, isConsulted: true},
+          customer1: {id: 'customer1', pType: 'Customer', name: 'Customer', hasLeft: false},
+          dn1: {id: 'dn1', pType: 'DN', name: 'DN', hasLeft: false},
         },
       }),
     });
 
-    expect(getConferenceParticipantsCount(task)).toBe(2);
-  });
-
-  it('should exclude participants who have left from count', () => {
-    const task = createMockTask({
-      interactionId: 'main',
-      interaction: createPartialInteraction({
-        media: {
-          main: {
-            participants: ['agent1', 'agent2', 'agent3'],
-          },
-        },
-        participants: {
-          agent1: {
-            id: 'agent1',
-            pType: 'Agent',
-            name: 'Agent One',
-            hasLeft: false,
-          },
-          agent2: {
-            id: 'agent2',
-            pType: 'Agent',
-            name: 'Agent Two',
-            hasLeft: false,
-          },
-          agent3: {
-            id: 'agent3',
-            pType: 'Agent',
-            name: 'Agent Three',
-            hasLeft: true,
-          },
-        },
-      }),
-    });
-
-    expect(getConferenceParticipantsCount(task)).toBe(2);
-  });
-
-  it('should return count of 1 for single agent', () => {
-    const task = createMockTask({
-      interactionId: 'main',
-      interaction: createPartialInteraction({
-        media: {
-          main: {
-            participants: ['agent1'],
-          },
-        },
-        participants: {
-          agent1: {
-            id: 'agent1',
-            pType: 'Agent',
-            name: 'Agent One',
-            hasLeft: false,
-          },
-        },
-      }),
-    });
-
-    expect(getConferenceParticipantsCount(task)).toBe(1);
-  });
-
-  it('should handle mixed participant types correctly', () => {
-    const task = createMockTask({
-      interactionId: 'main',
-      interaction: createPartialInteraction({
-        media: {
-          main: {
-            participants: ['agent1', 'agent2', 'agent3', 'customer1', 'supervisor1', 'vva1', 'agent4'],
-          },
-        },
-        participants: {
-          agent1: {
-            id: 'agent1',
-            pType: 'Agent',
-            name: 'Agent One',
-            hasLeft: false,
-          },
-          agent2: {
-            id: 'agent2',
-            pType: 'Agent',
-            name: 'Agent Two',
-            hasLeft: false,
-          },
-          agent3: {
-            id: 'agent3',
-            pType: 'Agent',
-            name: 'Agent Three',
-            hasLeft: true, // This one left
-          },
-          agent4: {
-            id: 'agent4',
-            pType: 'Agent',
-            name: 'Agent Four',
-            hasLeft: false,
-          },
-          customer1: {
-            id: 'customer1',
-            pType: 'Customer',
-            name: 'Customer One',
-            hasLeft: false,
-          },
-          supervisor1: {
-            id: 'supervisor1',
-            pType: 'Supervisor',
-            name: 'Supervisor One',
-            hasLeft: false,
-          },
-          vva1: {
-            id: 'vva1',
-            pType: 'VVA',
-            name: 'VVA One',
-            hasLeft: false,
-          },
-        },
-      }),
-    });
-
-    // Should count only agent1, agent2, and agent4 (agent3 has left, others are excluded types)
-    expect(getConferenceParticipantsCount(task)).toBe(3);
+    expect(getConferenceParticipants(task, 'agent3')).toEqual([]);
+    expect(getConferenceParticipants(task, 'agent1')).toEqual([
+      {id: 'agent2', pType: 'Agent', name: 'Agent Two'},
+      {id: 'dn1', pType: 'DN', name: 'DN'},
+    ]);
   });
 });
 

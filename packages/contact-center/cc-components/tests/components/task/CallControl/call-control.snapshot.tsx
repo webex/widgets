@@ -3,7 +3,16 @@ import '@testing-library/jest-dom';
 import {render, fireEvent, act} from '@testing-library/react';
 import CallControlComponent from '../../../../src/components/task/CallControl/call-control';
 import {CallControlComponentProps, TARGET_TYPE} from '../../../../src/components/task/task.types';
-import {mockTask, mockAgents, mockProfile, mockCC} from '@webex/test-fixtures';
+import {
+  mockTask,
+  mockAgents,
+  mockProfile,
+  mockCC,
+  createEnabledMainTaskUIControls,
+  createMockTaskUIControls,
+  disabledControl,
+  enabledControl,
+} from '@webex/test-fixtures';
 import {BuddyDetails, IWrapupCode} from '@webex/cc-store';
 
 const mockUIDProps = (container) => {
@@ -70,6 +79,8 @@ describe('CallControlComponent Snapshots', () => {
     teamIds: [mockProfile.teams[0]?.teamId || 'team1'],
   })) as BuddyDetails[];
 
+  const mockControls = createEnabledMainTaskUIControls();
+
   const defaultProps: CallControlComponentProps = {
     currentTask: mockCurrentTask,
     wrapupCodes: mockWrapupCodes,
@@ -102,35 +113,9 @@ describe('CallControlComponent Snapshots', () => {
     allowConsultToQueue: mockProfile.allowConsultToQueue,
     lastTargetType: TARGET_TYPE.AGENT,
     setLastTargetType: jest.fn(),
-    controlVisibility: {
-      accept: {isVisible: true, isEnabled: true},
-      decline: {isVisible: true, isEnabled: true},
-      end: {isVisible: true, isEnabled: true},
-      muteUnmute: {isVisible: true, isEnabled: true},
-      muteUnmuteConsult: {isVisible: true, isEnabled: true},
-      holdResume: {isVisible: true, isEnabled: true},
-      consult: {isVisible: true, isEnabled: true},
-      transfer: {isVisible: true, isEnabled: true},
-      conference: {isVisible: true, isEnabled: true},
-      wrapup: {isVisible: false, isEnabled: false},
-      pauseResumeRecording: {isVisible: true, isEnabled: true},
-      endConsult: {isVisible: true, isEnabled: true},
-      recordingIndicator: {isVisible: true, isEnabled: true},
-      exitConference: {isVisible: false, isEnabled: false},
-      mergeConference: {isVisible: false, isEnabled: false},
-      mergeConferenceConsult: {isVisible: false, isEnabled: false},
-      consultTransfer: {isVisible: false, isEnabled: false},
-      consultTransferConsult: {isVisible: false, isEnabled: false},
-      switchToMainCall: {isVisible: false, isEnabled: false},
-      switchToConsult: {isVisible: false, isEnabled: false},
-      isConferenceInProgress: false,
-      isConsultInitiated: false,
-      isConsultInitiatedAndAccepted: false,
-      isConsultInitiatedOrAccepted: false,
-      isConsultReceived: false,
-      isHeld: false,
-      consultCallHeld: false,
-    },
+    isHeld: false,
+    conferenceEnabled: true,
+    controls: mockControls,
     logger: mockLogger,
     secondsUntilAutoWrapup: undefined,
     cancelAutoWrapup: jest.fn(),
@@ -196,7 +181,7 @@ describe('CallControlComponent Snapshots', () => {
     it('should render with wrapup mode', async () => {
       const wrapupProps = {
         ...defaultProps,
-        controlVisibility: {...defaultProps.controlVisibility, wrapup: true},
+        controls: createEnabledMainTaskUIControls({wrapup: enabledControl}),
       };
       let screen;
       await act(async () => {
@@ -223,10 +208,7 @@ describe('CallControlComponent Snapshots', () => {
     it('should render with consultation accepted', async () => {
       const consultAcceptedProps = {
         ...defaultProps,
-        controlVisibility: {
-          ...defaultProps.controlVisibility,
-          isConsultInitiatedOrAccepted: true,
-        },
+        controls: createMockTaskUIControls({main: {endConsult: enabledControl}}),
       };
       let screen;
       await act(async () => {
@@ -241,20 +223,21 @@ describe('CallControlComponent Snapshots', () => {
     it('should render with limited control visibility', async () => {
       const limitedControlsProps = {
         ...defaultProps,
-        controlVisibility: {
-          accept: true,
-          decline: true,
-          end: true,
-          muteUnmute: true,
-          holdResume: false,
-          consult: false,
-          transfer: false,
-          conference: false,
-          wrapup: false,
-          pauseResumeRecording: false,
-          endConsult: true,
-          recordingIndicator: true,
-        },
+        controls: createMockTaskUIControls({
+          main: {
+            accept: enabledControl,
+            decline: enabledControl,
+            end: enabledControl,
+            mute: enabledControl,
+            hold: disabledControl,
+            consult: disabledControl,
+            transfer: disabledControl,
+            conference: disabledControl,
+            wrapup: disabledControl,
+            recording: disabledControl,
+            endConsult: enabledControl,
+          },
+        }),
       };
       let screen;
       await act(async () => {
@@ -352,7 +335,7 @@ describe('CallControlComponent Snapshots', () => {
     it('should render wrapup button in wrapup mode', async () => {
       const wrapupProps = {
         ...defaultProps,
-        controlVisibility: {...defaultProps.controlVisibility, wrapup: {isVisible: true, isEnabled: true}},
+        controls: createEnabledMainTaskUIControls({wrapup: enabledControl}),
       };
       let screen;
       await act(async () => {
@@ -451,7 +434,7 @@ describe('CallControlComponent Snapshots', () => {
       const noWrapupCodesProps = {
         ...defaultProps,
         wrapupCodes: [],
-        controlVisibility: {...defaultProps.controlVisibility, wrapup: true},
+        controls: createEnabledMainTaskUIControls({wrapup: enabledControl}),
       };
       let screen;
       await act(async () => {

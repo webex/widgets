@@ -3,7 +3,7 @@ import {render} from '@testing-library/react';
 import * as helper from '../../src/helper';
 import {CallControlCAD} from '../../src';
 import store from '@webex/cc-store';
-import {mockTask} from '@webex/test-fixtures';
+import {createEnabledMainTaskUIControls, mockTask} from '@webex/test-fixtures';
 import {TARGET_TYPE} from '../../src/task.types';
 import '@testing-library/jest-dom';
 
@@ -12,6 +12,8 @@ const onEndCb = jest.fn();
 const onWrapUpCb = jest.fn();
 const onRecordingToggleCb = jest.fn();
 const onToggleMuteCb = jest.fn();
+
+const mockControls = createEnabledMainTaskUIControls({hold: {isVisible: true, isEnabled: true}});
 
 describe('CallControlCAD Component', () => {
   beforeEach(() => {
@@ -46,35 +48,9 @@ describe('CallControlCAD Component', () => {
       startTimestamp: 0,
       lastTargetType: TARGET_TYPE.AGENT,
       setLastTargetType: jest.fn(),
-      controlVisibility: {
-        accept: {isVisible: false, isEnabled: false},
-        decline: {isVisible: false, isEnabled: false},
-        end: {isVisible: false, isEnabled: false},
-        muteUnmute: {isVisible: false, isEnabled: false},
-        muteUnmuteConsult: {isVisible: false, isEnabled: false},
-        holdResume: {isVisible: true, isEnabled: true},
-        consult: {isVisible: false, isEnabled: false},
-        transfer: {isVisible: false, isEnabled: false},
-        conference: {isVisible: false, isEnabled: false},
-        wrapup: {isVisible: false, isEnabled: false},
-        pauseResumeRecording: {isVisible: false, isEnabled: false},
-        endConsult: {isVisible: false, isEnabled: false},
-        consultTransfer: {isVisible: false, isEnabled: false},
-        mergeConference: {isVisible: false, isEnabled: false},
-        mergeConferenceConsult: {isVisible: false, isEnabled: false},
-        consultTransferConsult: {isVisible: false, isEnabled: false},
-        switchToMainCall: {isVisible: false, isEnabled: false},
-        switchToConsult: {isVisible: false, isEnabled: false},
-        exitConference: {isVisible: false, isEnabled: false},
-        recordingIndicator: {isVisible: false, isEnabled: false},
-        isConferenceInProgress: false,
-        isConsultInitiated: false,
-        isConsultInitiatedAndAccepted: false,
-        isConsultInitiatedOrAccepted: false,
-        isConsultReceived: false,
-        isHeld: false,
-        consultCallHeld: false,
-      },
+      controls: mockControls,
+      isHeld: false,
+      conferenceEnabled: true,
       switchToMainCall: jest.fn(),
       switchToConsult: jest.fn(),
       secondsUntilAutoWrapup: 0,
@@ -115,15 +91,13 @@ describe('CallControlCAD Component', () => {
       onRecordingToggle: onRecordingToggleCb,
       onToggleMute: onToggleMuteCb,
       logger: store.logger,
-      featureFlags: store.featureFlags,
-      deviceType: '',
       isMuted: false,
-      conferenceEnabled: true,
+      conferenceEnabled: undefined,
       agentId: store.agentId,
     });
   });
 
-  it('should use default conferenceEnabled value when not provided', () => {
+  it('should pass undefined conferenceEnabled when not provided', () => {
     const useCallControlSpy = jest.spyOn(helper, 'useCallControl').mockReturnValue({
       currentTask: mockTask,
       endCall: jest.fn(),
@@ -145,35 +119,9 @@ describe('CallControlCAD Component', () => {
       startTimestamp: 0,
       lastTargetType: TARGET_TYPE.AGENT,
       setLastTargetType: jest.fn(),
-      controlVisibility: {
-        accept: {isVisible: false, isEnabled: false},
-        decline: {isVisible: false, isEnabled: false},
-        end: {isVisible: false, isEnabled: false},
-        muteUnmute: {isVisible: false, isEnabled: false},
-        muteUnmuteConsult: {isVisible: false, isEnabled: false},
-        holdResume: {isVisible: true, isEnabled: true},
-        consult: {isVisible: false, isEnabled: false},
-        transfer: {isVisible: false, isEnabled: false},
-        conference: {isVisible: false, isEnabled: false},
-        wrapup: {isVisible: false, isEnabled: false},
-        pauseResumeRecording: {isVisible: false, isEnabled: false},
-        endConsult: {isVisible: false, isEnabled: false},
-        consultTransfer: {isVisible: false, isEnabled: false},
-        mergeConference: {isVisible: false, isEnabled: false},
-        mergeConferenceConsult: {isVisible: false, isEnabled: false},
-        consultTransferConsult: {isVisible: false, isEnabled: false},
-        switchToMainCall: {isVisible: false, isEnabled: false},
-        switchToConsult: {isVisible: false, isEnabled: false},
-        exitConference: {isVisible: false, isEnabled: false},
-        recordingIndicator: {isVisible: false, isEnabled: false},
-        isConferenceInProgress: false,
-        isConsultInitiated: false,
-        isConsultInitiatedAndAccepted: false,
-        isConsultInitiatedOrAccepted: false,
-        isConsultReceived: false,
-        isHeld: false,
-        consultCallHeld: false,
-      },
+      controls: mockControls,
+      isHeld: false,
+      conferenceEnabled: true,
       switchToMainCall: jest.fn(),
       switchToConsult: jest.fn(),
       secondsUntilAutoWrapup: 0,
@@ -195,10 +143,9 @@ describe('CallControlCAD Component', () => {
 
     render(<CallControlCAD onHoldResume={onHoldResumeCb} onEnd={onEndCb} onWrapUp={onWrapUpCb} />);
 
-    // Should default to true when not provided
     expect(useCallControlSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        conferenceEnabled: true,
+        conferenceEnabled: undefined,
       })
     );
   });
@@ -225,35 +172,9 @@ describe('CallControlCAD Component', () => {
       startTimestamp: 0,
       lastTargetType: TARGET_TYPE.AGENT,
       setLastTargetType: jest.fn(),
-      controlVisibility: {
-        accept: {isVisible: false, isEnabled: false},
-        decline: {isVisible: false, isEnabled: false},
-        end: {isVisible: false, isEnabled: false},
-        muteUnmute: {isVisible: false, isEnabled: false},
-        muteUnmuteConsult: {isVisible: false, isEnabled: false},
-        holdResume: {isVisible: true, isEnabled: true},
-        consult: {isVisible: false, isEnabled: false},
-        transfer: {isVisible: false, isEnabled: false},
-        conference: {isVisible: false, isEnabled: false},
-        wrapup: {isVisible: false, isEnabled: false},
-        pauseResumeRecording: {isVisible: false, isEnabled: false},
-        endConsult: {isVisible: false, isEnabled: false},
-        consultTransfer: {isVisible: false, isEnabled: false},
-        mergeConference: {isVisible: false, isEnabled: false},
-        mergeConferenceConsult: {isVisible: false, isEnabled: false},
-        consultTransferConsult: {isVisible: false, isEnabled: false},
-        switchToMainCall: {isVisible: false, isEnabled: false},
-        switchToConsult: {isVisible: false, isEnabled: false},
-        exitConference: {isVisible: false, isEnabled: false},
-        recordingIndicator: {isVisible: false, isEnabled: false},
-        isConferenceInProgress: false,
-        isConsultInitiated: false,
-        isConsultInitiatedAndAccepted: false,
-        isConsultInitiatedOrAccepted: false,
-        isConsultReceived: false,
-        isHeld: false,
-        consultCallHeld: false,
-      },
+      controls: mockControls,
+      isHeld: false,
+      conferenceEnabled: true,
       switchToMainCall: jest.fn(),
       switchToConsult: jest.fn(),
       secondsUntilAutoWrapup: 0,
@@ -307,35 +228,9 @@ describe('CallControlCAD Component', () => {
       startTimestamp: 0,
       lastTargetType: TARGET_TYPE.AGENT,
       setLastTargetType: jest.fn(),
-      controlVisibility: {
-        accept: {isVisible: false, isEnabled: false},
-        decline: {isVisible: false, isEnabled: false},
-        end: {isVisible: false, isEnabled: false},
-        muteUnmute: {isVisible: false, isEnabled: false},
-        muteUnmuteConsult: {isVisible: false, isEnabled: false},
-        holdResume: {isVisible: true, isEnabled: true},
-        consult: {isVisible: false, isEnabled: false},
-        transfer: {isVisible: false, isEnabled: false},
-        conference: {isVisible: false, isEnabled: false},
-        wrapup: {isVisible: false, isEnabled: false},
-        pauseResumeRecording: {isVisible: false, isEnabled: false},
-        endConsult: {isVisible: false, isEnabled: false},
-        consultTransfer: {isVisible: false, isEnabled: false},
-        mergeConference: {isVisible: false, isEnabled: false},
-        mergeConferenceConsult: {isVisible: false, isEnabled: false},
-        consultTransferConsult: {isVisible: false, isEnabled: false},
-        switchToMainCall: {isVisible: false, isEnabled: false},
-        switchToConsult: {isVisible: false, isEnabled: false},
-        exitConference: {isVisible: false, isEnabled: false},
-        recordingIndicator: {isVisible: false, isEnabled: false},
-        isConferenceInProgress: false,
-        isConsultInitiated: false,
-        isConsultInitiatedAndAccepted: false,
-        isConsultInitiatedOrAccepted: false,
-        isConsultReceived: false,
-        isHeld: false,
-        consultCallHeld: false,
-      },
+      controls: mockControls,
+      isHeld: false,
+      conferenceEnabled: true,
       switchToMainCall: jest.fn(),
       switchToConsult: jest.fn(),
       secondsUntilAutoWrapup: 0,

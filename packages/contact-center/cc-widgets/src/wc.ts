@@ -41,6 +41,7 @@ const WebCallControl = r2wc(CallControl, {
     onEnd: 'function',
     onWrapUp: 'function',
     onRecordingToggle: 'function',
+    conferenceEnabled: 'boolean',
   },
 });
 
@@ -50,6 +51,7 @@ const WebCallControlCAD = r2wc(CallControlCAD, {
     onEnd: 'function',
     onWrapUp: 'function',
     onRecordingToggle: 'function',
+    conferenceEnabled: 'boolean',
   },
 });
 

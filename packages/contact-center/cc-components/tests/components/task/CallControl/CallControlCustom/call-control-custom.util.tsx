@@ -1,7 +1,13 @@
 import '@testing-library/jest-dom';
 import {BuddyDetails, ContactServiceQueue} from '@webex/cc-store';
-import {mockAgents, mockQueueDetails} from '@webex/test-fixtures';
-import {ButtonConfig, ControlVisibility} from '../../../../../src/components/task/task.types';
+import {
+  mockAgents,
+  mockQueueDetails,
+  createMockTaskUIControls,
+  disabledControl,
+  enabledControl,
+} from '@webex/test-fixtures';
+import {ButtonConfig} from '../../../../../src/components/task/task.types';
 import {
   createConsultButtons,
   getVisibleButtons,
@@ -45,35 +51,21 @@ describe('Call Control Custom Utils', () => {
     jest.clearAllMocks();
   });
 
-  const mockControlVisibility = {
-    accept: {isVisible: true, isEnabled: true},
-    decline: {isVisible: true, isEnabled: true},
-    end: {isVisible: true, isEnabled: true},
-    muteUnmute: {isVisible: true, isEnabled: true},
-    muteUnmuteConsult: {isVisible: true, isEnabled: true},
-    holdResume: {isVisible: true, isEnabled: true},
-    consult: {isVisible: true, isEnabled: true},
-    transfer: {isVisible: true, isEnabled: true},
-    conference: {isVisible: true, isEnabled: true},
-    wrapup: {isVisible: false, isEnabled: false},
-    pauseResumeRecording: {isVisible: true, isEnabled: true},
-    endConsult: {isVisible: true, isEnabled: true},
-    recordingIndicator: {isVisible: true, isEnabled: true},
-    exitConference: {isVisible: false, isEnabled: false},
-    mergeConference: {isVisible: false, isEnabled: false},
-    mergeConferenceConsult: {isVisible: false, isEnabled: false},
-    consultTransfer: {isVisible: false, isEnabled: false},
-    consultTransferConsult: {isVisible: false, isEnabled: false},
-    switchToMainCall: {isVisible: false, isEnabled: false},
-    switchToConsult: {isVisible: false, isEnabled: false},
-    isConferenceInProgress: false,
-    isConsultInitiated: false,
-    isConsultInitiatedAndAccepted: false,
-    isConsultInitiatedOrAccepted: false,
-    isConsultReceived: false,
-    isHeld: false,
-    consultCallHeld: false,
-  };
+  const mockControls = createMockTaskUIControls({
+    activeLeg: 'consult',
+    main: {
+      endConsult: disabledControl,
+      transferConference: disabledControl,
+    },
+    consult: {
+      mute: enabledControl,
+      switch: enabledControl,
+      transfer: enabledControl,
+      transferConference: disabledControl,
+      mergeToConference: enabledControl,
+      endConsult: enabledControl,
+    },
+  });
 
   describe('createConsultButtons', () => {
     it('should create button configuration array with all buttons visible', () => {
@@ -85,7 +77,7 @@ describe('Call Control Custom Utils', () => {
 
       const buttons = createConsultButtons(
         false, // isMuted
-        mockControlVisibility,
+        mockControls,
         mockTransfer,
         mockMuteToggle,
         mockEndConsult,
@@ -105,7 +97,7 @@ describe('Call Control Custom Utils', () => {
     it('should configure mute button correctly when muted', () => {
       const buttons = createConsultButtons(
         true, // isMuted
-        mockControlVisibility,
+        mockControls,
         jest.fn(),
         jest.fn(),
         jest.fn(),
@@ -123,7 +115,7 @@ describe('Call Control Custom Utils', () => {
     it('should configure mute button correctly when not muted', () => {
       const buttons = createConsultButtons(
         false, // isMuted
-        mockControlVisibility,
+        mockControls,
         jest.fn(),
         jest.fn(),
         jest.fn(),
@@ -139,10 +131,24 @@ describe('Call Control Custom Utils', () => {
     });
 
     it('should disable transfer button when consult not completed', () => {
-      const customVisibility = {...mockControlVisibility, consultTransferConsult: {isVisible: true, isEnabled: false}};
+      const customControls = createMockTaskUIControls({
+        activeLeg: 'consult',
+        main: {
+          endConsult: disabledControl,
+          transferConference: disabledControl,
+        },
+        consult: {
+          mute: enabledControl,
+          switch: enabledControl,
+          transfer: {isVisible: true, isEnabled: false},
+          transferConference: disabledControl,
+          mergeToConference: enabledControl,
+          endConsult: enabledControl,
+        },
+      });
       const buttons = createConsultButtons(
         false, // isMuted
-        customVisibility,
+        customControls,
         jest.fn(),
         jest.fn(),
         jest.fn(),
@@ -156,10 +162,24 @@ describe('Call Control Custom Utils', () => {
     });
 
     it('should hide transfer button when not agent being consulted or no onTransfer', () => {
-      const customVisibility = {...mockControlVisibility, consultTransferConsult: {isVisible: false, isEnabled: false}};
+      const customControls = createMockTaskUIControls({
+        activeLeg: 'consult',
+        main: {
+          endConsult: disabledControl,
+          transferConference: disabledControl,
+        },
+        consult: {
+          mute: enabledControl,
+          switch: enabledControl,
+          transfer: disabledControl,
+          transferConference: disabledControl,
+          mergeToConference: enabledControl,
+          endConsult: enabledControl,
+        },
+      });
       const buttons = createConsultButtons(
         false, // isMuted
-        customVisibility,
+        customControls,
         jest.fn(),
         jest.fn(),
         jest.fn(),
@@ -172,11 +192,25 @@ describe('Call Control Custom Utils', () => {
       expect(transferButton?.isVisible).toBe(false);
     });
 
-    it('should hide mute button when muteUnmuteConsult is false', () => {
-      const customVisibility = {...mockControlVisibility, muteUnmuteConsult: {isVisible: false, isEnabled: false}};
+    it('should hide mute button when consult mute is false', () => {
+      const customControls = createMockTaskUIControls({
+        activeLeg: 'consult',
+        main: {
+          endConsult: disabledControl,
+          transferConference: disabledControl,
+        },
+        consult: {
+          mute: disabledControl,
+          switch: enabledControl,
+          transfer: enabledControl,
+          transferConference: disabledControl,
+          mergeToConference: enabledControl,
+          endConsult: enabledControl,
+        },
+      });
       const buttons = createConsultButtons(
         false, // isMuted
-        customVisibility,
+        customControls,
         jest.fn(),
         jest.fn(),
         jest.fn(),
@@ -187,6 +221,106 @@ describe('Call Control Custom Utils', () => {
 
       const muteButton = buttons.find((b) => b.key === 'mute');
       expect(muteButton?.isVisible).toBe(false);
+    });
+
+    it('should show Transfer Conference button from transferConference controls', () => {
+      const conferenceTransferControls = createMockTaskUIControls({
+        activeLeg: 'consult',
+        main: {
+          endConsult: disabledControl,
+          transferConference: disabledControl,
+        },
+        consult: {
+          mute: enabledControl,
+          switch: enabledControl,
+          transfer: disabledControl,
+          transferConference: enabledControl,
+          mergeToConference: enabledControl,
+          endConsult: enabledControl,
+        },
+      });
+
+      const buttons = createConsultButtons(
+        false,
+        conferenceTransferControls,
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        loggerMock
+      );
+
+      const transferButton = buttons.find((b) => b.key === 'transfer');
+      expect(transferButton?.isVisible).toBe(true);
+      expect(transferButton?.disabled).toBe(false);
+      expect(transferButton?.tooltip).toBe('Transfer Conference');
+      expect(transferButton?.icon).toBe('next-bold');
+    });
+
+    it('should disable consult mute when active leg is main', () => {
+      const nestedControls = {
+        activeLeg: 'main',
+        main: {
+          endConsult: {isVisible: true, isEnabled: true},
+        },
+        consult: {
+          mute: {isVisible: true, isEnabled: true},
+          switch: {isVisible: true, isEnabled: true},
+          transfer: {isVisible: true, isEnabled: true},
+          mergeToConference: {isVisible: true, isEnabled: true},
+          endConsult: {isVisible: true, isEnabled: true},
+        },
+      };
+
+      const buttons = createConsultButtons(
+        false,
+        nestedControls as never,
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        loggerMock
+      );
+
+      const muteButton = buttons.find((b) => b.key === 'mute');
+      expect(muteButton?.isVisible).toBe(true);
+      expect(muteButton?.disabled).toBe(true);
+    });
+
+    it('should disable transfer conference when active leg is main', () => {
+      const nestedControls = {
+        activeLeg: 'main',
+        main: {
+          endConsult: {isVisible: true, isEnabled: true},
+          transferConference: {isVisible: true, isEnabled: true},
+        },
+        consult: {
+          mute: {isVisible: true, isEnabled: true},
+          switch: {isVisible: true, isEnabled: true},
+          transfer: {isVisible: false, isEnabled: false},
+          transferConference: {isVisible: false, isEnabled: false},
+          mergeToConference: {isVisible: true, isEnabled: false},
+          endConsult: {isVisible: true, isEnabled: true},
+        },
+      };
+
+      const buttons = createConsultButtons(
+        false,
+        nestedControls as never,
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        loggerMock
+      );
+
+      const transferButton = buttons.find((b) => b.key === 'transfer');
+      expect(transferButton?.isVisible).toBe(true);
+      expect(transferButton?.tooltip).toBe('Transfer Conference');
+      expect(transferButton?.disabled).toBe(true);
     });
   });
 
@@ -923,7 +1057,7 @@ describe('Call Control Custom Utils', () => {
   describe('Error Handling in utility functions', () => {
     it('should handle errors in createConsultButtons', () => {
       // Create a mock that throws when accessed
-      const badControlVisibility = new Proxy(
+      const badControls = new Proxy(
         {},
         {
           get() {
@@ -934,7 +1068,7 @@ describe('Call Control Custom Utils', () => {
 
       const buttons = createConsultButtons(
         false,
-        badControlVisibility as unknown as ControlVisibility,
+        badControls as never,
         jest.fn(),
         jest.fn(),
         jest.fn(),

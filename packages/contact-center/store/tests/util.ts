@@ -6,7 +6,6 @@ describe('getFeatureFlags', () => {
     const featureFlags = {
       isAdhocDialingEnabled: true,
       isCampaignManagementEnabled: true,
-      isEndCallEnabled: true,
       agentPersonalStatsEnabled: true,
       webRtcEnabled: true,
       allowConsultToQueue: true,

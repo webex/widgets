@@ -1,288 +1,262 @@
-# React Patterns
+<!-- ───────────────────────────────
+  Template:     Pattern
+  Template-ID:  pattern
+  Generates:    ai-docs/patterns/react-patterns.md
+  Description:  React conventions from real code — Widget→Hook→Component layering, ErrorBoundary, helper.ts hooks, effect cleanup.
+  Library ver:  0.1.0-draft
+  Last updated: 2026-07-01
+─────────────────────────────── -->
 
-> Quick reference for LLMs working with React in this repository.
+# Pattern: React component structure
 
----
+> Start here → repo root [`AGENTS.md`](../../AGENTS.md) (agent entry) · router [`SPEC_INDEX.md`](../SPEC_INDEX.md). This is an `ai-docs/patterns/` file; the folder [README](./README.md) explains the per-pattern shape and routing.
+> Context-efficiency: link to canonical docs — don't duplicate them. The one-directional layering is fixed by ADR [`0001`](../adr/0001-one-directional-dependency-flow.md).
 
-## Rules
-
-- **Component style**
-  - **MUST** use functional components with hooks
-  - **MUST NOT** use class components
-
-- **Three-layer architecture (Widget → Hook → Component)**
-  - **MUST** follow the pattern: **Widget → Hook → Presentational Component**
-  - **MUST** encapsulate business logic and SDK calls inside custom hooks (`helper.ts`)
-  - **MUST** keep presentational components in the `cc-components` package
-  - **MUST NOT** access store directly in presentational components
-  - **MUST NOT** call SDK methods directly from widgets or presentational components (only from hooks)
-
-- **MobX + Error handling**
-  - **MUST** wrap every widget with `ErrorBoundary` from `react-error-boundary`
-  - **MUST** use `observer` from `mobx-react-lite` for widgets that access the store
+Language/layer group: **React**. Functional components with hooks only — no class components.
+Each section below is one pattern in the standard shape.
 
 ---
 
-## Three-Layer Architecture
+## Three-layer architecture: Widget → Hook → Presentational Component
 
-```
-┌─────────────────────────────────────┐
-│  Widget (observer)                  │  ← MobX observer, ErrorBoundary wrapper
-│  packages/*/src/{widget}/index.tsx  │
-├─────────────────────────────────────┤
-│  Custom Hook                        │  ← Business logic, SDK calls, events
-│  packages/*/src/helper.ts           │
-├─────────────────────────────────────┤
-│  Presentational Component           │  ← Pure UI, props only
-│  packages/cc-components/src/...     │
-└─────────────────────────────────────┘
-```
+**When to use:** Every user-facing feature. The widget (in a feature package) reads the store and wires
+an `ErrorBoundary`; a `helper.ts` hook holds business logic and SDK calls; the presentational component
+(in `cc-components`) is pure UI driven by props.
 
----
-## Widget Pattern
-
+**Correct**
 ```typescript
-// index.tsx
-import { observer } from 'mobx-react-lite';
-import { ErrorBoundary } from 'react-error-boundary';
-import store from '@webex/cc-store';
-import { UserStateComponent } from '@webex/cc-components';
-import { useUserState } from '../helper';
-import { IUserStateProps } from './user-state.types';
-
-const UserStateInternal: React.FC<IUserStateProps> = observer((props) => {
-  const { onStateChange } = props;
-  
-  // Get data from store
-  const { cc, idleCodes, currentState, agentId } = store;
-
-  // Use custom hook for logic
-  const { selectedState, isLoading, handleSetState } = useUserState({
-    cc,
+// from packages/contact-center/user-state/src/user-state/index.tsx
+const UserStateInternal: React.FunctionComponent<IUserStateProps> = observer(({onStateChange}) => {
+  const {cc, idleCodes, agentId, currentState /* ...from store */} = store;
+  const props: UserStateComponentsProps = {
+    ...useUserState({cc, idleCodes, agentId, currentState, onStateChange /* ... */}),
     idleCodes,
     currentState,
-    onStateChange,
-  });
-
-  // Render presentational component
-  return (
-    <UserStateComponent
-      idleCodes={idleCodes}
-      currentState={currentState}
-      selectedState={selectedState}
-      isLoading={isLoading}
-      onStateSelect={handleSetState}
-    />
-  );
+  };
+  return <UserStateComponent {...props} />;
 });
-
-const UserState: React.FC<IUserStateProps> = (props) => (
-  <ErrorBoundary
-    fallbackRender={() => <></>}
-    onError={(error) => store.onErrorCallback?.('UserState', error)}
-  >
-    <UserStateInternal {...props} />
-  </ErrorBoundary>
-);
-
-export { UserState };
 ```
+The three real layers for this feature:
+- Widget: `packages/contact-center/user-state/src/user-state/index.tsx`
+- Hook: `packages/contact-center/user-state/src/helper.ts` (`useUserState`)
+- Component: `packages/contact-center/cc-components/src/components/UserState/user-state.tsx` (`UserStateComponent`)
+
+**Incorrect**
+```typescript
+// a presentational component in cc-components reaching into the store
+import store from '@webex/cc-store';
+export const UserStateComponent = () => {
+  const {idleCodes} = store; // component must not read the store or call the SDK
+};
+```
+**Why wrong:** It reverses the dependency arrow (`cc-components` must not import the store/SDK) and makes
+the component untestable in isolation — it can no longer be driven purely by props. See ADR-0001.
+
+**Where it appears**
+- `user-state`: `.../user-state/src/user-state/index.tsx` → `.../user-state/src/helper.ts` → `.../cc-components/src/components/UserState/user-state.tsx`
+- `station-login`: `.../station-login/src/station-login/index.tsx` → `.../station-login/src/helper.ts` → `.../cc-components/src/components/StationLogin/station-login.tsx`
+- `task` (CallControl): `.../task/src/CallControl/index.tsx` → `.../task/src/helper.ts` → `.../cc-components/src/components/task/CallControl/call-control.tsx`
+
+**Edge cases / exceptions**
+- The `task` package has several widgets sharing one `helper.ts` (see the hooks pattern below).
+- Small presentational sub-components may compose without their own hook, but data still arrives via props.
 
 ---
 
-## Error Boundary Pattern
+## Wrap every widget with `ErrorBoundary`
 
-**ALWAYS wrap widgets with this pattern:**
+**When to use:** Every exported widget. An inner `observer` component does the work; an outer wrapper
+catches render errors and reports them through `store.onErrorCallback`.
 
+**Correct**
 ```typescript
-import { ErrorBoundary } from 'react-error-boundary';
-import { observer } from 'mobx-react-lite';
-import store from '@webex/cc-store';
-
-// Internal observer component
-const UserStateInternal: React.FC<IUserStateProps> = observer((props) => {
-  // Widget logic here
-  return <UserStateComponent {...componentProps} />;
-});
-
-// External wrapper with ErrorBoundary
-const UserState: React.FC<IUserStateProps> = (props) => {
+// from packages/contact-center/task/src/CallControl/index.tsx
+const CallControl: React.FunctionComponent<CallControlProps> = (props) => {
   return (
     <ErrorBoundary
       fallbackRender={() => <></>}
       onError={(error: Error) => {
-        if (store.onErrorCallback) {
-          store.onErrorCallback('UserState', error);
-        }
+        if (store.onErrorCallback) store.onErrorCallback('CallControl', error);
       }}
     >
-      <UserStateInternal {...props} />
+      <CallControlInternal {...props} conferenceEnabled={props.conferenceEnabled ?? true} />
     </ErrorBoundary>
   );
 };
-
-export { UserState };
 ```
+
+**Incorrect**
+```typescript
+// exporting the observer component directly, with no boundary
+export {CallControlInternal as CallControl};
+```
+**Why wrong:** A render error in one widget would otherwise bubble up and blank out the whole host page.
+The boundary contains the failure to that widget and forwards it to the host via `onErrorCallback`.
+
+**Where it appears**
+- `packages/contact-center/user-state/src/user-state/index.tsx` , `packages/contact-center/station-login/src/station-login/index.tsx` , `packages/contact-center/task/src/CallControl/index.tsx` (also `IncomingTask`, `OutdialCall`, `CallControlCAD`)
+
+**Edge cases / exceptions**
+- `fallbackRender={() => <></>}` renders nothing on failure by design (widgets are embedded in a host app that owns the surrounding UI).
+- The first `onError` argument is the widget name string — keep it matching the widget so host telemetry attributes errors correctly.
 
 ---
 
-## Custom Hook Pattern
+## Encapsulate logic in a `helper.ts` hook
 
-**ALWAYS encapsulate business logic in hooks:**
+**When to use:** Any SDK call, event subscription, timer, or local UI state a widget needs. It goes in a
+`use*` hook exported from the feature's `helper.ts`, not inline in the widget.
 
+**Correct**
 ```typescript
-// helper.ts
-export const useUserState = (props: UseUserStateProps) => {
-  const { cc, idleCodes, currentState, onStateChange } = props;
-  
-  const [selectedState, setSelectedState] = useState<IdleCode | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-
-  // Event listener setup
-  useEffect(() => {
-    const handleStateChange = (data: StateChangeEvent) => {
-      setSelectedState(data.state);
-      onStateChange?.(data.state);
-    };
-
-    cc.on(CC_EVENTS.AGENT_STATE_CHANGED, handleStateChange);
-    
-    return () => {
-      cc.off(CC_EVENTS.AGENT_STATE_CHANGED, handleStateChange);
-    };
-  }, [cc, onStateChange]);
-
-  // Action handler
-  const handleSetState = useCallback(async (state: IdleCode) => {
-    setIsLoading(true);
-    try {
-      await cc.setAgentState(state);
-    } catch (error) {
-      console.error('Failed to set state:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [cc]);
-
-  return {
-    selectedState,
-    isLoading,
-    handleSetState,
-  };
-};
+// from packages/contact-center/task/src/helper.ts
+const loadBuddyAgents = useCallback(async () => {
+  try {
+    setLoadingBuddyAgents(true);
+    const agents = await store.getBuddyAgents();
+    setBuddyAgents(agents);
+  } catch (error) {
+    logger?.error(`CC-Widgets: Task: Error loading buddy agents - ${error.message || error}`, {
+      module: 'useCallControl',
+      method: 'loadBuddyAgents',
+    });
+    setBuddyAgents([]);
+  } finally {
+    setLoadingBuddyAgents(false);
+  }
+}, [logger]);
 ```
+Real hooks: `useUserState` (`user-state/src/helper.ts`), `useStationLogin` (`station-login/src/helper.ts`),
+and `useTaskList` / `useIncomingTask` / `useCallControl` / `useOutdialCall` / `useRealTimeTranscript`
+(all in `task/src/helper.ts`).
+
+**Incorrect**
+```typescript
+// SDK call inline in the widget instead of a hook
+const CallControlInternal = observer((props) => {
+  const onHold = () => store.cc.hold(); // logic leaks into the widget
+});
+```
+**Why wrong:** Inline logic can't be unit-tested with `renderHook`, gets duplicated across widgets, and
+mixes rendering with side effects. Hooks keep the widget thin and the logic reusable/testable.
+
+**Where it appears**
+- `packages/contact-center/user-state/src/helper.ts` , `packages/contact-center/station-login/src/helper.ts` , `packages/contact-center/task/src/helper.ts` (also `packages/contact-center/cc-digital-channels/src/helper.ts`)
+
+**Edge cases / exceptions**
+- One `helper.ts` may export several hooks when a package hosts several widgets (the `task` package does).
+- A few narrowly-reusable hooks live outside `helper.ts` — e.g. `task/src/Utils/useHoldTimer.ts`, `cc-components/src/hooks/useIntersectionObserver.ts` — when they're shared UI utilities rather than a widget's business logic.
 
 ---
 
+## Pure presentational components in `cc-components`
 
-## Presentational Component Pattern
+**When to use:** All shared UI. Components take data and callbacks via props, render, and never touch the
+store or SDK.
 
+**Correct**
 ```typescript
-// cc-components/src/components/UserState/UserState.tsx
-import React from 'react';
-import { IUserStateComponentProps } from './user-state.types';
-
-export const UserStateComponent: React.FC<IUserStateComponentProps> = ({
-  idleCodes,
-  currentState,
-  selectedState,
-  isLoading,
-  onStateSelect,
-}) => {
+// from packages/contact-center/cc-components/src/components/UserState/user-state.tsx
+const UserStateComponent: React.FunctionComponent<UserStateComponentsProps> = (props) => {
+  const {idleCodes, setAgentStatus, isSettingAgentStatus, currentState, customState, logger} = props;
+  const items = buildDropdownItems(customState, idleCodes, currentState, logger);
   return (
-    <div className="user-state">
-      {idleCodes.map((code) => (
-        <button
-          key={code.id}
-          onClick={() => onStateSelect(code)}
-          disabled={isLoading}
-          className={currentState === code.id ? 'active' : ''}
-        >
-          {code.name}
-        </button>
-      ))}
+    <div className="user-state-container" data-testid="user-state-container">
+      {/* renders from props only */}
     </div>
   );
 };
 ```
 
+**Incorrect**
+```typescript
+import store from '@webex/cc-store'; // component pulling state itself
+```
+**Why wrong:** Same as the layering rule — importing the store into `cc-components` reverses the
+dependency arrow and destroys prop-driven testability.
+
+**Where it appears**
+- `packages/contact-center/cc-components/src/components/UserState/user-state.tsx` , `packages/contact-center/cc-components/src/components/StationLogin/station-login.tsx` , `packages/contact-center/cc-components/src/components/task/CallControl/call-control.tsx` (also `task/IncomingTask`, `task/TaskList`)
+
+**Edge cases / exceptions**
+- Components may hold local view-only state (open/closed, hover) and use UI utility hooks; they just never own domain state or call the SDK.
+
 ---
 
-## useEffect Cleanup Pattern
+## Clean up event/callback subscriptions in `useEffect`
 
-**ALWAYS clean up event listeners and subscriptions:**
+**When to use:** Any effect that registers a task/SDK callback or subscribes to an event. Always return a
+cleanup that unregisters the exact same handler.
 
+**Correct**
+```typescript
+// from packages/contact-center/task/src/helper.ts
+useEffect(() => {
+  if (!currentTask?.data?.interactionId) return;
+  const interactionId = currentTask.data.interactionId;
+
+  store.setTaskCallback(TASK_EVENTS.TASK_HOLD, holdCallback, interactionId);
+  store.setTaskCallback(TASK_EVENTS.TASK_RESUME, resumeCallback, interactionId);
+  store.setTaskCallback(TASK_EVENTS.TASK_END, endCallCallback, interactionId);
+
+  return () => {
+    store.removeTaskCallback(TASK_EVENTS.TASK_HOLD, holdCallback, interactionId);
+    store.removeTaskCallback(TASK_EVENTS.TASK_RESUME, resumeCallback, interactionId);
+    store.removeTaskCallback(TASK_EVENTS.TASK_END, endCallCallback, interactionId);
+  };
+}, [currentTask]);
+```
+Note the repo registers task-scoped listeners through the store's `setTaskCallback` /
+`removeTaskCallback` helpers (not raw `cc.on` / `cc.off` in the widget).
+
+**Incorrect**
 ```typescript
 useEffect(() => {
-  const handler = (data: EventData) => {
-    // Handle event
-  };
-
-  cc.on(CC_EVENTS.SOME_EVENT, handler);
-  
-  // Cleanup function
-  return () => {
-    cc.off(CC_EVENTS.SOME_EVENT, handler);
-  };
-}, [cc]);
+  store.setTaskCallback(TASK_EVENTS.TASK_HOLD, holdCallback, interactionId);
+  // no return — handler never removed
+}, [currentTask]);
 ```
+**Why wrong:** Without cleanup, handlers accumulate across re-renders/task changes, firing multiple times
+and holding references to stale task state (a memory + double-fire leak).
+
+**Where it appears**
+- `packages/contact-center/task/src/helper.ts` (task callbacks) , `packages/contact-center/user-state/src/helper.ts` (worker lifecycle) , `packages/contact-center/cc-digital-channels/src/helper.ts`
+
+**Edge cases / exceptions**
+- The cleanup must reference the **same function identity** passed on registration (define handlers in the hook body or memoize them), or removal is a no-op.
 
 ---
 
-## useCallback Pattern
+## Memoize callbacks with `useCallback`
 
-**ALWAYS use useCallback for handlers passed to child components:**
+**When to use:** A handler defined in a hook that is (a) a dependency of another effect/hook or (b)
+passed to a memoized child. Keeps identity stable across renders.
 
+**Correct**
 ```typescript
-const handleClick = useCallback((id: string) => {
-  // Handle click
-}, [dependency1, dependency2]);
+// from packages/contact-center/task/src/helper.ts
+const getEntryPoints = useCallback(async () => {
+  // ...fetch and set state...
+}, [logger]);
 ```
 
----
-
-## Conditional Rendering Pattern
-
+**Incorrect**
 ```typescript
-// Loading state
-if (isLoading) {
-  return <Spinner />;
-}
-
-// Error state
-if (error) {
-  return <ErrorMessage error={error} />;
-}
-
-// Empty state
-if (!data || data.length === 0) {
-  return <EmptyState message="No items found" />;
-}
-
-// Normal render
-return <DataList items={data} />;
+const getEntryPoints = async () => { /* ... */ }; // new identity every render
+useEffect(() => { getEntryPoints(); }, [getEntryPoints]); // effect re-runs every render
 ```
+**Why wrong:** A fresh function each render changes the effect's dependency identity, re-running the
+effect on every render — an infinite-ish fetch loop.
 
----
+**Where it appears**
+- `packages/contact-center/task/src/helper.ts` (`loadBuddyAgents`, `getAddressBookEntries`, `getEntryPoints`, `getQueuesFetcher`, `extractConsultingAgent`).
 
-## Props Destructuring Pattern
-
-```typescript
-const Component: React.FC<IComponentProps> = ({
-  prop1,
-  prop2,
-  optionalProp = 'default',
-  onCallback,
-}) => {
-  // Component logic
-};
-```
+**Edge cases / exceptions**
+- Skip `useCallback` for handlers used only inline in JSX with no memoized child and no effect dependency — the memo overhead buys nothing there.
 
 ---
 
 ## Related
 
-- [TypeScript Patterns](./typescript-patterns.md)
-- [MobX Patterns](./mobx-patterns.md)
-- [Web Component Patterns](./web-component-patterns.md)
-- [Testing Patterns](./testing-patterns.md)
+- [MobX Patterns](./mobx-patterns.md) · [TypeScript Patterns](./typescript-patterns.md) · [Testing Patterns](./testing-patterns.md)
+- ADR: [One-directional dependency flow](../adr/0001-one-directional-dependency-flow.md)

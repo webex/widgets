@@ -56,7 +56,6 @@ describe('TaskList Component', () => {
     // Verify that `useTaskList` is called with the correct arguments.
     expect(helperSpy).toHaveBeenCalledWith({
       cc: store.cc,
-      deviceType: 'BROWSER',
       logger: store.logger,
       onTaskAccepted: expect.any(Function),
       onTaskDeclined: expect.any(Function),

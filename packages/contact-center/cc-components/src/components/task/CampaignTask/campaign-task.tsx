@@ -38,7 +38,6 @@ const CampaignTask: React.FC<CampaignTaskProps> = ({
   const timeoutTimestamp = campaignCpd.campaignPreviewOfferTimeout;
   const autoAction = (campaignCpd.campaignPreviewAutoAction ?? '') as CampaignAutoAction | '';
 
-  // @ts-expect-error callAssociatedDetails not yet typed in SDK
   const callAssociatedDetails = task.data.interaction.callAssociatedDetails;
   const ani = callAssociatedDetails?.ani ?? '';
   const dn = callAssociatedDetails?.dn ?? '';
@@ -287,6 +286,12 @@ const CampaignTask: React.FC<CampaignTaskProps> = ({
   }, []);
 
   const campaignTaskTriggerId = `campaign-task-trigger-${interactionId}`;
+  const [taskListFallbackTimestamp] = useState<number>(() => Date.now());
+  const taskListHandleTimestamp =
+    handleTimestamp ??
+    getAgentJoinTimestamp(task, agentId) ??
+    task.data.interaction.createdTimestamp ??
+    taskListFallbackTimestamp;
 
   return (
     <section
@@ -325,7 +330,8 @@ const CampaignTask: React.FC<CampaignTaskProps> = ({
         onSkip={handleSkip}
         onRemove={handleRemove}
         onTimeout={handleTimeout}
-        handleTimestamp={handleTimestamp}
+        handleTimestamp={taskListHandleTimestamp}
+        timerDisplayMode="handle-time"
         logger={logger}
         className="campaign-task-list-item"
       />

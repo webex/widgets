@@ -1,0 +1,139 @@
+{
+  "$comment": "Machine source of truth for SDD coverage state. Human mirror: ai-docs/SPEC_INDEX.md. Generated during migration to SDLC-Templates component-repo standard 0.1.0-draft on 2026-06-29.",
+  "schemaVersion": "0.1.0-draft",
+  "templateLibraryVersion": "0.1.0-draft",
+  "repo": {
+    "name": "webex-widgets",
+    "displayName": "Webex Contact Center Widgets",
+    "type": "monorepo",
+    "packageManager": "yarn@4.5.1",
+    "workspaces": ["packages/**/*", "packages/contact-center/*", "widgets-samples/**/**"],
+    "standingDocsRoot": "ai-docs/",
+    "agentEntry": "AGENTS.md"
+  },
+  "commands": {
+    "install": "yarn install",
+    "build": "yarn build:dev",
+    "test": "yarn test:cc-widgets",
+    "testPackage": "yarn workspace @webex/{pkg} test:unit",
+    "lint": "yarn test:styles",
+    "e2e": "yarn test:e2e"
+  },
+  "coveragePolicy": ".sdd/coverage-policy.defaults.yaml",
+  "coverageStates": {
+    "AUTHORITATIVE": "Spec is validated and trusted; code cross-check not required for routine work.",
+    "PARTIAL": "Spec exists and is code-grounded but not fully validated; cross-check code for high-risk changes.",
+    "DRAFT": "Spec freshly generated during migration; cross-check code before relying on any claim.",
+    "NONE": "No module spec yet."
+  },
+  "modules": [
+    {
+      "id": "store",
+      "package": "@webex/cc-store",
+      "path": "packages/contact-center/store",
+      "spec": "packages/contact-center/store/ai-docs/store-spec.md",
+      "responsibility": "MobX singleton holding global CC state; proxies SDK events; sole SDK access point.",
+      "coverageState": "DRAFT",
+      "tier": 1
+    },
+    {
+      "id": "cc-components",
+      "package": "@webex/cc-components",
+      "path": "packages/contact-center/cc-components",
+      "spec": "packages/contact-center/cc-components/ai-docs/cc-components-spec.md",
+      "responsibility": "Shared presentational React UI primitives consumed by widget packages.",
+      "coverageState": "DRAFT",
+      "tier": 1
+    },
+    {
+      "id": "cc-widgets",
+      "package": "@webex/cc-widgets",
+      "path": "packages/contact-center/cc-widgets",
+      "spec": "packages/contact-center/cc-widgets/ai-docs/cc-widgets-spec.md",
+      "responsibility": "r2wc Web Component wrappers aggregating widget packages for framework-agnostic consumption.",
+      "coverageState": "DRAFT",
+      "tier": 1
+    },
+    {
+      "id": "cc-digital-channels",
+      "package": "@webex/cc-digital-channels",
+      "path": "packages/contact-center/cc-digital-channels",
+      "spec": "packages/contact-center/cc-digital-channels/ai-docs/cc-digital-channels-spec.md",
+      "responsibility": "Digital channels (chat/email/social) widget; embeds the digital-interactions experience via the store.",
+      "coverageState": "DRAFT",
+      "tier": 1
+    },
+    {
+      "id": "station-login",
+      "package": "@webex/cc-station-login",
+      "path": "packages/contact-center/station-login",
+      "spec": "packages/contact-center/station-login/ai-docs/station-login-spec.md",
+      "responsibility": "Agent login widget: team and device selection.",
+      "coverageState": "DRAFT",
+      "tier": 1
+    },
+    {
+      "id": "user-state",
+      "package": "@webex/cc-user-state",
+      "path": "packages/contact-center/user-state",
+      "spec": "packages/contact-center/user-state/ai-docs/user-state-spec.md",
+      "responsibility": "Agent state widget: state selection, idle codes, elapsed timer.",
+      "coverageState": "DRAFT",
+      "tier": 1
+    },
+    {
+      "id": "task",
+      "package": "@webex/cc-task",
+      "path": "packages/contact-center/task",
+      "spec": "packages/contact-center/task/ai-docs/task-spec.md",
+      "responsibility": "Task widget bundle: CallControl, CallControlCAD, IncomingTask, OutdialCall, TaskList.",
+      "coverageState": "DRAFT",
+      "tier": 1,
+      "subWidgets": ["CallControl", "CallControlCAD", "IncomingTask", "OutdialCall", "TaskList"]
+    },
+    {
+      "id": "ui-logging",
+      "package": "@webex/cc-ui-logging",
+      "path": "packages/contact-center/ui-logging",
+      "spec": "packages/contact-center/ui-logging/ai-docs/ui-logging-spec.md",
+      "responsibility": "Metrics/telemetry: withMetrics HOC and metricsLogger.",
+      "coverageState": "DRAFT",
+      "tier": 2
+    },
+    {
+      "id": "test-fixtures",
+      "package": "@webex/test-fixtures",
+      "path": "packages/contact-center/test-fixtures",
+      "spec": "packages/contact-center/test-fixtures/ai-docs/test-fixtures-spec.md",
+      "responsibility": "Shared test mocks and helpers across CC packages.",
+      "coverageState": "DRAFT",
+      "tier": 2
+    },
+    {
+      "id": "meetings-widgets",
+      "package": "@webex/widgets",
+      "path": "packages/@webex/widgets",
+      "spec": "packages/@webex/widgets/ai-docs/widgets-spec.md",
+      "responsibility": "Legacy meetings widgets (non-CC); separate widget family in the monorepo.",
+      "coverageState": "DRAFT",
+      "tier": 2
+    }
+  ],
+  "contracts": {
+    "index": "ai-docs/CONTRACTS.md",
+    "sdkApiReference": "node_modules/@webex/contact-center/dist/types/index.d.ts"
+  },
+  "standingDocs": {
+    "AGENTS.md": "AGENTS.md",
+    "ARCHITECTURE.md": "ai-docs/ARCHITECTURE.md",
+    "SPEC_INDEX.md": "ai-docs/SPEC_INDEX.md",
+    "RULES.md": "ai-docs/RULES.md",
+    "GLOSSARY.md": "ai-docs/GLOSSARY.md",
+    "SECURITY.md": "ai-docs/SECURITY.md",
+    "CONTRACTS.md": "ai-docs/CONTRACTS.md",
+    "SERVICE_STATE.md": "ai-docs/SERVICE_STATE.md",
+    "GETTING_STARTED.md": "ai-docs/GETTING_STARTED.md",
+    "REVIEW_CHECKLIST.md": "ai-docs/REVIEW_CHECKLIST.md",
+    "DATA_MODEL.md": "N/A — repo owns no persistent datastore; all domain data is fetched from the @webex/contact-center SDK at runtime."
+  }
+}
