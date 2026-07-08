@@ -116,7 +116,7 @@ Before running any tests, verify implementation matches approved diagrams:
 
 **For each SDK method in sequence diagrams:**
 
-- [ ] Method exists in [contact-centre-sdk-apis/contact-center.json](../../contact-centre-sdk-apis/contact-center.json)
+- [ ] Method exists in `@webex/contact-center` types (`node_modules/@webex/contact-center/dist/types/index.d.ts`)
 - [ ] **Exact path matches sequence diagram** (e.g., `store.cc.someService.someMethod`)
 - [ ] **Parameters match diagram specification** (type, order, values)
 - [ ] **Return type matches SDK documentation AND diagram**

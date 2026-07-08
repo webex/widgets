@@ -80,7 +80,7 @@ From 01-pre-questions.md, load:
 
 1. **Find exact API path in SDK knowledge base:**
    ```typescript
-   // Open: ai-docs/contact-centre-sdk-apis/contact-center.json
+   // Open: node_modules/@webex/contact-center/dist/types/index.d.ts
    // Search for method name
    // Verify path exists and is correct
    ```

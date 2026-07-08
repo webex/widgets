@@ -174,20 +174,27 @@ Widget (Observer) → Custom Hook (Business Logic) → Component (UI) → Store 
 
 ## Documentation Structure
 
-**Repository Patterns:**
-- `ai-docs/patterns/` - TypeScript, MobX, React, Web Components, Testing patterns
-- `ai-docs/templates/` - Task templates (new widget, bug fix, feature enhancement, documentation, Playwright)
+This repository follows the SDLC-Templates `component-repo` standard (library version `0.1.0-draft`).
+The doc spine is:
 
-**Component Documentation:**
-- `packages/*/ai-docs/README.md` - API and usage
-- `packages/*/ai-docs/OVERVIEW.md` - Architecture and design
-- `packages/*/ai-docs/EXAMPLES.md` - Code examples
-- `packages/*/ai-docs/RULES.md` - Component conventions
-- `packages/*/ai-docs/diagrams/` - Visual flows
+**Standing docs (repo-level, under `ai-docs/`):**
+- [`../AGENTS.md`](../AGENTS.md) — agent entry contract (read first)
+- [`SPEC_INDEX.md`](./SPEC_INDEX.md) — router: which doc to load per task + module registry
+- [`ARCHITECTURE.md`](./ARCHITECTURE.md) — system components, interactions, package map
+- [`RULES.md`](./RULES.md), [`GLOSSARY.md`](./GLOSSARY.md), [`SECURITY.md`](./SECURITY.md), [`CONTRACTS.md`](./CONTRACTS.md), [`GETTING_STARTED.md`](./GETTING_STARTED.md), [`REVIEW_CHECKLIST.md`](./REVIEW_CHECKLIST.md), [`SERVICE_STATE.md`](./SERVICE_STATE.md)
+- `patterns/`, `rules/`, `adr/` — reference conventions, rules, and decisions
+- `templates/` — code-generation task templates (new widget, bug fix, feature, Playwright)
+
+**Per-module specs (source-local):**
+- `packages/<area>/<module>/ai-docs/<module>-spec.md` — canonical module spec (orientation, requirements, design, flows, tests). See `SPEC_INDEX.md` for the registry.
+
+**Machine source of truth:** `.sdd/manifest.json` (coverage state per module) and `.sdd/coverage-policy.defaults.yaml`.
+
+Docs predating this standard are preserved under `_archive/pre-sdlc-migration/`.
 
 ## For AI Assistants
 
-See [AGENTS.md](./AGENTS.md) for AI navigation guidance, task-based workflows, and best practices.
+See [`../AGENTS.md`](../AGENTS.md) for the agent entry contract, then [`SPEC_INDEX.md`](./SPEC_INDEX.md) for routing.
 
 ---
 

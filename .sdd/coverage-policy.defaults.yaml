@@ -1,0 +1,19 @@
+# Coverage / drift policy defaults for the SDD doc set.
+# Mirrored by ai-docs/RULES.md (Spec-Currency & Drift Thresholds) and consumed by review checks.
+# See .sdd/manifest.json for per-module coverage state.
+
+# Maximum tolerated drift between a module spec and its code, by coverage state.
+# Drift = share of spec claims (signatures, flows, contracts) no longer matching code.
+driftThresholds:
+  AUTHORITATIVE: 0.05   # <= 5%  — spec is trusted; larger drift fails the spec-currency gate
+  PARTIAL: 0.15         # <= 15%
+  DRAFT: 0.25           # <= 25% — freshly generated; cross-check code before relying on a claim
+  NONE: null            # no spec to drift from
+
+# Changed-line coverage bar enforced by the test-adequacy review check (C4).
+coverageBar:
+  changedLines: 0.80
+
+# Spec-currency: the spec/docs MUST be updated in the same change as the code.
+specCurrency:
+  sameChangeRequired: true
