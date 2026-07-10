@@ -259,10 +259,7 @@ class StoreWrapper implements IStoreWrapper {
     // Clear currentTask so stale call-control state doesn't linger, but skip
     // the onTaskSelected callback to preserve its ITask contract.
     const isPendingPreview =
-      task &&
-      this.isCampaignPreview(task) &&
-      task.data.interaction.state === 'new' &&
-      !this.store.acceptedCampaignIds.has(task.data.interactionId);
+      task && this.isCampaignPreview(task) && !this.store.acceptedCampaignIds.has(task.data.interactionId);
 
     if (isPendingPreview) {
       runInAction(() => {
@@ -615,21 +612,21 @@ class StoreWrapper implements IStoreWrapper {
       this.onTaskAssigned(task);
     }
     runInAction(() => {
+      // For accepted campaign previews (state !== 'new'), record acceptance
+      // before promoting to currentTask so setCurrentTask allows it through.
+      if (this.isCampaignPreview(task) && task.data.interaction.state !== 'new') {
+        this.addAcceptedCampaign(task.data.interactionId);
+      }
+
       this.setCurrentTask(task);
-      // Campaign preview that is still pending acceptance (state 'new')
-      // keeps the agent in RESERVED.  Once the agent accepts the preview
-      // the interaction state transitions away from 'new' and the agent
-      // moves to ENGAGED — matching Agent Desktop behaviour.
+
+      // Pending (state 'new') campaign previews keep agent in RESERVED
       if (this.isCampaignPreview(task) && task.data.interaction.state === 'new') {
         this.setState({
           developerName: RESERVED_LABEL,
           name: RESERVED_USERNAME,
         });
       } else {
-        // Campaign preview with state !== 'new' means it was accepted.
-        if (this.isCampaignPreview(task)) {
-          this.addAcceptedCampaign(task.data.interactionId);
-        }
         this.setState({
           developerName: ENGAGED_LABEL,
           name: ENGAGED_USERNAME,
@@ -905,6 +902,13 @@ class StoreWrapper implements IStoreWrapper {
     }
 
     this.registerTaskEventListeners(task);
+
+    // Mark accepted campaign previews BEFORE refreshTaskList so that
+    // setCurrentTask's isPendingPreview guard allows them through.
+    if (this.isCampaignPreview(task) && task.data.interaction.state !== 'new') {
+      this.addAcceptedCampaign(task.data.interactionId);
+    }
+
     this.refreshTaskList();
     this.handleTaskAssigned(task);
   };
@@ -914,6 +918,13 @@ class StoreWrapper implements IStoreWrapper {
 
     // Register all task event listeners
     this.registerTaskEventListeners(task);
+
+    // Mark accepted campaign previews BEFORE refreshTaskList so that
+    // setCurrentTask's isPendingPreview guard allows them through when
+    // refreshTaskList internally promotes a task from the task list.
+    if (this.isCampaignPreview(task) && task.data.interaction.state !== 'new') {
+      this.addAcceptedCampaign(task.data.interactionId);
+    }
 
     this.refreshTaskList();
 
@@ -931,8 +942,6 @@ class StoreWrapper implements IStoreWrapper {
         name: RESERVED_USERNAME,
       });
     } else if (this.isCampaignPreview(task)) {
-      // Hydrating an accepted campaign preview — restore accepted state.
-      this.addAcceptedCampaign(task.data.interactionId);
       this.setState({
         developerName: ENGAGED_LABEL,
         name: ENGAGED_USERNAME,

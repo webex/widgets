@@ -41,6 +41,8 @@ export const TIME_LEFT = 'Time left:';
 // Campaign preview task constants
 export const CAMPAIGN_ACCEPT = 'Accept';
 export const CAMPAIGN_CONNECTING = 'Connecting...';
+export const CAMPAIGN_SKIPPING = 'Skipping...';
+export const CAMPAIGN_REMOVING = 'Removing...';
 export const CAMPAIGN_SKIP = 'Skip';
 export const CAMPAIGN_SKIP_TOOLTIP = 'Skip this contact';
 export const CAMPAIGN_SKIP_DISABLED_TOOLTIP = "Can't skip this contact";
