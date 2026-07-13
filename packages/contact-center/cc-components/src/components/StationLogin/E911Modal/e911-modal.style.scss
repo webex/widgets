@@ -1,0 +1,103 @@
+.e911-modal {
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  max-width: 480px;
+  width: 90%;
+
+  &::backdrop {
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+
+  .e911-modal-content {
+    padding: 24px;
+  }
+
+  .e911-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+
+    .e911-modal-title {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .e911-close-button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+    }
+  }
+
+  .e911-warning-box {
+    background-color: #fff3cd;
+    border: 1px solid #ffc107;
+    border-radius: 4px;
+    padding: 12px;
+    margin-bottom: 16px;
+
+    .e911-warning-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #856404;
+    }
+
+    .e911-warning-message {
+      color: #856404;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .e911-help-link {
+      color: #0056b3;
+      text-decoration: underline;
+      cursor: pointer;
+      font-size: 14px;
+      margin-top: 8px;
+      display: inline-block;
+    }
+  }
+
+  .e911-dialing-section {
+    margin-bottom: 20px;
+
+    .e911-dialing-title {
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .e911-dialing-message {
+      font-size: 14px;
+      line-height: 1.5;
+      color: #666;
+    }
+  }
+
+  .e911-checkbox-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+
+    .e911-checkbox-label {
+      font-size: 14px;
+      cursor: pointer;
+    }
+  }
+
+  .e911-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding-top: 16px;
+    border-top: 1px solid #e0e0e0;
+  }
+}

@@ -3,7 +3,7 @@ import store from '@webex/cc-store';
 import {observer} from 'mobx-react-lite';
 import {ErrorBoundary} from 'react-error-boundary';
 
-import {StationLoginComponent, StationLoginComponentProps} from '@webex/cc-components';
+import {StationLoginComponent, StationLoginComponentProps, E911Modal} from '@webex/cc-components';
 import {useStationLogin} from '../helper';
 import {StationLoginProps} from './station-login.types';
 
@@ -32,6 +32,9 @@ const StationLoginInternal: React.FunctionComponent<StationLoginProps> = observe
       setDialNumber,
       teamId,
       setTeamId,
+      showE911Modal,
+      setShowE911Modal,
+      updateEmergencyModalAcknowledgment,
     } = store;
 
     const result = useStationLogin({
@@ -67,7 +70,28 @@ const StationLoginInternal: React.FunctionComponent<StationLoginProps> = observe
       allowInternationalDn,
     };
 
-    return <StationLoginComponent {...props} />;
+    const handleE911SaveAndContinue = async () => {
+      try {
+        await updateEmergencyModalAcknowledgment();
+      } catch (error) {
+        logger.error('CC-Widgets: Failed to update E911 acknowledgment', {
+          module: 'widget-station-login#index.tsx',
+          method: 'handleE911SaveAndContinue',
+          error,
+        });
+      }
+    };
+
+    const handleE911Cancel = () => {
+      setShowE911Modal(false);
+    };
+
+    return (
+      <>
+        <StationLoginComponent {...props} />
+        <E911Modal isOpen={showE911Modal} onSaveAndContinue={handleE911SaveAndContinue} onCancel={handleE911Cancel} />
+      </>
+    );
   }
 );
 

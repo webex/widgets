@@ -73,6 +73,7 @@ interface IContactCenter {
   acceptPreviewContact(payload: PreviewContactPayload): Promise<TaskResponse>;
   skipPreviewContact(payload: PreviewContactPayload): Promise<TaskResponse>;
   removePreviewContact(payload: PreviewContactPayload): Promise<TaskResponse>;
+  userPreference?: IUserPreferenceService;
 }
 //  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
 type IWebex = {
@@ -167,6 +168,8 @@ interface IStore {
   dataCenter: string;
   realtimeTranscriptionData: Partial<RealTimeTranscriptionData>[];
   acceptedCampaignIds: Set<string>;
+  showE911Modal: boolean;
+  isEmergencyModalAlreadyDisplayed: boolean;
   init(params: InitParams, callback: (ccSDK: IContactCenter) => void): Promise<void>;
   registerCC(webex?: WithWebex['webex']): Promise<void>;
 }
@@ -201,6 +204,10 @@ interface IStoreWrapper extends IStore {
   getAccessToken(): Promise<string>;
   addAcceptedCampaign(interactionId: string): void;
   removeAcceptedCampaign(interactionId: string): void;
+  setShowE911Modal(value: boolean): void;
+  setIsEmergencyModalAlreadyDisplayed(value: boolean): void;
+  fetchUserPreferences(): Promise<void>;
+  updateEmergencyModalAcknowledgment(): Promise<void>;
 }
 
 interface IWrapupCode {
@@ -361,6 +368,55 @@ export type Participant = {
   pType: 'Customer' | 'Agent' | string;
   name?: string;
 };
+
+/**
+ * Desktop preference data structure containing E911 modal acknowledgment.
+ * @public
+ */
+export type DesktopPreference = {
+  isEmergencyModalAlreadyDisplayed?: boolean;
+};
+
+/**
+ * User preference response from the SDK.
+ * @public
+ */
+export type UserPreferenceResponse = {
+  id: string;
+  organizationId: string;
+  userId: string;
+  desktopPreference?: string;
+  createdTime?: number;
+  lastUpdatedTime?: number;
+};
+
+/**
+ * Request payload for updating user preferences.
+ * @public
+ */
+export type UpdateUserPreferenceRequest = {
+  desktopPreference: string;
+};
+
+/**
+ * Query parameters for fetching user preferences.
+ * @public
+ */
+export type GetUserPreferenceParams = {
+  userId?: string;
+  page?: number;
+  pageSize?: number;
+};
+
+/**
+ * User Preference service interface.
+ * TODO: Remove once SDK exposes this interface - CAI-7906
+ * @public
+ */
+export interface IUserPreferenceService {
+  getUserPreference(params?: GetUserPreferenceParams): Promise<UserPreferenceResponse>;
+  updateUserPreference(userId: string, data: UpdateUserPreferenceRequest): Promise<UserPreferenceResponse>;
+}
 
 /** Outbound type values that identify a campaign preview task. */
 export const CAMPAIGN_PREVIEW_OUTBOUND_TYPES = ['STANDARD_PREVIEW_CAMPAIGN', 'DIRECT_PREVIEW_CAMPAIGN'];

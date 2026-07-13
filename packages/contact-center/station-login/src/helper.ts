@@ -237,6 +237,29 @@ export const useStationLogin = (props: UseStationLoginProps) => {
     }
   };
 
+  const checkE911ModalDisplay = async () => {
+    try {
+      if (deviceType !== 'BROWSER') {
+        return;
+      }
+
+      await store.fetchUserPreferences();
+
+      if (!store.isEmergencyModalAlreadyDisplayed) {
+        store.setShowE911Modal(true);
+        logger.log('CC-Widgets: E911 modal displayed for BROWSER login', {
+          module: 'widget-station-login#helper.ts',
+          method: 'checkE911ModalDisplay',
+        });
+      }
+    } catch (error) {
+      logger.error(`CC-Widgets: Error checking E911 modal display - ${error.message}`, {
+        module: 'widget-station-login#helper.ts',
+        method: 'checkE911ModalDisplay',
+      });
+    }
+  };
+
   const login = () => {
     try {
       cc.stationLogin({teamId: team, loginOption: deviceType, dialNumber})
@@ -247,6 +270,8 @@ export const useStationLogin = (props: UseStationLoginProps) => {
           });
           setLoginSuccess(res);
           setLoginFailure(undefined);
+
+          checkE911ModalDisplay();
         })
         .catch((error: Error) => {
           logger.error(`Error logging in: ${error}`, {

@@ -160,6 +160,14 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.acceptedCampaignIds;
   }
 
+  get showE911Modal() {
+    return this.store.showE911Modal;
+  }
+
+  get isEmergencyModalAlreadyDisplayed() {
+    return this.store.isEmergencyModalAlreadyDisplayed;
+  }
+
   setDataCenter = (value: string): void => {
     this.store.dataCenter = value;
   };
@@ -579,6 +587,98 @@ class StoreWrapper implements IStoreWrapper {
       next.delete(interactionId);
       this.store.acceptedCampaignIds = next;
     });
+  };
+
+  setShowE911Modal = (value: boolean): void => {
+    runInAction(() => {
+      this.store.showE911Modal = value;
+    });
+  };
+
+  setIsEmergencyModalAlreadyDisplayed = (value: boolean): void => {
+    runInAction(() => {
+      this.store.isEmergencyModalAlreadyDisplayed = value;
+    });
+  };
+
+  fetchUserPreferences = async (): Promise<void> => {
+    try {
+      if (!this.store.cc.userPreference) {
+        this.store.logger.warn('CC-Widgets: fetchUserPreferences(): userPreference service not available', {
+          module: 'storeEventsWrapper.ts',
+          method: 'fetchUserPreferences',
+        });
+        return;
+      }
+
+      const response = await this.store.cc.userPreference.getUserPreference();
+      const desktopPrefString = response?.desktopPreference;
+
+      if (desktopPrefString) {
+        try {
+          const desktopPref = JSON.parse(desktopPrefString);
+          runInAction(() => {
+            this.store.isEmergencyModalAlreadyDisplayed = desktopPref.isEmergencyModalAlreadyDisplayed ?? false;
+          });
+        } catch (parseError) {
+          this.store.logger.error('CC-Widgets: fetchUserPreferences(): failed to parse desktopPreference', {
+            module: 'storeEventsWrapper.ts',
+            method: 'fetchUserPreferences',
+            error: parseError,
+          });
+        }
+      }
+    } catch (error) {
+      this.store.logger.error('CC-Widgets: fetchUserPreferences(): failed to fetch user preferences', {
+        module: 'storeEventsWrapper.ts',
+        method: 'fetchUserPreferences',
+        error,
+      });
+      throw error;
+    }
+  };
+
+  updateEmergencyModalAcknowledgment = async (): Promise<void> => {
+    try {
+      if (!this.store.cc.userPreference) {
+        this.store.logger.warn(
+          'CC-Widgets: updateEmergencyModalAcknowledgment(): userPreference service not available',
+          {
+            module: 'storeEventsWrapper.ts',
+            method: 'updateEmergencyModalAcknowledgment',
+          }
+        );
+        return;
+      }
+
+      const desktopPreference = JSON.stringify({
+        isEmergencyModalAlreadyDisplayed: true,
+      });
+
+      await this.store.cc.userPreference.updateUserPreference(this.store.agentId, {
+        desktopPreference,
+      });
+
+      runInAction(() => {
+        this.store.isEmergencyModalAlreadyDisplayed = true;
+        this.store.showE911Modal = false;
+      });
+
+      this.store.logger.info(
+        'CC-Widgets: updateEmergencyModalAcknowledgment(): successfully updated emergency modal acknowledgment',
+        {
+          module: 'storeEventsWrapper.ts',
+          method: 'updateEmergencyModalAcknowledgment',
+        }
+      );
+    } catch (error) {
+      this.store.logger.error('CC-Widgets: updateEmergencyModalAcknowledgment(): failed to update user preferences', {
+        module: 'storeEventsWrapper.ts',
+        method: 'updateEmergencyModalAcknowledgment',
+        error,
+      });
+      throw error;
+    }
   };
 
   handleCampaignPreviewReservation = (event: ITask) => {

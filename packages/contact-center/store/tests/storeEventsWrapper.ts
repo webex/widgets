@@ -107,6 +107,8 @@ jest.mock('../src/store', () => ({
     isDeclineButtonEnabled: false,
     isDigitalChannelsInitialized: false,
     acceptedCampaignIds: new Set<string>(),
+    showE911Modal: false,
+    isEmergencyModalAlreadyDisplayed: false,
     setShowMultipleLoginAlert: jest.fn(),
     setCurrentState: jest.fn(),
     setLastStateChangeTimestamp: jest.fn(),
@@ -2540,6 +2542,143 @@ describe('storeEventsWrapper', () => {
           developerName: 'ENGAGED',
           name: 'Engaged',
         });
+      });
+    });
+  });
+
+  describe('E911 Modal Methods', () => {
+    describe('setShowE911Modal', () => {
+      it('should set showE911Modal to true', () => {
+        storeWrapper.setShowE911Modal(true);
+        expect(storeWrapper['store'].showE911Modal).toBe(true);
+      });
+
+      it('should set showE911Modal to false', () => {
+        storeWrapper.setShowE911Modal(false);
+        expect(storeWrapper['store'].showE911Modal).toBe(false);
+      });
+    });
+
+    describe('setIsEmergencyModalAlreadyDisplayed', () => {
+      it('should set isEmergencyModalAlreadyDisplayed to true', () => {
+        storeWrapper.setIsEmergencyModalAlreadyDisplayed(true);
+        expect(storeWrapper['store'].isEmergencyModalAlreadyDisplayed).toBe(true);
+      });
+
+      it('should set isEmergencyModalAlreadyDisplayed to false', () => {
+        storeWrapper.setIsEmergencyModalAlreadyDisplayed(false);
+        expect(storeWrapper['store'].isEmergencyModalAlreadyDisplayed).toBe(false);
+      });
+    });
+
+    describe('fetchUserPreferences', () => {
+      it('should return early if userPreference service is not available', async () => {
+        storeWrapper['store'].cc.userPreference = undefined;
+
+        await storeWrapper.fetchUserPreferences();
+
+        expect(storeWrapper['store'].logger.warn).toHaveBeenCalledWith(
+          'CC-Widgets: fetchUserPreferences(): userPreference service not available',
+          expect.any(Object)
+        );
+      });
+
+      it('should fetch and parse user preferences successfully', async () => {
+        const mockUserPreference = {
+          getUserPreference: jest.fn().mockResolvedValue({
+            desktopPreference: JSON.stringify({isEmergencyModalAlreadyDisplayed: true}),
+          }),
+          updateUserPreference: jest.fn(),
+        };
+        storeWrapper['store'].cc.userPreference = mockUserPreference;
+
+        await storeWrapper.fetchUserPreferences();
+
+        expect(mockUserPreference.getUserPreference).toHaveBeenCalled();
+        expect(storeWrapper['store'].isEmergencyModalAlreadyDisplayed).toBe(true);
+      });
+
+      it('should handle empty desktopPreference', async () => {
+        const mockUserPreference = {
+          getUserPreference: jest.fn().mockResolvedValue({
+            desktopPreference: null,
+          }),
+          updateUserPreference: jest.fn(),
+        };
+        storeWrapper['store'].cc.userPreference = mockUserPreference;
+
+        await storeWrapper.fetchUserPreferences();
+
+        expect(mockUserPreference.getUserPreference).toHaveBeenCalled();
+      });
+
+      it('should handle parse error gracefully', async () => {
+        const mockUserPreference = {
+          getUserPreference: jest.fn().mockResolvedValue({
+            desktopPreference: 'invalid-json',
+          }),
+          updateUserPreference: jest.fn(),
+        };
+        storeWrapper['store'].cc.userPreference = mockUserPreference;
+
+        await storeWrapper.fetchUserPreferences();
+
+        expect(storeWrapper['store'].logger.error).toHaveBeenCalledWith(
+          'CC-Widgets: fetchUserPreferences(): failed to parse desktopPreference',
+          expect.any(Object)
+        );
+      });
+
+      it('should throw error on API failure', async () => {
+        const mockError = new Error('API Error');
+        const mockUserPreference = {
+          getUserPreference: jest.fn().mockRejectedValue(mockError),
+          updateUserPreference: jest.fn(),
+        };
+        storeWrapper['store'].cc.userPreference = mockUserPreference;
+
+        await expect(storeWrapper.fetchUserPreferences()).rejects.toThrow('API Error');
+      });
+    });
+
+    describe('updateEmergencyModalAcknowledgment', () => {
+      it('should return early if userPreference service is not available', async () => {
+        storeWrapper['store'].cc.userPreference = undefined;
+
+        await storeWrapper.updateEmergencyModalAcknowledgment();
+
+        expect(storeWrapper['store'].logger.warn).toHaveBeenCalledWith(
+          'CC-Widgets: updateEmergencyModalAcknowledgment(): userPreference service not available',
+          expect.any(Object)
+        );
+      });
+
+      it('should update user preferences and store state successfully', async () => {
+        const mockUserPreference = {
+          getUserPreference: jest.fn(),
+          updateUserPreference: jest.fn().mockResolvedValue({}),
+        };
+        storeWrapper['store'].cc.userPreference = mockUserPreference;
+        storeWrapper['store'].agentId = 'test-agent-id';
+
+        await storeWrapper.updateEmergencyModalAcknowledgment();
+
+        expect(mockUserPreference.updateUserPreference).toHaveBeenCalledWith('test-agent-id', {
+          desktopPreference: JSON.stringify({isEmergencyModalAlreadyDisplayed: true}),
+        });
+        expect(storeWrapper['store'].isEmergencyModalAlreadyDisplayed).toBe(true);
+        expect(storeWrapper['store'].showE911Modal).toBe(false);
+      });
+
+      it('should throw error on API failure', async () => {
+        const mockError = new Error('Update Error');
+        const mockUserPreference = {
+          getUserPreference: jest.fn(),
+          updateUserPreference: jest.fn().mockRejectedValue(mockError),
+        };
+        storeWrapper['store'].cc.userPreference = mockUserPreference;
+
+        await expect(storeWrapper.updateEmergencyModalAcknowledgment()).rejects.toThrow('Update Error');
       });
     });
   });

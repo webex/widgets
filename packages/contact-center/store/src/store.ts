@@ -55,6 +55,8 @@ class Store implements IStore {
   dataCenter: string = '';
   realtimeTranscriptionData: Partial<RealTimeTranscriptionData>[] = [];
   acceptedCampaignIds: Set<string> = new Set();
+  showE911Modal: boolean = false;
+  isEmergencyModalAlreadyDisplayed: boolean = false;
 
   constructor() {
     makeAutoObservable(this, {

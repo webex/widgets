@@ -55,7 +55,7 @@ const mockProfile: Profile = {
   isAgentAvailableAfterOutdial: false,
   isCampaignManagementEnabled: true,
   outDialEp: '',
-  isEndTaskEnabled: true,
+  isEndCallEnabled: true,
   isEndConsultEnabled: true,
   agentDbId: 'agentDb123',
   allowConsultToQueue: true,
