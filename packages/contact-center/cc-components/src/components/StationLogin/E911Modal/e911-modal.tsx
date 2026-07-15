@@ -8,6 +8,15 @@ const E911Modal: React.FC<E911ModalProps> = ({isOpen, onSaveAndContinue, onCance
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [isChecked, setIsChecked] = useState(false);
 
+  const handleCheckboxChange = () => {
+    setIsChecked(!isChecked);
+  };
+
+  const handleCancel = () => {
+    setIsChecked(false);
+    onCancel();
+  };
+
   useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;
@@ -22,16 +31,18 @@ const E911Modal: React.FC<E911ModalProps> = ({isOpen, onSaveAndContinue, onCance
       }
       setIsChecked(false);
     }
-  }, [isOpen]);
 
-  const handleCheckboxChange = () => {
-    setIsChecked(!isChecked);
-  };
+    const handleNativeCancel = (event: Event) => {
+      event.preventDefault();
+      handleCancel();
+    };
 
-  const handleCancel = () => {
-    setIsChecked(false);
-    onCancel();
-  };
+    dialog.addEventListener('cancel', handleNativeCancel);
+
+    return () => {
+      dialog.removeEventListener('cancel', handleNativeCancel);
+    };
+  }, [isOpen, onCancel]);
 
   const handleSaveAndContinue = () => {
     if (isChecked) {
@@ -88,7 +99,8 @@ const E911Modal: React.FC<E911ModalProps> = ({isOpen, onSaveAndContinue, onCance
           <Checkbox
             data-testid="e911-checkbox"
             checked={isChecked}
-            onChange={handleCheckboxChange}
+            // @ts-expect-error: TODO: https://github.com/momentum-design/momentum-design/pull/1118
+            onchange={handleCheckboxChange}
             label={E911ModalLabels.CHECKBOX_LABEL}
           />
         </div>

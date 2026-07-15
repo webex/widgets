@@ -126,4 +126,15 @@ describe('E911Modal', () => {
     expect(screen.getByTestId('e911-help-link')).toBeInTheDocument();
     expect(screen.getByText(E911ModalLabels.HELP_LINK_TEXT)).toBeInTheDocument();
   });
+
+  it('should call onCancel when the native dialog is dismissed via the cancel event (e.g. Escape key)', () => {
+    render(<E911Modal {...defaultProps} isOpen={true} />);
+    const dialog = screen.getByTestId('e911-modal');
+
+    const cancelEvent = new Event('cancel', {cancelable: true});
+    dialog.dispatchEvent(cancelEvent);
+
+    expect(cancelEvent.defaultPrevented).toBe(true);
+    expect(defaultProps.onCancel).toHaveBeenCalledTimes(1);
+  });
 });

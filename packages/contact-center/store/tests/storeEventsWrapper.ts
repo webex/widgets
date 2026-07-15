@@ -2572,10 +2572,10 @@ describe('storeEventsWrapper', () => {
     });
 
     describe('fetchUserPreferences', () => {
-      it('should return early if userPreference service is not available', async () => {
+      it('should throw and warn if userPreference service is not available', async () => {
         storeWrapper['store'].cc.userPreference = undefined;
 
-        await storeWrapper.fetchUserPreferences();
+        await expect(storeWrapper.fetchUserPreferences()).rejects.toThrow('userPreference service not available');
 
         expect(storeWrapper['store'].logger.warn).toHaveBeenCalledWith(
           'CC-Widgets: fetchUserPreferences(): userPreference service not available',
@@ -2610,6 +2610,22 @@ describe('storeEventsWrapper', () => {
         await storeWrapper.fetchUserPreferences();
 
         expect(mockUserPreference.getUserPreference).toHaveBeenCalled();
+        expect(storeWrapper['store'].isEmergencyModalAlreadyDisplayed).toBe(false);
+      });
+
+      it('should reset isEmergencyModalAlreadyDisplayed to false when desktopPreference is missing, even if previously true', async () => {
+        storeWrapper['store'].isEmergencyModalAlreadyDisplayed = true;
+        const mockUserPreference = {
+          getUserPreference: jest.fn().mockResolvedValue({
+            desktopPreference: null,
+          }),
+          updateUserPreference: jest.fn(),
+        };
+        storeWrapper['store'].cc.userPreference = mockUserPreference;
+
+        await storeWrapper.fetchUserPreferences();
+
+        expect(storeWrapper['store'].isEmergencyModalAlreadyDisplayed).toBe(false);
       });
 
       it('should handle parse error gracefully', async () => {
@@ -2627,6 +2643,7 @@ describe('storeEventsWrapper', () => {
           'CC-Widgets: fetchUserPreferences(): failed to parse desktopPreference',
           expect.any(Object)
         );
+        expect(storeWrapper['store'].isEmergencyModalAlreadyDisplayed).toBe(false);
       });
 
       it('should throw error on API failure', async () => {
@@ -2642,10 +2659,12 @@ describe('storeEventsWrapper', () => {
     });
 
     describe('updateEmergencyModalAcknowledgment', () => {
-      it('should return early if userPreference service is not available', async () => {
+      it('should throw and warn if userPreference service is not available', async () => {
         storeWrapper['store'].cc.userPreference = undefined;
 
-        await storeWrapper.updateEmergencyModalAcknowledgment();
+        await expect(storeWrapper.updateEmergencyModalAcknowledgment()).rejects.toThrow(
+          'userPreference service not available'
+        );
 
         expect(storeWrapper['store'].logger.warn).toHaveBeenCalledWith(
           'CC-Widgets: updateEmergencyModalAcknowledgment(): userPreference service not available',

@@ -608,18 +608,18 @@ class StoreWrapper implements IStoreWrapper {
           module: 'storeEventsWrapper.ts',
           method: 'fetchUserPreferences',
         });
-        return;
+        throw new Error('userPreference service not available');
       }
 
       const response = await this.store.cc.userPreference.getUserPreference();
       const desktopPrefString = response?.desktopPreference;
 
+      let isEmergencyModalAlreadyDisplayed = false;
+
       if (desktopPrefString) {
         try {
           const desktopPref = JSON.parse(desktopPrefString);
-          runInAction(() => {
-            this.store.isEmergencyModalAlreadyDisplayed = desktopPref.isEmergencyModalAlreadyDisplayed ?? false;
-          });
+          isEmergencyModalAlreadyDisplayed = desktopPref.isEmergencyModalAlreadyDisplayed ?? false;
         } catch (parseError) {
           this.store.logger.error('CC-Widgets: fetchUserPreferences(): failed to parse desktopPreference', {
             module: 'storeEventsWrapper.ts',
@@ -628,6 +628,10 @@ class StoreWrapper implements IStoreWrapper {
           });
         }
       }
+
+      runInAction(() => {
+        this.store.isEmergencyModalAlreadyDisplayed = isEmergencyModalAlreadyDisplayed;
+      });
     } catch (error) {
       this.store.logger.error('CC-Widgets: fetchUserPreferences(): failed to fetch user preferences', {
         module: 'storeEventsWrapper.ts',
@@ -648,7 +652,7 @@ class StoreWrapper implements IStoreWrapper {
             method: 'updateEmergencyModalAcknowledgment',
           }
         );
-        return;
+        throw new Error('userPreference service not available');
       }
 
       const desktopPreference = JSON.stringify({
