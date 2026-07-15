@@ -24,8 +24,8 @@ const E911Modal: React.FC<E911ModalProps> = ({isOpen, onSaveAndContinue, onCance
     }
   }, [isOpen]);
 
-  const handleCheckboxChange = (event: CustomEvent) => {
-    setIsChecked(event.detail.checked);
+  const handleCheckboxChange = () => {
+    setIsChecked(!isChecked);
   };
 
   const handleCancel = () => {

@@ -9,7 +9,7 @@ import CampaignErrorDialogComponent from './components/task/CampaignErrorDialog/
 import CampaignCountdownComponent from './components/task/CampaignCountdown/campaign-countdown';
 import CampaignTaskComponent from './components/task/CampaignTask/campaign-task';
 import RealTimeTranscriptComponent from './components/task/RealTimeTranscript/real-time-transcript';
-import {E911Modal} from './components/StationLogin/E911Modal';
+import E911Modal from './components/StationLogin/E911Modal/e911-modal';
 
 export {
   UserStateComponent,
@@ -26,7 +26,7 @@ export {
   E911Modal,
 };
 export * from './components/StationLogin/constants';
-export * from './components/StationLogin/E911Modal';
+export * from './components/StationLogin/E911Modal/e911-modal.types';
 export * from './components/StationLogin/station-login.types';
 export * from './components/UserState/user-state.types';
 export * from './components/task/task.types';
