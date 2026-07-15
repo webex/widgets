@@ -1,7 +1,7 @@
 import React from 'react';
 import {render, screen, fireEvent, waitFor} from '@testing-library/react';
 import '@testing-library/jest-dom';
-import E911Modal from '../../../../src/components/StationLogin/E911Modal/E911Modal';
+import E911Modal from '../../../../src/components/StationLogin/E911Modal/e911-modal';
 import {E911ModalLabels} from '../../../../src/components/StationLogin/E911Modal/e911-modal.constants';
 
 jest.mock('@webex/cc-ui-logging', () => ({
