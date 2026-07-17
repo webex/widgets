@@ -298,18 +298,19 @@ export async function removeCampaignPreviewTask(
 
 /**
  * Stubs the SDK's campaign preview action methods (acceptPreviewContact, skipPreviewContact,
- * removePreviewContact) on window['store'].cc so that test assertions can check whether
- * the action was invoked and control whether it resolves or rejects.
+ * removePreviewContact) on window['store'].cc and the task's end() method (used by cancel)
+ * so that test assertions can check whether the action was invoked and control whether it
+ * resolves or rejects.
  *
  * @param page - Playwright Page object
  * @param failAction - If set, that action will reject with an error (for error dialog tests)
  */
 export async function stubCampaignPreviewActions(
   page: Page,
-  failAction?: 'accept' | 'skip' | 'remove'
+  failAction?: 'accept' | 'skip' | 'remove' | 'cancel'
 ): Promise<void> {
   await page.evaluate(
-    ({failAction}) => {
+    ({failAction, campaignInteractionId}) => {
       const store = (window as unknown as Record<string, unknown>)['store'] as Record<string, unknown>;
       if (!store) return;
       const cc = store.cc as Record<string, (...args: unknown[]) => unknown>;
@@ -320,6 +321,7 @@ export async function stubCampaignPreviewActions(
         accept: 0,
         skip: 0,
         remove: 0,
+        cancel: 0,
       });
 
       cc.acceptPreviewContact = () => {
@@ -345,8 +347,20 @@ export async function stubCampaignPreviewActions(
         }
         return Promise.resolve({});
       };
+
+      // Stub the task's end() method (used by cancelPreviewContact) if cancel failure is needed
+      if (failAction === 'cancel') {
+        const taskList = store.taskList as Record<string, Record<string, unknown>>;
+        const task = taskList[campaignInteractionId];
+        if (task) {
+          task.end = () => {
+            tracker.cancel++;
+            return Promise.reject(new Error('Cancel failed (stubbed)'));
+          };
+        }
+      }
     },
-    {failAction: failAction ?? null}
+    {failAction: failAction ?? null, campaignInteractionId: CAMPAIGN_INTERACTION_ID}
   );
 }
 
@@ -354,16 +368,16 @@ export async function stubCampaignPreviewActions(
  * Returns the number of times each campaign action was called.
  *
  * @param page - Playwright Page object
- * @returns Call counts for accept, skip, and remove
+ * @returns Call counts for accept, skip, remove, and cancel
  */
 export async function getCampaignActionCounts(
   page: Page
-): Promise<{accept: number; skip: number; remove: number}> {
+): Promise<{accept: number; skip: number; remove: number; cancel: number}> {
   return page.evaluate(() => {
     const tracker = (window as unknown as Record<string, unknown>)['__campaignPreviewCalls'] as
-      | {accept: number; skip: number; remove: number}
+      | {accept: number; skip: number; remove: number; cancel: number}
       | undefined;
-    return tracker ?? {accept: 0, skip: 0, remove: 0};
+    return tracker ?? {accept: 0, skip: 0, remove: 0, cancel: 0};
   });
 }
 

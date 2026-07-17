@@ -525,4 +525,283 @@ export default function createCampaignPreviewTests() {
       await waitForCampaignTaskHidden(testManager.agent1Page);
     });
   });
+
+  test.describe('Campaign Preview - Cancel Error', () => {
+    let testManager: TestManager;
+
+    test.beforeAll(async ({browser}, testInfo) => {
+      const projectName = testInfo.project.name;
+      testManager = new TestManager(projectName);
+      await testManager.setupForCampaignPreview(browser);
+    });
+
+    test.afterAll(async () => {
+      await testManager.cleanup();
+    });
+
+    test.afterEach(async () => {
+      await removeCampaignPreviewTask(testManager.agent1Page).catch(() => {});
+    });
+
+    test('should show error dialog when cancel fails', async () => {
+      await injectCampaignPreviewTask(testManager.agent1Page);
+      await waitForCampaignTaskVisible(testManager.agent1Page);
+
+      // Stub actions with cancel failure AFTER task injection so the task's end() gets overwritten
+      await stubCampaignPreviewActions(testManager.agent1Page, 'cancel');
+
+      await clickCampaignCancel(testManager.agent1Page);
+
+      // Error dialog should appear with the cancel-specific title
+      const errorDialog = testManager.agent1Page.getByTestId(CAMPAIGN_TEST_IDS.ERROR_DIALOG).first();
+      await expect(errorDialog).toBeVisible({timeout: 5000});
+
+      const errorTitle = testManager.agent1Page.getByTestId(CAMPAIGN_TEST_IDS.ERROR_DIALOG_TITLE).first();
+      await expect(errorTitle).toContainText("Can't cancel contact");
+
+      // Dismiss the error dialog
+      const okButton = testManager.agent1Page.getByTestId(CAMPAIGN_TEST_IDS.ERROR_DIALOG_OK).first();
+      await okButton.click();
+      await expect(errorDialog).toBeHidden({timeout: 5000});
+
+      // Cancel button should be re-enabled after error dismissal
+      const cancelBtn = testManager.agent1Page.getByTestId(CAMPAIGN_TEST_IDS.CANCEL_BUTTON).first();
+      await expect(cancelBtn).toBeVisible();
+      await expect(cancelBtn).toBeEnabled();
+    });
+  });
+
+  test.describe('Campaign Preview - Button Disabled Combinations', () => {
+    let testManager: TestManager;
+
+    test.beforeAll(async ({browser}, testInfo) => {
+      const projectName = testInfo.project.name;
+      testManager = new TestManager(projectName);
+      await testManager.setupForCampaignPreview(browser);
+    });
+
+    test.afterAll(async () => {
+      await testManager.cleanup();
+    });
+
+    test.afterEach(async () => {
+      await removeCampaignPreviewTask(testManager.agent1Page).catch(() => {});
+    });
+
+    test('should render both skip and remove buttons disabled when both are configured', async () => {
+      await stubCampaignPreviewActions(testManager.agent1Page);
+      await injectCampaignPreviewTask(testManager.agent1Page, {
+        skipDisabled: 'true',
+        removeDisabled: 'true',
+      });
+      await waitForCampaignTaskVisible(testManager.agent1Page);
+
+      const skipBtn = testManager.agent1Page.getByTestId(CAMPAIGN_TEST_IDS.SKIP_BUTTON).first();
+      const removeBtn = testManager.agent1Page.getByTestId(CAMPAIGN_TEST_IDS.REMOVE_BUTTON).first();
+      await expect(skipBtn).toBeDisabled();
+      await expect(removeBtn).toBeDisabled();
+
+      // Accept should still be enabled — it's the only action available
+      const acceptBtn = testManager.agent1Page.getByTestId(CAMPAIGN_TEST_IDS.ACCEPT_BUTTON).first();
+      await expect(acceptBtn).toBeEnabled();
+    });
+  });
+
+  test.describe('Campaign Preview - Countdown Display', () => {
+    let testManager: TestManager;
+
+    test.beforeAll(async ({browser}, testInfo) => {
+      const projectName = testInfo.project.name;
+      testManager = new TestManager(projectName);
+      await testManager.setupForCampaignPreview(browser);
+    });
+
+    test.afterAll(async () => {
+      await testManager.cleanup();
+    });
+
+    test.afterEach(async () => {
+      await removeCampaignPreviewTask(testManager.agent1Page).catch(() => {});
+    });
+
+    test('should display countdown timer before timeout', async () => {
+      await stubCampaignPreviewActions(testManager.agent1Page);
+      // Use a generous timeout so countdown is visible during assertion
+      await injectCampaignPreviewTask(testManager.agent1Page, {
+        offerTimeout: String(Date.now() + 60000),
+      });
+      await waitForCampaignTaskVisible(testManager.agent1Page);
+
+      // The countdown element should be visible in the popover's list item
+      // The popover uses testIdPrefix="campaign-popover" and shows the countdown
+      // in the main list item the countdown is only shown when timerDisplayMode=auto (popover)
+      // The inline card uses timerDisplayMode=handle-time, so countdown only appears in popover.
+      // Check the campaign-countdown element directly
+      const countdown = testManager.agent1Page.getByTestId(CAMPAIGN_TEST_IDS.COUNTDOWN).first();
+      await expect(countdown).toBeAttached({timeout: 5000});
+    });
+  });
+
+  test.describe('Campaign Preview - Fallback Title', () => {
+    let testManager: TestManager;
+
+    test.beforeAll(async ({browser}, testInfo) => {
+      const projectName = testInfo.project.name;
+      testManager = new TestManager(projectName);
+      await testManager.setupForCampaignPreview(browser);
+    });
+
+    test.afterAll(async () => {
+      await testManager.cleanup();
+    });
+
+    test.afterEach(async () => {
+      await removeCampaignPreviewTask(testManager.agent1Page).catch(() => {});
+    });
+
+    test('should use phone number as title when customer name is not provided', async () => {
+      await stubCampaignPreviewActions(testManager.agent1Page);
+      await injectCampaignPreviewTask(testManager.agent1Page, {
+        customerName: '',
+        ani: '+14085551234',
+      });
+      await waitForCampaignTaskVisible(testManager.agent1Page);
+
+      // Title should fall back to ANI since customerName is empty
+      const title = testManager.agent1Page.getByTestId(CAMPAIGN_TEST_IDS.TITLE).first();
+      await expect(title).toContainText('+14085551234');
+
+      // Phone subtitle should not be visible when it equals the title
+      const phone = testManager.agent1Page.getByTestId(CAMPAIGN_TEST_IDS.PHONE).first();
+      await expect(phone).toBeHidden();
+    });
+  });
+
+  test.describe('Campaign Preview - Error Dialog Content', () => {
+    let testManager: TestManager;
+
+    test.beforeAll(async ({browser}, testInfo) => {
+      const projectName = testInfo.project.name;
+      testManager = new TestManager(projectName);
+      await testManager.setupForCampaignPreview(browser);
+    });
+
+    test.afterAll(async () => {
+      await testManager.cleanup();
+    });
+
+    test.afterEach(async () => {
+      await removeCampaignPreviewTask(testManager.agent1Page).catch(() => {});
+    });
+
+    test('should display correct error title for accept failure', async () => {
+      await stubCampaignPreviewActions(testManager.agent1Page, 'accept');
+      await injectCampaignPreviewTask(testManager.agent1Page);
+      await waitForCampaignTaskVisible(testManager.agent1Page);
+
+      await clickCampaignAccept(testManager.agent1Page);
+
+      const errorTitle = testManager.agent1Page.getByTestId(CAMPAIGN_TEST_IDS.ERROR_DIALOG_TITLE).first();
+      await expect(errorTitle).toContainText("Can't accept contact");
+
+      const errorMessage = testManager.agent1Page.getByTestId(CAMPAIGN_TEST_IDS.ERROR_DIALOG_MESSAGE).first();
+      await expect(errorMessage).toBeVisible();
+
+      // Dismiss
+      await testManager.agent1Page.getByTestId(CAMPAIGN_TEST_IDS.ERROR_DIALOG_OK).first().click();
+    });
+
+    test('should display correct error title for skip failure', async () => {
+      await stubCampaignPreviewActions(testManager.agent1Page, 'skip');
+      await injectCampaignPreviewTask(testManager.agent1Page);
+      await waitForCampaignTaskVisible(testManager.agent1Page);
+
+      await clickCampaignSkip(testManager.agent1Page);
+
+      const errorTitle = testManager.agent1Page.getByTestId(CAMPAIGN_TEST_IDS.ERROR_DIALOG_TITLE).first();
+      await expect(errorTitle).toContainText("Can't skip contact");
+
+      // Dismiss
+      await testManager.agent1Page.getByTestId(CAMPAIGN_TEST_IDS.ERROR_DIALOG_OK).first().click();
+    });
+
+    test('should display correct error title for remove failure', async () => {
+      await stubCampaignPreviewActions(testManager.agent1Page, 'remove');
+      await injectCampaignPreviewTask(testManager.agent1Page);
+      await waitForCampaignTaskVisible(testManager.agent1Page);
+
+      await clickCampaignRemove(testManager.agent1Page);
+
+      const errorTitle = testManager.agent1Page.getByTestId(CAMPAIGN_TEST_IDS.ERROR_DIALOG_TITLE).first();
+      await expect(errorTitle).toContainText("Can't remove contact");
+
+      // Dismiss
+      await testManager.agent1Page.getByTestId(CAMPAIGN_TEST_IDS.ERROR_DIALOG_OK).first().click();
+    });
+  });
+
+  test.describe('Campaign Preview - Re-offer After Skip', () => {
+    let testManager: TestManager;
+
+    test.beforeAll(async ({browser}, testInfo) => {
+      const projectName = testInfo.project.name;
+      testManager = new TestManager(projectName);
+      await testManager.setupForCampaignPreview(browser);
+    });
+
+    test.afterAll(async () => {
+      await testManager.cleanup();
+    });
+
+    test.afterEach(async () => {
+      await removeCampaignPreviewTask(testManager.agent1Page).catch(() => {});
+    });
+
+    test('should reset buttons when a new contact is offered after skip', async () => {
+      await stubCampaignPreviewActions(testManager.agent1Page);
+      await injectCampaignPreviewTask(testManager.agent1Page, {
+        offerTimeout: String(Date.now() + 60000),
+      });
+      await waitForCampaignTaskVisible(testManager.agent1Page);
+
+      // Skip the first contact
+      await clickCampaignSkip(testManager.agent1Page);
+
+      // Verify buttons are disabled after skip
+      const acceptBtn = testManager.agent1Page.getByTestId(CAMPAIGN_TEST_IDS.ACCEPT_BUTTON).first();
+      await expect(acceptBtn).toBeDisabled();
+
+      // Simulate a new contact offer by updating the task's timeout timestamp
+      // (the component resets state when timeoutTimestamp changes and task is not accepted)
+      await testManager.agent1Page.evaluate(
+        ({interactionId}) => {
+          const store = (window as unknown as Record<string, unknown>)['store'] as Record<string, unknown>;
+          if (!store) return;
+          const taskList = store.taskList as Record<string, Record<string, unknown>>;
+          const task = taskList[interactionId];
+          if (!task) return;
+
+          const data = task.data as Record<string, unknown>;
+          const interaction = data.interaction as Record<string, unknown>;
+          const cpd = interaction.callProcessingDetails as Record<string, string>;
+
+          // Change the timeout to simulate a new contact offer
+          cpd.campaignPreviewOfferTimeout = String(Date.now() + 60000);
+
+          // Trigger MobX reactivity
+          store.taskList = {...taskList};
+        },
+        {interactionId: 'campaign-preview-e2e-001'}
+      );
+
+      // After re-offer, accept button should become enabled again
+      await expect(acceptBtn).toBeEnabled({timeout: 5000});
+
+      // Skip and remove should also be re-enabled (based on their config, not disabled)
+      const skipBtn = testManager.agent1Page.getByTestId(CAMPAIGN_TEST_IDS.SKIP_BUTTON).first();
+      const removeBtn = testManager.agent1Page.getByTestId(CAMPAIGN_TEST_IDS.REMOVE_BUTTON).first();
+      await expect(skipBtn).toBeEnabled({timeout: 5000});
+      await expect(removeBtn).toBeEnabled({timeout: 5000});
+    });
+  });
 }

@@ -112,6 +112,30 @@ export const RONA_OPTIONS = {
 
 export type RonaOption = (typeof RONA_OPTIONS)[keyof typeof RONA_OPTIONS];
 
+// Campaign Preview test IDs — must match data-testid values in CampaignTask components
+export const CAMPAIGN_TEST_IDS = {
+  TASK: 'campaign-task',
+  LIST_ITEM: 'campaign-task-list-item',
+  TITLE: 'campaign-task-title',
+  PHONE: 'campaign-task-phone',
+  HANDLE_TIME: 'campaign-task-handle-time',
+  ACTIONS: 'campaign-task-actions',
+  ACCEPT_BUTTON: 'campaign-task-accept-button',
+  CONNECTING_BUTTON: 'campaign-task-connecting-button',
+  SKIP_REMOVE: 'campaign-task-skip-remove',
+  SKIP_BUTTON: 'campaign-task-skip-button',
+  REMOVE_BUTTON: 'campaign-task-remove-button',
+  EXPANDED: 'campaign-task-expanded',
+  CANCEL_BUTTON: 'campaign-task-cancel-button',
+  POPOVER: 'campaign-task-popover',
+  COUNTDOWN: 'campaign-countdown',
+  GLOBAL_VARIABLES_PANEL: 'global-variables-panel',
+  ERROR_DIALOG: 'campaign-error-dialog',
+  ERROR_DIALOG_TITLE: 'campaign-error-dialog-title',
+  ERROR_DIALOG_MESSAGE: 'campaign-error-dialog-message',
+  ERROR_DIALOG_OK: 'campaign-error-dialog-ok-button',
+};
+
 // Test Data Constants
 export const TEST_DATA = {
   CHAT_NAME: 'Playwright Test',

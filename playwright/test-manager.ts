@@ -552,6 +552,14 @@ export class TestManager {
     );
   }
 
+  async setupForCampaignPreview(browser: Browser): Promise<void> {
+    await this.setup(browser, {
+      needsAgent1: true,
+      agent1LoginMode: LOGIN_MODE.DESKTOP,
+      enableConsoleLogging: true,
+    });
+  }
+
   async setupForMultipartyConference(browser: Browser) {
     await this.setup(browser, {
       needsAgent1: true,
