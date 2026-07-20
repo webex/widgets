@@ -1239,6 +1239,8 @@ class StoreWrapper implements IStoreWrapper {
       this.store.acceptedCampaignIds = new Set();
       this.realtimeTranscriptionListeners = {};
       this.setLastConsultDestination(null);
+      this.setShowE911Modal(false);
+      this.setIsEmergencyModalAlreadyDisplayed(false);
     });
   };
 

@@ -1733,6 +1733,32 @@ describe('storeEventsWrapper', () => {
       expect(storeWrapper['store'].agentProfile).toEqual({});
     });
 
+    it('should reset showE911Modal and isEmergencyModalAlreadyDisplayed on logout', async () => {
+      const cc = storeWrapper['store'].cc;
+      const onSpy = jest.spyOn(cc, 'on');
+      storeWrapper['store'].init = jest.fn().mockImplementation((_options, setupIncomingTaskHandler) => {
+        setupIncomingTaskHandler(cc);
+        return Promise.resolve();
+      });
+
+      await storeWrapper.init(options);
+
+      storeWrapper['store'].showE911Modal = true;
+      storeWrapper['store'].isEmergencyModalAlreadyDisplayed = true;
+
+      act(() => {
+        onSpy.mock.calls[1][1]({});
+      });
+
+      act(() => {
+        const logOutCb = onSpy.mock.calls.find((call) => call[0] === CC_EVENTS.AGENT_LOGOUT_SUCCESS)[1];
+        logOutCb({});
+      });
+
+      expect(storeWrapper['store'].showE911Modal).toBe(false);
+      expect(storeWrapper['store'].isEmergencyModalAlreadyDisplayed).toBe(false);
+    });
+
     it('should handle task rejection event and call onTaskRejected with the provided reason', () => {
       const rejectTask = makeMockTask({
         data: {interactionId: 'rejectTest', interaction: {state: 'connected'}},
