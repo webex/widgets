@@ -53,6 +53,11 @@ jest.mock('../src/store', () => ({
         credentials: {
           getUserToken: jest.fn(),
         },
+        internal: {
+          device: {
+            userId: 'mock-ci-user-id',
+          },
+        },
       },
     },
     logger: {
@@ -2808,7 +2813,7 @@ describe('storeEventsWrapper', () => {
         expect(mockUserPreference.updateUserPreference).not.toHaveBeenCalledWith('cc-agent-id', expect.any(Object));
       });
 
-      it('should create a new preference record (using agentId) when the user has none yet (404 on getUserPreference)', async () => {
+      it('should create a new preference record using the CI user id (not the CC agentId) when the user has none yet (404 on getUserPreference)', async () => {
         const notFoundError = Object.assign(new Error('Not Found'), {statusCode: 404});
         const mockUserPreference = {
           getUserPreference: jest.fn().mockRejectedValue(notFoundError),
@@ -2816,14 +2821,21 @@ describe('storeEventsWrapper', () => {
           updateUserPreference: jest.fn().mockResolvedValue({}),
         };
         storeWrapper['store'].cc.userPreference = mockUserPreference;
+        // agentId (CC identifier) intentionally differs from the CI user id used by the
+        // preference service - createUserPreference must use the latter.
         storeWrapper['store'].agentId = 'first-time-agent-id';
+        // @ts-expect-error - webex internal device API not typed on IContactCenter
+        storeWrapper['store'].cc.webex = {internal: {device: {userId: 'first-time-ci-user-id'}}};
 
         await storeWrapper.updateEmergencyModalAcknowledgment();
 
         expect(mockUserPreference.createUserPreference).toHaveBeenCalledWith({
-          userId: 'first-time-agent-id',
+          userId: 'first-time-ci-user-id',
           desktopPreference: JSON.stringify({isEmergencyModalAlreadyDisplayed: true}),
         });
+        expect(mockUserPreference.createUserPreference).not.toHaveBeenCalledWith(
+          expect.objectContaining({userId: 'first-time-agent-id'})
+        );
         expect(mockUserPreference.updateUserPreference).not.toHaveBeenCalled();
         expect(storeWrapper['store'].isEmergencyModalAlreadyDisplayed).toBe(true);
         expect(storeWrapper['store'].showE911Modal).toBe(false);

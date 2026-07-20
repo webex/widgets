@@ -721,8 +721,15 @@ class StoreWrapper implements IStoreWrapper {
           desktopPreference,
         });
       } else {
+        // createUserPreference's userId must be the CI user id, not the CC agentId - they can
+        // differ (see the existing-record update path above, which uses response.userId for the
+        // same reason). There's no existing preference record to read the CI id from here, so
+        // pull it from the underlying webex SDK instead of guessing with store.agentId.
+        // @ts-expect-error - webex internal device API not typed
+        const ciUserId: string = this.store.cc.webex.internal.device.userId;
+
         await this.store.cc.userPreference.createUserPreference({
-          userId: this.store.agentId,
+          userId: ciUserId,
           desktopPreference,
         });
       }
