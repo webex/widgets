@@ -121,6 +121,8 @@ export const useStationLogin = (props: UseStationLoginProps) => {
             module: 'widget-station-login#helper.ts',
             method: 'saveLoginOptions',
           });
+          // Covers switching to BROWSER via profile save while already logged in.
+          checkE911ModalDisplay(currentLoginOptions.deviceType);
           if (props.onSaveEnd) props.onSaveEnd(true);
         })
         .catch((error: Error) => {
@@ -145,6 +147,11 @@ export const useStationLogin = (props: UseStationLoginProps) => {
     try {
       if (loginCb && store.isAgentLoggedIn) {
         loginCb();
+      }
+      if (store.isAgentLoggedIn) {
+        // Covers page refresh while already logged in with BROWSER: login() never runs, so this is
+        // the only place that can trigger the E911 modal for an already-hydrated BROWSER session.
+        checkE911ModalDisplay(store.deviceType);
       }
     } catch (error) {
       logger.error(`CC-Widgets: Error in useEffect (loginCb) - ${error.message}`, {
@@ -172,6 +179,9 @@ export const useStationLogin = (props: UseStationLoginProps) => {
       if (loginCb) {
         loginCb();
       }
+      // Covers AGENT_STATION_LOGIN_SUCCESS / relogin events that aren't driven by this widget's
+      // own login() call (e.g. another tab/session logging in as BROWSER).
+      checkE911ModalDisplay(store.deviceType);
     } catch (error) {
       logger.error(`CC-Widgets: Error in handleLogin - ${error.message}`, {
         module: 'widget-station-login#helper.ts',
@@ -223,6 +233,9 @@ export const useStationLogin = (props: UseStationLoginProps) => {
           module: 'widget-station-login#helper.ts',
           method: 'handleContinue',
         });
+        // Covers the multi-login takeover flow: registerCC() completes the relogin but never
+        // runs the E911 preference check on its own.
+        checkE911ModalDisplay(store.deviceType);
       } else {
         logger.error(`Agent Relogin Failed`, {
           module: 'widget-station-login#helper.ts',
@@ -237,9 +250,9 @@ export const useStationLogin = (props: UseStationLoginProps) => {
     }
   };
 
-  const checkE911ModalDisplay = async () => {
+  const checkE911ModalDisplay = async (deviceTypeToCheck: string) => {
     try {
-      if (deviceType !== DEVICE_TYPE_BROWSER) {
+      if (deviceTypeToCheck !== DEVICE_TYPE_BROWSER) {
         return;
       }
 
@@ -271,7 +284,7 @@ export const useStationLogin = (props: UseStationLoginProps) => {
           setLoginSuccess(res);
           setLoginFailure(undefined);
 
-          checkE911ModalDisplay();
+          checkE911ModalDisplay(deviceType);
         })
         .catch((error: Error) => {
           logger.error(`Error logging in: ${error}`, {

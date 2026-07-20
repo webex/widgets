@@ -17,8 +17,6 @@ describe('E911Modal', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    HTMLDialogElement.prototype.showModal = jest.fn();
-    HTMLDialogElement.prototype.close = jest.fn();
   });
 
   it('should render the modal when isOpen is true', () => {
@@ -28,7 +26,10 @@ describe('E911Modal', () => {
 
   it('should display the modal title', () => {
     render(<E911Modal {...defaultProps} />);
-    expect(screen.getByText(E911ModalLabels.TITLE)).toBeInTheDocument();
+    // The Dialog custom element renders headerText in its shadow DOM, so assert via the
+    // headerText property @lit/react sets on the element rather than a light-DOM text query.
+    const dialog = screen.getByTestId('e911-modal') as HTMLElement & {headerText?: string};
+    expect(dialog.headerText).toBe(E911ModalLabels.TITLE);
   });
 
   it('should display the warning message', () => {
@@ -78,15 +79,6 @@ describe('E911Modal', () => {
     expect(defaultProps.onCancel).toHaveBeenCalledTimes(1);
   });
 
-  it('should call onCancel when close button is clicked', () => {
-    render(<E911Modal {...defaultProps} />);
-    const closeButton = screen.getByTestId('e911-close-button');
-
-    fireEvent.click(closeButton);
-
-    expect(defaultProps.onCancel).toHaveBeenCalledTimes(1);
-  });
-
   it('should call onSaveAndContinue when Save & Continue is clicked with checkbox checked', async () => {
     render(<E911Modal {...defaultProps} />);
     const checkbox = screen.getByTestId('e911-checkbox');
@@ -104,12 +96,13 @@ describe('E911Modal', () => {
     expect(defaultProps.onSaveAndContinue).toHaveBeenCalledTimes(1);
   });
 
-  it('should call showModal when isOpen changes to true', () => {
+  it('should set visible on the Dialog when isOpen changes to true', () => {
     const {rerender} = render(<E911Modal {...defaultProps} isOpen={false} />);
 
     rerender(<E911Modal {...defaultProps} isOpen={true} />);
 
-    expect(HTMLDialogElement.prototype.showModal).toHaveBeenCalled();
+    const dialog = screen.getByTestId('e911-modal') as HTMLElement & {visible?: boolean};
+    expect(dialog.visible).toBe(true);
   });
 
   it('should reset checkbox state when modal closes', () => {
@@ -121,14 +114,12 @@ describe('E911Modal', () => {
     expect(screen.getByTestId('e911-modal')).toBeInTheDocument();
   });
 
-  it('should call onCancel when the native dialog is dismissed via the cancel event (e.g. Escape key)', () => {
+  it('should not call onCancel when the Dialog fires close (built-in close button or Escape key) - Cancel is the only way to dismiss', () => {
     render(<E911Modal {...defaultProps} isOpen={true} />);
     const dialog = screen.getByTestId('e911-modal');
 
-    const cancelEvent = new Event('cancel', {cancelable: true});
-    dialog.dispatchEvent(cancelEvent);
+    dialog.dispatchEvent(new CustomEvent('close'));
 
-    expect(cancelEvent.defaultPrevented).toBe(true);
-    expect(defaultProps.onCancel).toHaveBeenCalledTimes(1);
+    expect(defaultProps.onCancel).not.toHaveBeenCalled();
   });
 });

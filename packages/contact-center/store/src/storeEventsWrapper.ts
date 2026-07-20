@@ -679,7 +679,7 @@ class StoreWrapper implements IStoreWrapper {
         isEmergencyModalAlreadyDisplayed: true,
       });
 
-      await this.store.cc.userPreference.updateUserPreference(this.store.agentId, {
+      await this.store.cc.userPreference.updateUserPreference(response?.userId, {
         desktopPreference,
       });
 

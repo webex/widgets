@@ -17,6 +17,7 @@ jest.mock('@webex/cc-store', () => {
       isAgentLoggedIn = value; // Update internal variable
     }),
     registerCC: jest.fn(),
+    deviceType: 'EXTENSION',
     setDeviceType: jest.fn(),
     setDialNumber: jest.fn(),
     setCurrentState: jest.fn(),
@@ -1034,6 +1035,8 @@ describe('useStationLogin Hook', () => {
       (store.fetchUserPreferences as jest.Mock).mockReset();
       (store.setShowE911Modal as jest.Mock).mockReset();
       (store as unknown as {isEmergencyModalAlreadyDisplayed: boolean}).isEmergencyModalAlreadyDisplayed = false;
+      (store as unknown as {deviceType: string}).deviceType = 'EXTENSION';
+      store.setIsAgentLoggedIn(false);
     });
 
     it('should show the E911 modal on successful BROWSER login when not already acknowledged', async () => {
@@ -1125,6 +1128,116 @@ describe('useStationLogin Hook', () => {
             method: 'checkE911ModalDisplay',
           })
         );
+      });
+    });
+
+    it('should show the E911 modal on mount when already logged in with BROWSER (e.g. page refresh)', async () => {
+      (store.fetchUserPreferences as jest.Mock).mockResolvedValue(undefined);
+      store.setIsAgentLoggedIn(true);
+      (store as unknown as {deviceType: string}).deviceType = 'BROWSER';
+
+      renderHook(() => useStationLogin(baseStationLoginProps));
+
+      await waitFor(() => {
+        expect(store.fetchUserPreferences).toHaveBeenCalled();
+        expect(store.setShowE911Modal).toHaveBeenCalledWith(true);
+      });
+    });
+
+    it('should not show the E911 modal on mount when already logged in with a non-BROWSER device', async () => {
+      store.setIsAgentLoggedIn(true);
+      (store as unknown as {deviceType: string}).deviceType = 'EXTENSION';
+
+      renderHook(() => useStationLogin(baseStationLoginProps));
+
+      await waitFor(() => {
+        expect(store.fetchUserPreferences).not.toHaveBeenCalled();
+        expect(store.setShowE911Modal).not.toHaveBeenCalled();
+      });
+    });
+
+    it('should show the E911 modal on AGENT_STATION_LOGIN_SUCCESS / relogin when store.deviceType is BROWSER', async () => {
+      (store.fetchUserPreferences as jest.Mock).mockResolvedValue(undefined);
+      (store as unknown as {deviceType: string}).deviceType = 'BROWSER';
+      jest.spyOn(store, 'setCCCallback').mockImplementation((event, cb) => {
+        ccMock.on(event, cb);
+      });
+      const onSpy = jest.spyOn(ccMock, 'on');
+
+      renderHook(() => useStationLogin(baseStationLoginProps));
+
+      expect(ccMock.on).toHaveBeenCalledWith(CC_EVENTS.AGENT_STATION_LOGIN_SUCCESS, expect.any(Function));
+
+      act(() => {
+        (onSpy.mock.calls[0][1] as (payload: unknown) => void)({deviceType: 'BROWSER', auxCodeId: '0'});
+      });
+
+      await waitFor(() => {
+        expect(store.fetchUserPreferences).toHaveBeenCalled();
+        expect(store.setShowE911Modal).toHaveBeenCalledWith(true);
+      });
+    });
+
+    it('should show the E911 modal after a successful multi-login takeover (handleContinue) with BROWSER', async () => {
+      (store.fetchUserPreferences as jest.Mock).mockResolvedValue(undefined);
+      store.setIsAgentLoggedIn(true);
+      (store as unknown as {deviceType: string}).deviceType = 'BROWSER';
+
+      const {result} = renderHook(() => useStationLogin(baseStationLoginProps));
+
+      await act(async () => {
+        await result.current.handleContinue();
+      });
+
+      await waitFor(() => {
+        expect(store.fetchUserPreferences).toHaveBeenCalled();
+        expect(store.setShowE911Modal).toHaveBeenCalledWith(true);
+      });
+    });
+
+    it('should not show the E911 modal after handleContinue when store.deviceType is not BROWSER', async () => {
+      store.setIsAgentLoggedIn(true);
+      (store as unknown as {deviceType: string}).deviceType = 'EXTENSION';
+
+      const {result} = renderHook(() => useStationLogin(baseStationLoginProps));
+
+      await act(async () => {
+        await result.current.handleContinue();
+      });
+
+      await waitFor(() => {
+        expect(store.fetchUserPreferences).not.toHaveBeenCalled();
+        expect(store.setShowE911Modal).not.toHaveBeenCalled();
+      });
+    });
+
+    it('should show the E911 modal after saving login options with BROWSER as the new device type', async () => {
+      (store.fetchUserPreferences as jest.Mock).mockResolvedValue(undefined);
+      const cc = {...ccMock, updateAgentProfile: jest.fn().mockResolvedValue({})};
+
+      const {result} = renderHook(() =>
+        useStationLogin({
+          ...baseStationLoginProps,
+          cc,
+          deviceType: 'EXTENSION',
+        })
+      );
+
+      act(() => {
+        result.current.setCurrentLoginOptions({
+          deviceType: 'BROWSER',
+          dialNumber: '',
+          teamId: 'team123',
+        });
+      });
+
+      await act(async () => {
+        await result.current.saveLoginOptions();
+      });
+
+      await waitFor(() => {
+        expect(store.fetchUserPreferences).toHaveBeenCalled();
+        expect(store.setShowE911Modal).toHaveBeenCalledWith(true);
       });
     });
   });

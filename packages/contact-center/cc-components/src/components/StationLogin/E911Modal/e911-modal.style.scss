@@ -1,35 +1,7 @@
 .e911-modal {
-  padding: 0;
-  border: none;
-  border-radius: 0.5rem;
-  box-shadow: 0rem 0.25rem 1rem 0rem rgba(0, 0, 0, 0.2);
-  max-width: 30rem;
-  width: 90%;
-
-  &::backdrop {
-    background-color: rgba(0, 0, 0, 0.5);
-  }
-
-  .e911-modal-content {
-    padding: 1.5rem;
-  }
-
-  .e911-modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-
-    .e911-modal-title {
-      margin: 0;
-    }
-
-    .e911-close-button {
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 0.25rem;
-    }
+  // Cancel is the only way to dismiss this modal - hide the Dialog's built-in close ("X") button.
+  &::part(dialog-close-btn) {
+    display: none;
   }
 
   .e911-warning-box {
@@ -73,13 +45,5 @@
     .e911-checkbox-label {
       cursor: pointer;
     }
-  }
-
-  .e911-modal-footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: 0.75rem;
-    padding-top: 1rem;
-    border-top: 0.0625rem solid var(--mds-color-theme-outline-primary-normal);
   }
 }

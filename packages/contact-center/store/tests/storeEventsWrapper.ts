@@ -2674,15 +2674,16 @@ describe('storeEventsWrapper', () => {
 
       it('should update user preferences and store state successfully', async () => {
         const mockUserPreference = {
-          getUserPreference: jest.fn(),
+          getUserPreference: jest.fn().mockResolvedValue({userId: 'test-preference-user-id'}),
           updateUserPreference: jest.fn().mockResolvedValue({}),
         };
         storeWrapper['store'].cc.userPreference = mockUserPreference;
+        // agentId (CC identifier) intentionally differs from the preference service's userId
         storeWrapper['store'].agentId = 'test-agent-id';
 
         await storeWrapper.updateEmergencyModalAcknowledgment();
 
-        expect(mockUserPreference.updateUserPreference).toHaveBeenCalledWith('test-agent-id', {
+        expect(mockUserPreference.updateUserPreference).toHaveBeenCalledWith('test-preference-user-id', {
           desktopPreference: JSON.stringify({isEmergencyModalAlreadyDisplayed: true}),
         });
         expect(storeWrapper['store'].isEmergencyModalAlreadyDisplayed).toBe(true);
@@ -2692,6 +2693,7 @@ describe('storeEventsWrapper', () => {
       it('should merge the E911 flag into existing desktopPreference instead of overwriting it', async () => {
         const mockUserPreference = {
           getUserPreference: jest.fn().mockResolvedValue({
+            userId: 'test-preference-user-id',
             desktopPreference: JSON.stringify({someOtherSetting: 'value'}),
           }),
           updateUserPreference: jest.fn().mockResolvedValue({}),
@@ -2701,7 +2703,7 @@ describe('storeEventsWrapper', () => {
 
         await storeWrapper.updateEmergencyModalAcknowledgment();
 
-        expect(mockUserPreference.updateUserPreference).toHaveBeenCalledWith('test-agent-id', {
+        expect(mockUserPreference.updateUserPreference).toHaveBeenCalledWith('test-preference-user-id', {
           desktopPreference: JSON.stringify({someOtherSetting: 'value', isEmergencyModalAlreadyDisplayed: true}),
         });
       });
@@ -2709,6 +2711,7 @@ describe('storeEventsWrapper', () => {
       it('should handle unparsable existing desktopPreference gracefully when merging', async () => {
         const mockUserPreference = {
           getUserPreference: jest.fn().mockResolvedValue({
+            userId: 'test-preference-user-id',
             desktopPreference: 'invalid-json',
           }),
           updateUserPreference: jest.fn().mockResolvedValue({}),
@@ -2722,7 +2725,7 @@ describe('storeEventsWrapper', () => {
           'CC-Widgets: updateEmergencyModalAcknowledgment(): failed to parse existing desktopPreference',
           expect.any(Object)
         );
-        expect(mockUserPreference.updateUserPreference).toHaveBeenCalledWith('test-agent-id', {
+        expect(mockUserPreference.updateUserPreference).toHaveBeenCalledWith('test-preference-user-id', {
           desktopPreference: JSON.stringify({isEmergencyModalAlreadyDisplayed: true}),
         });
       });
@@ -2730,12 +2733,26 @@ describe('storeEventsWrapper', () => {
       it('should throw error on API failure', async () => {
         const mockError = new Error('Update Error');
         const mockUserPreference = {
-          getUserPreference: jest.fn(),
+          getUserPreference: jest.fn().mockResolvedValue({userId: 'test-preference-user-id'}),
           updateUserPreference: jest.fn().mockRejectedValue(mockError),
         };
         storeWrapper['store'].cc.userPreference = mockUserPreference;
 
         await expect(storeWrapper.updateEmergencyModalAcknowledgment()).rejects.toThrow('Update Error');
+      });
+
+      it('should use the preference service userId, not the CC agentId, when updating', async () => {
+        const mockUserPreference = {
+          getUserPreference: jest.fn().mockResolvedValue({userId: 'preference-user-id'}),
+          updateUserPreference: jest.fn().mockResolvedValue({}),
+        };
+        storeWrapper['store'].cc.userPreference = mockUserPreference;
+        storeWrapper['store'].agentId = 'cc-agent-id';
+
+        await storeWrapper.updateEmergencyModalAcknowledgment();
+
+        expect(mockUserPreference.updateUserPreference).toHaveBeenCalledWith('preference-user-id', expect.any(Object));
+        expect(mockUserPreference.updateUserPreference).not.toHaveBeenCalledWith('cc-agent-id', expect.any(Object));
       });
     });
   });
