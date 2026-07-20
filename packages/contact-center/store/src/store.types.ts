@@ -391,6 +391,15 @@ export type UserPreferenceResponse = {
 };
 
 /**
+ * Request payload for creating user preferences.
+ * @public
+ */
+export type CreateUserPreferenceRequest = {
+  userId: string;
+  desktopPreference: string;
+};
+
+/**
  * Request payload for updating user preferences.
  * @public
  */
@@ -415,6 +424,7 @@ export type GetUserPreferenceParams = {
  */
 export interface IUserPreferenceService {
   getUserPreference(params?: GetUserPreferenceParams): Promise<UserPreferenceResponse>;
+  createUserPreference(data: CreateUserPreferenceRequest): Promise<UserPreferenceResponse>;
   updateUserPreference(userId: string, data: UpdateUserPreferenceRequest): Promise<UserPreferenceResponse>;
 }
 

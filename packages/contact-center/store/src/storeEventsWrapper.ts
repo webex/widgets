@@ -611,7 +611,27 @@ class StoreWrapper implements IStoreWrapper {
         throw new Error('userPreference service not available');
       }
 
-      const response = await this.store.cc.userPreference.getUserPreference();
+      let response;
+      try {
+        response = await this.store.cc.userPreference.getUserPreference();
+      } catch (getError) {
+        if ((getError as {statusCode?: number})?.statusCode === 404) {
+          // First-time user: no preference record has been created yet. This is not a failure -
+          // treat it the same as "not yet acknowledged" so the E911 modal can still be shown.
+          this.store.logger.info('CC-Widgets: fetchUserPreferences(): no user preference record exists yet', {
+            module: 'storeEventsWrapper.ts',
+            method: 'fetchUserPreferences',
+          });
+          runInAction(() => {
+            this.store.isEmergencyModalAlreadyDisplayed = false;
+          });
+
+          return;
+        }
+
+        throw getError;
+      }
+
       const desktopPrefString = response?.desktopPreference;
 
       let isEmergencyModalAlreadyDisplayed = false;
@@ -655,7 +675,20 @@ class StoreWrapper implements IStoreWrapper {
         throw new Error('userPreference service not available');
       }
 
-      const response = await this.store.cc.userPreference.getUserPreference();
+      let response;
+      let hasExistingRecord = true;
+      try {
+        response = await this.store.cc.userPreference.getUserPreference();
+      } catch (getError) {
+        if ((getError as {statusCode?: number})?.statusCode === 404) {
+          // First-time user: no preference record exists yet, so there's nothing to merge and
+          // no userId to reuse. Fall through and create the record below.
+          hasExistingRecord = false;
+        } else {
+          throw getError;
+        }
+      }
+
       const existingDesktopPrefString = response?.desktopPreference;
 
       let existingDesktopPref = {};
@@ -679,9 +712,16 @@ class StoreWrapper implements IStoreWrapper {
         isEmergencyModalAlreadyDisplayed: true,
       });
 
-      await this.store.cc.userPreference.updateUserPreference(response?.userId, {
-        desktopPreference,
-      });
+      if (hasExistingRecord) {
+        await this.store.cc.userPreference.updateUserPreference(response?.userId, {
+          desktopPreference,
+        });
+      } else {
+        await this.store.cc.userPreference.createUserPreference({
+          userId: this.store.agentId,
+          desktopPreference,
+        });
+      }
 
       runInAction(() => {
         this.store.isEmergencyModalAlreadyDisplayed = true;

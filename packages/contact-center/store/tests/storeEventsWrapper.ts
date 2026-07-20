@@ -2614,6 +2614,7 @@ describe('storeEventsWrapper', () => {
           getUserPreference: jest.fn().mockResolvedValue({
             desktopPreference: JSON.stringify({isEmergencyModalAlreadyDisplayed: true}),
           }),
+          createUserPreference: jest.fn(),
           updateUserPreference: jest.fn(),
         };
         storeWrapper['store'].cc.userPreference = mockUserPreference;
@@ -2629,6 +2630,7 @@ describe('storeEventsWrapper', () => {
           getUserPreference: jest.fn().mockResolvedValue({
             desktopPreference: null,
           }),
+          createUserPreference: jest.fn(),
           updateUserPreference: jest.fn(),
         };
         storeWrapper['store'].cc.userPreference = mockUserPreference;
@@ -2645,6 +2647,7 @@ describe('storeEventsWrapper', () => {
           getUserPreference: jest.fn().mockResolvedValue({
             desktopPreference: null,
           }),
+          createUserPreference: jest.fn(),
           updateUserPreference: jest.fn(),
         };
         storeWrapper['store'].cc.userPreference = mockUserPreference;
@@ -2659,6 +2662,7 @@ describe('storeEventsWrapper', () => {
           getUserPreference: jest.fn().mockResolvedValue({
             desktopPreference: 'invalid-json',
           }),
+          createUserPreference: jest.fn(),
           updateUserPreference: jest.fn(),
         };
         storeWrapper['store'].cc.userPreference = mockUserPreference;
@@ -2676,11 +2680,29 @@ describe('storeEventsWrapper', () => {
         const mockError = new Error('API Error');
         const mockUserPreference = {
           getUserPreference: jest.fn().mockRejectedValue(mockError),
+          createUserPreference: jest.fn(),
           updateUserPreference: jest.fn(),
         };
         storeWrapper['store'].cc.userPreference = mockUserPreference;
 
         await expect(storeWrapper.fetchUserPreferences()).rejects.toThrow('API Error');
+      });
+
+      it('should treat a missing (404) preference record as not-yet-acknowledged instead of throwing', async () => {
+        const notFoundError = Object.assign(new Error('Not Found'), {statusCode: 404});
+        const mockUserPreference = {
+          getUserPreference: jest.fn().mockRejectedValue(notFoundError),
+          createUserPreference: jest.fn(),
+          updateUserPreference: jest.fn(),
+        };
+        storeWrapper['store'].cc.userPreference = mockUserPreference;
+        storeWrapper['store'].isEmergencyModalAlreadyDisplayed = true;
+        const errorCallCountBefore = (storeWrapper['store'].logger.error as jest.Mock).mock.calls.length;
+
+        await expect(storeWrapper.fetchUserPreferences()).resolves.toBeUndefined();
+
+        expect(storeWrapper['store'].isEmergencyModalAlreadyDisplayed).toBe(false);
+        expect((storeWrapper['store'].logger.error as jest.Mock).mock.calls.length).toBe(errorCallCountBefore);
       });
     });
 
@@ -2701,6 +2723,7 @@ describe('storeEventsWrapper', () => {
       it('should update user preferences and store state successfully', async () => {
         const mockUserPreference = {
           getUserPreference: jest.fn().mockResolvedValue({userId: 'test-preference-user-id'}),
+          createUserPreference: jest.fn(),
           updateUserPreference: jest.fn().mockResolvedValue({}),
         };
         storeWrapper['store'].cc.userPreference = mockUserPreference;
@@ -2722,6 +2745,7 @@ describe('storeEventsWrapper', () => {
             userId: 'test-preference-user-id',
             desktopPreference: JSON.stringify({someOtherSetting: 'value'}),
           }),
+          createUserPreference: jest.fn(),
           updateUserPreference: jest.fn().mockResolvedValue({}),
         };
         storeWrapper['store'].cc.userPreference = mockUserPreference;
@@ -2740,6 +2764,7 @@ describe('storeEventsWrapper', () => {
             userId: 'test-preference-user-id',
             desktopPreference: 'invalid-json',
           }),
+          createUserPreference: jest.fn(),
           updateUserPreference: jest.fn().mockResolvedValue({}),
         };
         storeWrapper['store'].cc.userPreference = mockUserPreference;
@@ -2760,6 +2785,7 @@ describe('storeEventsWrapper', () => {
         const mockError = new Error('Update Error');
         const mockUserPreference = {
           getUserPreference: jest.fn().mockResolvedValue({userId: 'test-preference-user-id'}),
+          createUserPreference: jest.fn(),
           updateUserPreference: jest.fn().mockRejectedValue(mockError),
         };
         storeWrapper['store'].cc.userPreference = mockUserPreference;
@@ -2770,6 +2796,7 @@ describe('storeEventsWrapper', () => {
       it('should use the preference service userId, not the CC agentId, when updating', async () => {
         const mockUserPreference = {
           getUserPreference: jest.fn().mockResolvedValue({userId: 'preference-user-id'}),
+          createUserPreference: jest.fn(),
           updateUserPreference: jest.fn().mockResolvedValue({}),
         };
         storeWrapper['store'].cc.userPreference = mockUserPreference;
@@ -2779,6 +2806,42 @@ describe('storeEventsWrapper', () => {
 
         expect(mockUserPreference.updateUserPreference).toHaveBeenCalledWith('preference-user-id', expect.any(Object));
         expect(mockUserPreference.updateUserPreference).not.toHaveBeenCalledWith('cc-agent-id', expect.any(Object));
+      });
+
+      it('should create a new preference record (using agentId) when the user has none yet (404 on getUserPreference)', async () => {
+        const notFoundError = Object.assign(new Error('Not Found'), {statusCode: 404});
+        const mockUserPreference = {
+          getUserPreference: jest.fn().mockRejectedValue(notFoundError),
+          createUserPreference: jest.fn().mockResolvedValue({}),
+          updateUserPreference: jest.fn().mockResolvedValue({}),
+        };
+        storeWrapper['store'].cc.userPreference = mockUserPreference;
+        storeWrapper['store'].agentId = 'first-time-agent-id';
+
+        await storeWrapper.updateEmergencyModalAcknowledgment();
+
+        expect(mockUserPreference.createUserPreference).toHaveBeenCalledWith({
+          userId: 'first-time-agent-id',
+          desktopPreference: JSON.stringify({isEmergencyModalAlreadyDisplayed: true}),
+        });
+        expect(mockUserPreference.updateUserPreference).not.toHaveBeenCalled();
+        expect(storeWrapper['store'].isEmergencyModalAlreadyDisplayed).toBe(true);
+        expect(storeWrapper['store'].showE911Modal).toBe(false);
+      });
+
+      it('should rethrow non-404 errors from getUserPreference without creating a record', async () => {
+        const mockError = new Error('Server Error');
+        const mockUserPreference = {
+          getUserPreference: jest.fn().mockRejectedValue(mockError),
+          createUserPreference: jest.fn(),
+          updateUserPreference: jest.fn(),
+        };
+        storeWrapper['store'].cc.userPreference = mockUserPreference;
+
+        await expect(storeWrapper.updateEmergencyModalAcknowledgment()).rejects.toThrow('Server Error');
+
+        expect(mockUserPreference.createUserPreference).not.toHaveBeenCalled();
+        expect(mockUserPreference.updateUserPreference).not.toHaveBeenCalled();
       });
     });
   });
