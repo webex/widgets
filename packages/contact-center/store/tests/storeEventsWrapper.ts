@@ -2612,7 +2612,7 @@ describe('storeEventsWrapper', () => {
       it('should fetch and parse user preferences successfully', async () => {
         const mockUserPreference = {
           getUserPreference: jest.fn().mockResolvedValue({
-            desktopPreference: JSON.stringify({isEmergencyModalAlreadyDisplayed: true}),
+            preferences: {desktopPreference: JSON.stringify({isEmergencyModalAlreadyDisplayed: true})},
           }),
           createUserPreference: jest.fn(),
           updateUserPreference: jest.fn(),
@@ -2628,7 +2628,7 @@ describe('storeEventsWrapper', () => {
       it('should handle empty desktopPreference', async () => {
         const mockUserPreference = {
           getUserPreference: jest.fn().mockResolvedValue({
-            desktopPreference: null,
+            preferences: {desktopPreference: null},
           }),
           createUserPreference: jest.fn(),
           updateUserPreference: jest.fn(),
@@ -2645,7 +2645,7 @@ describe('storeEventsWrapper', () => {
         storeWrapper['store'].isEmergencyModalAlreadyDisplayed = true;
         const mockUserPreference = {
           getUserPreference: jest.fn().mockResolvedValue({
-            desktopPreference: null,
+            preferences: {desktopPreference: null},
           }),
           createUserPreference: jest.fn(),
           updateUserPreference: jest.fn(),
@@ -2660,7 +2660,7 @@ describe('storeEventsWrapper', () => {
       it('should handle parse error gracefully', async () => {
         const mockUserPreference = {
           getUserPreference: jest.fn().mockResolvedValue({
-            desktopPreference: 'invalid-json',
+            preferences: {desktopPreference: 'invalid-json'},
           }),
           createUserPreference: jest.fn(),
           updateUserPreference: jest.fn(),
@@ -2743,7 +2743,7 @@ describe('storeEventsWrapper', () => {
         const mockUserPreference = {
           getUserPreference: jest.fn().mockResolvedValue({
             userId: 'test-preference-user-id',
-            desktopPreference: JSON.stringify({someOtherSetting: 'value'}),
+            preferences: {desktopPreference: JSON.stringify({someOtherSetting: 'value'})},
           }),
           createUserPreference: jest.fn(),
           updateUserPreference: jest.fn().mockResolvedValue({}),
@@ -2762,7 +2762,7 @@ describe('storeEventsWrapper', () => {
         const mockUserPreference = {
           getUserPreference: jest.fn().mockResolvedValue({
             userId: 'test-preference-user-id',
-            desktopPreference: 'invalid-json',
+            preferences: {desktopPreference: 'invalid-json'},
           }),
           createUserPreference: jest.fn(),
           updateUserPreference: jest.fn().mockResolvedValue({}),

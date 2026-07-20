@@ -632,7 +632,9 @@ class StoreWrapper implements IStoreWrapper {
         throw getError;
       }
 
-      const desktopPrefString = response?.desktopPreference;
+      // The SDK returns the persisted desktopPreference JSON string nested under `preferences`,
+      // not as a top-level field - see CAI-7906.
+      const desktopPrefString = response?.preferences?.desktopPreference;
 
       let isEmergencyModalAlreadyDisplayed = false;
 
@@ -689,7 +691,9 @@ class StoreWrapper implements IStoreWrapper {
         }
       }
 
-      const existingDesktopPrefString = response?.desktopPreference;
+      // The SDK returns the persisted desktopPreference JSON string nested under `preferences`,
+      // not as a top-level field - see CAI-7906.
+      const existingDesktopPrefString = response?.preferences?.desktopPreference;
 
       let existingDesktopPref = {};
       if (existingDesktopPrefString) {

@@ -385,7 +385,11 @@ export type UserPreferenceResponse = {
   id: string;
   organizationId: string;
   userId: string;
-  desktopPreference?: string;
+  // The SDK returns the persisted desktopPreference JSON string nested under `preferences`,
+  // not as a top-level field - see CAI-7906.
+  preferences?: {
+    desktopPreference?: string;
+  };
   createdTime?: number;
   lastUpdatedTime?: number;
 };
