@@ -956,6 +956,12 @@ export interface GlobalVariablesPanelProps {
 export type CampaignAutoAction = 'ACCEPT' | 'SKIP' | 'REMOVE';
 
 /**
+ * Indicates which campaign preview action is currently in progress.
+ * Used to display contextual status text ("Connecting...", "Skipping...", "Removing...").
+ */
+export type CampaignPendingAction = CampaignAutoAction | null;
+
+/**
  * Maps a CampaignAutoAction to the corresponding CampaignErrorType
  * used when the auto-action or manual action fails.
  */
@@ -1082,6 +1088,9 @@ export interface CampaignTaskPopoverProps {
   /** Whether the Accept button has been clicked (shows "Connecting..." state). */
   isAcceptClicked: boolean;
 
+  /** Which campaign action is currently in progress, or null if none. */
+  pendingAction?: CampaignPendingAction;
+
   /** Whether the campaign preview has been accepted by the backend (call controls visible). */
   isAccepted: boolean;
 
@@ -1132,6 +1141,9 @@ export interface CampaignTaskListItemProps {
 
   /** Whether the Accept button has been clicked (shows "Connecting..." state). */
   isAcceptClicked: boolean;
+
+  /** Which campaign action is currently in progress, or null if none. */
+  pendingAction?: CampaignPendingAction;
 
   /** Whether the campaign preview has been accepted by the backend (call controls visible). */
   isAccepted: boolean;

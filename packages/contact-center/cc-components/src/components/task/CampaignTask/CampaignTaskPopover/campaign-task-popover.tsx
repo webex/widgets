@@ -15,6 +15,7 @@ const CampaignTaskPopover: React.FC<CampaignTaskPopoverProps> = ({
   logger,
   triggerId,
   isAcceptClicked,
+  pendingAction,
   isAccepted,
   isAcceptDisabled,
   isSkipDisabled,
@@ -78,6 +79,7 @@ const CampaignTaskPopover: React.FC<CampaignTaskPopoverProps> = ({
           customerName={customerName}
           timeoutTimestamp={timeoutTimestamp}
           isAcceptClicked={isAcceptClicked}
+          pendingAction={pendingAction}
           isAccepted={isAccepted}
           isAcceptDisabled={isAcceptDisabled}
           isSkipDisabled={isSkipDisabled}

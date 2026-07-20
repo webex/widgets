@@ -22,6 +22,13 @@ const CallControlInternal: React.FunctionComponent<CallControlProps> = observer(
       acceptedCampaignIds,
     } = store;
 
+    // Hide call control when the current task is a campaign preview that
+    // the agent has not yet accepted. Matches agent desktop behavior where
+    // call controls are only shown after the preview contact is accepted.
+    if (currentTask && isUnacceptedCampaignPreview(currentTask, acceptedCampaignIds)) {
+      return <></>;
+    }
+
     const callControlProps = useCallControl({
       currentTask,
       onHoldResume,
@@ -35,17 +42,6 @@ const CallControlInternal: React.FunctionComponent<CallControlProps> = observer(
       agentId,
     });
 
-    if (!currentTask) {
-      return <></>;
-    }
-
-    // Hide call control when the current task is a campaign preview that
-    // the agent has not yet accepted.  Matches agent desktop behavior where
-    // call controls are only shown after the preview contact is accepted.
-    if (isUnacceptedCampaignPreview(currentTask, acceptedCampaignIds)) {
-      return <></>;
-    }
-
     const result = {
       ...callControlProps,
       wrapupCodes,
@@ -55,6 +51,10 @@ const CallControlInternal: React.FunctionComponent<CallControlProps> = observer(
       logger,
       consultTransferOptions,
     };
+
+    if (!currentTask) {
+      return <></>;
+    }
 
     return <CallControlComponent {...result} />;
   }

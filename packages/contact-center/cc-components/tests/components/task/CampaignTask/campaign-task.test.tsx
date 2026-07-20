@@ -221,8 +221,9 @@ describe('CampaignTask', () => {
     });
 
     expect(skipPreviewContact).toHaveBeenCalledTimes(1);
-    // After skip, buttons should be disabled (waiting for backend event)
-    expect((screen.getByTestId('campaign-task-accept-button') as unknown as {disabled: boolean}).disabled).toBe(true);
+    // After skip, Accept is replaced by "Skipping..." status button
+    expect(screen.queryByTestId('campaign-task-accept-button')).not.toBeInTheDocument();
+    expect(screen.getByTestId('campaign-task-connecting-button')).toHaveTextContent('Skipping...');
   });
 
   it('should show error dialog when skip fails', async () => {
@@ -438,8 +439,9 @@ describe('CampaignTask', () => {
 
       // Skip API should NOT be called — backend handles auto-skip
       expect(skipPreviewContact).not.toHaveBeenCalled();
-      // Buttons should be disabled
-      expect(screen.getByTestId('campaign-task-accept-button')).toHaveProperty('disabled', true);
+      // Accept is replaced by "Skipping..." status button; Skip/Remove still disabled
+      expect(screen.queryByTestId('campaign-task-accept-button')).not.toBeInTheDocument();
+      expect(screen.getByTestId('campaign-task-connecting-button')).toHaveTextContent('Skipping...');
       expect(screen.getByTestId('campaign-task-skip-button')).toHaveProperty('disabled', true);
       expect(screen.getByTestId('campaign-task-remove-button')).toHaveProperty('disabled', true);
     });
@@ -456,8 +458,9 @@ describe('CampaignTask', () => {
 
       // Remove API should NOT be called — backend handles auto-remove
       expect(removePreviewContact).not.toHaveBeenCalled();
-      // Buttons should be disabled
-      expect(screen.getByTestId('campaign-task-accept-button')).toHaveProperty('disabled', true);
+      // Accept is replaced by "Removing..." status button
+      expect(screen.queryByTestId('campaign-task-accept-button')).not.toBeInTheDocument();
+      expect(screen.getByTestId('campaign-task-connecting-button')).toHaveTextContent('Removing...');
     });
 
     it('should show Connecting button and disable Skip/Remove on timeout for ACCEPT autoAction', async () => {

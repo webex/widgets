@@ -32,6 +32,10 @@ const CallControlCADInternal: React.FunctionComponent<CallControlProps> = observ
       acceptedCampaignIds,
     } = store;
 
+    if (currentTask && isUnacceptedCampaignPreview(currentTask, acceptedCampaignIds)) {
+      return <></>;
+    }
+
     const callControlProps = useCallControl({
       currentTask,
       onHoldResume,
@@ -45,14 +49,6 @@ const CallControlCADInternal: React.FunctionComponent<CallControlProps> = observ
       agentId,
     });
 
-    if (!currentTask) {
-      return <></>;
-    }
-
-    if (isUnacceptedCampaignPreview(currentTask, acceptedCampaignIds)) {
-      return <></>;
-    }
-
     const result = {
       ...callControlProps,
       wrapupCodes,
@@ -64,6 +60,10 @@ const CallControlCADInternal: React.FunctionComponent<CallControlProps> = observ
       logger,
       consultTransferOptions,
     };
+
+    if (!currentTask) {
+      return <></>;
+    }
 
     return <CallControlCADComponent {...result} />;
   }
