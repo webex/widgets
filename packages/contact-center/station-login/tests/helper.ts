@@ -1178,6 +1178,54 @@ describe('useStationLogin Hook', () => {
       });
     });
 
+    it('should dedupe concurrent checkE911ModalDisplay calls (login() racing AGENT_STATION_LOGIN_SUCCESS) into a single fetchUserPreferences() call', async () => {
+      ccMock.stationLogin.mockResolvedValue(successResponse);
+      (store as unknown as {deviceType: string}).deviceType = 'BROWSER';
+
+      let resolveFetch: () => void = () => {};
+      (store.fetchUserPreferences as jest.Mock).mockImplementation(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveFetch = resolve;
+          })
+      );
+
+      jest.spyOn(store, 'setCCCallback').mockImplementation((event, cb) => {
+        ccMock.on(event, cb);
+      });
+      const onSpy = jest.spyOn(ccMock, 'on');
+
+      const {result} = renderHook(() =>
+        useStationLogin({
+          ...baseStationLoginProps,
+          deviceType: 'BROWSER',
+        })
+      );
+
+      const loginSuccessCb = onSpy.mock.calls.find((call) => call[0] === CC_EVENTS.AGENT_STATION_LOGIN_SUCCESS)[1] as (
+        payload: unknown
+      ) => void;
+
+      act(() => {
+        // Simulate the real race: login()'s own success handler and the SDK's
+        // AGENT_STATION_LOGIN_SUCCESS callback both firing for the same login before
+        // fetchUserPreferences() resolves.
+        result.current.login();
+        loginSuccessCb({deviceType: 'BROWSER', auxCodeId: '0'});
+      });
+
+      await act(async () => {
+        resolveFetch();
+        // Flush pending microtasks so both callers' continuations run.
+        await Promise.resolve();
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      expect(store.fetchUserPreferences).toHaveBeenCalledTimes(1);
+      expect(store.setShowE911Modal).toHaveBeenCalledWith(true);
+    });
+
     it('should show the E911 modal after a successful multi-login takeover (handleContinue) with BROWSER', async () => {
       (store.fetchUserPreferences as jest.Mock).mockResolvedValue(undefined);
       store.setIsAgentLoggedIn(true);

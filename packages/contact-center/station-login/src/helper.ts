@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import {LogoutSuccess, AgentProfileUpdate, LoginOption, StationLoginSuccessResponse} from '@webex/contact-center';
 import {UseStationLoginProps} from './station-login/station-login.types';
 import store, {CC_EVENTS, DEVICE_TYPE_BROWSER} from '@webex/cc-store'; // we need to import as we are losing the context of this in store
@@ -53,6 +53,9 @@ export const useStationLogin = (props: UseStationLoginProps) => {
 
   // Error for Save button
   const [saveError, setSaveError] = useState<string>('');
+
+  // Single-flight guard for checkE911ModalDisplay - see its usage below
+  const e911CheckInFlightRef = useRef<Promise<void> | null>(null);
 
   // Set original login options after successful login
   useEffect(() => {
@@ -250,27 +253,44 @@ export const useStationLogin = (props: UseStationLoginProps) => {
     }
   };
 
-  const checkE911ModalDisplay = async (deviceTypeToCheck: string) => {
-    try {
-      if (deviceTypeToCheck !== DEVICE_TYPE_BROWSER) {
-        return;
-      }
+  const checkE911ModalDisplay = (deviceTypeToCheck: string): Promise<void> => {
+    if (deviceTypeToCheck !== DEVICE_TYPE_BROWSER) {
+      return Promise.resolve();
+    }
 
-      await store.fetchUserPreferences();
+    // A single login can trigger this from more than one path at once (e.g. login()'s own
+    // success handler racing the AGENT_STATION_LOGIN_SUCCESS callback). Make the check
+    // single-flight so concurrent callers join the same fetchUserPreferences() call instead of
+    // each starting their own - two independent reads could otherwise race with the user's
+    // Save/Cancel action and reopen the modal with a stale "not yet acknowledged" result.
+    if (e911CheckInFlightRef.current) {
+      return e911CheckInFlightRef.current;
+    }
 
-      if (!store.isEmergencyModalAlreadyDisplayed) {
-        store.setShowE911Modal(true);
-        logger.log('CC-Widgets: E911 modal displayed for BROWSER login', {
+    const check = (async () => {
+      try {
+        await store.fetchUserPreferences();
+
+        if (!store.isEmergencyModalAlreadyDisplayed) {
+          store.setShowE911Modal(true);
+          logger.log('CC-Widgets: E911 modal displayed for BROWSER login', {
+            module: 'widget-station-login#helper.ts',
+            method: 'checkE911ModalDisplay',
+          });
+        }
+      } catch (error) {
+        logger.error(`CC-Widgets: Error checking E911 modal display - ${error.message}`, {
           module: 'widget-station-login#helper.ts',
           method: 'checkE911ModalDisplay',
         });
+      } finally {
+        e911CheckInFlightRef.current = null;
       }
-    } catch (error) {
-      logger.error(`CC-Widgets: Error checking E911 modal display - ${error.message}`, {
-        module: 'widget-station-login#helper.ts',
-        method: 'checkE911ModalDisplay',
-      });
-    }
+    })();
+
+    e911CheckInFlightRef.current = check;
+
+    return check;
   };
 
   const login = () => {
