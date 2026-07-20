@@ -2689,6 +2689,44 @@ describe('storeEventsWrapper', () => {
         expect(storeWrapper['store'].showE911Modal).toBe(false);
       });
 
+      it('should merge the E911 flag into existing desktopPreference instead of overwriting it', async () => {
+        const mockUserPreference = {
+          getUserPreference: jest.fn().mockResolvedValue({
+            desktopPreference: JSON.stringify({someOtherSetting: 'value'}),
+          }),
+          updateUserPreference: jest.fn().mockResolvedValue({}),
+        };
+        storeWrapper['store'].cc.userPreference = mockUserPreference;
+        storeWrapper['store'].agentId = 'test-agent-id';
+
+        await storeWrapper.updateEmergencyModalAcknowledgment();
+
+        expect(mockUserPreference.updateUserPreference).toHaveBeenCalledWith('test-agent-id', {
+          desktopPreference: JSON.stringify({someOtherSetting: 'value', isEmergencyModalAlreadyDisplayed: true}),
+        });
+      });
+
+      it('should handle unparsable existing desktopPreference gracefully when merging', async () => {
+        const mockUserPreference = {
+          getUserPreference: jest.fn().mockResolvedValue({
+            desktopPreference: 'invalid-json',
+          }),
+          updateUserPreference: jest.fn().mockResolvedValue({}),
+        };
+        storeWrapper['store'].cc.userPreference = mockUserPreference;
+        storeWrapper['store'].agentId = 'test-agent-id';
+
+        await storeWrapper.updateEmergencyModalAcknowledgment();
+
+        expect(storeWrapper['store'].logger.error).toHaveBeenCalledWith(
+          'CC-Widgets: updateEmergencyModalAcknowledgment(): failed to parse existing desktopPreference',
+          expect.any(Object)
+        );
+        expect(mockUserPreference.updateUserPreference).toHaveBeenCalledWith('test-agent-id', {
+          desktopPreference: JSON.stringify({isEmergencyModalAlreadyDisplayed: true}),
+        });
+      });
+
       it('should throw error on API failure', async () => {
         const mockError = new Error('Update Error');
         const mockUserPreference = {

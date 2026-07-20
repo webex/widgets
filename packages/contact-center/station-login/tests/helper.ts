@@ -26,9 +26,13 @@ jest.mock('@webex/cc-store', () => {
     setLogoutCallback: jest.fn(),
     setCCCallback: jest.fn(),
     removeCCCallback: jest.fn(),
+    fetchUserPreferences: jest.fn(),
+    setShowE911Modal: jest.fn(),
+    isEmergencyModalAlreadyDisplayed: false,
     CC_EVENTS: {
       AGENT_STATION_LOGIN_SUCCESS: 'AgentStationLoginSuccess',
     },
+    DEVICE_TYPE_BROWSER: 'BROWSER',
   };
 });
 
@@ -1021,6 +1025,106 @@ describe('useStationLogin Hook', () => {
           method: 'handleCCSignOut',
         });
         expect(onCCSignOut).toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('checkE911ModalDisplay (via login)', () => {
+    afterEach(() => {
+      (store.fetchUserPreferences as jest.Mock).mockReset();
+      (store.setShowE911Modal as jest.Mock).mockReset();
+      (store as unknown as {isEmergencyModalAlreadyDisplayed: boolean}).isEmergencyModalAlreadyDisplayed = false;
+    });
+
+    it('should show the E911 modal on successful BROWSER login when not already acknowledged', async () => {
+      ccMock.stationLogin.mockResolvedValue(successResponse);
+      (store.fetchUserPreferences as jest.Mock).mockResolvedValue(undefined);
+      (store as unknown as {isEmergencyModalAlreadyDisplayed: boolean}).isEmergencyModalAlreadyDisplayed = false;
+
+      const {result} = renderHook(() =>
+        useStationLogin({
+          ...baseStationLoginProps,
+          deviceType: 'BROWSER',
+        })
+      );
+
+      await act(async () => {
+        await result.current.login();
+      });
+
+      await waitFor(() => {
+        expect(store.fetchUserPreferences).toHaveBeenCalled();
+        expect(store.setShowE911Modal).toHaveBeenCalledWith(true);
+      });
+    });
+
+    it('should skip the E911 modal for non-BROWSER device types', async () => {
+      ccMock.stationLogin.mockResolvedValue(successResponse);
+
+      const {result} = renderHook(() =>
+        useStationLogin({
+          ...baseStationLoginProps,
+          deviceType: 'EXTENSION',
+        })
+      );
+
+      await act(async () => {
+        await result.current.login();
+      });
+
+      await waitFor(() => {
+        expect(store.fetchUserPreferences).not.toHaveBeenCalled();
+        expect(store.setShowE911Modal).not.toHaveBeenCalled();
+      });
+    });
+
+    it('should skip the E911 modal when the preference is already acknowledged', async () => {
+      ccMock.stationLogin.mockResolvedValue(successResponse);
+      (store.fetchUserPreferences as jest.Mock).mockResolvedValue(undefined);
+      (store as unknown as {isEmergencyModalAlreadyDisplayed: boolean}).isEmergencyModalAlreadyDisplayed = true;
+
+      const {result} = renderHook(() =>
+        useStationLogin({
+          ...baseStationLoginProps,
+          deviceType: 'BROWSER',
+        })
+      );
+
+      await act(async () => {
+        await result.current.login();
+      });
+
+      await waitFor(() => {
+        expect(store.fetchUserPreferences).toHaveBeenCalled();
+        expect(store.setShowE911Modal).not.toHaveBeenCalled();
+      });
+    });
+
+    it('should log an error and not show the modal when fetchUserPreferences fails', async () => {
+      ccMock.stationLogin.mockResolvedValue(successResponse);
+      const fetchError = new Error('userPreference service not available');
+      (store.fetchUserPreferences as jest.Mock).mockRejectedValue(fetchError);
+
+      const {result} = renderHook(() =>
+        useStationLogin({
+          ...baseStationLoginProps,
+          deviceType: 'BROWSER',
+        })
+      );
+
+      await act(async () => {
+        await result.current.login();
+      });
+
+      await waitFor(() => {
+        expect(store.setShowE911Modal).not.toHaveBeenCalled();
+        expect(logger.error).toHaveBeenCalledWith(
+          expect.stringContaining('CC-Widgets: Error checking E911 modal display'),
+          expect.objectContaining({
+            module: 'widget-station-login#helper.ts',
+            method: 'checkE911ModalDisplay',
+          })
+        );
       });
     });
   });

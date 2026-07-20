@@ -81,9 +81,6 @@ const E911Modal: React.FC<E911ModalProps> = ({isOpen, onSaveAndContinue, onCance
           <Text tagname="p" type="body-midsize-regular" className="e911-warning-message">
             {E911ModalLabels.WARNING_MESSAGE}
           </Text>
-          <a href="#" className="e911-help-link" data-testid="e911-help-link">
-            {E911ModalLabels.HELP_LINK_TEXT}
-          </a>
         </div>
 
         <div className="e911-dialing-section">

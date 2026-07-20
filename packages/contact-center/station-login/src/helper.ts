@@ -1,7 +1,7 @@
 import {useEffect, useState} from 'react';
 import {LogoutSuccess, AgentProfileUpdate, LoginOption, StationLoginSuccessResponse} from '@webex/contact-center';
 import {UseStationLoginProps} from './station-login/station-login.types';
-import store, {CC_EVENTS} from '@webex/cc-store'; // we need to import as we are losing the context of this in store
+import store, {CC_EVENTS, DEVICE_TYPE_BROWSER} from '@webex/cc-store'; // we need to import as we are losing the context of this in store
 import {LoginOptionsState} from '@webex/cc-components';
 
 export const useStationLogin = (props: UseStationLoginProps) => {
@@ -80,7 +80,7 @@ export const useStationLogin = (props: UseStationLoginProps) => {
   // Compare logic for Save button
   const isLoginOptionsChanged =
     originalLoginOptions.deviceType !== currentLoginOptions.deviceType ||
-    (currentLoginOptions.deviceType !== 'BROWSER' &&
+    (currentLoginOptions.deviceType !== DEVICE_TYPE_BROWSER &&
       originalLoginOptions.dialNumber !== currentLoginOptions.dialNumber) ||
     originalLoginOptions.teamId !== currentLoginOptions.teamId;
 
@@ -104,7 +104,7 @@ export const useStationLogin = (props: UseStationLoginProps) => {
         loginOption: currentLoginOptions.deviceType as LoginOption,
         teamId: currentLoginOptions.teamId || undefined,
       };
-      if (currentLoginOptions.deviceType !== 'BROWSER') {
+      if (currentLoginOptions.deviceType !== DEVICE_TYPE_BROWSER) {
         payload.dialNumber = currentLoginOptions.dialNumber;
       }
 
@@ -239,7 +239,7 @@ export const useStationLogin = (props: UseStationLoginProps) => {
 
   const checkE911ModalDisplay = async () => {
     try {
-      if (deviceType !== 'BROWSER') {
+      if (deviceType !== DEVICE_TYPE_BROWSER) {
         return;
       }
 

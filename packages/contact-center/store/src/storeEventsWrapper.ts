@@ -655,7 +655,27 @@ class StoreWrapper implements IStoreWrapper {
         throw new Error('userPreference service not available');
       }
 
+      const response = await this.store.cc.userPreference.getUserPreference();
+      const existingDesktopPrefString = response?.desktopPreference;
+
+      let existingDesktopPref = {};
+      if (existingDesktopPrefString) {
+        try {
+          existingDesktopPref = JSON.parse(existingDesktopPrefString);
+        } catch (parseError) {
+          this.store.logger.error(
+            'CC-Widgets: updateEmergencyModalAcknowledgment(): failed to parse existing desktopPreference',
+            {
+              module: 'storeEventsWrapper.ts',
+              method: 'updateEmergencyModalAcknowledgment',
+              error: parseError,
+            }
+          );
+        }
+      }
+
       const desktopPreference = JSON.stringify({
+        ...existingDesktopPref,
         isEmergencyModalAlreadyDisplayed: true,
       });
 

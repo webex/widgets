@@ -121,12 +121,6 @@ describe('E911Modal', () => {
     expect(screen.getByTestId('e911-modal')).toBeInTheDocument();
   });
 
-  it('should display help link', () => {
-    render(<E911Modal {...defaultProps} />);
-    expect(screen.getByTestId('e911-help-link')).toBeInTheDocument();
-    expect(screen.getByText(E911ModalLabels.HELP_LINK_TEXT)).toBeInTheDocument();
-  });
-
   it('should call onCancel when the native dialog is dismissed via the cancel event (e.g. Escape key)', () => {
     render(<E911Modal {...defaultProps} isOpen={true} />);
     const dialog = screen.getByTestId('e911-modal');
