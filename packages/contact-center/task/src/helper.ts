@@ -241,29 +241,21 @@ export const useIncomingTask = (props: UseTaskProps) => {
   useEffect(() => {
     try {
       if (!incomingTask) return;
-      store.setTaskCallback(TASK_EVENTS.TASK_ASSIGNED, taskAssignCallback, incomingTask.data.interactionId);
-      store.setTaskCallback(TASK_EVENTS.TASK_CONSULT_ACCEPTED, taskAssignCallback, incomingTask?.data.interactionId);
-      store.setTaskCallback(TASK_EVENTS.TASK_END, taskRejectCallback, incomingTask?.data.interactionId);
-      store.setTaskCallback(TASK_EVENTS.TASK_REJECT, taskRejectCallback, incomingTask?.data.interactionId);
-      store.setTaskCallback(TASK_EVENTS.TASK_CONSULT_END, taskRejectCallback, incomingTask?.data.interactionId);
-      store.setTaskCallback(TASK_EVENTS.TASK_OUTDIAL_FAILED, taskRejectCallback, incomingTask?.data.interactionId);
+      store.setTaskCallback(TASK_EVENTS.TASK_ASSIGNED, taskAssignCallback, incomingTask);
+      store.setTaskCallback(TASK_EVENTS.TASK_CONSULT_ACCEPTED, taskAssignCallback, incomingTask);
+      store.setTaskCallback(TASK_EVENTS.TASK_END, taskRejectCallback, incomingTask);
+      store.setTaskCallback(TASK_EVENTS.TASK_REJECT, taskRejectCallback, incomingTask);
+      store.setTaskCallback(TASK_EVENTS.TASK_CONSULT_END, taskRejectCallback, incomingTask);
+      store.setTaskCallback(TASK_EVENTS.TASK_OUTDIAL_FAILED, taskRejectCallback, incomingTask);
 
       return () => {
         try {
-          store.removeTaskCallback(TASK_EVENTS.TASK_ASSIGNED, taskAssignCallback, incomingTask?.data.interactionId);
-          store.removeTaskCallback(
-            TASK_EVENTS.TASK_CONSULT_ACCEPTED,
-            taskAssignCallback,
-            incomingTask?.data.interactionId
-          );
-          store.removeTaskCallback(TASK_EVENTS.TASK_END, taskRejectCallback, incomingTask?.data.interactionId);
-          store.removeTaskCallback(TASK_EVENTS.TASK_REJECT, taskRejectCallback, incomingTask?.data.interactionId);
-          store.removeTaskCallback(TASK_EVENTS.TASK_CONSULT_END, taskRejectCallback, incomingTask?.data.interactionId);
-          store.removeTaskCallback(
-            TASK_EVENTS.TASK_OUTDIAL_FAILED,
-            taskRejectCallback,
-            incomingTask?.data.interactionId
-          );
+          store.removeTaskCallback(TASK_EVENTS.TASK_ASSIGNED, taskAssignCallback, incomingTask);
+          store.removeTaskCallback(TASK_EVENTS.TASK_CONSULT_ACCEPTED, taskAssignCallback, incomingTask);
+          store.removeTaskCallback(TASK_EVENTS.TASK_END, taskRejectCallback, incomingTask);
+          store.removeTaskCallback(TASK_EVENTS.TASK_REJECT, taskRejectCallback, incomingTask);
+          store.removeTaskCallback(TASK_EVENTS.TASK_CONSULT_END, taskRejectCallback, incomingTask);
+          store.removeTaskCallback(TASK_EVENTS.TASK_OUTDIAL_FAILED, taskRejectCallback, incomingTask);
         } catch (error) {
           logger?.error(`CC-Widgets: Task: Error in useIncomingTask cleanup - ${error.message}`, {
             module: 'useIncomingTask',
@@ -741,29 +733,22 @@ export const useCallControl = (props: useCallControlProps) => {
       method: 'useEffect-init',
     });
 
-    const interactionId = currentTask.data.interactionId;
-
-    store.setTaskCallback(
-      // Should use holdCallback
-      TASK_EVENTS.TASK_HOLD,
-      holdCallback,
-      interactionId
-    );
-    store.setTaskCallback(TASK_EVENTS.TASK_RESUME, resumeCallback, interactionId);
-    store.setTaskCallback(TASK_EVENTS.TASK_END, endCallCallback, interactionId);
-    store.setTaskCallback(TASK_EVENTS.TASK_WRAPUP, endCallCallback, interactionId); // Also call onEnd when entering wrapup
-    store.setTaskCallback(TASK_EVENTS.TASK_WRAPPEDUP, wrapupCallCallback, interactionId);
-    store.setTaskCallback(TASK_EVENTS.TASK_RECORDING_PAUSED, pauseRecordingCallback, interactionId);
-    store.setTaskCallback(TASK_EVENTS.TASK_RECORDING_RESUMED, resumeRecordingCallback, interactionId);
+    store.setTaskCallback(TASK_EVENTS.TASK_HOLD, holdCallback, currentTask);
+    store.setTaskCallback(TASK_EVENTS.TASK_RESUME, resumeCallback, currentTask);
+    store.setTaskCallback(TASK_EVENTS.TASK_END, endCallCallback, currentTask);
+    store.setTaskCallback(TASK_EVENTS.TASK_WRAPUP, endCallCallback, currentTask); // Also call onEnd when entering wrapup
+    store.setTaskCallback(TASK_EVENTS.TASK_WRAPPEDUP, wrapupCallCallback, currentTask);
+    store.setTaskCallback(TASK_EVENTS.TASK_RECORDING_PAUSED, pauseRecordingCallback, currentTask);
+    store.setTaskCallback(TASK_EVENTS.TASK_RECORDING_RESUMED, resumeRecordingCallback, currentTask);
 
     return () => {
-      store.removeTaskCallback(TASK_EVENTS.TASK_HOLD, holdCallback, interactionId);
-      store.removeTaskCallback(TASK_EVENTS.TASK_RESUME, resumeCallback, interactionId);
-      store.removeTaskCallback(TASK_EVENTS.TASK_END, endCallCallback, interactionId);
-      store.removeTaskCallback(TASK_EVENTS.TASK_WRAPUP, endCallCallback, interactionId);
-      store.removeTaskCallback(TASK_EVENTS.TASK_WRAPPEDUP, wrapupCallCallback, interactionId);
-      store.removeTaskCallback(TASK_EVENTS.TASK_RECORDING_PAUSED, pauseRecordingCallback, interactionId);
-      store.removeTaskCallback(TASK_EVENTS.TASK_RECORDING_RESUMED, resumeRecordingCallback, interactionId);
+      store.removeTaskCallback(TASK_EVENTS.TASK_HOLD, holdCallback, currentTask);
+      store.removeTaskCallback(TASK_EVENTS.TASK_RESUME, resumeCallback, currentTask);
+      store.removeTaskCallback(TASK_EVENTS.TASK_END, endCallCallback, currentTask);
+      store.removeTaskCallback(TASK_EVENTS.TASK_WRAPUP, endCallCallback, currentTask);
+      store.removeTaskCallback(TASK_EVENTS.TASK_WRAPPEDUP, wrapupCallCallback, currentTask);
+      store.removeTaskCallback(TASK_EVENTS.TASK_RECORDING_PAUSED, pauseRecordingCallback, currentTask);
+      store.removeTaskCallback(TASK_EVENTS.TASK_RECORDING_RESUMED, resumeRecordingCallback, currentTask);
     };
   }, [currentTask]);
 

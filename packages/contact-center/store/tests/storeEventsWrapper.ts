@@ -474,45 +474,48 @@ describe('storeEventsWrapper', () => {
       it('should set task callback', () => {
         const mockCb = jest.fn();
         expect(storeWrapper.setTaskCallback).toBeInstanceOf(Function);
-        storeWrapper['store'].taskList = {
-          mockTaskId: mockTask,
-        };
 
-        storeWrapper.setTaskCallback(TASK_EVENTS.TASK_ASSIGNED, mockCb, 'mockTaskId');
+        storeWrapper.setTaskCallback(TASK_EVENTS.TASK_ASSIGNED, mockCb, mockTask);
         expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, mockCb);
       });
 
-      it('should return if callback is not present or task is not found', () => {
+      it('should return if callback is not present or task is not provided', () => {
         const mockCb = jest.fn();
         expect(storeWrapper.setTaskCallback).toBeInstanceOf(Function);
 
-        storeWrapper.setTaskCallback(TASK_EVENTS.TASK_ASSIGNED, undefined, 'mockTaskId');
+        storeWrapper.setTaskCallback(TASK_EVENTS.TASK_ASSIGNED, undefined, mockTask);
         expect(mockTask.on).not.toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, mockCb);
 
-        storeWrapper.setTaskCallback(TASK_EVENTS.TASK_ASSIGNED, mockCb, 'mockTaskI2');
+        storeWrapper.setTaskCallback(TASK_EVENTS.TASK_ASSIGNED, mockCb, null);
         expect(mockTask.on).not.toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, mockCb);
       });
 
       it('should remove task callback', () => {
         const mockCb = jest.fn();
-        storeWrapper['store'].taskList = {
-          mockTaskId: mockTask,
-        };
         expect(storeWrapper.removeTaskCallback).toBeInstanceOf(Function);
 
-        storeWrapper.removeTaskCallback(TASK_EVENTS.TASK_WRAPPEDUP, mockCb, 'mockTaskId');
+        storeWrapper.removeTaskCallback(TASK_EVENTS.TASK_WRAPPEDUP, mockCb, mockTask);
         expect(mockTask.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_WRAPPEDUP, mockCb);
       });
 
-      it('should return and not remove callback if callback is not present or task is not found', () => {
+      it('should return and not remove callback if callback is not present or task is not provided', () => {
         const mockCb = jest.fn();
         expect(storeWrapper.removeTaskCallback).toBeInstanceOf(Function);
 
-        storeWrapper.removeTaskCallback(TASK_EVENTS.TASK_ASSIGNED, undefined, 'mockTaskId');
+        storeWrapper.removeTaskCallback(TASK_EVENTS.TASK_ASSIGNED, undefined, mockTask);
         expect(mockTask.on).not.toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, mockCb);
 
-        storeWrapper.removeTaskCallback(TASK_EVENTS.TASK_ASSIGNED, mockCb, 'mockTaskI2');
+        storeWrapper.removeTaskCallback(TASK_EVENTS.TASK_ASSIGNED, mockCb, null);
         expect(mockTask.on).not.toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, mockCb);
+      });
+
+      it('should remove task callback even when task is absent from store.taskList', () => {
+        const mockCb = jest.fn();
+        // Clear taskList so the task is not found by ID lookup
+        storeWrapper['store'].taskList = {};
+
+        storeWrapper.removeTaskCallback(TASK_EVENTS.TASK_ASSIGNED, mockCb, mockTask);
+        expect(mockTask.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, mockCb);
       });
     });
   });
