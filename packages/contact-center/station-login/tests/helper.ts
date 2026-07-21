@@ -1226,6 +1226,56 @@ describe('useStationLogin Hook', () => {
       expect(store.setShowE911Modal).toHaveBeenCalledWith(true);
     });
 
+    it('should dedupe concurrent checkE911ModalDisplay calls across two separate StationLogin instances sharing the store', async () => {
+      // Regression test: the in-flight guard is module-scoped (not a per-hook useRef) so that
+      // two StationLogin instances mounted at once (e.g. the login widget plus a profileMode
+      // settings widget) join the same fetchUserPreferences() call instead of racing.
+      ccMock.stationLogin.mockResolvedValue(successResponse);
+      (store as unknown as {deviceType: string}).deviceType = 'BROWSER';
+
+      let resolveFetch: () => void = () => {};
+      (store.fetchUserPreferences as jest.Mock).mockImplementation(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveFetch = resolve;
+          })
+      );
+
+      const {result: resultA} = renderHook(() =>
+        useStationLogin({
+          ...baseStationLoginProps,
+          deviceType: 'BROWSER',
+        })
+      );
+      const {result: resultB} = renderHook(() =>
+        useStationLogin({
+          ...baseStationLoginProps,
+          deviceType: 'BROWSER',
+        })
+      );
+
+      await act(async () => {
+        // Simulate two mounted instances both reacting to the same login. login()'s
+        // cc.stationLogin().then() is a microtask, so flush it before resolving
+        // fetchUserPreferences() to ensure both instances have actually reached
+        // checkE911ModalDisplay() by the time it resolves.
+        resultA.current.login();
+        resultB.current.login();
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      await act(async () => {
+        resolveFetch();
+        await Promise.resolve();
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      expect(store.fetchUserPreferences).toHaveBeenCalledTimes(1);
+      expect(store.setShowE911Modal).toHaveBeenCalledWith(true);
+    });
+
     it('should show the E911 modal after a successful multi-login takeover (handleContinue) with BROWSER', async () => {
       (store.fetchUserPreferences as jest.Mock).mockResolvedValue(undefined);
       store.setIsAgentLoggedIn(true);

@@ -1,8 +1,15 @@
-import {useEffect, useRef, useState} from 'react';
+import {useEffect, useState} from 'react';
 import {LogoutSuccess, AgentProfileUpdate, LoginOption, StationLoginSuccessResponse} from '@webex/contact-center';
 import {UseStationLoginProps} from './station-login/station-login.types';
 import store, {CC_EVENTS, DEVICE_TYPE_BROWSER} from '@webex/cc-store'; // we need to import as we are losing the context of this in store
 import {LoginOptionsState} from '@webex/cc-components';
+
+// Single-flight guard for checkE911ModalDisplay - see its usage below. Module-scoped (not a
+// useRef) because more than one StationLogin/useStationLogin instance can be mounted against the
+// same store singleton at once (e.g. the login widget plus a profileMode settings widget); a
+// per-instance ref would only dedupe within one instance, letting a second instance's concurrent
+// fetchUserPreferences() read race the first and reopen the modal with a stale result.
+let e911CheckInFlight: Promise<void> | null = null;
 
 export const useStationLogin = (props: UseStationLoginProps) => {
   const cc = props.cc;
@@ -53,9 +60,6 @@ export const useStationLogin = (props: UseStationLoginProps) => {
 
   // Error for Save button
   const [saveError, setSaveError] = useState<string>('');
-
-  // Single-flight guard for checkE911ModalDisplay - see its usage below
-  const e911CheckInFlightRef = useRef<Promise<void> | null>(null);
 
   // Set original login options after successful login
   useEffect(() => {
@@ -263,8 +267,8 @@ export const useStationLogin = (props: UseStationLoginProps) => {
     // single-flight so concurrent callers join the same fetchUserPreferences() call instead of
     // each starting their own - two independent reads could otherwise race with the user's
     // Save/Cancel action and reopen the modal with a stale "not yet acknowledged" result.
-    if (e911CheckInFlightRef.current) {
-      return e911CheckInFlightRef.current;
+    if (e911CheckInFlight) {
+      return e911CheckInFlight;
     }
 
     const check = (async () => {
@@ -284,11 +288,11 @@ export const useStationLogin = (props: UseStationLoginProps) => {
           method: 'checkE911ModalDisplay',
         });
       } finally {
-        e911CheckInFlightRef.current = null;
+        e911CheckInFlight = null;
       }
     })();
 
-    e911CheckInFlightRef.current = check;
+    e911CheckInFlight = check;
 
     return check;
   };
