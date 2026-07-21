@@ -1,5 +1,5 @@
 export interface E911ModalProps {
   isOpen: boolean;
-  onSaveAndContinue: () => void;
+  onSaveAndContinue: () => Promise<void>;
   onCancel: () => void;
 }

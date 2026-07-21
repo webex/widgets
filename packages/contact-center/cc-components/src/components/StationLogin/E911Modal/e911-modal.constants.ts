@@ -9,4 +9,5 @@ export const E911ModalLabels = {
   CHECKBOX_LABEL: 'I have read the notification',
   CANCEL: 'Cancel',
   SAVE_AND_CONTINUE: 'Save & Continue',
+  SAVE_ERROR_MESSAGE: 'Failed to save. Please try again.',
 };

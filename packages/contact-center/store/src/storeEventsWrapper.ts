@@ -25,6 +25,7 @@ import {
   AgentLoginProfile,
   ERROR_TRIGGERING_IDLE_CODES,
   RealTimeTranscriptionEventPayload,
+  DesktopPreference,
 } from './store.types';
 import Store from './store';
 import {
@@ -640,7 +641,7 @@ class StoreWrapper implements IStoreWrapper {
 
       if (desktopPrefString) {
         try {
-          const desktopPref = JSON.parse(desktopPrefString);
+          const desktopPref = JSON.parse(desktopPrefString) as DesktopPreference;
           isEmergencyModalAlreadyDisplayed = desktopPref.isEmergencyModalAlreadyDisplayed ?? false;
         } catch (parseError) {
           this.store.logger.error('CC-Widgets: fetchUserPreferences(): failed to parse desktopPreference', {
@@ -695,10 +696,10 @@ class StoreWrapper implements IStoreWrapper {
       // not as a top-level field - see CAI-7906.
       const existingDesktopPrefString = response?.preferences?.desktopPreference;
 
-      let existingDesktopPref = {};
+      let existingDesktopPref: DesktopPreference = {};
       if (existingDesktopPrefString) {
         try {
-          existingDesktopPref = JSON.parse(existingDesktopPrefString);
+          existingDesktopPref = JSON.parse(existingDesktopPrefString) as DesktopPreference;
         } catch (parseError) {
           this.store.logger.error(
             'CC-Widgets: updateEmergencyModalAcknowledgment(): failed to parse existing desktopPreference',

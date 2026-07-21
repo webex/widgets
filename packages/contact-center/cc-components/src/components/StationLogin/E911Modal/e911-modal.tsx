@@ -6,10 +6,14 @@ import './e911-modal.style.scss';
 
 const E911Modal: React.FC<E911ModalProps> = ({isOpen, onSaveAndContinue, onCancel}) => {
   const [isChecked, setIsChecked] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
 
   useEffect(() => {
     if (!isOpen) {
       setIsChecked(false);
+      setIsSaving(false);
+      setSaveError('');
     }
   }, [isOpen]);
 
@@ -22,9 +26,20 @@ const E911Modal: React.FC<E911ModalProps> = ({isOpen, onSaveAndContinue, onCance
     onCancel();
   };
 
-  const handleSaveAndContinue = () => {
-    if (isChecked) {
-      onSaveAndContinue();
+  const handleSaveAndContinue = async () => {
+    if (!isChecked || isSaving) {
+      return;
+    }
+
+    setIsSaving(true);
+    setSaveError('');
+
+    try {
+      await onSaveAndContinue();
+    } catch {
+      setSaveError(E911ModalLabels.SAVE_ERROR_MESSAGE);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -61,15 +76,26 @@ const E911Modal: React.FC<E911ModalProps> = ({isOpen, onSaveAndContinue, onCance
             label={E911ModalLabels.CHECKBOX_LABEL}
           />
         </div>
+
+        {saveError && (
+          <Text tagname="p" type="body-midsize-regular" className="e911-save-error" data-testid="e911-save-error">
+            {saveError}
+          </Text>
+        )}
       </div>
 
-      <Button slot="footer-button-secondary" onClick={handleCancel} data-testid="e911-cancel-button">
+      <Button
+        slot="footer-button-secondary"
+        onClick={handleCancel}
+        disabled={isSaving}
+        data-testid="e911-cancel-button"
+      >
         {E911ModalLabels.CANCEL}
       </Button>
       <Button
         slot="footer-button-primary"
         onClick={handleSaveAndContinue}
-        disabled={!isChecked}
+        disabled={!isChecked || isSaving}
         data-testid="e911-save-button"
       >
         {E911ModalLabels.SAVE_AND_CONTINUE}

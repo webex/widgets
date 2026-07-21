@@ -11,7 +11,7 @@ jest.mock('@webex/cc-ui-logging', () => ({
 describe('E911Modal', () => {
   const defaultProps = {
     isOpen: true,
-    onSaveAndContinue: jest.fn(),
+    onSaveAndContinue: jest.fn().mockResolvedValue(undefined),
     onCancel: jest.fn(),
   };
 
@@ -94,6 +94,84 @@ describe('E911Modal', () => {
     fireEvent.click(saveButton);
 
     expect(defaultProps.onSaveAndContinue).toHaveBeenCalledTimes(1);
+
+    await waitFor(() => {
+      expect(saveButton).not.toBeDisabled();
+    });
+  });
+
+  it('should disable Save & Continue and Cancel while a save is in flight, and re-enable them once it resolves', async () => {
+    let resolveSave: () => void;
+    const onSaveAndContinue = jest.fn().mockImplementation(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveSave = resolve;
+        })
+    );
+    render(<E911Modal {...defaultProps} onSaveAndContinue={onSaveAndContinue} />);
+    const checkbox = screen.getByTestId('e911-checkbox');
+    fireEvent(checkbox, new CustomEvent('change', {detail: {checked: true}}));
+
+    const saveButton = screen.getByTestId('e911-save-button');
+    const cancelButton = screen.getByTestId('e911-cancel-button');
+    await waitFor(() => expect(saveButton).not.toBeDisabled());
+
+    fireEvent.click(saveButton);
+
+    await waitFor(() => {
+      expect(saveButton).toBeDisabled();
+      expect(cancelButton).toBeDisabled();
+    });
+
+    // A second click while saving must not fire another call - guards against the double-click
+    // race that could otherwise fire concurrent createUserPreference/updateUserPreference calls.
+    fireEvent.click(saveButton);
+    expect(onSaveAndContinue).toHaveBeenCalledTimes(1);
+
+    resolveSave();
+
+    await waitFor(() => {
+      expect(saveButton).not.toBeDisabled();
+      expect(cancelButton).not.toBeDisabled();
+    });
+  });
+
+  it('should show a user-facing error and re-enable the buttons when onSaveAndContinue rejects', async () => {
+    const onSaveAndContinue = jest.fn().mockRejectedValue(new Error('boom'));
+    render(<E911Modal {...defaultProps} onSaveAndContinue={onSaveAndContinue} />);
+    const checkbox = screen.getByTestId('e911-checkbox');
+    fireEvent(checkbox, new CustomEvent('change', {detail: {checked: true}}));
+
+    const saveButton = screen.getByTestId('e911-save-button');
+    await waitFor(() => expect(saveButton).not.toBeDisabled());
+
+    fireEvent.click(saveButton);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('e911-save-error')).toHaveTextContent(E911ModalLabels.SAVE_ERROR_MESSAGE);
+    });
+    expect(saveButton).not.toBeDisabled();
+    expect(screen.getByTestId('e911-cancel-button')).not.toBeDisabled();
+  });
+
+  it('should clear a previous save error when the modal is reopened', async () => {
+    const onSaveAndContinue = jest.fn().mockRejectedValue(new Error('boom'));
+    const {rerender} = render(<E911Modal {...defaultProps} onSaveAndContinue={onSaveAndContinue} />);
+    const checkbox = screen.getByTestId('e911-checkbox');
+    fireEvent(checkbox, new CustomEvent('change', {detail: {checked: true}}));
+
+    const saveButton = screen.getByTestId('e911-save-button');
+    await waitFor(() => expect(saveButton).not.toBeDisabled());
+    fireEvent.click(saveButton);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('e911-save-error')).toBeInTheDocument();
+    });
+
+    rerender(<E911Modal {...defaultProps} onSaveAndContinue={onSaveAndContinue} isOpen={false} />);
+    rerender(<E911Modal {...defaultProps} onSaveAndContinue={onSaveAndContinue} isOpen={true} />);
+
+    expect(screen.queryByTestId('e911-save-error')).not.toBeInTheDocument();
   });
 
   it('should set visible on the Dialog when isOpen changes to true', () => {
