@@ -9608,6 +9608,53 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@webex/cc-ai-assistant@workspace:*, @webex/cc-ai-assistant@workspace:packages/contact-center/ai-assistant":
+  version: 0.0.0-use.local
+  resolution: "@webex/cc-ai-assistant@workspace:packages/contact-center/ai-assistant"
+  dependencies:
+    "@babel/core": "npm:7.25.2"
+    "@babel/preset-env": "npm:7.25.4"
+    "@babel/preset-react": "npm:7.24.7"
+    "@babel/preset-typescript": "npm:7.25.9"
+    "@eslint/js": "npm:^9.20.0"
+    "@testing-library/dom": "npm:10.4.0"
+    "@testing-library/jest-dom": "npm:6.6.2"
+    "@testing-library/react": "npm:16.0.1"
+    "@types/jest": "npm:29.5.14"
+    "@types/react-test-renderer": "npm:18"
+    "@webex/cc-components": "workspace:*"
+    "@webex/cc-store": "workspace:*"
+    "@webex/cc-ui-logging": "workspace:*"
+    "@webex/test-fixtures": "workspace:*"
+    babel-jest: "npm:29.7.0"
+    babel-loader: "npm:9.2.1"
+    eslint: "npm:^9.20.1"
+    eslint-config-prettier: "npm:^10.0.1"
+    eslint-config-standard: "npm:^17.1.0"
+    eslint-plugin-import: "npm:^2.25.2"
+    eslint-plugin-n: "npm:^15.0.0 || ^16.0.0 "
+    eslint-plugin-prettier: "npm:^5.2.3"
+    eslint-plugin-promise: "npm:^6.0.0"
+    eslint-plugin-react: "npm:^7.37.4"
+    file-loader: "npm:6.2.0"
+    globals: "npm:^16.0.0"
+    jest: "npm:29.7.0"
+    jest-environment-jsdom: "npm:29.7.0"
+    mobx-react-lite: "npm:^4.1.0"
+    prettier: "npm:^3.5.1"
+    react-error-boundary: "npm:^6.0.0"
+    ts-loader: "npm:9.5.1"
+    typescript: "npm:5.6.3"
+    typescript-eslint: "npm:^8.24.1"
+    webpack: "npm:5.94.0"
+    webpack-cli: "npm:5.1.4"
+    webpack-merge: "npm:6.0.1"
+  peerDependencies:
+    react: ">=18.3.1"
+    react-dom: ">=18.3.1"
+  languageName: unknown
+  linkType: soft
+
 "@webex/cc-components@workspace:*, @webex/cc-components@workspace:packages/contact-center/cc-components":
   version: 0.0.0-use.local
   resolution: "@webex/cc-components@workspace:packages/contact-center/cc-components"
@@ -9627,6 +9674,7 @@ __metadata:
     "@webex/cc-store": "workspace:*"
     "@webex/cc-ui-logging": "workspace:*"
     "@webex/test-fixtures": "workspace:*"
+    adaptivecards: "npm:^3.0.0"
     babel-loader: "npm:9.2.1"
     eslint: "npm:^9.20.1"
     eslint-config-prettier: "npm:^10.0.1"
@@ -9641,6 +9689,7 @@ __metadata:
     jest: "npm:29.7.0"
     jest-environment-jsdom: "npm:29.7.0"
     prettier: "npm:^3.5.1"
+    swiper: "npm:^12.1.2"
     ts-loader: "npm:9.5.1"
     typescript: "npm:5.6.3"
     typescript-eslint: "npm:^8.24.1"
@@ -9925,6 +9974,7 @@ __metadata:
     "@testing-library/react": "npm:16.0.1"
     "@types/jest": "npm:29.5.14"
     "@types/react-test-renderer": "npm:18"
+    "@webex/cc-ai-assistant": "workspace:*"
     "@webex/cc-digital-channels": "workspace:*"
     "@webex/cc-station-login": "workspace:*"
     "@webex/cc-store": "workspace:*"
@@ -12863,6 +12913,15 @@ __metadata:
   peerDependencies:
     adaptive-expressions: ^4.11.0
   checksum: 10c0/b96d79a77b68a5047789621c0c88341e6f3832c537f4f278a58ed20f9d611517b05fbddc64c63f700805a0586bf50e6cce2e7d03e7b6d68b7cd28e08cfe8aca5
+  languageName: node
+  linkType: hard
+
+"adaptivecards@npm:^3.0.0":
+  version: 3.0.6
+  resolution: "adaptivecards@npm:3.0.6"
+  peerDependencies:
+    swiper: ^12.1.2
+  checksum: 10c0/cbd9397c25c332b408b8f62a5af5b6276539c7316a01c7b989537c84c8363aa4f97a9296d1d8659769c13c6def53839a0929bbc7acb436515c28edfca0f75bb1
   languageName: node
   linkType: hard
 
@@ -33117,6 +33176,13 @@ __metadata:
   bin:
     svgo: ./bin/svgo.js
   checksum: 10c0/2b01c910d59d10bb15e17714181a8fa96531b09a4e2cf2ca1abe24dbcb8400725b6d542d6e456c62222546e334d5b344799c170c5b6be0c48e31b02c23297275
+  languageName: node
+  linkType: hard
+
+"swiper@npm:^12.1.2":
+  version: 12.2.0
+  resolution: "swiper@npm:12.2.0"
+  checksum: 10c0/459c9621e170130c0a6874b05e24fefd0411529600a17b2d8afc4987dc2e803ab18d42983081b723423819d464568fdb541b6c3f517e558c60888c644dc4ead1
   languageName: node
   linkType: hard
 
