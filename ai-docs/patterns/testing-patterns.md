@@ -214,6 +214,12 @@ yarn test:styles       # style tests across workspaces
 yarn workspace @webex/cc-user-state test:unit   # a single package
 ```
 
+Each package's `test:unit` (and root `test:tooling`) pins `NODE_ENV=test` on the `jest`
+invocation. Jest only defaults `NODE_ENV` to `test` when it is *unset*; in a CI pod that already
+exports `NODE_ENV=production`, React loads its production build and `act(...)` throws
+(`act(...) is not supported in production builds of React`). Pinning it keeps tests correct
+regardless of the ambient environment.
+
 **Where it appears**
 - Root `package.json` `scripts` block (`test:unit`, `test:cc-widgets`, `test:e2e`, `test:styles`, `test:tooling`, `test:meetings-widget`).
 
