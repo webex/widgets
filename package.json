@@ -56,7 +56,7 @@
     "test:unit": "yarn run test:tooling && yarn run test:cc-widgets && yarn run test:meetings-widget",
     "test:e2e": "yarn playwright test",
     "test:styles": "yarn workspaces foreach --all --exclude webex-widgets run test:styles",
-    "test:tooling": "jest --coverage",
+    "test:tooling": "NODE_ENV=test jest --coverage",
     "test:cc-widgets": "yarn workspaces foreach --all --exclude webex-widgets --exclude samples-cc-wc-app --exclude samples-cc-react-app run test:unit",
     "test:meetings-widget": "yarn workspaces foreach --all --verbose --include @webex/widgets run test:unit",
     "build:dev": "NODE_ENV=development yarn build",
