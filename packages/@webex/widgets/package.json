@@ -20,7 +20,7 @@
     "release:debug": "semantic-release --debug",
     "release:dry-run": "semantic-release --dry-run",
     "start": "npm run demo:serve",
-    "test:unit": "jest --config jest.config.js --coverage",
+    "test:unit": "NODE_ENV=test jest --config jest.config.js --coverage",
     "test:e2e": "npm run demo:build && wdio wdio.conf.js",
     "test:eslint": "echo 'Broken eslint tests'",
     "test:eslint:broken": "eslint src/"

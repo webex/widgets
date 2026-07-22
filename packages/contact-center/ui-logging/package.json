@@ -16,7 +16,7 @@
     "build:src": "webpack --mode=development",
     "clean": "rm -rf dist",
     "clean:dist": "rm -rf dist",
-    "test:unit": "jest --coverage",
+    "test:unit": "NODE_ENV=test jest --coverage",
     "test:styles": "echo 'No styles to test'",
     "deploy:npm": "yarn npm publish"
   },
