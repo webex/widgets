@@ -1,4 +1,4 @@
-import {useEffect, useState, useMemo} from 'react';
+import {useEffect, useState, useMemo, useRef} from 'react';
 import {initializeApp} from 'cc-digital-interactions';
 
 import {DigitalChannelsInitHookProps, DigitalChannelsDataHookProps} from './digital-channels/digital-channels.types';
@@ -19,6 +19,7 @@ export const useDigitalChannelsInit = (props: DigitalChannelsInitHookProps) => {
   } = props;
 
   const [initialized, setInitialized] = useState(isDigitalChannelsInitialized);
+  const initInFlightRef = useRef(false);
 
   useEffect(() => {
     // Skip initialization if required data is not available
@@ -27,8 +28,14 @@ export const useDigitalChannelsInit = (props: DigitalChannelsInitHookProps) => {
     }
 
     const initialize = async () => {
+      // Synchronous in-flight guard: prevents double-init under React Strict Mode /
+      // concurrent re-renders where state hasn't propagated yet.
+      if (initInFlightRef.current) {
+        return;
+      }
       // Initialize the digital channels app only once per session
       if (!isDigitalChannelsInitialized) {
+        initInFlightRef.current = true;
         logger.log(
           `[DIGITAL_CHANNELS_INIT] Starting Digital Channels initialization for the FIRST TIME (dataCenter: ${dataCenter})...`,
           {

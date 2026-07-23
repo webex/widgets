@@ -104,6 +104,42 @@ describe('useDigitalChannelsInit', () => {
       expect(mockLogger.error).toHaveBeenCalledWith(expect.stringContaining('Unknown error'), expect.any(Object));
     });
   });
+
+  it('should call initializeApp exactly once when effect fires twice mid-flight (WF-08)', async () => {
+    // AC-5: synchronous useRef in-flight guard prevents double-init when a dependency
+    // (jwtToken) changes while initializeApp is still awaiting — the ref is set
+    // synchronously before the await so the re-triggered effect sees it immediately.
+    let resolveInit: () => void;
+    const slowInit = new Promise<void>((resolve) => {
+      resolveInit = resolve;
+    });
+    (initializeApp as jest.Mock).mockImplementation(() => slowInit);
+
+    const {rerender, result} = renderHook(
+      ({jwtToken}: {jwtToken: string}) =>
+        useDigitalChannelsInit({...defaultProps, jwtToken, isDigitalChannelsInitialized: false}),
+      {initialProps: {jwtToken: 'token1'}}
+    );
+
+    // Allow effect to fire once and start the slow init
+    await new Promise((r) => setTimeout(r, 0));
+
+    // Change jwtToken while init is still in-flight — triggers second effect
+    rerender({jwtToken: 'token2'});
+
+    // Allow second effect to run
+    await new Promise((r) => setTimeout(r, 0));
+
+    // Resolve the in-flight init
+    resolveInit!();
+
+    await waitFor(() => {
+      expect(result.current.initialized).toBe(true);
+    });
+
+    // initializeApp must be called exactly once despite the re-render mid-flight
+    expect(initializeApp).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe('useDigitalChannelsData', () => {
