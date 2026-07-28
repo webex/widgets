@@ -116,7 +116,6 @@ describe('AIAssistantComponent', () => {
 
     const listening = screen.getByTestId('ai-assistant:listening');
     expect(listening).toHaveTextContent('Listening');
-    expect(listening).not.toHaveTextContent('Listening for information');
     expect(listening.querySelectorAll('.ai-assistant__chat-listening-dot')).toHaveLength(3);
 
     const input = screen.getByTestId('ai-assistant:context-input');

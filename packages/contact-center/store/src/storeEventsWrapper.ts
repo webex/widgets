@@ -38,11 +38,7 @@ import {
 } from './store.types';
 import {runInAction} from 'mobx';
 import {isIncomingTask} from './task-utils';
-
-const TASK_MULTI_LOGIN_HYDRATE = 'task:multiLoginHydrate';
-// Mirrored from the SDK's CC_TASK_EVENTS — importing the runtime const breaks
-// our jest transform setup.
-const SUGGESTED_RESPONSE_EVENT = 'SUGGESTED_RESPONSE';
+import {SUGGESTED_RESPONSE_EVENT, TASK_MULTI_LOGIN_HYDRATE} from './constants';
 
 class StoreWrapper implements IStoreWrapper {
   store: IStore;
