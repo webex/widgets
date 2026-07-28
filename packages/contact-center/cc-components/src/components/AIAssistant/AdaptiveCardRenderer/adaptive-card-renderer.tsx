@@ -1,9 +1,9 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useRef} from 'react';
 import * as AdaptiveCards from 'adaptivecards';
+import {Text} from '@momentum-design/components/dist/react';
+import {ErrorBoundary, useErrorBoundary} from 'react-error-boundary';
 import {AdaptiveCardRendererProps} from '../ai-assistant.types';
-import {buildHostConfig, prepareCardForRender} from './adaptive-card-renderer.utils';
-
-const MOMENTUM_ICON_CDN = 'https://cdn.jsdelivr.net/npm/@momentum-design/icons/dist/svg/';
+import {buildHostConfig, prepareCardForRender, resolveMomentumIconUrl} from './adaptive-card-renderer.utils';
 
 // Preload regular + filled variants so the like/dislike/copy toggles don't
 // wait on a network roundtrip on the first click.
@@ -20,8 +20,10 @@ const preloadIcons = () => {
   if (iconsPreloaded || typeof Image === 'undefined') return;
   iconsPreloaded = true;
   PRELOAD_ICONS.forEach((name) => {
+    const iconUrl = resolveMomentumIconUrl(name);
+    if (!iconUrl) return;
     const img = new Image();
-    img.src = `${MOMENTUM_ICON_CDN}${name}`;
+    img.src = iconUrl;
   });
 };
 
@@ -54,16 +56,42 @@ const detectIconKind = (element: Element): IconKind => {
   return null;
 };
 
-const AdaptiveCardRenderer: React.FC<AdaptiveCardRendererProps> = ({
+const addImageFallbacks = (container: HTMLElement) => {
+  container.querySelectorAll('img').forEach((img) => {
+    img.onerror = () => {
+      const context = `${img.alt} ${img.parentElement?.textContent || ''}`.toLowerCase();
+      const sourceIconUrl = resolveMomentumIconUrl('link-regular.svg');
+      img.onerror = null;
+      if (context.includes('source') && sourceIconUrl) {
+        img.src = sourceIconUrl;
+      } else {
+        img.hidden = true;
+      }
+    };
+  });
+};
+
+const AdaptiveCardFallback: React.FC<Pick<AdaptiveCardRendererProps, 'fallbackText'>> = ({fallbackText}) =>
+  fallbackText ? (
+    <Text
+      tagname="p"
+      type="body-midsize-regular"
+      className="ai-assistant__card-fallback"
+      data-testid="ai-assistant:adaptive-card-fallback"
+    >
+      {fallbackText}
+    </Text>
+  ) : null;
+
+const AdaptiveCardRendererBody: React.FC<AdaptiveCardRendererProps> = ({
   card,
-  fallbackText,
   publishTimestamp,
   suggestionText,
   onFeedback,
   onAction,
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [renderFailed, setRenderFailed] = useState(false);
+  const {resetBoundary, showBoundary} = useErrorBoundary();
 
   // Stash callbacks in refs so the render effect only re-runs when the card
   // itself changes — fresh inline parent callbacks would otherwise force a
@@ -82,7 +110,7 @@ const AdaptiveCardRenderer: React.FC<AdaptiveCardRendererProps> = ({
     const container = containerRef.current;
     if (!container || !card) return undefined;
 
-    setRenderFailed(false);
+    resetBoundary();
     container.innerHTML = '';
 
     const handleCopy = async (sourceEl?: Element) => {
@@ -105,7 +133,10 @@ const AdaptiveCardRenderer: React.FC<AdaptiveCardRendererProps> = ({
         const img = sourceEl?.querySelector('img');
         if (sourceEl && img) {
           const previousSrc = img.getAttribute('src');
-          img.setAttribute('src', `${MOMENTUM_ICON_CDN}check-circle-filled.svg`);
+          const copiedIconUrl = resolveMomentumIconUrl('check-circle-filled.svg');
+          if (copiedIconUrl) {
+            img.setAttribute('src', copiedIconUrl);
+          }
           sourceEl.setAttribute('data-copied', 'true');
           setTimeout(() => {
             sourceEl.removeAttribute('data-copied');
@@ -126,7 +157,10 @@ const AdaptiveCardRenderer: React.FC<AdaptiveCardRendererProps> = ({
         const nextActive = isThis ? !active : false;
         const img = el.querySelector('img');
         if (img) {
-          img.setAttribute('src', `${MOMENTUM_ICON_CDN}${thisKind}-${nextActive ? 'filled' : 'regular'}.svg`);
+          const nextIconUrl = resolveMomentumIconUrl(`${thisKind}-${nextActive ? 'filled' : 'regular'}.svg`);
+          if (nextIconUrl) {
+            img.setAttribute('src', nextIconUrl);
+          }
         }
         if (nextActive) {
           el.setAttribute('data-active', 'true');
@@ -137,6 +171,9 @@ const AdaptiveCardRenderer: React.FC<AdaptiveCardRendererProps> = ({
     };
 
     try {
+      const controls = new Map<Element, IconKind>();
+      const getControl = (kind: Exclude<IconKind, null>): Element | undefined =>
+        Array.from(controls.entries()).find(([, controlKind]) => controlKind === kind)?.[0];
       const adaptiveCard = new AdaptiveCards.AdaptiveCard();
       adaptiveCard.hostConfig = new AdaptiveCards.HostConfig(buildHostConfig());
       adaptiveCard.onExecuteAction = (action) => {
@@ -144,15 +181,17 @@ const AdaptiveCardRenderer: React.FC<AdaptiveCardRendererProps> = ({
         const label = `${a?.id || ''} ${a?.title || ''}`.toLowerCase();
         const actionId = a?.id || a?.title || '';
         if (label.includes('copy')) {
-          handleCopy();
+          void handleCopy(getControl('copy'));
           onFeedbackRef.current?.({type: 'copy', actionId});
           return;
         }
         if (label.includes('dislike')) {
+          toggleFeedback('dislike', controls);
           onFeedbackRef.current?.({type: 'dislike', actionId});
           return;
         }
         if (label.includes('like')) {
+          toggleFeedback('like', controls);
           onFeedbackRef.current?.({type: 'like', actionId});
           return;
         }
@@ -162,9 +201,9 @@ const AdaptiveCardRenderer: React.FC<AdaptiveCardRendererProps> = ({
       const rendered = adaptiveCard.render();
       if (rendered) {
         container.appendChild(rendered);
+        addImageFallbacks(container);
 
         // Visual-state wiring for the like/dislike/copy controls.
-        const controls = new Map<Element, IconKind>();
         container.querySelectorAll('button, [role="button"], a').forEach((el) => {
           const kind = detectIconKind(el);
           if (!kind) return;
@@ -179,35 +218,44 @@ const AdaptiveCardRenderer: React.FC<AdaptiveCardRendererProps> = ({
             };
             el.setAttribute('aria-label', labels[kind]);
           }
-          // Visual-only: telemetry fires via onExecuteAction above to avoid double-posting.
-          el.addEventListener('click', () => {
-            if (kind === 'copy') {
-              handleCopy(el);
-            } else {
-              toggleFeedback(kind, controls);
-            }
-          });
         });
       } else {
-        setRenderFailed(true);
+        showBoundary(new Error('Adaptive card render returned no DOM output.'));
       }
-    } catch {
-      setRenderFailed(true);
+    } catch (error) {
+      showBoundary(error instanceof Error ? error : new Error('Adaptive card rendering failed.'));
     }
 
     return () => {
-      if (container) container.innerHTML = '';
+      if (container) {
+        container.innerHTML = '';
+      }
     };
-  }, [card, publishTimestamp]);
+  }, [card, publishTimestamp, resetBoundary, showBoundary]);
 
+  return <div ref={containerRef} className="ai-assistant__card-host" />;
+};
+
+const AdaptiveCardRenderer: React.FC<AdaptiveCardRendererProps> = ({
+  card,
+  fallbackText,
+  publishTimestamp,
+  suggestionText,
+  onFeedback,
+  onAction,
+}) => {
   return (
     <div className="ai-assistant__card" data-testid="ai-assistant:adaptive-card">
-      {renderFailed && fallbackText ? (
-        <p className="ai-assistant__card-fallback" data-testid="ai-assistant:adaptive-card-fallback">
-          {fallbackText}
-        </p>
-      ) : null}
-      <div ref={containerRef} className="ai-assistant__card-host" />
+      <ErrorBoundary fallbackRender={() => <AdaptiveCardFallback fallbackText={fallbackText} />}>
+        <AdaptiveCardRendererBody
+          card={card}
+          fallbackText={fallbackText}
+          publishTimestamp={publishTimestamp}
+          suggestionText={suggestionText}
+          onFeedback={onFeedback}
+          onAction={onAction}
+        />
+      </ErrorBoundary>
     </div>
   );
 };

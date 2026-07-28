@@ -1,36 +1,83 @@
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import store from '@webex/cc-store';
-import type {RealTimeAssistPayload} from '@webex/cc-store';
 import type {AIAssistantChatEntry, AIAssistantChromeState, AIAssistantRequestStatus} from '@webex/cc-components';
-import {IAIAssistantProps} from './ai-assistant.types';
+import {UseAiAssistantInput, UserMessage} from './ai-assistant.types';
 
 const REAL_TIME_ASSIST_FLAG = 'isSuggestedResponsesEnabled';
 const GREETING_TEXT = "I'm here to help! I'll keep listening and suggest responses as the conversation evolves.";
 
-interface UseAiAssistantInput extends IAIAssistantProps {
-  interactionId?: string;
-  agentId: string;
-  isFeatureEnabled: boolean;
-  realTimeAssist: RealTimeAssistPayload[];
-}
+type UseAIAssistantChromeInput = Pick<
+  UseAiAssistantInput,
+  'onOpen' | 'onMinimize' | 'onRestore' | 'onClose' | 'onFullScreenToggle'
+>;
 
-type UserMessage = {id: string; text: string; sentAt: number};
+type UseRealTimeAssistInput = Pick<
+  UseAiAssistantInput,
+  'interactionId' | 'agentId' | 'isFeatureEnabled' | 'realTimeAssist' | 'onClearChat' | 'onRealTimeAssistReceived'
+>;
 
-export const useAiAssistant = ({
-  interactionId,
-  agentId,
-  isFeatureEnabled,
-  realTimeAssist,
+export const useAIAssistantChrome = ({
   onOpen,
   onMinimize,
   onRestore,
   onClose,
-  onClearChat,
   onFullScreenToggle,
-  onRealTimeAssistReceived,
-}: UseAiAssistantInput) => {
+}: UseAIAssistantChromeInput) => {
   const [chrome, setChrome] = useState<AIAssistantChromeState>('closed');
   const [isFullScreen, setIsFullScreen] = useState(false);
+
+  const open = useCallback(() => {
+    setChrome('open');
+    onOpen?.();
+  }, [onOpen]);
+
+  // close preserves chat state so reopening continues the session; clearChat resets it.
+  const close = useCallback(() => {
+    setChrome('closed');
+    setIsFullScreen(false);
+    onClose?.();
+  }, [onClose]);
+
+  const minimize = useCallback(() => {
+    setChrome('minimized');
+    onMinimize?.();
+  }, [onMinimize]);
+
+  const restore = useCallback(() => {
+    setChrome('open');
+    onRestore?.();
+  }, [onRestore]);
+
+  const toggleFullScreen = useCallback(() => {
+    setIsFullScreen((prev) => {
+      const next = !prev;
+      onFullScreenToggle?.(next);
+      return next;
+    });
+  }, [onFullScreenToggle]);
+
+  return useMemo(
+    () => ({
+      chrome,
+      isFullScreen,
+      open,
+      close,
+      minimize,
+      restore,
+      toggleFullScreen,
+    }),
+    [chrome, isFullScreen, open, close, minimize, restore, toggleFullScreen]
+  );
+};
+
+export const useRealTimeAssist = ({
+  interactionId,
+  agentId,
+  isFeatureEnabled,
+  realTimeAssist,
+  onClearChat,
+  onRealTimeAssistReceived,
+}: UseRealTimeAssistInput) => {
   const [requestStatus, setRequestStatus] = useState<AIAssistantRequestStatus>('idle');
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
   const [contextDraft, setContextDraft] = useState('');
@@ -69,36 +116,6 @@ export const useAiAssistant = ({
     }
     onRealTimeAssistReceivedRef.current?.(latest);
   }, [realTimeAssist]);
-
-  const open = useCallback(() => {
-    setChrome('open');
-    onOpen?.();
-  }, [onOpen]);
-
-  // close preserves chat state so reopening continues the session; clearChat resets it.
-  const close = useCallback(() => {
-    setChrome('closed');
-    setIsFullScreen(false);
-    onClose?.();
-  }, [onClose]);
-
-  const minimize = useCallback(() => {
-    setChrome('minimized');
-    onMinimize?.();
-  }, [onMinimize]);
-
-  const restore = useCallback(() => {
-    setChrome('open');
-    onRestore?.();
-  }, [onRestore]);
-
-  const toggleFullScreen = useCallback(() => {
-    setIsFullScreen((prev) => {
-      const next = !prev;
-      onFullScreenToggle?.(next);
-      return next;
-    });
-  }, [onFullScreenToggle]);
 
   const clearChat = useCallback(() => {
     setRequestStatus('idle');
@@ -201,43 +218,38 @@ export const useAiAssistant = ({
     return [{type: 'assistant-greeting', id: 'greeting-assistant', text: GREETING_TEXT}, ...sorted];
   }, [realTimeAssist, userMessages, hasFiredInitialRequest]);
 
+  const requestSuggestion = useCallback(() => requestRealTimeAssist(), [requestRealTimeAssist]);
+
   return useMemo(
     () => ({
-      chrome,
-      isFullScreen,
       requestStatus,
       errorMessage,
       contextDraft,
       hasFiredInitialRequest,
       chatEntries,
-      open,
-      close,
-      minimize,
-      restore,
-      toggleFullScreen,
       clearChat,
-      requestSuggestion: () => requestRealTimeAssist(),
+      requestSuggestion,
       setContextDraft,
       submitContext,
     }),
     [
-      chrome,
-      isFullScreen,
       requestStatus,
       errorMessage,
       contextDraft,
       hasFiredInitialRequest,
       chatEntries,
-      open,
-      close,
-      minimize,
-      restore,
-      toggleFullScreen,
       clearChat,
-      requestRealTimeAssist,
+      requestSuggestion,
       submitContext,
     ]
   );
+};
+
+export const useAiAssistant = (input: UseAiAssistantInput) => {
+  const chrome = useAIAssistantChrome(input);
+  const realTimeAssist = useRealTimeAssist(input);
+
+  return useMemo(() => ({...chrome, ...realTimeAssist}), [chrome, realTimeAssist]);
 };
 
 export {REAL_TIME_ASSIST_FLAG};

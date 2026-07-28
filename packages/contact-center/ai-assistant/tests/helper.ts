@@ -1,25 +1,21 @@
 import {renderHook, act, waitFor} from '@testing-library/react';
 import {useAiAssistant} from '../src/helper';
 import store from '@webex/cc-store';
+import {mockCC} from '@webex/test-fixtures';
 
 jest.mock('@webex/cc-store', () => {
-  const clearRealTimeAssist = jest.fn();
-  const getRealTimeAssistance = jest.fn().mockResolvedValue({});
+  const {mockCC} = jest.requireActual('@webex/test-fixtures');
   return {
     __esModule: true,
     default: {
-      cc: {
-        apiAIAssistant: {
-          getRealTimeAssistance,
-        },
-      },
-      clearRealTimeAssist,
+      cc: mockCC,
+      clearRealTimeAssist: jest.fn(),
     },
   };
 });
 
 type StoreMock = {
-  cc: {apiAIAssistant: {getRealTimeAssistance: jest.Mock}};
+  cc: typeof mockCC;
   clearRealTimeAssist: jest.Mock;
 };
 const storeMock = store as unknown as StoreMock;

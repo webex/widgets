@@ -1,6 +1,5 @@
+import {AI_FEATURE_SUGGESTED_RESPONSES_KEY} from './constants';
 import {Profile} from './store.types';
-
-export const AI_FEATURE_SUGGESTED_RESPONSES_KEY = 'isSuggestedResponsesEnabled';
 
 const getValueAtPath = (obj: unknown, path: string): unknown => {
   return path.split('.').reduce<unknown>((acc, segment) => {

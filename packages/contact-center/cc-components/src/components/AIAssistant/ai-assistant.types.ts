@@ -60,11 +60,6 @@ export interface AIAssistantComponentProps {
   className?: string;
 }
 
-export interface LauncherProps {
-  onOpen: () => void;
-  className?: string;
-}
-
 export interface AIAssistantHeaderProps {
   onMinimize: () => void;
   onToggleFullScreen: () => void;
@@ -77,42 +72,18 @@ export interface MinimizedBarProps {
   onClose: () => void;
 }
 
-export interface AIAssistantPanelProps {
-  chrome: AIAssistantChromeState;
-  isFullScreen: boolean;
-  requestStatus: AIAssistantRequestStatus;
-  errorMessage?: string;
-  contextDraft: string;
-  chatEntries: AIAssistantChatEntry[];
-  isFeatureEnabled: boolean;
-  hasFiredInitialRequest: boolean;
-  onMinimize: () => void;
-  onRestore: () => void;
-  onClose: () => void;
-  onToggleFullScreen: () => void;
-  onRequestSuggestion: () => void;
-  onContextDraftChange: (value: string) => void;
-  onSubmitContext: () => void;
-  onRealTimeAssistAction?: (event: AIAssistantFeedbackEvent, assist: RealTimeAssistPayload) => void;
-}
-
 export interface RealTimeAssistProps {
   status: AIAssistantRequestStatus;
   errorMessage?: string;
   chatEntries: AIAssistantChatEntry[];
+  contextDraft: string;
   onRequestSuggestion: () => void;
+  onContextDraftChange: (value: string) => void;
+  onSubmitContext: () => void;
   isFeatureEnabled: boolean;
   hasFiredInitialRequest: boolean;
   /** Fires when the agent clicks the like / dislike / copy buttons on a card. */
   onRealTimeAssistAction?: (event: AIAssistantFeedbackEvent, assist: RealTimeAssistPayload) => void;
-}
-
-export interface ContextInputProps {
-  value: string;
-  disabled?: boolean;
-  placeholder?: string;
-  onChange: (value: string) => void;
-  onSubmit: () => void;
 }
 
 /** Kind of feedback the agent gave on a suggestion card. */

@@ -1,5 +1,24 @@
-const MOMENTUM_ICON_CDN = 'https://cdn.jsdelivr.net/npm/@momentum-design/icons/dist/svg/';
+import checkCircleFilledIcon from '@momentum-design/icons/dist/svg/check-circle-filled.svg';
+import ciscoAIAssistantSolidBoldIcon from '@momentum-design/icons/dist/svg/cisco-ai-assistant-solid-bold.svg';
+import copyRegularIcon from '@momentum-design/icons/dist/svg/copy-regular.svg';
+import dislikeFilledIcon from '@momentum-design/icons/dist/svg/dislike-filled.svg';
+import dislikeRegularIcon from '@momentum-design/icons/dist/svg/dislike-regular.svg';
+import linkRegularIcon from '@momentum-design/icons/dist/svg/link-regular.svg';
+import likeFilledIcon from '@momentum-design/icons/dist/svg/like-filled.svg';
+import likeRegularIcon from '@momentum-design/icons/dist/svg/like-regular.svg';
+
 const SOURCE_TIMESTAMP_PLACEHOLDER = 'SOURCE_TIMESTAMP_PLACEHOLDER';
+
+const MOMENTUM_ICON_URLS: Record<string, string> = {
+  'check-circle-filled.svg': checkCircleFilledIcon,
+  'cisco-ai-assistant-solid-bold.svg': ciscoAIAssistantSolidBoldIcon,
+  'copy-regular.svg': copyRegularIcon,
+  'dislike-filled.svg': dislikeFilledIcon,
+  'dislike-regular.svg': dislikeRegularIcon,
+  'link-regular.svg': linkRegularIcon,
+  'like-filled.svg': likeFilledIcon,
+  'like-regular.svg': likeRegularIcon,
+};
 
 /** Format an epoch (ms) into "HH:MM"; empty string on bad input. */
 const formatSourceTimestamp = (raw: number | string | undefined): string => {
@@ -18,18 +37,24 @@ const MOMENTUM_ICON_ALIASES: Record<string, string> = {
   'cisco-ai-assistant-color.svg': 'cisco-ai-assistant-solid-bold.svg',
 };
 
-/** Returns the trailing `name.svg` of a non-absolute path, else null. */
+export const resolveMomentumIconUrl = (iconName: string): string | null => {
+  const normalized = iconName.trim().toLowerCase();
+  const resolved = MOMENTUM_ICON_ALIASES[normalized] ?? normalized;
+  return MOMENTUM_ICON_URLS[resolved] ?? null;
+};
+
+/** Returns the trailing `name.svg` from a local path or URL, else null. */
 const extractMomentumIconName = (value: string): string | null => {
   const trimmed = value.trim();
   if (!trimmed) return null;
-  if (/^(https?:|data:|blob:)/i.test(trimmed)) return null;
-  const match = trimmed.match(/([\w-]+\.svg)$/i);
+  const match = trimmed.match(/([\w-]+\.svg)(?:[?#].*)?$/i);
   return match ? match[1].toLowerCase() : null;
 };
 
 /**
- * Returns a clone of the card with bare `*.svg` URLs rewritten to the
- * Momentum CDN and any `SOURCE_TIMESTAMP_PLACEHOLDER` substituted.
+ * Returns a clone of the card with supported bare `*.svg` URLs rewritten to
+ * bundled Momentum asset URLs and any `SOURCE_TIMESTAMP_PLACEHOLDER`
+ * substituted.
  */
 export const prepareCardForRender = <T>(card: T, publishTimestamp?: number | string): T => {
   if (card === null || typeof card !== 'object') return card;
@@ -44,9 +69,11 @@ export const prepareCardForRender = <T>(card: T, publishTimestamp?: number | str
         if (typeof value === 'string') {
           const iconName = extractMomentumIconName(value);
           if (iconName) {
-            const resolved = MOMENTUM_ICON_ALIASES[iconName] ?? iconName;
-            out[key] = `${MOMENTUM_ICON_CDN}${resolved}`;
-            continue;
+            const iconUrl = resolveMomentumIconUrl(iconName);
+            if (iconUrl) {
+              out[key] = iconUrl;
+              continue;
+            }
           }
           if (value.includes(SOURCE_TIMESTAMP_PLACEHOLDER)) {
             out[key] = value.split(SOURCE_TIMESTAMP_PLACEHOLDER).join(formattedTimestamp);
@@ -95,11 +122,11 @@ export const buildHostConfig = () => ({
     };
     return {
       default: {
-        backgroundColor: 'var(--mds-color-theme-background-primary-normal)',
+        backgroundColor: 'transparent',
         foregroundColors,
       },
       emphasis: {
-        backgroundColor: 'var(--mds-color-theme-background-secondary-normal)',
+        backgroundColor: 'transparent',
         foregroundColors,
       },
     };

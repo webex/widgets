@@ -24,3 +24,12 @@ export interface IAIAssistantProps {
   /** Optional extra class applied to the widget root. */
   className?: string;
 }
+
+export interface UseAiAssistantInput extends IAIAssistantProps {
+  interactionId?: string;
+  agentId: string;
+  isFeatureEnabled: boolean;
+  realTimeAssist: RealTimeAssistPayload[];
+}
+
+export type UserMessage = {id: string; text: string; sentAt: number};
