@@ -98,6 +98,8 @@ export interface AIAssistantFeedbackEvent {
 
 export interface AdaptiveCardRendererProps {
   card: unknown;
+  /** Title already rendered by RealTimeAssist; removes the matching header embedded in backend cards. */
+  assistantTitle?: string;
   /** Plain-text fallback rendered when the Adaptive Card cannot be parsed/rendered. */
   fallbackText?: string;
   /** Source timestamp (epoch ms, or stringified epoch) used to fill in any

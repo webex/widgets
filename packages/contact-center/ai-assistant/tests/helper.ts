@@ -76,6 +76,17 @@ describe('useAiAssistant', () => {
     expect(onFullScreenToggle).toHaveBeenLastCalledWith(false);
   });
 
+  it('close exits full-screen mode', () => {
+    const {result} = renderHook(() => useAiAssistant(baseProps));
+
+    act(() => result.current.toggleFullScreen());
+    expect(result.current.isFullScreen).toBe(true);
+
+    act(() => result.current.close());
+    expect(result.current.chrome).toBe('closed');
+    expect(result.current.isFullScreen).toBe(false);
+  });
+
   it('clearChat resets state, calls store.clearRealTimeAssist, and fires onClearChat', () => {
     const onClearChat = jest.fn();
     const {result} = renderHook(() => useAiAssistant({...baseProps, onClearChat}));
@@ -87,6 +98,14 @@ describe('useAiAssistant', () => {
     expect(result.current.requestStatus).toBe('idle');
     expect(storeMock.clearRealTimeAssist).toHaveBeenCalledWith('interaction-1');
     expect(onClearChat).toHaveBeenCalled();
+  });
+
+  it('clearChat skips the store interaction cleanup when no interaction is active', () => {
+    const {result} = renderHook(() => useAiAssistant({...baseProps, interactionId: ''}));
+
+    act(() => result.current.clearChat());
+
+    expect(storeMock.clearRealTimeAssist).not.toHaveBeenCalled();
   });
 
   it('requestSuggestion sends the right shape and sets listening', async () => {
@@ -151,6 +170,9 @@ describe('useAiAssistant', () => {
     await waitFor(() => expect(onRealTimeAssistReceived).toHaveBeenLastCalledWith(second));
     expect(onRealTimeAssistReceived).toHaveBeenCalledTimes(2);
     expect(result.current.requestStatus).toBe('ready');
+
+    rerender({realTimeAssist: [first, second]});
+    expect(onRealTimeAssistReceived).toHaveBeenCalledTimes(2);
   });
 
   it('adds user context messages alongside assistant suggestions in chatEntries', async () => {
@@ -201,6 +223,39 @@ describe('useAiAssistant', () => {
 
     expect(result.current.requestStatus).toBe('error');
     expect(storeMock.cc.apiAIAssistant.getRealTimeAssistance).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['interaction id', {interactionId: ''}],
+    ['agent id', {agentId: ''}],
+  ])('errors without an active %s', async (_label, missingId) => {
+    const {result} = renderHook(() => useAiAssistant({...baseProps, ...missingId}));
+
+    await act(async () => {
+      await result.current.requestSuggestion();
+    });
+
+    expect(result.current.requestStatus).toBe('error');
+    expect(result.current.errorMessage).toBe('No active interaction to request real-time assist for.');
+    expect(storeMock.cc.apiAIAssistant.getRealTimeAssistance).not.toHaveBeenCalled();
+  });
+
+  it('errors when the loaded SDK does not expose getRealTimeAssistance', async () => {
+    const api = storeMock.cc.apiAIAssistant;
+    const getRealTimeAssistance = api.getRealTimeAssistance;
+    api.getRealTimeAssistance = undefined as unknown as typeof getRealTimeAssistance;
+    try {
+      const {result} = renderHook(() => useAiAssistant(baseProps));
+
+      await act(async () => {
+        await result.current.requestSuggestion();
+      });
+
+      expect(result.current.requestStatus).toBe('error');
+      expect(result.current.errorMessage).toContain('API is not available');
+    } finally {
+      api.getRealTimeAssistance = getRealTimeAssistance;
+    }
   });
 
   it('submitContext requests with the trimmed draft and clears it', async () => {

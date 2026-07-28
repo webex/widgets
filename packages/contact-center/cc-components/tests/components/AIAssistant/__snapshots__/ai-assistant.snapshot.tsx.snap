@@ -1,0 +1,615 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AIAssistantComponent snapshots matches a full-screen RealTimeAssist conversation 1`] = `
+<div>
+  <div
+    class="ai-assistant"
+    data-testid="ai-assistant:root"
+  >
+    <div
+      aria-label="Cisco AI Assistant"
+      class="ai-assistant__panel ai-assistant__panel--full-screen"
+      data-testid="ai-assistant:panel"
+      role="dialog"
+    >
+      <header
+        class="ai-assistant__header"
+        data-testid="ai-assistant:header"
+      >
+        <mdc-text
+          class="ai-assistant__title"
+        >
+          Cisco AI Assistant
+        </mdc-text>
+        <div
+          class="ai-assistant__header-actions"
+        >
+          <mdc-button
+            aria-label="Minimize"
+            data-testid="ai-assistant:header-minimize"
+            prefix-icon="minimize-bold"
+          />
+          <mdc-button
+            aria-label="Exit full screen"
+            data-testid="ai-assistant:header-fullscreen"
+            prefix-icon="fullscreen-exit-bold"
+          />
+          <mdc-button
+            aria-label="Close"
+            data-testid="ai-assistant:header-close"
+            prefix-icon="cancel-bold"
+          />
+        </div>
+      </header>
+      <div
+        class="ai-assistant__body"
+        data-testid="ai-assistant:body"
+      >
+        <div
+          class="ai-assistant__real-time-assist"
+        >
+          <div
+            class="ai-assistant__chat"
+            data-testid="ai-assistant:chat"
+          >
+            <div
+              class="ai-assistant__chat-item ai-assistant__chat-item--assistant"
+              data-testid="ai-assistant:chat-greeting"
+            >
+              <div
+                class="ai-assistant__assistant-header"
+              >
+                <span
+                  aria-hidden="true"
+                  class="ai-assistant__assistant-icon"
+                >
+                  <svg
+                    aria-hidden="true"
+                    fill="none"
+                    focusable="false"
+                    height="20"
+                    viewBox="0 0 16 16"
+                    width="20"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M11.9844 9.0625C14.1849 9.0625 15.9688 7.27864 15.9688 5.07813C15.9688 2.87761 14.1849 1.09375 11.9844 1.09375C9.78386 1.09375 8 2.87762 8 5.07813C8 7.27863 9.78386 9.0625 11.9844 9.0625Z"
+                      fill="url(#ai-icon-paint0)"
+                    />
+                    <path
+                      clip-rule="evenodd"
+                      d="M8 3.97455C5.77504 3.97455 3.97135 5.77772 3.97135 8.00204C3.97135 10.2264 5.77504 12.0295 8 12.0295C10.225 12.0295 12.0286 10.2264 12.0286 8.00204C12.0286 5.77772 10.225 3.97455 8 3.97455ZM1.09375 8.00204C1.09375 4.18892 4.18578 1.09778 8 1.09778C11.8142 1.09778 14.9062 4.18892 14.9062 8.00204C14.9062 11.8152 11.8142 14.9063 8 14.9063C4.18578 14.9063 1.09375 11.8152 1.09375 8.00204Z"
+                      fill="url(#ai-icon-paint1)"
+                      fill-rule="evenodd"
+                    />
+                    <path
+                      d="M10.2705 1.4762C12.9068 2.39335 14.8131 4.86284 14.8994 7.79065C14.1722 8.56982 13.1372 9.05823 11.9873 9.05823C11.9537 9.05823 11.9202 9.05613 11.8867 9.0553C11.9782 8.71819 12.0293 8.36377 12.0293 7.99768C12.0292 5.826 10.3098 4.05568 8.1582 3.97327C8.47447 2.87097 9.25224 1.96305 10.2705 1.4762Z"
+                      fill="url(#ai-icon-paint2)"
+                    />
+                    <path
+                      d="M11.9823 9.0625C14.1828 9.0625 15.9667 7.27864 15.9667 5.07813C15.9667 2.87761 14.1828 1.09375 11.9823 1.09375C9.78179 1.09375 7.99792 2.87762 7.99792 5.07813C7.99792 7.27863 9.78179 9.0625 11.9823 9.0625Z"
+                      fill="url(#ai-icon-paint3)"
+                    />
+                    <defs>
+                      <lineargradient
+                        gradientUnits="userSpaceOnUse"
+                        id="ai-icon-paint0"
+                        x1="8.15802"
+                        x2="14.6826"
+                        y1="1.09375"
+                        y2="7.61831"
+                      >
+                        <stop
+                          stop-color="#0087EA"
+                        />
+                        <stop
+                          offset="1"
+                          stop-color="#63FFF7"
+                        />
+                      </lineargradient>
+                      <lineargradient
+                        gradientUnits="userSpaceOnUse"
+                        id="ai-icon-paint1"
+                        x1="14.9062"
+                        x2="1.09772"
+                        y1="1.09778"
+                        y2="14.9103"
+                      >
+                        <stop
+                          stop-color="#0051AF"
+                        />
+                        <stop
+                          offset="0.666238"
+                          stop-color="#0087EA"
+                        />
+                        <stop
+                          offset="1"
+                          stop-color="#00BCEB"
+                        />
+                      </lineargradient>
+                      <lineargradient
+                        gradientUnits="userSpaceOnUse"
+                        id="ai-icon-paint2"
+                        x1="10.6267"
+                        x2="14.3207"
+                        y1="3.74467"
+                        y2="8.01453"
+                      >
+                        <stop
+                          stop-color="#74BF4B"
+                          stop-opacity="0"
+                        />
+                        <stop
+                          offset="1"
+                          stop-color="#74BF4B"
+                        />
+                      </lineargradient>
+                      <radialgradient
+                        cx="0"
+                        cy="0"
+                        gradientTransform="translate(15.9667 9.0625) rotate(-135) scale(11.2695 11.2648)"
+                        gradientUnits="userSpaceOnUse"
+                        id="ai-icon-paint3"
+                        r="1"
+                      >
+                        <stop
+                          stop-color="#00BCEB"
+                          stop-opacity="0"
+                        />
+                        <stop
+                          offset="0.666962"
+                          stop-color="#00BCEB"
+                          stop-opacity="0"
+                        />
+                        <stop
+                          offset="1"
+                          stop-color="#00BCEB"
+                        />
+                      </radialgradient>
+                    </defs>
+                  </svg>
+                </span>
+                <mdc-text
+                  class="ai-assistant__suggestion-title"
+                >
+                  How can I help?
+                </mdc-text>
+              </div>
+            </div>
+            <div
+              class="ai-assistant__chat-item ai-assistant__chat-item--user"
+              data-testid="ai-assistant:chat-user"
+            >
+              <div
+                class="ai-assistant__user-bubble"
+              >
+                Help with a refund
+              </div>
+            </div>
+            <div
+              class="ai-assistant__chat-item ai-assistant__chat-item--assistant"
+              data-testid="ai-assistant:chat-assistant"
+            >
+              <div
+                class="ai-assistant__assistant-header"
+              >
+                <span
+                  aria-hidden="true"
+                  class="ai-assistant__assistant-icon"
+                >
+                  <svg
+                    aria-hidden="true"
+                    fill="none"
+                    focusable="false"
+                    height="20"
+                    viewBox="0 0 16 16"
+                    width="20"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M11.9844 9.0625C14.1849 9.0625 15.9688 7.27864 15.9688 5.07813C15.9688 2.87761 14.1849 1.09375 11.9844 1.09375C9.78386 1.09375 8 2.87762 8 5.07813C8 7.27863 9.78386 9.0625 11.9844 9.0625Z"
+                      fill="url(#ai-icon-paint0)"
+                    />
+                    <path
+                      clip-rule="evenodd"
+                      d="M8 3.97455C5.77504 3.97455 3.97135 5.77772 3.97135 8.00204C3.97135 10.2264 5.77504 12.0295 8 12.0295C10.225 12.0295 12.0286 10.2264 12.0286 8.00204C12.0286 5.77772 10.225 3.97455 8 3.97455ZM1.09375 8.00204C1.09375 4.18892 4.18578 1.09778 8 1.09778C11.8142 1.09778 14.9062 4.18892 14.9062 8.00204C14.9062 11.8152 11.8142 14.9063 8 14.9063C4.18578 14.9063 1.09375 11.8152 1.09375 8.00204Z"
+                      fill="url(#ai-icon-paint1)"
+                      fill-rule="evenodd"
+                    />
+                    <path
+                      d="M10.2705 1.4762C12.9068 2.39335 14.8131 4.86284 14.8994 7.79065C14.1722 8.56982 13.1372 9.05823 11.9873 9.05823C11.9537 9.05823 11.9202 9.05613 11.8867 9.0553C11.9782 8.71819 12.0293 8.36377 12.0293 7.99768C12.0292 5.826 10.3098 4.05568 8.1582 3.97327C8.47447 2.87097 9.25224 1.96305 10.2705 1.4762Z"
+                      fill="url(#ai-icon-paint2)"
+                    />
+                    <path
+                      d="M11.9823 9.0625C14.1828 9.0625 15.9667 7.27864 15.9667 5.07813C15.9667 2.87761 14.1828 1.09375 11.9823 1.09375C9.78179 1.09375 7.99792 2.87762 7.99792 5.07813C7.99792 7.27863 9.78179 9.0625 11.9823 9.0625Z"
+                      fill="url(#ai-icon-paint3)"
+                    />
+                    <defs>
+                      <lineargradient
+                        gradientUnits="userSpaceOnUse"
+                        id="ai-icon-paint0"
+                        x1="8.15802"
+                        x2="14.6826"
+                        y1="1.09375"
+                        y2="7.61831"
+                      >
+                        <stop
+                          stop-color="#0087EA"
+                        />
+                        <stop
+                          offset="1"
+                          stop-color="#63FFF7"
+                        />
+                      </lineargradient>
+                      <lineargradient
+                        gradientUnits="userSpaceOnUse"
+                        id="ai-icon-paint1"
+                        x1="14.9062"
+                        x2="1.09772"
+                        y1="1.09778"
+                        y2="14.9103"
+                      >
+                        <stop
+                          stop-color="#0051AF"
+                        />
+                        <stop
+                          offset="0.666238"
+                          stop-color="#0087EA"
+                        />
+                        <stop
+                          offset="1"
+                          stop-color="#00BCEB"
+                        />
+                      </lineargradient>
+                      <lineargradient
+                        gradientUnits="userSpaceOnUse"
+                        id="ai-icon-paint2"
+                        x1="10.6267"
+                        x2="14.3207"
+                        y1="3.74467"
+                        y2="8.01453"
+                      >
+                        <stop
+                          stop-color="#74BF4B"
+                          stop-opacity="0"
+                        />
+                        <stop
+                          offset="1"
+                          stop-color="#74BF4B"
+                        />
+                      </lineargradient>
+                      <radialgradient
+                        cx="0"
+                        cy="0"
+                        gradientTransform="translate(15.9667 9.0625) rotate(-135) scale(11.2695 11.2648)"
+                        gradientUnits="userSpaceOnUse"
+                        id="ai-icon-paint3"
+                        r="1"
+                      >
+                        <stop
+                          stop-color="#00BCEB"
+                          stop-opacity="0"
+                        />
+                        <stop
+                          offset="0.666962"
+                          stop-color="#00BCEB"
+                          stop-opacity="0"
+                        />
+                        <stop
+                          offset="1"
+                          stop-color="#00BCEB"
+                        />
+                      </radialgradient>
+                    </defs>
+                  </svg>
+                </span>
+                <mdc-text
+                  class="ai-assistant__suggestion-title"
+                >
+                  Suggested response
+                </mdc-text>
+              </div>
+              <div
+                data-testid="mock-adaptive-card"
+              >
+                Use the refund workflow
+              </div>
+            </div>
+            <div
+              class="ai-assistant__chat-listening"
+              data-testid="ai-assistant:listening"
+            >
+              <span
+                aria-hidden="true"
+                class="ai-assistant__chat-listening-dots"
+              >
+                <span
+                  class="ai-assistant__chat-listening-dot"
+                />
+                <span
+                  class="ai-assistant__chat-listening-dot"
+                />
+                <span
+                  class="ai-assistant__chat-listening-dot"
+                />
+              </span>
+              <mdc-text>
+                Listening
+              </mdc-text>
+            </div>
+          </div>
+          <form
+            class="ai-assistant__context"
+            data-testid="ai-assistant:context-form"
+          >
+            <mdc-input
+              aria-label="Add context"
+              class="ai-assistant__context-input"
+              data-testid="ai-assistant:context-input"
+            />
+            <mdc-button
+              data-testid="ai-assistant:context-submit"
+            >
+              Send
+            </mdc-button>
+          </form>
+        </div>
+      </div>
+      <footer
+        class="ai-assistant__footer"
+        data-testid="ai-assistant:footer"
+      >
+        <mdc-text
+          class="ai-assistant__disclaimer"
+          data-testid="ai-assistant:disclaimer"
+        >
+          I can make mistakes, so check my responses.
+        </mdc-text>
+      </footer>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`AIAssistantComponent snapshots matches the closed launcher state 1`] = `
+<div>
+  <div
+    class="ai-assistant"
+    data-testid="ai-assistant:root"
+  >
+    <mdc-button
+      aria-label="Open AI Assistant"
+      class="ai-assistant__launcher"
+      data-testid="ai-assistant:launcher"
+    >
+      <svg
+        aria-hidden="true"
+        fill="none"
+        focusable="false"
+        height="22"
+        viewBox="0 0 16 16"
+        width="22"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M11.9844 9.0625C14.1849 9.0625 15.9688 7.27864 15.9688 5.07813C15.9688 2.87761 14.1849 1.09375 11.9844 1.09375C9.78386 1.09375 8 2.87762 8 5.07813C8 7.27863 9.78386 9.0625 11.9844 9.0625Z"
+          fill="url(#ai-icon-paint0)"
+        />
+        <path
+          clip-rule="evenodd"
+          d="M8 3.97455C5.77504 3.97455 3.97135 5.77772 3.97135 8.00204C3.97135 10.2264 5.77504 12.0295 8 12.0295C10.225 12.0295 12.0286 10.2264 12.0286 8.00204C12.0286 5.77772 10.225 3.97455 8 3.97455ZM1.09375 8.00204C1.09375 4.18892 4.18578 1.09778 8 1.09778C11.8142 1.09778 14.9062 4.18892 14.9062 8.00204C14.9062 11.8152 11.8142 14.9063 8 14.9063C4.18578 14.9063 1.09375 11.8152 1.09375 8.00204Z"
+          fill="url(#ai-icon-paint1)"
+          fill-rule="evenodd"
+        />
+        <path
+          d="M10.2705 1.4762C12.9068 2.39335 14.8131 4.86284 14.8994 7.79065C14.1722 8.56982 13.1372 9.05823 11.9873 9.05823C11.9537 9.05823 11.9202 9.05613 11.8867 9.0553C11.9782 8.71819 12.0293 8.36377 12.0293 7.99768C12.0292 5.826 10.3098 4.05568 8.1582 3.97327C8.47447 2.87097 9.25224 1.96305 10.2705 1.4762Z"
+          fill="url(#ai-icon-paint2)"
+        />
+        <path
+          d="M11.9823 9.0625C14.1828 9.0625 15.9667 7.27864 15.9667 5.07813C15.9667 2.87761 14.1828 1.09375 11.9823 1.09375C9.78179 1.09375 7.99792 2.87762 7.99792 5.07813C7.99792 7.27863 9.78179 9.0625 11.9823 9.0625Z"
+          fill="url(#ai-icon-paint3)"
+        />
+        <defs>
+          <lineargradient
+            gradientUnits="userSpaceOnUse"
+            id="ai-icon-paint0"
+            x1="8.15802"
+            x2="14.6826"
+            y1="1.09375"
+            y2="7.61831"
+          >
+            <stop
+              stop-color="#0087EA"
+            />
+            <stop
+              offset="1"
+              stop-color="#63FFF7"
+            />
+          </lineargradient>
+          <lineargradient
+            gradientUnits="userSpaceOnUse"
+            id="ai-icon-paint1"
+            x1="14.9062"
+            x2="1.09772"
+            y1="1.09778"
+            y2="14.9103"
+          >
+            <stop
+              stop-color="#0051AF"
+            />
+            <stop
+              offset="0.666238"
+              stop-color="#0087EA"
+            />
+            <stop
+              offset="1"
+              stop-color="#00BCEB"
+            />
+          </lineargradient>
+          <lineargradient
+            gradientUnits="userSpaceOnUse"
+            id="ai-icon-paint2"
+            x1="10.6267"
+            x2="14.3207"
+            y1="3.74467"
+            y2="8.01453"
+          >
+            <stop
+              stop-color="#74BF4B"
+              stop-opacity="0"
+            />
+            <stop
+              offset="1"
+              stop-color="#74BF4B"
+            />
+          </lineargradient>
+          <radialgradient
+            cx="0"
+            cy="0"
+            gradientTransform="translate(15.9667 9.0625) rotate(-135) scale(11.2695 11.2648)"
+            gradientUnits="userSpaceOnUse"
+            id="ai-icon-paint3"
+            r="1"
+          >
+            <stop
+              stop-color="#00BCEB"
+              stop-opacity="0"
+            />
+            <stop
+              offset="0.666962"
+              stop-color="#00BCEB"
+              stop-opacity="0"
+            />
+            <stop
+              offset="1"
+              stop-color="#00BCEB"
+            />
+          </radialgradient>
+        </defs>
+      </svg>
+    </mdc-button>
+  </div>
+</div>
+`;
+
+exports[`AIAssistantComponent snapshots matches the minimized shared chrome 1`] = `
+<div>
+  <div
+    class="ai-assistant"
+    data-testid="ai-assistant:root"
+  >
+    <div
+      class="ai-assistant__panel ai-assistant__panel--minimized"
+      data-testid="ai-assistant:panel-minimized"
+    >
+      <div
+        class="ai-assistant__minimized-bar"
+        data-testid="ai-assistant:minimized-bar"
+      >
+        <mdc-text
+          class="ai-assistant__title"
+        >
+          Cisco AI Assistant
+        </mdc-text>
+        <div
+          class="ai-assistant__header-actions"
+        >
+          <mdc-button
+            aria-label="Restore"
+            data-testid="ai-assistant:minimized-restore"
+            prefix-icon="arrow-up-bold"
+          />
+          <mdc-button
+            aria-label="Close"
+            data-testid="ai-assistant:minimized-close"
+            prefix-icon="cancel-bold"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`AIAssistantComponent snapshots matches the open RealTimeAssist empty state 1`] = `
+<div>
+  <div
+    class="ai-assistant"
+    data-testid="ai-assistant:root"
+  >
+    <div
+      aria-label="Cisco AI Assistant"
+      class="ai-assistant__panel"
+      data-testid="ai-assistant:panel"
+      role="dialog"
+    >
+      <header
+        class="ai-assistant__header"
+        data-testid="ai-assistant:header"
+      >
+        <mdc-text
+          class="ai-assistant__title"
+        >
+          Cisco AI Assistant
+        </mdc-text>
+        <div
+          class="ai-assistant__header-actions"
+        >
+          <mdc-button
+            aria-label="Minimize"
+            data-testid="ai-assistant:header-minimize"
+            prefix-icon="minimize-bold"
+          />
+          <mdc-button
+            aria-label="Full screen"
+            data-testid="ai-assistant:header-fullscreen"
+            prefix-icon="fullscreen-bold"
+          />
+          <mdc-button
+            aria-label="Close"
+            data-testid="ai-assistant:header-close"
+            prefix-icon="cancel-bold"
+          />
+        </div>
+      </header>
+      <div
+        class="ai-assistant__body"
+        data-testid="ai-assistant:body"
+      >
+        <div
+          class="ai-assistant__real-time-assist"
+        >
+          <div
+            class="ai-assistant__body-empty"
+            data-testid="ai-assistant:empty"
+          >
+            <mdc-text>
+              Ask the assistant for help
+            </mdc-text>
+            <mdc-text>
+              Get a suggested response based on the live conversation. Add context below to refine the result.
+            </mdc-text>
+            <mdc-button
+              class="ai-assistant__pill-button"
+              data-testid="ai-assistant:get-suggestions"
+            >
+              Get Suggestions
+            </mdc-button>
+          </div>
+        </div>
+      </div>
+      <footer
+        class="ai-assistant__footer"
+        data-testid="ai-assistant:footer"
+      >
+        <mdc-text
+          class="ai-assistant__disclaimer"
+          data-testid="ai-assistant:disclaimer"
+        >
+          I can make mistakes, so check my responses.
+        </mdc-text>
+      </footer>
+    </div>
+  </div>
+</div>
+`;

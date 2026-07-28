@@ -4,6 +4,7 @@
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
+  font-family: var(--mds-font-family-primary, CiscoSans, 'Helvetica Neue', Arial, sans-serif);
   padding: 0.75rem 0.5rem;
   width: 100%;
 }
@@ -43,7 +44,8 @@
   display: flex;
   flex-direction: column;
   height: 32rem;
-  max-width: 28rem;
+  max-height: 90vh;
+  max-width: 22rem;
   overflow: hidden;
   width: 100%;
 }
@@ -89,7 +91,8 @@
   flex: 1;
   flex-direction: column;
   gap: 1rem;
-  overflow-y: auto;
+  min-height: 0;
+  overflow: hidden;
   padding: 1rem 1.125rem;
   row-gap: 1.25rem;
 }
@@ -224,14 +227,26 @@
 
 .ai-assistant__card {
   background: var(--mds-color-theme-background-secondary-normal, #f1f3f5);
-  border-radius: 0.75rem;
+  border-radius: 0.5rem;
   padding: 0.75rem;
+}
+
+.ai-assistant__card--customer-statement {
+  background: var(--mds-color-theme-background-primary-normal, #fff);
+  border: 0.0625rem solid var(--mds-color-theme-outline-secondary-normal, #c7c7c7);
 }
 
 // Scoped overrides for elements emitted by the adaptivecards renderer.
 .ai-assistant__card-host {
   font-size: 0.875rem;
   line-height: 1.25rem;
+
+  // Adaptive Cards can emit inline font-family declarations (including
+  // monospace). Keep card copy aligned with Momentum/Cisco typography.
+  &,
+  * {
+    font-family: inherit !important;
+  }
 
   // Force primary text color — backend ships accent/attention TextBlocks we don't want as alerts.
   &,
@@ -261,8 +276,10 @@
 
     // Match the compact action size in the AI Assistant design.
     img {
-      height: 1rem;
-      width: 1rem;
+      // Adaptive Cards writes dimensions inline, so these scoped overrides
+      // need precedence to keep all disclosure and feedback icons at 16px.
+      height: 1rem !important;
+      width: 1rem !important;
     }
   }
 
@@ -271,6 +288,13 @@
   [aria-expanded] {
     background: transparent;
     border: none;
+  }
+
+  [id='input-timestamp-richTextBlock'],
+  [id='input-timestamp-richTextBlock'] * {
+    color: var(--mds-color-theme-text-accent-normal, #0051af) !important;
+    text-decoration: underline;
+    text-underline-offset: 0.125rem;
   }
 
   // Copy confirmation pill — green circle, white check.
@@ -307,11 +331,49 @@
   padding: 0.5rem 0;
 }
 
+.ai-assistant__chat-listening-dots {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.1875rem;
+}
+
 .ai-assistant__chat-listening-dot {
-  background: linear-gradient(135deg, #4dbef0 0%, #5b6cff 100%);
+  animation: ai-assistant-listening-pulse 1.2s ease-in-out infinite;
+  background: var(--mds-color-theme-text-accent-normal, #0087ea);
   border-radius: 50%;
-  height: 0.625rem;
-  width: 0.625rem;
+  height: 0.3125rem;
+  opacity: 0.3;
+  width: 0.3125rem;
+
+  &:nth-child(2) {
+    animation-delay: 0.15s;
+  }
+
+  &:nth-child(3) {
+    animation-delay: 0.3s;
+  }
+}
+
+@keyframes ai-assistant-listening-pulse {
+  0%,
+  80%,
+  100% {
+    opacity: 0.3;
+    transform: scale(0.7);
+  }
+
+  40% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ai-assistant__chat-listening-dot {
+    animation: none;
+    opacity: 0.7;
+    transform: none;
+  }
 }
 
 .ai-assistant__footer {
@@ -332,6 +394,7 @@
 .ai-assistant__context {
   align-items: center;
   display: flex;
+  flex-shrink: 0;
   gap: 0.5rem;
 }
 

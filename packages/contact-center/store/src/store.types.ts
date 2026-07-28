@@ -25,7 +25,7 @@ import {
   getDefaultUIControls,
   TaskResponse,
 } from '@webex/contact-center';
-import type {SuggestedResponseParams} from 'node_modules/@webex/contact-center/dist/types/types';
+import type {RealTimeAssistanceParams} from 'node_modules/@webex/contact-center/dist/types/types';
 import {
   OutdialAniEntriesResponse,
   OutdialAniParams,
@@ -80,7 +80,7 @@ interface IContactCenter {
   };
 }
 
-type RealTimeAssistRequestParams = SuggestedResponseParams;
+type RealTimeAssistRequestParams = RealTimeAssistanceParams;
 
 type RealTimeAssistUserActionId = string;
 

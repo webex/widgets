@@ -41,18 +41,6 @@ jest.mock('adaptivecards', () => ({
   HostConfig: jest.fn(),
 }));
 
-jest.mock('@momentum-design/icons/dist/svg/check-circle-filled.svg', () => 'check-circle-filled.svg');
-jest.mock(
-  '@momentum-design/icons/dist/svg/cisco-ai-assistant-solid-bold.svg',
-  () => 'cisco-ai-assistant-solid-bold.svg'
-);
-jest.mock('@momentum-design/icons/dist/svg/copy-regular.svg', () => 'copy-regular.svg');
-jest.mock('@momentum-design/icons/dist/svg/dislike-filled.svg', () => 'dislike-filled.svg');
-jest.mock('@momentum-design/icons/dist/svg/dislike-regular.svg', () => 'dislike-regular.svg');
-jest.mock('@momentum-design/icons/dist/svg/link-regular.svg', () => 'link-regular.svg');
-jest.mock('@momentum-design/icons/dist/svg/like-filled.svg', () => 'like-filled.svg');
-jest.mock('@momentum-design/icons/dist/svg/like-regular.svg', () => 'like-regular.svg');
-
 describe('AdaptiveCardRenderer', () => {
   beforeEach(() => {
     Object.defineProperty(navigator, 'clipboard', {
@@ -74,14 +62,25 @@ describe('AdaptiveCardRenderer', () => {
     fireEvent.click(await screen.findByLabelText(`${type[0].toUpperCase()}${type.slice(1)} suggestion`));
 
     await waitFor(() => expect(onFeedback).toHaveBeenCalledWith({type, actionId}));
+    if (type === 'copy') {
+      expect(navigator.clipboard.writeText).toHaveBeenCalledWith('Suggested response');
+    }
   });
 
   it('replaces a failed source image with the bundled link icon', async () => {
     render(<AdaptiveCardRenderer card={{type: 'AdaptiveCard'}} />);
     const sourceImage = await screen.findByAltText('Source');
+    const originalSource = sourceImage.getAttribute('src');
 
     fireEvent.error(sourceImage);
 
-    expect(sourceImage.getAttribute('src')).toContain('link-regular.svg');
+    expect(sourceImage.getAttribute('src')).not.toBe(originalSource);
+    expect(sourceImage).not.toHaveAttribute('hidden');
+  });
+
+  it('uses the bordered quote treatment for customer statements', () => {
+    render(<AdaptiveCardRenderer card={{type: 'AdaptiveCard'}} assistantTitle="The customer said:" />);
+
+    expect(screen.getByTestId('ai-assistant:adaptive-card')).toHaveClass('ai-assistant__card--customer-statement');
   });
 });

@@ -85,6 +85,7 @@ const AdaptiveCardFallback: React.FC<Pick<AdaptiveCardRendererProps, 'fallbackTe
 
 const AdaptiveCardRendererBody: React.FC<AdaptiveCardRendererProps> = ({
   card,
+  assistantTitle,
   publishTimestamp,
   suggestionText,
   onFeedback,
@@ -197,7 +198,7 @@ const AdaptiveCardRendererBody: React.FC<AdaptiveCardRendererProps> = ({
         }
         onActionRef.current?.(action);
       };
-      adaptiveCard.parse(prepareCardForRender(card, publishTimestamp));
+      adaptiveCard.parse(prepareCardForRender(card, publishTimestamp, assistantTitle));
       const rendered = adaptiveCard.render();
       if (rendered) {
         container.appendChild(rendered);
@@ -231,24 +232,31 @@ const AdaptiveCardRendererBody: React.FC<AdaptiveCardRendererProps> = ({
         container.innerHTML = '';
       }
     };
-  }, [card, publishTimestamp, resetBoundary, showBoundary]);
+  }, [assistantTitle, card, publishTimestamp, resetBoundary, showBoundary]);
 
   return <div ref={containerRef} className="ai-assistant__card-host" />;
 };
 
 const AdaptiveCardRenderer: React.FC<AdaptiveCardRendererProps> = ({
   card,
+  assistantTitle,
   fallbackText,
   publishTimestamp,
   suggestionText,
   onFeedback,
   onAction,
 }) => {
+  const isCustomerStatement = /^the customer said:?$/i.test(assistantTitle?.trim() ?? '');
+
   return (
-    <div className="ai-assistant__card" data-testid="ai-assistant:adaptive-card">
+    <div
+      className={`ai-assistant__card${isCustomerStatement ? ' ai-assistant__card--customer-statement' : ''}`}
+      data-testid="ai-assistant:adaptive-card"
+    >
       <ErrorBoundary fallbackRender={() => <AdaptiveCardFallback fallbackText={fallbackText} />}>
         <AdaptiveCardRendererBody
           card={card}
+          assistantTitle={assistantTitle}
           fallbackText={fallbackText}
           publishTimestamp={publishTimestamp}
           suggestionText={suggestionText}

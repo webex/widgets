@@ -1,5 +1,6 @@
+import arrowDownRegularIcon from '@momentum-design/icons/dist/svg/arrow-down-regular.svg';
+import arrowRightRegularIcon from '@momentum-design/icons/dist/svg/arrow-right-regular.svg';
 import checkCircleFilledIcon from '@momentum-design/icons/dist/svg/check-circle-filled.svg';
-import ciscoAIAssistantSolidBoldIcon from '@momentum-design/icons/dist/svg/cisco-ai-assistant-solid-bold.svg';
 import copyRegularIcon from '@momentum-design/icons/dist/svg/copy-regular.svg';
 import dislikeFilledIcon from '@momentum-design/icons/dist/svg/dislike-filled.svg';
 import dislikeRegularIcon from '@momentum-design/icons/dist/svg/dislike-regular.svg';
@@ -8,10 +9,22 @@ import likeFilledIcon from '@momentum-design/icons/dist/svg/like-filled.svg';
 import likeRegularIcon from '@momentum-design/icons/dist/svg/like-regular.svg';
 
 const SOURCE_TIMESTAMP_PLACEHOLDER = 'SOURCE_TIMESTAMP_PLACEHOLDER';
+const CISCO_AI_ASSISTANT_COLOR_SVG =
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">' +
+  '<defs><linearGradient id="a" x1="15" y1="1" x2="1" y2="15" gradientUnits="userSpaceOnUse">' +
+  '<stop stop-color="#0051AF"/><stop offset=".67" stop-color="#0087EA"/><stop offset="1" stop-color="#00BCEB"/>' +
+  '</linearGradient><linearGradient id="b" x1="8" y1="1" x2="15" y2="8" gradientUnits="userSpaceOnUse">' +
+  '<stop stop-color="#0087EA"/><stop offset="1" stop-color="#63FFF7"/></linearGradient></defs>' +
+  '<circle cx="12" cy="5" r="4" fill="url(#b)"/>' +
+  '<path fill="url(#a)" fill-rule="evenodd" d="M8 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8ZM1 8a7 7 0 1 1 14 0A7 7 0 0 1 1 8Z"/>' +
+  '</svg>';
+const ciscoAIAssistantColorIcon = `data:image/svg+xml,${encodeURIComponent(CISCO_AI_ASSISTANT_COLOR_SVG)}`;
 
 const MOMENTUM_ICON_URLS: Record<string, string> = {
+  'arrow-down-regular.svg': arrowDownRegularIcon,
+  'arrow-right-regular.svg': arrowRightRegularIcon,
   'check-circle-filled.svg': checkCircleFilledIcon,
-  'cisco-ai-assistant-solid-bold.svg': ciscoAIAssistantSolidBoldIcon,
+  'cisco-ai-assistant-color.svg': ciscoAIAssistantColorIcon,
   'copy-regular.svg': copyRegularIcon,
   'dislike-filled.svg': dislikeFilledIcon,
   'dislike-regular.svg': dislikeRegularIcon,
@@ -32,15 +45,9 @@ const formatSourceTimestamp = (raw: number | string | undefined): string => {
   return `${hh}:${mm}`;
 };
 
-// Backend ships filenames not published in @momentum-design/icons; alias them.
-const MOMENTUM_ICON_ALIASES: Record<string, string> = {
-  'cisco-ai-assistant-color.svg': 'cisco-ai-assistant-solid-bold.svg',
-};
-
 export const resolveMomentumIconUrl = (iconName: string): string | null => {
   const normalized = iconName.trim().toLowerCase();
-  const resolved = MOMENTUM_ICON_ALIASES[normalized] ?? normalized;
-  return MOMENTUM_ICON_URLS[resolved] ?? null;
+  return MOMENTUM_ICON_URLS[normalized] ?? null;
 };
 
 /** Returns the trailing `name.svg` from a local path or URL, else null. */
@@ -51,15 +58,73 @@ const extractMomentumIconName = (value: string): string | null => {
   return match ? match[1].toLowerCase() : null;
 };
 
+export const extractCustomerStatementTitle = (card: unknown): string | undefined => {
+  if (Array.isArray(card)) {
+    for (const item of card) {
+      const title = extractCustomerStatementTitle(item);
+      if (title) return title;
+    }
+    return undefined;
+  }
+  if (!card || typeof card !== 'object') return undefined;
+
+  const node = card as Record<string, unknown>;
+  if (node.type === 'TextBlock' && typeof node.text === 'string' && /^the customer said:?$/i.test(node.text.trim())) {
+    return node.text.trim();
+  }
+
+  for (const value of Object.values(node)) {
+    const title = extractCustomerStatementTitle(value);
+    if (title) return title;
+  }
+  return undefined;
+};
+
 /**
  * Returns a clone of the card with supported bare `*.svg` URLs rewritten to
  * bundled Momentum asset URLs and any `SOURCE_TIMESTAMP_PLACEHOLDER`
  * substituted.
  */
-export const prepareCardForRender = <T>(card: T, publishTimestamp?: number | string): T => {
+const removeDuplicateAssistantHeader = (
+  card: Record<string, unknown>,
+  assistantTitle?: string
+): Record<string, unknown> => {
+  if (!assistantTitle || !Array.isArray(card.body) || card.body.length === 0) return card;
+  const [first, ...rest] = card.body;
+  if (!first || typeof first !== 'object') return card;
+
+  const firstItem = first as Record<string, unknown>;
+  const serializedHeader = JSON.stringify(firstItem).toLowerCase();
+  const normalizedTitle = assistantTitle.trim().toLowerCase();
+  const containsTitle = serializedHeader.includes(normalizedTitle);
+
+  if (firstItem.type === 'ColumnSet' && containsTitle) {
+    return {...card, body: rest};
+  }
+
+  if (firstItem.type === 'TextBlock' && `${firstItem.text ?? ''}`.trim().toLowerCase() === normalizedTitle) {
+    return {...card, body: rest};
+  }
+
+  if (firstItem.type === 'Container' && Array.isArray(firstItem.items)) {
+    const [firstChild, ...remainingItems] = firstItem.items;
+    if (
+      firstChild &&
+      typeof firstChild === 'object' &&
+      `${(firstChild as Record<string, unknown>).text ?? ''}`.trim().toLowerCase() === normalizedTitle
+    ) {
+      return {...card, body: [{...firstItem, items: remainingItems}, ...rest]};
+    }
+  }
+
+  return card;
+};
+
+export const prepareCardForRender = <T>(card: T, publishTimestamp?: number | string, assistantTitle?: string): T => {
   if (card === null || typeof card !== 'object') return card;
 
   const formattedTimestamp = formatSourceTimestamp(publishTimestamp);
+  const cardWithoutDuplicateHeader = removeDuplicateAssistantHeader(card as Record<string, unknown>, assistantTitle);
 
   const visit = (node: unknown): unknown => {
     if (Array.isArray(node)) return node.map(visit);
@@ -79,6 +144,10 @@ export const prepareCardForRender = <T>(card: T, publishTimestamp?: number | str
             out[key] = value.split(SOURCE_TIMESTAMP_PLACEHOLDER).join(formattedTimestamp);
             continue;
           }
+          if (key === 'text' && /(^|\n)\s*-\s+/.test(value)) {
+            out[key] = value.replace(/(^|\n)\s*-\s+/g, '$1• ');
+            continue;
+          }
         }
         out[key] = visit(value);
       }
@@ -87,7 +156,7 @@ export const prepareCardForRender = <T>(card: T, publishTimestamp?: number | str
     return node;
   };
 
-  return visit(card) as T;
+  return visit(cardWithoutDuplicateHeader) as T;
 };
 
 /** HostConfig wired to Momentum CSS tokens so cards inherit the active theme. */
@@ -99,7 +168,7 @@ export const buildHostConfig = () => ({
     medium: 12,
     large: 16,
     extraLarge: 24,
-    padding: 12,
+    padding: 0,
   },
   separator: {
     lineThickness: 1,
