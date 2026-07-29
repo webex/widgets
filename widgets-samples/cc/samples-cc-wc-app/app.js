@@ -158,17 +158,10 @@ window.addEventListener('load', () => {
     const accessToken = urlParams.get('access_token');
 
     if (accessToken) {
-      localStorage.setItem('accessToken', accessToken);
       accessTokenElem.value = accessToken;
       updateButtonState();
       // Clear the hash from the URL to remove the token from browser history
       window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
-    }
-  } else {
-    const storedAccessToken = window.localStorage.getItem('accessToken');
-    if (storedAccessToken) {
-      accessTokenElem.value = storedAccessToken;
-      updateButtonState();
     }
   }
 });

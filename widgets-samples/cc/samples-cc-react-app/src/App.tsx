@@ -28,10 +28,6 @@ import './App.scss';
 import {observer} from 'mobx-react-lite';
 import EngageWidget from './EngageWidget';
 
-// This is not to be included to a production app.
-// Have added here for debugging purposes
-window['store'] = store;
-
 const defaultWidgets = {
   stationLogin: true,
   stationLoginProfile: false,
@@ -132,15 +128,9 @@ function App() {
       const accessToken = urlParams.get('access_token');
 
       if (accessToken) {
-        window.localStorage.setItem('accessToken', accessToken);
         setAccessToken(accessToken);
         // Clear the hash from the URL to remove the token from browser history
         window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
-      }
-    } else {
-      const storedAccessToken = window.localStorage.getItem('accessToken');
-      if (storedAccessToken) {
-        setAccessToken(storedAccessToken);
       }
     }
   }, []);
@@ -375,13 +365,6 @@ function App() {
       webex.authorization.initiateLogin();
     });
   };
-
-  // Store accessToken changes in local storage
-  useEffect(() => {
-    if (accessToken.trim() !== '') {
-      window.localStorage.setItem('accessToken', accessToken);
-    }
-  }, [accessToken]);
 
   useEffect(() => {
     window.localStorage.setItem('selectedWidgets', JSON.stringify(selectedWidgets));
