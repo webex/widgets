@@ -54,14 +54,18 @@ describe('AdaptiveCardRenderer', () => {
     ['dislike', 'dislikeButton'],
     ['copy', 'copyButton'],
   ] as const)('emits %s feedback through the Adaptive Card action', async (type, actionId) => {
-    const onFeedback = jest.fn();
+    const onUserAction = jest.fn();
     render(
-      <AdaptiveCardRenderer card={{type: 'AdaptiveCard'}} suggestionText="Suggested response" onFeedback={onFeedback} />
+      <AdaptiveCardRenderer
+        card={{type: 'AdaptiveCard'}}
+        suggestionText="Suggested response"
+        onUserAction={onUserAction}
+      />
     );
 
     fireEvent.click(await screen.findByLabelText(`${type[0].toUpperCase()}${type.slice(1)} suggestion`));
 
-    await waitFor(() => expect(onFeedback).toHaveBeenCalledWith({type, actionId}));
+    await waitFor(() => expect(onUserAction).toHaveBeenCalledWith({type, actionId}));
     if (type === 'copy') {
       expect(navigator.clipboard.writeText).toHaveBeenCalledWith('Suggested response');
     }

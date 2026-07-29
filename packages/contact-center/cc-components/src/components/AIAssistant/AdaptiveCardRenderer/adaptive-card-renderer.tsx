@@ -2,8 +2,10 @@ import React, {useEffect, useRef} from 'react';
 import * as AdaptiveCards from 'adaptivecards';
 import {Text} from '@momentum-design/components/dist/react';
 import {ErrorBoundary, useErrorBoundary} from 'react-error-boundary';
-import {AdaptiveCardRendererProps} from '../ai-assistant.types';
+import {AdaptiveCardRendererProps, AIAssistantActionEvent} from '../ai-assistant.types';
 import {buildHostConfig, prepareCardForRender, resolveMomentumIconUrl} from './adaptive-card-renderer.utils';
+
+const MODULE = 'cc-components/AdaptiveCardRenderer';
 
 // Preload regular + filled variants so the like/dislike/copy toggles don't
 // wait on a network roundtrip on the first click.
@@ -88,8 +90,9 @@ const AdaptiveCardRendererBody: React.FC<AdaptiveCardRendererProps> = ({
   assistantTitle,
   publishTimestamp,
   suggestionText,
-  onFeedback,
+  onUserAction,
   onAction,
+  logger,
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const {resetBoundary, showBoundary} = useErrorBoundary();
@@ -97,13 +100,15 @@ const AdaptiveCardRendererBody: React.FC<AdaptiveCardRendererProps> = ({
   // Stash callbacks in refs so the render effect only re-runs when the card
   // itself changes — fresh inline parent callbacks would otherwise force a
   // full re-parse and re-fetch of every image on each render.
-  const onFeedbackRef = useRef(onFeedback);
+  const onUserActionRef = useRef(onUserAction);
   const onActionRef = useRef(onAction);
   const suggestionTextRef = useRef(suggestionText);
+  const loggerRef = useRef(logger);
   useEffect(() => {
-    onFeedbackRef.current = onFeedback;
+    onUserActionRef.current = onUserAction;
     onActionRef.current = onAction;
     suggestionTextRef.current = suggestionText;
+    loggerRef.current = logger;
   });
 
   useEffect(() => {
@@ -145,11 +150,34 @@ const AdaptiveCardRendererBody: React.FC<AdaptiveCardRendererProps> = ({
           }, 1500);
         }
       } catch (err) {
-        console.warn('[AIAssistant] copy to clipboard failed', err);
+        loggerRef.current?.error(`CC-Components: copy to clipboard failed - ${err}`, {
+          module: MODULE,
+          method: 'handleCopy',
+        });
       }
     };
 
-    const toggleFeedback = (kind: 'like' | 'dislike', controls: Map<Element, IconKind>) => {
+    /** Snapshot the like/dislike controls so a failed action can be undone. */
+    const captureControlState = (controls: Map<Element, IconKind>) => {
+      const snapshot = Array.from(controls.keys()).map((el) => ({
+        el,
+        active: el.getAttribute('data-active'),
+        src: el.querySelector('img')?.getAttribute('src') ?? null,
+      }));
+      return () => {
+        snapshot.forEach(({el, active, src}) => {
+          if (active) {
+            el.setAttribute('data-active', active);
+          } else {
+            el.removeAttribute('data-active');
+          }
+          const img = el.querySelector('img');
+          if (img && src) img.setAttribute('src', src);
+        });
+      };
+    };
+
+    const toggleAction = (kind: 'like' | 'dislike', controls: Map<Element, IconKind>) => {
       controls.forEach((thisKind, el) => {
         if (thisKind !== 'like' && thisKind !== 'dislike') return;
         const active = el.getAttribute('data-active') === 'true';
@@ -177,23 +205,28 @@ const AdaptiveCardRendererBody: React.FC<AdaptiveCardRendererProps> = ({
         Array.from(controls.entries()).find(([, controlKind]) => controlKind === kind)?.[0];
       const adaptiveCard = new AdaptiveCards.AdaptiveCard();
       adaptiveCard.hostConfig = new AdaptiveCards.HostConfig(buildHostConfig());
+      // The toggle is optimistic; `revert` puts the icons back if the host
+      // reports that the action never reached the backend.
+      const emitUserAction = (event: AIAssistantActionEvent, revert?: () => void) => {
+        const result = onUserActionRef.current?.(event);
+        if (!revert || !result || typeof (result as Promise<void>).catch !== 'function') return;
+        (result as Promise<void>).catch(() => revert());
+      };
+
       adaptiveCard.onExecuteAction = (action) => {
         const a = action as {id?: string; title?: string};
         const label = `${a?.id || ''} ${a?.title || ''}`.toLowerCase();
         const actionId = a?.id || a?.title || '';
         if (label.includes('copy')) {
           void handleCopy(getControl('copy'));
-          onFeedbackRef.current?.({type: 'copy', actionId});
+          emitUserAction({type: 'copy', actionId});
           return;
         }
-        if (label.includes('dislike')) {
-          toggleFeedback('dislike', controls);
-          onFeedbackRef.current?.({type: 'dislike', actionId});
-          return;
-        }
-        if (label.includes('like')) {
-          toggleFeedback('like', controls);
-          onFeedbackRef.current?.({type: 'like', actionId});
+        if (label.includes('dislike') || label.includes('like')) {
+          const kind = label.includes('dislike') ? 'dislike' : 'like';
+          const revert = captureControlState(controls);
+          toggleAction(kind, controls);
+          emitUserAction({type: kind, actionId}, revert);
           return;
         }
         onActionRef.current?.(action);
@@ -243,8 +276,9 @@ const AdaptiveCardRenderer: React.FC<AdaptiveCardRendererProps> = ({
   fallbackText,
   publishTimestamp,
   suggestionText,
-  onFeedback,
+  onUserAction,
   onAction,
+  logger,
 }) => {
   const isCustomerStatement = /^the customer said:?$/i.test(assistantTitle?.trim() ?? '');
 
@@ -260,8 +294,9 @@ const AdaptiveCardRenderer: React.FC<AdaptiveCardRendererProps> = ({
           fallbackText={fallbackText}
           publishTimestamp={publishTimestamp}
           suggestionText={suggestionText}
-          onFeedback={onFeedback}
+          onUserAction={onUserAction}
           onAction={onAction}
+          logger={logger}
         />
       </ErrorBoundary>
     </div>

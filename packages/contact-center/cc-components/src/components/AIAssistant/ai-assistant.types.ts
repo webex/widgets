@@ -1,4 +1,4 @@
-import type {RealTimeAssistPayload} from '@webex/cc-store';
+import type {ILogger, RealTimeAssistPayload} from '@webex/cc-store';
 
 /** Visual state of the AI Assistant panel chrome. */
 export type AIAssistantChromeState = 'closed' | 'open' | 'minimized';
@@ -36,8 +36,12 @@ export interface AIAssistantComponentProps {
   chatEntries: AIAssistantChatEntry[];
   /** Whether `aiFeature.suggestedResponses.enable` is true on the agent profile. */
   isFeatureEnabled: boolean;
-  /** Whether `Get Suggestions` has been clicked at least once this session. */
-  hasFiredInitialRequest: boolean;
+  /** Whether an interaction is currently active. */
+  hasActiveInteraction: boolean;
+  /** Display name used in the AI Assistant landing greeting. */
+  agentName?: string;
+  /** Whether the first real-time assist request has completed successfully. */
+  hasInitialRequestSucceeded: boolean;
   /** Transition the chrome to `open`. */
   open: () => void;
   /** Transition the chrome to `closed`; preserves chat state. */
@@ -49,13 +53,15 @@ export interface AIAssistantComponentProps {
   /** Toggle the fullscreen affordance; layout is host-owned. */
   toggleFullScreen: () => void;
   /** Fire a no-context `GET_SUGGESTIONS` request. */
-  requestSuggestion: () => void;
+  requestRealTimeAssist: () => void;
   /** Update the context input value. */
   setContextDraft: (value: string) => void;
   /** Fire an `ADD_SUGGESTIONS_EXTRA_CONTEXT` request using the current draft. */
   submitContext: () => void;
   /** Notify the host when the agent acts on a real-time assist card. */
-  onRealTimeAssistAction?: (event: AIAssistantFeedbackEvent, assist: RealTimeAssistPayload) => void;
+  onRealTimeAssistAction?: (event: AIAssistantActionEvent, assist: RealTimeAssistPayload) => void | Promise<void>;
+  /** Store logger, used to report failures this package cannot surface itself. */
+  logger?: ILogger;
   /** Extra class applied to the widget root. */
   className?: string;
 }
@@ -65,21 +71,21 @@ export interface RealTimeAssistProps {
   errorMessage?: string;
   chatEntries: AIAssistantChatEntry[];
   contextDraft: string;
-  onRequestSuggestion: () => void;
+  onRequestRealTimeAssist: () => void;
   onContextDraftChange: (value: string) => void;
   onSubmitContext: () => void;
-  isFeatureEnabled: boolean;
-  hasFiredInitialRequest: boolean;
+  hasInitialRequestSucceeded: boolean;
   /** Fires when the agent clicks the like / dislike / copy buttons on a card. */
-  onRealTimeAssistAction?: (event: AIAssistantFeedbackEvent, assist: RealTimeAssistPayload) => void;
+  onRealTimeAssistAction?: (event: AIAssistantActionEvent, assist: RealTimeAssistPayload) => void | Promise<void>;
+  logger?: ILogger;
 }
 
-/** Kind of feedback the agent gave on a suggestion card. */
-export type AIAssistantFeedbackKind = 'like' | 'dislike' | 'copy';
+/** Kind of action the agent can take on a suggestion card. */
+export type AIAssistantActionKind = 'like' | 'dislike' | 'copy';
 
 /** Payload emitted by like / dislike / copy clicks inside a card. */
-export interface AIAssistantFeedbackEvent {
-  type: AIAssistantFeedbackKind;
+export interface AIAssistantActionEvent {
+  type: AIAssistantActionKind;
   /** The id of the underlying card action that fired this event. */
   actionId: string;
 }
@@ -96,7 +102,9 @@ export interface AdaptiveCardRendererProps {
   /** Plain-text version of the suggestion, copied to the clipboard when the
    * user activates the card's copy action. */
   suggestionText?: string;
-  /** Fires when the user clicks the like / dislike / copy controls inside the card. */
-  onFeedback?: (event: AIAssistantFeedbackEvent) => void;
+  /** Fires when the user clicks the like / dislike / copy controls inside the
+   * card.  A rejected promise reverts the control's optimistic state. */
+  onUserAction?: (event: AIAssistantActionEvent) => void | Promise<void>;
   onAction?: (action: unknown) => void;
+  logger?: ILogger;
 }

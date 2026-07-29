@@ -14,7 +14,7 @@ jest.mock('@webex/cc-components', () => {
       onRealTimeAssistAction?: (
         event: {type: 'like' | 'dislike' | 'copy'; actionId: string},
         assist: {data: {adaptiveCardId?: string; languageCode?: string}}
-      ) => void;
+      ) => void | Promise<void>;
     }) =>
       ReactModule.createElement(
         ReactModule.Fragment,
@@ -26,14 +26,17 @@ jest.mock('@webex/cc-components', () => {
               key: actionId,
               type: 'button',
               'data-testid': actionId,
+              // The real renderer consumes the promise to revert on failure.
               onClick: () =>
-                onRealTimeAssistAction?.(
-                  {
-                    type: actionId === 'likeButton' ? 'like' : actionId === 'dislikeButton' ? 'dislike' : 'copy',
-                    actionId,
-                  },
-                  {data: {adaptiveCardId: 'card-1', languageCode: 'en'}}
-                ),
+                void Promise.resolve(
+                  onRealTimeAssistAction?.(
+                    {
+                      type: actionId === 'likeButton' ? 'like' : actionId === 'dislikeButton' ? 'dislike' : 'copy',
+                      actionId,
+                    },
+                    {data: {adaptiveCardId: 'card-1', languageCode: 'en'}}
+                  )
+                ).catch(() => undefined),
             },
             actionId
           )
@@ -44,7 +47,9 @@ jest.mock('@webex/cc-components', () => {
             type: 'button',
             'data-testid': 'missing-card-id',
             onClick: () =>
-              onRealTimeAssistAction?.({type: 'like', actionId: 'likeButton'}, {data: {languageCode: 'en'}}),
+              void Promise.resolve(
+                onRealTimeAssistAction?.({type: 'like', actionId: 'likeButton'}, {data: {languageCode: 'en'}})
+              ).catch(() => undefined),
           },
           'missing card id'
         )
@@ -66,7 +71,7 @@ jest.mock('@webex/cc-store', () => ({
     featureFlags: {isSuggestedResponsesEnabled: true},
     realTimeAssist: {'interaction-1': []},
     clearRealTimeAssist: jest.fn(),
-    logger: {error: jest.fn()},
+    logger: {error: jest.fn(), warn: jest.fn()},
   },
 }));
 
@@ -76,12 +81,12 @@ type StoreMock = {
       sendRealTimeAssistanceUserAction: jest.Mock;
     };
   };
-  logger: {error: jest.Mock};
+  logger: {error: jest.Mock; warn: jest.Mock};
 };
 
 const storeMock = store as unknown as StoreMock;
 
-describe('AIAssistant real-time assist feedback', () => {
+describe('AIAssistant real-time assist actions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     storeMock.cc.apiAIAssistant.sendRealTimeAssistanceUserAction.mockResolvedValue(undefined);
@@ -101,16 +106,22 @@ describe('AIAssistant real-time assist feedback', () => {
     });
   });
 
-  it('does not call the SDK when the adaptive card id is missing', () => {
+  it('warns instead of silently dropping the action when the adaptive card id is missing', () => {
     render(<AIAssistant />);
 
     fireEvent.click(screen.getByTestId('missing-card-id'));
 
     expect(storeMock.cc.apiAIAssistant.sendRealTimeAssistanceUserAction).not.toHaveBeenCalled();
+    expect(storeMock.logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('adaptiveCardId'),
+      expect.objectContaining({method: 'handleRealTimeAssistAction'})
+    );
   });
 
-  it('logs SDK feedback failures', async () => {
-    storeMock.cc.apiAIAssistant.sendRealTimeAssistanceUserAction.mockRejectedValueOnce(new Error('feedback failed'));
+  it('logs SDK action event failures', async () => {
+    storeMock.cc.apiAIAssistant.sendRealTimeAssistanceUserAction.mockRejectedValueOnce(
+      new Error('action event failed')
+    );
     render(<AIAssistant />);
 
     fireEvent.click(screen.getByTestId('likeButton'));

@@ -1,10 +1,10 @@
 import React, {useEffect, useRef} from 'react';
-import {Button, Input, Text} from '@momentum-design/components/dist/react';
+import {Button, Input, Spinner, Text} from '@momentum-design/components/dist/react';
 import AdaptiveCardRenderer from '../AdaptiveCardRenderer/adaptive-card-renderer';
 import {extractCustomerStatementTitle} from '../AdaptiveCardRenderer/adaptive-card-renderer.utils';
 import CiscoAIAssistantColorIcon from '../CiscoAIAssistantColorIcon';
 import {RealTimeAssistProps} from '../ai-assistant.types';
-import {EMPTY_DESCRIPTION, EMPTY_TITLE, FLAG_OFF_MESSAGE, GET_SUGGESTIONS_LABEL, LISTENING_TEXT} from '../constants';
+import {EMPTY_TITLE, GET_ASSISTANCE_LABEL, LISTENING_TEXT, REQUEST_FAILED_TEXT, REQUESTING_TEXT} from '../constants';
 
 const AssistantIcon: React.FC = () => (
   <span className="ai-assistant__assistant-icon" aria-hidden="true">
@@ -30,12 +30,12 @@ const RealTimeAssist: React.FC<RealTimeAssistProps> = ({
   errorMessage,
   chatEntries,
   contextDraft,
-  onRequestSuggestion,
+  onRequestRealTimeAssist,
   onContextDraftChange,
   onSubmitContext,
-  isFeatureEnabled,
-  hasFiredInitialRequest,
+  hasInitialRequestSucceeded,
   onRealTimeAssistAction,
+  logger,
 }) => {
   const listRef = useRef<HTMLDivElement | null>(null);
 
@@ -46,7 +46,6 @@ const RealTimeAssist: React.FC<RealTimeAssistProps> = ({
     node.scrollTop = node.scrollHeight;
   }, [chatEntries.length, status]);
 
-  const contextDisabled = !isFeatureEnabled || !hasFiredInitialRequest;
   const handleContextSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!contextDraft.trim()) return;
@@ -54,19 +53,40 @@ const RealTimeAssist: React.FC<RealTimeAssistProps> = ({
   };
 
   const content = (() => {
-    if (!isFeatureEnabled) {
+    if (!hasInitialRequestSucceeded) {
       return (
-        <div className="ai-assistant__body-empty" data-testid="ai-assistant:flag-off">
-          <Text tagname="p" type="body-midsize-regular">
-            {FLAG_OFF_MESSAGE}
+        <div className="ai-assistant__body-empty" data-testid="ai-assistant:empty">
+          <Text tagname="h3" type="body-large-bold">
+            {EMPTY_TITLE}
           </Text>
+          {status === 'listening' ? (
+            <Spinner size="small" role="status" aria-label={REQUESTING_TEXT} data-testid="ai-assistant:requesting" />
+          ) : (
+            <Button
+              type="button"
+              variant="secondary"
+              className="ai-assistant__pill-button"
+              onClick={() => onRequestRealTimeAssist()}
+              data-testid="ai-assistant:get-suggestions"
+            >
+              {GET_ASSISTANCE_LABEL}
+            </Button>
+          )}
+          {status === 'error' ? (
+            <Text
+              tagname="p"
+              type="body-midsize-regular"
+              className="ai-assistant__error-text"
+              data-testid="ai-assistant:error"
+            >
+              {errorMessage || REQUEST_FAILED_TEXT}
+            </Text>
+          ) : null}
         </div>
       );
     }
 
-    const hasEntries = chatEntries.length > 0;
-
-    if (hasEntries) {
+    if (chatEntries.length > 0) {
       return (
         <div className="ai-assistant__chat" ref={listRef} data-testid="ai-assistant:chat">
           {chatEntries.map((entry) => {
@@ -119,64 +139,31 @@ const RealTimeAssist: React.FC<RealTimeAssistProps> = ({
                   fallbackText={entry.realTimeAssist?.data?.suggestion as string | undefined}
                   publishTimestamp={entry.realTimeAssist?.data?.publishTimestamp}
                   suggestionText={entry.realTimeAssist?.data?.suggestion as string | undefined}
-                  onFeedback={(event) => entry.realTimeAssist && onRealTimeAssistAction?.(event, entry.realTimeAssist)}
+                  onUserAction={(event) =>
+                    entry.realTimeAssist ? onRealTimeAssistAction?.(event, entry.realTimeAssist) : undefined
+                  }
+                  logger={logger}
                 />
               </div>
             );
           })}
-          {hasFiredInitialRequest && status !== 'error' ? <ListeningStatus /> : null}
+          <ListeningStatus />
         </div>
       );
     }
 
-    if (status === 'error') {
-      return (
-        <div className="ai-assistant__body-error" data-testid="ai-assistant:error">
-          <Text tagname="p" type="body-midsize-regular">
-            {errorMessage || 'Something went wrong while requesting a suggestion.'}
-          </Text>
-          <Button type="button" variant="primary" onClick={onRequestSuggestion} data-testid="ai-assistant:retry">
-            Try again
-          </Button>
-        </div>
-      );
-    }
-
-    if (status === 'listening' || hasFiredInitialRequest) {
-      return <ListeningStatus />;
-    }
-
-    return (
-      <div className="ai-assistant__body-empty" data-testid="ai-assistant:empty">
-        <Text tagname="h3" type="body-large-bold">
-          {EMPTY_TITLE}
-        </Text>
-        <Text tagname="p" type="body-midsize-regular">
-          {EMPTY_DESCRIPTION}
-        </Text>
-        <Button
-          type="button"
-          variant="secondary"
-          className="ai-assistant__pill-button"
-          onClick={onRequestSuggestion}
-          data-testid="ai-assistant:get-suggestions"
-        >
-          {GET_SUGGESTIONS_LABEL}
-        </Button>
-      </div>
-    );
+    return <ListeningStatus />;
   })();
 
   return (
     <div className="ai-assistant__real-time-assist">
       {content}
-      {hasFiredInitialRequest ? (
+      {hasInitialRequestSucceeded ? (
         <form className="ai-assistant__context" onSubmit={handleContextSubmit} data-testid="ai-assistant:context-form">
           <Input
             className="ai-assistant__context-input"
             placeholder="Add context to refine suggestions"
             value={contextDraft}
-            disabled={contextDisabled}
             aria-label="Add context"
             data-testid="ai-assistant:context-input"
             // @ts-expect-error momentum-design Input emits a CustomEvent
@@ -188,7 +175,7 @@ const RealTimeAssist: React.FC<RealTimeAssistProps> = ({
             type="submit"
             variant="primary"
             size={28}
-            disabled={contextDisabled || !contextDraft.trim()}
+            disabled={!contextDraft.trim()}
             data-testid="ai-assistant:context-submit"
           >
             Send

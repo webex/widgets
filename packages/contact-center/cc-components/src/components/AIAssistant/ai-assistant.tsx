@@ -2,6 +2,7 @@ import React from 'react';
 import {Button, Text} from '@momentum-design/components/dist/react';
 import {withMetrics} from '@webex/cc-ui-logging';
 import RealTimeAssist from './RealTimeAssist/real-time-assist';
+import AIAssistantLanding from './ai-assistant-landing';
 import CiscoAIAssistantColorIcon from './CiscoAIAssistantColorIcon';
 import {AIAssistantComponentProps} from './ai-assistant.types';
 import {AI_ASSISTANT_TITLE, DISCLAIMER_TEXT} from './constants';
@@ -15,16 +16,19 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
   contextDraft,
   chatEntries,
   isFeatureEnabled,
-  hasFiredInitialRequest,
+  hasActiveInteraction,
+  agentName,
+  hasInitialRequestSucceeded,
   open,
   close,
   minimize,
   restore,
   toggleFullScreen,
-  requestSuggestion,
+  requestRealTimeAssist,
   setContextDraft,
   submitContext,
   onRealTimeAssistAction,
+  logger,
   className,
 }) => {
   // Fullscreen is consumer-owned: we emit onFullScreenToggle; the host owns layout.
@@ -32,6 +36,7 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
   const panelClass = ['ai-assistant__panel', isFullScreen ? 'ai-assistant__panel--full-screen' : '']
     .filter(Boolean)
     .join(' ');
+  const showLanding = !hasActiveInteraction || !isFeatureEnabled;
 
   return (
     <div className={rootClass} data-testid="ai-assistant:root">
@@ -111,30 +116,39 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
               />
             </div>
           </header>
-          <div className="ai-assistant__body" data-testid="ai-assistant:body">
-            <RealTimeAssist
-              status={requestStatus}
-              errorMessage={errorMessage}
-              chatEntries={chatEntries}
-              contextDraft={contextDraft}
-              onRequestSuggestion={requestSuggestion}
-              onContextDraftChange={setContextDraft}
-              onSubmitContext={submitContext}
-              isFeatureEnabled={isFeatureEnabled}
-              hasFiredInitialRequest={hasFiredInitialRequest}
-              onRealTimeAssistAction={onRealTimeAssistAction}
-            />
+          <div
+            className={`ai-assistant__body${showLanding ? ' ai-assistant__body--landing' : ''}`}
+            data-testid="ai-assistant:body"
+          >
+            {showLanding ? (
+              <AIAssistantLanding agentName={agentName} showRealTimeAssist={isFeatureEnabled} />
+            ) : (
+              <RealTimeAssist
+                status={requestStatus}
+                errorMessage={errorMessage}
+                chatEntries={chatEntries}
+                contextDraft={contextDraft}
+                onRequestRealTimeAssist={requestRealTimeAssist}
+                onContextDraftChange={setContextDraft}
+                onSubmitContext={submitContext}
+                hasInitialRequestSucceeded={hasInitialRequestSucceeded}
+                onRealTimeAssistAction={onRealTimeAssistAction}
+                logger={logger}
+              />
+            )}
           </div>
-          <footer className="ai-assistant__footer" data-testid="ai-assistant:footer">
-            <Text
-              tagname="p"
-              type="body-small-regular"
-              className="ai-assistant__disclaimer"
-              data-testid="ai-assistant:disclaimer"
-            >
-              {DISCLAIMER_TEXT}
-            </Text>
-          </footer>
+          {showLanding ? null : (
+            <footer className="ai-assistant__footer" data-testid="ai-assistant:footer">
+              <Text
+                tagname="p"
+                type="body-small-regular"
+                className="ai-assistant__disclaimer"
+                data-testid="ai-assistant:disclaimer"
+              >
+                {DISCLAIMER_TEXT}
+              </Text>
+            </footer>
+          )}
         </div>
       )}
     </div>

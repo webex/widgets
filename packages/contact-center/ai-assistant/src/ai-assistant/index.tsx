@@ -1,16 +1,14 @@
-import React, {useCallback} from 'react';
+import React from 'react';
 import store from '@webex/cc-store';
 import {observer} from 'mobx-react-lite';
 import {ErrorBoundary} from 'react-error-boundary';
 
 import {AIAssistantComponent} from '@webex/cc-components';
-import type {AIAssistantFeedbackEvent} from '@webex/cc-components';
-import type {RealTimeAssistPayload} from '@webex/cc-store';
 import {useAiAssistant, REAL_TIME_ASSIST_FLAG} from '../helper';
 import {IAIAssistantProps} from '../ai-assistant.types';
 
 const AIAssistantInternal: React.FunctionComponent<IAIAssistantProps> = observer((props) => {
-  const {currentTask, agentId, featureFlags, realTimeAssist} = store;
+  const {currentTask, agentId, agentProfile, featureFlags, realTimeAssist} = store;
   const interactionId = currentTask?.data?.interactionId;
   const isFeatureEnabled = Boolean(featureFlags?.[REAL_TIME_ASSIST_FLAG]);
   const activeRealTimeAssist = interactionId ? realTimeAssist?.[interactionId] || [] : [];
@@ -23,36 +21,14 @@ const AIAssistantInternal: React.FunctionComponent<IAIAssistantProps> = observer
     realTimeAssist: activeRealTimeAssist,
   });
 
-  const handleRealTimeAssistAction = useCallback(
-    (event: AIAssistantFeedbackEvent, assist: RealTimeAssistPayload) => {
-      const api = store.cc?.apiAIAssistant;
-      const adaptiveCardId = assist?.data?.adaptiveCardId;
-      if (!interactionId || !agentId || !adaptiveCardId || !api?.sendRealTimeAssistanceUserAction) return;
-
-      void api
-        .sendRealTimeAssistanceUserAction({
-          agentId,
-          interactionId,
-          adaptiveCardId,
-          actionId: event.actionId,
-          languageCode: typeof assist?.data?.languageCode === 'string' ? assist.data.languageCode : undefined,
-        })
-        .catch((error) => {
-          store.logger?.error(`CC-Widgets: sendRealTimeAssistanceUserAction failed - ${error}`, {
-            module: 'ai-assistant/index.tsx',
-            method: 'handleRealTimeAssistAction',
-          });
-        });
-    },
-    [agentId, interactionId]
-  );
-
   return (
     <AIAssistantComponent
       {...hookProps}
       isFeatureEnabled={isFeatureEnabled}
+      hasActiveInteraction={Boolean(interactionId)}
+      agentName={agentProfile?.agentName}
+      logger={store.logger}
       className={props.className}
-      onRealTimeAssistAction={handleRealTimeAssistAction}
     />
   );
 });

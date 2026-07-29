@@ -49,7 +49,10 @@ class StoreWrapper implements IStoreWrapper {
   onTaskSelected?: (task: ITask, isClicked: boolean) => void;
   onErrorCallback?: (widgetName: string, error: Error) => void;
   private realtimeTranscriptionListeners: Record<string, (payload: RealTimeTranscriptionEventPayload) => void> = {};
-  private realTimeAssistListeners: Record<string, (payload: RealTimeAssistPayload) => void> = {};
+  // Keyed by interactionId; the task is tracked alongside the listener so a
+  // replacement task object (task:hydrate / task:merged) gets rebound.
+  private realTimeAssistListeners: Record<string, {task: ITask; listener: (payload: RealTimeAssistPayload) => void}> =
+    {};
 
   constructor() {
     this.store = Store.getInstance();
@@ -524,7 +527,8 @@ class StoreWrapper implements IStoreWrapper {
       }
 
       if (taskId && this.realTimeAssistListeners[taskId]) {
-        taskToRemove.off(SUGGESTED_RESPONSE_EVENT, this.realTimeAssistListeners[taskId]);
+        const {task: listenerTask, listener} = this.realTimeAssistListeners[taskId];
+        (listenerTask ?? taskToRemove).off(SUGGESTED_RESPONSE_EVENT, listener);
         delete this.realTimeAssistListeners[taskId];
       }
       if (taskId && this.store.realTimeAssist && this.store.realTimeAssist[taskId]) {
@@ -814,12 +818,17 @@ class StoreWrapper implements IStoreWrapper {
       task.on(TASK_EVENTS.TASK_MEDIA, this.handleTaskMedia);
     }
 
-    // Guard against duplicate registration when this method is re-entered via
-    // task:hydrate / task:merged for the same interaction.
-    if (taskId && !this.realTimeAssistListeners[taskId]) {
-      const listener = (payload: RealTimeAssistPayload) => this.handleRealTimeAssist(taskId, payload);
-      this.realTimeAssistListeners[taskId] = listener;
-      task.on(SUGGESTED_RESPONSE_EVENT, listener);
+    // Avoid duplicate registration when this method is re-entered for the same
+    // task, but do rebind when task:hydrate / task:merged supplies a
+    // replacement object for the same interaction.
+    if (taskId) {
+      const existing = this.realTimeAssistListeners[taskId];
+      if (existing?.task !== task) {
+        existing?.task?.off(SUGGESTED_RESPONSE_EVENT, existing.listener);
+        const listener = (payload: RealTimeAssistPayload) => this.handleRealTimeAssist(taskId, payload);
+        this.realTimeAssistListeners[taskId] = {task, listener};
+        task.on(SUGGESTED_RESPONSE_EVENT, listener);
+      }
     }
   };
 

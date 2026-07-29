@@ -24,13 +24,14 @@ const createProps = (overrides: Partial<AIAssistantComponentProps> = {}): AIAssi
   contextDraft: '',
   chatEntries: [],
   isFeatureEnabled: true,
-  hasFiredInitialRequest: false,
+  hasActiveInteraction: true,
+  hasInitialRequestSucceeded: false,
   open: jest.fn(),
   close: jest.fn(),
   minimize: jest.fn(),
   restore: jest.fn(),
   toggleFullScreen: jest.fn(),
-  requestSuggestion: jest.fn(),
+  requestRealTimeAssist: jest.fn(),
   setContextDraft: jest.fn(),
   submitContext: jest.fn(),
   ...overrides,
@@ -52,6 +53,13 @@ describe('AIAssistantComponent snapshots', () => {
     expect(container).toMatchSnapshot();
   });
 
+  it('matches the AI features landing state', () => {
+    const {container} = render(
+      <AIAssistantComponent {...createProps({agentName: 'User5 Agent5', hasActiveInteraction: false})} />
+    );
+    expect(container).toMatchSnapshot();
+  });
+
   it('matches a full-screen RealTimeAssist conversation', () => {
     const {container} = render(
       <AIAssistantComponent
@@ -59,7 +67,7 @@ describe('AIAssistantComponent snapshots', () => {
           isFullScreen: true,
           requestStatus: 'ready',
           contextDraft: 'Additional refund context',
-          hasFiredInitialRequest: true,
+          hasInitialRequestSucceeded: true,
           chatEntries: [
             {type: 'assistant-greeting', id: 'greeting-1', text: 'How can I help?'},
             {type: 'user', id: 'user-1', text: 'Help with a refund'},

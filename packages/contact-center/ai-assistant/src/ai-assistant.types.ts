@@ -13,14 +13,10 @@ export interface IAIAssistantProps {
   onRestore?: () => void;
   /** Fired when the panel is closed back to the launcher. */
   onClose?: () => void;
-  /** Fired when the chat is reset (suggestions, drafts, session flags wiped). */
-  onClearChat?: () => void;
   /** Fired when the fullscreen affordance is toggled.  Host owns layout. */
   onFullScreenToggle?: (isFullScreen: boolean) => void;
   /** Fired each time a fresh real-time assist response arrives for the active task. */
   onRealTimeAssistReceived?: (payload: RealTimeAssistPayload) => void;
-  /** @deprecated Use `onRealTimeAssistReceived` instead. */
-  onSuggestionReceived?: (payload: RealTimeAssistPayload) => void;
   /** Optional extra class applied to the widget root. */
   className?: string;
 }
@@ -31,5 +27,15 @@ export interface UseAiAssistantInput extends IAIAssistantProps {
   isFeatureEnabled: boolean;
   realTimeAssist: RealTimeAssistPayload[];
 }
+
+export type UseAIAssistantChromeInput = Pick<
+  UseAiAssistantInput,
+  'onOpen' | 'onMinimize' | 'onRestore' | 'onClose' | 'onFullScreenToggle'
+>;
+
+export type UseRealTimeAssistInput = Pick<
+  UseAiAssistantInput,
+  'interactionId' | 'agentId' | 'isFeatureEnabled' | 'realTimeAssist' | 'onRealTimeAssistReceived'
+>;
 
 export type UserMessage = {id: string; text: string; sentAt: number};

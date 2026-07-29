@@ -72,9 +72,8 @@ const WebAIAssistant = r2wc(AIAssistant, {
     onMinimize: 'function',
     onRestore: 'function',
     onClose: 'function',
-    onClearChat: 'function',
     onFullScreenToggle: 'function',
-    onSuggestionReceived: 'function',
+    onRealTimeAssistReceived: 'function',
     className: 'string',
   },
 });

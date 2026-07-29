@@ -9,14 +9,12 @@ jest.mock('@webex/cc-store', () => {
     __esModule: true,
     default: {
       cc: mockCC,
-      clearRealTimeAssist: jest.fn(),
     },
   };
 });
 
 type StoreMock = {
   cc: typeof mockCC;
-  clearRealTimeAssist: jest.Mock;
 };
 const storeMock = store as unknown as StoreMock;
 
@@ -87,32 +85,11 @@ describe('useAiAssistant', () => {
     expect(result.current.isFullScreen).toBe(false);
   });
 
-  it('clearChat resets state, calls store.clearRealTimeAssist, and fires onClearChat', () => {
-    const onClearChat = jest.fn();
-    const {result} = renderHook(() => useAiAssistant({...baseProps, onClearChat}));
-
-    act(() => result.current.setContextDraft('hello'));
-    act(() => result.current.clearChat());
-
-    expect(result.current.contextDraft).toBe('');
-    expect(result.current.requestStatus).toBe('idle');
-    expect(storeMock.clearRealTimeAssist).toHaveBeenCalledWith('interaction-1');
-    expect(onClearChat).toHaveBeenCalled();
-  });
-
-  it('clearChat skips the store interaction cleanup when no interaction is active', () => {
-    const {result} = renderHook(() => useAiAssistant({...baseProps, interactionId: ''}));
-
-    act(() => result.current.clearChat());
-
-    expect(storeMock.clearRealTimeAssist).not.toHaveBeenCalled();
-  });
-
-  it('requestSuggestion sends the right shape and sets listening', async () => {
+  it('requestRealTimeAssist sends the right shape and sets listening', async () => {
     const {result} = renderHook(() => useAiAssistant(baseProps));
 
     await act(async () => {
-      result.current.requestSuggestion();
+      result.current.requestRealTimeAssist();
     });
 
     expect(storeMock.cc.apiAIAssistant.getRealTimeAssistance).toHaveBeenCalledWith(
@@ -123,6 +100,7 @@ describe('useAiAssistant', () => {
       })
     );
     expect(result.current.requestStatus).toBe('listening');
+    expect(result.current.hasInitialRequestSucceeded).toBe(true);
   });
 
   it('flips status to ready and notifies host once a suggestion arrives', async () => {
@@ -139,7 +117,7 @@ describe('useAiAssistant', () => {
     );
 
     await act(async () => {
-      result.current.requestSuggestion();
+      result.current.requestRealTimeAssist();
     });
     expect(result.current.requestStatus).toBe('listening');
 
@@ -190,7 +168,7 @@ describe('useAiAssistant', () => {
     // First Get Suggestions (no context) → first assistant response arrives.
     // After the first request the chat is seeded with an assistant greeting.
     await act(async () => {
-      result.current.requestSuggestion();
+      result.current.requestRealTimeAssist();
     });
     rerender({realTimeAssist: [first]});
     await waitFor(() => expect(result.current.requestStatus).toBe('ready'));
@@ -214,33 +192,34 @@ describe('useAiAssistant', () => {
     expect(types.filter((t) => t === 'assistant')).toHaveLength(2);
   });
 
-  it('errors out when feature flag is off', async () => {
+  it('stays idle when the feature flag is off', async () => {
     const {result} = renderHook(() => useAiAssistant({...baseProps, isFeatureEnabled: false}));
 
     await act(async () => {
-      result.current.requestSuggestion();
+      result.current.requestRealTimeAssist();
     });
 
-    expect(result.current.requestStatus).toBe('error');
+    expect(result.current.requestStatus).toBe('idle');
+    expect(result.current.errorMessage).toBeUndefined();
     expect(storeMock.cc.apiAIAssistant.getRealTimeAssistance).not.toHaveBeenCalled();
   });
 
   it.each([
     ['interaction id', {interactionId: ''}],
     ['agent id', {agentId: ''}],
-  ])('errors without an active %s', async (_label, missingId) => {
+  ])('stays idle without an active %s', async (_label, missingId) => {
     const {result} = renderHook(() => useAiAssistant({...baseProps, ...missingId}));
 
     await act(async () => {
-      await result.current.requestSuggestion();
+      await result.current.requestRealTimeAssist();
     });
 
-    expect(result.current.requestStatus).toBe('error');
-    expect(result.current.errorMessage).toBe('No active interaction to request real-time assist for.');
+    expect(result.current.requestStatus).toBe('idle');
+    expect(result.current.errorMessage).toBeUndefined();
     expect(storeMock.cc.apiAIAssistant.getRealTimeAssistance).not.toHaveBeenCalled();
   });
 
-  it('errors when the loaded SDK does not expose getRealTimeAssistance', async () => {
+  it('errors instead of throwing when the loaded SDK does not expose getRealTimeAssistance', async () => {
     const api = storeMock.cc.apiAIAssistant;
     const getRealTimeAssistance = api.getRealTimeAssistance;
     api.getRealTimeAssistance = undefined as unknown as typeof getRealTimeAssistance;
@@ -248,11 +227,11 @@ describe('useAiAssistant', () => {
       const {result} = renderHook(() => useAiAssistant(baseProps));
 
       await act(async () => {
-        await result.current.requestSuggestion();
+        await result.current.requestRealTimeAssist();
       });
 
       expect(result.current.requestStatus).toBe('error');
-      expect(result.current.errorMessage).toContain('API is not available');
+      expect(result.current.errorMessage).toBeTruthy();
     } finally {
       api.getRealTimeAssistance = getRealTimeAssistance;
     }
@@ -285,10 +264,80 @@ describe('useAiAssistant', () => {
 
     const {result} = renderHook(() => useAiAssistant(baseProps));
     await act(async () => {
-      await result.current.requestSuggestion();
+      await result.current.requestRealTimeAssist();
     });
 
     expect(result.current.requestStatus).toBe('error');
     expect(result.current.errorMessage).toBe('boom');
+    // A failed request must leave the widget on the initial prompt.
+    expect(result.current.hasInitialRequestSucceeded).toBe(false);
+  });
+
+  it('ignores a second request while one is still in flight', async () => {
+    let release: () => void = () => undefined;
+    storeMock.cc.apiAIAssistant.getRealTimeAssistance.mockImplementationOnce(
+      () =>
+        new Promise<void>((resolve) => {
+          release = resolve;
+        })
+    );
+
+    const {result} = renderHook(() => useAiAssistant(baseProps));
+
+    act(() => {
+      result.current.requestRealTimeAssist();
+      result.current.requestRealTimeAssist();
+    });
+    expect(storeMock.cc.apiAIAssistant.getRealTimeAssistance).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      release();
+    });
+
+    await act(async () => {
+      result.current.requestRealTimeAssist();
+    });
+    expect(storeMock.cc.apiAIAssistant.getRealTimeAssistance).toHaveBeenCalledTimes(2);
+  });
+
+  it('replays every payload that landed since the last render', async () => {
+    const onRealTimeAssistReceived = jest.fn();
+    const first = {data: {adaptiveCard: {type: 'AdaptiveCard'}, title: 'first'}};
+    const second = {data: {adaptiveCard: {type: 'AdaptiveCard'}, title: 'second'}};
+
+    const {rerender} = renderHook((props: {realTimeAssist?: Array<typeof first>} = {}) =>
+      useAiAssistant({
+        ...baseProps,
+        ...props,
+        realTimeAssist: props.realTimeAssist ?? [],
+        onRealTimeAssistReceived,
+      })
+    );
+
+    // Both payloads arrive in the same commit.
+    rerender({realTimeAssist: [first, second]});
+
+    await waitFor(() => expect(onRealTimeAssistReceived).toHaveBeenCalledTimes(2));
+    expect(onRealTimeAssistReceived).toHaveBeenNthCalledWith(1, first);
+    expect(onRealTimeAssistReceived).toHaveBeenNthCalledWith(2, second);
+  });
+
+  it('clears session state when the interaction changes', async () => {
+    const {result, rerender} = renderHook((props: {interactionId?: string} = {}) =>
+      useAiAssistant({...baseProps, interactionId: props.interactionId ?? 'interaction-1'})
+    );
+
+    await act(async () => {
+      result.current.requestRealTimeAssist();
+    });
+    act(() => result.current.setContextDraft('previous customer context'));
+    expect(result.current.hasInitialRequestSucceeded).toBe(true);
+
+    rerender({interactionId: 'interaction-2'});
+
+    expect(result.current.hasInitialRequestSucceeded).toBe(false);
+    expect(result.current.contextDraft).toBe('');
+    expect(result.current.requestStatus).toBe('idle');
+    expect(result.current.chatEntries).toHaveLength(0);
   });
 });

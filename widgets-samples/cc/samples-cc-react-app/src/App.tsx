@@ -209,9 +209,7 @@ function App() {
     const mediaType = task?.data?.interaction?.mediaType;
     const isSocial = mediaType === 'social';
     const title = isSocial ? callAssociatedDetails?.customerName : callAssociatedDetails?.ani;
-    console.log(
-      `onTaskSelected invoked for task with title : ${title}, and mediaType : ${mediaType}`
-    );
+    console.log(`onTaskSelected invoked for task with title : ${title}, and mediaType : ${mediaType}`);
   };
 
   const onHoldResume = ({isHeld, task}) => {
@@ -592,47 +590,13 @@ function App() {
                     <legend className="legend-box">&nbsp;Select Widgets to Show&nbsp;</legend>
                     <div className="widget-checkboxes">
                       {Object.keys(defaultWidgets).map((widget) => (
-                        <>
-                          <label key={widget}>
-                            <input
-                              type="checkbox"
-                              name={widget}
-                              checked={selectedWidgets[widget]}
-                              onChange={handleCheckboxChange}
-                              disabled={isWidgetDisabledByWebRTC(widget)}
-                              data-testid={`samples:widget-${widget}`}
-                            />
-                            &nbsp;
-                            {formatWidgetName(widget)}&nbsp;
-                            {widget === 'outdialCall' && (
-                              <span style={{display: 'inline-flex', alignItems: 'center'}}>
-                                <PopoverNext
-                                  trigger="mouseenter"
-                                  triggerComponent={<Icon name="info-badge-filled" />}
-                                  placement="auto-end"
-                                  closeButtonPlacement="top-left"
-                                  closeButtonProps={{'aria-label': 'Close'}}
-                                >
-                                  <Text>
-                                    <div
-                                      style={{color: 'var(--mds-color-theme-text-error-normal)', marginBottom: '10px'}}
-                                    >
-                                      <strong>Note:</strong> When a number is dialed, the agent gets an incoming task to
-                                      accept via an Extension, Dial Number, or Browser. It is recommended to have the
-                                      incoming task/task list widget and call controls widget according to your needs.
-                                    </div>
-                                  </Text>
-                                </PopoverNext>
-                              </span>
-                            )}
-                          </label>
-                       
                         <label key={widget}>
                           <input
                             type="checkbox"
                             name={widget}
                             checked={selectedWidgets[widget]}
                             onChange={handleCheckboxChange}
+                            disabled={isWidgetDisabledByWebRTC(widget)}
                             data-testid={`samples:widget-${widget}`}
                           />
                           &nbsp;
@@ -651,7 +615,7 @@ function App() {
                                     style={{color: 'var(--mds-color-theme-text-error-normal)', marginBottom: '10px'}}
                                   >
                                     <strong>Note:</strong> When a number is dialed, the agent gets an incoming task to
-                                    accept via an Extension, Dial Number, or Browser. It's recommended to have the
+                                    accept via an Extension, Dial Number, or Browser. It is recommended to have the
                                     incoming task/task list widget and call controls widget according to your needs.
                                   </div>
                                 </Text>
@@ -659,7 +623,6 @@ function App() {
                             </span>
                           )}
                         </label>
-                        </>
                       ))}
                     </div>
                   </fieldset>
@@ -1162,9 +1125,7 @@ function App() {
                                 setIsAIAssistantFullScreen(isFs);
                                 console.log('AIAssistant fullScreen', isFs);
                               }}
-                              onSuggestionReceived={(payload) =>
-                                console.log('AIAssistant suggestion', payload)
-                              }
+                              onRealTimeAssistReceived={(payload) => console.log('AIAssistant suggestion', payload)}
                             />
                           </fieldset>
                         </section>

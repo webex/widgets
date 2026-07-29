@@ -66,14 +66,19 @@ module.exports = mergeWithCustomize({
       },
       {
         test: /\.(png|jpg|gif|svg)$/,
-        include: [
-          resolveMonorepoRoot('node_modules/@momentum-ui/react-collaboration'),
-          resolveMonorepoRoot('node_modules/@momentum-design/icons'),
-        ],
+        include: [resolveMonorepoRoot('node_modules/@momentum-ui/react-collaboration')],
         type: 'asset/resource',
         generator: {
           filename: 'images/[name][ext][query]',
         },
+      },
+      {
+        // Inline rather than emit: packages that consume the prebuilt
+        // `cc-components/dist` never copy emitted assets, so a file reference
+        // here would 404 in every downstream host.
+        test: /\.svg$/,
+        include: [resolveMonorepoRoot('node_modules/@momentum-design/icons')],
+        type: 'asset/inline',
       },
     ],
   },

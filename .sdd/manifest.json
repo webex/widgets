@@ -92,6 +92,15 @@
       "subWidgets": ["CallControl", "CallControlCAD", "IncomingTask", "OutdialCall", "TaskList"]
     },
     {
+      "id": "ai-assistant",
+      "package": "@webex/cc-ai-assistant",
+      "path": "packages/contact-center/ai-assistant",
+      "spec": "packages/contact-center/ai-assistant/ai-docs/ai-assistant-spec.md",
+      "responsibility": "AI Assistant widget: panel chrome, Real-time Assist requests, transcript, feedback actions.",
+      "coverageState": "DRAFT",
+      "tier": 1
+    },
+    {
       "id": "ui-logging",
       "package": "@webex/cc-ui-logging",
       "path": "packages/contact-center/ui-logging",

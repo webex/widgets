@@ -4,7 +4,7 @@ import '@testing-library/jest-dom';
 import AIAssistantComponent from '../../../src/components/AIAssistant/ai-assistant';
 import type {
   AIAssistantComponentProps,
-  AIAssistantFeedbackEvent,
+  AIAssistantActionEvent,
 } from '../../../src/components/AIAssistant/ai-assistant.types';
 
 jest.mock('@webex/cc-ui-logging', () => ({
@@ -17,17 +17,17 @@ jest.mock('../../../src/components/AIAssistant/AdaptiveCardRenderer/adaptive-car
     __esModule: true,
     default: ({
       fallbackText,
-      onFeedback,
+      onUserAction,
     }: {
       fallbackText?: string;
-      onFeedback?: (event: AIAssistantFeedbackEvent) => void;
+      onUserAction?: (event: AIAssistantActionEvent) => void;
     }) =>
       ReactModule.createElement(
         'button',
         {
           type: 'button',
           'data-testid': 'mock-adaptive-card',
-          onClick: () => onFeedback?.({type: 'like', actionId: 'likeButton'}),
+          onClick: () => onUserAction?.({type: 'like', actionId: 'likeButton'}),
         },
         fallbackText
       ),
@@ -41,13 +41,15 @@ const createProps = (overrides: Partial<AIAssistantComponentProps> = {}): AIAssi
   contextDraft: '',
   chatEntries: [],
   isFeatureEnabled: true,
-  hasFiredInitialRequest: false,
+  hasActiveInteraction: true,
+  agentName: 'User5 Agent5',
+  hasInitialRequestSucceeded: false,
   open: jest.fn(),
   close: jest.fn(),
   minimize: jest.fn(),
   restore: jest.fn(),
   toggleFullScreen: jest.fn(),
-  requestSuggestion: jest.fn(),
+  requestRealTimeAssist: jest.fn(),
   setContextDraft: jest.fn(),
   submitContext: jest.fn(),
   ...overrides,
@@ -83,33 +85,76 @@ describe('AIAssistantComponent', () => {
     expect(screen.getByTestId('ai-assistant:empty')).toBeInTheDocument();
     expect(screen.queryByTestId('ai-assistant:context-form')).not.toBeInTheDocument();
     fireEvent.click(screen.getByTestId('ai-assistant:get-suggestions'));
-    expect(props.requestSuggestion).toHaveBeenCalledTimes(1);
+    expect(props.requestRealTimeAssist).toHaveBeenCalledTimes(1);
   });
 
-  it('renders the feature-disabled and error states', () => {
+  it('renders the landing page without Real-time Assist when the feature is disabled', () => {
     const props = createProps({isFeatureEnabled: false});
-    const {rerender} = render(<AIAssistantComponent {...props} />);
+    render(<AIAssistantComponent {...props} />);
 
-    expect(screen.getByTestId('ai-assistant:flag-off')).toBeInTheDocument();
+    expect(screen.getByTestId('ai-assistant:landing')).toHaveTextContent("Hi User5 Agent5. I'm your AI Assistant");
+    expect(screen.queryByText('Real-time Assist')).not.toBeInTheDocument();
+    expect(screen.getByText('Wellness breaks')).toBeInTheDocument();
+    expect(screen.getByText('Smart summaries')).toBeInTheDocument();
     expect(screen.queryByTestId('ai-assistant:context-form')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('ai-assistant:footer')).not.toBeInTheDocument();
+  });
 
-    rerender(
-      <AIAssistantComponent
-        {...props}
-        isFeatureEnabled
-        requestStatus="error"
-        errorMessage="Real-time assistance failed"
-      />
-    );
+  it('shows Real-time Assist on the landing page before an interaction starts', () => {
+    render(<AIAssistantComponent {...createProps({hasActiveInteraction: false})} />);
+
+    expect(screen.getByTestId('ai-assistant:landing')).toBeInTheDocument();
+    expect(screen.getByText('Real-time Assist')).toBeInTheDocument();
+    expect(screen.queryByTestId('ai-assistant:empty')).not.toBeInTheDocument();
+  });
+
+  it('buffers in place while the first request is in flight', () => {
+    render(<AIAssistantComponent {...createProps({requestStatus: 'listening'})} />);
+
+    expect(screen.getByTestId('ai-assistant:empty')).toBeInTheDocument();
+    expect(screen.getByTestId('ai-assistant:requesting')).toBeInTheDocument();
+    expect(screen.queryByTestId('ai-assistant:get-suggestions')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('ai-assistant:context-form')).not.toBeInTheDocument();
+  });
+
+  it('stays on the initial prompt with the reason when the first request fails', () => {
+    const props = createProps({requestStatus: 'error', errorMessage: 'Real-time assistance failed'});
+    render(<AIAssistantComponent {...props} />);
+
+    expect(screen.getByTestId('ai-assistant:empty')).toBeInTheDocument();
     expect(screen.getByTestId('ai-assistant:error')).toHaveTextContent('Real-time assistance failed');
-    fireEvent.click(screen.getByTestId('ai-assistant:retry'));
-    expect(props.requestSuggestion).toHaveBeenCalledTimes(1);
+    expect(screen.queryByTestId('ai-assistant:listening')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('ai-assistant:get-suggestions'));
+    expect(props.requestRealTimeAssist).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows a generic reason when a failed request carries no message', () => {
+    render(<AIAssistantComponent {...createProps({requestStatus: 'error'})} />);
+
+    expect(screen.getByTestId('ai-assistant:error')).toHaveTextContent(
+      'Something went wrong while requesting a suggestion.'
+    );
+  });
+
+  it('keeps listening mode when a later context request fails', () => {
+    const props = createProps({
+      requestStatus: 'error',
+      errorMessage: 'Real-time assistance failed',
+      hasInitialRequestSucceeded: true,
+      chatEntries: [{type: 'assistant-greeting', id: 'greeting', text: 'Greeting'}],
+    });
+    render(<AIAssistantComponent {...props} />);
+
+    expect(screen.getByTestId('ai-assistant:listening')).toBeInTheDocument();
+    expect(screen.queryByTestId('ai-assistant:empty')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('ai-assistant:error')).not.toBeInTheDocument();
   });
 
   it('updates and submits context after the initial request', () => {
     const props = createProps({
       requestStatus: 'listening',
-      hasFiredInitialRequest: true,
+      hasInitialRequestSucceeded: true,
       contextDraft: 'refund policy',
     });
     render(<AIAssistantComponent {...props} />);
@@ -135,7 +180,7 @@ describe('AIAssistantComponent', () => {
   it('renders a customer-statement title supplied only by its adaptive card', () => {
     const props = createProps({
       requestStatus: 'ready',
-      hasFiredInitialRequest: true,
+      hasInitialRequestSucceeded: true,
       chatEntries: [
         {
           type: 'assistant',
@@ -169,7 +214,7 @@ describe('AIAssistantComponent', () => {
     };
     const props = createProps({
       requestStatus: 'ready',
-      hasFiredInitialRequest: true,
+      hasInitialRequestSucceeded: true,
       onRealTimeAssistAction,
       chatEntries: [
         {type: 'assistant-greeting', id: 'greeting-1', text: 'How can I help?'},
