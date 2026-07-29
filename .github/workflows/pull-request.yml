@@ -106,6 +106,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           ref: ${{ github.event.pull_request.head.sha }}
+          allow-unsafe-pr-checkout: true
           persist-credentials: false
 
       - name: Setup Node
@@ -145,6 +146,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           ref: ${{ github.event.pull_request.head.sha }}
+          allow-unsafe-pr-checkout: true
           persist-credentials: false
 
       - name: Setup Node
@@ -198,6 +200,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           ref: ${{ github.event.pull_request.head.sha }}
+          allow-unsafe-pr-checkout: true
           persist-credentials: false
 
       - name: Setup Node
@@ -251,6 +254,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           ref: ${{ github.event.pull_request.head.sha }}
+          allow-unsafe-pr-checkout: true
           persist-credentials: false
 
       - name: Setup Node

@@ -9689,6 +9689,7 @@ __metadata:
     jest: "npm:29.7.0"
     jest-environment-jsdom: "npm:29.7.0"
     prettier: "npm:^3.5.1"
+    react-error-boundary: "npm:^6.0.0"
     swiper: "npm:^12.1.2"
     ts-loader: "npm:9.5.1"
     typescript: "npm:5.6.3"
