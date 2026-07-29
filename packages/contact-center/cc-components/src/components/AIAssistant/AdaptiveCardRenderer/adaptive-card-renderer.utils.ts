@@ -9,6 +9,7 @@ import likeFilledIcon from '@momentum-design/icons/dist/svg/like-filled.svg';
 import likeRegularIcon from '@momentum-design/icons/dist/svg/like-regular.svg';
 
 const SOURCE_TIMESTAMP_PLACEHOLDER = 'SOURCE_TIMESTAMP_PLACEHOLDER';
+const LINE_SEPARATOR_ID = 'line-separator-textBlock';
 const CISCO_AI_ASSISTANT_COLOR_SVG =
   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">' +
   '<defs><linearGradient id="a" x1="15" y1="1" x2="1" y2="15" gradientUnits="userSpaceOnUse">' +
@@ -150,6 +151,9 @@ export const prepareCardForRender = <T>(card: T, publishTimestamp?: number | str
           }
         }
         out[key] = visit(value);
+      }
+      if (out.id === LINE_SEPARATOR_ID) {
+        out.separator = true;
       }
       return out;
     }

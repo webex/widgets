@@ -1161,7 +1161,6 @@ class StoreWrapper implements IStoreWrapper {
       this.store.acceptedCampaignIds = new Set();
       this.realtimeTranscriptionListeners = {};
       this.setLastConsultDestination(null);
-      this.setLastConsultDestination(null);
       this.store.realTimeAssist = {};
       this.realTimeAssistListeners = {};
     });

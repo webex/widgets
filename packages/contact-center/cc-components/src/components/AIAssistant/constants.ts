@@ -1,3 +1,4 @@
+export const AI_ASSISTANT_TITLE = 'Cisco AI Assistant';
 export const DISCLAIMER_TEXT = 'I can make mistakes, so check my responses.';
 export const EMPTY_TITLE = 'Ask the assistant for help';
 export const EMPTY_DESCRIPTION =

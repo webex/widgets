@@ -1,12 +1,10 @@
 import React from 'react';
 import {Button, Text} from '@momentum-design/components/dist/react';
 import {withMetrics} from '@webex/cc-ui-logging';
-import Header from './Panel/Header/header';
-import MinimizedBar from './Panel/MinimizedBar/minimized-bar';
 import RealTimeAssist from './RealTimeAssist/real-time-assist';
 import CiscoAIAssistantColorIcon from './CiscoAIAssistantColorIcon';
 import {AIAssistantComponentProps} from './ai-assistant.types';
-import {DISCLAIMER_TEXT} from './constant';
+import {AI_ASSISTANT_TITLE, DISCLAIMER_TEXT} from './constants';
 import './ai-assistant.styles.scss';
 
 const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
@@ -51,16 +49,68 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
         </Button>
       ) : chrome === 'minimized' ? (
         <div className="ai-assistant__panel ai-assistant__panel--minimized" data-testid="ai-assistant:panel-minimized">
-          <MinimizedBar onRestore={restore} onClose={close} />
+          <div className="ai-assistant__minimized-bar" data-testid="ai-assistant:minimized-bar">
+            <Text tagname="span" type="body-midsize-bold" className="ai-assistant__title">
+              {AI_ASSISTANT_TITLE}
+            </Text>
+            <div className="ai-assistant__header-actions">
+              <Button
+                type="button"
+                variant="tertiary"
+                size={28}
+                prefix-icon="arrow-up-bold"
+                aria-label="Restore"
+                data-testid="ai-assistant:minimized-restore"
+                onClick={restore}
+              />
+              <Button
+                type="button"
+                variant="tertiary"
+                size={28}
+                prefix-icon="cancel-bold"
+                aria-label="Close"
+                data-testid="ai-assistant:minimized-close"
+                onClick={close}
+              />
+            </div>
+          </div>
         </div>
       ) : (
-        <div className={panelClass} data-testid="ai-assistant:panel" role="dialog" aria-label="Cisco AI Assistant">
-          <Header
-            onMinimize={minimize}
-            onToggleFullScreen={toggleFullScreen}
-            onClose={close}
-            isFullScreen={isFullScreen}
-          />
+        <div className={panelClass} data-testid="ai-assistant:panel" role="dialog" aria-label={AI_ASSISTANT_TITLE}>
+          <header className="ai-assistant__header" data-testid="ai-assistant:header">
+            <Text tagname="h2" type="body-large-bold" className="ai-assistant__title">
+              {AI_ASSISTANT_TITLE}
+            </Text>
+            <div className="ai-assistant__header-actions">
+              <Button
+                type="button"
+                variant="tertiary"
+                size={28}
+                prefix-icon="minimize-bold"
+                aria-label="Minimize"
+                data-testid="ai-assistant:header-minimize"
+                onClick={minimize}
+              />
+              <Button
+                type="button"
+                variant="tertiary"
+                size={28}
+                prefix-icon={isFullScreen ? 'fullscreen-exit-bold' : 'fullscreen-bold'}
+                aria-label={isFullScreen ? 'Exit full screen' : 'Full screen'}
+                data-testid="ai-assistant:header-fullscreen"
+                onClick={toggleFullScreen}
+              />
+              <Button
+                type="button"
+                variant="tertiary"
+                size={28}
+                prefix-icon="cancel-bold"
+                aria-label="Close"
+                data-testid="ai-assistant:header-close"
+                onClick={close}
+              />
+            </div>
+          </header>
           <div className="ai-assistant__body" data-testid="ai-assistant:body">
             <RealTimeAssist
               status={requestStatus}

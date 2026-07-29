@@ -44,6 +44,19 @@ describe('AdaptiveCardRenderer utilities', () => {
     expect(card.body[0].text).toMatch(/^-/);
   });
 
+  it('turns the backend separator placeholder into a horizontal rule', () => {
+    const card = {
+      type: 'AdaptiveCard',
+      body: [{id: 'line-separator-textBlock', type: 'TextBlock', spacing: 'small', text: ' '}],
+    };
+
+    expect(prepareCardForRender(card).body[0]).toMatchObject({
+      id: 'line-separator-textBlock',
+      separator: true,
+      text: ' ',
+    });
+  });
+
   it('extracts and removes a customer-statement header while preserving its quote', () => {
     const title = 'The customer said:';
     const card = {

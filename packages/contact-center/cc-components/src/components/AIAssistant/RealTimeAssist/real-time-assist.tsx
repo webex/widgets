@@ -4,7 +4,7 @@ import AdaptiveCardRenderer from '../AdaptiveCardRenderer/adaptive-card-renderer
 import {extractCustomerStatementTitle} from '../AdaptiveCardRenderer/adaptive-card-renderer.utils';
 import CiscoAIAssistantColorIcon from '../CiscoAIAssistantColorIcon';
 import {RealTimeAssistProps} from '../ai-assistant.types';
-import {EMPTY_DESCRIPTION, EMPTY_TITLE, FLAG_OFF_MESSAGE, GET_SUGGESTIONS_LABEL, LISTENING_TEXT} from '../constant';
+import {EMPTY_DESCRIPTION, EMPTY_TITLE, FLAG_OFF_MESSAGE, GET_SUGGESTIONS_LABEL, LISTENING_TEXT} from '../constants';
 
 const AssistantIcon: React.FC = () => (
   <span className="ai-assistant__assistant-icon" aria-hidden="true">

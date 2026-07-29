@@ -60,18 +60,6 @@ export interface AIAssistantComponentProps {
   className?: string;
 }
 
-export interface AIAssistantHeaderProps {
-  onMinimize: () => void;
-  onToggleFullScreen: () => void;
-  onClose: () => void;
-  isFullScreen: boolean;
-}
-
-export interface MinimizedBarProps {
-  onRestore: () => void;
-  onClose: () => void;
-}
-
 export interface RealTimeAssistProps {
   status: AIAssistantRequestStatus;
   errorMessage?: string;
