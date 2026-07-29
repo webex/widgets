@@ -171,5 +171,4 @@ describe('CallControl recording pause/resume state', () => {
 
     expect(recordButtonLabel()).toBe('Resume Recording');
   });
-
 });
