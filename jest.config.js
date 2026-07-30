@@ -5,6 +5,8 @@ module.exports = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   moduleNameMapper: {
     '^.+\\.(css|less|scss)$': 'babel-jest',
+    '^.+\\.svg$': '<rootDir>/jest.file-mock.js',
+    '^adaptivecards$': '<rootDir>/node_modules/adaptivecards/dist/adaptivecards.js',
   },
   testEnvironment: 'jsdom',
   testMatch: ['**/tooling/tests/**/*.js'],
