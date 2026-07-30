@@ -26,7 +26,7 @@ jest.mock('@webex/cc-components', () => {
               key: actionId,
               type: 'button',
               'data-testid': actionId,
-              // The real renderer consumes the promise to revert on failure.
+              // The real renderer waits on this promise before marking the control selected.
               onClick: () =>
                 void Promise.resolve(
                   onRealTimeAssistAction?.(

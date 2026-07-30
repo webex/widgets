@@ -15,3 +15,9 @@ export const LISTENING_TEXT = 'Listening';
 export const GET_ASSISTANCE_LABEL = 'Get Assistance';
 export const REQUEST_FAILED_TEXT = 'Something went wrong while requesting a suggestion.';
 export const REQUESTING_TEXT = 'Requesting suggestions';
+export const ADAPTIVE_CARD_MODULE = 'cc-components/AdaptiveCardRenderer';
+/** How long the copy control shows its "copied" icon. */
+export const COPIED_FEEDBACK_MS = 1500;
+/** Token the backend puts in card text for us to replace with the source time. */
+export const SOURCE_TIMESTAMP_PLACEHOLDER = 'SOURCE_TIMESTAMP_PLACEHOLDER';
+export const LINE_SEPARATOR_ID = 'line-separator-textBlock';

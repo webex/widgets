@@ -273,7 +273,7 @@ describe('useAiAssistant', () => {
     expect(result.current.hasInitialRequestSucceeded).toBe(false);
   });
 
-  it('ignores a second request while one is still in flight', async () => {
+  it('reports isRequesting only while the SDK call is unresolved', async () => {
     let release: () => void = () => undefined;
     storeMock.cc.apiAIAssistant.getRealTimeAssistance.mockImplementationOnce(
       () =>
@@ -283,21 +283,28 @@ describe('useAiAssistant', () => {
     );
 
     const {result} = renderHook(() => useAiAssistant(baseProps));
+    expect(result.current.isRequesting).toBe(false);
 
     act(() => {
       result.current.requestRealTimeAssist();
-      result.current.requestRealTimeAssist();
     });
-    expect(storeMock.cc.apiAIAssistant.getRealTimeAssistance).toHaveBeenCalledTimes(1);
+    expect(result.current.isRequesting).toBe(true);
 
     await act(async () => {
       release();
     });
+    expect(result.current.isRequesting).toBe(false);
+  });
 
+  it('clears isRequesting when the request fails', async () => {
+    storeMock.cc.apiAIAssistant.getRealTimeAssistance.mockRejectedValueOnce(new Error('boom'));
+
+    const {result} = renderHook(() => useAiAssistant(baseProps));
     await act(async () => {
-      result.current.requestRealTimeAssist();
+      await result.current.requestRealTimeAssist();
     });
-    expect(storeMock.cc.apiAIAssistant.getRealTimeAssistance).toHaveBeenCalledTimes(2);
+
+    expect(result.current.isRequesting).toBe(false);
   });
 
   it('replays every payload that landed since the last render', async () => {

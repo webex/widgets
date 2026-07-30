@@ -39,6 +39,7 @@ const createProps = (overrides: Partial<AIAssistantComponentProps> = {}): AIAssi
   isFullScreen: false,
   requestStatus: 'idle',
   contextDraft: '',
+  isRequesting: false,
   chatEntries: [],
   isFeatureEnabled: true,
   hasActiveInteraction: true,
@@ -109,7 +110,7 @@ describe('AIAssistantComponent', () => {
   });
 
   it('buffers in place while the first request is in flight', () => {
-    render(<AIAssistantComponent {...createProps({requestStatus: 'listening'})} />);
+    render(<AIAssistantComponent {...createProps({requestStatus: 'listening', isRequesting: true})} />);
 
     expect(screen.getByTestId('ai-assistant:empty')).toBeInTheDocument();
     expect(screen.getByTestId('ai-assistant:requesting')).toBeInTheDocument();
@@ -175,6 +176,23 @@ describe('AIAssistantComponent', () => {
 
     fireEvent.submit(screen.getByTestId('ai-assistant:context-form'));
     expect(props.submitContext).toHaveBeenCalledTimes(1);
+  });
+
+  it('blocks a second context submit while the previous request is in flight', () => {
+    const props = createProps({
+      requestStatus: 'listening',
+      hasInitialRequestSucceeded: true,
+      contextDraft: 'refund policy',
+      isRequesting: true,
+    });
+    render(<AIAssistantComponent {...props} />);
+
+    expect((screen.getByTestId('ai-assistant:context-submit') as HTMLElement & {disabled: boolean}).disabled).toBe(
+      true
+    );
+
+    fireEvent.submit(screen.getByTestId('ai-assistant:context-form'));
+    expect(props.submitContext).not.toHaveBeenCalled();
   });
 
   it('renders a customer-statement title supplied only by its adaptive card', () => {

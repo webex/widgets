@@ -82,14 +82,15 @@ export const useRealTimeAssist = ({
   const [requestStatus, setRequestStatus] = useState<AIAssistantRequestStatus>('idle');
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
   const [contextDraft, setContextDraft] = useState('');
+  // True only while a getRealTimeAssistance call is unresolved; drives the
+  // spinner and disables the request controls.
+  const [isRequesting, setIsRequesting] = useState(false);
   const [pendingRequest, setPendingRequest] = useState(false);
   // ADD_SUGGESTIONS_EXTRA_CONTEXT only makes sense once a GET_SUGGESTIONS has succeeded.
   const [hasInitialRequestSucceeded, setHasInitialRequestSucceeded] = useState(false);
   const [userMessages, setUserMessages] = useState<UserMessage[]>([]);
 
   const lastSeenCountRef = useRef(0);
-  // Blocks overlapping SDK calls when the agent double-clicks a request control.
-  const inFlightRef = useRef(false);
   // Stash these in refs so the response effect can read the latest values
   // without re-running on every change (it only reacts to `realTimeAssist`).
   const pendingRequestRef = useRef(pendingRequest);
@@ -105,10 +106,10 @@ export const useRealTimeAssist = ({
   // customer may leak into it.
   useEffect(() => {
     lastSeenCountRef.current = 0;
-    inFlightRef.current = false;
     setRequestStatus('idle');
     setErrorMessage(undefined);
     setContextDraft('');
+    setIsRequesting(false);
     setPendingRequest(false);
     setHasInitialRequestSucceeded(false);
     setUserMessages([]);
@@ -143,11 +144,9 @@ export const useRealTimeAssist = ({
         setErrorMessage(undefined);
         return;
       }
-      if (inFlightRef.current) return;
-      inFlightRef.current = true;
-
       setRequestStatus('listening');
       setErrorMessage(undefined);
+      setIsRequesting(true);
       setPendingRequest(true);
       const sentAt = Date.now();
       if (context) {
@@ -166,7 +165,7 @@ export const useRealTimeAssist = ({
         setRequestStatus('error');
         setErrorMessage((err as Error)?.message || 'Failed to request real-time assist.');
       } finally {
-        inFlightRef.current = false;
+        setIsRequesting(false);
       }
     },
     [agentId, interactionId, isFeatureEnabled]
@@ -179,8 +178,8 @@ export const useRealTimeAssist = ({
     setContextDraft('');
   }, [contextDraft, requestRealTimeAssist]);
 
-  // Returns the SDK promise so the card can undo its optimistic like/dislike
-  // state when the action fails to reach the backend.
+  // Returns the SDK promise so the card only marks like/dislike as selected
+  // once the action has actually reached the backend.
   const handleRealTimeAssistAction = useCallback(
     (event: AIAssistantActionEvent, assist: RealTimeAssistPayload) => {
       const api = store.cc?.apiAIAssistant;
@@ -252,6 +251,7 @@ export const useRealTimeAssist = ({
       requestStatus,
       errorMessage,
       contextDraft,
+      isRequesting,
       hasInitialRequestSucceeded,
       chatEntries,
       requestRealTimeAssist,
@@ -263,6 +263,7 @@ export const useRealTimeAssist = ({
       requestStatus,
       errorMessage,
       contextDraft,
+      isRequesting,
       hasInitialRequestSucceeded,
       chatEntries,
       requestRealTimeAssist,

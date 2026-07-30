@@ -32,6 +32,8 @@ export interface AIAssistantComponentProps {
   errorMessage?: string;
   /** Current value of the context input. */
   contextDraft: string;
+  /** Whether a real-time assist request is awaiting a response. */
+  isRequesting: boolean;
   /** Chronological list of chat entries to render. */
   chatEntries: AIAssistantChatEntry[];
   /** Whether `aiFeature.suggestedResponses.enable` is true on the agent profile. */
@@ -71,6 +73,7 @@ export interface RealTimeAssistProps {
   errorMessage?: string;
   chatEntries: AIAssistantChatEntry[];
   contextDraft: string;
+  isRequesting: boolean;
   onRequestRealTimeAssist: () => void;
   onContextDraftChange: (value: string) => void;
   onSubmitContext: () => void;
@@ -103,7 +106,8 @@ export interface AdaptiveCardRendererProps {
    * user activates the card's copy action. */
   suggestionText?: string;
   /** Fires when the user clicks the like / dislike / copy controls inside the
-   * card.  A rejected promise reverts the control's optimistic state. */
+   * card.  Like/dislike is only painted as selected once the returned promise
+   * resolves; a rejection leaves the control untouched. */
   onUserAction?: (event: AIAssistantActionEvent) => void | Promise<void>;
   onAction?: (action: unknown) => void;
   logger?: ILogger;

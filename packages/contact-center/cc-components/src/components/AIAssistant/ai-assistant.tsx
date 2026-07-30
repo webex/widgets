@@ -14,6 +14,7 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
   requestStatus,
   errorMessage,
   contextDraft,
+  isRequesting,
   chatEntries,
   isFeatureEnabled,
   hasActiveInteraction,
@@ -128,6 +129,7 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
                 errorMessage={errorMessage}
                 chatEntries={chatEntries}
                 contextDraft={contextDraft}
+                isRequesting={isRequesting}
                 onRequestRealTimeAssist={requestRealTimeAssist}
                 onContextDraftChange={setContextDraft}
                 onSubmitContext={submitContext}

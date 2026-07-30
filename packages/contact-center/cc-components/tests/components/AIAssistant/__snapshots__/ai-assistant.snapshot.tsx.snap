@@ -535,73 +535,77 @@ exports[`AIAssistantComponent snapshots matches the AI features landing state 1`
           >
             Hi User5 Agent5. I'm your AI Assistant
           </mdc-text>
-          <ul
+          <mdc-list
             class="ai-assistant__landing-features"
           >
-            <li
+            <mdc-listitem
               class="ai-assistant__landing-feature"
+              tabindex="0"
             >
+              <span
+                aria-hidden="true"
+                slot="leading-controls"
+              >
+                ✨
+              </span>
               <mdc-text
                 class="ai-assistant__landing-feature-title"
+                slot="leading-text-primary-label"
               >
-                <span
-                  aria-hidden="true"
-                >
-                  ✨
-                </span>
-                <span>
-                  Real-time Assist
-                </span>
+                Real-time Assist
               </mdc-text>
               <mdc-text
                 class="ai-assistant__landing-feature-description"
+                slot="leading-text-secondary-label"
               >
                 Real-time guidance to help you to respond to the customer
               </mdc-text>
-            </li>
-            <li
+            </mdc-listitem>
+            <mdc-listitem
               class="ai-assistant__landing-feature"
             >
+              <span
+                aria-hidden="true"
+                slot="leading-controls"
+              >
+                🪷
+              </span>
               <mdc-text
                 class="ai-assistant__landing-feature-title"
+                slot="leading-text-primary-label"
               >
-                <span
-                  aria-hidden="true"
-                >
-                  🪷
-                </span>
-                <span>
-                  Wellness breaks
-                </span>
+                Wellness breaks
               </mdc-text>
               <mdc-text
                 class="ai-assistant__landing-feature-description"
+                slot="leading-text-secondary-label"
               >
                 Ensuring you get those well needed breaks
               </mdc-text>
-            </li>
-            <li
+            </mdc-listitem>
+            <mdc-listitem
               class="ai-assistant__landing-feature"
             >
+              <span
+                aria-hidden="true"
+                slot="leading-controls"
+              >
+                ✍🏻
+              </span>
               <mdc-text
                 class="ai-assistant__landing-feature-title"
+                slot="leading-text-primary-label"
               >
-                <span
-                  aria-hidden="true"
-                >
-                  ✍🏻
-                </span>
-                <span>
-                  Smart summaries
-                </span>
+                Smart summaries
               </mdc-text>
               <mdc-text
                 class="ai-assistant__landing-feature-description"
+                slot="leading-text-secondary-label"
               >
                 Focus on the conversation while we capture the context - covering AI handoffs, transfers & consults, dropped conversations, and wrap-up.
               </mdc-text>
-            </li>
-          </ul>
+            </mdc-listitem>
+          </mdc-list>
           <mdc-link
             data-testid="ai-assistant:view-all-features"
           >

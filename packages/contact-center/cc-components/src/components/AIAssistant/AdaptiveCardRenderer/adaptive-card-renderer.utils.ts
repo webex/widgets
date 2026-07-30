@@ -1,3 +1,6 @@
+import type {ILogger} from '@webex/cc-store';
+import type {AIAssistantActionKind} from '../ai-assistant.types';
+import {ADAPTIVE_CARD_MODULE, COPIED_FEEDBACK_MS, LINE_SEPARATOR_ID, SOURCE_TIMESTAMP_PLACEHOLDER} from '../constants';
 import arrowDownRegularIcon from '@momentum-design/icons/dist/svg/arrow-down-regular.svg';
 import arrowRightRegularIcon from '@momentum-design/icons/dist/svg/arrow-right-regular.svg';
 import checkCircleFilledIcon from '@momentum-design/icons/dist/svg/check-circle-filled.svg';
@@ -8,8 +11,6 @@ import linkRegularIcon from '@momentum-design/icons/dist/svg/link-regular.svg';
 import likeFilledIcon from '@momentum-design/icons/dist/svg/like-filled.svg';
 import likeRegularIcon from '@momentum-design/icons/dist/svg/like-regular.svg';
 
-const SOURCE_TIMESTAMP_PLACEHOLDER = 'SOURCE_TIMESTAMP_PLACEHOLDER';
-const LINE_SEPARATOR_ID = 'line-separator-textBlock';
 const CISCO_AI_ASSISTANT_COLOR_SVG =
   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">' +
   '<defs><linearGradient id="a" x1="15" y1="1" x2="1" y2="15" gradientUnits="userSpaceOnUse">' +
@@ -161,6 +162,135 @@ export const prepareCardForRender = <T>(card: T, publishTimestamp?: number | str
   };
 
   return visit(cardWithoutDuplicateHeader) as T;
+};
+
+/**
+ * Classifies a card action by its `id` / `title` (e.g. `likeButton`).  The
+ * icon URL is deliberately not used: it is bundled as an inline data URI, so
+ * it carries no file name to match on.
+ */
+export const detectActionKind = (action: {id?: string; title?: string}): AIAssistantActionKind | null => {
+  const label = `${action?.id || ''} ${action?.title || ''}`.toLowerCase();
+  if (label.includes('copy')) return 'copy';
+  // `dislike` contains `like`, so it has to be checked first.
+  if (label.includes('dislike')) return 'dislike';
+  if (label.includes('like')) return 'like';
+  return null;
+};
+
+const PRELOAD_ICONS = [
+  'like-regular.svg',
+  'like-filled.svg',
+  'dislike-regular.svg',
+  'dislike-filled.svg',
+  'copy-regular.svg',
+  'check-circle-filled.svg',
+];
+let iconsPreloaded = false;
+
+/**
+ * Warms the regular + filled variants so the like/dislike/copy toggles don't
+ * wait on a network roundtrip on the first click.
+ */
+export const preloadIcons = () => {
+  if (iconsPreloaded || typeof Image === 'undefined') return;
+  iconsPreloaded = true;
+  PRELOAD_ICONS.forEach((name) => {
+    const iconUrl = resolveMomentumIconUrl(name);
+    if (!iconUrl) return;
+    const img = new Image();
+    img.src = iconUrl;
+  });
+};
+
+/** Concatenate TextBlocks in the rendered card as a clipboard fallback. */
+export const extractCardText = (container: HTMLElement): string => {
+  const blocks = container.querySelectorAll('.ac-textBlock, .ac-richTextBlock');
+  const lines: string[] = [];
+  blocks.forEach((el) => {
+    const text = (el.textContent || '').trim();
+    if (text && text !== 'Source') lines.push(text);
+  });
+  return lines.join('\n');
+};
+
+/** Swap broken card images for the bundled source icon, or hide them. */
+export const addImageFallbacks = (container: HTMLElement) => {
+  container.querySelectorAll('img').forEach((img) => {
+    img.onerror = () => {
+      const context = `${img.alt} ${img.parentElement?.textContent || ''}`.toLowerCase();
+      const sourceIconUrl = resolveMomentumIconUrl('link-regular.svg');
+      img.onerror = null;
+      if (context.includes('source') && sourceIconUrl) {
+        img.src = sourceIconUrl;
+      } else {
+        img.hidden = true;
+      }
+    };
+  });
+};
+
+/** Paint `kind` as the only selected control; re-clicking it clears the selection. */
+export const toggleActionControls = (kind: 'like' | 'dislike', controls: Map<Element, AIAssistantActionKind>) => {
+  controls.forEach((thisKind, el) => {
+    if (thisKind !== 'like' && thisKind !== 'dislike') return;
+    const active = el.getAttribute('data-active') === 'true';
+    const isThis = thisKind === kind;
+    // Mutually exclusive: clicking the active one clears it; clicking the other flips.
+    const nextActive = isThis ? !active : false;
+    const img = el.querySelector('img');
+    if (img) {
+      const nextIconUrl = resolveMomentumIconUrl(`${thisKind}-${nextActive ? 'filled' : 'regular'}.svg`);
+      if (nextIconUrl) {
+        img.setAttribute('src', nextIconUrl);
+      }
+    }
+    if (nextActive) {
+      el.setAttribute('data-active', 'true');
+    } else {
+      el.removeAttribute('data-active');
+    }
+  });
+};
+
+/**
+ * Copies `text` and briefly flashes the copy control as confirmation.  Falls
+ * back to a hidden textarea for non-secure contexts without the async API.
+ */
+export const copySuggestion = async (text: string, sourceEl?: Element, logger?: ILogger): Promise<void> => {
+  if (!text) return;
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
+    const img = sourceEl?.querySelector('img');
+    if (sourceEl && img) {
+      const previousSrc = img.getAttribute('src');
+      const copiedIconUrl = resolveMomentumIconUrl('check-circle-filled.svg');
+      if (copiedIconUrl) {
+        img.setAttribute('src', copiedIconUrl);
+      }
+      sourceEl.setAttribute('data-copied', 'true');
+      setTimeout(() => {
+        sourceEl.removeAttribute('data-copied');
+        if (previousSrc) img.setAttribute('src', previousSrc);
+      }, COPIED_FEEDBACK_MS);
+    }
+  } catch (err) {
+    logger?.error(`CC-Components: copy to clipboard failed - ${err}`, {
+      module: ADAPTIVE_CARD_MODULE,
+      method: 'copySuggestion',
+    });
+  }
 };
 
 /** HostConfig wired to Momentum CSS tokens so cards inherit the active theme. */

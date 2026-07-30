@@ -32,7 +32,7 @@ type StoreMock = {
       sendRealTimeAssistanceUserAction: jest.Mock;
     };
   };
-  currentTask: {data: {interactionId: string}};
+  currentTask?: {data: {interactionId: string}};
   agentId: string;
   featureFlags: {isSuggestedResponsesEnabled: boolean};
   realTimeAssist: Record<string, unknown>;
@@ -46,6 +46,8 @@ describe('AIAssistant widget', () => {
     jest.clearAllMocks();
     jest.restoreAllMocks();
     jest.spyOn(console, 'error').mockImplementation(() => {});
+    storeMock.currentTask = {data: {interactionId: 'interaction-1'}};
+    storeMock.featureFlags = {isSuggestedResponsesEnabled: true};
     storeMock.realTimeAssist = {};
     storeMock.onErrorCallback = undefined;
     storeMock.cc.apiAIAssistant.sendRealTimeAssistanceUserAction.mockResolvedValue(undefined);
@@ -54,6 +56,27 @@ describe('AIAssistant widget', () => {
   it('renders launcher when chrome is closed', () => {
     render(<AIAssistant />);
     expect(screen.getByTestId('ai-assistant:launcher')).toBeInTheDocument();
+  });
+
+  it('offers the launcher and the landing page before an interaction starts', () => {
+    storeMock.currentTask = undefined;
+    render(<AIAssistant />);
+
+    fireEvent.click(screen.getByTestId('ai-assistant:launcher'));
+
+    expect(screen.getByTestId('ai-assistant:landing')).toBeInTheDocument();
+    expect(screen.queryByTestId('ai-assistant:empty')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('ai-assistant:footer')).not.toBeInTheDocument();
+  });
+
+  it('offers the launcher and the landing page when the feature is disabled', () => {
+    storeMock.featureFlags = {isSuggestedResponsesEnabled: false};
+    render(<AIAssistant />);
+
+    fireEvent.click(screen.getByTestId('ai-assistant:launcher'));
+
+    expect(screen.getByTestId('ai-assistant:landing')).toBeInTheDocument();
+    expect(screen.queryByTestId('ai-assistant:empty')).not.toBeInTheDocument();
   });
 
   it('renders RealTimeAssist inside the shared assistant panel', async () => {

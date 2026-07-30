@@ -1107,7 +1107,7 @@ function App() {
                         </section>
                       </div>
                     )}
-                    {selectedWidgets.aiAssistant && store.currentTask && (
+                    {selectedWidgets.aiAssistant && (
                       <div className="box">
                         <section className="section-box">
                           <fieldset className="fieldset">

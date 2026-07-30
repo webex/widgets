@@ -86,11 +86,11 @@ packages/contact-center/ai-assistant/
 | `ai-assistant-R-001` | Chrome moves closed → open → minimized → open and fires the matching host callback on each transition; closing preserves chat state. | The agent must be able to park the panel mid-interaction without losing context. | `src/helper.ts` (`useAIAssistantChrome`) | `tests/helper.ts`, `tests/ai-assistant/index.tsx` | PRESENT |
 | `ai-assistant-R-002` | The landing view is shown when the feature flag is off or no interaction is active, and `requestStatus` stays `idle` in that case (never `error`). | Absence of a call is not a failure; showing an error would be misleading. | `packages/contact-center/cc-components/src/components/AIAssistant/ai-assistant.tsx`, `src/helper.ts` (early return in `requestRealTimeAssist`) | `packages/contact-center/cc-components/tests/components/AIAssistant/ai-assistant.tsx` | PRESENT |
 | `ai-assistant-R-003` | The opening prompt stays until the first `getRealTimeAssistance` call resolves: in-flight shows a spinner, failure keeps the prompt plus an error message, success switches to listening mode permanently. | A failed first request must be retryable; later failures must not unwind an established session. | `src/helper.ts` (`hasInitialRequestSucceeded` set after `await`), `packages/contact-center/cc-components/src/components/AIAssistant/RealTimeAssist/real-time-assist.tsx` | `packages/contact-center/cc-components/tests/components/AIAssistant/ai-assistant.tsx`, `tests/helper.ts` | PRESENT |
-| `ai-assistant-R-004` | Concurrent requests are suppressed: while a `getRealTimeAssistance` call is in flight, further requests are ignored until it settles. | Double-clicking a request control must not fan out duplicate SDK calls. | `src/helper.ts` (`inFlightRef`) | `tests/helper.ts` | PRESENT |
+| `ai-assistant-R-004` | `isRequesting` is true only while a `getRealTimeAssistance` call is unresolved; the UI uses it to show the spinner and to block the request controls. | Double-clicking a request control must not fan out duplicate SDK calls. | `src/helper.ts` (`isRequesting`), `packages/contact-center/cc-components/src/components/AIAssistant/RealTimeAssist/real-time-assist.tsx` (disabled submit + guarded `handleContextSubmit`) | `tests/helper.ts`, `packages/contact-center/cc-components/tests/components/AIAssistant/ai-assistant.tsx` | PRESENT |
 | `ai-assistant-R-005` | Every unseen `realTimeAssist` payload invokes `onRealTimeAssistReceived` once, even when several land before React commits. | Hosts mirror the transcript; a dropped payload is unrecoverable. | `src/helper.ts` (response effect loops from the previous cursor) | `tests/helper.ts` | PRESENT |
 | `ai-assistant-R-006` | Changing `interactionId` resets request status, error, context draft, pending flag, first-success flag, user messages, and the payload cursor. | Session state from one customer must never surface on the next. | `src/helper.ts` (reset effect keyed on `interactionId`) | `tests/helper.ts` | PRESENT |
 | `ai-assistant-R-007` | `chatEntries` is a chronological transcript — greeting (only after first success), then user and assistant entries ordered by timestamp, user first on ties. | The agent reads context and suggestion in the order they happened. | `src/helper.ts` (`chatEntries` memo) | `tests/helper.ts` | PRESENT |
-| `ai-assistant-R-008` | Like / dislike / copy call `sendRealTimeAssistanceUserAction` and return its promise; a rejection is logged and reverts the card's optimistic state. | The UI must not claim feedback was recorded when it was not. | `src/helper.ts` (`handleRealTimeAssistAction`), `packages/contact-center/cc-components/src/components/AIAssistant/AdaptiveCardRenderer/adaptive-card-renderer.tsx` (`captureControlState`) | `tests/ai-assistant/feedback.tsx` | PRESENT |
+| `ai-assistant-R-008` | Like / dislike / copy call `sendRealTimeAssistanceUserAction` and return its promise; the card marks the control as selected only after that promise resolves, and a rejection is logged and leaves the control untouched. | The UI must not claim feedback was recorded when it was not. | `src/helper.ts` (`handleRealTimeAssistAction`), `packages/contact-center/cc-components/src/components/AIAssistant/AdaptiveCardRenderer/adaptive-card-renderer.tsx` (`emitUserAction`) | `tests/ai-assistant/feedback.tsx`, `packages/contact-center/cc-components/tests/components/AIAssistant/adaptive-card-renderer.test.tsx` | PRESENT |
 | `ai-assistant-R-009` | When the action cannot be sent (missing `adaptiveCardId`, ids, or SDK method), the reason is logged via `store.logger.warn` and the returned promise rejects. | A silent no-op leaves both agent and support blind. | `src/helper.ts` | `tests/ai-assistant/feedback.tsx` | PRESENT |
 | `ai-assistant-R-010` | A render failure is contained by the widget's `ErrorBoundary` and reported through `store.onErrorCallback('AIAssistant', error)`. | A crashing assistant must not take the agent desktop down. | `src/ai-assistant/index.tsx` | `tests/ai-assistant/index.tsx` | PRESENT |
 
@@ -106,8 +106,8 @@ packages/contact-center/ai-assistant/
 - `useRealTimeAssist` — the request lifecycle. `requestRealTimeAssist(context?)` is the single entry
   point for both the initial request and extra-context refinements; the presence of `context`
   distinguishes them. It early-returns to `idle` when the feature is off or there is no interaction,
-  guards against overlapping calls with `inFlightRef`, and only flips `hasInitialRequestSucceeded`
-  after the SDK call resolves. Store payloads arrive asynchronously through `store.realTimeAssist`, so
+  exposes `isRequesting` for the duration of the SDK call so the UI can block the controls, and only
+  flips `hasInitialRequestSucceeded` after the SDK call resolves. Store payloads arrive asynchronously through `store.realTimeAssist`, so
   a separate effect watches that array, advances a cursor, and replays every unseen entry to the host.
 
 Refs (`pendingRequestRef`, `requestStatusRef`, `onRealTimeAssistReceivedRef`) keep the response effect
@@ -131,7 +131,7 @@ graph LR
 ## Sequence Diagram(s)
 | Operation group | Diagram | Failure coverage |
 |---|---|---|
-| First request → suggestion → feedback | "Real-time assist round trip" | request rejection keeps the opening prompt; feedback rejection reverts the card |
+| First request → suggestion → feedback | "Real-time assist round trip" | request rejection keeps the opening prompt; feedback rejection leaves the card control unselected |
 
 ```mermaid
 sequenceDiagram
@@ -142,7 +142,7 @@ sequenceDiagram
 
     A->>UI: Get Assistance
     UI->>H: requestRealTimeAssist()
-    H->>H: inFlight guard, status = listening
+    H->>H: isRequesting = true, status = listening
     H->>S: getRealTimeAssistance({agentId, interactionId, actionTimeStamp})
     alt resolves
         S-->>H: ok
@@ -157,16 +157,19 @@ sequenceDiagram
     A->>UI: Like
     UI->>H: onRealTimeAssistAction
     H->>S: sendRealTimeAssistanceUserAction
-    alt rejects
+    alt resolves
+        S-->>H: ok
+        H->>UI: card marks the control selected
+    else rejects
         S-->>H: error
-        H->>UI: log + reject → card reverts icon
+        H->>UI: log + reject → control stays unselected
     end
 ```
 
 ## Use Cases
 - **UC-1 Ask for a suggestion:** agent opens the panel during a call and clicks "Get Assistance" → spinner → listening mode with the assistant greeting; cards stream in as the conversation progresses.
 - **UC-2 Refine with context:** agent types context and sends → an `ADD_SUGGESTIONS_EXTRA_CONTEXT` request goes out, the message appears in the transcript, and the panel remains in listening mode whether or not it succeeds.
-- **UC-3 Give feedback:** agent likes/dislikes/copies a card → the SDK records the action; a failure reverts the icon.
+- **UC-3 Give feedback:** agent likes/dislikes/copies a card → the SDK records the action and the icon then shows as selected; a failure leaves it unselected so the agent can retry.
 - **UC-4 No active call:** agent opens the panel with no interaction or the feature disabled → landing view listing AI features, no error state.
 
 ## Error Handling & Failure Modes
@@ -175,13 +178,13 @@ sequenceDiagram
 | Feature disabled / no interaction | `requestStatus` stays `idle`; landing view | None needed — informational state |
 | First `getRealTimeAssistance` rejects | `requestStatus = 'error'`, message under the prompt | Agent clicks the button again |
 | Later request rejects | Panel stays in listening mode | Next successful push resumes the transcript |
-| Overlapping request | Ignored while one is in flight | Wait for the current call to settle |
-| Feedback action fails | `store.logger.error`, promise rejects, card reverts | Agent can click again |
+| Overlapping request | Request controls are disabled while `isRequesting` | Wait for the current call to settle |
+| Feedback action fails | `store.logger.error`, promise rejects, control stays unselected | Agent can click again |
 | Render crash | `ErrorBoundary` renders nothing, `store.onErrorCallback('AIAssistant', error)` | Host decides |
 
 ## Pitfalls
 - `hasInitialRequestSucceeded` means *the first request resolved*, not *a request was fired*. Setting it before the `await` would strand the agent in listening mode after a failure.
-- `requestStatus === 'listening'` is the steady post-success state, not an "in flight" flag. Use `inFlightRef` / `pendingRequest` for concurrency questions.
+- `requestStatus === 'listening'` is the steady post-success state, not an "in flight" flag. Use `isRequesting` for that, and `pendingRequest` for "waiting on a pushed payload".
 - The response effect must depend on `realTimeAssist` only; adding state to its dependency array replays payloads to the host.
 - The widget never imports the SDK directly — everything goes through `store.cc`.
 - `cc-components` cannot import the store, so failures there (clipboard, card render) surface through the `logger` prop this package passes down.
@@ -195,10 +198,10 @@ sequenceDiagram
 
 ## Test-Case Strategy (module)
 `tests/helper.ts` drives the hooks with `renderHook`: chrome transitions, request success/failure, the
-in-flight guard, interaction reset, batched payload replay, and transcript ordering.
+`isRequesting` lifecycle, interaction reset, batched payload replay, and transcript ordering.
 `tests/ai-assistant/index.tsx` renders the container against a mocked store for the landing/listening
-views and the ErrorBoundary path. `tests/ai-assistant/feedback.tsx` covers like/dislike/copy dispatch,
-the missing-`adaptiveCardId` warning, and revert-on-rejection. UI-level rendering (spinner, error text,
+views and the ErrorBoundary path. `tests/ai-assistant/feedback.tsx` covers like/dislike/copy dispatch
+and the missing-`adaptiveCardId` warning. UI-level rendering (spinner, error text,
 snapshots) is covered in `cc-components/tests/components/AIAssistant/`.
 
 ## Traceability

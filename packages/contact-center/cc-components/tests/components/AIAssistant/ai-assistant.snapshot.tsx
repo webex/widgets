@@ -22,6 +22,7 @@ const createProps = (overrides: Partial<AIAssistantComponentProps> = {}): AIAssi
   isFullScreen: false,
   requestStatus: 'idle',
   contextDraft: '',
+  isRequesting: false,
   chatEntries: [],
   isFeatureEnabled: true,
   hasActiveInteraction: true,

@@ -30,6 +30,7 @@ const RealTimeAssist: React.FC<RealTimeAssistProps> = ({
   errorMessage,
   chatEntries,
   contextDraft,
+  isRequesting,
   onRequestRealTimeAssist,
   onContextDraftChange,
   onSubmitContext,
@@ -48,7 +49,8 @@ const RealTimeAssist: React.FC<RealTimeAssistProps> = ({
 
   const handleContextSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!contextDraft.trim()) return;
+    // Also covers the Enter key, which a disabled submit button doesn't block.
+    if (isRequesting || !contextDraft.trim()) return;
     onSubmitContext();
   };
 
@@ -59,7 +61,7 @@ const RealTimeAssist: React.FC<RealTimeAssistProps> = ({
           <Text tagname="h3" type="body-large-bold">
             {EMPTY_TITLE}
           </Text>
-          {status === 'listening' ? (
+          {isRequesting ? (
             <Spinner size="small" role="status" aria-label={REQUESTING_TEXT} data-testid="ai-assistant:requesting" />
           ) : (
             <Button
@@ -175,7 +177,7 @@ const RealTimeAssist: React.FC<RealTimeAssistProps> = ({
             type="submit"
             variant="primary"
             size={28}
-            disabled={!contextDraft.trim()}
+            disabled={isRequesting || !contextDraft.trim()}
             data-testid="ai-assistant:context-submit"
           >
             Send
