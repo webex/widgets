@@ -1,6 +1,6 @@
 {
-  "name": "@webex/cc-store",
-  "description": "Webex Contact Center Widgets: Widgets Store",
+  "name": "@webex/cc-ai-assistant",
+  "description": "Webex Contact Center Widgets: AI Assistant",
   "license": "Cisco's General Terms (https://www.cisco.com/site/us/en/about/legal/contract-experience/index.html)",
   "version": "1.28.0-ccwidgets.126",
   "main": "dist/index.js",
@@ -18,13 +18,16 @@
     "build": "yarn run -T tsc",
     "build:src": "yarn run clean:dist && webpack",
     "build:watch": "webpack --watch",
-    "test:unit": "tsc --project tsconfig.test.json && NODE_ENV=test jest --coverage",
+    "test:unit": "tsc --project tsconfig.test.json && jest --coverage",
     "test:styles": "eslint",
     "deploy:npm": "yarn npm publish"
   },
   "dependencies": {
-    "@webex/contact-center": "3.12.0-next.87",
-    "mobx": "6.13.5",
+    "@webex/cc-components": "workspace:*",
+    "@webex/cc-store": "workspace:*",
+    "@webex/cc-ui-logging": "workspace:*",
+    "mobx-react-lite": "^4.1.0",
+    "react-error-boundary": "^6.0.0",
     "typescript": "5.6.3"
   },
   "devDependencies": {
@@ -38,7 +41,6 @@
     "@testing-library/react": "16.0.1",
     "@types/jest": "29.5.14",
     "@types/react-test-renderer": "18",
-    "@webex/event-dictionary-ts": "^1.0.2191",
     "@webex/test-fixtures": "workspace:*",
     "babel-jest": "29.7.0",
     "babel-loader": "9.2.1",
@@ -60,5 +62,9 @@
     "webpack": "5.94.0",
     "webpack-cli": "5.1.4",
     "webpack-merge": "6.0.1"
+  },
+  "peerDependencies": {
+    "react": ">=18.3.1",
+    "react-dom": ">=18.3.1"
   }
 }

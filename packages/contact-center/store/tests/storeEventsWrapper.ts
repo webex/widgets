@@ -23,6 +23,7 @@ console.error = jest.fn();
 console.log = jest.fn();
 
 import {CC_EVENTS, TASK_EVENTS} from '../src/store.types';
+import type {RealTimeAssistPayload} from '../src/store.types';
 import storeWrapper from '../src/storeEventsWrapper';
 import {ITask} from '../src/store.types';
 import {
@@ -107,6 +108,7 @@ jest.mock('../src/store', () => ({
     isDeclineButtonEnabled: false,
     isDigitalChannelsInitialized: false,
     acceptedCampaignIds: new Set<string>(),
+    realTimeAssist: {},
     setShowMultipleLoginAlert: jest.fn(),
     setCurrentState: jest.fn(),
     setLastStateChangeTimestamp: jest.fn(),
@@ -865,6 +867,77 @@ describe('storeEventsWrapper', () => {
           role: 'AGENT',
         }),
       ]);
+    });
+
+    it('should append real-time assist payloads by interaction id', () => {
+      const first: RealTimeAssistPayload = {
+        data: {
+          adaptiveCard: {type: 'AdaptiveCard'},
+          adaptiveCardId: 'card-1',
+          suggestion: 'First suggestion',
+        },
+      };
+      const second: RealTimeAssistPayload = {
+        data: {
+          adaptiveCard: {type: 'AdaptiveCard'},
+          adaptiveCardId: 'card-2',
+          suggestion: 'Second suggestion',
+        },
+      };
+      storeWrapper['store'].realTimeAssist = {};
+
+      storeWrapper.handleRealTimeAssist('interaction-assist', first);
+      storeWrapper.handleRealTimeAssist('interaction-assist', second);
+
+      expect(storeWrapper.realTimeAssist).toEqual({
+        'interaction-assist': [first, second],
+      });
+    });
+
+    it('should ignore invalid real-time assist events and clear only the requested interaction', () => {
+      const retained: RealTimeAssistPayload = {
+        data: {adaptiveCard: {type: 'AdaptiveCard'}, adaptiveCardId: 'retained-card'},
+      };
+      const removed: RealTimeAssistPayload = {
+        data: {adaptiveCard: {type: 'AdaptiveCard'}, adaptiveCardId: 'removed-card'},
+      };
+      storeWrapper['store'].realTimeAssist = {
+        retained: [retained],
+        removed: [removed],
+      };
+
+      storeWrapper.handleRealTimeAssist('', removed);
+      storeWrapper.handleRealTimeAssist('invalid', {data: undefined} as unknown as RealTimeAssistPayload);
+      storeWrapper.clearRealTimeAssist('removed');
+
+      expect(storeWrapper.realTimeAssist).toEqual({retained: [retained]});
+    });
+
+    it('should register one suggested-response listener and remove its state with the task', () => {
+      const interactionId = 'interaction-listener';
+      const task = makeMockTask({
+        data: {interactionId, interaction: {state: 'connected'}},
+      });
+      const registerTaskEventListeners = storeWrapper as unknown as {
+        registerTaskEventListeners: (taskToRegister: ITask) => void;
+      };
+      storeWrapper['store'].realTimeAssist = {};
+
+      registerTaskEventListeners.registerTaskEventListeners(task);
+      registerTaskEventListeners.registerTaskEventListeners(task);
+
+      const listenerCalls = (task.on as jest.Mock).mock.calls.filter(([event]) => event === 'SUGGESTED_RESPONSE');
+      expect(listenerCalls).toHaveLength(1);
+
+      const payload: RealTimeAssistPayload = {
+        data: {adaptiveCard: {type: 'AdaptiveCard'}, adaptiveCardId: 'card-listener'},
+      };
+      listenerCalls[0][1](payload);
+      expect(storeWrapper.realTimeAssist[interactionId]).toEqual([payload]);
+
+      storeWrapper.handleTaskRemove(task);
+      expect(task.off).toHaveBeenCalledWith('SUGGESTED_RESPONSE', listenerCalls[0][1]);
+      expect(storeWrapper.realTimeAssist[interactionId]).toBeUndefined();
     });
 
     it('should handle task removal', () => {
