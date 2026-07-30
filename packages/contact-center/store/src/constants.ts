@@ -17,3 +17,9 @@ export const VVA = 'VVA';
 export const EXCLUDED_PARTICIPANT_TYPES = [CUSTOMER, SUPERVISOR, VVA];
 
 export const MEDIA_TYPE_CONSULT = 'consult';
+
+export const AI_FEATURE_SUGGESTED_RESPONSES_KEY = 'isSuggestedResponsesEnabled';
+
+export const TASK_MULTI_LOGIN_HYDRATE = 'task:multiLoginHydrate';
+
+export const SUGGESTED_RESPONSE_EVENT = 'SUGGESTED_RESPONSE';

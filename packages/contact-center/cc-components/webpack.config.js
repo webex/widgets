@@ -72,6 +72,14 @@ module.exports = mergeWithCustomize({
           filename: 'images/[name][ext][query]',
         },
       },
+      {
+        // Inline rather than emit: packages that consume the prebuilt
+        // `cc-components/dist` never copy emitted assets, so a file reference
+        // here would 404 in every downstream host.
+        test: /\.svg$/,
+        include: [resolveMonorepoRoot('node_modules/@momentum-design/icons')],
+        type: 'asset/inline',
+      },
     ],
   },
 });

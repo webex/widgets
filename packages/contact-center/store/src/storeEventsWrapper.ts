@@ -25,6 +25,7 @@ import {
   AgentLoginProfile,
   ERROR_TRIGGERING_IDLE_CODES,
   RealTimeTranscriptionEventPayload,
+  RealTimeAssistPayload,
 } from './store.types';
 import Store from './store';
 import {
@@ -37,8 +38,7 @@ import {
 } from './store.types';
 import {runInAction} from 'mobx';
 import {isIncomingTask} from './task-utils';
-
-const TASK_MULTI_LOGIN_HYDRATE = 'task:multiLoginHydrate';
+import {SUGGESTED_RESPONSE_EVENT, TASK_MULTI_LOGIN_HYDRATE} from './constants';
 
 class StoreWrapper implements IStoreWrapper {
   store: IStore;
@@ -49,6 +49,10 @@ class StoreWrapper implements IStoreWrapper {
   onTaskSelected?: (task: ITask, isClicked: boolean) => void;
   onErrorCallback?: (widgetName: string, error: Error) => void;
   private realtimeTranscriptionListeners: Record<string, (payload: RealTimeTranscriptionEventPayload) => void> = {};
+  // Keyed by interactionId; the task is tracked alongside the listener so a
+  // replacement task object (task:hydrate / task:merged) gets rebound.
+  private realTimeAssistListeners: Record<string, {task: ITask; listener: (payload: RealTimeAssistPayload) => void}> =
+    {};
 
   constructor() {
     this.store = Store.getInstance();
@@ -158,6 +162,10 @@ class StoreWrapper implements IStoreWrapper {
 
   get acceptedCampaignIds() {
     return this.store.acceptedCampaignIds;
+  }
+
+  get realTimeAssist() {
+    return this.store.realTimeAssist;
   }
 
   setDataCenter = (value: string): void => {
@@ -517,6 +525,19 @@ class StoreWrapper implements IStoreWrapper {
         taskToRemove.off(TASK_EVENTS.TASK_MEDIA, this.handleTaskMedia);
         this.setCallControlAudio(null);
       }
+
+      if (taskId && this.realTimeAssistListeners[taskId]) {
+        const {task: listenerTask, listener} = this.realTimeAssistListeners[taskId];
+        (listenerTask ?? taskToRemove).off(SUGGESTED_RESPONSE_EVENT, listener);
+        delete this.realTimeAssistListeners[taskId];
+      }
+      if (taskId && this.store.realTimeAssist && this.store.realTimeAssist[taskId]) {
+        runInAction(() => {
+          const next = {...this.store.realTimeAssist};
+          delete next[taskId];
+          this.store.realTimeAssist = next;
+        });
+      }
     }
 
     runInAction(() => {
@@ -639,6 +660,28 @@ class StoreWrapper implements IStoreWrapper {
     this.setCallControlAudio(new MediaStream([track]));
   };
 
+  handleRealTimeAssist = (interactionId: string, payload: RealTimeAssistPayload) => {
+    if (!interactionId || !payload?.data) return;
+    runInAction(() => {
+      const current = (this.store.realTimeAssist && this.store.realTimeAssist[interactionId]) || [];
+      this.store.realTimeAssist = {
+        ...(this.store.realTimeAssist || {}),
+        [interactionId]: [...current, payload],
+      };
+    });
+  };
+
+  clearRealTimeAssist = (interactionId: string): void => {
+    if (!interactionId) return;
+    runInAction(() => {
+      if (this.store.realTimeAssist?.[interactionId]) {
+        const next = {...this.store.realTimeAssist};
+        delete next[interactionId];
+        this.store.realTimeAssist = next;
+      }
+    });
+  };
+
   // Case to handle multi session
   handleConsultCreated = () => {
     this.refreshTaskList();
@@ -757,7 +800,6 @@ class StoreWrapper implements IStoreWrapper {
     task.on(TASK_EVENTS.TASK_PARTICIPANT_LEFT_FAILED, this.refreshTaskList);
     task.on(TASK_EVENTS.TASK_CONFERENCE_TRANSFERRED, this.refreshTaskList);
     task.on(TASK_EVENTS.TASK_CONFERENCE_TRANSFER_FAILED, this.refreshTaskList);
-    task.on(TASK_EVENTS.TASK_POST_CALL_ACTIVITY, this.refreshTaskList);
 
     // Campaign preview: transition RESERVED → ENGAGED when the agent accepts
     task.on(TASK_EVENTS.TASK_CAMPAIGN_PREVIEW_RESERVATION, this.handleCampaignPreviewReservation);
@@ -774,6 +816,19 @@ class StoreWrapper implements IStoreWrapper {
 
     if (this.deviceType === DEVICE_TYPE_BROWSER) {
       task.on(TASK_EVENTS.TASK_MEDIA, this.handleTaskMedia);
+    }
+
+    // Avoid duplicate registration when this method is re-entered for the same
+    // task, but do rebind when task:hydrate / task:merged supplies a
+    // replacement object for the same interaction.
+    if (taskId) {
+      const existing = this.realTimeAssistListeners[taskId];
+      if (existing?.task !== task) {
+        existing?.task?.off(SUGGESTED_RESPONSE_EVENT, existing.listener);
+        const listener = (payload: RealTimeAssistPayload) => this.handleRealTimeAssist(taskId, payload);
+        this.realTimeAssistListeners[taskId] = {task, listener};
+        task.on(SUGGESTED_RESPONSE_EVENT, listener);
+      }
     }
   };
 
@@ -1115,6 +1170,8 @@ class StoreWrapper implements IStoreWrapper {
       this.store.acceptedCampaignIds = new Set();
       this.realtimeTranscriptionListeners = {};
       this.setLastConsultDestination(null);
+      this.store.realTimeAssist = {};
+      this.realTimeAssistListeners = {};
     });
   };
 
