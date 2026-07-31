@@ -150,6 +150,9 @@ const updateButtonState = () => {
 accessTokenElem.addEventListener('keyup', updateButtonState);
 
 window.addEventListener('load', () => {
+  // Remove token persisted by older sample builds — no longer read or written (SPARK-833336)
+  localStorage.removeItem('accessToken');
+
   changeLoginType();
   loadintegrationEnvSetting(); // Load the setting on page load
   if (window.location.hash) {

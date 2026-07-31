@@ -127,6 +127,9 @@ function App() {
   };
 
   useEffect(() => {
+    // Remove token persisted by older sample builds — no longer read or written (SPARK-833336)
+    window.localStorage.removeItem('accessToken');
+
     if (window.location.hash) {
       const urlParams = new URLSearchParams(window.location.hash.replace('#', '?'));
 
