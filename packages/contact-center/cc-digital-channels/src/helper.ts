@@ -22,6 +22,13 @@ export const useDigitalChannelsInit = (props: DigitalChannelsInitHookProps) => {
   const initInFlightRef = useRef(false);
 
   useEffect(() => {
+    if (!isDigitalChannelsInitialized) {
+      initInFlightRef.current = false;
+      setInitialized(false);
+    }
+  }, [isDigitalChannelsInitialized]);
+
+  useEffect(() => {
     // Skip initialization if required data is not available
     if (skipInit) {
       return;
@@ -53,6 +60,7 @@ export const useDigitalChannelsInit = (props: DigitalChannelsInitHookProps) => {
             method: 'useDigitalChannelsInit',
           });
         } catch (error) {
+          initInFlightRef.current = false;
           const errorMessage = error instanceof Error ? error.message : 'Unknown error';
           logger.error(`[DIGITAL_CHANNELS_INIT] ❌ Failed to initialize Digital Channels app: ${errorMessage}`, {
             module: 'cc-digital-channels',
@@ -70,7 +78,7 @@ export const useDigitalChannelsInit = (props: DigitalChannelsInitHookProps) => {
     };
 
     initialize();
-  }, [currentTask, skipInit, jwtToken]);
+  }, [currentTask, skipInit, jwtToken, isDigitalChannelsInitialized]);
 
   return {initialized};
 };

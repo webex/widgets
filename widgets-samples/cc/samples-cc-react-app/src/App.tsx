@@ -137,8 +137,10 @@ function App() {
       const accessToken = urlParams.get('access_token');
 
       if (accessToken) {
-        // Validate CSRF state token before accepting the OAuth redirect.
-        // The SDK encodes state as base64(JSON({app_state, csrf_token})) in the hash.
+        /*
+         * Validate CSRF state token before accepting the OAuth redirect.
+         * The SDK encodes state as base64(JSON({app_state, csrf_token})) in the hash.
+         */
         const rawState = urlParams.get('state');
         const storedState = window.sessionStorage.getItem('oauth2-state-token');
         window.sessionStorage.removeItem('oauth2-state-token');
@@ -401,8 +403,10 @@ function App() {
     const webex = Webex.init(webexConfig);
 
     webex.once('ready', () => {
-      // Pass our state token so the SDK embeds it in the authorize URL;
-      // the redirect handler validates the returned state against sessionStorage.
+      /*
+       * Pass our state token so the SDK embeds it in the authorize URL;
+       * the redirect handler validates the returned state against sessionStorage.
+       */
       webex.authorization.initiateLogin({state: {app_state: stateToken}});
     });
   };

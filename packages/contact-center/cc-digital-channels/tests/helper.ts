@@ -140,6 +140,64 @@ describe('useDigitalChannelsInit', () => {
     // initializeApp must be called exactly once despite the re-render mid-flight
     expect(initializeApp).toHaveBeenCalledTimes(1);
   });
+
+  it('should allow retry after initialization failure when jwtToken changes', async () => {
+    (initializeApp as jest.Mock)
+      .mockRejectedValueOnce(new Error('Initialization failed'))
+      .mockResolvedValueOnce(undefined);
+
+    const {rerender, result} = renderHook(
+      ({jwtToken}: {jwtToken: string}) =>
+        useDigitalChannelsInit({...defaultProps, jwtToken, isDigitalChannelsInitialized: false}),
+      {initialProps: {jwtToken: 'token1'}}
+    );
+
+    await waitFor(() => {
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to initialize Digital Channels app'),
+        expect.any(Object)
+      );
+    });
+
+    expect(result.current.initialized).toBe(false);
+    expect(initializeApp).toHaveBeenCalledTimes(1);
+
+    rerender({jwtToken: 'token2'});
+
+    await waitFor(() => {
+      expect(result.current.initialized).toBe(true);
+    });
+
+    expect(initializeApp).toHaveBeenCalledTimes(2);
+    expect(mockSetDigitalChannelsInitialized).toHaveBeenCalledWith(true);
+  });
+
+  it('should reinitialize after store session reset on logout', async () => {
+    (initializeApp as jest.Mock).mockResolvedValue(undefined);
+
+    const {rerender, result} = renderHook(
+      ({isDigitalChannelsInitialized}: {isDigitalChannelsInitialized: boolean}) =>
+        useDigitalChannelsInit({...defaultProps, isDigitalChannelsInitialized}),
+      {initialProps: {isDigitalChannelsInitialized: false}}
+    );
+
+    await waitFor(() => {
+      expect(result.current.initialized).toBe(true);
+    });
+
+    expect(initializeApp).toHaveBeenCalledTimes(1);
+
+    rerender({isDigitalChannelsInitialized: true});
+    expect(initializeApp).toHaveBeenCalledTimes(1);
+
+    rerender({isDigitalChannelsInitialized: false});
+
+    await waitFor(() => {
+      expect(result.current.initialized).toBe(true);
+    });
+
+    expect(initializeApp).toHaveBeenCalledTimes(2);
+  });
 });
 
 describe('useDigitalChannelsData', () => {
