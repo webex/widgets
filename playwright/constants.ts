@@ -61,6 +61,15 @@ export const CONSULT_NO_ANSWER_TIMEOUT = 12000;
 // Wrapup timeouts
 export const WRAPUP_TIMEOUT = 15000;
 
+// Real-Time Assist / Real-Time Transcript timeouts.
+// These are backend AI pipeline operations (live speech-to-text + suggestion
+// generation), not UI interactions, so they need materially more time than
+// AWAIT_TIMEOUT. Observed end-to-end latency for the first transcript segment
+// and the first AI suggestion on the dummy-audio e2e call is in the 15-40s
+// range; 60s leaves headroom without masking a genuine pipeline failure.
+export const AI_ASSIST_SUGGESTION_TIMEOUT = 60000;
+export const TRANSCRIPT_ENTRY_TIMEOUT = 60000;
+
 // Station login timeouts
 export const DROPDOWN_SETTLE_TIMEOUT = 200;
 export const STATION_LOGOUT_UNREGISTER_SETTLE_TIMEOUT = 4000;

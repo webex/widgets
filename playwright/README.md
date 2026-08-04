@@ -15,7 +15,8 @@ playwright/
 │   ├── dial-number-tests.spec.ts            # Dial number task control orchestration
 │   ├── multiparty-conference-set-7-tests.spec.ts # Multiparty conference set 7 orchestration
 │   ├── multiparty-conference-set-8-tests.spec.ts # Multiparty conference set 8 orchestration
-│   └── multiparty-conference-set-9-tests.spec.ts # Multiparty conference set 9 orchestration
+│   ├── multiparty-conference-set-9-tests.spec.ts # Multiparty conference set 9 orchestration
+│   └── ai-assistant-tests.spec.ts # AI Assistant & Real-Time Transcript orchestration
 ├── tests/                                     # Individual test implementations
 ├── Utils/                                     # Utility functions
 ├── test-data.ts                              # **CENTRAL CONFIG** - Test data & suite mapping
@@ -33,29 +34,37 @@ playwright/
 - ✅ Positions browser windows automatically
 - ✅ Maps test suites to user sets
 
-| Set       | Focus                              | Port | Suite File                                   |
-| --------- | ---------------------------------- | ---- | -------------------------------------------- |
-| **SET_1** | Digital incoming tasks & controls  | 9221 | `digital-incoming-task-tests.spec.ts`        |
-| **SET_2** | Task lists & multi-session         | 9222 | `task-list-multi-session-tests.spec.ts`      |
-| **SET_3** | Authentication & user management   | 9223 | `station-login-user-state-tests.spec.ts`     |
-| **SET_4** | Task controls & combinations       | 9224 | `basic-advanced-task-controls-tests.spec.ts` |
-| **SET_5** | Advanced task operations           | 9225 | `advanced-task-controls-tests.spec.ts`       |
-| **SET_6** | Dial number scenarios              | 9226 | `dial-number-tests.spec.ts`                  |
-| **SET_7** | Multiparty conference (team 25-28) | 9227 | `multiparty-conference-set-7-tests.spec.ts`  |
-| **SET_8** | Multiparty conference (team 29-32) | 9228 | `multiparty-conference-set-8-tests.spec.ts`  |
-| **SET_9** | Multiparty conference (team 33-36) | 9229 | `multiparty-conference-set-9-tests.spec.ts`  |
+| Set        | Focus                               | Port | Suite File                                   |
+| ---------- | ----------------------------------- | ---- | -------------------------------------------- |
+| **SET_1**  | Digital incoming tasks & controls   | 9221 | `digital-incoming-task-tests.spec.ts`        |
+| **SET_2**  | Task lists & multi-session          | 9222 | `task-list-multi-session-tests.spec.ts`      |
+| **SET_3**  | Authentication & user management    | 9223 | `station-login-user-state-tests.spec.ts`     |
+| **SET_4**  | Task controls & combinations        | 9224 | `basic-advanced-task-controls-tests.spec.ts` |
+| **SET_5**  | Advanced task operations            | 9225 | `advanced-task-controls-tests.spec.ts`       |
+| **SET_6**  | Dial number scenarios               | 9226 | `dial-number-tests.spec.ts`                  |
+| **SET_7**  | Multiparty conference (team 25-28)  | 9227 | `multiparty-conference-set-7-tests.spec.ts`  |
+| **SET_8**  | Multiparty conference (team 29-32)  | 9228 | `multiparty-conference-set-8-tests.spec.ts`  |
+| **SET_9**  | Multiparty conference (team 33-36)  | 9229 | `multiparty-conference-set-9-tests.spec.ts`  |
+| **SET_10** | AI Assistant & Real-Time Transcript | 9230 | `ai-assistant-tests.spec.ts`                 |
 
 ### Where to Add New Tests?
 
-| Test Type                    | Use Set   | Why                         |
-| ---------------------------- | --------- | --------------------------- |
-| Digital channels tasks       | SET_1     | Digital channels configured |
-| Task list operations         | SET_2     | Task list focus             |
-| Authentication/User states   | SET_3     | User management             |
-| Basic/Advanced task controls | SET_4     | Task control operations     |
-| Complex advanced scenarios   | SET_5     | Advanced operations         |
-| Dial number scenarios        | SET_6     | Dial number flows           |
-| Multiparty conference        | SET_7/8/9 | 4-agent conference coverage |
+| Test Type                           | Use Set   | Why                         |
+| ----------------------------------- | --------- | --------------------------- |
+| Digital channels tasks              | SET_1     | Digital channels configured |
+| Task list operations                | SET_2     | Task list focus             |
+| Authentication/User states          | SET_3     | User management             |
+| Basic/Advanced task controls        | SET_4     | Task control operations     |
+| Complex advanced scenarios          | SET_5     | Advanced operations         |
+| Dial number scenarios               | SET_6     | Dial number flows           |
+| Multiparty conference               | SET_7/8/9 | 4-agent conference coverage |
+| AI Assistant / Real-Time Transcript | SET_10    | Live call required for both |
+
+> **Note on AI Assistant / Real-Time Transcript coverage:** suggestion and transcript
+> content is produced by a live backend AI/speech pipeline against the call's dummy
+> audio, so it isn't deterministic. `SET_10` tests intentionally assert on structure
+> and state transitions (landing to request view to listening mode, feedback controls
+> toggling `data-active`, transcript entries appearing) rather than exact text.
 
 ## Multiparty Conference Consolidation
 
