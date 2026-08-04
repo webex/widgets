@@ -15,8 +15,7 @@ playwright/
 │   ├── dial-number-tests.spec.ts            # Dial number task control orchestration
 │   ├── multiparty-conference-set-7-tests.spec.ts # Multiparty conference set 7 orchestration
 │   ├── multiparty-conference-set-8-tests.spec.ts # Multiparty conference set 8 orchestration
-│   ├── multiparty-conference-set-9-tests.spec.ts # Multiparty conference set 9 orchestration
-│   └── ai-assistant-tests.spec.ts # AI Assistant & Real-Time Transcript orchestration
+│   └── multiparty-conference-set-9-tests.spec.ts # Multiparty conference set 9 orchestration
 ├── tests/                                     # Individual test implementations
 ├── Utils/                                     # Utility functions
 ├── test-data.ts                              # **CENTRAL CONFIG** - Test data & suite mapping
@@ -45,26 +44,28 @@ playwright/
 | **SET_7**  | Multiparty conference (team 25-28)  | 9227 | `multiparty-conference-set-7-tests.spec.ts`  |
 | **SET_8**  | Multiparty conference (team 29-32)  | 9228 | `multiparty-conference-set-8-tests.spec.ts`  |
 | **SET_9**  | Multiparty conference (team 33-36)  | 9229 | `multiparty-conference-set-9-tests.spec.ts`  |
-| **SET_10** | AI Assistant & Real-Time Transcript | 9230 | `ai-assistant-tests.spec.ts`                 |
 
 ### Where to Add New Tests?
 
-| Test Type                           | Use Set   | Why                         |
-| ----------------------------------- | --------- | --------------------------- |
-| Digital channels tasks              | SET_1     | Digital channels configured |
-| Task list operations                | SET_2     | Task list focus             |
-| Authentication/User states          | SET_3     | User management             |
-| Basic/Advanced task controls        | SET_4     | Task control operations     |
-| Complex advanced scenarios          | SET_5     | Advanced operations         |
-| Dial number scenarios               | SET_6     | Dial number flows           |
-| Multiparty conference               | SET_7/8/9 | 4-agent conference coverage |
-| AI Assistant / Real-Time Transcript | SET_10    | Live call required for both |
+| Test Type                           | Use Set   | Why                                                |
+| ----------------------------------- | --------- | --------------------------------------------------- |
+| Digital channels tasks              | SET_1     | Digital channels configured                        |
+| Task list operations                | SET_2     | Task list focus                                     |
+| Authentication/User states          | SET_3     | User management                                     |
+| Basic/Advanced task controls        | SET_4     | Task control operations; single agent + caller call |
+| Complex advanced scenarios          | SET_5     | Advanced operations                                 |
+| Dial number scenarios               | SET_6     | Dial number flows                                   |
+| Multiparty conference               | SET_7/8/9 | 4-agent conference coverage                         |
+| AI Assistant / Real-Time Transcript | SET_4     | Live call required for both; reuses SET_4's agent   |
 
 > **Note on AI Assistant / Real-Time Transcript coverage:** suggestion and transcript
 > content is produced by a live backend AI/speech pipeline against the call's dummy
-> audio, so it isn't deterministic. `SET_10` tests intentionally assert on structure
-> and state transitions (landing to request view to listening mode, feedback controls
-> toggling `data-active`, transcript entries appearing) rather than exact text.
+> audio, so it isn't deterministic. These tests (bundled into `SET_4`'s suite,
+> `basic-advanced-task-controls-tests.spec.ts`) intentionally assert on structure and
+> state transitions (landing to request view to listening mode, feedback controls
+> toggling `data-active`, transcript entries appearing) rather than exact text. They
+> reuse `SET_4`'s already-provisioned agent (`user21`) instead of a dedicated user set,
+> since both widgets only need a single agent plus a caller for a live voice call.
 
 ## Multiparty Conference Consolidation
 

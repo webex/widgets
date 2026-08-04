@@ -31,7 +31,9 @@ describe('RealTimeTranscriptComponent', () => {
     const messages = screen.getAllByTestId('real-time-transcript:item');
     expect(messages).toHaveLength(2);
     expect(messages[0]).toHaveTextContent('Agent message');
+    expect(messages[0]).toHaveAttribute('data-speaker-role', 'agent');
     expect(messages[1]).toHaveTextContent('Customer message');
+    expect(messages[1]).toHaveAttribute('data-speaker-role', 'customer');
   });
 
   it('renders transcript event inline with timestamp', () => {

@@ -4,7 +4,13 @@ import {changeUserState, verifyCurrentState, getCurrentState} from '../Utils/use
 import {createCallTask, acceptIncomingTask} from '../Utils/incomingTaskUtils';
 import {endTask} from '../Utils/taskControlUtils';
 import {submitWrapup} from '../Utils/wrapupUtils';
-import {waitForRealTimeTranscriptPanel, waitForFirstTranscriptEntry} from '../Utils/realTimeTranscriptUtils';
+import {
+  waitForRealTimeTranscriptPanel,
+  waitForTranscriptEntry,
+  dispatchRealtimeTranscriptionEvent,
+  locateMockTranscriptMessage,
+  MOCK_TRANSCRIPT_CONVERSATION,
+} from '../Utils/realTimeTranscriptUtils';
 import {USER_STATES, TASK_TYPES, WRAPUP_REASONS, ACCEPT_TASK_TIMEOUT} from '../constants';
 
 const {beforeAll, afterAll} = test;
@@ -12,10 +18,18 @@ const {beforeAll, afterAll} = test;
 /**
  * Real-Time Transcript e2e coverage.
  *
- * Transcript text is produced by a live speech-to-text pipeline from the
- * call's dummy audio, so these tests assert that the panel renders and that
- * entries eventually appear, rather than asserting on exact transcribed
- * text.
+ * Transcript content normally comes from a live speech-to-text pipeline
+ * running against the call's dummy audio, which is non-deterministic. To
+ * verify the widget's rendering behaviour precisely - in particular that a
+ * single utterance progressively fills in word by word as multiple
+ * `REAL_TIME_TRANSCRIPTION` events arrive for the same `messageId`, for both
+ * the agent and the caller - these tests inject a consistent, known mock
+ * conversation directly via `store.handleRealtimeTranscription` (the same
+ * method the SDK's real event listener calls) instead of relying on actual
+ * transcribed speech. A separate, lightweight smoke test still checks that
+ * the live pipeline itself produces *some* real entries, to catch a
+ * regression in the SDK/backend wiring that the mock-driven tests wouldn't
+ * detect (since they bypass the live pipeline entirely).
  */
 export default function createRealTimeTranscriptTests() {
   let testManager: TestManager;
@@ -57,11 +71,57 @@ export default function createRealTimeTranscriptTests() {
     await waitForRealTimeTranscriptPanel(testManager.agent1Page);
   });
 
-  test('Live transcript entries appear as the call progresses', async () => {
-    const firstEntry = await waitForFirstTranscriptEntry(testManager.agent1Page);
-    await expect(firstEntry).toBeVisible();
+  test('Live transcript pipeline smoke check: real transcription eventually arrives for both legs', async () => {
+    // Runs before the mock-driven test below so `.first()` here can only
+    // match a genuinely live-transcribed entry, not one of our injected
+    // mock utterances.
+    const agentEntry = await waitForTranscriptEntry(testManager.agent1Page, 'agent');
+    const customerEntry = await waitForTranscriptEntry(testManager.agent1Page, 'customer');
 
-    const entryText = (await firstEntry.innerText()).trim();
-    expect(entryText.length).toBeGreaterThan(0);
+    await expect(agentEntry).toBeVisible();
+    await expect(customerEntry).toBeVisible();
+  });
+
+  test('Transcript renders a single utterance word-by-word as REAL_TIME_TRANSCRIPTION events arrive, for both agent and caller', async () => {
+    const page = testManager.agent1Page;
+    const {agent, customer} = MOCK_TRANSCRIPT_CONVERSATION;
+    const agentWords = agent.sentence.split(' ');
+    const customerWords = customer.sentence.split(' ');
+
+    const agentMessage = locateMockTranscriptMessage(page, 'agent', agentWords[0]);
+    const customerMessage = locateMockTranscriptMessage(page, 'customer', customerWords[0]);
+
+    // Drive both utterances forward one word at a time, interleaved, so we
+    // also prove the two roles' progressive updates don't interfere with
+    // each other (mirrors how a real conversation streams both legs at
+    // once).
+    const stepCount = Math.max(agentWords.length, customerWords.length);
+    for (let step = 0; step < stepCount; step += 1) {
+      if (step < agentWords.length) {
+        const partialContent = agentWords.slice(0, step + 1).join(' ');
+        await dispatchRealtimeTranscriptionEvent(page, {
+          role: agent.role,
+          content: partialContent,
+          isFinal: step === agentWords.length - 1,
+          messageId: agent.messageId,
+        });
+        await expect(agentMessage).toHaveText(partialContent);
+      }
+
+      if (step < customerWords.length) {
+        const partialContent = customerWords.slice(0, step + 1).join(' ');
+        await dispatchRealtimeTranscriptionEvent(page, {
+          role: customer.role,
+          content: partialContent,
+          isFinal: step === customerWords.length - 1,
+          messageId: customer.messageId,
+        });
+        await expect(customerMessage).toHaveText(partialContent);
+      }
+    }
+
+    // Final state: each role shows exactly its own complete, known sentence.
+    await expect(agentMessage).toHaveText(agent.sentence);
+    await expect(customerMessage).toHaveText(customer.sentence);
   });
 }

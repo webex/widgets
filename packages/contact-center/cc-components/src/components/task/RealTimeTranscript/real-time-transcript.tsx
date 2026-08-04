@@ -46,7 +46,11 @@ const RealTimeTranscriptComponent: React.FC<RealTimeTranscriptComponentProps> = 
                     ) : null}
                   </Text>
                 ) : null}
-                <div className="real-time-transcript__item" data-testid="real-time-transcript:item">
+                <div
+                  className="real-time-transcript__item"
+                  data-testid="real-time-transcript:item"
+                  data-speaker-role={entry.isCustomer ? 'customer' : 'agent'}
+                >
                   <div className="real-time-transcript__avatar-wrap">
                     <Avatar
                       className="real-time-transcript__avatar-fallback"
