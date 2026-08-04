@@ -58,14 +58,33 @@ playwright/
 | Multiparty conference               | SET_7/8/9 | 4-agent conference coverage                         |
 | AI Assistant / Real-Time Transcript | SET_4     | Live call required for both; reuses SET_4's agent   |
 
-> **Note on AI Assistant / Real-Time Transcript coverage:** suggestion and transcript
-> content is produced by a live backend AI/speech pipeline against the call's dummy
-> audio, so it isn't deterministic. These tests (bundled into `SET_4`'s suite,
-> `basic-advanced-task-controls-tests.spec.ts`) intentionally assert on structure and
-> state transitions (landing to request view to listening mode, feedback controls
-> toggling `data-active`, transcript entries appearing) rather than exact text. They
-> reuse `SET_4`'s already-provisioned agent (`user21`) instead of a dedicated user set,
-> since both widgets only need a single agent plus a caller for a live voice call.
+> **Note on AI Assistant / Real-Time Transcript coverage:** these tests are bundled into
+> `SET_4`'s suite, `basic-advanced-task-controls-tests.spec.ts`, and reuse its
+> already-provisioned agent (`user21`) plus caller. Both features retain a lightweight
+> live-backend smoke check. Precise UI behavior is tested deterministically by driving
+> the same sample-app store surfaces used by SDK events: Real Time Assist controls the
+> SDK request/feedback promises and injects `SUGGESTED_RESPONSE` payloads through
+> `store.handleRealTimeAssist`; Real-Time Transcript injects
+> `REAL_TIME_TRANSCRIPTION` payloads through `store.handleRealtimeTranscription`.
+> This split verifies the real integration path without making every rendering and
+> transition assertion depend on non-deterministic AI/speech timing.
+
+### Real Time Assist scenario coverage
+
+`playwright/tests/real-time-assist-test.spec.ts` runs serially because it validates one
+continuous interaction lifecycle. It covers:
+
+- launcher, open, minimize, restore, fullscreen, exit-fullscreen, close, and reopen;
+- no-interaction, feature-disabled, active/request, pending, error, retry, listening,
+  ready, and task-ended render states;
+- `getRealTimeAssistance` payloads, pending-request duplicate prevention, context
+  submission, user-message rendering, and subsequent suggestions;
+- deterministic `SUGGESTED_RESPONSE` rendering, chronological ordering, Adaptive Card
+  actions, and the plain-text fallback path;
+- feedback API payloads and the rule that like/dislike selection changes only after
+  backend success; and
+- active-session preservation across close/reopen, interaction cleanup, and one final
+  live SDK/backend suggestion smoke check.
 
 ## Multiparty Conference Consolidation
 

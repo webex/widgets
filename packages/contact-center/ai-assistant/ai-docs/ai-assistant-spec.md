@@ -11,7 +11,7 @@
 | Doc kind | Module spec |
 | Coverage score | Pending coverage assessment |
 | Generated from | `module-spec` @ SDLC template library `0.1.0-draft` |
-| generated_by / approved_by / updated_at | generated_by `ai-assistant feature work` / approved_by `pending` / updated_at `2026-07-29` |
+| generated_by / approved_by / updated_at | generated_by `ai-assistant feature work` / approved_by `pending` / updated_at `2026-08-04` |
 | Validation status | not-run |
 
 ## Evidence Rules
@@ -203,6 +203,15 @@ sequenceDiagram
 views and the ErrorBoundary path. `tests/ai-assistant/feedback.tsx` covers like/dislike/copy dispatch
 and the missing-`adaptiveCardId` warning. UI-level rendering (spinner, error text,
 snapshots) is covered in `cc-components/tests/components/AIAssistant/`.
+
+Playwright coverage lives in `playwright/tests/real-time-assist-test.spec.ts` and runs in the SET_4
+call suite. It deterministically controls the SDK request and feedback promises, injects
+`SUGGESTED_RESPONSE` payloads through `store.handleRealTimeAssist`, and verifies the complete visible
+state sequence: chrome actions; no-task and feature-disabled gates; empty, requesting, failure/retry,
+listening, and ready states; context requests; ordered responses; Adaptive Card fallback and feedback;
+close/reopen preservation; and task-removal cleanup. A final test restores the SDK methods and waits for
+a live backend suggestion so deterministic rendering coverage does not replace the integration smoke
+check.
 
 ## Traceability
 - Repo architecture: `../../../../ai-docs/ARCHITECTURE.md` · Registry: `../../../../ai-docs/SPEC_INDEX.md`

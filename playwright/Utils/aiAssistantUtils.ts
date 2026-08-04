@@ -1,6 +1,34 @@
 import {Page, expect, Locator} from '@playwright/test';
 import {AWAIT_TIMEOUT, AI_ASSIST_SUGGESTION_TIMEOUT} from '../constants';
 
+export type RealTimeAssistRequest = {
+  agentId: string;
+  interactionId: string;
+  actionTimeStamp: number;
+  context?: string;
+};
+
+export type RealTimeAssistFeedbackRequest = {
+  agentId: string;
+  interactionId: string;
+  adaptiveCardId: string;
+  actionId: string;
+  languageCode?: string;
+};
+
+export type MockRealTimeAssistPayload = {
+  data: {
+    adaptiveCard: unknown;
+    adaptiveCardId: string;
+    title: string;
+    suggestion: string;
+    publishTimestamp: number;
+    languageCode?: string;
+    conversationId?: string;
+    trackingId?: string;
+  };
+};
+
 /**
  * Utility functions for exercising the AI Assistant widget (launcher, landing
  * page, Real-Time Assist chat, and adaptive-card feedback controls) in e2e
@@ -66,7 +94,7 @@ export async function isShowingLanding(page: Page): Promise<boolean> {
 }
 
 /**
- * Clicks "Get Suggestions" and waits for the request to settle: either the
+ * Clicks "Get Assistance" and waits for the request to settle: either the
  * chat/context-form appears (success) or the inline error message appears
  * (failure). Does not throw on failure - callers assert the outcome.
  * @param page - The Playwright page object
@@ -82,6 +110,259 @@ export async function requestRealTimeAssistSuggestions(page: Page): Promise<void
     page.getByTestId('ai-assistant:context-form').waitFor({state: 'visible', timeout: AI_ASSIST_SUGGESTION_TIMEOUT}),
     page.getByTestId('ai-assistant:error').waitFor({state: 'visible', timeout: AI_ASSIST_SUGGESTION_TIMEOUT}),
   ]).catch(() => {});
+}
+
+/**
+ * Returns a deterministic Adaptive Card payload with the same feedback action
+ * ids consumed by the production renderer and backend API.
+ */
+export function createMockRealTimeAssistPayload({
+  adaptiveCardId,
+  title,
+  suggestion,
+  publishTimestamp,
+  languageCode = 'en-US',
+}: {
+  adaptiveCardId: string;
+  title: string;
+  suggestion: string;
+  publishTimestamp: number;
+  languageCode?: string;
+}): MockRealTimeAssistPayload {
+  return {
+    data: {
+      adaptiveCardId,
+      title,
+      suggestion,
+      publishTimestamp,
+      languageCode,
+      conversationId: 'e2e-conversation',
+      trackingId: `tracking-${adaptiveCardId}`,
+      adaptiveCard: {
+        type: 'AdaptiveCard',
+        version: '1.4',
+        body: [{type: 'TextBlock', text: suggestion, wrap: true}],
+        actions: [
+          {type: 'Action.Submit', id: 'likeButton', title: '', iconUrl: 'like-regular.svg'},
+          {type: 'Action.Submit', id: 'dislikeButton', title: '', iconUrl: 'dislike-regular.svg'},
+          {type: 'Action.Submit', id: 'copyButton', title: '', iconUrl: 'copy-regular.svg'},
+        ],
+      },
+    },
+  };
+}
+
+/**
+ * Installs controllable SDK stubs in the sample app. Calls remain pending
+ * until the test explicitly resolves or rejects them, allowing assertions on
+ * every intermediate UI state instead of racing an immediate mock response.
+ */
+export async function installRealTimeAssistBackendHarness(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    type Deferred = {resolve: () => void; reject: (error: Error) => void};
+    type Request = {
+      agentId: string;
+      interactionId: string;
+      actionTimeStamp: number;
+      context?: string;
+    };
+    type FeedbackRequest = {
+      agentId: string;
+      interactionId: string;
+      adaptiveCardId: string;
+      actionId: string;
+      languageCode?: string;
+    };
+    type Api = {
+      getRealTimeAssistance: (request: Request) => Promise<void>;
+      sendRealTimeAssistanceUserAction: (request: FeedbackRequest) => Promise<void>;
+    };
+    type Harness = {
+      requestCalls: Request[];
+      feedbackCalls: FeedbackRequest[];
+      pendingRequests: Deferred[];
+      pendingFeedback: Deferred[];
+      originalGetRealTimeAssistance: Api['getRealTimeAssistance'];
+      originalSendUserAction: Api['sendRealTimeAssistanceUserAction'];
+    };
+    const host = window as unknown as {
+      store?: {cc?: {apiAIAssistant?: Api}};
+      __realTimeAssistE2E?: Harness;
+    };
+    const api = host.store?.cc?.apiAIAssistant;
+    if (!api?.getRealTimeAssistance || !api.sendRealTimeAssistanceUserAction) {
+      throw new Error('AI Assistant SDK API is not available for the Playwright harness');
+    }
+
+    if (host.__realTimeAssistE2E) {
+      api.getRealTimeAssistance = host.__realTimeAssistE2E.originalGetRealTimeAssistance;
+      api.sendRealTimeAssistanceUserAction = host.__realTimeAssistE2E.originalSendUserAction;
+    }
+
+    const harness: Harness = {
+      requestCalls: [],
+      feedbackCalls: [],
+      pendingRequests: [],
+      pendingFeedback: [],
+      originalGetRealTimeAssistance: api.getRealTimeAssistance,
+      originalSendUserAction: api.sendRealTimeAssistanceUserAction,
+    };
+    host.__realTimeAssistE2E = harness;
+
+    api.getRealTimeAssistance = (request: Request) => {
+      harness.requestCalls.push(request);
+      return new Promise<void>((resolve, reject) => harness.pendingRequests.push({resolve, reject}));
+    };
+    api.sendRealTimeAssistanceUserAction = (request: FeedbackRequest) => {
+      harness.feedbackCalls.push(request);
+      return new Promise<void>((resolve, reject) => harness.pendingFeedback.push({resolve, reject}));
+    };
+  });
+}
+
+/** Restore the real SDK methods after deterministic coverage. */
+export async function restoreRealTimeAssistBackend(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    type Api = {
+      getRealTimeAssistance: (request: unknown) => Promise<void>;
+      sendRealTimeAssistanceUserAction: (request: unknown) => Promise<void>;
+    };
+    type Harness = {
+      originalGetRealTimeAssistance: Api['getRealTimeAssistance'];
+      originalSendUserAction: Api['sendRealTimeAssistanceUserAction'];
+    };
+    const host = window as unknown as {
+      store?: {cc?: {apiAIAssistant?: Api}};
+      __realTimeAssistE2E?: Harness;
+    };
+    const api = host.store?.cc?.apiAIAssistant;
+    const harness = host.__realTimeAssistE2E;
+    if (!api || !harness) return;
+    api.getRealTimeAssistance = harness.originalGetRealTimeAssistance;
+    api.sendRealTimeAssistanceUserAction = harness.originalSendUserAction;
+    delete host.__realTimeAssistE2E;
+  });
+}
+
+async function settleNextHarnessCall(page: Page, kind: 'request' | 'feedback', errorMessage?: string): Promise<void> {
+  await page.evaluate(
+    ({callKind, rejection}) => {
+      type Deferred = {resolve: () => void; reject: (error: Error) => void};
+      const host = window as unknown as {
+        __realTimeAssistE2E?: {pendingRequests: Deferred[]; pendingFeedback: Deferred[]};
+      };
+      const harness = host.__realTimeAssistE2E;
+      if (!harness) throw new Error('Real Time Assist Playwright harness is not installed');
+      const queue = callKind === 'request' ? harness.pendingRequests : harness.pendingFeedback;
+      const deferred = queue.shift();
+      if (!deferred) throw new Error(`No pending Real Time Assist ${callKind} call`);
+      if (rejection) deferred.reject(new Error(rejection));
+      else deferred.resolve();
+    },
+    {callKind: kind, rejection: errorMessage}
+  );
+}
+
+export async function resolveNextRealTimeAssistRequest(page: Page): Promise<void> {
+  await settleNextHarnessCall(page, 'request');
+}
+
+export async function rejectNextRealTimeAssistRequest(page: Page, message: string): Promise<void> {
+  await settleNextHarnessCall(page, 'request', message);
+}
+
+export async function resolveNextRealTimeAssistFeedback(page: Page): Promise<void> {
+  await settleNextHarnessCall(page, 'feedback');
+}
+
+export async function rejectNextRealTimeAssistFeedback(page: Page, message: string): Promise<void> {
+  await settleNextHarnessCall(page, 'feedback', message);
+}
+
+export async function getRealTimeAssistRequestCalls(page: Page): Promise<RealTimeAssistRequest[]> {
+  return page.evaluate(() => {
+    const host = window as unknown as {
+      __realTimeAssistE2E?: {requestCalls: RealTimeAssistRequest[]};
+    };
+    return host.__realTimeAssistE2E?.requestCalls ?? [];
+  });
+}
+
+export async function getRealTimeAssistFeedbackCalls(page: Page): Promise<RealTimeAssistFeedbackRequest[]> {
+  return page.evaluate(() => {
+    const host = window as unknown as {
+      __realTimeAssistE2E?: {feedbackCalls: RealTimeAssistFeedbackRequest[]};
+    };
+    return host.__realTimeAssistE2E?.feedbackCalls ?? [];
+  });
+}
+
+/** Read the active interaction id from the same store observed by the widget. */
+export async function getActiveInteractionId(page: Page): Promise<string> {
+  return page.evaluate(() => {
+    const host = window as unknown as {store?: {currentTask?: {data?: {interactionId?: string}}}};
+    const interactionId = host.store?.currentTask?.data?.interactionId;
+    if (!interactionId) throw new Error('No active interaction is available');
+    return interactionId;
+  });
+}
+
+/** Toggle the backing observable feature flag to validate both render gates. */
+export async function setSuggestedResponsesEnabled(page: Page, enabled: boolean): Promise<void> {
+  await page.evaluate((nextEnabled) => {
+    const host = window as unknown as {
+      store?: {store?: {featureFlags?: Record<string, boolean>}};
+    };
+    const backingStore = host.store?.store;
+    if (!backingStore) throw new Error('Backing CC store is not available');
+    backingStore.featureFlags = {
+      ...(backingStore.featureFlags ?? {}),
+      isSuggestedResponsesEnabled: nextEnabled,
+    };
+  }, enabled);
+}
+
+/** Inject a payload through the store's real SUGGESTED_RESPONSE handler. */
+export async function dispatchSuggestedResponse(
+  page: Page,
+  interactionId: string,
+  payload: MockRealTimeAssistPayload
+): Promise<void> {
+  await page.evaluate(
+    ({activeInteractionId, response}) => {
+      const host = window as unknown as {
+        store?: {handleRealTimeAssist?: (id: string, nextPayload: MockRealTimeAssistPayload) => void};
+      };
+      if (!host.store?.handleRealTimeAssist) {
+        throw new Error('window.store.handleRealTimeAssist is not available');
+      }
+      host.store.handleRealTimeAssist(activeInteractionId, response);
+    },
+    {activeInteractionId: interactionId, response: payload}
+  );
+}
+
+/**
+ * Unmount/remount the widget and clear its active-interaction payloads. This
+ * provides a fresh local hook state before the final live-backend smoke test.
+ */
+export async function resetAIAssistantForActiveInteraction(page: Page): Promise<void> {
+  const checkbox = page.getByTestId('samples:widget-aiAssistant');
+  if (await checkbox.isChecked()) {
+    await checkbox.uncheck({timeout: AWAIT_TIMEOUT});
+  }
+  await page.evaluate(() => {
+    const host = window as unknown as {
+      store?: {
+        currentTask?: {data?: {interactionId?: string}};
+        clearRealTimeAssist?: (interactionId: string) => void;
+      };
+    };
+    const interactionId = host.store?.currentTask?.data?.interactionId;
+    if (interactionId) host.store?.clearRealTimeAssist?.(interactionId);
+  });
+  await checkbox.check({timeout: AWAIT_TIMEOUT});
+  await expect(page.getByTestId('ai-assistant:launcher')).toBeVisible({timeout: AWAIT_TIMEOUT});
 }
 
 /**
