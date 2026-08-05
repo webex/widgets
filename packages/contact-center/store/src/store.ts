@@ -14,6 +14,7 @@ import {
   LoginOptions,
   WithWebex,
   RealTimeTranscriptionData,
+  RealTimeAssistPayload,
 } from './store.types';
 
 import {getFeatureFlags} from './util';
@@ -55,6 +56,7 @@ class Store implements IStore {
   dataCenter: string = '';
   realtimeTranscriptionData: Partial<RealTimeTranscriptionData>[] = [];
   acceptedCampaignIds: Set<string> = new Set();
+  realTimeAssist: Record<string, RealTimeAssistPayload[]> = {};
 
   constructor() {
     makeAutoObservable(this, {
