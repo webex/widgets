@@ -29,6 +29,10 @@ export default defineConfig({
     {
       name: 'OAuth: Get Access Token',
       testMatch: /global\.setup\.ts/,
+      use: {
+        ...devices['Desktop Chrome'],
+        channel: 'chrome',
+      },
     },
     // Dynamically generate test projects from USER_SETS
     ...Object.entries(USER_SETS).map(([setName, setData], index) => {

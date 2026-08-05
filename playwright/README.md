@@ -108,6 +108,10 @@ To reduce runtime and repeated call initialization, conference scenarios are con
 
 ## 🧪 Adding New Tests
 
+The OAuth setup project and all user-set projects run against the installed
+Google Chrome channel. This keeps browser selection consistent across setup and
+feature tests and avoids requiring a separate bundled Chromium revision.
+
 ### 1. Create Test File (in `tests/` folder)
 
 ```typescript
@@ -222,6 +226,7 @@ Create `.env` file in project root:
 ```env
 PW_CHAT_URL=https://your-chat-url
 PW_SANDBOX=your-sandbox-name
+PW_SANDBOX_PASSWORD=your-test-agent-password
 PW_ENTRY_POINT1=entry-point-1
 PW_ENTRY_POINT2=entry-point-2
 # ... PW_ENTRY_POINT3 ... PW_ENTRY_POINT9

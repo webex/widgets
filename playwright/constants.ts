@@ -121,6 +121,14 @@ export const RONA_OPTIONS = {
 
 export type RonaOption = (typeof RONA_OPTIONS)[keyof typeof RONA_OPTIONS];
 
+export type SuggestionAction = 'like' | 'dislike' | 'copy';
+
+export const SUGGESTION_ACTION_LABELS: Record<SuggestionAction, string> = {
+  like: 'Like suggestion',
+  dislike: 'Dislike suggestion',
+  copy: 'Copy suggestion',
+};
+
 // Test Data Constants
 export const TEST_DATA = {
   CHAT_NAME: 'Playwright Test',

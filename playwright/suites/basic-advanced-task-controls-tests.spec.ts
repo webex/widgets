@@ -6,5 +6,6 @@ import createRealTimeTranscriptTests from '../tests/real-time-transcript-test.sp
 
 test.describe('Call Task Controls Tests', createCallTaskControlsTests);
 test.describe('Advanced Combinations Tests', createAdvanceCombinationsTests);
-test.describe('Real-Time Assist Tests', createRealTimeAssistTests);
+
 test.describe('Real-Time Transcript Tests', createRealTimeTranscriptTests);
+test.describe('Real-Time Assist Tests', createRealTimeAssistTests);

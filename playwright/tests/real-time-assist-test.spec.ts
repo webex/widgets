@@ -5,7 +5,7 @@ import {createCallTask, acceptIncomingTask} from '../Utils/incomingTaskUtils';
 import {endTask} from '../Utils/taskControlUtils';
 import {submitWrapup, waitForWrapupAfterCallEnd} from '../Utils/wrapupUtils';
 import {
-  clickSuggestionCopy,
+  clickSuggestionAction,
   closeAIAssistant,
   createMockRealTimeAssistPayload,
   dispatchSuggestedResponse,
@@ -22,7 +22,7 @@ import {
   resolveNextRealTimeAssistFeedback,
   resolveNextRealTimeAssistRequest,
   restoreRealTimeAssistBackend,
-  setSuggestedResponsesEnabled,
+  setRealTimeAssistEnabled,
   waitForFirstSuggestion,
 } from '../Utils/aiAssistantUtils';
 import {
@@ -126,14 +126,14 @@ export default function createRealTimeAssistTests() {
     await verifyCurrentState(page, USER_STATES.ENGAGED);
     interactionId = await getActiveInteractionId(page);
 
-    await setSuggestedResponsesEnabled(page, false);
+    await setRealTimeAssistEnabled(page, false);
     await expect(page.getByTestId('ai-assistant:landing')).toBeVisible();
     await expect(page.getByText('Real-time Assist', {exact: true})).not.toBeVisible();
     await expect(page.getByText('Wellness breaks', {exact: true})).toBeVisible();
     await expect(page.getByTestId('ai-assistant:get-suggestions')).not.toBeVisible();
     await expect(page.getByTestId('ai-assistant:footer')).not.toBeVisible();
 
-    await setSuggestedResponsesEnabled(page, true);
+    await setRealTimeAssistEnabled(page, true);
     await expect(page.getByTestId('ai-assistant:landing')).not.toBeVisible();
     await expect(page.getByTestId('ai-assistant:empty')).toContainText('Hi, Here is how I can help you');
     await expect(page.getByTestId('ai-assistant:get-suggestions')).toHaveText('Get Assistance');
@@ -258,11 +258,8 @@ export default function createRealTimeAssistTests() {
 
   test('sends feedback action payloads and updates controls only after backend success', async () => {
     const page = testManager.agent1Page;
-    const card = page.getByTestId('ai-assistant:chat-assistant').filter({hasText: 'Later suggested response'});
-    const like = card.getByLabel('Like suggestion');
-    const dislike = card.getByLabel('Dislike suggestion');
 
-    await like.click();
+    const like = await clickSuggestionAction(page, 'like');
     await expect(like).not.toHaveAttribute('data-active', 'true');
     let feedbackCalls = await getRealTimeAssistFeedbackCalls(page);
     expect(feedbackCalls).toHaveLength(1);
@@ -275,7 +272,7 @@ export default function createRealTimeAssistTests() {
     await resolveNextRealTimeAssistFeedback(page);
     await expect(like).toHaveAttribute('data-active', 'true');
 
-    await dislike.click();
+    const dislike = await clickSuggestionAction(page, 'dislike');
     await expect(dislike).not.toHaveAttribute('data-active', 'true');
     await expect(like).toHaveAttribute('data-active', 'true');
     feedbackCalls = await getRealTimeAssistFeedbackCalls(page);
@@ -284,12 +281,12 @@ export default function createRealTimeAssistTests() {
     await expect(dislike).not.toHaveAttribute('data-active', 'true');
     await expect(like).toHaveAttribute('data-active', 'true');
 
-    await dislike.click();
+    await clickSuggestionAction(page, 'dislike');
     await resolveNextRealTimeAssistFeedback(page);
     await expect(dislike).toHaveAttribute('data-active', 'true');
     await expect(like).not.toHaveAttribute('data-active', 'true');
 
-    const copy = await clickSuggestionCopy(page);
+    const copy = await clickSuggestionAction(page, 'copy');
     await expect(copy).toHaveAttribute('data-copied', 'true');
     feedbackCalls = await getRealTimeAssistFeedbackCalls(page);
     expect(feedbackCalls[feedbackCalls.length - 1]).toMatchObject({

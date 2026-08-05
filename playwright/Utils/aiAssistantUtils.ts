@@ -1,5 +1,5 @@
 import {Page, expect, Locator} from '@playwright/test';
-import {AWAIT_TIMEOUT, AI_ASSIST_SUGGESTION_TIMEOUT} from '../constants';
+import {AWAIT_TIMEOUT, AI_ASSIST_SUGGESTION_TIMEOUT, SUGGESTION_ACTION_LABELS, SuggestionAction} from '../constants';
 
 export type RealTimeAssistRequest = {
   agentId: string;
@@ -308,7 +308,7 @@ export async function getActiveInteractionId(page: Page): Promise<string> {
 }
 
 /** Toggle the backing observable feature flag to validate both render gates. */
-export async function setSuggestedResponsesEnabled(page: Page, enabled: boolean): Promise<void> {
+export async function setRealTimeAssistEnabled(page: Page, enabled: boolean): Promise<void> {
   await page.evaluate((nextEnabled) => {
     const host = window as unknown as {
       store?: {store?: {featureFlags?: Record<string, boolean>}};
@@ -378,27 +378,13 @@ export async function waitForFirstSuggestion(page: Page): Promise<Locator> {
 }
 
 /**
- * Clicks the like/dislike feedback control (identified by its accessible
- * name) on the first rendered suggestion card and returns its locator so the
- * caller can assert on the resulting `data-active` state.
+ * Clicks a feedback or copy action on the first rendered suggestion card.
  * @param page - The Playwright page object
- * @param kind - Which control to click
+ * @param action - Suggestion action to click
+ * @returns Locator for the clicked control
  */
-export async function clickSuggestionFeedback(page: Page, kind: 'like' | 'dislike'): Promise<Locator> {
-  const label = kind === 'like' ? 'Like suggestion' : 'Dislike suggestion';
-  const control = page.getByLabel(label).first();
-  await expect(control).toBeVisible({timeout: AWAIT_TIMEOUT});
-  await control.click({timeout: AWAIT_TIMEOUT});
-  return control;
-}
-
-/**
- * Clicks the copy control on the first rendered suggestion card.
- * @param page - The Playwright page object
- * @returns Locator for the copy control
- */
-export async function clickSuggestionCopy(page: Page): Promise<Locator> {
-  const control = page.getByLabel('Copy suggestion').first();
+export async function clickSuggestionAction(page: Page, action: SuggestionAction): Promise<Locator> {
+  const control = page.getByLabel(SUGGESTION_ACTION_LABELS[action]).first();
   await expect(control).toBeVisible({timeout: AWAIT_TIMEOUT});
   await control.click({timeout: AWAIT_TIMEOUT});
   return control;
