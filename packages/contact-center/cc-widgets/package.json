@@ -31,6 +31,7 @@
     "build:src": "yarn run clean:dist && webpack",
     "build:watch": "webpack --watch",
     "test:unit": "NODE_ENV=test jest --coverage",
+    "test:e2e": "yarn run -T playwright test --config ../../../playwright.config.ts",
     "test:styles": "eslint",
     "deploy:npm": "yarn npm publish"
   },
