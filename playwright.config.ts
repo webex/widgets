@@ -14,17 +14,13 @@ export default defineConfig({
     command: 'yarn workspace samples-cc-react-app serve',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
-    stdout: 'pipe',
+    stdout: 'ignore',
     stderr: 'pipe',
   },
   retries: 0,
   fullyParallel: true,
   workers: Object.keys(USER_SETS).length, // Dynamic worker count based on USER_SETS
-  // 'list' streams a line per test to stdout as it starts/finishes (with the
-  // failure message/stack right there), so the raw CI job log shows live
-  // progress instead of staying silent until (or unless) the html report is
-  // generated at the very end. 'html' still produces the full report artifact.
-  reporter: [['list'], ['html', {open: 'never'}]],
+  reporter: 'html',
   use: {
     baseURL: 'http://localhost:3000',
     trace: 'retain-on-failure',
