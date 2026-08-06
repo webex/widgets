@@ -238,12 +238,13 @@ jobs:
         run: yarn run test:e2e:cc
 
       - uses: actions/upload-artifact@v7
-        if: ${{ !cancelled() }}
+        if: ${{ always() }}
         with:
           name: playwright-report
           path: |
             **/playwright-report/**
             **/test-results/**
+            resource-monitor.log
           retention-days: 10
 
   unit_tests:
