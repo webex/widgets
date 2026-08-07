@@ -91,7 +91,7 @@ export default function createAdvancedTaskControlsTests() {
       await testManager.agent2Page.waitForTimeout(3000);
       // Verify transfer success in console logs
       await testManager.agent1Page.bringToFront();
-      verifyTransferSuccessLogs();
+      await verifyTransferSuccessLogs();
 
       // Verify Agent 1 goes to wrapup state
       await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
@@ -102,7 +102,7 @@ export default function createAdvancedTaskControlsTests() {
 
       // Verify transfer success was logged
       await testManager.agent2Page.waitForTimeout(2000);
-      verifyTransferSuccessLogs();
+      await verifyTransferSuccessLogs();
 
       // End the call and complete wrapup to clean up for next test
       await endTask(testManager.agent2Page);
@@ -124,7 +124,7 @@ export default function createAdvancedTaskControlsTests() {
       await acceptIncomingTask(testManager.agent2Page, TASK_TYPES.CALL, ACCEPT_TASK_TIMEOUT);
       await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
       await testManager.agent1Page.waitForTimeout(3000);
-      verifyTransferSuccessLogs();
+      await verifyTransferSuccessLogs();
       await verifyCurrentState(testManager.agent2Page, USER_STATES.ENGAGED);
       await endTask(testManager.agent2Page);
       await testManager.agent2Page.waitForTimeout(2000);
@@ -169,10 +169,10 @@ export default function createAdvancedTaskControlsTests() {
       await testManager.agent2Page.waitForTimeout(3000);
       await expect(testManager.agent1Page.getByTestId('transfer-consult-btn')).toBeVisible();
       await testManager.agent1Page.waitForTimeout(2000);
-      verifyConsultStartSuccessLogs();
+      await verifyConsultStartSuccessLogs();
       await cancelConsult(testManager.agent2Page);
       await testManager.agent1Page.waitForTimeout(2000);
-      verifyConsultEndSuccessLogs();
+      await verifyConsultEndSuccessLogs();
       await verifyHoldButtonIcon(testManager.agent1Page, {expectedIsHeld: true});
       await verifyCurrentState(testManager.agent2Page, USER_STATES.AVAILABLE);
       await holdCallToggle(testManager.agent1Page);
@@ -226,8 +226,8 @@ export default function createAdvancedTaskControlsTests() {
       await verifyCurrentState(testManager.agent2Page, USER_STATES.ENGAGED);
       await verifyTaskControls(testManager.agent2Page, TASK_TYPES.CALL);
       await testManager.agent2Page.waitForTimeout(2000);
-      verifyConsultStartSuccessLogs();
-      verifyTransferSuccessLogs();
+      await verifyConsultStartSuccessLogs();
+      await verifyTransferSuccessLogs();
       await endTask(testManager.agent2Page);
       await testManager.agent2Page.waitForTimeout(3000);
       await submitWrapup(testManager.agent2Page, WRAPUP_REASONS.RESOLVED);
@@ -269,14 +269,14 @@ export default function createAdvancedTaskControlsTests() {
         process.env[`${testManager.projectName}_QUEUE_NAME`]!
       );
       await testManager.agent1Page.waitForTimeout(3000);
-      verifyConsultStartSuccessLogs();
+      await verifyConsultStartSuccessLogs();
       await acceptIncomingTask(testManager.agent2Page, TASK_TYPES.CALL, ACCEPT_TASK_TIMEOUT);
       await cancelConsult(testManager.agent1Page);
       await testManager.agent1Page.waitForTimeout(3000);
       await verifyCurrentState(testManager.agent2Page, USER_STATES.AVAILABLE);
       await verifyTaskControls(testManager.agent1Page, TASK_TYPES.CALL);
       await testManager.agent1Page.waitForTimeout(2000);
-      verifyConsultEndSuccessLogs();
+      await verifyConsultEndSuccessLogs();
       await verifyHoldButtonIcon(testManager.agent1Page, {expectedIsHeld: true});
       await holdCallToggle(testManager.agent1Page);
 
@@ -315,8 +315,8 @@ export default function createAdvancedTaskControlsTests() {
       await verifyCurrentState(testManager.agent2Page, USER_STATES.ENGAGED);
       await verifyTaskControls(testManager.agent2Page, TASK_TYPES.CALL);
       await testManager.agent2Page.waitForTimeout(2000);
-      verifyConsultStartSuccessLogs();
-      verifyConsultTransferredLogs();
+      await verifyConsultStartSuccessLogs();
+      await verifyConsultTransferredLogs();
       await endTask(testManager.agent2Page);
       await testManager.agent2Page.waitForTimeout(3000);
       await submitWrapup(testManager.agent2Page, WRAPUP_REASONS.RESOLVED);

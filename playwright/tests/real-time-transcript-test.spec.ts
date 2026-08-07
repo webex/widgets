@@ -75,8 +75,16 @@ export default function createRealTimeTranscriptTests() {
     // Runs before the mock-driven test below so `.first()` here can only
     // match a genuinely live-transcribed entry, not one of our injected
     // mock utterances.
-    const agentEntry = await waitForTranscriptEntry(testManager.agent1Page, 'agent');
-    const customerEntry = await waitForTranscriptEntry(testManager.agent1Page, 'customer');
+    //
+    // Both legs are transcribed off the same live, simultaneous call, so wait
+    // for them concurrently rather than serially. Waiting serially doubles
+    // the worst-case wall-clock time (up to 2x TRANSCRIPT_ENTRY_TIMEOUT)
+    // before the second leg's wait even starts, which made this smoke check
+    // needlessly sensitive to transient STT/runner latency.
+    const [agentEntry, customerEntry] = await Promise.all([
+      waitForTranscriptEntry(testManager.agent1Page, 'agent'),
+      waitForTranscriptEntry(testManager.agent1Page, 'customer'),
+    ]);
 
     await expect(agentEntry).toBeVisible();
     await expect(customerEntry).toBeVisible();
