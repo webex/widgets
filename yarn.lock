@@ -10148,9 +10148,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/components@npm:1.275.2":
-  version: 1.275.2
-  resolution: "@webex/components@npm:1.275.2"
+"@webex/components@npm:1.277.1":
+  version: 1.277.1
+  resolution: "@webex/components@npm:1.277.1"
   dependencies:
     "@juggle/resize-observer": "npm:^3.2.0"
     "@webex/component-adapter-interfaces": "npm:^1.28.0"
@@ -10166,7 +10166,7 @@ __metadata:
     react: 18.3.1
     react-dom: 18.3.1
     rxjs: ^6.6.2
-  checksum: 10c0/b1e20cae9e4bc6d82cf497ad9e12e02d5d73850f2ac6b92819919ef5bfcb93d9bdc32f7772eccdfea1fa5cdba8902374773920de75075e6680a65bf3e4378d2b
+  checksum: 10c0/6a9050d5af0f38e29161edc845ec5156f18df893fe51ec8bd625a4495147a75f902dd50331a2a0fd57840ce9017c8cd52991420dbcfd13b94bcffcf7b8c8ad11
   languageName: node
   linkType: hard
 
@@ -11852,9 +11852,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@webex/sdk-component-adapter@npm:1.112.12":
-  version: 1.112.12
-  resolution: "@webex/sdk-component-adapter@npm:1.112.12"
+"@webex/sdk-component-adapter@npm:1.113.3":
+  version: 1.113.3
+  resolution: "@webex/sdk-component-adapter@npm:1.113.3"
   dependencies:
     "@babel/plugin-transform-runtime": "npm:^7.16.0"
     "@webex/common": "npm:^2.60.4"
@@ -11864,7 +11864,7 @@ __metadata:
   peerDependencies:
     rxjs: ^6.5.4
     webex: ^2.60.4
-  checksum: 10c0/c9c9bec529705dfa49bd92e5a3abd44edaa28aebcfb569e5259454c05d8946a6724839d980df7be1a47ce8dc5bd01ec0d6575cd517257123fe0800513fd2d1d2
+  checksum: 10c0/2a32e4d78a54a873a3a92eaeca8bcf570cc83cc02a15f6bd0eaa00774faba109daff0948158bdfc795c779071ac0ab58d7b67f43d8da78903a0d0d82e40dae6f
   languageName: node
   linkType: hard
 
@@ -12641,8 +12641,8 @@ __metadata:
     "@wdio/spec-reporter": "npm:^7.4.3"
     "@wdio/static-server-service": "npm:^7.5.7"
     "@webex/component-adapter-interfaces": "npm:^1.30.5"
-    "@webex/components": "npm:1.275.2"
-    "@webex/sdk-component-adapter": "npm:1.112.12"
+    "@webex/components": "npm:1.277.1"
+    "@webex/sdk-component-adapter": "npm:1.113.3"
     "@webex/test-users": "npm:^1.157.0"
     babel-eslint: "npm:^10.0.3"
     babel-loader: "npm:^8.0.6"

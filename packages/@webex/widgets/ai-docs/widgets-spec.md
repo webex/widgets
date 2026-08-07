@@ -135,9 +135,9 @@ Compatibility notes:
 ## Requires (dependencies)
 - `webex` `2.60.4` (pinned, also peer) — the JS SDK; constructed in the `adapterFactory`
   (`WebexMeetings.jsx:260`). No fallback: an invalid/expired token leaves the widget on a loading state.
-- `@webex/sdk-component-adapter` `1.112.12` (pinned) — RxJS adapter wrapping the SDK; constructed via
+- `@webex/sdk-component-adapter` `1.113.3` (pinned) — RxJS adapter wrapping the SDK; constructed via
   `new WebexSDKAdapter(webex)` (`WebexMeetings.jsx:277`).
-- `@webex/components` `1.275.2` (pinned) — supplies `WebexMeeting`, `WebexMediaAccess`, and the
+- `@webex/components` `1.277.1` (pinned) — supplies `WebexMeeting`, `WebexMediaAccess`, and the
   `withAdapter`/`withMeeting` HOCs (`WebexMeetings.jsx:4`) plus the `webex-components.css`.
 - `@webex/component-adapter-interfaces` `^1.30.5` — meeting-state enum (`MeetingState`) and adapter
   interfaces used by the adapter/components layers.

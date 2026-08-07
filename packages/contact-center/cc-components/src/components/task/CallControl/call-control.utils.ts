@@ -403,6 +403,20 @@ export const filterButtonsForConsultation = (
 };
 
 /**
+ * The SDK normalizes callProcessingDetails booleans, but older backend payloads can
+ * still surface them as 'true'/'false' strings.
+ */
+const toOptionalBoolean = (value: unknown): boolean | undefined => {
+  if (typeof value === 'boolean') return value;
+  if (typeof value === 'string') {
+    const normalized = value.toLowerCase();
+    if (normalized === 'true') return true;
+    if (normalized === 'false') return false;
+  }
+  return undefined;
+};
+
+/**
  * Updates call state from current task data
  */
 export const updateCallStateFromTask = (
@@ -417,8 +431,18 @@ export const updateCallStateFromTask = (
     const {callProcessingDetails} = interaction;
 
     if (callProcessingDetails) {
-      const {isPaused} = callProcessingDetails;
-      setIsRecording(isPaused !== 'true');
+      // Mirrors the SDK's own precedence: isPaused wins when present, otherwise
+      // recordInProgress is the active recording signal.
+      const isPaused = toOptionalBoolean(callProcessingDetails.isPaused);
+      if (isPaused !== undefined) {
+        setIsRecording(!isPaused);
+        return;
+      }
+
+      const recordInProgress = toOptionalBoolean(callProcessingDetails.recordInProgress);
+      if (recordInProgress !== undefined) {
+        setIsRecording(recordInProgress);
+      }
     }
   } catch (error) {
     logger?.error('CC-Widgets: CallControl: Error in updateCallStateFromTask', {
