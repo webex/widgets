@@ -46,8 +46,10 @@ const OutdialCallComponent: React.FunctionComponent<OutdialCallComponentProps> =
   const [hasMoreAddressBookEntries, setHasMoreAddressBookEntries] = useState(true);
 
   // Validate the input format using regex from agent desktop
+  // Branch 1: explicit (\+|1) prefix — matches a leading '+' or '1' followed by digits
+  // Branch 2: *# prefix with +/1 following; Branch 3: digits/special only (no prefix required)
   const regExForDnSpecialChars = useMemo(
-    () => new RegExp('^[+1][0-9]{3,18}$|^[*#][+1][0-9*#:]{3,18}$|^[0-9*#]{3,18}$'),
+    () => new RegExp('^(\\+|1)[0-9]{3,18}$|^[*#](\\+|1)[0-9*#:]{3,18}$|^[0-9*#]{3,18}$'),
     []
   );
 

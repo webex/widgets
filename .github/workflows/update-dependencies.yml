@@ -9,13 +9,24 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v2
-      - run: |
+      - name: Validate package version
+        env:
+          VERSION: ${{ github.event.client_payload.version }}
+        run: |
+          if ! echo "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$'; then
+            echo "Invalid version: $VERSION" >&2
+            exit 1
+          fi
+      - name: Update dependency
+        env:
+          VERSION: ${{ github.event.client_payload.version }}
+        run: |
           npm install @webex/component-adapter-interfaces
           if [ -n "$(git status --porcelain)" ]; then
             git config user.name "webex-components-publisher"
             git config user.email "webex-components@cisco.com"
             git add .
-            git commit -m "build(package): update component adapter interfaces to v${{ github.event.client_payload.version }}"
+            git commit -m "build(package): update component adapter interfaces to v${VERSION}"
             git push origin master
           fi
 
@@ -25,13 +36,24 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v2
-      - run: |
+      - name: Validate package version
+        env:
+          VERSION: ${{ github.event.client_payload.version }}
+        run: |
+          if ! echo "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$'; then
+            echo "Invalid version: $VERSION" >&2
+            exit 1
+          fi
+      - name: Update dependency
+        env:
+          VERSION: ${{ github.event.client_payload.version }}
+        run: |
           npm install @webex/components
           if [ -n "$(git status --porcelain)" ]; then
             git config user.name "webex-components-publisher"
             git config user.email "webex-components@cisco.com"
             git add .
-            git commit -m "build(package): update webex components to v${{ github.event.client_payload.version }}"
+            git commit -m "build(package): update webex components to v${VERSION}"
             git push origin master
           fi
 
@@ -41,12 +63,23 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v2
-      - run: |
+      - name: Validate package version
+        env:
+          VERSION: ${{ github.event.client_payload.version }}
+        run: |
+          if ! echo "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$'; then
+            echo "Invalid version: $VERSION" >&2
+            exit 1
+          fi
+      - name: Update dependency
+        env:
+          VERSION: ${{ github.event.client_payload.version }}
+        run: |
           npm install @webex/sdk-component-adapter
           if [ -n "$(git status --porcelain)" ]; then
             git config user.name "webex-components-publisher"
             git config user.email "webex-components@cisco.com"
             git add .
-            git commit -m "build(package): update webex sdk-component-adapter to v${{ github.event.client_payload.version }}"
+            git commit -m "build(package): update webex sdk-component-adapter to v${VERSION}"
             git push origin master
           fi

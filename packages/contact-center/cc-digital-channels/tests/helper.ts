@@ -104,6 +104,100 @@ describe('useDigitalChannelsInit', () => {
       expect(mockLogger.error).toHaveBeenCalledWith(expect.stringContaining('Unknown error'), expect.any(Object));
     });
   });
+
+  it('should call initializeApp exactly once when effect fires twice mid-flight (WF-08)', async () => {
+    // AC-5: synchronous useRef in-flight guard prevents double-init when a dependency
+    // (jwtToken) changes while initializeApp is still awaiting — the ref is set
+    // synchronously before the await so the re-triggered effect sees it immediately.
+    let resolveInit: () => void;
+    const slowInit = new Promise<void>((resolve) => {
+      resolveInit = resolve;
+    });
+    (initializeApp as jest.Mock).mockImplementation(() => slowInit);
+
+    const {rerender, result} = renderHook(
+      ({jwtToken}: {jwtToken: string}) =>
+        useDigitalChannelsInit({...defaultProps, jwtToken, isDigitalChannelsInitialized: false}),
+      {initialProps: {jwtToken: 'token1'}}
+    );
+
+    // Allow effect to fire once and start the slow init
+    await new Promise((r) => setTimeout(r, 0));
+
+    // Change jwtToken while init is still in-flight — triggers second effect
+    rerender({jwtToken: 'token2'});
+
+    // Allow second effect to run
+    await new Promise((r) => setTimeout(r, 0));
+
+    // Resolve the in-flight init
+    resolveInit!();
+
+    await waitFor(() => {
+      expect(result.current.initialized).toBe(true);
+    });
+
+    // initializeApp must be called exactly once despite the re-render mid-flight
+    expect(initializeApp).toHaveBeenCalledTimes(1);
+  });
+
+  it('should allow retry after initialization failure when jwtToken changes', async () => {
+    (initializeApp as jest.Mock)
+      .mockRejectedValueOnce(new Error('Initialization failed'))
+      .mockResolvedValueOnce(undefined);
+
+    const {rerender, result} = renderHook(
+      ({jwtToken}: {jwtToken: string}) =>
+        useDigitalChannelsInit({...defaultProps, jwtToken, isDigitalChannelsInitialized: false}),
+      {initialProps: {jwtToken: 'token1'}}
+    );
+
+    await waitFor(() => {
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to initialize Digital Channels app'),
+        expect.any(Object)
+      );
+    });
+
+    expect(result.current.initialized).toBe(false);
+    expect(initializeApp).toHaveBeenCalledTimes(1);
+
+    rerender({jwtToken: 'token2'});
+
+    await waitFor(() => {
+      expect(result.current.initialized).toBe(true);
+    });
+
+    expect(initializeApp).toHaveBeenCalledTimes(2);
+    expect(mockSetDigitalChannelsInitialized).toHaveBeenCalledWith(true);
+  });
+
+  it('should reinitialize after store session reset on logout', async () => {
+    (initializeApp as jest.Mock).mockResolvedValue(undefined);
+
+    const {rerender, result} = renderHook(
+      ({isDigitalChannelsInitialized}: {isDigitalChannelsInitialized: boolean}) =>
+        useDigitalChannelsInit({...defaultProps, isDigitalChannelsInitialized}),
+      {initialProps: {isDigitalChannelsInitialized: false}}
+    );
+
+    await waitFor(() => {
+      expect(result.current.initialized).toBe(true);
+    });
+
+    expect(initializeApp).toHaveBeenCalledTimes(1);
+
+    rerender({isDigitalChannelsInitialized: true});
+    expect(initializeApp).toHaveBeenCalledTimes(1);
+
+    rerender({isDigitalChannelsInitialized: false});
+
+    await waitFor(() => {
+      expect(result.current.initialized).toBe(true);
+    });
+
+    expect(initializeApp).toHaveBeenCalledTimes(2);
+  });
 });
 
 describe('useDigitalChannelsData', () => {

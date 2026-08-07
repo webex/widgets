@@ -29,9 +29,10 @@ import './App.scss';
 import {observer} from 'mobx-react-lite';
 import EngageWidget from './EngageWidget';
 
-// This is not to be included to a production app.
-// Have added here for debugging purposes
-window['store'] = store;
+if (process.env.NODE_ENV !== 'production') {
+  // Expose store for debugging in non-production builds only
+  window['store'] = store;
+}
 
 const defaultWidgets = {
   stationLogin: true,
@@ -78,10 +79,9 @@ function App() {
   const [collapsedTasks, setCollapsedTasks] = React.useState([]);
   const [showLoader, setShowLoader] = useState(false);
   const [toast, setToast] = useState<{type: 'success' | 'error'} | null>(null);
-  const [integrationEnv, setintegrationEnv] = useState(() => {
-    const savedintegrationEnv = window.localStorage.getItem('integrationEnv');
-    return savedintegrationEnv === 'true';
-  });
+  const [integrationEnv, setintegrationEnv] = useState(
+    process.env.REACT_APP_INTEGRATION_ENV === 'true'
+  );
   const [conferenceEnabled, setConferenceEnabled] = useState(() => {
     const savedMultiPartyConferenceEnabled = window.localStorage.getItem('conferenceEnabled');
     return savedMultiPartyConferenceEnabled !== null ? savedMultiPartyConferenceEnabled === 'true' : true;
@@ -137,6 +137,28 @@ function App() {
       const accessToken = urlParams.get('access_token');
 
       if (accessToken) {
+        /*
+         * Validate CSRF state token before accepting the OAuth redirect.
+         * The SDK encodes state as base64(JSON({app_state, csrf_token})) in the hash.
+         */
+        const rawState = urlParams.get('state');
+        const storedState = window.sessionStorage.getItem('oauth2-state-token');
+        window.sessionStorage.removeItem('oauth2-state-token');
+
+        let stateValid = false;
+        try {
+          const parsedState = rawState ? JSON.parse(atob(rawState)) : null;
+          stateValid = !!(parsedState && storedState && parsedState.app_state === storedState);
+        } catch {
+          stateValid = false;
+        }
+
+        if (!stateValid) {
+          console.error('OAuth state mismatch — possible CSRF attack; token rejected.');
+          window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
+          return;
+        }
+
         window.localStorage.setItem('accessToken', accessToken);
         setAccessToken(accessToken);
         // Clear the hash from the URL to remove the token from browser history
@@ -337,6 +359,12 @@ function App() {
       redirectUri += window.location.pathname;
     }
 
+    // Generate cryptographically-random CSRF state token and persist in sessionStorage
+    const stateArray = new Uint8Array(32);
+    crypto.getRandomValues(stateArray);
+    const stateToken = Array.from(stateArray, (b) => b.toString(16).padStart(2, '0')).join('');
+    window.sessionStorage.setItem('oauth2-state-token', stateToken);
+
     // Reference: https://developer.webex-cx.com/documentation/integrations
     const ccMandatoryScopes = ['cjp:config_read', 'cjp:config_write', 'cjp:config', 'cjp:user'];
 
@@ -375,7 +403,11 @@ function App() {
     const webex = Webex.init(webexConfig);
 
     webex.once('ready', () => {
-      webex.authorization.initiateLogin();
+      /*
+       * Pass our state token so the SDK embeds it in the authorize URL;
+       * the redirect handler validates the returned state against sessionStorage.
+       */
+      webex.authorization.initiateLogin({state: {app_state: stateToken}});
     });
   };
 
@@ -397,9 +429,6 @@ function App() {
   useEffect(() => {
     window.localStorage.setItem('currentTheme', currentTheme);
   }, [currentTheme]);
-  useEffect(() => {
-    window.localStorage.setItem('integrationEnv', JSON.stringify(integrationEnv));
-  }, [integrationEnv]);
   useEffect(() => {
     window.localStorage.setItem('conferenceEnabled', JSON.stringify(conferenceEnabled));
   }, [conferenceEnabled]);
