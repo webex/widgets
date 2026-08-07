@@ -1,4 +1,4 @@
-const {execSync} = require('child_process');
+const {execFileSync} = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
@@ -42,6 +42,17 @@ function versionAndPublish() {
     );
     process.exit(1);
   }
+
+  // Validate branchName (used as npm dist-tag): must match npm tag naming rules.
+  // Reject any value containing shell metacharacters or characters outside the allowed set.
+  const validTagPattern = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
+  if (!validTagPattern.test(branchName)) {
+    console.error(
+      `Error: Invalid branchName/tag value "${branchName}". Must match /^[A-Za-z0-9][A-Za-z0-9._-]*$/`
+    );
+    process.exit(1);
+    return;
+  }
   const contactCenterPath = './packages/contact-center';
 
   try {
@@ -61,10 +72,16 @@ function versionAndPublish() {
         return packageData.name;
       });
 
-    // Publish the package
+    // Validate workspace names (npm package name pattern) and publish via no-shell execFileSync.
+    // Using execFileSync instead of execSync prevents shell interpretation of workspace or tag values.
+    const validPackageNamePattern = /^(@[a-z0-9-~][a-z0-9-._~]*\/)?[a-z0-9-~][a-z0-9-._~]*$/;
+
     const publishWorkspace = (workspace) => {
+      if (!validPackageNamePattern.test(workspace)) {
+        throw new Error(`Invalid package name "${workspace}": does not match npm package name pattern`);
+      }
       console.log(`Publishing new version for ${workspace}: ${newVersion}`);
-      execSync(`yarn workspace ${workspace} npm publish --tag ${branchName}`, {stdio: 'inherit'});
+      execFileSync('yarn', ['workspace', workspace, 'npm', 'publish', '--tag', branchName], {stdio: 'inherit'});
     };
 
     const denyList = ['@webex/test-fixtures']; // Add workspace names to exclude from publishing
