@@ -58,6 +58,10 @@ function CallControlComponent(props: CallControlComponentProps) {
     callControlAudio,
     setConsultAgentName,
     allowConsultToQueue,
+    accessQueue,
+    accessEntryPoint,
+    accessBuddyTeam,
+    interactionContext,
     setLastTargetType,
     controls,
     logger,
@@ -242,6 +246,11 @@ function CallControlComponent(props: CallControlComponentProps) {
                           handleTargetSelect(dialNumber, dialNumber, 'dialNumber', allowParticipantsToInteract)
                         }
                         allowConsultToQueue={allowConsultToQueue}
+                        accessQueue={accessQueue}
+                        accessEntryPoint={accessEntryPoint}
+                        accessBuddyTeam={accessBuddyTeam}
+                        interactionContext={interactionContext}
+                        isTelephony={isTelephony}
                         consultTransferOptions={
                           isTelephony
                             ? consultTransferOptions

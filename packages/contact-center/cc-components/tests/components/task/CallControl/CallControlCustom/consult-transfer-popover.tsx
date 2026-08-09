@@ -223,15 +223,43 @@ describe('ConsultTransferPopoverComponent', () => {
     expect(screen.container.querySelectorAll('.call-control-list-item').length).toBe(0);
   });
 
-  it('hides queue tab when allowConsultToQueue is false', async () => {
+  it('hides queue tab when allowConsultToQueue is false for Consult', async () => {
     const propsWithoutQueue = {
       ...baseProps,
+      heading: 'Consult',
       allowConsultToQueue: false,
     };
 
     const screen = await render(<ConsultTransferPopoverComponent {...propsWithoutQueue} />);
     const maybeQueuesButton = screen.queryByRole('button', {name: 'Queues'}) as HTMLButtonElement | null;
     expect(maybeQueuesButton).toBeNull();
+  });
+
+  it('shows queue tab for Transfer inbound when consultToQueue is off and accessQueue is SPECIFIC (AVERA)', async () => {
+    const averaProps = {
+      ...baseProps,
+      heading: 'Transfer',
+      allowConsultToQueue: false,
+      accessQueue: 'SPECIFIC',
+      interactionContext: {contactDirectionType: 'INBOUND', mediaType: 'telephony'},
+      isTelephony: true,
+    };
+
+    const screen = await render(<ConsultTransferPopoverComponent {...averaProps} />);
+    expect(screen.getByRole('button', {name: 'Queues'})).toBeInTheDocument();
+  });
+
+  it('shows entry point tab on Transfer when accessEntryPoint allows it', async () => {
+    const transferProps = {
+      ...baseProps,
+      heading: 'Transfer',
+      accessEntryPoint: 'SPECIFIC',
+      isTelephony: true,
+      consultTransferOptions: {showEntryPointTab: true},
+    };
+
+    const screen = await render(<ConsultTransferPopoverComponent {...transferProps} />);
+    expect(screen.getByRole('button', {name: 'Entry Point'})).toBeInTheDocument();
   });
 
   it('covers edge case for empty items in renderList (line 50)', async () => {

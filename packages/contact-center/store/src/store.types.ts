@@ -196,6 +196,9 @@ interface IStore {
   callControlAudio: MediaStream | null;
   isEndConsultEnabled: boolean;
   allowConsultToQueue: boolean;
+  accessQueue?: string;
+  accessEntryPoint?: string;
+  accessBuddyTeam?: string;
   agentProfile: AgentLoginProfile;
   isMuted: boolean;
   isAddressBookEnabled: boolean;

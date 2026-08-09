@@ -468,6 +468,18 @@ export interface ControlProps {
    */
   allowConsultToQueue: boolean;
 
+  /** Desktop Profile collaboration access for queues */
+  accessQueue?: string;
+
+  /** Desktop Profile collaboration access for entry points */
+  accessEntryPoint?: string;
+
+  /** Desktop Profile collaboration access for buddy teams */
+  accessBuddyTeam?: string;
+
+  /** Interaction context for Consult/Transfer tab visibility */
+  interactionContext?: ConsultTransferInteractionContext;
+
   /**
    * Flag to enable or disable conference feature
    */
@@ -553,6 +565,10 @@ export type CallControlComponentProps = Pick<
   | 'consultTimerLabel'
   | 'consultTimerTimestamp'
   | 'allowConsultToQueue'
+  | 'accessQueue'
+  | 'accessEntryPoint'
+  | 'accessBuddyTeam'
+  | 'interactionContext'
   | 'lastTargetType'
   | 'setLastTargetType'
   | 'controls'
@@ -666,6 +682,15 @@ export interface ConsultTransferDialNumberComponentProps {
 }
 
 /**
+ * Interaction fields used for Consult/Transfer tab visibility (Agent Desktop parity).
+ */
+export type ConsultTransferInteractionContext = {
+  contactDirectionType?: string;
+  outdialTransferToQueueEnabled?: boolean;
+  mediaType?: string;
+};
+
+/**
  * Interface representing the properties for ConsultTransferPopover component.
  */
 export interface ConsultTransferPopoverComponentProps {
@@ -682,6 +707,11 @@ export interface ConsultTransferPopoverComponentProps {
   onEntryPointSelect: (entryPointId: string, entryPointName: string, allowParticipantsToInteract: boolean) => void;
   onDialNumberSelect: (dialNumber: string, allowParticipantsToInteract: boolean) => void;
   allowConsultToQueue: boolean;
+  accessQueue?: string;
+  accessEntryPoint?: string;
+  accessBuddyTeam?: string;
+  interactionContext?: ConsultTransferInteractionContext;
+  isTelephony?: boolean;
   /** Options governing popover visibility/behavior */
   consultTransferOptions?: ConsultTransferOptions;
   isConferenceInProgress?: boolean;

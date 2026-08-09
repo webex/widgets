@@ -998,7 +998,11 @@ describe('storeEventsWrapper', () => {
     });
 
     it('should return buddy agents list', async () => {
-      const buddyAgents = [{name: 'agent1'}, {name: 'agent2'}];
+      const buddyAgents = [
+        {agentName: 'Zeta Agent', agentId: '3'},
+        {agentName: 'Alpha Agent', agentId: '1'},
+        {agentName: 'Beta Agent', agentId: '2'},
+      ];
       storeWrapper['store'].cc.getBuddyAgents = jest.fn().mockResolvedValue({data: {agentList: buddyAgents}});
       const result = await storeWrapper.getBuddyAgents('telephony');
       expect(result).toEqual(buddyAgents);
@@ -1023,7 +1027,22 @@ describe('storeEventsWrapper', () => {
         {id: 'queue1', name: 'Queue 1', channelType: 'TELEPHONY'},
         {id: 'queue2', name: 'Queue 2', channelType: 'TELEPHONY'},
       ]);
-      expect(storeWrapper['store'].cc.getQueues).toHaveBeenCalled();
+      expect(storeWrapper['store'].cc.getQueues).toHaveBeenCalledWith({
+        desktopProfileFilter: true,
+      });
+    });
+
+    it('should pass desktopProfileFilter when getQueues is called with params', async () => {
+      const queueList = [{id: 'queue1', name: 'Queue 1', channelType: 'TELEPHONY'}];
+      storeWrapper['store'].cc.getQueues = jest.fn().mockResolvedValue(queueList);
+
+      await storeWrapper.getQueues('telephony', {page: 1, pageSize: 25});
+
+      expect(storeWrapper['store'].cc.getQueues).toHaveBeenCalledWith({
+        page: 1,
+        pageSize: 25,
+        desktopProfileFilter: true,
+      });
     });
 
     it('should handle error in getQueues and throw error', async () => {
@@ -1044,7 +1063,9 @@ describe('storeEventsWrapper', () => {
       const result = await storeWrapper.getQueues('telephony');
 
       expect(result.data).toEqual([{...mockQueueDetails[0], channelType: 'TELEPHONY'}]);
-      expect(storeWrapper['store'].cc.getQueues).toHaveBeenCalled();
+      expect(storeWrapper['store'].cc.getQueues).toHaveBeenCalledWith({
+        desktopProfileFilter: true,
+      });
     });
 
     it('should handle consultQueueCancelled event', () => {
@@ -1062,7 +1083,11 @@ describe('storeEventsWrapper', () => {
       storeWrapper['store'].cc.getEntryPoints = jest.fn().mockResolvedValue(mockEntryPointsResponse);
 
       const result = await storeWrapper.getEntryPoints({page: 0, pageSize: 25});
-      expect(storeWrapper['store'].cc.getEntryPoints).toHaveBeenCalledWith({page: 0, pageSize: 25});
+      expect(storeWrapper['store'].cc.getEntryPoints).toHaveBeenCalledWith({
+        page: 0,
+        pageSize: 25,
+        desktopProfileFilter: true,
+      });
       expect(result).toEqual(mockEntryPointsResponse);
     });
 
@@ -1076,7 +1101,10 @@ describe('storeEventsWrapper', () => {
       jest.spyOn(storeWrapper['store'].cc.addressBook, 'getEntries').mockResolvedValue(mockAddressBookEntriesResponse);
 
       const result = await storeWrapper.getAddressBookEntries({page: 0, pageSize: 25});
-      expect(storeWrapper['store'].cc.addressBook.getEntries).toHaveBeenCalledWith({page: 0, pageSize: 25});
+      expect(storeWrapper['store'].cc.addressBook.getEntries).toHaveBeenCalledWith({
+        page: 0,
+        pageSize: 25,
+      });
       expect(result).toEqual(mockAddressBookEntriesResponse);
     });
 

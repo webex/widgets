@@ -188,6 +188,18 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.allowConsultToQueue;
   }
 
+  get accessQueue() {
+    return this.store.accessQueue;
+  }
+
+  get accessEntryPoint() {
+    return this.store.accessEntryPoint;
+  }
+
+  get accessBuddyTeam() {
+    return this.store.accessBuddyTeam;
+  }
+
   get agentProfile() {
     return this.store.agentProfile;
   }
@@ -1095,7 +1107,10 @@ class StoreWrapper implements IStoreWrapper {
   }> => {
     try {
       const upperMediaType = mediaType.toUpperCase();
-      const response = await this.store.cc.getQueues(params);
+      const response = await this.store.cc.getQueues({
+        ...(params ?? {}),
+        desktopProfileFilter: true,
+      } as ContactServiceQueueSearchParams);
       const data = Array.isArray(response) ? response : response.data;
       const filtered = data.filter((queue) => queue.channelType === upperMediaType);
       const page = Array.isArray(response) ? 0 : (response.meta?.page ?? 0);
@@ -1113,8 +1128,10 @@ class StoreWrapper implements IStoreWrapper {
 
   getEntryPoints = async (params?: EntryPointSearchParams): Promise<EntryPointListResponse> => {
     try {
-      const response: EntryPointListResponse = await this.store.cc.getEntryPoints(params);
-      return response;
+      return await this.store.cc.getEntryPoints({
+        ...(params ?? {}),
+        desktopProfileFilter: true,
+      } as EntryPointSearchParams);
     } catch (error) {
       this.store.logger.error('Error fetching entry points:', error);
       throw error;
@@ -1126,8 +1143,7 @@ class StoreWrapper implements IStoreWrapper {
       if (!this.store.isAddressBookEnabled) {
         return {data: [], meta: {page: 0, totalPages: 0}};
       }
-      const response: AddressBookEntriesResponse = await this.store.cc.addressBook.getEntries(params ?? {});
-      return response;
+      return await this.store.cc.addressBook.getEntries(params ?? {});
     } catch (error) {
       this.store.logger.error('Error fetching address book entries:', error);
       throw error;

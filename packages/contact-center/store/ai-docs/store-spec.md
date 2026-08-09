@@ -281,14 +281,16 @@ classDiagram
 - **UC-3 Observe agent/session state in React:** Widget wraps in `observer()` and reads `store.agentId`, `store.isAgentLoggedIn`, `store.deviceType`, `store.currentState` → re-renders on mutation. Evidence: `src/storeEventsWrapper.ts:56-187`, `_archive/.../AGENTS.md` usage.
 - **UC-4 Handle an incoming task through to wrap-up:** SDK `task:incoming` → listeners registered + `onIncomingTask` fired → `task:assigned` sets ENGAGED/current → `task:end` + `handleTaskRemove` cleans up. Evidence: `src/storeEventsWrapper.ts:585-762`, `tests/storeEventsWrapper.ts` ("events reactions").
 - **UC-5 Campaign-preview accept flow:** `task:campaignPreviewReservation` puts a preview in RESERVED; preview stays out of `currentTask` until accepted (`acceptedCampaignIds`), then transitions to ENGAGED. Evidence: `src/storeEventsWrapper.ts:243-283,537-583,772-795`, `tests/storeEventsWrapper.ts` ("campaign preview task lifecycle").
-- **UC-6 Fetch a domain list for a widget dropdown:** Transfer/Consult widget calls `getBuddyAgents()`/`getQueues()`; Outdial calls `getEntryPoints()`/`getAddressBookEntries()` → store proxies the SDK, transforms/filters, returns. Evidence: `src/storeEventsWrapper.ts:924-1001`, `tests/storeEventsWrapper.ts`.
+- **UC-6 Fetch a domain list for a widget dropdown:** Transfer/Consult widget calls `getBuddyAgents()`/`getQueues()`; Outdial calls `getEntryPoints()`/`getAddressBookEntries()` → store proxies the SDK, transforms/filters, returns. `getQueues`/`getEntryPoints` merge `desktopProfileFilter: true`. Evidence: `src/storeEventsWrapper.ts:924-1001`, `tests/storeEventsWrapper.ts`.
 
 ## State Model
 The store is a single MobX `makeAutoObservable` instance. Observable slices (all in `src/store.ts:23-56`):
 - **Session / profile:** `agentId`, `agentProfile`, `isAgentLoggedIn`, `deviceType`, `dialNumber`, `teamId`, `teams`, `loginOptions`, `idleCodes`, `wrapupCodes`, `featureFlags`, `dataCenter`.
 - **Agent state:** `currentState`, `customState`, `lastStateChangeTimestamp`, `lastIdleCodeChangeTimestamp`, `showMultipleLoginAlert`.
 - **Tasks:** `taskList` (`Record<interactionId, ITask>`), `currentTask`, `acceptedCampaignIds` (`Set<string>`), `realtimeTranscriptionData`.
-- **Call/consult control:** `isMuted`, `callControlAudio`, `isQueueConsultInProgress`, `currentConsultQueueId`, `consultStartTimeStamp`, `isDeclineButtonEnabled`, `isEndConsultEnabled`, `allowConsultToQueue`, `isDigitalChannelsInitialized`.
+- **Call/consult control:** `isMuted`, `callControlAudio`, `isQueueConsultInProgress`, `currentConsultQueueId`, `consultStartTimeStamp`, `isDeclineButtonEnabled`, `isEndConsultEnabled`, `allowConsultToQueue`, `accessQueue`, `accessEntryPoint`, `accessBuddyTeam`, `isDigitalChannelsInitialized`.
+- **`getQueues` / `getEntryPoints`:** merge `desktopProfileFilter: true` into SDK search params. List sort deferred pending team decision on CMS/BFF sort param parity.
+- **`getBuddyAgents`:** returns agents sorted by `agentName` ascending (client-side; full list, no pagination).
 - **Misc:** `currentTheme`, `cc` (`observable.ref` — not deeply observed), `isAddressBookEnabled`.
 
 Transition triggers: SDK CC/task events drive the session/agent/task slices via the wrapper's handlers (`handleStateChange`, `handleTaskAssigned`, `refreshTaskList`, `cleanUpStore`, campaign-preview handlers). Widget-initiated mutators (`setDeviceType`, `setDialNumber`, `setTeamId`, `setState`, `setCurrentTheme`, etc.) drive UI-local slices. All writes pass through `runInAction`.

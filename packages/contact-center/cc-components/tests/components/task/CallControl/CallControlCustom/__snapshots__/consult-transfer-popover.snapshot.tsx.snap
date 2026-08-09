@@ -79,9 +79,9 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
       alt=""
       aria-labelledby=""
       class="md-button md-button--36 consult-category-button-standard consult-category-button-active"
-      data-md-event-key="md-button-34"
+      data-md-event-key="md-button-44"
       data-md-keyboard-key="agents"
-      id="md-button-34"
+      id="md-button-44"
       tabindex="0"
       type="button"
       variant="primary"
@@ -97,9 +97,9 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
       alt=""
       aria-labelledby=""
       class="md-button md-button--36 consult-category-button-standard "
-      data-md-event-key="md-button-35"
+      data-md-event-key="md-button-45"
       data-md-keyboard-key="queues"
-      id="md-button-35"
+      id="md-button-45"
       tabindex="0"
       type="button"
       variant="secondary"
@@ -115,9 +115,9 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
       alt=""
       aria-labelledby=""
       class="md-button md-button--36 consult-category-button-wide "
-      data-md-event-key="md-button-36"
+      data-md-event-key="md-button-46"
       data-md-keyboard-key="dial-number"
-      id="md-button-36"
+      id="md-button-46"
       tabindex="0"
       type="button"
       variant="secondary"
@@ -127,6 +127,24 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
         style="opacity: 1;"
       >
         Dial Number
+      </span>
+    </button>
+    <button
+      alt=""
+      aria-labelledby=""
+      class="md-button md-button--36 consult-category-button-wide "
+      data-md-event-key="md-button-47"
+      data-md-keyboard-key="entry-point"
+      id="md-button-47"
+      tabindex="0"
+      type="button"
+      variant="secondary"
+    >
+      <span
+        class="md-button__children"
+        style="opacity: 1;"
+      >
+        Entry Point
       </span>
     </button>
   </div>
@@ -370,9 +388,9 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
       alt=""
       aria-labelledby=""
       class="md-button md-button--36 consult-category-button-standard "
-      data-md-event-key="md-button-37"
+      data-md-event-key="md-button-48"
       data-md-keyboard-key="agents"
-      id="md-button-37"
+      id="md-button-48"
       tabindex="0"
       type="button"
       variant="secondary"
@@ -388,9 +406,9 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
       alt=""
       aria-labelledby=""
       class="md-button md-button--36 consult-category-button-standard consult-category-button-active"
-      data-md-event-key="md-button-38"
+      data-md-event-key="md-button-49"
       data-md-keyboard-key="queues"
-      id="md-button-38"
+      id="md-button-49"
       tabindex="0"
       type="button"
       variant="primary"
@@ -406,9 +424,9 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
       alt=""
       aria-labelledby=""
       class="md-button md-button--36 consult-category-button-wide "
-      data-md-event-key="md-button-39"
+      data-md-event-key="md-button-50"
       data-md-keyboard-key="dial-number"
-      id="md-button-39"
+      id="md-button-50"
       tabindex="0"
       type="button"
       variant="secondary"
@@ -418,6 +436,24 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
         style="opacity: 1;"
       >
         Dial Number
+      </span>
+    </button>
+    <button
+      alt=""
+      aria-labelledby=""
+      class="md-button md-button--36 consult-category-button-wide "
+      data-md-event-key="md-button-51"
+      data-md-keyboard-key="entry-point"
+      id="md-button-51"
+      tabindex="0"
+      type="button"
+      variant="secondary"
+    >
+      <span
+        class="md-button__children"
+        style="opacity: 1;"
+      >
+        Entry Point
       </span>
     </button>
   </div>
@@ -588,9 +624,9 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
       alt=""
       aria-labelledby=""
       class="md-button md-button--36 consult-category-button-standard "
-      data-md-event-key="md-button-31"
+      data-md-event-key="md-button-40"
       data-md-keyboard-key="agents"
-      id="md-button-31"
+      id="md-button-40"
       tabindex="0"
       type="button"
       variant="secondary"
@@ -606,9 +642,9 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
       alt=""
       aria-labelledby=""
       class="md-button md-button--36 consult-category-button-standard consult-category-button-active"
-      data-md-event-key="md-button-32"
+      data-md-event-key="md-button-41"
       data-md-keyboard-key="queues"
-      id="md-button-32"
+      id="md-button-41"
       tabindex="0"
       type="button"
       variant="primary"
@@ -624,9 +660,9 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
       alt=""
       aria-labelledby=""
       class="md-button md-button--36 consult-category-button-wide "
-      data-md-event-key="md-button-33"
+      data-md-event-key="md-button-42"
       data-md-keyboard-key="dial-number"
-      id="md-button-33"
+      id="md-button-42"
       tabindex="0"
       type="button"
       variant="secondary"
@@ -636,6 +672,24 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
         style="opacity: 1;"
       >
         Dial Number
+      </span>
+    </button>
+    <button
+      alt=""
+      aria-labelledby=""
+      class="md-button md-button--36 consult-category-button-wide "
+      data-md-event-key="md-button-43"
+      data-md-keyboard-key="entry-point"
+      id="md-button-43"
+      tabindex="0"
+      type="button"
+      variant="secondary"
+    >
+      <span
+        class="md-button__children"
+        style="opacity: 1;"
+      >
+        Entry Point
       </span>
     </button>
   </div>
@@ -1115,9 +1169,9 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
       alt=""
       aria-labelledby=""
       class="md-button md-button--36 consult-category-button-standard consult-category-button-active"
-      data-md-event-key="md-button-28"
+      data-md-event-key="md-button-36"
       data-md-keyboard-key="agents"
-      id="md-button-28"
+      id="md-button-36"
       tabindex="0"
       type="button"
       variant="primary"
@@ -1133,9 +1187,9 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
       alt=""
       aria-labelledby=""
       class="md-button md-button--36 consult-category-button-standard "
-      data-md-event-key="md-button-29"
+      data-md-event-key="md-button-37"
       data-md-keyboard-key="queues"
-      id="md-button-29"
+      id="md-button-37"
       tabindex="0"
       type="button"
       variant="secondary"
@@ -1151,9 +1205,9 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
       alt=""
       aria-labelledby=""
       class="md-button md-button--36 consult-category-button-wide "
-      data-md-event-key="md-button-30"
+      data-md-event-key="md-button-38"
       data-md-keyboard-key="dial-number"
-      id="md-button-30"
+      id="md-button-38"
       tabindex="0"
       type="button"
       variant="secondary"
@@ -1163,6 +1217,24 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         style="opacity: 1;"
       >
         Dial Number
+      </span>
+    </button>
+    <button
+      alt=""
+      aria-labelledby=""
+      class="md-button md-button--36 consult-category-button-wide "
+      data-md-event-key="md-button-39"
+      data-md-keyboard-key="entry-point"
+      id="md-button-39"
+      tabindex="0"
+      type="button"
+      variant="secondary"
+    >
+      <span
+        class="md-button__children"
+        style="opacity: 1;"
+      >
+        Entry Point
       </span>
     </button>
   </div>
@@ -1402,7 +1474,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
 </div>
 `;
 
-exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elements and visual states of ConsultTransferPopoverComponent component should render with allowConsultToQueue false 1`] = `
+exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elements and visual states of ConsultTransferPopoverComponent component should render with allowConsultToQueue false for Consult 1`] = `
 <div
   class="agent-popover-content"
 >
@@ -1411,7 +1483,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
     tagname="h3"
     type="body-large-bold"
   >
-    Select an Agent
+    Consult
   </mdc-text>
   <div
     class="consult-search-row"
@@ -1481,9 +1553,9 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
       alt=""
       aria-labelledby=""
       class="md-button md-button--36 consult-category-button-standard consult-category-button-active"
-      data-md-event-key="md-button-17"
+      data-md-event-key="md-button-21"
       data-md-keyboard-key="agents"
-      id="md-button-17"
+      id="md-button-21"
       tabindex="0"
       type="button"
       variant="primary"
@@ -1499,9 +1571,9 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
       alt=""
       aria-labelledby=""
       class="md-button md-button--36 consult-category-button-wide "
-      data-md-event-key="md-button-18"
+      data-md-event-key="md-button-22"
       data-md-keyboard-key="dial-number"
-      id="md-button-18"
+      id="md-button-22"
       tabindex="0"
       type="button"
       variant="secondary"
@@ -1511,6 +1583,24 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         style="opacity: 1;"
       >
         Dial Number
+      </span>
+    </button>
+    <button
+      alt=""
+      aria-labelledby=""
+      class="md-button md-button--36 consult-category-button-wide "
+      data-md-event-key="md-button-23"
+      data-md-keyboard-key="entry-point"
+      id="md-button-23"
+      tabindex="0"
+      type="button"
+      variant="secondary"
+    >
+      <span
+        class="md-button__children"
+        style="opacity: 1;"
+      >
+        Entry Point
       </span>
     </button>
   </div>
@@ -1754,9 +1844,9 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
       alt=""
       aria-labelledby=""
       class="md-button md-button--36 consult-category-button-standard consult-category-button-active"
-      data-md-event-key="md-button-19"
+      data-md-event-key="md-button-24"
       data-md-keyboard-key="agents"
-      id="md-button-19"
+      id="md-button-24"
       tabindex="0"
       type="button"
       variant="primary"
@@ -1772,9 +1862,9 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
       alt=""
       aria-labelledby=""
       class="md-button md-button--36 consult-category-button-standard "
-      data-md-event-key="md-button-20"
+      data-md-event-key="md-button-25"
       data-md-keyboard-key="queues"
-      id="md-button-20"
+      id="md-button-25"
       tabindex="0"
       type="button"
       variant="secondary"
@@ -1790,9 +1880,9 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
       alt=""
       aria-labelledby=""
       class="md-button md-button--36 consult-category-button-wide "
-      data-md-event-key="md-button-21"
+      data-md-event-key="md-button-26"
       data-md-keyboard-key="dial-number"
-      id="md-button-21"
+      id="md-button-26"
       tabindex="0"
       type="button"
       variant="secondary"
@@ -1802,6 +1892,24 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         style="opacity: 1;"
       >
         Dial Number
+      </span>
+    </button>
+    <button
+      alt=""
+      aria-labelledby=""
+      class="md-button md-button--36 consult-category-button-wide "
+      data-md-event-key="md-button-27"
+      data-md-keyboard-key="entry-point"
+      id="md-button-27"
+      tabindex="0"
+      type="button"
+      variant="secondary"
+    >
+      <span
+        class="md-button__children"
+        style="opacity: 1;"
+      >
+        Entry Point
       </span>
     </button>
   </div>
@@ -1903,9 +2011,9 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
       alt=""
       aria-labelledby=""
       class="md-button md-button--36 consult-category-button-standard consult-category-button-active"
-      data-md-event-key="md-button-8"
+      data-md-event-key="md-button-9"
       data-md-keyboard-key="agents"
-      id="md-button-8"
+      id="md-button-9"
       tabindex="0"
       type="button"
       variant="primary"
@@ -1921,9 +2029,9 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
       alt=""
       aria-labelledby=""
       class="md-button md-button--36 consult-category-button-standard "
-      data-md-event-key="md-button-9"
+      data-md-event-key="md-button-10"
       data-md-keyboard-key="queues"
-      id="md-button-9"
+      id="md-button-10"
       tabindex="0"
       type="button"
       variant="secondary"
@@ -1939,9 +2047,9 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
       alt=""
       aria-labelledby=""
       class="md-button md-button--36 consult-category-button-wide "
-      data-md-event-key="md-button-10"
+      data-md-event-key="md-button-11"
       data-md-keyboard-key="dial-number"
-      id="md-button-10"
+      id="md-button-11"
       tabindex="0"
       type="button"
       variant="secondary"
@@ -1951,6 +2059,24 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         style="opacity: 1;"
       >
         Dial Number
+      </span>
+    </button>
+    <button
+      alt=""
+      aria-labelledby=""
+      class="md-button md-button--36 consult-category-button-wide "
+      data-md-event-key="md-button-12"
+      data-md-keyboard-key="entry-point"
+      id="md-button-12"
+      tabindex="0"
+      type="button"
+      variant="secondary"
+    >
+      <span
+        class="md-button__children"
+        style="opacity: 1;"
+      >
+        Entry Point
       </span>
     </button>
   </div>
@@ -2194,9 +2320,9 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
       alt=""
       aria-labelledby=""
       class="md-button md-button--36 consult-category-button-standard consult-category-button-active"
-      data-md-event-key="md-button-11"
+      data-md-event-key="md-button-13"
       data-md-keyboard-key="agents"
-      id="md-button-11"
+      id="md-button-13"
       tabindex="0"
       type="button"
       variant="primary"
@@ -2212,9 +2338,9 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
       alt=""
       aria-labelledby=""
       class="md-button md-button--36 consult-category-button-standard "
-      data-md-event-key="md-button-12"
+      data-md-event-key="md-button-14"
       data-md-keyboard-key="queues"
-      id="md-button-12"
+      id="md-button-14"
       tabindex="0"
       type="button"
       variant="secondary"
@@ -2230,9 +2356,9 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
       alt=""
       aria-labelledby=""
       class="md-button md-button--36 consult-category-button-wide "
-      data-md-event-key="md-button-13"
+      data-md-event-key="md-button-15"
       data-md-keyboard-key="dial-number"
-      id="md-button-13"
+      id="md-button-15"
       tabindex="0"
       type="button"
       variant="secondary"
@@ -2242,6 +2368,24 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         style="opacity: 1;"
       >
         Dial Number
+      </span>
+    </button>
+    <button
+      alt=""
+      aria-labelledby=""
+      class="md-button md-button--36 consult-category-button-wide "
+      data-md-event-key="md-button-16"
+      data-md-keyboard-key="entry-point"
+      id="md-button-16"
+      tabindex="0"
+      type="button"
+      variant="secondary"
+    >
+      <span
+        class="md-button__children"
+        style="opacity: 1;"
+      >
+        Entry Point
       </span>
     </button>
   </div>
@@ -2340,9 +2484,9 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
       alt=""
       aria-labelledby=""
       class="md-button md-button--36 consult-category-button-standard "
-      data-md-event-key="md-button-14"
+      data-md-event-key="md-button-17"
       data-md-keyboard-key="agents"
-      id="md-button-14"
+      id="md-button-17"
       tabindex="0"
       type="button"
       variant="secondary"
@@ -2358,9 +2502,9 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
       alt=""
       aria-labelledby=""
       class="md-button md-button--36 consult-category-button-standard consult-category-button-active"
-      data-md-event-key="md-button-15"
+      data-md-event-key="md-button-18"
       data-md-keyboard-key="queues"
-      id="md-button-15"
+      id="md-button-18"
       tabindex="0"
       type="button"
       variant="primary"
@@ -2376,9 +2520,9 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
       alt=""
       aria-labelledby=""
       class="md-button md-button--36 consult-category-button-wide "
-      data-md-event-key="md-button-16"
+      data-md-event-key="md-button-19"
       data-md-keyboard-key="dial-number"
-      id="md-button-16"
+      id="md-button-19"
       tabindex="0"
       type="button"
       variant="secondary"
@@ -2388,6 +2532,24 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         style="opacity: 1;"
       >
         Dial Number
+      </span>
+    </button>
+    <button
+      alt=""
+      aria-labelledby=""
+      class="md-button md-button--36 consult-category-button-wide "
+      data-md-event-key="md-button-20"
+      data-md-keyboard-key="entry-point"
+      id="md-button-20"
+      tabindex="0"
+      type="button"
+      variant="secondary"
+    >
+      <span
+        class="md-button__children"
+        style="opacity: 1;"
+      >
+        Entry Point
       </span>
     </button>
   </div>
@@ -2482,9 +2644,9 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
       alt=""
       aria-labelledby=""
       class="md-button md-button--36 consult-category-button-standard consult-category-button-active"
-      data-md-event-key="md-button-22"
+      data-md-event-key="md-button-28"
       data-md-keyboard-key="agents"
-      id="md-button-22"
+      id="md-button-28"
       tabindex="0"
       type="button"
       variant="primary"
@@ -2500,9 +2662,9 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
       alt=""
       aria-labelledby=""
       class="md-button md-button--36 consult-category-button-standard "
-      data-md-event-key="md-button-23"
+      data-md-event-key="md-button-29"
       data-md-keyboard-key="queues"
-      id="md-button-23"
+      id="md-button-29"
       tabindex="0"
       type="button"
       variant="secondary"
@@ -2518,9 +2680,9 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
       alt=""
       aria-labelledby=""
       class="md-button md-button--36 consult-category-button-wide "
-      data-md-event-key="md-button-24"
+      data-md-event-key="md-button-30"
       data-md-keyboard-key="dial-number"
-      id="md-button-24"
+      id="md-button-30"
       tabindex="0"
       type="button"
       variant="secondary"
@@ -2530,6 +2692,24 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         style="opacity: 1;"
       >
         Dial Number
+      </span>
+    </button>
+    <button
+      alt=""
+      aria-labelledby=""
+      class="md-button md-button--36 consult-category-button-wide "
+      data-md-event-key="md-button-31"
+      data-md-keyboard-key="entry-point"
+      id="md-button-31"
+      tabindex="0"
+      type="button"
+      variant="secondary"
+    >
+      <span
+        class="md-button__children"
+        style="opacity: 1;"
+      >
+        Entry Point
       </span>
     </button>
   </div>
@@ -2698,9 +2878,9 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
       alt=""
       aria-labelledby=""
       class="md-button md-button--36 consult-category-button-standard "
-      data-md-event-key="md-button-25"
+      data-md-event-key="md-button-32"
       data-md-keyboard-key="agents"
-      id="md-button-25"
+      id="md-button-32"
       tabindex="0"
       type="button"
       variant="secondary"
@@ -2716,9 +2896,9 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
       alt=""
       aria-labelledby=""
       class="md-button md-button--36 consult-category-button-standard consult-category-button-active"
-      data-md-event-key="md-button-26"
+      data-md-event-key="md-button-33"
       data-md-keyboard-key="queues"
-      id="md-button-26"
+      id="md-button-33"
       tabindex="0"
       type="button"
       variant="primary"
@@ -2734,9 +2914,9 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
       alt=""
       aria-labelledby=""
       class="md-button md-button--36 consult-category-button-wide "
-      data-md-event-key="md-button-27"
+      data-md-event-key="md-button-34"
       data-md-keyboard-key="dial-number"
-      id="md-button-27"
+      id="md-button-34"
       tabindex="0"
       type="button"
       variant="secondary"
@@ -2746,6 +2926,24 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         style="opacity: 1;"
       >
         Dial Number
+      </span>
+    </button>
+    <button
+      alt=""
+      aria-labelledby=""
+      class="md-button md-button--36 consult-category-button-wide "
+      data-md-event-key="md-button-35"
+      data-md-keyboard-key="entry-point"
+      id="md-button-35"
+      tabindex="0"
+      type="button"
+      variant="secondary"
+    >
+      <span
+        class="md-button__children"
+        style="opacity: 1;"
+      >
+        Entry Point
       </span>
     </button>
   </div>
@@ -2964,6 +3162,24 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         style="opacity: 1;"
       >
         Dial Number
+      </span>
+    </button>
+    <button
+      alt=""
+      aria-labelledby=""
+      class="md-button md-button--36 consult-category-button-wide "
+      data-md-event-key="md-button-8"
+      data-md-keyboard-key="entry-point"
+      id="md-button-8"
+      tabindex="0"
+      type="button"
+      variant="secondary"
+    >
+      <span
+        class="md-button__children"
+        style="opacity: 1;"
+      >
+        Entry Point
       </span>
     </button>
   </div>
@@ -3207,9 +3423,9 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
       alt=""
       aria-labelledby=""
       class="md-button md-button--36 consult-category-button-standard consult-category-button-active"
-      data-md-event-key="md-button-43"
+      data-md-event-key="md-button-56"
       data-md-keyboard-key="agents"
-      id="md-button-43"
+      id="md-button-56"
       tabindex="0"
       type="button"
       variant="primary"
@@ -3225,9 +3441,9 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
       alt=""
       aria-labelledby=""
       class="md-button md-button--36 consult-category-button-standard "
-      data-md-event-key="md-button-44"
+      data-md-event-key="md-button-57"
       data-md-keyboard-key="queues"
-      id="md-button-44"
+      id="md-button-57"
       tabindex="0"
       type="button"
       variant="secondary"
@@ -3243,9 +3459,9 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
       alt=""
       aria-labelledby=""
       class="md-button md-button--36 consult-category-button-wide "
-      data-md-event-key="md-button-45"
+      data-md-event-key="md-button-58"
       data-md-keyboard-key="dial-number"
-      id="md-button-45"
+      id="md-button-58"
       tabindex="0"
       type="button"
       variant="secondary"
@@ -3255,6 +3471,24 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
         style="opacity: 1;"
       >
         Dial Number
+      </span>
+    </button>
+    <button
+      alt=""
+      aria-labelledby=""
+      class="md-button md-button--36 consult-category-button-wide "
+      data-md-event-key="md-button-59"
+      data-md-keyboard-key="entry-point"
+      id="md-button-59"
+      tabindex="0"
+      type="button"
+      variant="secondary"
+    >
+      <span
+        class="md-button__children"
+        style="opacity: 1;"
+      >
+        Entry Point
       </span>
     </button>
   </div>
@@ -3419,9 +3653,9 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
       alt=""
       aria-labelledby=""
       class="md-button md-button--36 consult-category-button-standard consult-category-button-active"
-      data-md-event-key="md-button-40"
+      data-md-event-key="md-button-52"
       data-md-keyboard-key="agents"
-      id="md-button-40"
+      id="md-button-52"
       tabindex="0"
       type="button"
       variant="primary"
@@ -3437,9 +3671,9 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
       alt=""
       aria-labelledby=""
       class="md-button md-button--36 consult-category-button-standard "
-      data-md-event-key="md-button-41"
+      data-md-event-key="md-button-53"
       data-md-keyboard-key="queues"
-      id="md-button-41"
+      id="md-button-53"
       tabindex="0"
       type="button"
       variant="secondary"
@@ -3455,9 +3689,9 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
       alt=""
       aria-labelledby=""
       class="md-button md-button--36 consult-category-button-wide "
-      data-md-event-key="md-button-42"
+      data-md-event-key="md-button-54"
       data-md-keyboard-key="dial-number"
-      id="md-button-42"
+      id="md-button-54"
       tabindex="0"
       type="button"
       variant="secondary"
@@ -3467,6 +3701,24 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
         style="opacity: 1;"
       >
         Dial Number
+      </span>
+    </button>
+    <button
+      alt=""
+      aria-labelledby=""
+      class="md-button md-button--36 consult-category-button-wide "
+      data-md-event-key="md-button-55"
+      data-md-keyboard-key="entry-point"
+      id="md-button-55"
+      tabindex="0"
+      type="button"
+      variant="secondary"
+    >
+      <span
+        class="md-button__children"
+        style="opacity: 1;"
+      >
+        Entry Point
       </span>
     </button>
   </div>
@@ -3710,9 +3962,9 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
       alt=""
       aria-labelledby=""
       class="md-button md-button--36 consult-category-button-standard "
-      data-md-event-key="md-button-46"
+      data-md-event-key="md-button-60"
       data-md-keyboard-key="agents"
-      id="md-button-46"
+      id="md-button-60"
       tabindex="0"
       type="button"
       variant="secondary"
@@ -3728,9 +3980,9 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
       alt=""
       aria-labelledby=""
       class="md-button md-button--36 consult-category-button-standard consult-category-button-active"
-      data-md-event-key="md-button-47"
+      data-md-event-key="md-button-61"
       data-md-keyboard-key="queues"
-      id="md-button-47"
+      id="md-button-61"
       tabindex="0"
       type="button"
       variant="primary"
@@ -3746,9 +3998,9 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
       alt=""
       aria-labelledby=""
       class="md-button md-button--36 consult-category-button-wide "
-      data-md-event-key="md-button-48"
+      data-md-event-key="md-button-62"
       data-md-keyboard-key="dial-number"
-      id="md-button-48"
+      id="md-button-62"
       tabindex="0"
       type="button"
       variant="secondary"
@@ -3758,6 +4010,24 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
         style="opacity: 1;"
       >
         Dial Number
+      </span>
+    </button>
+    <button
+      alt=""
+      aria-labelledby=""
+      class="md-button md-button--36 consult-category-button-wide "
+      data-md-event-key="md-button-63"
+      data-md-keyboard-key="entry-point"
+      id="md-button-63"
+      tabindex="0"
+      type="button"
+      variant="secondary"
+    >
+      <span
+        class="md-button__children"
+        style="opacity: 1;"
+      >
+        Entry Point
       </span>
     </button>
   </div>
