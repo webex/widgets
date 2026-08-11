@@ -1,8 +1,15 @@
 import {useEffect, useState} from 'react';
 import {LogoutSuccess, AgentProfileUpdate, LoginOption, StationLoginSuccessResponse} from '@webex/contact-center';
 import {UseStationLoginProps} from './station-login/station-login.types';
-import store, {CC_EVENTS} from '@webex/cc-store'; // we need to import as we are losing the context of this in store
+import store, {CC_EVENTS, DEVICE_TYPE_BROWSER} from '@webex/cc-store'; // we need to import as we are losing the context of this in store
 import {LoginOptionsState} from '@webex/cc-components';
+
+// Single-flight guard for checkE911ModalDisplay - see its usage below. Module-scoped (not a
+// useRef) because more than one StationLogin/useStationLogin instance can be mounted against the
+// same store singleton at once (e.g. the login widget plus a profileMode settings widget); a
+// per-instance ref would only dedupe within one instance, letting a second instance's concurrent
+// fetchUserPreferences() read race the first and reopen the modal with a stale result.
+let e911CheckInFlight: Promise<void> | null = null;
 
 export const useStationLogin = (props: UseStationLoginProps) => {
   const cc = props.cc;
@@ -80,7 +87,7 @@ export const useStationLogin = (props: UseStationLoginProps) => {
   // Compare logic for Save button
   const isLoginOptionsChanged =
     originalLoginOptions.deviceType !== currentLoginOptions.deviceType ||
-    (currentLoginOptions.deviceType !== 'BROWSER' &&
+    (currentLoginOptions.deviceType !== DEVICE_TYPE_BROWSER &&
       originalLoginOptions.dialNumber !== currentLoginOptions.dialNumber) ||
     originalLoginOptions.teamId !== currentLoginOptions.teamId;
 
@@ -104,7 +111,7 @@ export const useStationLogin = (props: UseStationLoginProps) => {
         loginOption: currentLoginOptions.deviceType as LoginOption,
         teamId: currentLoginOptions.teamId || undefined,
       };
-      if (currentLoginOptions.deviceType !== 'BROWSER') {
+      if (currentLoginOptions.deviceType !== DEVICE_TYPE_BROWSER) {
         payload.dialNumber = currentLoginOptions.dialNumber;
       }
 
@@ -121,6 +128,8 @@ export const useStationLogin = (props: UseStationLoginProps) => {
             module: 'widget-station-login#helper.ts',
             method: 'saveLoginOptions',
           });
+          // Covers switching to BROWSER via profile save while already logged in.
+          checkE911ModalDisplay(currentLoginOptions.deviceType);
           if (props.onSaveEnd) props.onSaveEnd(true);
         })
         .catch((error: Error) => {
@@ -145,6 +154,11 @@ export const useStationLogin = (props: UseStationLoginProps) => {
     try {
       if (loginCb && store.isAgentLoggedIn) {
         loginCb();
+      }
+      if (store.isAgentLoggedIn) {
+        // Covers page refresh while already logged in with BROWSER: login() never runs, so this is
+        // the only place that can trigger the E911 modal for an already-hydrated BROWSER session.
+        checkE911ModalDisplay(store.deviceType);
       }
     } catch (error) {
       logger.error(`CC-Widgets: Error in useEffect (loginCb) - ${error.message}`, {
@@ -172,6 +186,9 @@ export const useStationLogin = (props: UseStationLoginProps) => {
       if (loginCb) {
         loginCb();
       }
+      // Covers AGENT_STATION_LOGIN_SUCCESS / relogin events that aren't driven by this widget's
+      // own login() call (e.g. another tab/session logging in as BROWSER).
+      checkE911ModalDisplay(store.deviceType);
     } catch (error) {
       logger.error(`CC-Widgets: Error in handleLogin - ${error.message}`, {
         module: 'widget-station-login#helper.ts',
@@ -223,6 +240,9 @@ export const useStationLogin = (props: UseStationLoginProps) => {
           module: 'widget-station-login#helper.ts',
           method: 'handleContinue',
         });
+        // Covers the multi-login takeover flow: registerCC() completes the relogin but never
+        // runs the E911 preference check on its own.
+        checkE911ModalDisplay(store.deviceType);
       } else {
         logger.error(`Agent Relogin Failed`, {
           module: 'widget-station-login#helper.ts',
@@ -237,6 +257,46 @@ export const useStationLogin = (props: UseStationLoginProps) => {
     }
   };
 
+  const checkE911ModalDisplay = (deviceTypeToCheck: string): Promise<void> => {
+    if (deviceTypeToCheck !== DEVICE_TYPE_BROWSER) {
+      return Promise.resolve();
+    }
+
+    // A single login can trigger this from more than one path at once (e.g. login()'s own
+    // success handler racing the AGENT_STATION_LOGIN_SUCCESS callback). Make the check
+    // single-flight so concurrent callers join the same fetchUserPreferences() call instead of
+    // each starting their own - two independent reads could otherwise race with the user's
+    // Save/Cancel action and reopen the modal with a stale "not yet acknowledged" result.
+    if (e911CheckInFlight) {
+      return e911CheckInFlight;
+    }
+
+    const check = (async () => {
+      try {
+        await store.fetchUserPreferences();
+
+        if (!store.isEmergencyModalAlreadyDisplayed) {
+          store.setShowE911Modal(true);
+          logger.log('CC-Widgets: E911 modal displayed for BROWSER login', {
+            module: 'widget-station-login#helper.ts',
+            method: 'checkE911ModalDisplay',
+          });
+        }
+      } catch (error) {
+        logger.error(`CC-Widgets: Error checking E911 modal display - ${error.message}`, {
+          module: 'widget-station-login#helper.ts',
+          method: 'checkE911ModalDisplay',
+        });
+      } finally {
+        e911CheckInFlight = null;
+      }
+    })();
+
+    e911CheckInFlight = check;
+
+    return check;
+  };
+
   const login = () => {
     try {
       cc.stationLogin({teamId: team, loginOption: deviceType, dialNumber})
@@ -247,6 +307,8 @@ export const useStationLogin = (props: UseStationLoginProps) => {
           });
           setLoginSuccess(res);
           setLoginFailure(undefined);
+
+          checkE911ModalDisplay(deviceType);
         })
         .catch((error: Error) => {
           logger.error(`Error logging in: ${error}`, {

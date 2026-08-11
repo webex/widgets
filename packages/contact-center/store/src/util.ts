@@ -16,7 +16,7 @@ export function getFeatureFlags(agentProfile: Profile) {
     'isOutboundEnabledForAgent',
     'isAdhocDialingEnabled',
     'isCampaignManagementEnabled',
-    'isEndCallEnabled',
+    'isEndTaskEnabled',
     'isEndConsultEnabled',
     'agentPersonalStatsEnabled',
     'isCallMonitoringEnabled',
