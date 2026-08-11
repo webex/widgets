@@ -1,5 +1,5 @@
 import React from 'react';
-import {render} from '@testing-library/react';
+import {render, screen} from '@testing-library/react';
 import {StationLogin} from '../../src';
 import * as helper from '../../src/helper';
 import '@testing-library/jest-dom';
@@ -90,6 +90,40 @@ describe('StationLogin Component', () => {
       teamId: undefined,
       onCCSignOut: ccLogoutCb,
       doStationLogout: undefined,
+    });
+  });
+
+  describe('E911Modal single-owner rendering', () => {
+    it('renders E911Modal in only one of multiple mounted StationLogin instances', () => {
+      render(
+        <>
+          <StationLogin profileMode={false} />
+          <StationLogin profileMode={true} />
+        </>
+      );
+
+      // Two StationLogin widgets (e.g. the normal login widget + a profileMode settings widget)
+      // are commonly mounted together against the same store singleton - only one should render
+      // the E911Modal, otherwise a single BROWSER login would pop duplicate blocking dialogs.
+      expect(screen.getAllByTestId('e911-modal')).toHaveLength(1);
+    });
+
+    it('lets a surviving instance reclaim the E911Modal after the owning instance unmounts', () => {
+      const owner = render(<StationLogin profileMode={false} />);
+      const survivor = render(<StationLogin profileMode={true} />);
+
+      expect(screen.getAllByTestId('e911-modal')).toHaveLength(1);
+
+      owner.unmount();
+      expect(screen.queryAllByTestId('e911-modal')).toHaveLength(0);
+
+      (store as unknown as {showE911Modal: boolean}).showE911Modal = true;
+      // The observer-wrapped component memoizes on props, so re-rendering with the exact same
+      // props would bail out before ever re-reading the (test-mocked, non-reactive) store value.
+      // Change an unrelated prop to force React to re-invoke the component and pick up the update.
+      survivor.rerender(<StationLogin profileMode={true} hideDesktopLogin={false} />);
+
+      expect(screen.getAllByTestId('e911-modal')).toHaveLength(1);
     });
   });
 
