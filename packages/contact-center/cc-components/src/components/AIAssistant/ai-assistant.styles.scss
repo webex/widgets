@@ -1,0 +1,505 @@
+.ai-assistant {
+  // Inset the widget contents so the launcher and panel never sit flush
+  // against the host container's edge (e.g. behind a `<legend>` line).
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--mds-font-family-primary, CiscoSans, 'Helvetica Neue', Arial, sans-serif);
+  padding: 0.75rem 0.5rem;
+  width: 100%;
+}
+
+.ai-assistant__launcher {
+  align-items: center;
+  align-self: flex-start;
+  background: transparent;
+  border: none;
+  border-radius: 6.25rem;
+  box-shadow: none;
+  cursor: pointer;
+  display: inline-flex;
+  flex-direction: row;
+  height: 3.125rem;
+  isolation: isolate;
+  justify-content: center;
+  padding: 0.5625rem;
+  width: 3.125rem;
+
+  &:hover {
+    background: var(--mds-color-theme-background-secondary-hover, rgba(0, 0, 0, 0.04));
+  }
+
+  &:focus-visible {
+    outline: 0.125rem solid var(--mds-color-theme-outline-focus-default, #0087ea);
+    outline-offset: 0.125rem;
+  }
+}
+
+// Default chrome: small floating card with border + shadow.
+.ai-assistant__panel {
+  background: var(--mds-color-theme-background-primary-normal);
+  border: 0.0625rem solid var(--mds-color-theme-outline-secondary-normal);
+  border-radius: 0.75rem;
+  box-shadow: 0 0.75rem 2rem rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  height: 32rem;
+  max-height: 90vh;
+  max-width: 22rem;
+  overflow: hidden;
+  width: 100%;
+}
+
+.ai-assistant__panel--minimized {
+  border: 0.0625rem solid var(--mds-color-theme-outline-secondary-normal);
+  border-radius: 0.5rem;
+  box-shadow: none;
+  height: auto;
+  max-height: none;
+  max-width: 22rem;
+  min-height: 0;
+  overflow: visible;
+}
+
+.ai-assistant__panel--full-screen {
+  border-radius: 0;
+  box-shadow: none;
+  height: 100%;
+  max-height: none;
+  max-width: none;
+}
+
+.ai-assistant__header,
+.ai-assistant__minimized-bar {
+  align-items: center;
+  border-bottom: 0.0625rem solid var(--mds-color-theme-outline-secondary-normal);
+  display: flex;
+  gap: 0.75rem;
+  justify-content: space-between;
+  padding: 0.75rem 1.125rem;
+}
+
+.ai-assistant__minimized-bar {
+  border-bottom: none;
+}
+
+.ai-assistant__title {
+  color: var(--mds-color-theme-text-primary-normal);
+  margin: 0;
+}
+
+.ai-assistant__header-actions {
+  align-items: center;
+  display: flex;
+  gap: 0.25rem;
+}
+
+.ai-assistant__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 1rem;
+  min-height: 0;
+  overflow: hidden;
+  padding: 1rem 1.125rem;
+  row-gap: 1.25rem;
+}
+
+.ai-assistant__body--landing {
+  overflow-y: auto;
+  padding: 0;
+}
+
+.ai-assistant__landing {
+  align-items: center;
+  box-sizing: border-box;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100%;
+  padding: 2.5rem 2rem;
+  text-align: center;
+}
+
+.ai-assistant__landing-logo {
+  display: flex;
+  margin-bottom: 1.25rem;
+}
+
+.ai-assistant__landing-greeting {
+  color: var(--mds-color-theme-text-secondary-normal);
+  margin: 0 0 1.75rem;
+}
+
+.ai-assistant__landing-features {
+  margin: 0 0 2.5rem;
+  max-width: 27rem;
+  width: 100%;
+
+  // Items are laid out by the container part, not the host, so the row gap
+  // has to be set there.
+  &::part(container) {
+    gap: 1.75rem;
+  }
+}
+
+.ai-assistant__landing-feature {
+  // These rows are informational, so drop the interactive affordances
+  // `mdc-listitem` ships with by default.
+  --mdc-listitem-background-color-hover: transparent;
+  --mdc-listitem-background-color-active: transparent;
+  --mdc-listitem-cursor: default;
+  --mdc-listitem-padding-left-right: 0;
+  --mdc-listitem-padding-top-bottom: 0;
+
+  &::part(leading) {
+    align-items: flex-start;
+    justify-content: center;
+  }
+
+  // The default parts clip to a single line; these descriptions wrap.
+  &::part(leading-text) {
+    display: flex;
+    flex: 0 1 auto;
+    flex-direction: column;
+    gap: 0.375rem;
+    overflow: visible;
+    white-space: normal;
+  }
+
+  // Slotted labels aren't the shadow parts, so the listitem label colors
+  // don't reach them.
+  mdc-text::part(text) {
+    margin: 0;
+  }
+}
+
+.ai-assistant__landing-feature-title {
+  color: var(--mds-color-theme-text-primary-normal);
+}
+
+.ai-assistant__landing-feature-description {
+  color: var(--mds-color-theme-text-secondary-normal);
+}
+
+.ai-assistant__landing > mdc-link {
+  --mdc-link-color-normal: var(--mds-color-theme-text-accent-normal, #0051af);
+}
+
+.ai-assistant__real-time-assist {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 1rem;
+  min-height: 0;
+}
+
+.ai-assistant__body-empty,
+.ai-assistant__body-listening,
+.ai-assistant__body-ready {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.ai-assistant__error-text {
+  color: var(--mds-color-theme-text-error-normal);
+}
+
+// "Get Suggestions" pill button — Figma Button/Pill spec: 134x28, rounded.
+.ai-assistant__pill-button {
+  align-items: center;
+  align-self: flex-start;
+  background: transparent;
+  border: 0.0625rem solid rgba(0, 0, 0, 0.5);
+  border-radius: 6.25rem;
+  box-sizing: border-box;
+  color: var(--mds-color-theme-text-primary-normal);
+  cursor: pointer;
+  display: inline-flex;
+  flex: none;
+  flex-direction: row;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  gap: 0.375rem;
+  height: 1.75rem;
+  isolation: isolate;
+  padding: 0.25rem 0.75rem;
+  width: 8.375rem;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.04);
+  }
+
+  &:focus-visible {
+    outline: 0.125rem solid var(--mds-color-theme-outline-focus-default, #0087ea);
+    outline-offset: 0.125rem;
+  }
+}
+
+.ai-assistant__body-listening,
+.ai-assistant__body-empty {
+  color: var(--mds-color-theme-text-secondary-normal);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.ai-assistant__chat {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 1rem;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
+
+.ai-assistant__chat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ai-assistant__chat-item--user {
+  align-items: flex-end;
+}
+
+.ai-assistant__user-bubble {
+  background: #000;
+  border-radius: 1rem;
+  color: #fff;
+  font-size: 0.9375rem;
+  line-height: 1.4;
+  max-width: 85%;
+  padding: 0.625rem 1rem;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.ai-assistant__chat-item--assistant {
+  gap: 0.5rem;
+}
+
+.ai-assistant__assistant-header {
+  align-items: center;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.ai-assistant__assistant-icon {
+  align-items: center;
+  display: inline-flex;
+  flex-shrink: 0;
+  height: 1.5625rem;
+  justify-content: center;
+  width: 1.5625rem;
+
+  svg {
+    display: block;
+    height: 100%;
+    width: 100%;
+  }
+}
+
+.ai-assistant__suggestion-updating {
+  color: var(--mds-color-theme-text-secondary-normal);
+  font-size: 0.875rem;
+  font-style: italic;
+  margin: 0;
+}
+
+.ai-assistant__suggestion-title {
+  color: var(--mds-color-theme-text-primary-normal);
+  margin: 0;
+}
+
+.ai-assistant__suggestion-summary {
+  color: var(--mds-color-theme-text-secondary-normal);
+  margin: 0;
+}
+
+.ai-assistant__card {
+  background: var(--mds-color-theme-background-secondary-normal, #f1f3f5);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+}
+
+.ai-assistant__card--customer-statement {
+  background: var(--mds-color-theme-background-primary-normal, #fff);
+  border: 0.0625rem solid var(--mds-color-theme-outline-secondary-normal, #c7c7c7);
+}
+
+// Scoped overrides for elements emitted by the adaptivecards renderer.
+.ai-assistant__card-host {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+
+  // Adaptive Cards can emit inline font-family declarations (including
+  // monospace). Keep card copy aligned with Momentum/Cisco typography.
+  &,
+  * {
+    font-family: inherit !important;
+  }
+
+  // Force primary text color — backend ships accent/attention TextBlocks we don't want as alerts.
+  &,
+  .ac-textBlock,
+  .ac-richTextBlock {
+    color: var(--mds-color-theme-text-primary-normal);
+  }
+
+  button,
+  .ac-pushButton,
+  .ac-action-showCard,
+  .ac-actionSet button {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0.25rem;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.05);
+      border: none;
+    }
+
+    &:focus-visible {
+      outline: 0.125rem solid var(--mds-color-theme-outline-focus-default, #0087ea);
+      outline-offset: 0.125rem;
+    }
+
+    // Match the compact action size in the AI Assistant design.
+    img {
+      // Adaptive Cards writes dimensions inline, so these scoped overrides
+      // need precedence to keep all disclosure and feedback icons at 16px.
+      height: 1rem !important;
+      width: 1rem !important;
+    }
+  }
+
+  // Source disclosure row: flatten the toggle button.
+  .ac-action-toggleVisibility,
+  [aria-expanded] {
+    background: transparent;
+    border: none;
+  }
+
+  [id='input-timestamp-richTextBlock'],
+  [id='input-timestamp-richTextBlock'] * {
+    color: var(--mds-color-theme-text-accent-normal, #0051af) !important;
+    text-decoration: underline;
+    text-underline-offset: 0.125rem;
+  }
+
+  // Copy confirmation pill — green circle, white check.
+  [data-copied='true'] {
+    background: var(--mds-color-theme-background-success-normal, #2eb872);
+    border-radius: 62.4375rem;
+    transition: background 0.15s ease-out;
+
+    img {
+      filter: brightness(0) invert(1);
+    }
+  }
+}
+
+.ai-assistant__card-error {
+  color: var(--mds-color-theme-text-error-normal);
+  font-size: 0.875rem;
+}
+
+.ai-assistant__card-fallback {
+  color: var(--mds-color-theme-text-primary-normal);
+  font-size: 0.9375rem;
+  line-height: 1.4;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.ai-assistant__chat-listening {
+  align-items: center;
+  color: var(--mds-color-theme-text-primary-normal);
+  display: flex;
+  font-weight: 600;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+}
+
+.ai-assistant__chat-listening-dots {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.1875rem;
+}
+
+.ai-assistant__chat-listening-dot {
+  animation: ai-assistant-listening-pulse 1.2s ease-in-out infinite;
+  background: var(--mds-color-theme-text-accent-normal, #0087ea);
+  border-radius: 50%;
+  height: 0.3125rem;
+  opacity: 0.3;
+  width: 0.3125rem;
+
+  &:nth-child(2) {
+    animation-delay: 0.15s;
+  }
+
+  &:nth-child(3) {
+    animation-delay: 0.3s;
+  }
+}
+
+@keyframes ai-assistant-listening-pulse {
+  0%,
+  80%,
+  100% {
+    opacity: 0.3;
+    transform: scale(0.7);
+  }
+
+  40% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ai-assistant__chat-listening-dot {
+    animation: none;
+    opacity: 0.7;
+    transform: none;
+  }
+}
+
+.ai-assistant__footer {
+  border-top: 0.0625rem solid var(--mds-color-theme-outline-secondary-normal);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem 1.125rem;
+}
+
+.ai-assistant__disclaimer {
+  color: var(--mds-color-theme-text-secondary-normal);
+  font-size: 0.8125rem;
+  margin: 0;
+  text-align: center;
+}
+
+.ai-assistant__context {
+  align-items: center;
+  display: flex;
+  flex-shrink: 0;
+  gap: 0.5rem;
+}
+
+.ai-assistant__context-input {
+  border-radius: 1.5rem;
+  flex: 1;
+
+  &::part(mdc-input-base-container) {
+    border-radius: 1.5rem;
+  }
+
+  &::part(mdc-input) {
+    border-radius: 1.5rem;
+  }
+}

@@ -173,8 +173,8 @@ describe('versionAndPublish', () => {
     mockFs.readFileSync.mockReturnValueOnce(packageJsonContent).mockReturnValueOnce(packageJsonContent2);
     mockFs.writeFileSync.mockImplementation(() => {});
 
-    const mockExecSync = require('child_process').execSync;
-    mockExecSync.mockImplementation(() => {});
+    const mockExecFileSync = require('child_process').execFileSync;
+    mockExecFileSync.mockImplementation(() => {});
 
     const processArgvMock = ['node', 'script.js', 'main', '1.0.1'];
     process.argv = processArgvMock;
@@ -195,12 +195,18 @@ describe('versionAndPublish', () => {
       'utf-8'
     );
 
-    expect(mockExecSync).toHaveBeenNthCalledWith(1, 'yarn workspace @webex/cc-store npm publish --tag main', {
-      stdio: 'inherit',
-    });
-    expect(mockExecSync).toHaveBeenNthCalledWith(2, 'yarn workspace @webex/cc-station-login npm publish --tag main', {
-      stdio: 'inherit',
-    });
+    expect(mockExecFileSync).toHaveBeenNthCalledWith(
+      1,
+      'yarn',
+      ['workspace', '@webex/cc-store', 'npm', 'publish', '--tag', 'main'],
+      {stdio: 'inherit'}
+    );
+    expect(mockExecFileSync).toHaveBeenNthCalledWith(
+      2,
+      'yarn',
+      ['workspace', '@webex/cc-station-login', 'npm', 'publish', '--tag', 'main'],
+      {stdio: 'inherit'}
+    );
   });
 
   it('should not publish packages in deny list P.S we only have test-fixtures in deny list right now', () => {
@@ -221,8 +227,8 @@ describe('versionAndPublish', () => {
     mockFs.readFileSync.mockReturnValueOnce(packageJsonContent).mockReturnValueOnce(packageJsonContent2);
     mockFs.writeFileSync.mockImplementation(() => {});
 
-    const mockExecSync = require('child_process').execSync;
-    mockExecSync.mockImplementation(() => {});
+    const mockExecFileSync = require('child_process').execFileSync;
+    mockExecFileSync.mockImplementation(() => {});
 
     const processArgvMock = ['node', 'script.js', 'main', '1.0.1'];
     process.argv = processArgvMock;
@@ -243,12 +249,17 @@ describe('versionAndPublish', () => {
       'utf-8'
     );
 
-    expect(mockExecSync).not.toHaveBeenCalledWith('yarn workspace @webex/test-fixtures npm publish --tag main', {
-      stdio: 'inherit',
-    });
-    expect(mockExecSync).toHaveBeenNthCalledWith(1, 'yarn workspace @webex/cc-station-login npm publish --tag main', {
-      stdio: 'inherit',
-    });
+    expect(mockExecFileSync).not.toHaveBeenCalledWith(
+      'yarn',
+      ['workspace', '@webex/test-fixtures', 'npm', 'publish', '--tag', 'main'],
+      {stdio: 'inherit'}
+    );
+    expect(mockExecFileSync).toHaveBeenNthCalledWith(
+      1,
+      'yarn',
+      ['workspace', '@webex/cc-station-login', 'npm', 'publish', '--tag', 'main'],
+      {stdio: 'inherit'}
+    );
   });
 
   it('error occurred while reading package.json data', () => {
@@ -261,14 +272,65 @@ describe('versionAndPublish', () => {
       throw new Error('Error while reading from file');
     });
 
-    const mockExecSync = require('child_process').execSync;
+    const mockExecFileSync = require('child_process').execFileSync;
 
     const processArgvMock = ['node', 'script.js', 'main', '1.0.1'];
     process.argv = processArgvMock;
 
     versionAndPublish();
     expect(console.error).toHaveBeenCalledWith('Failed to process workspaces:', 'Error while reading from file');
-    expect(mockExecSync).not.toHaveBeenCalled();
+    expect(mockExecFileSync).not.toHaveBeenCalled();
+  });
+
+  it('WF-02: rejects a malicious branchName containing shell metacharacters', () => {
+    const packageJsonContent = JSON.stringify({
+      name: '@webex/cc-store',
+      version: '1.0.0',
+    });
+
+    mockFs.readdirSync.mockReturnValue([{name: 'store', isDirectory: () => true}]);
+    mockFs.readFileSync.mockReturnValue(packageJsonContent);
+    mockFs.writeFileSync.mockImplementation(() => {});
+
+    const mockExecFileSync = require('child_process').execFileSync;
+    mockExecFileSync.mockImplementation(() => {});
+
+    // A tag with shell metacharacters must be rejected before any publish call
+    process.argv = ['node', 'script.js', 'main; rm -rf /', '1.0.1'];
+
+    versionAndPublish();
+
+    expect(console.error).toHaveBeenCalledWith(
+      expect.stringContaining('Error')
+    );
+    expect(process.exit).toHaveBeenCalledWith(1);
+    expect(mockExecFileSync).not.toHaveBeenCalled();
+  });
+
+  it('WF-01: rejects a workspace name containing shell metacharacters', () => {
+    const packageJsonContent = JSON.stringify({
+      name: '@webex/cc-store$(malicious)',
+      version: '1.0.0',
+    });
+
+    mockFs.readdirSync.mockReturnValue([{name: 'store', isDirectory: () => true}]);
+    mockFs.readFileSync.mockReturnValue(packageJsonContent);
+    mockFs.writeFileSync.mockImplementation(() => {});
+
+    const mockExecFileSync = require('child_process').execFileSync;
+    mockExecFileSync.mockImplementation(() => {});
+
+    process.argv = ['node', 'script.js', 'main', '1.0.1'];
+
+    versionAndPublish();
+
+    // The malicious workspace should either be rejected (process.exit) or
+    // skipped without ever being passed to execFileSync
+    expect(mockExecFileSync).not.toHaveBeenCalledWith(
+      'yarn',
+      expect.arrayContaining(['@webex/cc-store$(malicious)']),
+      expect.anything()
+    );
   });
 
   it('should export versionAndPublish when required as a module', () => {
@@ -289,7 +351,7 @@ describe('versionAndPublish', () => {
       throw new Error('Error while reading from file');
     });
 
-    const mockExecSync = require('child_process').execSync;
+    const mockExecFileSync = require('child_process').execFileSync;
 
     const processArgvMock = ['node', 'script.js', 'main', '1.0.1'];
     process.argv = processArgvMock;
@@ -299,6 +361,6 @@ describe('versionAndPublish', () => {
     versionAndPublish();
 
     expect(console.error).toHaveBeenCalledWith('Failed to process workspaces:', 'package.json not found in store');
-    expect(mockExecSync).not.toHaveBeenCalled();
+    expect(mockExecFileSync).not.toHaveBeenCalled();
   });
 });

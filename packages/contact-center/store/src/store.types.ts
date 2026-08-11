@@ -25,6 +25,7 @@ import {
   getDefaultUIControls,
   TaskResponse,
 } from '@webex/contact-center';
+import type {RealTimeAssistanceParams} from 'node_modules/@webex/contact-center/dist/types/types';
 import {
   OutdialAniEntriesResponse,
   OutdialAniParams,
@@ -74,7 +75,42 @@ interface IContactCenter {
   skipPreviewContact(payload: PreviewContactPayload): Promise<TaskResponse>;
   removePreviewContact(payload: PreviewContactPayload): Promise<TaskResponse>;
   userPreference?: IUserPreferenceService;
+  apiAIAssistant?: {
+    getRealTimeAssistance(params: RealTimeAssistRequestParams & {actionTimeStamp?: number}): Promise<unknown>;
+    sendRealTimeAssistanceUserAction(params: RealTimeAssistUserActionParams): Promise<unknown>;
+  };
 }
+
+type RealTimeAssistRequestParams = RealTimeAssistanceParams;
+
+type RealTimeAssistUserActionId = string;
+
+type RealTimeAssistUserActionParams = {
+  agentId: string;
+  interactionId: string;
+  adaptiveCardId: string;
+  actionId: RealTimeAssistUserActionId;
+  languageCode?: string;
+};
+
+type RealTimeAssistPayload = {
+  agentId?: string;
+  data: {
+    adaptiveCard: unknown;
+    adaptiveCardId?: string;
+    title?: string;
+    suggestion?: string;
+    conversationId?: string;
+    trackingId?: string;
+    publishTimestamp?: number | string;
+    [key: string]: unknown;
+  };
+  notifDetails?: {
+    actionEvent?: string;
+  };
+  notifType?: string;
+  orgId?: string;
+};
 //  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
 type IWebex = {
   cc: IContactCenter;
@@ -170,6 +206,7 @@ interface IStore {
   acceptedCampaignIds: Set<string>;
   showE911Modal: boolean;
   isEmergencyModalAlreadyDisplayed: boolean;
+  realTimeAssist: Record<string, RealTimeAssistPayload[]>;
   init(params: InitParams, callback: (ccSDK: IContactCenter) => void): Promise<void>;
   registerCC(webex?: WithWebex['webex']): Promise<void>;
 }
@@ -208,6 +245,7 @@ interface IStoreWrapper extends IStore {
   setIsEmergencyModalAlreadyDisplayed(value: boolean): void;
   fetchUserPreferences(): Promise<void>;
   updateEmergencyModalAcknowledgment(): Promise<void>;
+  clearRealTimeAssist(interactionId: string): void;
 }
 
 interface IWrapupCode {
@@ -340,6 +378,10 @@ export type {
   TaskUILeg,
   RealTimeTranscriptionData,
   RealTimeTranscriptionEventPayload,
+  RealTimeAssistPayload,
+  RealTimeAssistRequestParams,
+  RealTimeAssistUserActionId,
+  RealTimeAssistUserActionParams,
 };
 
 export {

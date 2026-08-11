@@ -9,6 +9,7 @@ import {
   store,
   OutdialCall,
   RealTimeTranscript,
+  AIAssistant,
 } from '@webex/cc-widgets';
 import {StationLogoutResponse} from '@webex/contact-center';
 import {ERROR_TRIGGERING_IDLE_CODES} from '@webex/cc-store';
@@ -28,10 +29,6 @@ import './App.scss';
 import {observer} from 'mobx-react-lite';
 import EngageWidget from './EngageWidget';
 
-// This is not to be included to a production app.
-// Have added here for debugging purposes
-window['store'] = store;
-
 const defaultWidgets = {
   stationLogin: true,
   stationLoginProfile: false,
@@ -42,6 +39,7 @@ const defaultWidgets = {
   callControlCAD: true,
   outdialCall: true,
   realtimeTranscript: true,
+  aiAssistant: false,
 };
 
 function App() {
@@ -105,6 +103,9 @@ function App() {
   const isWidgetDisabledByWebRTC = (widget: string) =>
     isWebRTCWidgetSelectionLocked && WEBRTC_DEPENDENT_WIDGETS.includes(widget);
 
+  // AI Assistant fullscreen state — the widget reports toggles, the host decides the layout.
+  const [isAIAssistantFullScreen, setIsAIAssistantFullScreen] = useState(false);
+
   const handleSaveStart = () => {
     setShowLoader(true);
     setToast(null);
@@ -126,21 +127,18 @@ function App() {
   };
 
   useEffect(() => {
+    // Remove token persisted by older sample builds — no longer read or written (SPARK-833336)
+    window.localStorage.removeItem('accessToken');
+
     if (window.location.hash) {
       const urlParams = new URLSearchParams(window.location.hash.replace('#', '?'));
 
       const accessToken = urlParams.get('access_token');
 
       if (accessToken) {
-        window.localStorage.setItem('accessToken', accessToken);
         setAccessToken(accessToken);
         // Clear the hash from the URL to remove the token from browser history
         window.history.replaceState({}, document.title, window.location.pathname + window.location.search);
-      }
-    } else {
-      const storedAccessToken = window.localStorage.getItem('accessToken');
-      if (storedAccessToken) {
-        setAccessToken(storedAccessToken);
       }
     }
   }, []);
@@ -374,13 +372,6 @@ function App() {
     });
   };
 
-  // Store accessToken changes in local storage
-  useEffect(() => {
-    if (accessToken.trim() !== '') {
-      window.localStorage.setItem('accessToken', accessToken);
-    }
-  }, [accessToken]);
-
   useEffect(() => {
     window.localStorage.setItem('selectedWidgets', JSON.stringify(selectedWidgets));
   }, [selectedWidgets]);
@@ -585,41 +576,39 @@ function App() {
                     <legend className="legend-box">&nbsp;Select Widgets to Show&nbsp;</legend>
                     <div className="widget-checkboxes">
                       {Object.keys(defaultWidgets).map((widget) => (
-                        <>
-                          <label key={widget}>
-                            <input
-                              type="checkbox"
-                              name={widget}
-                              checked={selectedWidgets[widget]}
-                              onChange={handleCheckboxChange}
-                              disabled={isWidgetDisabledByWebRTC(widget)}
-                              data-testid={`samples:widget-${widget}`}
-                            />
-                            &nbsp;
-                            {formatWidgetName(widget)}&nbsp;
-                            {widget === 'outdialCall' && (
-                              <span style={{display: 'inline-flex', alignItems: 'center'}}>
-                                <PopoverNext
-                                  trigger="mouseenter"
-                                  triggerComponent={<Icon name="info-badge-filled" />}
-                                  placement="auto-end"
-                                  closeButtonPlacement="top-left"
-                                  closeButtonProps={{'aria-label': 'Close'}}
-                                >
-                                  <Text>
-                                    <div
-                                      style={{color: 'var(--mds-color-theme-text-error-normal)', marginBottom: '10px'}}
-                                    >
-                                      <strong>Note:</strong> When a number is dialed, the agent gets an incoming task to
-                                      accept via an Extension, Dial Number, or Browser. It is recommended to have the
-                                      incoming task/task list widget and call controls widget according to your needs.
-                                    </div>
-                                  </Text>
-                                </PopoverNext>
-                              </span>
-                            )}
-                          </label>
-                        </>
+                        <label key={widget}>
+                          <input
+                            type="checkbox"
+                            name={widget}
+                            checked={selectedWidgets[widget]}
+                            onChange={handleCheckboxChange}
+                            disabled={isWidgetDisabledByWebRTC(widget)}
+                            data-testid={`samples:widget-${widget}`}
+                          />
+                          &nbsp;
+                          {formatWidgetName(widget)}&nbsp;
+                          {widget === 'outdialCall' && (
+                            <span style={{display: 'inline-flex', alignItems: 'center'}}>
+                              <PopoverNext
+                                trigger="mouseenter"
+                                triggerComponent={<Icon name="info-badge-filled" />}
+                                placement="auto-end"
+                                closeButtonPlacement="top-left"
+                                closeButtonProps={{'aria-label': 'Close'}}
+                              >
+                                <Text>
+                                  <div
+                                    style={{color: 'var(--mds-color-theme-text-error-normal)', marginBottom: '10px'}}
+                                  >
+                                    <strong>Note:</strong> When a number is dialed, the agent gets an incoming task to
+                                    accept via an Extension, Dial Number, or Browser. It is recommended to have the
+                                    incoming task/task list widget and call controls widget according to your needs.
+                                  </div>
+                                </Text>
+                              </PopoverNext>
+                            </span>
+                          )}
+                        </label>
                       ))}
                     </div>
                   </fieldset>
@@ -1107,6 +1096,30 @@ function App() {
                               onchange={() => setIsAddressBookEnabled(!isAddressBookEnabled)}
                             />
                             <OutdialCall isAddressBookEnabled={isAddressBookEnabled} />
+                          </fieldset>
+                        </section>
+                      </div>
+                    )}
+                    {selectedWidgets.aiAssistant && (
+                      <div className="box">
+                        <section className="section-box">
+                          <fieldset className="fieldset">
+                            <legend className="legend-box">AI Assistant</legend>
+                            <AIAssistant
+                              className={isAIAssistantFullScreen ? 'ai-assistant--host-full' : undefined}
+                              onOpen={() => console.log('AIAssistant opened')}
+                              onMinimize={() => console.log('AIAssistant minimized')}
+                              onRestore={() => console.log('AIAssistant restored')}
+                              onClose={() => {
+                                setIsAIAssistantFullScreen(false);
+                                console.log('AIAssistant closed');
+                              }}
+                              onFullScreenToggle={(isFs) => {
+                                setIsAIAssistantFullScreen(isFs);
+                                console.log('AIAssistant fullScreen', isFs);
+                              }}
+                              onRealTimeAssistReceived={(payload) => console.log('AIAssistant suggestion', payload)}
+                            />
                           </fieldset>
                         </section>
                       </div>

@@ -956,6 +956,76 @@ describe('CallControl Utils', () => {
       expect(mockSetIsRecording).toHaveBeenCalledWith(true);
     });
 
+    // The SDK's taskDataNormalizer coerces callProcessingDetails flags to real
+    // booleans before widgets ever see them.
+    it('should handle isPaused as boolean true from the SDK', () => {
+      const taskWithBooleanPaused = {
+        ...mockCurrentTask,
+        data: {
+          ...mockCurrentTask.data,
+          interaction: {
+            ...mockCurrentTask.data.interaction,
+            callProcessingDetails: {isPaused: true},
+          },
+        },
+      };
+
+      updateCallStateFromTask(taskWithBooleanPaused as unknown as ITask, mockSetIsRecording);
+
+      expect(mockSetIsRecording).toHaveBeenCalledWith(false);
+    });
+
+    it('should handle isPaused as boolean false from the SDK', () => {
+      const taskWithBooleanNotPaused = {
+        ...mockCurrentTask,
+        data: {
+          ...mockCurrentTask.data,
+          interaction: {
+            ...mockCurrentTask.data.interaction,
+            callProcessingDetails: {isPaused: false},
+          },
+        },
+      };
+
+      updateCallStateFromTask(taskWithBooleanNotPaused as unknown as ITask, mockSetIsRecording);
+
+      expect(mockSetIsRecording).toHaveBeenCalledWith(true);
+    });
+
+    it('should fall back to recordInProgress when isPaused is absent', () => {
+      const taskWithoutIsPaused = {
+        ...mockCurrentTask,
+        data: {
+          ...mockCurrentTask.data,
+          interaction: {
+            ...mockCurrentTask.data.interaction,
+            callProcessingDetails: {recordingStarted: true, recordInProgress: false},
+          },
+        },
+      };
+
+      updateCallStateFromTask(taskWithoutIsPaused as unknown as ITask, mockSetIsRecording);
+
+      expect(mockSetIsRecording).toHaveBeenCalledWith(false);
+    });
+
+    it('should not change recording state when no recording flags are present', () => {
+      const taskWithUnrelatedDetails = {
+        ...mockCurrentTask,
+        data: {
+          ...mockCurrentTask.data,
+          interaction: {
+            ...mockCurrentTask.data.interaction,
+            callProcessingDetails: {pauseResumeEnabled: true},
+          },
+        },
+      };
+
+      updateCallStateFromTask(taskWithUnrelatedDetails as unknown as ITask, mockSetIsRecording);
+
+      expect(mockSetIsRecording).not.toHaveBeenCalled();
+    });
+
     it('should return early when currentTask is null', () => {
       updateCallStateFromTask(null as unknown as ITask, mockSetIsRecording);
 
