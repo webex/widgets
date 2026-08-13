@@ -512,10 +512,10 @@ describe('storeEventsWrapper', () => {
         expect(storeWrapper.removeTaskCallback).toBeInstanceOf(Function);
 
         storeWrapper.removeTaskCallback(TASK_EVENTS.TASK_ASSIGNED, undefined, mockTask);
-        expect(mockTask.on).not.toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, mockCb);
+        expect(mockTask.off).not.toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, mockCb);
 
         storeWrapper.removeTaskCallback(TASK_EVENTS.TASK_ASSIGNED, mockCb, null);
-        expect(mockTask.on).not.toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, mockCb);
+        expect(mockTask.off).not.toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, mockCb);
       });
 
       it('should remove task callback even when task is absent from store.taskList', () => {

@@ -794,10 +794,10 @@ describe('useCallControl', () => {
     const onSpy = jest.spyOn(mockCurrentTask, 'on');
 
     // Mock the implementation of setTaskCallback to also call the onSpy for testing
-    setTaskCallbackSpy.mockImplementation((event, callback) => {
+    setTaskCallbackSpy.mockImplementation((event, callback, task) => {
       // Skip calling original implementation to avoid recursion
-      // Just register directly on task for test visibility
-      mockCurrentTask.on(event, callback);
+      // Just register directly on the passed-in task for test visibility
+      task.on(event, callback);
     });
 
     const {unmount} = renderHook(() =>
@@ -815,6 +815,7 @@ describe('useCallControl', () => {
 
     // 7 store callbacks + TASK_UI_CONTROLS_UPDATED + TASK_SWITCH_CALL + TASK_HOLD + TASK_RESUME on task
     expect(onSpy).toHaveBeenCalledTimes(11);
+    expect(setTaskCallbackSpy).toHaveBeenCalledWith(expect.any(String), expect.any(Function), mockCurrentTask);
 
     // Unmount the component
     act(() => {
