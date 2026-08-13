@@ -289,6 +289,11 @@ export interface ControlProps {
   toggleMute: () => void;
 
   /**
+   * Sends a DTMF tone on wxApp engaged telephony calls.
+   */
+  sendDtmf: (digit: string) => void;
+
+  /**
    * Function to handle ending the call.
    */
   endCall: () => void;
@@ -525,6 +530,7 @@ export type CallControlComponentProps = Pick<
   | 'toggleHold'
   | 'toggleRecording'
   | 'toggleMute'
+  | 'sendDtmf'
   | 'isMuted'
   | 'endCall'
   | 'wrapupCall'
@@ -709,7 +715,7 @@ export interface CallControlConsultComponentsProps {
 /**
  * Type representing the possible menu types in call control.
  */
-export type CallControlMenuType = 'Consult' | 'Transfer' | 'ExitConference';
+export type CallControlMenuType = 'Consult' | 'Transfer' | 'ExitConference' | 'Keypad';
 
 export const MEDIA_CHANNEL = {
   EMAIL: 'email',

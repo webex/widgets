@@ -127,6 +127,7 @@ describe('CallControlCADComponent Snapshots', () => {
     toggleHold: jest.fn(),
     toggleRecording: jest.fn(),
     toggleMute: jest.fn(),
+    sendDtmf: jest.fn(),
     isMuted: false,
     endCall: jest.fn(),
     wrapupCall: jest.fn(),

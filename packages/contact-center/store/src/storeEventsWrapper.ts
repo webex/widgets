@@ -54,6 +54,7 @@ class StoreWrapper implements IStoreWrapper {
   // replacement task object (task:hydrate / task:merged) gets rebound.
   private realTimeAssistListeners: Record<string, {task: ITask; listener: (payload: RealTimeAssistPayload) => void}> =
     {};
+  private wxAppMuteStateListeners: Record<string, (payload: {muted: boolean}) => void> = {};
 
   constructor() {
     this.store = Store.getInstance();
@@ -503,6 +504,10 @@ class StoreWrapper implements IStoreWrapper {
       taskToRemove.off(TASK_EVENTS.TASK_REJECT, (reason) => this.handleTaskReject(taskToRemove, reason));
       taskToRemove.off(TASK_EVENTS.TASK_OUTDIAL_FAILED, (reason) => this.handleOutdialFailed(reason));
       taskToRemove.off(TASK_EVENTS.TASK_UI_CONTROLS_UPDATED, this.handleUIControlsUpdated);
+      if (taskId && this.wxAppMuteStateListeners[taskId]) {
+        taskToRemove.off(TASK_EVENTS.TASK_WXAPP_MUTE_STATE_UPDATED, this.wxAppMuteStateListeners[taskId]);
+        delete this.wxAppMuteStateListeners[taskId];
+      }
       taskToRemove.off(TASK_EVENTS.TASK_WRAPPEDUP, this.refreshTaskList);
       taskToRemove.off(TASK_EVENTS.TASK_CONSULT_CREATED, this.handleConsultCreated);
       taskToRemove.off(TASK_EVENTS.TASK_OFFER_CONTACT, this.refreshTaskList);
@@ -558,6 +563,7 @@ class StoreWrapper implements IStoreWrapper {
       }
       if (taskToRemove && this.store.currentTask?.data.interactionId === taskToRemove.data.interactionId) {
         this.setCurrentTask(null);
+        this.setIsMuted(false);
       }
 
       this.setState({
@@ -568,11 +574,12 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   handleTaskMuteState = (task: ITask): void => {
-    const isBrowser = this.deviceType === DEVICE_TYPE_BROWSER;
-    const webRtcEnabled = this.featureFlags?.webRtcEnabled;
     const isTelephony = task?.data?.interaction?.mediaType === MEDIA_TYPE_TELEPHONY_LOWER;
 
-    if (isBrowser && isTelephony && webRtcEnabled) {
+    // Each new telephony offer starts unmuted on Webex App / WebRTC media.
+    // Widgets track mute locally in store.isMuted — reset so a prior call's mute
+    // state does not leak into the next interaction (WXCC-6026 wxApp thick-client).
+    if (isTelephony) {
       this.setIsMuted(false);
     }
   };
@@ -799,6 +806,7 @@ class StoreWrapper implements IStoreWrapper {
 
   handleTaskEnd = () => {
     this.setIsDeclineButtonEnabled(false);
+    this.setIsMuted(false);
 
     this.refreshTaskList();
   };
@@ -931,6 +939,12 @@ class StoreWrapper implements IStoreWrapper {
     this.refreshTaskList();
   };
 
+  handleWxAppMuteStateUpdated = (payload: {muted: boolean}, task: ITask) => {
+    if (this.currentTask?.data?.interactionId === task.data?.interactionId) {
+      this.setIsMuted(payload.muted);
+    }
+  };
+
   handleSwitchCall = () => {
     this.refreshTaskList();
   };
@@ -982,6 +996,11 @@ class StoreWrapper implements IStoreWrapper {
     task.on(TASK_EVENTS.TASK_CAMPAIGN_CONTACT_UPDATED, this.refreshTaskList);
 
     const taskId = task.data?.interactionId;
+    if (taskId && !this.wxAppMuteStateListeners[taskId]) {
+      const wxAppMuteListener = (payload: {muted: boolean}) => this.handleWxAppMuteStateUpdated(payload, task);
+      this.wxAppMuteStateListeners[taskId] = wxAppMuteListener;
+      task.on(TASK_EVENTS.TASK_WXAPP_MUTE_STATE_UPDATED, wxAppMuteListener);
+    }
     if (taskId && !this.realtimeTranscriptionListeners[taskId]) {
       this.realtimeTranscriptionListeners[taskId] = (payload: RealTimeTranscriptionEventPayload) =>
         this.handleRealtimeTranscription(payload);

@@ -8,9 +8,15 @@ import '@testing-library/jest-dom';
 
 // Mock the store
 jest.mock('@webex/cc-store', () => ({
-  cc: {},
-  deviceType: 'BROWSER',
-  dialNumber: '12345',
+  __esModule: true,
+  default: {
+    cc: {},
+    deviceType: 'BROWSER',
+    dialNumber: '12345',
+    taskList: {},
+    isDeclineButtonEnabled: false,
+    logger: undefined,
+  },
 }));
 
 const onAcceptedCb = jest.fn();
@@ -19,11 +25,35 @@ const onRejectedCb = jest.fn();
 describe('IncomingTask Component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    store.taskList = {};
     // Suppress console.error for error boundary tests
     jest.spyOn(console, 'error').mockImplementation(() => {});
   });
   afterEach(() => {
     jest.restoreAllMocks();
+  });
+
+  it('prefers live task from store.taskList over incoming prop snapshot', () => {
+    const useIncomingTaskSpy = jest.spyOn(helper, 'useIncomingTask');
+    useIncomingTaskSpy.mockReturnValue({
+      incomingTask: mockTask,
+      accept: jest.fn(),
+      reject: jest.fn(),
+      acceptControl: {isVisible: true, isEnabled: true},
+      declineControl: {isVisible: true, isEnabled: true},
+    });
+
+    const staleTask = {...mockTask, uiControls: {main: {accept: {isVisible: true, isEnabled: false}}}};
+    const liveTask = {...mockTask, uiControls: {main: {accept: {isVisible: true, isEnabled: true}}}};
+    store.taskList = {[mockTask.data.interactionId]: liveTask as typeof mockTask};
+
+    render(<IncomingTask incomingTask={staleTask} onAccepted={onAcceptedCb} onRejected={onRejectedCb} />);
+
+    expect(useIncomingTaskSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        incomingTask: liveTask,
+      })
+    );
   });
 
   it('renders IncomingTaskPresentational with correct props', () => {

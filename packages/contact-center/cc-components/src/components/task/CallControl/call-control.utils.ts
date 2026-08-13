@@ -3,6 +3,7 @@ import type {CallControlButton, MEDIA_CHANNEL as MediaChannelType, MediaTypeInfo
 import type {TaskUIControls} from '@webex/cc-store';
 import {getMediaTypeInfo} from '../../../utils';
 import {DestinationType, ILogger, ITask} from '@webex/cc-store';
+
 import {
   RESUME_CALL,
   HOLD_CALL,
@@ -14,6 +15,11 @@ import {
   MUTE_CALL,
   UNMUTE_CALL,
 } from '../constants';
+
+/** SDK P0 keypad control — may exist on main leg before InteractionUIControls ships keypad. */
+type TaskMainControlsWithKeypad = TaskUIControls['main'] & {
+  keypad?: {isVisible: boolean; isEnabled: boolean};
+};
 
 /**
  * Handles toggle hold functionality
@@ -204,7 +210,7 @@ export const buildCallControlButtons = (
   conferenceEnabled = true
 ): CallControlButton[] => {
   try {
-    const mainCtrl = controls?.main;
+    const mainCtrl = controls?.main as TaskMainControlsWithKeypad | undefined;
     const isTransferConferenceVisible = mainCtrl?.transferConference?.isVisible ?? false;
     const isTransferConferenceEnabled = mainCtrl?.transferConference?.isEnabled ?? false;
     const isTransferVisible = mainCtrl?.transfer?.isVisible ?? false;
@@ -228,6 +234,16 @@ export const buildCallControlButtons = (
         disabled: isMuteButtonDisabled || !(mainCtrl?.mute?.isEnabled ?? false),
         isVisible: mainCtrl?.mute?.isVisible ?? false,
         dataTestId: 'call-control:mute-toggle',
+      },
+      {
+        id: 'keypad',
+        icon: 'dialpad-bold',
+        tooltip: 'Keypad',
+        className: 'call-control-button',
+        disabled: !(mainCtrl?.keypad?.isEnabled ?? false),
+        isVisible: mainCtrl?.keypad?.isVisible ?? false,
+        menuType: 'Keypad',
+        dataTestId: 'call-control:keypad',
       },
       {
         id: 'switchToConsult',

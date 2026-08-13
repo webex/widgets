@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {
   StationLogin,
   UserState,
@@ -94,6 +94,8 @@ function App() {
     const savedDisableWebRTCRegistration = window.localStorage.getItem('disableWebRTCRegistration');
     return savedDisableWebRTCRegistration === 'true';
   });
+  const [enableAnswerOnWebex, setEnableAnswerOnWebex] = useState(false);
+  const wxAppPreferenceAppliedRef = useRef(false);
   const [isWebRTCWidgetSelectionLocked, setIsWebRTCWidgetSelectionLocked] = useState(() => {
     const savedDisableWebRTCRegistration = window.localStorage.getItem('disableWebRTCRegistration');
     return savedDisableWebRTCRegistration === 'true';
@@ -151,6 +153,7 @@ function App() {
     cc: {
       allowMultiLogin: isMultiLoginEnabled,
       disableWebRTCRegistration,
+      enableAnswerOnWebex: false,
     },
     ...(integrationEnv && {
       services: {
@@ -232,6 +235,25 @@ function App() {
       setIsMultiLoginEnabled(false);
     } else {
       setIsMultiLoginEnabled(true);
+    }
+  };
+
+  const handleEnableAnswerOnWebexChange = async () => {
+    const next = !enableAnswerOnWebex;
+
+    setEnableAnswerOnWebex(next);
+    window.localStorage.setItem('enableAnswerOnWebex', next ? 'true' : 'false');
+
+    if (!store.isAgentLoggedIn) {
+      return;
+    }
+
+    try {
+      await store.cc.setManageWebexCallingInWxcc(next);
+    } catch (error) {
+      console.error('setManageWebexCallingInWxcc failed:', error);
+      setEnableAnswerOnWebex(!next);
+      window.localStorage.setItem('enableAnswerOnWebex', !next ? 'true' : 'false');
     }
   };
 
@@ -395,6 +417,34 @@ function App() {
   useEffect(() => {
     window.localStorage.setItem('disableWebRTCRegistration', JSON.stringify(disableWebRTCRegistration));
   }, [disableWebRTCRegistration]);
+
+  useEffect(() => {
+    if (!isSdkReady || !store.isAgentLoggedIn) {
+      if (!store.isAgentLoggedIn) {
+        wxAppPreferenceAppliedRef.current = false;
+        setEnableAnswerOnWebex(false);
+      }
+
+      return;
+    }
+
+    if (wxAppPreferenceAppliedRef.current) {
+      return;
+    }
+
+    wxAppPreferenceAppliedRef.current = true;
+
+    const savedPreference = window.localStorage.getItem('enableAnswerOnWebex') === 'true';
+    if (!savedPreference) {
+      return;
+    }
+
+    setEnableAnswerOnWebex(true);
+    store.cc.setManageWebexCallingInWxcc(true).catch((error) => {
+      console.error('setManageWebexCallingInWxcc failed:', error);
+      setEnableAnswerOnWebex(false);
+    });
+  }, [isSdkReady, store.isAgentLoggedIn]);
 
   useEffect(() => {
     if (!disableWebRTCRegistration) {
@@ -950,6 +1000,53 @@ function App() {
                 )}
                 {(store.isAgentLoggedIn || isLoggedIn) && (
                   <>
+                    {store.isAgentLoggedIn && (
+                      <div className="box">
+                        <section className="section-box">
+                          <fieldset className="fieldset">
+                            <legend className="legend-box">&nbsp;Webex Calling (WxCC)&nbsp;</legend>
+                            <label style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
+                              <input
+                                data-testid="samples:enable-answer-on-webex-checkbox"
+                                type="checkbox"
+                                id="enableAnswerOnWebexFlag"
+                                name="enableAnswerOnWebexFlag"
+                                onChange={() => {
+                                  void handleEnableAnswerOnWebexChange();
+                                }}
+                                checked={enableAnswerOnWebex}
+                              />{' '}
+                              &nbsp; Enable Answer on Webex
+                              <PopoverNext
+                                trigger="mouseenter"
+                                triggerComponent={<Icon name="info-badge-filled" />}
+                                placement="auto-end"
+                                closeButtonPlacement="top-left"
+                                closeButtonProps={{'aria-label': 'Close'}}
+                              >
+                                <Text>
+                                  <div
+                                    className="warning-note"
+                                    style={{
+                                      color: 'var(--mds-color-theme-text-error-normal)',
+                                      marginBottom: '10px',
+                                      maxWidth: '320px',
+                                    }}
+                                  >
+                                    <strong>Note:</strong> Agent Desktop parity — available after station login. Toggling
+                                    ON calls <code>setManageWebexCallingInWxcc(true)</code> (usersub{' '}
+                                    <code>answer-calls-on-wxcc: true</code>); OFF publishes <code>false</code>. Enables
+                                    telephony Accept/Decline, mute, and DTMF keypad for wxApp calls. Do not enable with
+                                    Multi Login for production wxApp answer.
+                                  </div>
+                                </Text>
+                              </PopoverNext>
+                            </label>
+                          </fieldset>
+                        </section>
+                      </div>
+                    )}
+
                     {selectedWidgets.userState && (
                       <div className="box">
                         <section className="section-box">

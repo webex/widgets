@@ -27,6 +27,22 @@
   margin-top: 1rem;
 }
 
+.call-control-dtmf-keys {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  list-style: none;
+  padding: 0.5rem;
+  margin: 0;
+  min-width: 12rem;
+}
+
+.call-control-dtmf-key {
+  width: 100%;
+  min-height: 2.5rem;
+}
+
+
 .wrapup-group {
   display: flex;
   flex-direction: column;

@@ -5,6 +5,7 @@ import './call-control.styles.scss';
 import {PopoverNext, TooltipNext, Text, ButtonCircle} from '@momentum-ui/react-collaboration';
 import {Icon, Button, Select, Option} from '@momentum-design/components/dist/react';
 import ConsultTransferPopoverComponent from './CallControlCustom/consult-transfer-popover';
+import CallControlDtmfKeypad from './call-control-dtmf-keypad';
 import AutoWrapupTimer from '../AutoWrapupTimer/AutoWrapupTimer';
 import type {MEDIA_CHANNEL as MediaChannelType} from '../task.types';
 import {DestinationType} from '@webex/cc-store';
@@ -40,6 +41,7 @@ function CallControlComponent(props: CallControlComponentProps) {
     toggleHold,
     toggleRecording,
     toggleMute,
+    sendDtmf,
     isMuted,
     endCall,
     wrapupCall,
@@ -168,13 +170,15 @@ function CallControlComponent(props: CallControlComponentProps) {
                   <PopoverNext
                     key={index}
                     onShow={() => {
-                      logger.info(`CC-Widgets: CallControl: showing consult-transfer popover`, {
+                      logger.info(`CC-Widgets: CallControl: showing ${button.menuType} popover`, {
                         module: 'call-control.tsx',
                         method: 'onShowPopover',
                       });
                       setShowAgentMenu(true);
                       setAgentMenuType(button.menuType as CallControlMenuType);
-                      loadBuddyAgents();
+                      if (button.menuType !== 'Keypad') {
+                        loadBuddyAgents();
+                      }
                     }}
                     onHide={() => {
                       setShowAgentMenu(false);
@@ -219,7 +223,9 @@ function CallControlComponent(props: CallControlComponentProps) {
                       </TooltipNext>
                     }
                   >
-                    {showAgentMenu && agentMenuType === button.menuType ? (
+                    {showAgentMenu && agentMenuType === button.menuType && button.menuType === 'Keypad' ? (
+                      <CallControlDtmfKeypad onDigitPress={sendDtmf} logger={logger} />
+                    ) : showAgentMenu && agentMenuType === button.menuType ? (
                       <ConsultTransferPopoverComponent
                         heading={button.menuType}
                         buttonIcon={button.icon}

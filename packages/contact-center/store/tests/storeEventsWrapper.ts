@@ -688,6 +688,34 @@ describe('storeEventsWrapper', () => {
       expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_CONSULT_CREATED, expect.any(Function));
     });
 
+    describe('handleTaskMuteState', () => {
+      it('resets isMuted on new incoming telephony task for Extension login', () => {
+        storeWrapper['store'].deviceType = 'EXTENSION';
+        storeWrapper['store'].isMuted = true;
+
+        storeWrapper.handleTaskMuteState(mockTask);
+
+        expect(storeWrapper.isMuted).toBe(false);
+      });
+
+      it('resets isMuted when current task is removed after ending muted', () => {
+        storeWrapper['store'].isMuted = true;
+        storeWrapper['store'].currentTask = mockTask;
+
+        storeWrapper.handleTaskRemove(mockTask);
+
+        expect(storeWrapper.isMuted).toBe(false);
+      });
+
+      it('resets isMuted on task end', () => {
+        storeWrapper['store'].isMuted = true;
+
+        storeWrapper.handleTaskEnd();
+
+        expect(storeWrapper.isMuted).toBe(false);
+      });
+    });
+
     it('should call onErrorCallback and rethrow when store.init rejects with an Error', async () => {
       const cc = storeWrapper['store'].cc;
       const logger = storeWrapper['store'].logger;
@@ -945,6 +973,59 @@ describe('storeEventsWrapper', () => {
       storeWrapper.handleTaskRemove(task);
       expect(task.off).toHaveBeenCalledWith('SUGGESTED_RESPONSE', listenerCalls[0][1]);
       expect(storeWrapper.realTimeAssist[interactionId]).toBeUndefined();
+    });
+
+    it('should update isMuted for current task on TASK_WXAPP_MUTE_STATE_UPDATED', () => {
+      const interactionId = 'interaction-wxapp-mute';
+      const task = makeMockTask({
+        data: {interactionId, interaction: {state: 'connected'}},
+      });
+      storeWrapper['store'].currentTask = task;
+      const setIsMutedSpy = jest.spyOn(storeWrapper, 'setIsMuted');
+
+      storeWrapper.handleWxAppMuteStateUpdated({muted: true}, task);
+
+      expect(setIsMutedSpy).toHaveBeenCalledWith(true);
+    });
+
+    it('should ignore TASK_WXAPP_MUTE_STATE_UPDATED for non-current task', () => {
+      const task = makeMockTask({
+        data: {interactionId: 'interaction-wxapp-mute', interaction: {state: 'connected'}},
+      });
+      storeWrapper['store'].currentTask = makeMockTask({
+        data: {interactionId: 'other-interaction', interaction: {state: 'connected'}},
+      });
+      const setIsMutedSpy = jest.spyOn(storeWrapper, 'setIsMuted');
+
+      storeWrapper.handleWxAppMuteStateUpdated({muted: true}, task);
+
+      expect(setIsMutedSpy).not.toHaveBeenCalled();
+    });
+
+    it('should register one wxApp mute listener and remove it with the task', () => {
+      const interactionId = 'interaction-wxapp-mute-listener';
+      const task = makeMockTask({
+        data: {interactionId, interaction: {state: 'connected'}},
+      });
+      const registerTaskEventListeners = storeWrapper as unknown as {
+        registerTaskEventListeners: (taskToRegister: ITask) => void;
+      };
+
+      registerTaskEventListeners.registerTaskEventListeners(task);
+      registerTaskEventListeners.registerTaskEventListeners(task);
+
+      const listenerCalls = (task.on as jest.Mock).mock.calls.filter(
+        ([event]) => event === TASK_EVENTS.TASK_WXAPP_MUTE_STATE_UPDATED
+      );
+      expect(listenerCalls).toHaveLength(1);
+
+      storeWrapper['store'].currentTask = task;
+      const setIsMutedSpy = jest.spyOn(storeWrapper, 'setIsMuted');
+      listenerCalls[0][1]({muted: false});
+      expect(setIsMutedSpy).toHaveBeenCalledWith(false);
+
+      storeWrapper.handleTaskRemove(task);
+      expect(task.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_WXAPP_MUTE_STATE_UPDATED, listenerCalls[0][1]);
     });
 
     it('should handle task removal', () => {

@@ -445,7 +445,7 @@ describe('CallControl Utils', () => {
         jest.fn() // mergeConference
       );
 
-      expect(buttons).toHaveLength(10); // Updated to 10 to include switchToConsult, transferConsult, and conference buttons
+      expect(buttons).toHaveLength(11); // Includes keypad (WXCC-6026), switchToConsult, transferConsult, and conference buttons
 
       // Check mute button
       const muteButton = buttons.find((b) => b.id === 'mute');

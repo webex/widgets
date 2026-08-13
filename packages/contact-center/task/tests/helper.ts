@@ -7076,3 +7076,138 @@ describe('Task Hook Error Handling and Logging', () => {
     });
   });
 });
+
+describe('WXCC-6026 wxApp thick-client routing', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('useIncomingTask accept routes to acceptOnWebex for wxApp offers', async () => {
+    const acceptOnWebex = jest.fn().mockResolvedValue(undefined);
+    const accept = jest.fn();
+    const wxAppTask = {
+      ...taskMock,
+      accept,
+      decline: jest.fn(),
+      isWebexAppCallingOffer: jest.fn().mockReturnValue(true),
+      acceptOnWebex,
+      on: jest.fn(),
+      off: jest.fn(),
+    };
+
+    const {result} = renderHook(() =>
+      useIncomingTask({
+        incomingTask: wxAppTask,
+        onAccepted: onTaskAccepted,
+        onRejected: onTaskDeclined,
+        logger,
+      })
+    );
+
+    await act(async () => {
+      await result.current.accept();
+    });
+
+    expect(acceptOnWebex).toHaveBeenCalled();
+    expect(accept).not.toHaveBeenCalled();
+  });
+
+  it('useIncomingTask reject routes to rejectOnWebex for wxApp offers', async () => {
+    const rejectOnWebex = jest.fn().mockResolvedValue(undefined);
+    const decline = jest.fn();
+    const wxAppTask = {
+      ...taskMock,
+      accept: jest.fn(),
+      decline,
+      isWebexAppCallingOffer: jest.fn().mockReturnValue(true),
+      rejectOnWebex,
+      on: jest.fn(),
+      off: jest.fn(),
+    };
+
+    const {result} = renderHook(() =>
+      useIncomingTask({
+        incomingTask: wxAppTask,
+        onRejected: onTaskDeclined,
+        logger,
+      })
+    );
+
+    await act(async () => {
+      await result.current.reject();
+    });
+
+    expect(rejectOnWebex).toHaveBeenCalled();
+    expect(decline).not.toHaveBeenCalled();
+  });
+
+  it('useCallControl toggleMute routes to toggleMuteOnWebex for engaged wxApp calls', async () => {
+    const toggleMuteOnWebex = jest.fn().mockResolvedValue(undefined);
+    const toggleMute = jest.fn();
+    const wxAppTask = {
+      ...mockTask,
+      data: {...mockTask.data, interactionId: 'wxapp-interaction'},
+      toggleMute,
+      getWebexCallingCallId: jest.fn().mockReturnValue('call-123'),
+      toggleMuteOnWebex,
+      uiControls: createEnabledMainTaskUIControls(),
+      on: jest.fn(),
+      off: jest.fn(),
+    };
+
+    jest.spyOn(store, 'setIsMuted').mockImplementation(() => {});
+    jest.spyOn(store, 'isMuted', 'get').mockImplementation(() => false);
+
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: wxAppTask,
+        logger: mockCC.LoggerProxy,
+        isMuted: false,
+        conferenceEnabled: false,
+        agentId: 'agent1',
+      })
+    );
+
+    await act(async () => {
+      await result.current.toggleMute();
+    });
+
+    expect(toggleMuteOnWebex).toHaveBeenCalledWith({muted: true});
+    expect(toggleMute).not.toHaveBeenCalled();
+  });
+
+  it('useCallControl sendDtmf routes to transmitDtmfOnWebex for engaged wxApp calls', async () => {
+    const transmitDtmfOnWebex = jest.fn().mockResolvedValue(undefined);
+    const wxAppTask = {
+      ...mockTask,
+      data: {...mockTask.data, interactionId: 'wxapp-interaction'},
+      getWebexCallingCallId: jest.fn().mockReturnValue('call-123'),
+      transmitDtmfOnWebex,
+      uiControls: {
+        ...createEnabledMainTaskUIControls(),
+        main: {
+          ...createEnabledMainTaskUIControls().main,
+          keypad: {isVisible: true, isEnabled: true},
+        },
+      },
+      on: jest.fn(),
+      off: jest.fn(),
+    };
+
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: wxAppTask,
+        logger: mockCC.LoggerProxy,
+        isMuted: false,
+        conferenceEnabled: false,
+        agentId: 'agent1',
+      })
+    );
+
+    await act(async () => {
+      await result.current.sendDtmf('5');
+    });
+
+    expect(transmitDtmfOnWebex).toHaveBeenCalledWith({dtmf: '5'});
+  });
+});

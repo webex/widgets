@@ -28,6 +28,13 @@ import store, {
   RealTimeTranscriptionData,
 } from '@webex/cc-store';
 import {
+  acceptTaskForOffer,
+  getKeypadControl,
+  rejectTaskForOffer,
+  toggleMuteForTask,
+  transmitDtmfForTask,
+} from './wxapp-task.utils';
+import {
   TIMER_LABEL_CONSULTING,
   TIMER_LABEL_CONSULT_REQUESTED,
   TIMER_LABEL_CONSULT_ON_HOLD,
@@ -142,7 +149,7 @@ export const useTaskList = (props: UseTaskListProps) => {
         module: 'useTaskList',
         method: 'acceptTask',
       });
-      task.accept().catch((error) => {
+      acceptTaskForOffer(task).catch((error) => {
         logError(`CC-Widgets: Error accepting task: ${error}`, 'acceptTask');
       });
     } catch (error) {
@@ -159,7 +166,7 @@ export const useTaskList = (props: UseTaskListProps) => {
         module: 'useTaskList',
         method: 'declineTask',
       });
-      task.decline().catch((error) => {
+      rejectTaskForOffer(task).catch((error) => {
         logError(`CC-Widgets: Error declining task: ${error}`, 'declineTask');
       });
       logger.log(`CC-Widgets: incoming task declined for ${task.data.interactionId}`, {
@@ -211,6 +218,14 @@ export const useIncomingTask = (props: UseTaskProps) => {
 
   const acceptControl = incomingTask?.uiControls?.main?.accept ?? {isVisible: false, isEnabled: false};
   const sdkDeclineControl = incomingTask?.uiControls?.main?.decline ?? {isVisible: false, isEnabled: false};
+
+  logger?.info('CC-Widgets: IncomingTask uiControls snapshot', {
+    module: 'useIncomingTask',
+    method: 'render',
+    interactionId: incomingTask?.data?.interactionId,
+    accept: acceptControl,
+    decline: sdkDeclineControl,
+  });
   const declineControl = {
     ...sdkDeclineControl,
     isEnabled: sdkDeclineControl.isEnabled || store.isDeclineButtonEnabled,
@@ -293,7 +308,7 @@ export const useIncomingTask = (props: UseTaskProps) => {
         method: 'accept',
       });
       if (!incomingTask?.data.interactionId) return;
-      incomingTask.accept().catch((error) => {
+      acceptTaskForOffer(incomingTask).catch((error) => {
         logError(`CC-Widgets: Error accepting incoming task: ${error}`, 'accept');
       });
       logger.log(`CC-Widgets: incomingTask accepted`, {
@@ -315,7 +330,7 @@ export const useIncomingTask = (props: UseTaskProps) => {
         method: 'reject',
       });
       if (!incomingTask?.data.interactionId) return;
-      incomingTask.decline().catch((error) => {
+      rejectTaskForOffer(incomingTask).catch((error) => {
         logError(`CC-Widgets: Error rejecting incoming task: ${error}`, 'reject');
       });
       logger.log(`CC-Widgets: incomingTask rejected`, {
@@ -826,7 +841,7 @@ export const useCallControl = (props: useCallControlProps) => {
       const intendedMuteState = !isMuted;
 
       try {
-        await currentTask.toggleMute();
+        await toggleMuteForTask(currentTask, intendedMuteState);
 
         // Only update state after successful SDK call
         store.setIsMuted(intendedMuteState);
@@ -854,6 +869,21 @@ export const useCallControl = (props: useCallControlProps) => {
         module: 'useCallControl',
         method: 'toggleMute',
       });
+    }
+  };
+
+  const sendDtmf = async (digit: string) => {
+    try {
+      if (!getKeypadControl(controls)?.isVisible) {
+        logger.warn('Keypad control not available', {module: 'useCallControl', method: 'sendDtmf'});
+        return;
+      }
+
+      logger.info(`sendDtmf(${digit}) called`, {module: 'useCallControl', method: 'sendDtmf'});
+
+      await transmitDtmfForTask(currentTask, digit);
+    } catch (error) {
+      logger.error(`sendDtmf failed: ${error}`, {module: 'useCallControl', method: 'sendDtmf'});
     }
   };
 
@@ -1231,6 +1261,7 @@ export const useCallControl = (props: useCallControlProps) => {
     toggleHold,
     toggleRecording,
     toggleMute,
+    sendDtmf,
     isMuted,
     wrapupCall,
     isRecording,

@@ -53,6 +53,7 @@ describe('CallControl Component', () => {
       secondsUntilAutoWrapup: 0,
       cancelAutoWrapup: jest.fn(),
       toggleMute: jest.fn(),
+      sendDtmf: jest.fn(),
       isMuted: false,
       consultConference: jest.fn(),
       exitConference: jest.fn(),
