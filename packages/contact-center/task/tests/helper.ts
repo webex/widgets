@@ -7210,4 +7210,155 @@ describe('WXCC-6026 wxApp thick-client routing', () => {
 
     expect(transmitDtmfOnWebex).toHaveBeenCalledWith({dtmf: '5'});
   });
+
+  it('useTaskList acceptTask routes to acceptOnWebex for wxApp offers', async () => {
+    const acceptOnWebex = jest.fn().mockResolvedValue(undefined);
+    const accept = jest.fn();
+    const wxAppTask = {
+      ...taskMock,
+      accept,
+      decline: jest.fn(),
+      isWebexAppCallingOffer: jest.fn().mockReturnValue(true),
+      acceptOnWebex,
+    };
+    const mockTaskList = {mockId1: wxAppTask};
+
+    const {result} = renderHook(() => useTaskList({cc: mockCC, onTaskAccepted, logger, taskList: mockTaskList}));
+
+    act(() => {
+      result.current.acceptTask(wxAppTask);
+    });
+
+    await waitFor(() => {
+      expect(acceptOnWebex).toHaveBeenCalled();
+    });
+    expect(accept).not.toHaveBeenCalled();
+  });
+
+  it('useTaskList declineTask routes to rejectOnWebex for wxApp offers', async () => {
+    const rejectOnWebex = jest.fn().mockResolvedValue(undefined);
+    const decline = jest.fn();
+    const wxAppTask = {
+      ...taskMock,
+      accept: jest.fn(),
+      decline,
+      isWebexAppCallingOffer: jest.fn().mockReturnValue(true),
+      rejectOnWebex,
+    };
+    const mockTaskList = {mockId1: wxAppTask};
+
+    const {result} = renderHook(() => useTaskList({cc: mockCC, onTaskDeclined, logger, taskList: mockTaskList}));
+
+    act(() => {
+      result.current.declineTask(wxAppTask);
+    });
+
+    await waitFor(() => {
+      expect(rejectOnWebex).toHaveBeenCalled();
+    });
+    expect(decline).not.toHaveBeenCalled();
+  });
+
+  it('useIncomingTask accept uses legacy accept for non-wxApp offers', async () => {
+    const accept = jest.fn().mockResolvedValue(undefined);
+    const acceptOnWebex = jest.fn();
+    const legacyTask = {
+      ...taskMock,
+      accept,
+      decline: jest.fn(),
+      isWebexAppCallingOffer: jest.fn().mockReturnValue(false),
+      acceptOnWebex,
+      on: jest.fn(),
+      off: jest.fn(),
+    };
+
+    const {result} = renderHook(() =>
+      useIncomingTask({
+        incomingTask: legacyTask,
+        onAccepted: onTaskAccepted,
+        onRejected: onTaskDeclined,
+        logger,
+      })
+    );
+
+    await act(async () => {
+      await result.current.accept();
+    });
+
+    expect(accept).toHaveBeenCalled();
+    expect(acceptOnWebex).not.toHaveBeenCalled();
+  });
+
+  it('useCallControl toggleMute uses legacy toggleMute for non-wxApp calls', async () => {
+    const toggleMute = jest.fn().mockResolvedValue(undefined);
+    const toggleMuteOnWebex = jest.fn();
+    const legacyTask = {
+      ...mockTask,
+      toggleMute,
+      getWebexCallingCallId: jest.fn().mockReturnValue(null),
+      toggleMuteOnWebex,
+      uiControls: createEnabledMainTaskUIControls(),
+      on: jest.fn(),
+      off: jest.fn(),
+    };
+
+    jest.spyOn(store, 'setIsMuted').mockImplementation(() => {});
+    jest.spyOn(store, 'isMuted', 'get').mockImplementation(() => false);
+
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: legacyTask,
+        logger: mockCC.LoggerProxy,
+        isMuted: false,
+        conferenceEnabled: false,
+        agentId: 'agent1',
+      })
+    );
+
+    await act(async () => {
+      await result.current.toggleMute();
+    });
+
+    expect(toggleMute).toHaveBeenCalled();
+    expect(toggleMuteOnWebex).not.toHaveBeenCalled();
+  });
+
+  it('useCallControl sendDtmf no-ops when keypad control is not visible', async () => {
+    const transmitDtmfOnWebex = jest.fn().mockResolvedValue(undefined);
+    const wxAppTask = {
+      ...mockTask,
+      data: {...mockTask.data, interactionId: 'wxapp-interaction'},
+      getWebexCallingCallId: jest.fn().mockReturnValue('call-123'),
+      transmitDtmfOnWebex,
+      uiControls: {
+        ...createEnabledMainTaskUIControls(),
+        main: {
+          ...createEnabledMainTaskUIControls().main,
+          keypad: {isVisible: false, isEnabled: false},
+        },
+      },
+      on: jest.fn(),
+      off: jest.fn(),
+    };
+
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: wxAppTask,
+        logger: mockCC.LoggerProxy,
+        isMuted: false,
+        conferenceEnabled: false,
+        agentId: 'agent1',
+      })
+    );
+
+    await act(async () => {
+      await result.current.sendDtmf('5');
+    });
+
+    expect(transmitDtmfOnWebex).not.toHaveBeenCalled();
+    expect(mockCC.LoggerProxy.warn).toHaveBeenCalledWith('Keypad control not available', {
+      module: 'useCallControl',
+      method: 'sendDtmf',
+    });
+  });
 });

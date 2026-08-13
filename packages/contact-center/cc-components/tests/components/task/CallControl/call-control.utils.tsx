@@ -474,6 +474,76 @@ describe('CallControl Utils', () => {
       });
     });
 
+    it('includes visible keypad button when main keypad control is enabled (WXCC-6026)', () => {
+      const controlsWithKeypad = {
+        ...mockControls,
+        main: {
+          ...mockControls.main,
+          keypad: {isVisible: true, isEnabled: true},
+        },
+      };
+
+      const buttons = buildCallControlButtons(
+        false,
+        false,
+        false,
+        mockMediaTypeInfo,
+        controlsWithKeypad,
+        false,
+        mockFunctions.handleMuteToggleFunc,
+        mockFunctions.handleToggleHoldFunc,
+        mockFunctions.toggleRecording,
+        mockFunctions.endCall,
+        mockFunctions.exitConference,
+        mockFunctions.switchToConsult,
+        jest.fn(),
+        jest.fn()
+      );
+
+      const keypadButton = buttons.find((b) => b.id === 'keypad');
+      expect(keypadButton).toEqual({
+        id: 'keypad',
+        icon: 'dialpad-bold',
+        tooltip: 'Keypad',
+        className: 'call-control-button',
+        disabled: false,
+        isVisible: true,
+        menuType: 'Keypad',
+        dataTestId: 'call-control:keypad',
+      });
+    });
+
+    it('hides keypad button when main keypad control is not visible (WXCC-6026)', () => {
+      const controlsWithoutKeypad = {
+        ...mockControls,
+        main: {
+          ...mockControls.main,
+          keypad: {isVisible: false, isEnabled: false},
+        },
+      };
+
+      const buttons = buildCallControlButtons(
+        false,
+        false,
+        false,
+        mockMediaTypeInfo,
+        controlsWithoutKeypad,
+        false,
+        mockFunctions.handleMuteToggleFunc,
+        mockFunctions.handleToggleHoldFunc,
+        mockFunctions.toggleRecording,
+        mockFunctions.endCall,
+        mockFunctions.exitConference,
+        mockFunctions.switchToConsult,
+        jest.fn(),
+        jest.fn()
+      );
+
+      const keypadButton = buttons.find((b) => b.id === 'keypad');
+      expect(keypadButton?.isVisible).toBe(false);
+      expect(keypadButton?.disabled).toBe(true);
+    });
+
     it('should build buttons with correct configuration when not muted and held', () => {
       const heldControls = createEnabledMainTaskUIControls({
         wrapup: enabledControl,
