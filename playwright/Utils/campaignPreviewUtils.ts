@@ -319,6 +319,8 @@ export async function stubRefreshTaskList(page: Page): Promise<void> {
   await page.evaluate(() => {
     const storeWrapper = (window as unknown as Record<string, unknown>)['store'] as Record<string, unknown>;
     if (!storeWrapper) return;
+    // Save the original before overwriting so restoreRefreshTaskList can put it back
+    (window as unknown as Record<string, unknown>)['__originalRefreshTaskList'] = storeWrapper.refreshTaskList;
     // Replace refreshTaskList with a no-op to prevent SDK events from clearing mock tasks
     (storeWrapper as Record<string, () => void>).refreshTaskList = () => {};
   });
@@ -334,10 +336,11 @@ export async function restoreRefreshTaskList(page: Page): Promise<void> {
   await page.evaluate(() => {
     const storeWrapper = (window as unknown as Record<string, unknown>)['store'] as Record<string, unknown>;
     if (!storeWrapper) return;
-    // Restore the original method from the prototype
-    const proto = Object.getPrototypeOf(storeWrapper) as Record<string, unknown>;
-    if (proto && typeof proto.refreshTaskList === 'function') {
-      (storeWrapper as Record<string, unknown>).refreshTaskList = proto.refreshTaskList;
+    // Restore the original saved by stubRefreshTaskList
+    const saved = (window as unknown as Record<string, unknown>)['__originalRefreshTaskList'];
+    if (typeof saved === 'function') {
+      (storeWrapper as Record<string, unknown>).refreshTaskList = saved;
+      delete (window as unknown as Record<string, unknown>)['__originalRefreshTaskList'];
     }
   });
 }
