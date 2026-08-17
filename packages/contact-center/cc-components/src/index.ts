@@ -9,6 +9,8 @@ import CampaignErrorDialogComponent from './components/task/CampaignErrorDialog/
 import CampaignCountdownComponent from './components/task/CampaignCountdown/campaign-countdown';
 import CampaignTaskComponent from './components/task/CampaignTask/campaign-task';
 import RealTimeTranscriptComponent from './components/task/RealTimeTranscript/real-time-transcript';
+import E911Modal from './components/StationLogin/E911Modal/e911-modal';
+import AIAssistantComponent from './components/AIAssistant/ai-assistant';
 
 export {
   UserStateComponent,
@@ -22,10 +24,14 @@ export {
   CampaignCountdownComponent,
   CampaignTaskComponent,
   RealTimeTranscriptComponent,
+  E911Modal,
+  AIAssistantComponent,
 };
 export * from './components/StationLogin/constants';
+export * from './components/StationLogin/E911Modal/e911-modal.types';
 export * from './components/StationLogin/station-login.types';
 export * from './components/UserState/user-state.types';
 export * from './components/task/task.types';
 export * from './components/task/CampaignErrorDialog/campaign-error-dialog.types';
 export * from './components/task/CampaignCountdown/campaign-countdown.types';
+export * from './components/AIAssistant/ai-assistant.types';

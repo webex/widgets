@@ -626,6 +626,10 @@ const mockCC: IContactCenter = {
   acceptPreviewContact: jest.fn().mockResolvedValue({}),
   skipPreviewContact: jest.fn().mockResolvedValue({}),
   removePreviewContact: jest.fn().mockResolvedValue({}),
+  apiAIAssistant: {
+    getRealTimeAssistance: jest.fn().mockResolvedValue({}),
+    sendRealTimeAssistanceUserAction: jest.fn().mockResolvedValue({}),
+  },
 };
 
 const mockCallAssociatedData: Record<

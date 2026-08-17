@@ -36,6 +36,7 @@
   },
   "dependencies": {
     "@r2wc/react-to-web-component": "2.0.3",
+    "@webex/cc-ai-assistant": "workspace:*",
     "@webex/cc-digital-channels": "workspace:*",
     "@webex/cc-station-login": "workspace:*",
     "@webex/cc-store": "workspace:*",

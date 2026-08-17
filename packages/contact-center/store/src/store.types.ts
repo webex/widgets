@@ -25,6 +25,7 @@ import {
   getDefaultUIControls,
   TaskResponse,
 } from '@webex/contact-center';
+import type {RealTimeAssistanceParams} from 'node_modules/@webex/contact-center/dist/types/types';
 import {
   OutdialAniEntriesResponse,
   OutdialAniParams,
@@ -73,7 +74,43 @@ interface IContactCenter {
   acceptPreviewContact(payload: PreviewContactPayload): Promise<TaskResponse>;
   skipPreviewContact(payload: PreviewContactPayload): Promise<TaskResponse>;
   removePreviewContact(payload: PreviewContactPayload): Promise<TaskResponse>;
+  userPreference?: IUserPreferenceService;
+  apiAIAssistant?: {
+    getRealTimeAssistance(params: RealTimeAssistRequestParams & {actionTimeStamp?: number}): Promise<unknown>;
+    sendRealTimeAssistanceUserAction(params: RealTimeAssistUserActionParams): Promise<unknown>;
+  };
 }
+
+type RealTimeAssistRequestParams = RealTimeAssistanceParams;
+
+type RealTimeAssistUserActionId = string;
+
+type RealTimeAssistUserActionParams = {
+  agentId: string;
+  interactionId: string;
+  adaptiveCardId: string;
+  actionId: RealTimeAssistUserActionId;
+  languageCode?: string;
+};
+
+type RealTimeAssistPayload = {
+  agentId?: string;
+  data: {
+    adaptiveCard: unknown;
+    adaptiveCardId?: string;
+    title?: string;
+    suggestion?: string;
+    conversationId?: string;
+    trackingId?: string;
+    publishTimestamp?: number | string;
+    [key: string]: unknown;
+  };
+  notifDetails?: {
+    actionEvent?: string;
+  };
+  notifType?: string;
+  orgId?: string;
+};
 //  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
 type IWebex = {
   cc: IContactCenter;
@@ -167,6 +204,9 @@ interface IStore {
   dataCenter: string;
   realtimeTranscriptionData: Partial<RealTimeTranscriptionData>[];
   acceptedCampaignIds: Set<string>;
+  showE911Modal: boolean;
+  isEmergencyModalAlreadyDisplayed: boolean;
+  realTimeAssist: Record<string, RealTimeAssistPayload[]>;
   init(params: InitParams, callback: (ccSDK: IContactCenter) => void): Promise<void>;
   registerCC(webex?: WithWebex['webex']): Promise<void>;
 }
@@ -201,6 +241,11 @@ interface IStoreWrapper extends IStore {
   getAccessToken(): Promise<string>;
   addAcceptedCampaign(interactionId: string): void;
   removeAcceptedCampaign(interactionId: string): void;
+  setShowE911Modal(value: boolean): void;
+  setIsEmergencyModalAlreadyDisplayed(value: boolean): void;
+  fetchUserPreferences(): Promise<void>;
+  updateEmergencyModalAcknowledgment(): Promise<void>;
+  clearRealTimeAssist(interactionId: string): void;
 }
 
 interface IWrapupCode {
@@ -333,6 +378,10 @@ export type {
   TaskUILeg,
   RealTimeTranscriptionData,
   RealTimeTranscriptionEventPayload,
+  RealTimeAssistPayload,
+  RealTimeAssistRequestParams,
+  RealTimeAssistUserActionId,
+  RealTimeAssistUserActionParams,
 };
 
 export {
@@ -361,6 +410,69 @@ export type Participant = {
   pType: 'Customer' | 'Agent' | string;
   name?: string;
 };
+
+/**
+ * Desktop preference data structure containing E911 modal acknowledgment.
+ * @public
+ */
+export type DesktopPreference = {
+  isEmergencyModalAlreadyDisplayed?: boolean;
+};
+
+/**
+ * User preference response from the SDK.
+ * @public
+ */
+export type UserPreferenceResponse = {
+  id: string;
+  organizationId: string;
+  userId: string;
+  // The SDK returns the persisted desktopPreference JSON string nested under `preferences`,
+  // not as a top-level field - see CAI-7906.
+  preferences?: {
+    desktopPreference?: string;
+  };
+  createdTime?: number;
+  lastUpdatedTime?: number;
+};
+
+/**
+ * Request payload for creating user preferences.
+ * @public
+ */
+export type CreateUserPreferenceRequest = {
+  userId: string;
+  desktopPreference: string;
+};
+
+/**
+ * Request payload for updating user preferences.
+ * @public
+ */
+export type UpdateUserPreferenceRequest = {
+  desktopPreference: string;
+};
+
+/**
+ * Query parameters for fetching user preferences.
+ * @public
+ */
+export type GetUserPreferenceParams = {
+  userId?: string;
+  page?: number;
+  pageSize?: number;
+};
+
+/**
+ * User Preference service interface.
+ * TODO: Remove once SDK exposes this interface - CAI-7906
+ * @public
+ */
+export interface IUserPreferenceService {
+  getUserPreference(params?: GetUserPreferenceParams): Promise<UserPreferenceResponse>;
+  createUserPreference(data: CreateUserPreferenceRequest): Promise<UserPreferenceResponse>;
+  updateUserPreference(userId: string, data: UpdateUserPreferenceRequest): Promise<UserPreferenceResponse>;
+}
 
 /** Outbound type values that identify a campaign preview task. */
 export const CAMPAIGN_PREVIEW_OUTBOUND_TYPES = ['STANDARD_PREVIEW_CAMPAIGN', 'DIRECT_PREVIEW_CAMPAIGN'];

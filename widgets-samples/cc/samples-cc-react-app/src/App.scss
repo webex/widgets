@@ -213,3 +213,15 @@ iframe {
 .margin-bottom-1rem {
   margin-bottom: 1rem;
 }
+
+// AI Assistant fullscreen: drop the popup look so the panel fills the host fieldset.
+.ai-assistant--host-full .ai-assistant__panel {
+  border: none;
+  border-radius: 0.5rem;
+  box-shadow: none;
+  height: auto;
+  max-height: none;
+  max-width: none;
+  min-height: 12rem;
+  width: 100%;
+}

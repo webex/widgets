@@ -16,6 +16,7 @@
 | `station-login/` | Agent login: team + device selection | DRAFT | `packages/contact-center/station-login/ai-docs/station-login-spec.md` |
 | `user-state/` | Agent state: state, idle codes, timer | DRAFT | `packages/contact-center/user-state/ai-docs/user-state-spec.md` |
 | `task/` | Task widget bundle: CallControl, IncomingTask, OutdialCall, TaskList, CallControlCAD | DRAFT | `packages/contact-center/task/ai-docs/task-spec.md` |
+| `ai-assistant/` | AI Assistant widget: chrome + Real-time Assist requests, transcript, feedback | DRAFT | `packages/contact-center/ai-assistant/ai-docs/ai-assistant-spec.md` |
 | `ui-logging/` | Metrics/telemetry: `withMetrics`, `metricsLogger` | DRAFT | `packages/contact-center/ui-logging/ai-docs/ui-logging-spec.md` |
 | `test-fixtures/` | Shared test mocks/helpers | DRAFT | `packages/contact-center/test-fixtures/ai-docs/test-fixtures-spec.md` |
 | `@webex/widgets/` | Legacy meetings widgets (separate family) | DRAFT | `packages/@webex/widgets/ai-docs/widgets-spec.md` |

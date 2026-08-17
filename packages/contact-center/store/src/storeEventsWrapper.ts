@@ -25,6 +25,8 @@ import {
   AgentLoginProfile,
   ERROR_TRIGGERING_IDLE_CODES,
   RealTimeTranscriptionEventPayload,
+  DesktopPreference,
+  RealTimeAssistPayload,
 } from './store.types';
 import Store from './store';
 import {
@@ -37,8 +39,7 @@ import {
 } from './store.types';
 import {runInAction} from 'mobx';
 import {isIncomingTask} from './task-utils';
-
-const TASK_MULTI_LOGIN_HYDRATE = 'task:multiLoginHydrate';
+import {SUGGESTED_RESPONSE_EVENT, TASK_MULTI_LOGIN_HYDRATE} from './constants';
 
 class StoreWrapper implements IStoreWrapper {
   store: IStore;
@@ -49,6 +50,10 @@ class StoreWrapper implements IStoreWrapper {
   onTaskSelected?: (task: ITask, isClicked: boolean) => void;
   onErrorCallback?: (widgetName: string, error: Error) => void;
   private realtimeTranscriptionListeners: Record<string, (payload: RealTimeTranscriptionEventPayload) => void> = {};
+  // Keyed by interactionId; the task is tracked alongside the listener so a
+  // replacement task object (task:hydrate / task:merged) gets rebound.
+  private realTimeAssistListeners: Record<string, {task: ITask; listener: (payload: RealTimeAssistPayload) => void}> =
+    {};
 
   constructor() {
     this.store = Store.getInstance();
@@ -158,6 +163,18 @@ class StoreWrapper implements IStoreWrapper {
 
   get acceptedCampaignIds() {
     return this.store.acceptedCampaignIds;
+  }
+
+  get showE911Modal() {
+    return this.store.showE911Modal;
+  }
+
+  get isEmergencyModalAlreadyDisplayed() {
+    return this.store.isEmergencyModalAlreadyDisplayed;
+  }
+
+  get realTimeAssist() {
+    return this.store.realTimeAssist;
   }
 
   setDataCenter = (value: string): void => {
@@ -517,6 +534,19 @@ class StoreWrapper implements IStoreWrapper {
         taskToRemove.off(TASK_EVENTS.TASK_MEDIA, this.handleTaskMedia);
         this.setCallControlAudio(null);
       }
+
+      if (taskId && this.realTimeAssistListeners[taskId]) {
+        const {task: listenerTask, listener} = this.realTimeAssistListeners[taskId];
+        (listenerTask ?? taskToRemove).off(SUGGESTED_RESPONSE_EVENT, listener);
+        delete this.realTimeAssistListeners[taskId];
+      }
+      if (taskId && this.store.realTimeAssist && this.store.realTimeAssist[taskId]) {
+        runInAction(() => {
+          const next = {...this.store.realTimeAssist};
+          delete next[taskId];
+          this.store.realTimeAssist = next;
+        });
+      }
     }
 
     runInAction(() => {
@@ -581,6 +611,173 @@ class StoreWrapper implements IStoreWrapper {
     });
   };
 
+  setShowE911Modal = (value: boolean): void => {
+    runInAction(() => {
+      this.store.showE911Modal = value;
+    });
+  };
+
+  setIsEmergencyModalAlreadyDisplayed = (value: boolean): void => {
+    runInAction(() => {
+      this.store.isEmergencyModalAlreadyDisplayed = value;
+    });
+  };
+
+  fetchUserPreferences = async (): Promise<void> => {
+    try {
+      if (!this.store.cc.userPreference) {
+        this.store.logger.warn('CC-Widgets: fetchUserPreferences(): userPreference service not available', {
+          module: 'storeEventsWrapper.ts',
+          method: 'fetchUserPreferences',
+        });
+        throw new Error('userPreference service not available');
+      }
+
+      let response;
+      try {
+        response = await this.store.cc.userPreference.getUserPreference();
+      } catch (getError) {
+        if ((getError as {statusCode?: number})?.statusCode === 404) {
+          // First-time user: no preference record has been created yet. This is not a failure -
+          // treat it the same as "not yet acknowledged" so the E911 modal can still be shown.
+          this.store.logger.info('CC-Widgets: fetchUserPreferences(): no user preference record exists yet', {
+            module: 'storeEventsWrapper.ts',
+            method: 'fetchUserPreferences',
+          });
+          runInAction(() => {
+            this.store.isEmergencyModalAlreadyDisplayed = false;
+          });
+
+          return;
+        }
+
+        throw getError;
+      }
+
+      // The SDK returns the persisted desktopPreference JSON string nested under `preferences`,
+      // not as a top-level field - see CAI-7906.
+      const desktopPrefString = response?.preferences?.desktopPreference;
+
+      let isEmergencyModalAlreadyDisplayed = false;
+
+      if (desktopPrefString) {
+        try {
+          const desktopPref = JSON.parse(desktopPrefString) as DesktopPreference;
+          isEmergencyModalAlreadyDisplayed = desktopPref.isEmergencyModalAlreadyDisplayed ?? false;
+        } catch (parseError) {
+          this.store.logger.error('CC-Widgets: fetchUserPreferences(): failed to parse desktopPreference', {
+            module: 'storeEventsWrapper.ts',
+            method: 'fetchUserPreferences',
+            error: parseError,
+          });
+        }
+      }
+
+      runInAction(() => {
+        this.store.isEmergencyModalAlreadyDisplayed = isEmergencyModalAlreadyDisplayed;
+      });
+    } catch (error) {
+      this.store.logger.error('CC-Widgets: fetchUserPreferences(): failed to fetch user preferences', {
+        module: 'storeEventsWrapper.ts',
+        method: 'fetchUserPreferences',
+        error,
+      });
+      throw error;
+    }
+  };
+
+  updateEmergencyModalAcknowledgment = async (): Promise<void> => {
+    try {
+      if (!this.store.cc.userPreference) {
+        this.store.logger.warn(
+          'CC-Widgets: updateEmergencyModalAcknowledgment(): userPreference service not available',
+          {
+            module: 'storeEventsWrapper.ts',
+            method: 'updateEmergencyModalAcknowledgment',
+          }
+        );
+        throw new Error('userPreference service not available');
+      }
+
+      let response;
+      let hasExistingRecord = true;
+      try {
+        response = await this.store.cc.userPreference.getUserPreference();
+      } catch (getError) {
+        if ((getError as {statusCode?: number})?.statusCode === 404) {
+          // First-time user: no preference record exists yet, so there's nothing to merge and
+          // no userId to reuse. Fall through and create the record below.
+          hasExistingRecord = false;
+        } else {
+          throw getError;
+        }
+      }
+
+      // The SDK returns the persisted desktopPreference JSON string nested under `preferences`,
+      // not as a top-level field - see CAI-7906.
+      const existingDesktopPrefString = response?.preferences?.desktopPreference;
+
+      let existingDesktopPref: DesktopPreference = {};
+      if (existingDesktopPrefString) {
+        try {
+          existingDesktopPref = JSON.parse(existingDesktopPrefString) as DesktopPreference;
+        } catch (parseError) {
+          this.store.logger.error(
+            'CC-Widgets: updateEmergencyModalAcknowledgment(): failed to parse existing desktopPreference',
+            {
+              module: 'storeEventsWrapper.ts',
+              method: 'updateEmergencyModalAcknowledgment',
+              error: parseError,
+            }
+          );
+        }
+      }
+
+      const desktopPreference = JSON.stringify({
+        ...existingDesktopPref,
+        isEmergencyModalAlreadyDisplayed: true,
+      });
+
+      if (hasExistingRecord) {
+        await this.store.cc.userPreference.updateUserPreference(response?.userId, {
+          desktopPreference,
+        });
+      } else {
+        // createUserPreference's userId must be the CI user id, not the CC agentId - they can
+        // differ (see the existing-record update path above, which uses response.userId for the
+        // same reason). There's no existing preference record to read the CI id from here, so
+        // pull it from the underlying webex SDK instead of guessing with store.agentId.
+        // @ts-expect-error - webex internal device API not typed
+        const ciUserId: string = this.store.cc.webex.internal.device.userId;
+
+        await this.store.cc.userPreference.createUserPreference({
+          userId: ciUserId,
+          desktopPreference,
+        });
+      }
+
+      runInAction(() => {
+        this.store.isEmergencyModalAlreadyDisplayed = true;
+        this.store.showE911Modal = false;
+      });
+
+      this.store.logger.info(
+        'CC-Widgets: updateEmergencyModalAcknowledgment(): successfully updated emergency modal acknowledgment',
+        {
+          module: 'storeEventsWrapper.ts',
+          method: 'updateEmergencyModalAcknowledgment',
+        }
+      );
+    } catch (error) {
+      this.store.logger.error('CC-Widgets: updateEmergencyModalAcknowledgment(): failed to update user preferences', {
+        module: 'storeEventsWrapper.ts',
+        method: 'updateEmergencyModalAcknowledgment',
+        error,
+      });
+      throw error;
+    }
+  };
+
   handleCampaignPreviewReservation = (event: ITask) => {
     const isCampaignPreview = this.isCampaignPreview(event);
 
@@ -637,6 +834,28 @@ class StoreWrapper implements IStoreWrapper {
 
   handleTaskMedia = (track) => {
     this.setCallControlAudio(new MediaStream([track]));
+  };
+
+  handleRealTimeAssist = (interactionId: string, payload: RealTimeAssistPayload) => {
+    if (!interactionId || !payload?.data) return;
+    runInAction(() => {
+      const current = (this.store.realTimeAssist && this.store.realTimeAssist[interactionId]) || [];
+      this.store.realTimeAssist = {
+        ...(this.store.realTimeAssist || {}),
+        [interactionId]: [...current, payload],
+      };
+    });
+  };
+
+  clearRealTimeAssist = (interactionId: string): void => {
+    if (!interactionId) return;
+    runInAction(() => {
+      if (this.store.realTimeAssist?.[interactionId]) {
+        const next = {...this.store.realTimeAssist};
+        delete next[interactionId];
+        this.store.realTimeAssist = next;
+      }
+    });
   };
 
   // Case to handle multi session
@@ -757,7 +976,6 @@ class StoreWrapper implements IStoreWrapper {
     task.on(TASK_EVENTS.TASK_PARTICIPANT_LEFT_FAILED, this.refreshTaskList);
     task.on(TASK_EVENTS.TASK_CONFERENCE_TRANSFERRED, this.refreshTaskList);
     task.on(TASK_EVENTS.TASK_CONFERENCE_TRANSFER_FAILED, this.refreshTaskList);
-    task.on(TASK_EVENTS.TASK_POST_CALL_ACTIVITY, this.refreshTaskList);
 
     // Campaign preview: transition RESERVED → ENGAGED when the agent accepts
     task.on(TASK_EVENTS.TASK_CAMPAIGN_PREVIEW_RESERVATION, this.handleCampaignPreviewReservation);
@@ -774,6 +992,19 @@ class StoreWrapper implements IStoreWrapper {
 
     if (this.deviceType === DEVICE_TYPE_BROWSER) {
       task.on(TASK_EVENTS.TASK_MEDIA, this.handleTaskMedia);
+    }
+
+    // Avoid duplicate registration when this method is re-entered for the same
+    // task, but do rebind when task:hydrate / task:merged supplies a
+    // replacement object for the same interaction.
+    if (taskId) {
+      const existing = this.realTimeAssistListeners[taskId];
+      if (existing?.task !== task) {
+        existing?.task?.off(SUGGESTED_RESPONSE_EVENT, existing.listener);
+        const listener = (payload: RealTimeAssistPayload) => this.handleRealTimeAssist(taskId, payload);
+        this.realTimeAssistListeners[taskId] = {task, listener};
+        task.on(SUGGESTED_RESPONSE_EVENT, listener);
+      }
     }
   };
 
@@ -1115,6 +1346,10 @@ class StoreWrapper implements IStoreWrapper {
       this.store.acceptedCampaignIds = new Set();
       this.realtimeTranscriptionListeners = {};
       this.setLastConsultDestination(null);
+      this.setShowE911Modal(false);
+      this.setIsEmergencyModalAlreadyDisplayed(false);
+      this.store.realTimeAssist = {};
+      this.realTimeAssistListeners = {};
     });
   };
 

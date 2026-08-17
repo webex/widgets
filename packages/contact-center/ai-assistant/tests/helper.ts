@@ -1,0 +1,350 @@
+import {renderHook, act, waitFor} from '@testing-library/react';
+import {useAiAssistant} from '../src/helper';
+import store from '@webex/cc-store';
+import {mockCC} from '@webex/test-fixtures';
+
+jest.mock('@webex/cc-store', () => {
+  const {mockCC} = jest.requireActual('@webex/test-fixtures');
+  return {
+    __esModule: true,
+    default: {
+      cc: mockCC,
+    },
+  };
+});
+
+type StoreMock = {
+  cc: typeof mockCC;
+};
+const storeMock = store as unknown as StoreMock;
+
+const baseProps = {
+  agentId: 'agent-1',
+  interactionId: 'interaction-1',
+  isFeatureEnabled: true,
+  realTimeAssist: [] as Array<{data: {adaptiveCard: unknown; title?: string}}>,
+};
+
+describe('useAiAssistant', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('starts in the closed/idle state', () => {
+    const {result} = renderHook(() => useAiAssistant(baseProps));
+    expect(result.current.chrome).toBe('closed');
+    expect(result.current.isFullScreen).toBe(false);
+    expect(result.current.requestStatus).toBe('idle');
+  });
+
+  it('open/close/minimize/restore flips chrome state and fires callbacks', () => {
+    const onOpen = jest.fn();
+    const onClose = jest.fn();
+    const onMinimize = jest.fn();
+    const onRestore = jest.fn();
+    const {result} = renderHook(() => useAiAssistant({...baseProps, onOpen, onClose, onMinimize, onRestore}));
+
+    act(() => result.current.open());
+    expect(result.current.chrome).toBe('open');
+    expect(onOpen).toHaveBeenCalled();
+
+    act(() => result.current.minimize());
+    expect(result.current.chrome).toBe('minimized');
+    expect(onMinimize).toHaveBeenCalled();
+
+    act(() => result.current.restore());
+    expect(result.current.chrome).toBe('open');
+    expect(onRestore).toHaveBeenCalled();
+
+    act(() => result.current.close());
+    expect(result.current.chrome).toBe('closed');
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it('toggleFullScreen flips state and reports the next value', () => {
+    const onFullScreenToggle = jest.fn();
+    const {result} = renderHook(() => useAiAssistant({...baseProps, onFullScreenToggle}));
+
+    act(() => result.current.toggleFullScreen());
+    expect(result.current.isFullScreen).toBe(true);
+    expect(onFullScreenToggle).toHaveBeenLastCalledWith(true);
+
+    act(() => result.current.toggleFullScreen());
+    expect(result.current.isFullScreen).toBe(false);
+    expect(onFullScreenToggle).toHaveBeenLastCalledWith(false);
+  });
+
+  it('close exits full-screen mode', () => {
+    const {result} = renderHook(() => useAiAssistant(baseProps));
+
+    act(() => result.current.toggleFullScreen());
+    expect(result.current.isFullScreen).toBe(true);
+
+    act(() => result.current.close());
+    expect(result.current.chrome).toBe('closed');
+    expect(result.current.isFullScreen).toBe(false);
+  });
+
+  it('requestRealTimeAssist sends the right shape and sets listening', async () => {
+    const {result} = renderHook(() => useAiAssistant(baseProps));
+
+    await act(async () => {
+      result.current.requestRealTimeAssist();
+    });
+
+    expect(storeMock.cc.apiAIAssistant.getRealTimeAssistance).toHaveBeenCalledWith(
+      expect.objectContaining({
+        agentId: 'agent-1',
+        interactionId: 'interaction-1',
+        actionTimeStamp: expect.any(Number),
+      })
+    );
+    expect(result.current.requestStatus).toBe('listening');
+    expect(result.current.hasInitialRequestSucceeded).toBe(true);
+  });
+
+  it('flips status to ready and notifies host once a suggestion arrives', async () => {
+    const onRealTimeAssistReceived = jest.fn();
+    const payload = {data: {adaptiveCard: {type: 'AdaptiveCard'}, title: 'Refund policy'}};
+
+    const {result, rerender} = renderHook((props: {realTimeAssist?: Array<typeof payload>} = {}) =>
+      useAiAssistant({
+        ...baseProps,
+        ...props,
+        realTimeAssist: props.realTimeAssist ?? [],
+        onRealTimeAssistReceived,
+      })
+    );
+
+    await act(async () => {
+      result.current.requestRealTimeAssist();
+    });
+    expect(result.current.requestStatus).toBe('listening');
+
+    rerender({realTimeAssist: [payload]});
+
+    await waitFor(() => expect(result.current.requestStatus).toBe('ready'));
+    expect(onRealTimeAssistReceived).toHaveBeenCalledWith(payload);
+  });
+
+  it('appends additional suggestions and notifies the host on each', async () => {
+    const onRealTimeAssistReceived = jest.fn();
+    const first = {data: {adaptiveCard: {type: 'AdaptiveCard'}, title: 'first'}};
+    const second = {data: {adaptiveCard: {type: 'AdaptiveCard'}, title: 'second'}};
+
+    const {result, rerender} = renderHook((props: {realTimeAssist?: Array<typeof first>} = {}) =>
+      useAiAssistant({
+        ...baseProps,
+        ...props,
+        realTimeAssist: props.realTimeAssist ?? [],
+        onRealTimeAssistReceived,
+      })
+    );
+
+    rerender({realTimeAssist: [first]});
+    await waitFor(() => expect(onRealTimeAssistReceived).toHaveBeenLastCalledWith(first));
+
+    rerender({realTimeAssist: [first, second]});
+    await waitFor(() => expect(onRealTimeAssistReceived).toHaveBeenLastCalledWith(second));
+    expect(onRealTimeAssistReceived).toHaveBeenCalledTimes(2);
+    expect(result.current.requestStatus).toBe('ready');
+
+    rerender({realTimeAssist: [first, second]});
+    expect(onRealTimeAssistReceived).toHaveBeenCalledTimes(2);
+  });
+
+  it('adds user context messages alongside assistant suggestions in chatEntries', async () => {
+    const first = {
+      data: {adaptiveCard: {type: 'AdaptiveCard'}, title: 'first', publishTimestamp: Date.now() + 100},
+    };
+    const second = {
+      data: {adaptiveCard: {type: 'AdaptiveCard'}, title: 'second', publishTimestamp: Date.now() + 2000},
+    };
+
+    const {result, rerender} = renderHook((props: {realTimeAssist?: Array<typeof first>} = {}) =>
+      useAiAssistant({...baseProps, ...props, realTimeAssist: props.realTimeAssist ?? []})
+    );
+
+    // First Get Suggestions (no context) → first assistant response arrives.
+    // After the first request the chat is seeded with an assistant greeting.
+    await act(async () => {
+      result.current.requestRealTimeAssist();
+    });
+    rerender({realTimeAssist: [first]});
+    await waitFor(() => expect(result.current.requestStatus).toBe('ready'));
+    expect(result.current.chatEntries[0]).toMatchObject({type: 'assistant-greeting'});
+    expect(result.current.chatEntries.some((e) => e.type === 'assistant')).toBe(true);
+
+    // Agent types context and sends → user entry appears, then second
+    // assistant response arrives
+    act(() => result.current.setContextDraft('refunds question'));
+    await act(async () => {
+      result.current.submitContext();
+    });
+    expect(result.current.chatEntries.some((e) => e.type === 'user' && e.text === 'refunds question')).toBe(true);
+
+    rerender({realTimeAssist: [first, second]});
+    await waitFor(() => expect(result.current.chatEntries.filter((e) => e.type === 'assistant')).toHaveLength(2));
+
+    const types = result.current.chatEntries.map((e) => e.type);
+    expect(types).toContain('user');
+    expect(types).toContain('assistant-greeting');
+    expect(types.filter((t) => t === 'assistant')).toHaveLength(2);
+  });
+
+  it('stays idle when the feature flag is off', async () => {
+    const {result} = renderHook(() => useAiAssistant({...baseProps, isFeatureEnabled: false}));
+
+    await act(async () => {
+      result.current.requestRealTimeAssist();
+    });
+
+    expect(result.current.requestStatus).toBe('idle');
+    expect(result.current.errorMessage).toBeUndefined();
+    expect(storeMock.cc.apiAIAssistant.getRealTimeAssistance).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['interaction id', {interactionId: ''}],
+    ['agent id', {agentId: ''}],
+  ])('stays idle without an active %s', async (_label, missingId) => {
+    const {result} = renderHook(() => useAiAssistant({...baseProps, ...missingId}));
+
+    await act(async () => {
+      await result.current.requestRealTimeAssist();
+    });
+
+    expect(result.current.requestStatus).toBe('idle');
+    expect(result.current.errorMessage).toBeUndefined();
+    expect(storeMock.cc.apiAIAssistant.getRealTimeAssistance).not.toHaveBeenCalled();
+  });
+
+  it('errors instead of throwing when the loaded SDK does not expose getRealTimeAssistance', async () => {
+    const api = storeMock.cc.apiAIAssistant;
+    const getRealTimeAssistance = api.getRealTimeAssistance;
+    api.getRealTimeAssistance = undefined as unknown as typeof getRealTimeAssistance;
+    try {
+      const {result} = renderHook(() => useAiAssistant(baseProps));
+
+      await act(async () => {
+        await result.current.requestRealTimeAssist();
+      });
+
+      expect(result.current.requestStatus).toBe('error');
+      expect(result.current.errorMessage).toBeTruthy();
+    } finally {
+      api.getRealTimeAssistance = getRealTimeAssistance;
+    }
+  });
+
+  it('submitContext requests with the trimmed draft and clears it', async () => {
+    const {result} = renderHook(() => useAiAssistant(baseProps));
+
+    act(() => result.current.setContextDraft('  refund policy  '));
+    await act(async () => {
+      result.current.submitContext();
+    });
+
+    expect(storeMock.cc.apiAIAssistant.getRealTimeAssistance).toHaveBeenCalledWith(
+      expect.objectContaining({context: 'refund policy'})
+    );
+    expect(result.current.contextDraft).toBe('');
+  });
+
+  it('submitContext is a no-op when draft is empty', async () => {
+    const {result} = renderHook(() => useAiAssistant(baseProps));
+    await act(async () => {
+      result.current.submitContext();
+    });
+    expect(storeMock.cc.apiAIAssistant.getRealTimeAssistance).not.toHaveBeenCalled();
+  });
+
+  it('records error path when SDK rejects', async () => {
+    storeMock.cc.apiAIAssistant.getRealTimeAssistance.mockRejectedValueOnce(new Error('boom'));
+
+    const {result} = renderHook(() => useAiAssistant(baseProps));
+    await act(async () => {
+      await result.current.requestRealTimeAssist();
+    });
+
+    expect(result.current.requestStatus).toBe('error');
+    expect(result.current.errorMessage).toBe('boom');
+    // A failed request must leave the widget on the initial prompt.
+    expect(result.current.hasInitialRequestSucceeded).toBe(false);
+  });
+
+  it('reports isRequesting only while the SDK call is unresolved', async () => {
+    let release: () => void = () => undefined;
+    storeMock.cc.apiAIAssistant.getRealTimeAssistance.mockImplementationOnce(
+      () =>
+        new Promise<void>((resolve) => {
+          release = resolve;
+        })
+    );
+
+    const {result} = renderHook(() => useAiAssistant(baseProps));
+    expect(result.current.isRequesting).toBe(false);
+
+    act(() => {
+      result.current.requestRealTimeAssist();
+    });
+    expect(result.current.isRequesting).toBe(true);
+
+    await act(async () => {
+      release();
+    });
+    expect(result.current.isRequesting).toBe(false);
+  });
+
+  it('clears isRequesting when the request fails', async () => {
+    storeMock.cc.apiAIAssistant.getRealTimeAssistance.mockRejectedValueOnce(new Error('boom'));
+
+    const {result} = renderHook(() => useAiAssistant(baseProps));
+    await act(async () => {
+      await result.current.requestRealTimeAssist();
+    });
+
+    expect(result.current.isRequesting).toBe(false);
+  });
+
+  it('replays every payload that landed since the last render', async () => {
+    const onRealTimeAssistReceived = jest.fn();
+    const first = {data: {adaptiveCard: {type: 'AdaptiveCard'}, title: 'first'}};
+    const second = {data: {adaptiveCard: {type: 'AdaptiveCard'}, title: 'second'}};
+
+    const {rerender} = renderHook((props: {realTimeAssist?: Array<typeof first>} = {}) =>
+      useAiAssistant({
+        ...baseProps,
+        ...props,
+        realTimeAssist: props.realTimeAssist ?? [],
+        onRealTimeAssistReceived,
+      })
+    );
+
+    // Both payloads arrive in the same commit.
+    rerender({realTimeAssist: [first, second]});
+
+    await waitFor(() => expect(onRealTimeAssistReceived).toHaveBeenCalledTimes(2));
+    expect(onRealTimeAssistReceived).toHaveBeenNthCalledWith(1, first);
+    expect(onRealTimeAssistReceived).toHaveBeenNthCalledWith(2, second);
+  });
+
+  it('clears session state when the interaction changes', async () => {
+    const {result, rerender} = renderHook((props: {interactionId?: string} = {}) =>
+      useAiAssistant({...baseProps, interactionId: props.interactionId ?? 'interaction-1'})
+    );
+
+    await act(async () => {
+      result.current.requestRealTimeAssist();
+    });
+    act(() => result.current.setContextDraft('previous customer context'));
+    expect(result.current.hasInitialRequestSucceeded).toBe(true);
+
+    rerender({interactionId: 'interaction-2'});
+
+    expect(result.current.hasInitialRequestSucceeded).toBe(false);
+    expect(result.current.contextDraft).toBe('');
+    expect(result.current.requestStatus).toBe('idle');
+    expect(result.current.chatEntries).toHaveLength(0);
+  });
+});

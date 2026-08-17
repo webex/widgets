@@ -1,0 +1,53 @@
+.e911-modal {
+  // Cancel is the only way to dismiss this modal - hide the Dialog's built-in close ("X") button.
+  &::part(dialog-close-btn) {
+    display: none;
+  }
+
+  .e911-warning-box {
+    background-color: var(--mds-color-theme-background-alert-warning-normal);
+    border: 0.0625rem solid var(--mds-color-theme-outline-warning-normal);
+    border-radius: 0.25rem;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+
+    .e911-warning-title {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+      color: var(--mds-color-theme-text-warning-normal);
+    }
+
+    .e911-warning-message {
+      color: var(--mds-color-theme-text-warning-normal);
+    }
+  }
+
+  .e911-dialing-section {
+    margin-bottom: 1.25rem;
+
+    .e911-dialing-title {
+      margin-bottom: 0.5rem;
+    }
+
+    .e911-dialing-message {
+      color: var(--mds-color-theme-text-secondary-normal);
+    }
+  }
+
+  .e911-checkbox-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+
+    .e911-checkbox-label {
+      cursor: pointer;
+    }
+  }
+
+  .e911-save-error {
+    color: var(--mds-color-theme-text-error-normal);
+  }
+}
