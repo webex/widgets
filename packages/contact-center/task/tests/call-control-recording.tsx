@@ -76,8 +76,8 @@ const promoteTask = (task: FakeTask) => {
   store.store.agentId = AGENT_ID;
   // Registers the store's own task listeners (refreshTaskList on recording
   // pause/resume, etc.) exactly as production does.
-  store.handleIncomingTask(task);
-  store.setCurrentTask(task);
+  store.handleIncomingTask(task as unknown as Parameters<typeof store.handleIncomingTask>[0]);
+  store.setCurrentTask(task as unknown as Parameters<typeof store.setCurrentTask>[0]);
 };
 
 /** What the SDK does when the ContactRecordingPaused websocket event arrives. */
@@ -104,7 +104,6 @@ describe('CallControl recording pause/resume state', () => {
       info: jest.fn(),
       warn: jest.fn(),
       error: jest.fn(),
-      debug: jest.fn(),
       trace: jest.fn(),
     };
   });

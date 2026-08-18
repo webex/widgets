@@ -206,6 +206,28 @@ describe('useIncomingTask Hook', () => {
     expect(logger.error).not.toHaveBeenCalled();
   });
 
+  it('should reject an unaccepted consult exactly once on consult-end', async () => {
+    renderHook(() =>
+      useIncomingTask({
+        incomingTask: taskMock,
+        onAccepted: onTaskAccepted,
+        onRejected: onTaskDeclined,
+        logger,
+      })
+    );
+
+    const consultEndCallback = taskMock.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_CONSULT_END)?.[1];
+
+    act(() => {
+      consultEndCallback?.();
+    });
+
+    await waitFor(() => {
+      expect(onTaskDeclined).toHaveBeenCalledTimes(1);
+      expect(onTaskDeclined).toHaveBeenCalledWith({task: taskMock});
+    });
+  });
+
   it('should return if there is no taskId for incoming task', async () => {
     // Reset the mock first
     onTaskDeclined.mockClear();
@@ -746,6 +768,7 @@ describe('useCallControl', () => {
     toggleMute: jest.fn(() => Promise.resolve()),
     switchCall: jest.fn(() => Promise.resolve()),
     transferConference: jest.fn(() => Promise.resolve()),
+    dropConferenceParticipant: jest.fn(() => Promise.resolve()),
   };
 
   const mockLogger = mockCC.LoggerProxy;
@@ -753,6 +776,69 @@ describe('useCallControl', () => {
   const mockOnHoldResume = jest.fn();
   const mockOnEnd = jest.fn();
   const mockOnWrapUp = jest.fn();
+
+  const createParticipantDropTask = (dropRequest = jest.fn().mockResolvedValue(undefined)): ITask =>
+    ({
+      ...mockCurrentTask,
+      dropConferenceParticipant: dropRequest,
+      uiControls: createEnabledMainTaskUIControls({exitConference: {isVisible: true, isEnabled: true}}),
+      data: {
+        ...mockCurrentTask.data,
+        interactionId: 'participant-drop-task',
+        isConferenceInProgress: true,
+        interaction: {
+          ...mockCurrentTask.data.interaction,
+          interactionId: 'participant-drop-task',
+          mediaType: 'telephony',
+          mediaChannel: 'telephony',
+          state: 'conference',
+          owner: 'agent1',
+          contactDirection: {type: 'inbound'},
+          callAssociatedDetails: {ani: '+15550000001', dnis: '+15550000002'},
+          callProcessingDetails: {...mockCurrentTask.data.interaction.callProcessingDetails},
+          media: {
+            main: {
+              mediaResourceId: 'main',
+              mediaType: 'telephony',
+              mediaMgr: 'aqm',
+              participants: ['agent1', 'agent2', 'customer1'],
+              mType: 'mainCall',
+              isHold: false,
+              holdTimestamp: null,
+            },
+          },
+          participants: {
+            agent1: {
+              id: 'agent1',
+              pType: 'Agent',
+              type: 'Agent',
+              name: 'Current Agent',
+              hasJoined: true,
+              hasLeft: false,
+              isInPredial: false,
+            },
+            agent2: {
+              id: 'agent2',
+              pType: 'Agent',
+              type: 'Agent',
+              name: 'Agent Two',
+              hasJoined: true,
+              hasLeft: false,
+              isInPredial: false,
+            },
+            customer1: {
+              id: 'customer1',
+              pType: 'Customer',
+              type: 'Customer',
+              name: 'Customer',
+              hasJoined: true,
+              hasLeft: false,
+              isInPredial: false,
+            },
+          },
+        },
+      },
+    }) as ITask;
 
   beforeEach(() => {
     store.refreshTaskList();
@@ -799,6 +885,7 @@ describe('useCallControl', () => {
     // Restore the original Worker class and URL.createObjectURL
     global.Worker = originalWorker;
     delete global.URL.createObjectURL;
+    store.onErrorCallback = undefined;
     jest.clearAllMocks();
   });
 
@@ -835,6 +922,321 @@ describe('useCallControl', () => {
     });
 
     setTaskCallbackSpy.mockRestore();
+  });
+
+  describe('conference participant Drop', () => {
+    it('retains surviving Participants when Customer leaves and conference signals downgrade', () => {
+      const task = createParticipantDropTask();
+      task.data.interaction.media.main.participants = ['agent1', 'agent2', 'agent3', 'customer1'];
+      task.data.interaction.participants.agent3 = {
+        id: 'agent3',
+        pType: 'Agent',
+        type: 'Agent',
+        name: 'Agent Three',
+        hasJoined: true,
+        hasLeft: false,
+        isInPredial: false,
+      };
+      const {result, rerender} = renderHook(() =>
+        useCallControl({
+          currentTask: task,
+          logger: mockLogger,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'agent1',
+        })
+      );
+
+      expect(result.current.conferenceParticipantDropRoster?.customer).not.toBeNull();
+
+      task.data.interaction.participants.customer1.hasLeft = true;
+      task.data.interaction.state = 'connected';
+      task.data.isConferenceInProgress = false;
+      task.data.isConferencing = false;
+      task.data.interaction.callProcessingDetails.isConferencing = 'false';
+      task.uiControls.main.exitConference = {isVisible: false, isEnabled: false};
+      rerender();
+
+      expect(result.current.conferenceParticipantDropRoster?.customer).toBeNull();
+      expect(result.current.conferenceParticipantDropRoster?.participants).toEqual([
+        expect.objectContaining({participantType: 'Agent', dropTargetId: 'agent2'}),
+        expect.objectContaining({participantType: 'Agent', dropTargetId: 'agent3'}),
+      ]);
+    });
+
+    it('keeps the roster when Customer leaves only one other Agent', () => {
+      const task = createParticipantDropTask();
+      const {result, rerender} = renderHook(() =>
+        useCallControl({
+          currentTask: task,
+          logger: mockLogger,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'agent1',
+        })
+      );
+
+      expect(result.current.conferenceParticipantDropRoster).not.toBeNull();
+
+      task.data.interaction.participants.customer1.hasLeft = true;
+      task.data.interaction.state = 'post_call';
+      task.data.wrapUpRequired = true;
+      task.data.isConferenceInProgress = false;
+      task.data.isConferencing = false;
+      task.data.interaction.callProcessingDetails.isConferencing = 'false';
+      task.uiControls.main.exitConference = {isVisible: false, isEnabled: false};
+      task.uiControls.main.wrapup = {isVisible: true, isEnabled: true};
+      rerender();
+
+      expect(result.current.conferenceParticipantDropRoster).toEqual({
+        customer: null,
+        participants: [expect.objectContaining({participantType: 'Agent', dropTargetId: 'agent2'})],
+        isDropDisabled: false,
+      });
+    });
+
+    it('shows the Entry Point number while ringing, then replaces it with the answering agent', async () => {
+      const dropRequest = jest.fn().mockResolvedValue(undefined);
+      const task = createParticipantDropTask(dropRequest);
+      task.data.consultMediaResourceId = 'consult';
+      task.data.destinationType = 'entryPoint';
+      task.data.interaction.state = 'consulting';
+      task.data.interaction.media.consult = {
+        mediaResourceId: 'consult',
+        mediaType: 'telephony',
+        mediaMgr: 'aqm',
+        participants: ['agent1', 'entry-point-route'],
+        mType: 'consult',
+        isHold: true,
+        holdTimestamp: Date.now(),
+      };
+      task.data.interaction.participants['entry-point-route'] = {
+        id: '+15550000009',
+        pType: 'entry-point-id',
+        type: 'EpDn',
+        name: 'EP-DN',
+        dn: '+15550000009',
+        hasJoined: false,
+        hasLeft: false,
+        isInPredial: false,
+      };
+      task.uiControls.consult.endConsult = {isVisible: true, isEnabled: true};
+      const {result, rerender} = renderHook(() =>
+        useCallControl({
+          currentTask: task,
+          logger: mockLogger,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'agent1',
+        })
+      );
+      const pendingTarget = result.current.conferenceParticipantDropRoster?.participants.find(
+        (target) => target.dropTargetId === '+15550000009'
+      );
+
+      expect(pendingTarget).toEqual(expect.objectContaining({displayName: '+15550000009', isDropDisabled: true}));
+      if (!pendingTarget) throw new Error('Expected pending EP-DN target');
+
+      await act(async () => {
+        await result.current.dropConferenceParticipant(pendingTarget);
+      });
+
+      expect(dropRequest).not.toHaveBeenCalled();
+
+      task.data.interaction.media.consult.participants.push('agent2', 'agent3');
+      task.data.interaction.participants.agent3 = {
+        id: 'agent3',
+        pType: 'Agent',
+        type: 'Agent',
+        name: 'Support Agent',
+        hasJoined: true,
+        hasLeft: false,
+        isInPredial: false,
+        isConsulted: true,
+      };
+      task.data.interaction.callProcessingDetails.consultDestinationAgentJoined = 'true';
+      task.data.interaction.callProcessingDetails.consultDestinationAgentName = 'Support Agent';
+      rerender();
+
+      expect(result.current.conferenceParticipantDropRoster?.participants).toEqual([
+        expect.objectContaining({
+          participantType: 'Agent',
+          displayName: 'Agent Two',
+          dropTargetId: 'agent2',
+          isDropDisabled: false,
+        }),
+        expect.objectContaining({
+          participantType: 'Agent',
+          displayName: 'Support Agent',
+          dropTargetId: 'agent3',
+          isDropDisabled: true,
+        }),
+      ]);
+    });
+
+    it('delegates the exact target and publishes success only after the SDK promise resolves', async () => {
+      let resolveDrop!: () => void;
+      const dropRequest = jest.fn(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveDrop = resolve;
+          })
+      );
+      const task = createParticipantDropTask(dropRequest);
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: task,
+          logger: mockLogger,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'agent1',
+        })
+      );
+      const target = result.current.conferenceParticipantDropRoster?.participants[0];
+
+      if (!target) throw new Error('Expected Agent Drop target');
+      let requestPromise!: Promise<void>;
+      act(() => {
+        requestPromise = result.current.dropConferenceParticipant(target);
+      });
+
+      expect(dropRequest).toHaveBeenCalledWith({participantId: 'agent2'});
+      expect(result.current.pendingParticipantDropId).toBe('agent2');
+      expect(result.current.participantDropAnnouncement).toBeNull();
+
+      await act(async () => {
+        resolveDrop();
+        await requestPromise;
+      });
+
+      expect(result.current.pendingParticipantDropId).toBeNull();
+      expect(result.current.participantDropAnnouncement).toEqual({
+        type: 'success',
+        message: 'Participant removed from the conference.',
+      });
+    });
+
+    it('globally serializes same-target and cross-target requests', async () => {
+      let resolveDrop!: () => void;
+      const dropRequest = jest.fn(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveDrop = resolve;
+          })
+      );
+      const task = createParticipantDropTask(dropRequest);
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: task,
+          logger: mockLogger,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'agent1',
+        })
+      );
+      const agentTarget = result.current.conferenceParticipantDropRoster?.participants[0];
+      const customerTarget = result.current.conferenceParticipantDropRoster?.customer;
+      if (!agentTarget || !customerTarget) throw new Error('Expected Agent and Customer Drop targets');
+      let firstRequest!: Promise<void>;
+
+      act(() => {
+        firstRequest = result.current.dropConferenceParticipant(agentTarget);
+        void result.current.dropConferenceParticipant(agentTarget);
+        void result.current.dropConferenceParticipant(customerTarget);
+      });
+
+      expect(dropRequest).toHaveBeenCalledTimes(1);
+
+      await act(async () => {
+        resolveDrop();
+        await firstRequest;
+      });
+    });
+
+    it('reports a sanitized failure without logging participant data', async () => {
+      const sensitiveParticipantId = 'sensitive-participant-id';
+      const dropRequest = jest.fn().mockRejectedValue(new Error(`Failed URL contained ${sensitiveParticipantId}`));
+      const task = createParticipantDropTask(dropRequest);
+      task.data.interaction.media.main.participants[1] = sensitiveParticipantId;
+      task.data.interaction.participants[sensitiveParticipantId] = {
+        ...task.data.interaction.participants.agent2,
+        id: sensitiveParticipantId,
+      };
+      delete task.data.interaction.participants.agent2;
+      const hostErrorCallback = jest.fn();
+      store.onErrorCallback = hostErrorCallback;
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: task,
+          logger: mockLogger,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'agent1',
+        })
+      );
+      const target = result.current.conferenceParticipantDropRoster?.participants[0];
+      if (!target) throw new Error('Expected Agent Drop target');
+
+      await act(async () => {
+        await result.current.dropConferenceParticipant(target);
+      });
+
+      expect(result.current.participantDropAnnouncement).toEqual({
+        type: 'error',
+        message: 'Unable to drop participant from the call. Try again.',
+      });
+      expect(hostErrorCallback).toHaveBeenCalledWith(
+        'CallControlCAD',
+        Error('Unable to drop participant from the call. Try again.')
+      );
+      expect(JSON.stringify(mockLogger.error.mock.calls)).not.toContain(sensitiveParticipantId);
+      expect(JSON.stringify(hostErrorCallback.mock.calls)).not.toContain(sensitiveParticipantId);
+    });
+
+    it('ignores stale completion and re-derives roster changes from the current task', async () => {
+      let resolveDrop!: () => void;
+      const dropRequest = jest.fn(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveDrop = resolve;
+          })
+      );
+      const firstTask = createParticipantDropTask(dropRequest);
+      const nextTask = createParticipantDropTask();
+      nextTask.data.interaction.owner = 'agent2';
+      let activeTask = firstTask;
+      const {result, rerender} = renderHook(() =>
+        useCallControl({
+          currentTask: activeTask,
+          logger: mockLogger,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'agent1',
+        })
+      );
+      const target = result.current.conferenceParticipantDropRoster?.participants[0];
+      if (!target) throw new Error('Expected Agent Drop target');
+      let requestPromise!: Promise<void>;
+
+      act(() => {
+        requestPromise = result.current.dropConferenceParticipant(target);
+      });
+      activeTask = nextTask;
+      rerender();
+
+      expect(result.current.conferenceParticipantDropRoster?.participants[0].isReadOnly).toBe(true);
+
+      await act(async () => {
+        resolveDrop();
+        await requestPromise;
+      });
+
+      expect(result.current.participantDropAnnouncement).toBeNull();
+
+      nextTask.data.interaction.participants.agent2.hasLeft = true;
+      rerender();
+      expect(result.current.conferenceParticipantDropRoster).toBeNull();
+    });
   });
 
   it('should not call any call backs if callbacks are not provided', async () => {
@@ -5696,7 +6098,7 @@ describe('useOutdialCall', () => {
     });
 
     expect(mockOutdialCallProps.startOutdial).toHaveBeenCalledWith(destination);
-    expect(logger.info).toHaveBeenCalledWith('Outdial call started', 'Success');
+    expect(logger.info).toHaveBeenCalledWith('Outdial call started');
   });
 
   it('should successfully start an outdial call with origin', async () => {
@@ -5713,7 +6115,7 @@ describe('useOutdialCall', () => {
     });
 
     expect(mockOutdialCallProps.startOutdial).toHaveBeenCalledWith(destination, origin);
-    expect(logger.info).toHaveBeenCalledWith('Outdial call started', 'Success');
+    expect(logger.info).toHaveBeenCalledWith('Outdial call started');
   });
 
   it('should show alert when destination is empty or only contains spaces', async () => {

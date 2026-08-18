@@ -411,6 +411,32 @@ export type Participant = {
   name?: string;
 };
 
+export type ConferenceParticipantDropType = 'Customer' | 'Agent' | 'EP-DN' | 'Supervisor';
+
+/**
+ * Display and authorization data for one participant-drop roster row.
+ * `dropTargetId` is passed to the SDK only when `isReadOnly` is false.
+ */
+export type ConferenceParticipantDropTarget = {
+  participantType: ConferenceParticipantDropType;
+  displayName: string;
+  dropTargetId: string;
+  isPrimary: boolean;
+  isReadOnly: boolean;
+  /** Target is visible with an action, but the conference Drop request is not valid yet. */
+  isDropDisabled: boolean;
+  requiresConfirmation: boolean;
+};
+
+/**
+ * Participant-drop roster derived from the authoritative main-call media leg.
+ */
+export type ConferenceParticipantDropRoster = {
+  customer: ConferenceParticipantDropTarget | null;
+  participants: ConferenceParticipantDropTarget[];
+  isDropDisabled: boolean;
+};
+
 /**
  * Desktop preference data structure containing E911 modal acknowledgment.
  * @public

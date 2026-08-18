@@ -2392,7 +2392,7 @@ describe('storeEventsWrapper', () => {
     });
 
     describe('handleTaskEnd — campaign preview (unaccepted)', () => {
-      it('should call refreshTaskList and let the backend drive task removal', () => {
+      it('should defer refreshTaskList so SDK cleanup completes first', async () => {
         const task = createCampaignPreviewTask('campaign-1');
         storeWrapper['store'].taskList = {'campaign-1': task};
         storeWrapper['store'].currentTask = task;
@@ -2403,13 +2403,14 @@ describe('storeEventsWrapper', () => {
 
         storeWrapper.handleTaskEnd();
 
-        // refreshTaskList should be called (normal path, no force cleanup)
-        expect(refreshSpy).toHaveBeenCalled();
+        expect(refreshSpy).not.toHaveBeenCalled();
+        await Promise.resolve();
+        expect(refreshSpy).toHaveBeenCalledTimes(1);
       });
     });
 
     describe('handleTaskEnd — accepted campaign preview', () => {
-      it('should call refreshTaskList for accepted campaign', () => {
+      it('should defer refreshTaskList for accepted campaign', async () => {
         const task = createCampaignPreviewTask('campaign-accepted');
         storeWrapper['store'].acceptedCampaignIds = new Set(['campaign-accepted']);
         storeWrapper['store'].taskList = {'campaign-accepted': task};
@@ -2422,8 +2423,9 @@ describe('storeEventsWrapper', () => {
 
         // acceptedCampaignIds should NOT be cleaned up here (deferred to handleTaskRemove)
         expect(storeWrapper['store'].acceptedCampaignIds.has('campaign-accepted')).toBe(true);
-        // refreshTaskList SHOULD be called (normal path)
-        expect(refreshSpy).toHaveBeenCalled();
+        expect(refreshSpy).not.toHaveBeenCalled();
+        await Promise.resolve();
+        expect(refreshSpy).toHaveBeenCalledTimes(1);
       });
     });
 
@@ -2455,7 +2457,7 @@ describe('storeEventsWrapper', () => {
     });
 
     describe('handleTaskEnd — non-campaign tasks', () => {
-      it('should call refreshTaskList for a regular (non-campaign) task', () => {
+      it('should refresh a regular task after SDK terminal cleanup', async () => {
         const regularTask = makeMockTask({
           data: {
             interactionId: 'regular-1',
@@ -2474,10 +2476,42 @@ describe('storeEventsWrapper', () => {
 
         storeWrapper.handleTaskEnd();
 
-        // Should call refreshTaskList normally
-        expect(refreshSpy).toHaveBeenCalled();
+        expect(refreshSpy).not.toHaveBeenCalled();
+        await Promise.resolve();
+        expect(refreshSpy).toHaveBeenCalledTimes(1);
         // taskList should still contain the task (SDK still returns it)
         expect(storeWrapper['store'].taskList['regular-1']).toBeDefined();
+      });
+
+      it('coalesces consult-end and task-end into one deferred refresh', async () => {
+        const refreshSpy = jest.spyOn(storeWrapper, 'refreshTaskList');
+        const setQueueProgressSpy = jest.spyOn(storeWrapper, 'setIsQueueConsultInProgress');
+
+        storeWrapper.handleConsultEnd();
+        storeWrapper.handleTaskEnd();
+
+        expect(setQueueProgressSpy).toHaveBeenCalledWith(false);
+        expect(storeWrapper.consultStartTimeStamp).toBeNull();
+        expect(refreshSpy).not.toHaveBeenCalled();
+
+        await Promise.resolve();
+
+        expect(refreshSpy).toHaveBeenCalledTimes(1);
+      });
+
+      it('clears the ended current task after SDK cleanup removes it', async () => {
+        const regularTask = makeMockTask({
+          data: {interactionId: 'ended-task', interaction: {state: 'connected'}},
+        });
+        storeWrapper['store'].taskList = {'ended-task': regularTask};
+        storeWrapper['store'].currentTask = regularTask;
+        storeWrapper['store'].cc.taskManager.getAllTasks = jest.fn().mockReturnValue({});
+
+        storeWrapper.handleTaskEnd();
+
+        expect(storeWrapper.currentTask).toBe(regularTask);
+        await Promise.resolve();
+        expect(storeWrapper.currentTask).toBeNull();
       });
     });
 

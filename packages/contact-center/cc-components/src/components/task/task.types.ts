@@ -10,6 +10,8 @@ import {
   EntryPointRecord,
   FetchPaginatedList,
   Participant,
+  ConferenceParticipantDropRoster,
+  ConferenceParticipantDropTarget,
   AddressBookEntrySearchParams,
   AddressBookEntriesResponse,
   TaskUIControls,
@@ -52,6 +54,11 @@ export const TARGET_TYPE = {
 } as const;
 
 export type TargetType = (typeof TARGET_TYPE)[keyof typeof TARGET_TYPE];
+
+export type ParticipantDropAnnouncement = {
+  type: 'success' | 'error';
+  message: string;
+};
 
 /**
  * Interface representing the TaskProps of a user.
@@ -497,6 +504,18 @@ export interface ControlProps {
    */
   conferenceParticipants: Participant[];
 
+  /** Owner-aware conference roster used by the CallControlCAD Drop menu. */
+  conferenceParticipantDropRoster: ConferenceParticipantDropRoster | null;
+
+  /** Drop target currently waiting for routing-event completion. */
+  pendingParticipantDropId: string | null;
+
+  /** Generic screen-reader and visible feedback for the most recent Drop request. */
+  participantDropAnnouncement: ParticipantDropAnnouncement | null;
+
+  /** Requests removal of one currently eligible conference participant. */
+  dropConferenceParticipant: (target: ConferenceParticipantDropTarget) => Promise<void>;
+
   /** Fetch paginated address book entries for dial numbers */
   getAddressBookEntries?: FetchPaginatedList<AddressBookEntry>;
 
@@ -565,14 +584,23 @@ export type CallControlComponentProps = Pick<
   | 'getQueuesFetcher'
   | 'consultTransferOptions'
   | 'conferenceEnabled'
-> & {
-  /**
-   * Whether the current task is an accepted campaign preview call.
-   * When `true`, the header renders the campaign icon and
-   * "Campaign call" label instead of the standard media type.
-   */
-  isCampaignCall?: boolean;
-};
+> &
+  Partial<
+    Pick<
+      ControlProps,
+      | 'conferenceParticipantDropRoster'
+      | 'pendingParticipantDropId'
+      | 'participantDropAnnouncement'
+      | 'dropConferenceParticipant'
+    >
+  > & {
+    /**
+     * Whether the current task is an accepted campaign preview call.
+     * When `true`, the header renders the campaign icon and
+     * "Campaign call" label instead of the standard media type.
+     */
+    isCampaignCall?: boolean;
+  };
 
 export type OutdialAniEntry = {
   /** Unique identifier for the ANI entry */

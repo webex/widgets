@@ -32,7 +32,7 @@
       "package": "@webex/cc-store",
       "path": "packages/contact-center/store",
       "spec": "packages/contact-center/store/ai-docs/store-spec.md",
-      "responsibility": "MobX singleton holding global CC state; proxies SDK events; sole SDK access point.",
+      "responsibility": "MobX singleton holding global CC state; proxies SDK events; sole SDK access point; owns pure conference Drop roster derivation.",
       "coverageState": "DRAFT",
       "tier": 1
     },
@@ -41,7 +41,7 @@
       "package": "@webex/cc-components",
       "path": "packages/contact-center/cc-components",
       "spec": "packages/contact-center/cc-components/ai-docs/cc-components-spec.md",
-      "responsibility": "Shared presentational React UI primitives consumed by widget packages.",
+      "responsibility": "Shared presentational React UI primitives, including the CallControlCAD participant Drop experience.",
       "coverageState": "DRAFT",
       "tier": 1
     },
@@ -50,7 +50,7 @@
       "package": "@webex/cc-widgets",
       "path": "packages/contact-center/cc-widgets",
       "spec": "packages/contact-center/cc-widgets/ai-docs/cc-widgets-spec.md",
-      "responsibility": "r2wc Web Component wrappers aggregating widget packages for framework-agnostic consumption.",
+      "responsibility": "r2wc Web Component wrappers aggregating widget packages; existing CallControlCAD wrapper inherits participant Drop without new properties.",
       "coverageState": "DRAFT",
       "tier": 1
     },
@@ -86,7 +86,7 @@
       "package": "@webex/cc-task",
       "path": "packages/contact-center/task",
       "spec": "packages/contact-center/task/ai-docs/task-spec.md",
-      "responsibility": "Task widget bundle: CallControl, CallControlCAD, IncomingTask, OutdialCall, TaskList.",
+      "responsibility": "Task widget bundle: CallControl, CallControlCAD with participant Drop orchestration, IncomingTask, OutdialCall, TaskList.",
       "coverageState": "DRAFT",
       "tier": 1,
       "subWidgets": ["CallControl", "CallControlCAD", "IncomingTask", "OutdialCall", "TaskList"]

@@ -1,5 +1,11 @@
-import {isIncomingTask, getConferenceParticipants, findHoldTimestamp} from '../src/task-utils';
+import {
+  isIncomingTask,
+  getConferenceParticipants,
+  getConferenceParticipantDropRoster,
+  findHoldTimestamp,
+} from '../src/task-utils';
 import {mockTask} from '../../test-fixtures/src/fixtures';
+import {createEnabledMainTaskUIControls} from '../../test-fixtures/src/taskUIControlsFixtures';
 import {ITask} from '../src/store.types';
 
 const participant = (hasJoined: boolean) =>
@@ -598,6 +604,458 @@ describe('getConferenceParticipants', () => {
       {id: 'agent2', pType: 'Agent', name: 'Agent Two'},
       {id: 'dn1', pType: 'DN', name: 'DN'},
     ]);
+  });
+});
+
+describe('getConferenceParticipantDropRoster', () => {
+  const currentAgentId = 'agent1';
+
+  const activeParticipant = (id: string, pType: string, name?: string) => ({
+    id,
+    pType,
+    type: pType,
+    name,
+    hasJoined: true,
+    hasLeft: false,
+    isInPredial: false,
+  });
+
+  const createDropRosterTask = ({
+    owner = currentAgentId,
+    direction = 'inbound',
+    state = 'conference',
+    wrapUpRequired = false,
+    consultHold,
+  }: {
+    owner?: string;
+    direction?: string;
+    state?: string;
+    wrapUpRequired?: boolean;
+    consultHold?: boolean;
+  } = {}): ITask => {
+    const controls = createEnabledMainTaskUIControls({exitConference: {isVisible: true, isEnabled: true}});
+    const media = {
+      main: {
+        mediaResourceId: 'main',
+        mediaType: 'telephony',
+        mediaMgr: 'aqm',
+        mType: 'mainCall',
+        isHold: false,
+        holdTimestamp: null,
+        participants: ['agent1', 'agent2', 'epdn1', 'supervisor1', 'customer1', 'vva1', 'unsupported1'],
+      },
+      ...(consultHold === undefined
+        ? {}
+        : {
+            consult: {
+              mediaResourceId: 'consult',
+              mediaType: 'telephony',
+              mediaMgr: 'aqm',
+              mType: 'consult',
+              isHold: consultHold,
+              holdTimestamp: consultHold ? Date.now() : null,
+              participants: ['agent1', 'consult-agent'],
+            },
+          }),
+    };
+
+    if (consultHold !== undefined) {
+      controls.consult.endConsult = {isVisible: true, isEnabled: true};
+    }
+
+    return {
+      ...mockTask,
+      uiControls: controls,
+      data: {
+        ...mockTask.data,
+        interactionId: 'main',
+        wrapUpRequired,
+        isConferenceInProgress: true,
+        interaction: createPartialInteraction({
+          ...mockTask.data.interaction,
+          interactionId: 'main',
+          mediaType: 'telephony',
+          state,
+          owner,
+          contactDirection: {type: direction},
+          callAssociatedDetails: {ani: '+15550000001', dnis: '+15550000002'},
+          callProcessingDetails: {
+            ...mockTask.data.interaction.callProcessingDetails,
+            ani: '+15550000001',
+            dnis: '+15550000002',
+          },
+          media,
+          participants: {
+            agent1: activeParticipant('agent1', 'Agent', 'Current Agent'),
+            agent2: activeParticipant('agent2', 'Agent', 'Agent Two'),
+            epdn1: {...activeParticipant('epdn1', 'EP_DN', 'EP-DN'), dn: '+15550000003'},
+            supervisor1: activeParticipant('supervisor1', 'Supervisor', 'Supervisor One'),
+            customer1: activeParticipant('customer1', 'Customer', 'Customer'),
+            vva1: activeParticipant('vva1', 'VVA', 'Virtual Agent'),
+            unsupported1: activeParticipant('unsupported1', 'Queue', 'Queue'),
+            'consult-agent': activeParticipant('consult-agent', 'Agent', 'Consult Agent'),
+          },
+        }),
+      },
+    } as ITask;
+  };
+
+  it('derives Customer, Agent, EP-DN, and read-only Supervisor rows from the main leg', () => {
+    const task = createDropRosterTask();
+    const roster = getConferenceParticipantDropRoster(task, currentAgentId);
+
+    expect(roster).toEqual({
+      customer: {
+        participantType: 'Customer',
+        displayName: '+15550000001',
+        dropTargetId: '+15550000001',
+        isPrimary: false,
+        isReadOnly: false,
+        isDropDisabled: false,
+        requiresConfirmation: true,
+      },
+      participants: [
+        {
+          participantType: 'Agent',
+          displayName: 'Agent Two',
+          dropTargetId: 'agent2',
+          isPrimary: false,
+          isReadOnly: false,
+          isDropDisabled: false,
+          requiresConfirmation: false,
+        },
+        {
+          participantType: 'EP-DN',
+          displayName: '+15550000003',
+          dropTargetId: 'epdn1',
+          isPrimary: false,
+          isReadOnly: false,
+          isDropDisabled: false,
+          requiresConfirmation: false,
+        },
+        {
+          participantType: 'Supervisor',
+          displayName: 'Supervisor One',
+          dropTargetId: 'supervisor1',
+          isPrimary: false,
+          isReadOnly: true,
+          isDropDisabled: false,
+          requiresConfirmation: false,
+        },
+      ],
+      isDropDisabled: false,
+    });
+    expect(roster?.participants).not.toEqual(expect.arrayContaining([expect.objectContaining({dropTargetId: 'vva1'})]));
+    expect(roster?.participants).not.toEqual(
+      expect.arrayContaining([expect.objectContaining({dropTargetId: 'consult-agent'})])
+    );
+    expect(getConferenceParticipants(task, currentAgentId)).toHaveLength(3);
+  });
+
+  it('uses outbound DNIS for the synthetic Customer target', () => {
+    const roster = getConferenceParticipantDropRoster(createDropRosterTask({direction: 'outbound'}), currentAgentId);
+
+    expect(roster?.customer?.dropTargetId).toBe('+15550000002');
+  });
+
+  it('omits departed, not-yet-joined, and customer rows without a valid direction number', () => {
+    const task = createDropRosterTask();
+    task.data.interaction.participants.agent2.hasLeft = true;
+    task.data.interaction.participants.epdn1.hasJoined = false;
+    task.data.interaction.callAssociatedDetails.ani = '';
+    task.data.interaction.callProcessingDetails.ani = '';
+
+    expect(getConferenceParticipantDropRoster(task, currentAgentId)).toEqual({
+      customer: null,
+      participants: [
+        {
+          participantType: 'Supervisor',
+          displayName: 'Supervisor One',
+          dropTargetId: 'supervisor1',
+          isPrimary: false,
+          isReadOnly: true,
+          isDropDisabled: false,
+          requiresConfirmation: false,
+        },
+      ],
+      isDropDisabled: false,
+    });
+  });
+
+  it('makes every row read-only for a non-owner and marks the owner as Primary', () => {
+    const roster = getConferenceParticipantDropRoster(createDropRosterTask({owner: 'agent2'}), currentAgentId);
+
+    expect(roster?.customer?.isReadOnly).toBe(true);
+    expect(roster?.participants.every((target) => target.isReadOnly)).toBe(true);
+    expect(roster?.participants.find((target) => target.dropTargetId === 'agent2')?.isPrimary).toBe(true);
+  });
+
+  it('disables Drop only while an active consult is not held', () => {
+    expect(
+      getConferenceParticipantDropRoster(createDropRosterTask({consultHold: false}), currentAgentId)?.isDropDisabled
+    ).toBe(true);
+    expect(
+      getConferenceParticipantDropRoster(createDropRosterTask({consultHold: true}), currentAgentId)?.isDropDisabled
+    ).toBe(false);
+  });
+
+  it('keeps Drop disabled while active consult controls precede consult media hydration', () => {
+    const task = createDropRosterTask({consultHold: false});
+    delete task.data.interaction.media.consult;
+
+    expect(getConferenceParticipantDropRoster(task, currentAgentId)?.isDropDisabled).toBe(true);
+  });
+
+  it('returns null outside an eligible telephony main call', () => {
+    const task = createDropRosterTask();
+    task.data.interaction.mediaType = 'chat';
+    expect(getConferenceParticipantDropRoster(task, currentAgentId)).toBeNull();
+  });
+
+  it('keeps a valid multiparty roster through post-call and wrap-up signal downgrades', () => {
+    const task = createDropRosterTask({state: 'post_call', wrapUpRequired: true});
+    task.data.isConferenceInProgress = false;
+    task.data.isConferencing = false;
+    task.data.interaction.callProcessingDetails.isConferencing = 'false';
+    task.uiControls.main.exitConference = {isVisible: false, isEnabled: false};
+    task.uiControls.main.wrapup = {isVisible: true, isEnabled: true};
+    task.data.interaction.media.main.participants = ['agent1', 'agent2', 'epdn1'];
+
+    expect(getConferenceParticipantDropRoster(task, currentAgentId)?.participants).toEqual([
+      expect.objectContaining({dropTargetId: 'agent2'}),
+      expect.objectContaining({dropTargetId: 'epdn1'}),
+    ]);
+  });
+
+  it('uses main-leg membership for a Customer-plus-Agent multiparty call', () => {
+    const task = createDropRosterTask({state: 'connected'});
+    task.data.isConferenceInProgress = false;
+    task.data.isConferencing = false;
+    task.data.interaction.callProcessingDetails.isConferencing = 'false';
+    task.uiControls.main.exitConference = {isVisible: false, isEnabled: false};
+
+    expect(getConferenceParticipantDropRoster(task, currentAgentId)).not.toBeNull();
+  });
+
+  it('keeps Participants after Customer leaves and conference signals downgrade', () => {
+    const task = createDropRosterTask({state: 'connected'});
+    task.data.isConferenceInProgress = false;
+    task.data.isConferencing = false;
+    task.data.interaction.callProcessingDetails.isConferencing = 'false';
+    task.uiControls.main.exitConference = {isVisible: false, isEnabled: false};
+    task.data.interaction.participants.customer1.hasLeft = true;
+
+    const roster = getConferenceParticipantDropRoster(task, currentAgentId);
+
+    expect(roster?.customer).toBeNull();
+    expect(roster?.participants).toEqual([
+      expect.objectContaining({participantType: 'Agent', dropTargetId: 'agent2'}),
+      expect.objectContaining({participantType: 'EP-DN', dropTargetId: 'epdn1'}),
+      expect.objectContaining({participantType: 'Supervisor', dropTargetId: 'supervisor1'}),
+    ]);
+  });
+
+  it('does not treat an initial one-agent/one-customer call as a conference roster', () => {
+    const task = createDropRosterTask({state: 'connected'});
+    task.data.isConferenceInProgress = false;
+    task.data.isConferencing = false;
+    task.data.interaction.callProcessingDetails.isConferencing = 'false';
+    task.uiControls.main.exitConference = {isVisible: false, isEnabled: false};
+    task.data.interaction.media.main.participants = ['agent1', 'customer1'];
+
+    expect(getConferenceParticipantDropRoster(task, currentAgentId)).toBeNull();
+  });
+
+  it('keeps the roster when Customer leaves one other Agent', () => {
+    const task = createDropRosterTask({state: 'post_call', wrapUpRequired: true});
+    task.data.isConferenceInProgress = false;
+    task.data.isConferencing = false;
+    task.data.interaction.callProcessingDetails.isConferencing = 'false';
+    task.uiControls.main.exitConference = {isVisible: false, isEnabled: false};
+    task.uiControls.main.wrapup = {isVisible: true, isEnabled: true};
+    task.data.interaction.media.main.participants = ['agent1', 'agent2'];
+    task.data.interaction.participants.customer1.hasLeft = true;
+
+    expect(getConferenceParticipantDropRoster(task, currentAgentId)).toEqual({
+      customer: null,
+      participants: [expect.objectContaining({participantType: 'Agent', dropTargetId: 'agent2'})],
+      isDropDisabled: false,
+    });
+  });
+
+  it('returns to the 1-to-1 UI when the final Agent leaves while Customer remains', () => {
+    const task = createDropRosterTask({state: 'connected'});
+    task.data.interaction.media.main.participants = ['agent1', 'agent2', 'customer1'];
+    task.data.interaction.participants.agent2.hasLeft = true;
+
+    expect(getConferenceParticipantDropRoster(task, currentAgentId)).toBeNull();
+  });
+
+  it('shows an Entry Point number while ringing, replaces it with the answering agent, and enables it after merge', () => {
+    const task = createDropRosterTask({state: 'consulting', consultHold: false});
+    task.data.consultMediaResourceId = 'consult';
+    task.data.destinationType = 'entryPoint';
+    task.data.interaction.media.main.participants = ['agent1', 'customer1'];
+    task.data.interaction.media.consult.participants = ['agent1', 'entry-point-route'];
+    task.data.interaction.participants['entry-point-route'] = {
+      ...activeParticipant('+15550000009', 'entry-point-id', 'EP-DN'),
+      type: 'EpDn',
+      dn: '+15550000009',
+      hasJoined: false,
+    };
+
+    expect(getConferenceParticipantDropRoster(task, currentAgentId)?.participants).toEqual([
+      expect.objectContaining({
+        participantType: 'EP-DN',
+        displayName: '+15550000009',
+        dropTargetId: '+15550000009',
+        isReadOnly: false,
+        isDropDisabled: true,
+      }),
+    ]);
+
+    task.data.interaction.participants['answering-agent'] = activeParticipant(
+      'answering-agent',
+      'Agent',
+      'Support Agent'
+    );
+    task.data.interaction.media.consult.participants.push('answering-agent');
+    task.data.interaction.callProcessingDetails.consultDestinationAgentJoined = 'true';
+    task.data.interaction.callProcessingDetails.consultDestinationAgentName = 'Support Agent';
+
+    expect(getConferenceParticipantDropRoster(task, currentAgentId)?.participants).toEqual([
+      expect.objectContaining({
+        participantType: 'Agent',
+        displayName: 'Support Agent',
+        dropTargetId: 'answering-agent',
+        isDropDisabled: true,
+      }),
+    ]);
+
+    task.data.interaction.media.main.participants.push('answering-agent');
+    task.data.interaction.state = 'conference';
+    task.data.interaction.media.consult.isHold = true;
+
+    expect(getConferenceParticipantDropRoster(task, currentAgentId)?.participants).toEqual([
+      expect.objectContaining({
+        participantType: 'Agent',
+        displayName: 'Support Agent',
+        dropTargetId: 'answering-agent',
+        isDropDisabled: false,
+      }),
+    ]);
+  });
+
+  it('keeps the consulting conference Agent and identifies the Entry Point answering Agent', () => {
+    const task = createDropRosterTask({state: 'consulting', consultHold: false});
+    task.data.consultMediaResourceId = 'consult';
+    task.data.destinationType = 'entryPoint';
+    task.data.interaction.media.main.participants = ['agent1', 'agent2', 'customer1'];
+    task.data.interaction.media.consult.participants = ['agent2', 'entry-point-route'];
+    task.data.interaction.participants['entry-point-route'] = {
+      ...activeParticipant('+15550000009', 'entry-point-id', 'EP-DN'),
+      type: 'EpDn',
+      dn: '+15550000009',
+      hasJoined: false,
+    };
+
+    expect(getConferenceParticipantDropRoster(task, currentAgentId)?.participants).toEqual([
+      expect.objectContaining({displayName: 'Agent Two', dropTargetId: 'agent2'}),
+      expect.objectContaining({displayName: '+15550000009', isDropDisabled: true}),
+    ]);
+
+    task.data.interaction.participants['answering-agent'] = {
+      ...activeParticipant('answering-agent', 'Agent', 'Support Agent'),
+      isConsulted: true,
+    };
+    task.data.interaction.media.consult.participants.push('answering-agent');
+    task.data.interaction.callProcessingDetails.consultDestinationAgentJoined = 'true';
+    task.data.interaction.callProcessingDetails.consultDestinationAgentName = 'Support Agent';
+
+    expect(getConferenceParticipantDropRoster(task, currentAgentId)?.participants).toEqual([
+      expect.objectContaining({displayName: 'Agent Two', dropTargetId: 'agent2'}),
+      expect.objectContaining({
+        participantType: 'Agent',
+        displayName: 'Support Agent',
+        dropTargetId: 'answering-agent',
+        isDropDisabled: true,
+      }),
+    ]);
+  });
+
+  it('uses the latest task snapshot when the Entry Point consult leg has not reached task.data yet', () => {
+    const task = createDropRosterTask({state: 'consulting', consultHold: false});
+    task.data.interaction.media.main.participants = ['agent1', 'customer1'];
+    delete task.data.interaction.media.consult;
+
+    const snapshotTaskData = {
+      ...task.data,
+      consultMediaResourceId: 'snapshot-consult',
+      destinationType: 'entryPoint',
+      interaction: {
+        ...task.data.interaction,
+        media: {
+          ...task.data.interaction.media,
+          'snapshot-consult': {
+            mediaResourceId: 'snapshot-consult',
+            mediaType: 'telephony',
+            mediaMgr: 'aqm',
+            mType: 'consult',
+            isHold: false,
+            holdTimestamp: null,
+            participants: ['agent1', 'snapshot-entry-point'],
+          },
+        },
+        participants: {
+          ...task.data.interaction.participants,
+          'snapshot-entry-point': {
+            ...activeParticipant('+15550000010', 'entry-point-id', 'EP-DN'),
+            type: 'EpDn',
+            hasJoined: false,
+          },
+        },
+      },
+    };
+
+    (
+      task as ITask & {
+        state: {context: {taskData: ITask['data']}};
+      }
+    ).state = {context: {taskData: snapshotTaskData}};
+
+    expect(getConferenceParticipantDropRoster(task, currentAgentId)?.participants).toEqual([
+      expect.objectContaining({
+        participantType: 'EP-DN',
+        displayName: '+15550000010',
+        dropTargetId: '+15550000010',
+        isDropDisabled: true,
+      }),
+    ]);
+  });
+
+  it('does not revive a stale pending EP-DN consult leg', () => {
+    const task = createDropRosterTask({state: 'connected', consultHold: false});
+    task.data.consultMediaResourceId = 'consult';
+    task.data.interaction.media.main.participants = ['agent1', 'customer1'];
+    task.data.interaction.media.consult.participants = ['agent1', 'pending-epdn'];
+    task.data.interaction.participants['pending-epdn'] = {
+      ...activeParticipant('pending-epdn', 'EP_DN', 'EP-DN'),
+      dn: '+15550000009',
+      hasJoined: false,
+    };
+    task.uiControls.consult = createEnabledMainTaskUIControls().consult;
+
+    expect(getConferenceParticipantDropRoster(task, currentAgentId)).toBeNull();
+  });
+
+  it('returns null when the viewing agent has departed or the task is terminated', () => {
+    const departedTask = createDropRosterTask();
+    departedTask.data.interaction.participants.agent1.hasLeft = true;
+    expect(getConferenceParticipantDropRoster(departedTask, currentAgentId)).toBeNull();
+
+    const terminatedTask = createDropRosterTask({state: 'terminated'});
+    terminatedTask.data.interaction.isTerminated = true;
+    expect(getConferenceParticipantDropRoster(terminatedTask, currentAgentId)).toBeNull();
   });
 });
 

@@ -4,6 +4,7 @@ import {
   OutdialCallProps,
   RealTimeTranscriptComponentProps,
   RealTimeTranscriptEntry,
+  ParticipantDropAnnouncement,
 } from '@webex/cc-components';
 import {RealTimeTranscriptionData} from '@webex/cc-store';
 
@@ -57,7 +58,7 @@ export type useOutdialCallProps = Pick<OutdialCallProps, 'cc' | 'logger'>;
 // Re-exported from store — single source of truth.
 export {CAMPAIGN_PREVIEW_OUTBOUND_TYPES, CAMPAIGN_PREVIEW_CAMPAIGN_TYPES} from '@webex/cc-store';
 
-export type {RealTimeTranscriptEntry};
+export type {RealTimeTranscriptEntry, ParticipantDropAnnouncement};
 export interface OutdialProps {
   /**
    * Flag to determine if the address book is enabled.

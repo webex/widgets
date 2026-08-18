@@ -15,6 +15,7 @@ import {
   useOutdialCallProps,
   TargetType,
   TARGET_TYPE,
+  ParticipantDropAnnouncement,
 } from './task.types';
 import store, {
   TASK_EVENTS,
@@ -22,7 +23,8 @@ import store, {
   DestinationType,
   PaginatedListParams,
   getConferenceParticipants,
-  Participant,
+  getConferenceParticipantDropRoster,
+  ConferenceParticipantDropTarget,
   findMediaResourceId,
   MEDIA_TYPE_TELEPHONY_LOWER,
   RealTimeTranscriptionData,
@@ -42,6 +44,15 @@ import {OutdialAniEntriesResponse} from '@webex/contact-center/dist/types/servic
 
 const ENGAGED_LABEL = 'ENGAGED';
 const ENGAGED_USERNAME = 'Engaged';
+const PARTICIPANT_DROP_SUCCESS_MESSAGE = 'Participant removed from the conference.';
+const PARTICIPANT_DROP_FAILURE_MESSAGE = 'Unable to drop participant from the call. Try again.';
+
+type PendingParticipantDropRequest = {
+  token: symbol;
+  taskId: string;
+  task: ITask;
+  dropTargetId: string;
+};
 
 const getTranscriptSpeaker = (role?: string): string => {
   const normalizedRole = role?.toUpperCase();
@@ -376,8 +387,22 @@ export const useCallControl = (props: useCallControlProps) => {
     !!(initialControls?.consult?.endConsult?.isVisible || initialControls?.main?.endConsult?.isVisible)
   );
   const [lastTargetType, setLastTargetType] = useState<TargetType>(TARGET_TYPE.AGENT);
-  const [conferenceParticipants, setConferenceParticipants] = useState<Participant[]>([]);
   const lastWrapupAuxCodeIdRef = useRef<string | null>(null);
+  const [pendingParticipantDropId, setPendingParticipantDropId] = useState<string | null>(null);
+  const [participantDropAnnouncement, setParticipantDropAnnouncement] = useState<ParticipantDropAnnouncement | null>(
+    null
+  );
+  const pendingParticipantDropRef = useRef<PendingParticipantDropRequest | null>(null);
+  const participantDropTaskRef = useRef(currentTask);
+  const participantDropAgentIdRef = useRef(agentId);
+  participantDropTaskRef.current = currentTask;
+  participantDropAgentIdRef.current = agentId;
+
+  // Derive conference state during render so MobX tracks nested participant and owner changes.
+  const conferenceParticipants = currentTask && agentId ? getConferenceParticipants(currentTask, agentId) : [];
+  const conferenceParticipantDropRoster =
+    currentTask && agentId ? getConferenceParticipantDropRoster(currentTask, agentId) : null;
+  const participantDropTaskId = currentTask?.data?.interactionId;
 
   // Subscribe to SDK-computed UI control updates
   useEffect(() => {
@@ -447,11 +472,15 @@ export const useCallControl = (props: useCallControlProps) => {
   }, [controls?.consult?.endConsult?.isVisible, controls?.main?.endConsult?.isVisible]);
 
   useEffect(() => {
-    if (currentTask && store?.cc?.agentConfig?.agentId) {
-      const participants = getConferenceParticipants(currentTask, store.cc.agentConfig.agentId);
-      setConferenceParticipants(participants);
+    const pendingRequest = pendingParticipantDropRef.current;
+
+    if (pendingRequest && (pendingRequest.taskId !== participantDropTaskId || pendingRequest.task !== currentTask)) {
+      pendingParticipantDropRef.current = null;
     }
-  }, [currentTask, controls]);
+
+    setPendingParticipantDropId(null);
+    setParticipantDropAnnouncement(null);
+  }, [currentTask, participantDropTaskId]);
   // Function to extract consulting agent information
   const extractConsultingAgent = useCallback(() => {
     try {
@@ -812,6 +841,84 @@ export const useCallControl = (props: useCallControlProps) => {
       });
     }
   };
+
+  const dropConferenceParticipant = useCallback(
+    async (target: ConferenceParticipantDropTarget): Promise<void> => {
+      const task = participantDropTaskRef.current;
+      const currentAgentId = participantDropAgentIdRef.current;
+
+      if (!task || !currentAgentId || pendingParticipantDropRef.current) {
+        return;
+      }
+
+      const latestRoster = getConferenceParticipantDropRoster(task, currentAgentId);
+      const latestTarget = [latestRoster?.customer, ...(latestRoster?.participants ?? [])].find(
+        (candidate) =>
+          candidate?.dropTargetId === target.dropTargetId && candidate.participantType === target.participantType
+      );
+
+      if (
+        !latestRoster ||
+        !latestTarget ||
+        latestTarget.isReadOnly ||
+        latestTarget.isDropDisabled ||
+        latestRoster.isDropDisabled
+      ) {
+        return;
+      }
+
+      const taskId = task.data.interactionId;
+      const request: PendingParticipantDropRequest = {
+        token: Symbol('participant-drop-request'),
+        taskId,
+        task,
+        dropTargetId: latestTarget.dropTargetId,
+      };
+
+      pendingParticipantDropRef.current = request;
+      setPendingParticipantDropId(latestTarget.dropTargetId);
+      setParticipantDropAnnouncement(null);
+
+      try {
+        await task.dropConferenceParticipant({participantId: latestTarget.dropTargetId});
+
+        if (
+          pendingParticipantDropRef.current === request &&
+          participantDropTaskRef.current === request.task &&
+          participantDropTaskRef.current?.data?.interactionId === request.taskId
+        ) {
+          setParticipantDropAnnouncement({type: 'success', message: PARTICIPANT_DROP_SUCCESS_MESSAGE});
+        }
+      } catch {
+        if (
+          pendingParticipantDropRef.current === request &&
+          participantDropTaskRef.current === request.task &&
+          participantDropTaskRef.current?.data?.interactionId === request.taskId
+        ) {
+          const sanitizedError = new Error(PARTICIPANT_DROP_FAILURE_MESSAGE);
+
+          setParticipantDropAnnouncement({type: 'error', message: PARTICIPANT_DROP_FAILURE_MESSAGE});
+          logger.error('CC-Widgets: Conference participant Drop failed', {
+            module: 'useCallControl',
+            method: 'dropConferenceParticipant',
+          });
+          store.onErrorCallback?.('CallControlCAD', sanitizedError);
+        }
+      } finally {
+        if (pendingParticipantDropRef.current === request) {
+          pendingParticipantDropRef.current = null;
+
+          if (
+            participantDropTaskRef.current === request.task &&
+            participantDropTaskRef.current?.data?.interactionId === request.taskId
+          ) {
+            setPendingParticipantDropId(null);
+          }
+        }
+      }
+    },
+    [logger]
+  );
 
   const toggleMute = async () => {
     try {
@@ -1261,6 +1368,10 @@ export const useCallControl = (props: useCallControlProps) => {
     secondsUntilAutoWrapup,
     cancelAutoWrapup,
     conferenceParticipants,
+    conferenceParticipantDropRoster,
+    pendingParticipantDropId,
+    participantDropAnnouncement,
+    dropConferenceParticipant,
     getAddressBookEntries,
     getEntryPoints,
     getQueuesFetcher,
@@ -1304,12 +1415,17 @@ export const useOutdialCall = (props: useOutdialCallProps) => {
         return;
       }
 
-      // Only pass origin if it's defined and not empty
-      const outdialArgs = origin ? [destination, origin] : [destination];
+      const outdialClient = cc as typeof cc & {
+        startOutdial(destination: string, origin?: string): Promise<unknown>;
+      };
 
-      cc.startOutdial(...outdialArgs)
-        .then((response) => {
-          logger.info('Outdial call started', response);
+      const outdialRequest = origin
+        ? outdialClient.startOutdial(destination, origin)
+        : outdialClient.startOutdial(destination);
+
+      outdialRequest
+        .then(() => {
+          logger.info('Outdial call started');
         })
         .catch((error: Error) => {
           logger.error(`${error}`, {

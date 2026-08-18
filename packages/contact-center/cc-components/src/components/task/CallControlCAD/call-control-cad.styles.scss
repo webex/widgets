@@ -317,42 +317,148 @@
   }
 
   .participants-menu {
-    padding: 0.125rem;
-    max-height: 12.5rem;
+    padding: 0.5rem;
+    max-height: 18rem;
     min-width: 16.125rem;
     max-width: 16.125rem;
     overflow-y: auto;
     overflow-x: hidden;
   }
 
+  .participant-roster-section + .participant-roster-section {
+    border-top: 0.0625rem solid var(--mds-color-theme-outline-secondary-normal);
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+  }
+
+  .participant-roster-heading {
+    margin: 0 0 0.25rem;
+    padding: 0 0.25rem;
+    font-weight: 700;
+  }
+
+  .participant-roster-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
   .participant-menu-item {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.4rem 0.6rem;
+    padding: 0.5rem 0.25rem;
     font-size: 0.875rem;
-    cursor: pointer;
     color: var(--mds-color-theme-text-primary-normal, #000000f2);
     border-radius: 0.5rem;
     min-width: 0;
     max-width: 100%;
-    white-space: nowrap;
+  }
 
-    &:hover {
-      background-color: var(--mds-color-theme-background-secondary-hover);
-    }
-
-    &:focus-visible {
-      background-color: var(--mds-color-theme-background-secondary-normal);
-      outline: 0.0625rem solid var(--mds-color-theme-outline-input-focus);
-      outline-offset: -0.0625rem;
-    }
+  .participant-menu-identity {
+    flex: 1 1 auto;
+    min-width: 0;
   }
 
   .participant-menu-text {
-    flex: 1 1 auto;
-    min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .participant-drop-button {
+    background: transparent;
+    border: 0.0625rem solid var(--mds-color-theme-outline-button-normal);
+    border-radius: 1rem;
+    color: var(--mds-color-theme-text-error-normal);
+    cursor: pointer;
+    flex: 0 0 auto;
+    font: inherit;
+    padding: 0.25rem 0.625rem;
+
+    &:hover:not(:disabled) {
+      background: var(--mds-color-theme-background-alert-error-normal);
+    }
+
+    &:focus-visible {
+      outline: 0.125rem solid var(--mds-color-theme-outline-input-focus);
+      outline-offset: 0.125rem;
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+    }
+  }
+}
+
+.participant-drop-dialog {
+  background: var(--mds-color-theme-background-solid-primary-normal);
+  border: 0.0625rem solid var(--mds-color-theme-outline-secondary-normal);
+  border-radius: 0.75rem;
+  color: var(--mds-color-theme-text-primary-normal);
+  max-width: min(25rem, calc(100vw - 2rem));
+  padding: 1.5rem;
+
+  &::backdrop {
+    background: var(--mds-color-theme-background-overlay, rgb(0 0 0 / 45%));
+  }
+
+  h2,
+  p {
+    margin: 0;
+  }
+
+  p {
+    margin-top: 0.75rem;
+  }
+}
+
+.participant-drop-dialog-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+
+  button {
+    border: 0.0625rem solid var(--mds-color-theme-outline-button-normal);
+    border-radius: 1rem;
+    cursor: pointer;
+    font: inherit;
+    padding: 0.5rem 1rem;
+
+    &:focus-visible {
+      outline: 0.125rem solid var(--mds-color-theme-outline-input-focus);
+      outline-offset: 0.125rem;
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+    }
+  }
+}
+
+.participant-drop-dialog-cancel {
+  background: var(--mds-color-theme-background-solid-primary-normal);
+  color: var(--mds-color-theme-text-primary-normal);
+}
+
+.participant-drop-dialog-confirm {
+  background: var(--mds-color-theme-background-alert-error-normal);
+  color: var(--mds-color-theme-text-error-normal);
+}
+
+.participant-drop-feedback {
+  p {
+    margin: 0.5rem 0 0;
+  }
+
+  [role='status'] {
+    color: var(--mds-color-theme-text-success-normal);
+  }
+
+  [role='alert'] {
+    color: var(--mds-color-theme-text-error-normal);
   }
 }
