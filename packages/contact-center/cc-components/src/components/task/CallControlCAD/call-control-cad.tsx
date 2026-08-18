@@ -391,6 +391,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
                             className="participants-select-button"
                             color="default"
                             variant="tertiary"
+                            postfix-icon="arrow-down-bold"
                             onClick={(event) => {
                               participantMenuTriggerRef.current = event.currentTarget as HTMLElement;
                             }}
@@ -398,7 +399,6 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
                             <Text type="body-secondary" tagName={'small'} className="participants-count">
                               +{participantsCount} {participantsLabel}
                             </Text>
-                            <Icon name="arrow-down-bold" className="dropdown-arrow" />
                           </Button>
                         }
                       >

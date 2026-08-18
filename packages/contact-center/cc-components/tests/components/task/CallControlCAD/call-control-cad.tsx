@@ -485,7 +485,9 @@ describe('CallControlCADComponent', () => {
 
     it('renders Customer and Participants sections and immediately drops an Agent target', () => {
       const {screen, dropConferenceParticipant} = renderRoster();
+      const participantsTrigger = screen.getByTestId('call-control:participants-trigger');
 
+      expect(participantsTrigger).toHaveAttribute('postfix-icon', 'arrow-down-bold');
       expect(screen.getByRole('heading', {name: 'Customer'})).toBeInTheDocument();
       expect(screen.getByRole('heading', {name: 'Participants'})).toBeInTheDocument();
       expect(screen.getByText('+15551234567')).toBeInTheDocument();

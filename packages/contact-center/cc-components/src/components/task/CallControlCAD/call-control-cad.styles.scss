@@ -122,6 +122,7 @@
 .participants-section {
   display: flex;
   align-items: center;
+  flex: 0 0 auto;
   gap: 0.25rem;
 }
 
@@ -139,9 +140,12 @@
 .participants-select-button {
   display: inline-flex;
   align-items: center;
+  flex: 0 0 auto;
   gap: 0.3rem;
   padding: 0 0.4rem;
   min-height: 1.5rem;
+  width: max-content;
+  white-space: nowrap;
   border-radius: 999px;
   background: transparent !important;
   border: 1px solid var(--mds-color-theme-outline-secondary-normal) !important;
@@ -153,15 +157,21 @@
   }
 }
 
-.dropdown-arrow {
+.participants-select-button::part(button-text) {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.participants-select-button::part(postfix-icon) {
   width: 0.75rem;
   height: 0.75rem;
   color: var(--mds-color-theme-text-secondary-normal);
-  margin-top: 0.0625rem;
+  flex: 0 0 auto;
   transition: transform 0.15s ease;
 }
 
-.participants-select-button[aria-expanded='true'] .dropdown-arrow {
+.participants-select-button[aria-expanded='true']::part(postfix-icon) {
   transform: rotate(180deg);
 }
 
