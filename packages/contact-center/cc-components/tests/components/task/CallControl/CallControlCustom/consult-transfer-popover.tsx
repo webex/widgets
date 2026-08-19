@@ -2,8 +2,10 @@ import React from 'react';
 import {render, fireEvent, waitFor, act} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import ConsultTransferPopoverComponent from '../../../../../src/components/task/CallControl/CallControlCustom/consult-transfer-popover';
-import {AddressBookEntry, ContactServiceQueue, ConsultTransferDestinationType, EntryPointRecord} from '@webex/cc-store';
+import {AddressBookEntry, ContactServiceQueue, EntryPointRecord, TaskUIControls} from '@webex/cc-store';
 import {DEFAULT_PAGE_SIZE} from '../../../../../src/components/task/constants';
+
+type AvailableDestinations = TaskUIControls['consultTransferDestinations']['consult'];
 
 const loggerMock = {
   log: jest.fn(),
@@ -60,7 +62,7 @@ describe('ConsultTransferPopoverComponent', () => {
     onDialNumberSelect: jest.fn(),
     onEntryPointSelect: jest.fn(),
     action: 'Consult' as const,
-    availableDestinations: ['agent', 'queue', 'dialNumber', 'entryPoint'] as ConsultTransferDestinationType[],
+    availableDestinations: ['agent', 'queue', 'dialNumber', 'entryPoint'] as AvailableDestinations,
     loadingBuddyAgents: false,
     logger: loggerMock,
   };
@@ -227,7 +229,7 @@ describe('ConsultTransferPopoverComponent', () => {
   it('hides a category omitted by the SDK controls', async () => {
     const propsWithoutQueue = {
       ...baseProps,
-      availableDestinations: ['agent', 'dialNumber', 'entryPoint'] as ConsultTransferDestinationType[],
+      availableDestinations: ['agent', 'dialNumber', 'entryPoint'] as AvailableDestinations,
     };
 
     const screen = await render(<ConsultTransferPopoverComponent {...propsWithoutQueue} />);
@@ -239,7 +241,7 @@ describe('ConsultTransferPopoverComponent', () => {
     const orderedProps = {
       ...baseProps,
       action: 'Transfer' as const,
-      availableDestinations: ['queue', 'agent', 'entryPoint', 'dialNumber'] as ConsultTransferDestinationType[],
+      availableDestinations: ['queue', 'agent', 'entryPoint', 'dialNumber'] as AvailableDestinations,
     };
 
     const screen = await render(<ConsultTransferPopoverComponent {...orderedProps} />);

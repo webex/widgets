@@ -1020,6 +1020,15 @@ describe('storeEventsWrapper', () => {
       });
     });
 
+    it('should omit an unsupported task media type and use the SDK default', async () => {
+      storeWrapper['store'].currentTask = {data: {interaction: {mediaType: 'video'}}} as ITask;
+      storeWrapper['store'].cc.getBuddyAgents = jest.fn().mockResolvedValue({data: {agentList: []}});
+
+      await storeWrapper.getBuddyAgents('Consult');
+
+      expect(storeWrapper['store'].cc.getBuddyAgents).toHaveBeenCalledWith({action: 'Consult'});
+    });
+
     it('should handle error in getBuddyAgents and throw error', async () => {
       storeWrapper['store'].currentTask = null;
       storeWrapper['store'].cc.getBuddyAgents = jest.fn().mockRejectedValue(new Error('error'));
@@ -1079,8 +1088,8 @@ describe('storeEventsWrapper', () => {
 
     it('should return contact service queues list when SDK returns paginated response', async () => {
       const queueList = [
-        {id: mockQueueDetails[0].id, name: mockQueueDetails[0].name, dbId: 'queue-db-1'},
-        {id: mockQueueDetails[1].id, name: mockQueueDetails[1].name, dbId: 'queue-db-2'},
+        {id: mockQueueDetails[0].id, name: mockQueueDetails[0].name},
+        {id: mockQueueDetails[1].id, name: mockQueueDetails[1].name},
       ];
       const response = {data: queueList, meta: {page: 1, pageSize: 50, totalRecords: 2, totalPages: 1}};
       storeWrapper['store'].currentTask = null;

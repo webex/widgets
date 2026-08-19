@@ -7,8 +7,6 @@ import {
   DestinationType,
   ContactServiceQueue,
   EntryPointRecord,
-  ConsultTransferAction,
-  ConsultTransferDestinationType,
   AddressBookEntry,
   FetchPaginatedList,
   Participant,
@@ -669,7 +667,7 @@ export interface ConsultTransferPopoverComponentProps {
   buttonIcon: string;
   buddyAgents: BuddyDetails[];
   loadingBuddyAgents: boolean;
-  loadBuddyAgents?: (action?: ConsultTransferAction) => Promise<void>;
+  loadBuddyAgents?: (action?: 'Consult' | 'Transfer') => Promise<void>;
   getAddressBookEntries?: FetchPaginatedList<AddressBookEntry>;
   getEntryPoints?: FetchPaginatedList<EntryPointRecord>;
   getQueues?: FetchPaginatedList<ContactServiceQueue>;
@@ -677,8 +675,8 @@ export interface ConsultTransferPopoverComponentProps {
   onQueueSelect: (queueId: string, queueName: string, allowParticipantsToInteract: boolean) => void;
   onEntryPointSelect: (entryPointId: string, entryPointName: string, allowParticipantsToInteract: boolean) => void;
   onDialNumberSelect: (dialNumber: string, allowParticipantsToInteract: boolean) => void;
-  action: ConsultTransferAction;
-  availableDestinations: ConsultTransferDestinationType[];
+  action: 'Consult' | 'Transfer';
+  availableDestinations: TaskUIControls['consultTransferDestinations']['consult'];
   /** Options governing popover visibility/behavior */
   consultTransferOptions?: ConsultTransferOptions;
   isConferenceInProgress?: boolean;

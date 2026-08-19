@@ -307,7 +307,7 @@ Transition triggers: SDK CC/task events drive the session/agent/task slices via 
 - **Event enums are local copies (`store.types.ts:204-259`):** `CC_EVENTS`/`TASK_EVENTS` string values must match the SDK exactly; an SDK rename will silently stop a handler from firing.
 - **Pending campaign previews must not become `currentTask`:** `setCurrentTask` clears `currentTask` for a preview in state `new` that is not in `acceptedCampaignIds` (`storeEventsWrapper.ts:255-267`). Bypassing this (e.g. calling SDK methods directly) re-introduces the bug where CallControl renders for an unaccepted preview.
 - **Listener leaks:** every `task.on(...)` in `registerTaskEventListeners` has a matching `task.off(...)` in `handleTaskRemove`. Adding a listener in one without the other leaks handlers and can double-fire `refreshTaskList`.
-- **Task media is SDK-originated but broadly typed on `ITask`:** the store forwards it as `ConsultTransferMediaType`; runtime validation remains SDK-owned, and absent media uses the SDK telephony default.
+- **Task media is SDK-originated but broadly typed on `ITask`:** the store validates it against the supported media keys before passing the existing `BuddyAgents` option; absent or unknown media uses the SDK telephony default.
 - **`@ts-expect-error` markers tie to SDK gaps:** several casts (e.g. `response.teams`, credentials API) are pinned to `CAI-6762`; removing the workaround before the SDK fix breaks the build.
 
 ## Module Do's / Don'ts

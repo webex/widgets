@@ -11,10 +11,6 @@ import {
   EntryPointRecord,
   EntryPointListResponse,
   EntryPointSearchParams,
-  ConsultTransferAction,
-  ConsultTransferDestinationControls,
-  ConsultTransferDestinationType,
-  ConsultTransferMediaType,
   AddressBookEntry,
   AddressBookEntriesResponse,
   AddressBookEntrySearchParams,
@@ -217,7 +213,7 @@ interface IStoreWrapper extends IStore {
   onErrorCallback?: (widgetName: string, error: Error) => void;
   setCurrentTask(task: ITask): void;
   refreshTaskList(): void;
-  getBuddyAgents(action?: ConsultTransferAction): Promise<BuddyDetails[]>;
+  getBuddyAgents(action?: 'Consult' | 'Transfer'): Promise<BuddyDetails[]>;
   getQueues(params?: ContactServiceQueueSearchParams): Promise<ContactServiceQueuesResponse>;
   getEntryPoints(params?: EntryPointSearchParams): Promise<EntryPointListResponse>;
   getAddressBookEntries(params?: AddressBookEntrySearchParams): Promise<AddressBookEntriesResponse>;
@@ -357,10 +353,6 @@ export type {
   EntryPointRecord,
   EntryPointListResponse,
   EntryPointSearchParams,
-  ConsultTransferAction,
-  ConsultTransferDestinationControls,
-  ConsultTransferDestinationType,
-  ConsultTransferMediaType,
   AddressBookEntry,
   AddressBookEntriesResponse,
   AddressBookEntrySearchParams,

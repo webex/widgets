@@ -2,7 +2,9 @@ import React from 'react';
 import '@testing-library/jest-dom';
 import {render, fireEvent, act, waitFor} from '@testing-library/react';
 import ConsultTransferPopoverComponent from '../../../../../src/components/task/CallControl/CallControlCustom/consult-transfer-popover';
-import {ContactServiceQueue, ConsultTransferDestinationType} from '@webex/cc-store';
+import {ContactServiceQueue, TaskUIControls} from '@webex/cc-store';
+
+type AvailableDestinations = TaskUIControls['consultTransferDestinations']['consult'];
 
 const mockUIDProps = (container) => {
   container
@@ -58,7 +60,7 @@ describe('ConsultTransferPopoverComponent Snapshots', () => {
     onDialNumberSelect: jest.fn(),
     onEntryPointSelect: jest.fn(),
     action: 'Consult' as const,
-    availableDestinations: ['agent', 'queue', 'dialNumber', 'entryPoint'] as ConsultTransferDestinationType[],
+    availableDestinations: ['agent', 'queue', 'dialNumber', 'entryPoint'] as AvailableDestinations,
     loadingBuddyAgents: false,
     logger: mockLogger,
   };
@@ -145,7 +147,7 @@ describe('ConsultTransferPopoverComponent Snapshots', () => {
       const noQueueConsultProps = {
         ...defaultProps,
         heading: 'Consult',
-        availableDestinations: ['agent', 'dialNumber', 'entryPoint'] as ConsultTransferDestinationType[],
+        availableDestinations: ['agent', 'dialNumber', 'entryPoint'] as AvailableDestinations,
       };
       let screen;
       await act(async () => {

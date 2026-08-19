@@ -1,10 +1,4 @@
-import {
-  ConsultTransferDestinationControls,
-  getDefaultUIControls,
-  InteractionUIControls,
-  TaskUIControls,
-  TaskUILeg,
-} from '@webex/cc-store';
+import {getDefaultUIControls, InteractionUIControls, TaskUIControls, TaskUILeg} from '@webex/cc-store';
 
 const disabledControl = {isVisible: false, isEnabled: false};
 const enabledControl = {isVisible: true, isEnabled: true};
@@ -16,7 +10,7 @@ export function createMockTaskUIControls(overrides?: {
   main?: Partial<InteractionUIControls>;
   consult?: Partial<InteractionUIControls>;
   activeLeg?: TaskUILeg;
-  consultTransferDestinations?: Partial<ConsultTransferDestinationControls>;
+  consultTransferDestinations?: Partial<TaskUIControls['consultTransferDestinations']>;
 }): TaskUIControls {
   const base = getDefaultUIControls();
   return {

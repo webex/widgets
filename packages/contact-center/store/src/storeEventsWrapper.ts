@@ -15,8 +15,6 @@ import {
   ENGAGED_USERNAME,
   RESERVED_LABEL,
   RESERVED_USERNAME,
-  ConsultTransferAction,
-  ConsultTransferMediaType,
   ContactServiceQueuesResponse,
   ContactServiceQueueSearchParams,
   EntryPointListResponse,
@@ -40,16 +38,24 @@ import {runInAction} from 'mobx';
 import {isIncomingTask} from './task-utils';
 import {SUGGESTED_RESPONSE_EVENT, TASK_MULTI_LOGIN_HYDRATE} from './constants';
 
-const CONSULT_TRANSFER_CHANNELS: Record<ConsultTransferMediaType, string> = {
+const CONSULT_TRANSFER_CHANNELS = {
   telephony: 'TELEPHONY',
   chat: 'CHAT',
   social: 'SOCIAL_CHANNEL',
   email: 'EMAIL',
+} as const;
+
+const getSupportedMediaType = (mediaType?: string): keyof typeof CONSULT_TRANSFER_CHANNELS | undefined => {
+  const normalizedMediaType = typeof mediaType === 'string' ? mediaType.toLowerCase() : '';
+
+  return normalizedMediaType in CONSULT_TRANSFER_CHANNELS
+    ? (normalizedMediaType as keyof typeof CONSULT_TRANSFER_CHANNELS)
+    : undefined;
 };
 
 const getTaskChannelFilter = (entityType: 'queue' | 'entryPoint', mediaType?: string): string | undefined => {
-  const normalizedMediaType = typeof mediaType === 'string' ? mediaType.toLowerCase() : '';
-  const channelType = CONSULT_TRANSFER_CHANNELS[normalizedMediaType as ConsultTransferMediaType];
+  const supportedMediaType = getSupportedMediaType(mediaType);
+  const channelType = supportedMediaType ? CONSULT_TRANSFER_CHANNELS[supportedMediaType] : undefined;
 
   if (!channelType || channelType === 'TELEPHONY') return undefined;
 
@@ -1084,12 +1090,12 @@ class StoreWrapper implements IStoreWrapper {
     });
   };
 
-  getBuddyAgents = async (action: ConsultTransferAction = 'Consult'): Promise<Array<BuddyDetails>> => {
+  getBuddyAgents = async (action: 'Consult' | 'Transfer' = 'Consult'): Promise<Array<BuddyDetails>> => {
     try {
-      const mediaType = this.currentTask?.data?.interaction?.mediaType;
+      const mediaType = getSupportedMediaType(this.currentTask?.data?.interaction?.mediaType);
       const response = await this.store.cc.getBuddyAgents({
         action,
-        ...(mediaType ? {mediaType: mediaType as ConsultTransferMediaType} : {}),
+        ...(mediaType ? {mediaType} : {}),
       });
       return 'data' in response ? response.data.agentList : [];
     } catch (error) {
