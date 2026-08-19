@@ -153,7 +153,7 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
                 data-testid="consult-reload-button"
                 onPress={() => {
                   if (selectedCategory === CATEGORY_AGENTS && loadBuddyAgents) {
-                    loadBuddyAgents();
+                    loadBuddyAgents(action);
                   } else {
                     handleReload();
                   }

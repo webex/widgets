@@ -178,7 +178,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                       });
                       setShowAgentMenu(true);
                       setAgentMenuType(button.menuType as CallControlMenuType);
-                      loadBuddyAgents();
+                      loadBuddyAgents(button.menuType === 'Transfer' ? 'Transfer' : 'Consult');
                     }}
                     onHide={() => {
                       setShowAgentMenu(false);

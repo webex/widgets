@@ -340,7 +340,7 @@ export interface ControlProps {
   /**
    * Function to load buddy agents
    */
-  loadBuddyAgents: () => Promise<void>;
+  loadBuddyAgents: (action?: 'Consult' | 'Transfer') => Promise<void>;
 
   /**
    * Function to transfer the call to a destination.
@@ -698,7 +698,7 @@ export interface ConsultTransferPopoverComponentProps {
   buttonIcon: string;
   buddyAgents: BuddyDetails[];
   loadingBuddyAgents: boolean;
-  loadBuddyAgents?: () => Promise<void>;
+  loadBuddyAgents?: (action?: 'Consult' | 'Transfer') => Promise<void>;
   getAddressBookEntries?: FetchPaginatedList<AddressBookEntry>;
   getEntryPoints?: FetchPaginatedList<EntryPointRecord>;
   getQueues?: FetchPaginatedList<ContactServiceQueue>;

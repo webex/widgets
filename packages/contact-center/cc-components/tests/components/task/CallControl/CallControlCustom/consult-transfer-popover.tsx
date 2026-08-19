@@ -361,6 +361,7 @@ describe('ConsultTransferPopoverComponent', () => {
       fireEvent.click(reloadButton);
 
       expect(mockLoadBuddyAgents).toHaveBeenCalledTimes(1);
+      expect(mockLoadBuddyAgents).toHaveBeenCalledWith('Consult');
     });
 
     it('reloads queues when reload button clicked on Queues tab', async () => {

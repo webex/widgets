@@ -11,6 +11,10 @@ import {
   EntryPointRecord,
   EntryPointListResponse,
   EntryPointSearchParams,
+  ConsultTransferAction,
+  ConsultTransferListSearchParams,
+  ConsultTransferQueueSearchParams,
+  ConsultTransferEntryPointSearchParams,
   AddressBookEntry,
   AddressBookEntriesResponse,
   AddressBookEntrySearchParams,
@@ -62,6 +66,8 @@ interface IContactCenter {
   getBuddyAgents(data: BuddyAgents): Promise<BuddyAgentsResponse>;
   getQueues(params?: ContactServiceQueueSearchParams): Promise<ContactServiceQueuesResponse>;
   getEntryPoints(params?: EntryPointSearchParams): Promise<EntryPointListResponse>;
+  getConsultTransferQueues(params?: ConsultTransferQueueSearchParams): Promise<ContactServiceQueuesResponse>;
+  getConsultTransferEntryPoints(params?: ConsultTransferEntryPointSearchParams): Promise<EntryPointListResponse>;
   addressBook: AddressBook;
   agentConfig?: {
     regexUS: RegExp | string;
@@ -71,6 +77,7 @@ interface IContactCenter {
   setAgentState(data: StateChange): Promise<SetStateResponse>;
   getOutdialAniEntries(params: OutdialAniParams): Promise<OutdialAniEntriesResponse>;
   getAccessToken(): Promise<string>;
+  startOutdial(destination: string, origin?: string): Promise<TaskResponse>;
   acceptPreviewContact(payload: PreviewContactPayload): Promise<TaskResponse>;
   skipPreviewContact(payload: PreviewContactPayload): Promise<TaskResponse>;
   removePreviewContact(payload: PreviewContactPayload): Promise<TaskResponse>;
@@ -216,9 +223,9 @@ interface IStoreWrapper extends IStore {
   onErrorCallback?: (widgetName: string, error: Error) => void;
   setCurrentTask(task: ITask): void;
   refreshTaskList(): void;
-  getBuddyAgents(mediaType?: string): Promise<BuddyDetails[]>;
-  getQueues(mediaType?: string, params?: ContactServiceQueueSearchParams): Promise<ContactServiceQueuesResponse>;
-  getEntryPoints(params?: EntryPointSearchParams): Promise<EntryPointListResponse>;
+  getBuddyAgents(action?: ConsultTransferAction): Promise<BuddyDetails[]>;
+  getQueues(params?: ConsultTransferListSearchParams): Promise<ContactServiceQueuesResponse>;
+  getEntryPoints(params?: ConsultTransferListSearchParams): Promise<EntryPointListResponse>;
   getAddressBookEntries(params?: AddressBookEntrySearchParams): Promise<AddressBookEntriesResponse>;
   setDeviceType(option: string): void;
   setDialNumber(input: string): void;
@@ -359,6 +366,10 @@ export type {
   EntryPointRecord,
   EntryPointListResponse,
   EntryPointSearchParams,
+  ConsultTransferAction,
+  ConsultTransferListSearchParams,
+  ConsultTransferQueueSearchParams,
+  ConsultTransferEntryPointSearchParams,
   AddressBookEntry,
   AddressBookEntriesResponse,
   AddressBookEntrySearchParams,

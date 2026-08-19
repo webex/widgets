@@ -2400,9 +2400,10 @@ describe('useCallControl', () => {
       })
     );
     await act(async () => {
-      await result.current.loadBuddyAgents();
+      await result.current.loadBuddyAgents('Transfer');
     });
     expect(result.current.buddyAgents).toEqual(mockAgents);
+    expect(getBuddyAgentsSpy).toHaveBeenCalledWith('Transfer');
     getBuddyAgentsSpy.mockRestore();
   });
 
@@ -3538,7 +3539,7 @@ describe('useCallControl', () => {
   it('should get queues via getQueuesFetcher', async () => {
     const getQueuesResponse: Awaited<ReturnType<typeof store.getQueues>> = {
       data: mockQueueDetails,
-      meta: {page: 0, pageSize: mockQueueDetails.length, total: mockQueueDetails.length, totalPages: 1},
+      meta: {page: 0, pageSize: mockQueueDetails.length, totalRecords: mockQueueDetails.length, totalPages: 1},
     };
     const getQueuesSpy = jest.spyOn(store, 'getQueues').mockResolvedValue(getQueuesResponse);
 
@@ -3598,7 +3599,7 @@ describe('useCallControl', () => {
   it('should get queues via getQueuesFetcher (paginated)', async () => {
     const mockResponse: Awaited<ReturnType<typeof store.getQueues>> = {
       data: [mockQueueDetails[0]],
-      meta: {page: 0, pageSize: 25, total: 1, totalPages: 1},
+      meta: {page: 0, pageSize: 25, totalRecords: 1, totalPages: 1},
     };
     jest.spyOn(store, 'getQueues').mockResolvedValue(mockResponse);
 
@@ -5696,7 +5697,10 @@ describe('useOutdialCall', () => {
     });
 
     expect(mockOutdialCallProps.startOutdial).toHaveBeenCalledWith(destination);
-    expect(logger.info).toHaveBeenCalledWith('Outdial call started', 'Success');
+    expect(logger.info).toHaveBeenCalledWith('Outdial call started', {
+      module: 'widget-OutdialCall#helper.ts',
+      method: 'startOutdial',
+    });
   });
 
   it('should successfully start an outdial call with origin', async () => {
@@ -5713,7 +5717,10 @@ describe('useOutdialCall', () => {
     });
 
     expect(mockOutdialCallProps.startOutdial).toHaveBeenCalledWith(destination, origin);
-    expect(logger.info).toHaveBeenCalledWith('Outdial call started', 'Success');
+    expect(logger.info).toHaveBeenCalledWith('Outdial call started', {
+      module: 'widget-OutdialCall#helper.ts',
+      method: 'startOutdial',
+    });
   });
 
   it('should show alert when destination is empty or only contains spaces', async () => {
