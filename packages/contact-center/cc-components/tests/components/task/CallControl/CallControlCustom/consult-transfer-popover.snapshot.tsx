@@ -2,7 +2,7 @@ import React from 'react';
 import '@testing-library/jest-dom';
 import {render, fireEvent, act, waitFor} from '@testing-library/react';
 import ConsultTransferPopoverComponent from '../../../../../src/components/task/CallControl/CallControlCustom/consult-transfer-popover';
-import {ContactServiceQueue} from '@webex/cc-store';
+import {ConsultTransferDestination} from '@webex/cc-store';
 
 const mockUIDProps = (container) => {
   container
@@ -29,30 +29,9 @@ describe('ConsultTransferPopoverComponent Snapshots', () => {
   const mockOnAgentSelect = jest.fn();
   const mockOnQueueSelect = jest.fn();
 
-  const buildQueue = (id: string, name: string, description: string = 'Queue'): ContactServiceQueue => ({
-    organizationId: 'org-test',
+  const buildQueue = (id: string, name: string): ConsultTransferDestination => ({
     id,
-    version: 1,
     name,
-    description,
-    queueType: 'INBOUND',
-    checkAgentAvailability: true,
-    channelType: 'TELEPHONY',
-    serviceLevelThreshold: 20,
-    maxActiveContacts: 25,
-    maxTimeInQueue: 600,
-    defaultMusicInQueueMediaFileId: 'media-1',
-    active: true,
-    monitoringPermitted: true,
-    parkingPermitted: true,
-    recordingPermitted: true,
-    recordingAllCallsPermitted: true,
-    pauseRecordingPermitted: true,
-    controlFlowScriptUrl: 'https://example.com/flow',
-    ivrRequeueUrl: 'https://example.com/requeue',
-    routingType: 'LONGEST_AVAILABLE_AGENT',
-    queueRoutingType: 'TEAM_BASED',
-    callDistributionGroups: [],
   });
 
   const defaultProps = {

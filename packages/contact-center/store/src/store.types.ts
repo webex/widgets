@@ -12,9 +12,10 @@ import {
   EntryPointListResponse,
   EntryPointSearchParams,
   ConsultTransferAction,
-  ConsultTransferListSearchParams,
-  ConsultTransferQueueSearchParams,
-  ConsultTransferEntryPointSearchParams,
+  ConsultTransferDestination,
+  ConsultTransferListResponse,
+  ConsultTransferListOptions,
+  ConsultTransferMediaType,
   AddressBookEntry,
   AddressBookEntriesResponse,
   AddressBookEntrySearchParams,
@@ -66,8 +67,8 @@ interface IContactCenter {
   getBuddyAgents(data: BuddyAgents): Promise<BuddyAgentsResponse>;
   getQueues(params?: ContactServiceQueueSearchParams): Promise<ContactServiceQueuesResponse>;
   getEntryPoints(params?: EntryPointSearchParams): Promise<EntryPointListResponse>;
-  getConsultTransferQueues(params?: ConsultTransferQueueSearchParams): Promise<ContactServiceQueuesResponse>;
-  getConsultTransferEntryPoints(params?: ConsultTransferEntryPointSearchParams): Promise<EntryPointListResponse>;
+  getConsultTransferQueues(params?: ConsultTransferListOptions): Promise<ConsultTransferListResponse>;
+  getConsultTransferEntryPoints(params?: ConsultTransferListOptions): Promise<ConsultTransferListResponse>;
   addressBook: AddressBook;
   agentConfig?: {
     regexUS: RegExp | string;
@@ -224,8 +225,8 @@ interface IStoreWrapper extends IStore {
   setCurrentTask(task: ITask): void;
   refreshTaskList(): void;
   getBuddyAgents(action?: ConsultTransferAction): Promise<BuddyDetails[]>;
-  getQueues(params?: ConsultTransferListSearchParams): Promise<ContactServiceQueuesResponse>;
-  getEntryPoints(params?: ConsultTransferListSearchParams): Promise<EntryPointListResponse>;
+  getQueues(params?: ConsultTransferListSearchOptions): Promise<ConsultTransferListResponse>;
+  getEntryPoints(params?: ConsultTransferListSearchOptions): Promise<ConsultTransferListResponse>;
   getAddressBookEntries(params?: AddressBookEntrySearchParams): Promise<AddressBookEntriesResponse>;
   setDeviceType(option: string): void;
   setDialNumber(input: string): void;
@@ -250,6 +251,8 @@ interface IStoreWrapper extends IStore {
   removeAcceptedCampaign(interactionId: string): void;
   clearRealTimeAssist(interactionId: string): void;
 }
+
+type ConsultTransferListSearchOptions = Omit<ConsultTransferListOptions, 'mediaType'>;
 
 interface IWrapupCode {
   id: string;
@@ -367,9 +370,10 @@ export type {
   EntryPointListResponse,
   EntryPointSearchParams,
   ConsultTransferAction,
-  ConsultTransferListSearchParams,
-  ConsultTransferQueueSearchParams,
-  ConsultTransferEntryPointSearchParams,
+  ConsultTransferDestination,
+  ConsultTransferListResponse,
+  ConsultTransferListOptions,
+  ConsultTransferMediaType,
   AddressBookEntry,
   AddressBookEntriesResponse,
   AddressBookEntrySearchParams,

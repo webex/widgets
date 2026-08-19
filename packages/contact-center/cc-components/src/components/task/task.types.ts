@@ -6,8 +6,8 @@ import {
   BuddyDetails,
   DestinationType,
   ContactServiceQueue,
+  ConsultTransferDestination,
   AddressBookEntry,
-  EntryPointRecord,
   FetchPaginatedList,
   Participant,
   AddressBookEntrySearchParams,
@@ -513,10 +513,10 @@ export interface ControlProps {
   getAddressBookEntries?: FetchPaginatedList<AddressBookEntry>;
 
   /** Fetch paginated entry points */
-  getEntryPoints?: FetchPaginatedList<EntryPointRecord>;
+  getEntryPoints?: FetchPaginatedList<ConsultTransferDestination>;
 
-  /** Fetch paginated queues (filtered by media type in store) */
-  getQueuesFetcher?: FetchPaginatedList<ContactServiceQueue>;
+  /** Fetch paginated consult/transfer queues from the SDK-owned policy */
+  getQueuesFetcher?: FetchPaginatedList<ConsultTransferDestination>;
 
   /**
    * Options to configure consult/transfer popover behavior.
@@ -700,8 +700,8 @@ export interface ConsultTransferPopoverComponentProps {
   loadingBuddyAgents: boolean;
   loadBuddyAgents?: (action?: 'Consult' | 'Transfer') => Promise<void>;
   getAddressBookEntries?: FetchPaginatedList<AddressBookEntry>;
-  getEntryPoints?: FetchPaginatedList<EntryPointRecord>;
-  getQueues?: FetchPaginatedList<ContactServiceQueue>;
+  getEntryPoints?: FetchPaginatedList<ConsultTransferDestination>;
+  getQueues?: FetchPaginatedList<ConsultTransferDestination>;
   onAgentSelect: (agentId: string, agentName: string, allowParticipantsToInteract: boolean) => void;
   onQueueSelect: (queueId: string, queueName: string, allowParticipantsToInteract: boolean) => void;
   onEntryPointSelect: (entryPointId: string, entryPointName: string, allowParticipantsToInteract: boolean) => void;
@@ -918,8 +918,8 @@ export type UseConsultTransferParams = {
   showDialNumberTab: boolean;
   showEntryPointTab: boolean;
   getAddressBookEntries?: FetchPaginatedList<AddressBookEntry>;
-  getEntryPoints?: FetchPaginatedList<EntryPointRecord>;
-  getQueues?: FetchPaginatedList<ContactServiceQueue>;
+  getEntryPoints?: FetchPaginatedList<ConsultTransferDestination>;
+  getQueues?: FetchPaginatedList<ConsultTransferDestination>;
   logger?: ILogger;
 };
 

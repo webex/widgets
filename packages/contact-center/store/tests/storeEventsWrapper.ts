@@ -1074,8 +1074,8 @@ describe('storeEventsWrapper', () => {
 
     it('should return contact service queues list when SDK returns paginated response', async () => {
       const queueList = [
-        {...mockQueueDetails[0], channelType: 'TELEPHONY'},
-        {...mockQueueDetails[1], channelType: 'CHAT'},
+        {id: mockQueueDetails[0].id, name: mockQueueDetails[0].name, dbId: 'queue-db-1'},
+        {id: mockQueueDetails[1].id, name: mockQueueDetails[1].name, dbId: 'queue-db-2'},
       ];
       const response = {data: queueList, meta: {page: 1, pageSize: 50, totalRecords: 2, totalPages: 1}};
       storeWrapper['store'].currentTask = null;
@@ -1099,12 +1099,14 @@ describe('storeEventsWrapper', () => {
     });
 
     it('should fetch entry points successfully', async () => {
+      storeWrapper['store'].currentTask = {data: {interaction: {mediaType: 'telephony'}}} as ITask;
       storeWrapper['store'].cc.getConsultTransferEntryPoints = jest.fn().mockResolvedValue(mockEntryPointsResponse);
 
       const result = await storeWrapper.getEntryPoints({page: 0, pageSize: 25});
       expect(storeWrapper['store'].cc.getConsultTransferEntryPoints).toHaveBeenCalledWith({
         page: 0,
         pageSize: 25,
+        mediaType: 'telephony',
       });
       expect(result).toEqual(mockEntryPointsResponse);
     });

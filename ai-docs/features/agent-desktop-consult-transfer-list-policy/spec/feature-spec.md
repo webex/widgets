@@ -17,11 +17,11 @@ Related context: [repository architecture](../../../ARCHITECTURE.md) · [specifi
 | --- | --- |
 | Feature key | `CAI-8354` |
 | Owner | Webex Contact Center widgets maintainers |
-| Status | Approved and implemented; generator-side conformance PASS; independent validation pending |
+| Status | Approved and implemented; diff-scoped drift validation PASS; independent validation pending |
 | Work type | Defect |
 | Change class | Contract / UI |
 | Source/intake | Developer-approved Agent Desktop parity review and current code/tests |
-| Last verified | 2026-08-19 in a working tree based on `4b928847` |
+| Last verified | 2026-08-19 in a working tree based on `69fdb37c` |
 
 ## Applicability
 
@@ -96,10 +96,10 @@ There are no open product decisions for this delta.
 | --- | --- | --- | --- | --- | --- | --- |
 | `WIDGET-LIST-R-001` | The store must use the SDK's specialized consult/transfer queue and entry-point methods, use the generic SDK AddressBook service for dial numbers, and must not apply local eligibility filters, sorting, or pagination reconstruction. | SDK-owned defaults prevent drift while avoiding a redundant consult-specific dial-number API. | `packages/contact-center/store/src/storeEventsWrapper.ts` | `packages/contact-center/store/tests/storeEventsWrapper.ts` | Requires the paired SDK delta at runtime. | Present |
 | `WIDGET-LIST-R-002` | Opening or reloading the Agents list must forward the active `Consult` or `Transfer` action through the component, hook, and store. | Agent eligibility differs by action, so losing the action would silently return the wrong population. | `packages/contact-center/cc-components/src/components/task/CallControl/call-control.tsx`, `packages/contact-center/cc-components/src/components/task/CallControl/CallControlCustom/consult-transfer-popover.tsx`, `packages/contact-center/task/src/helper.ts` | `packages/contact-center/cc-components/tests/components/task/CallControl`, `packages/contact-center/task/tests/helper.ts` | None. | Present |
-| `WIDGET-LIST-R-003` | Queue requests must forward page, page size, search, and current-task media; entry-point and dial-number requests must forward only pagination/search. | Queue media comes from the active task, while telephony entry-point behavior and both list-order defaults are SDK decisions that widgets must not duplicate. | `packages/contact-center/store/src/storeEventsWrapper.ts`, `packages/contact-center/task/src/helper.ts` | `packages/contact-center/store/tests/storeEventsWrapper.ts`, `packages/contact-center/task/tests/helper.ts` | When queue media is absent, the SDK default applies. | Present |
+| `WIDGET-LIST-R-003` | Queue and entry-point requests must forward page, page size, search, and current-task media; dial-number requests forward only pagination/search. | Agent Desktop supplies interaction media for both queues and entry points, while channel mapping, eligibility, and all list-order defaults remain SDK decisions. | `packages/contact-center/store/src/storeEventsWrapper.ts`, `packages/contact-center/task/src/helper.ts` | `packages/contact-center/store/tests/storeEventsWrapper.ts`, `packages/contact-center/task/tests/helper.ts` | When task media is absent, the SDK telephony default applies. | Present |
 | `WIDGET-LIST-R-004` | Widgets must render destination arrays in the order supplied by the SDK and preserve the SDK pagination metadata object. | Backend-selected ordering must not be changed or made inconsistent by a second client sort. | `packages/contact-center/store/src/storeEventsWrapper.ts` | `packages/contact-center/store/tests/storeEventsWrapper.ts` | Presentational virtualized-list behavior remains unchanged. | Present |
 | `WIDGET-LIST-R-005` | Store failures must be logged and rethrown; the task hook must convert destination-page failures to an empty page and buddy-agent failures to an empty agent list while ending loading state. | Existing UI boundaries need predictable empty/error behavior without hiding failures at the SDK/store boundary. | `packages/contact-center/store/src/storeEventsWrapper.ts`, `packages/contact-center/task/src/helper.ts` | `packages/contact-center/store/tests/storeEventsWrapper.ts`, `packages/contact-center/task/tests/helper.ts` | Existing UI error presentation remains unchanged. | Present |
-| `WIDGET-LIST-R-006` | Store and component types must expose the action-aware loader and the specialized SDK request/response shapes without `any`. | Compile-time alignment prevents the widgets from recreating SDK policy through loosely typed escape hatches. | `packages/contact-center/store/src/store.types.ts`, `packages/contact-center/cc-components/src/components/task/task.types.ts` | `packages/contact-center/store/tests/storeEventsWrapper.ts`, `packages/contact-center/task/tests/helper.ts`, `packages/contact-center/cc-components/tests/components/task/CallControl` | The local SDK link is required until a released SDK contains the new exports. | Present |
+| `WIDGET-LIST-R-006` | Store and component types must expose the action-aware loader, shared `ConsultTransferListOptions`, `ConsultTransferMediaType`, `ConsultTransferDestination`, and `ConsultTransferListResponse` without `any`; they must not type projected queue/entry-point rows as full CMS records or expose SDK policy flags through widget loaders. | Compile-time alignment gives consumers one minimal list contract, prevents widgets from reading fields omitted by the SDK projection, and avoids loosely typed policy escape hatches. | `packages/contact-center/store/src/store.types.ts`, `packages/contact-center/cc-components/src/components/task/task.types.ts` | `packages/contact-center/store/tests/storeEventsWrapper.ts`, `packages/contact-center/task/tests/helper.ts`, `packages/contact-center/cc-components/tests/components/task/CallControl` | The local SDK link is required until a released SDK contains the new exports. | Present |
 
 ## Defect context (when applicable)
 
@@ -113,7 +113,7 @@ There are no open product decisions for this delta.
 
 ### MOD-001 — Store list delegation (`STORE-R-015`)
 
-- **WHAT**: Replace widget-owned queue filtering/metadata reconstruction and generic entry-point calls with thin delegation to the SDK's consult/transfer queue/entry-point methods. Keep dial numbers on the generic AddressBook service. Pass current-task media only to queues and pass no ordering inputs; preserve each SDK response as returned.
+- **WHAT**: Replace widget-owned queue filtering/metadata reconstruction and generic entry-point calls with thin delegation to the SDK's consult/transfer queue/entry-point methods. Keep dial numbers on the generic AddressBook service. Pass current-task media to both queues and entry points, pass no ordering or policy inputs, and preserve each SDK response as returned.
 - **WHY**: Eligibility, backend query flags, and ordering defaults are reusable domain policy and must not diverge across UI clients.
 - **Evidence:** `packages/contact-center/store/src/storeEventsWrapper.ts`, `packages/contact-center/store/tests/storeEventsWrapper.ts`.
 - **Acceptance:** No queue, entry-point, or dial-number `.sort()`/`.filter()` exists in the store list path, and tests prove response order and metadata are unchanged.
@@ -136,10 +136,11 @@ There are no open product decisions for this delta.
 
 - [x] Consult agent loading forwards `Consult`; Transfer agent loading forwards `Transfer` on initial open and reload (`MOD-002`, `MOD-003`, `WIDGET-LIST-R-002`).
 - [x] Queue and entry-point fetchers delegate to specialized SDK methods, while dial numbers use AddressBook, without local sort/filter/metadata logic (`MOD-001`, `WIDGET-LIST-R-001`, `WIDGET-LIST-R-004`).
-- [x] Only queue requests include current-task media when available; entry-point and dial-number requests contain no widget-selected media or sorting (`MOD-001`, `WIDGET-LIST-R-003`).
+- [x] Queue and entry-point requests include current-task media when available; dial-number requests contain no widget-selected media, and no list request contains widget-selected sorting or policy flags (`MOD-001`, `WIDGET-LIST-R-003`).
 - [x] Store errors are rethrown and task-hook errors retain the existing empty-result behavior (`WIDGET-LIST-R-005`).
 - [x] Store, task, test-fixtures, and cc-components build/type surfaces agree with the linked SDK (`WIDGET-LIST-R-006`).
-- [x] Store, task, and cc-components unit suites pass with the coordinated SDK worktree.
+- [x] Store and task unit suites, focused consult/transfer cc-components tests, and touched package build/style checks pass with the coordinated SDK worktree.
+- [ ] The complete cc-components unit suite is blocked in the local-link setup by the SDK calling package's `uuid` ESM/Jest incompatibility; the changed consult/transfer suites pass independently.
 
 ## Scenarios and applicable change views
 
@@ -148,7 +149,7 @@ There are no open product decisions for this delta.
 | Open Consult Agents | Agent | Active task and Consult selected | UI forwards `Consult`; SDK result order is rendered unchanged. | SDK failure produces an empty agent list and clears loading. | `WIDGET-LIST-R-002`, `WIDGET-LIST-R-005` |
 | Open Transfer Agents | Agent | Active task and Transfer selected | UI forwards `Transfer`; SDK applies transfer eligibility. | Reload retains `Transfer`; it does not fall back to Consult. | `WIDGET-LIST-R-002` |
 | Search Queues | Agent | Active task with media context | Page/search input plus media reach the SDK; response and metadata are preserved. | Missing task media lets the SDK default to telephony. | `WIDGET-LIST-R-003`, `WIDGET-LIST-R-004` |
-| Search Entry Points | Agent | Entry-point tab visible | Page/search input reaches the SDK and backend order is rendered. | Failure becomes the existing empty paginated result. | `WIDGET-LIST-R-004`, `WIDGET-LIST-R-005` |
+| Search Entry Points | Agent | Entry-point tab visible and active task may carry media | Page/search plus available task media reach the SDK and backend order is rendered. | Missing media uses the SDK default; failure becomes the existing empty paginated result. | `WIDGET-LIST-R-003`, `WIDGET-LIST-R-004`, `WIDGET-LIST-R-005` |
 | Search Dial Numbers | Agent | Address book enabled | Page/search input reaches AddressBook and its SDK-default backend order is rendered. | Failure becomes the existing empty paginated result. | `WIDGET-LIST-R-001`, `WIDGET-LIST-R-004`, `WIDGET-LIST-R-005` |
 
 ### Interaction and scenario matrix
@@ -158,8 +159,9 @@ There are no open product decisions for this delta.
 | Consult + Agents | Open or reload | `loadBuddyAgents('Consult')` | Applying Transfer-only availability filtering | `WIDGET-LIST-R-002` |
 | Transfer + Agents | Open or reload | `loadBuddyAgents('Transfer')` | Reloading with the default Consult action | `WIDGET-LIST-R-002` |
 | Queue + current task media | Fetch/search/page | Store forwards media once to the specialized SDK call | Hook/store filters returned rows or sorts them again | `WIDGET-LIST-R-001`, `WIDGET-LIST-R-003`, `WIDGET-LIST-R-004` |
-| No current task media | Queue fetch | SDK receives no media override and uses its default | Widget invents a backend channel policy | `WIDGET-LIST-R-003` |
-| Entry point or dial number | Fetch/search/page | Store forwards pagination/search only and preserves SDK order | Widget supplies media or sort policy | `WIDGET-LIST-R-001`, `WIDGET-LIST-R-003`, `WIDGET-LIST-R-004` |
+| No current task media | Queue or entry-point fetch | SDK receives no media override and uses its default | Widget invents a backend channel policy | `WIDGET-LIST-R-003` |
+| Entry point + current task media | Fetch/search/page | Store forwards media once to the specialized SDK call and preserves SDK order | Widget maps the channel or supplies sort policy | `WIDGET-LIST-R-001`, `WIDGET-LIST-R-003`, `WIDGET-LIST-R-004` |
+| Dial number | Fetch/search/page | Store forwards pagination/search only and preserves SDK order | Widget supplies media or sort policy | `WIDGET-LIST-R-001`, `WIDGET-LIST-R-003`, `WIDGET-LIST-R-004` |
 
 ### UI flow and design
 
@@ -170,8 +172,8 @@ The visible popover, tabs, row presentation, pagination, loading indicators, emp
 | API or operation | Change | Consumer impact | Compatibility expectation | Canonical definition |
 | --- | --- | --- | --- | --- |
 | Store buddy-agent loader | Accepts optional `Consult`/`Transfer` action instead of a media argument. | Task and component layers pass user intent. | Coordinated widgets release required. | `packages/contact-center/store/src/store.types.ts` |
-| Store queue loader | Accepts pagination/search only and delegates to the SDK's specialized method. | Callers no longer supply independent media policy. | Coordinated widgets/SDK release required. | `packages/contact-center/store/src/store.types.ts` |
-| Store entry-point loader | Delegates pagination/search to the SDK's specialized method. | No caller-owned media, profile, filter, or sort flags. | Additive at the SDK boundary; coordinated store update. | `packages/contact-center/store/src/store.types.ts` |
+| Store queue loader | Accepts pagination/search only and delegates with current-task media to the SDK's specialized method. | Callers no longer supply independent media or policy controls. | Coordinated widgets/SDK release required. | `packages/contact-center/store/src/store.types.ts` |
+| Store entry-point loader | Accepts pagination/search only and delegates with current-task media to the SDK's specialized method. | No caller-owned media, profile, filter, projection, or sort flags. | Additive at the SDK boundary; coordinated store update. | `packages/contact-center/store/src/store.types.ts` |
 | Store dial-number loader | Delegates pagination/search to the generic SDK AddressBook service. | The SDK default supplies backend name ordering. | Existing SDK surface with a corrected default. | `packages/contact-center/store/src/store.types.ts` |
 
 ### Public API and semver impact
@@ -194,7 +196,7 @@ The visible popover, tabs, row presentation, pagination, loading indicators, emp
 
 **Provides — MODIFIED:** The widget packages provide action-aware list loading and preserve SDK result order/metadata without owning eligibility policy.
 
-**Requires — MODIFIED:** The store requires an SDK that exports `ConsultTransferAction`, `ConsultTransferListSearchParams`, `ConsultTransferQueueSearchParams`, `getConsultTransferQueues`, and `getConsultTransferEntryPoints`.
+**Requires — MODIFIED:** The store requires an SDK that exports `ConsultTransferAction`, `ConsultTransferListOptions`, `ConsultTransferMediaType`, `ConsultTransferDestination`, `ConsultTransferListResponse`, `getConsultTransferQueues`, and `getConsultTransferEntryPoints`.
 
 No event contract changes.
 
@@ -213,9 +215,9 @@ No event contract changes.
 | --- | --- | --- | --- | --- |
 | Buddy-agent request | `action`, optional current task `mediaType` | Distinguish Consult and Transfer eligibility. | SDK contract; widgets supply runtime context. | No new retained data or credentials. |
 | Queue list request | `page`, `pageSize`, `search`, optional current task `mediaType` | Paginated destination discovery. | SDK owns reusable defaults. | No widget-owned eligibility flags. |
-| Entry-point list request | `page`, `pageSize`, `search` | Paginated destination discovery. | SDK owns telephony eligibility and backend name ordering. | No widget-owned media, eligibility, or sort flags. |
+| Entry-point list request | `page`, `pageSize`, `search`, optional current task `mediaType` | Paginated destination discovery. | SDK owns media validation/mapping, eligibility, and backend name ordering. | No widget-owned filter, projection, view, or sort flags. |
 | Dial-number list request | `page`, `pageSize`, `search` | Paginated address-book destination discovery. | AddressBook owns backend name ordering. | No widget-owned sort flags. |
-| Paginated response | SDK `data` and `meta` unchanged | Preserve backend order and pagination truth. | SDK/backend | No client reconstruction. |
+| Queue/entry-point paginated response | SDK `ConsultTransferListResponse` with `data: {id, name, dbId?}[]` and `meta` unchanged | Preserve backend order, typed projection, and pagination truth. | SDK/backend | Widgets must not assume full queue or entry-point records or reconstruct metadata. |
 
 ## Impacted domains
 
@@ -289,4 +291,5 @@ No event contract changes.
 | 2026-08-19 | Approved this exact MODIFIED delta path. | Avoid overwriting draft canonical module specs while keeping spec-currency with the implementation. | Developer |
 | 2026-08-19 | Assigned reusable list policy to the SDK and retained only UI/runtime context in widgets. | Prevent policy duplication and ordering drift. | Developer + Codex |
 | 2026-08-19 | Explicitly prohibited widget-side sorting/filtering of SDK destination results. | Preserve the backend order selected by the SDK request. | Developer + Codex |
+| 2026-08-19 | Adopted the SDK's single minimal consult/transfer options type and forward current-task media for both queue and entry-point requests. | Match Agent Desktop inputs while keeping filter, projection, view, channel mapping, ordering, and cache decisions out of widgets. | Developer + Codex |
 | 2026-08-19 | Removed widget selection of entry-point media and the consult-specific dial-number helper. | EntryPoint and AddressBook defaults must work for widgets out of the box; other SDK consumers can pass explicit overrides. | Developer + Codex |

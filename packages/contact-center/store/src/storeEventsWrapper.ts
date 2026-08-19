@@ -15,10 +15,10 @@ import {
   ENGAGED_USERNAME,
   RESERVED_LABEL,
   RESERVED_USERNAME,
-  ContactServiceQueuesResponse,
-  EntryPointListResponse,
   ConsultTransferAction,
-  ConsultTransferListSearchParams,
+  ConsultTransferListResponse,
+  ConsultTransferListOptions,
+  ConsultTransferMediaType,
   AddressBookEntriesResponse,
   AddressBookEntrySearchParams,
   Profile,
@@ -1085,7 +1085,7 @@ class StoreWrapper implements IStoreWrapper {
       const mediaType = this.currentTask?.data?.interaction?.mediaType;
       const response = await this.store.cc.getBuddyAgents({
         action,
-        ...(mediaType ? {mediaType} : {}),
+        ...(mediaType ? {mediaType: mediaType as ConsultTransferMediaType} : {}),
       });
       return 'data' in response ? response.data.agentList : [];
     } catch (error) {
@@ -1094,13 +1094,13 @@ class StoreWrapper implements IStoreWrapper {
     }
   };
 
-  getQueues = async (params?: ConsultTransferListSearchParams): Promise<ContactServiceQueuesResponse> => {
+  getQueues = async (params?: Omit<ConsultTransferListOptions, 'mediaType'>): Promise<ConsultTransferListResponse> => {
     try {
       const mediaType = this.currentTask?.data?.interaction?.mediaType;
 
       return await this.store.cc.getConsultTransferQueues({
         ...(params ?? {}),
-        ...(mediaType ? {mediaType} : {}),
+        ...(mediaType ? {mediaType: mediaType as ConsultTransferMediaType} : {}),
       });
     } catch (error) {
       this.store.logger.error('Error fetching queues:', error);
@@ -1108,9 +1108,16 @@ class StoreWrapper implements IStoreWrapper {
     }
   };
 
-  getEntryPoints = async (params?: ConsultTransferListSearchParams): Promise<EntryPointListResponse> => {
+  getEntryPoints = async (
+    params?: Omit<ConsultTransferListOptions, 'mediaType'>
+  ): Promise<ConsultTransferListResponse> => {
     try {
-      return await this.store.cc.getConsultTransferEntryPoints(params);
+      const mediaType = this.currentTask?.data?.interaction?.mediaType;
+
+      return await this.store.cc.getConsultTransferEntryPoints({
+        ...(params ?? {}),
+        ...(mediaType ? {mediaType: mediaType as ConsultTransferMediaType} : {}),
+      });
     } catch (error) {
       this.store.logger.error('Error fetching entry points:', error);
       throw error;

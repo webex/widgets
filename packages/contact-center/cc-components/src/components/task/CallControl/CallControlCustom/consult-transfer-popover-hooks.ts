@@ -1,8 +1,7 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
 import {
   AddressBookEntry,
-  ContactServiceQueue,
-  EntryPointRecord,
+  ConsultTransferDestination,
   ILogger,
   FetchPaginatedList,
   PaginatedListParams,
@@ -170,7 +169,7 @@ export function useConsultTransferPopover({
     loading: loadingEntryPoints,
     loadData: loadEntryPoints,
     reset: resetEntryPoints,
-  } = usePaginatedData<EntryPointRecord, {id: string; name: string}>(
+  } = usePaginatedData<ConsultTransferDestination, {id: string; name: string}>(
     getEntryPoints,
     (entry) => ({id: entry.id, name: entry.name}),
     CATEGORY_ENTRY_POINT,
@@ -184,9 +183,9 @@ export function useConsultTransferPopover({
     loading: loadingQueues,
     loadData: loadQueues,
     reset: resetQueues,
-  } = usePaginatedData<ContactServiceQueue, {id: string; name: string; description?: string}>(
+  } = usePaginatedData<ConsultTransferDestination, {id: string; name: string}>(
     getQueues,
-    (entry) => ({id: entry.id, name: entry.name, description: entry.description}),
+    (entry) => ({id: entry.id, name: entry.name}),
     CATEGORY_QUEUES,
     logger
   );
