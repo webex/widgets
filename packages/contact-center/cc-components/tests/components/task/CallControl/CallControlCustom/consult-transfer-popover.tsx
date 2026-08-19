@@ -2,7 +2,12 @@ import React from 'react';
 import {render, fireEvent, waitFor, act} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import ConsultTransferPopoverComponent from '../../../../../src/components/task/CallControl/CallControlCustom/consult-transfer-popover';
-import {ConsultTransferDestination, EntryPointRecord, AddressBookEntry} from '@webex/cc-store';
+import {
+  AddressBookEntry,
+  ConsultTransferDestination,
+  ConsultTransferDestinationType,
+  EntryPointRecord,
+} from '@webex/cc-store';
 import {DEFAULT_PAGE_SIZE} from '../../../../../src/components/task/constants';
 
 const loggerMock = {
@@ -59,7 +64,8 @@ describe('ConsultTransferPopoverComponent', () => {
     onQueueSelect: mockOnQueueSelect,
     onDialNumberSelect: jest.fn(),
     onEntryPointSelect: jest.fn(),
-    allowConsultToQueue: true,
+    action: 'Consult' as const,
+    availableDestinations: ['agent', 'queue', 'dialNumber', 'entryPoint'] as ConsultTransferDestinationType[],
     loadingBuddyAgents: false,
     logger: loggerMock,
   };
@@ -223,11 +229,10 @@ describe('ConsultTransferPopoverComponent', () => {
     expect(screen.container.querySelectorAll('.call-control-list-item').length).toBe(0);
   });
 
-  it('hides queue tab when allowConsultToQueue is false for Consult', async () => {
+  it('hides a category omitted by the SDK controls', async () => {
     const propsWithoutQueue = {
       ...baseProps,
-      heading: 'Consult',
-      allowConsultToQueue: false,
+      availableDestinations: ['agent', 'dialNumber', 'entryPoint'] as ConsultTransferDestinationType[],
     };
 
     const screen = await render(<ConsultTransferPopoverComponent {...propsWithoutQueue} />);
@@ -235,26 +240,33 @@ describe('ConsultTransferPopoverComponent', () => {
     expect(maybeQueuesButton).toBeNull();
   });
 
-  it('shows queue tab for Transfer inbound when consultToQueue is off and accessQueue is SPECIFIC (AVERA)', async () => {
-    const averaProps = {
+  it('renders category tabs in the order supplied by the SDK controls', async () => {
+    const orderedProps = {
       ...baseProps,
-      heading: 'Transfer',
-      allowConsultToQueue: false,
-      accessQueue: 'SPECIFIC',
-      interactionContext: {contactDirectionType: 'INBOUND', mediaType: 'telephony'},
-      isTelephony: true,
+      action: 'Transfer' as const,
+      availableDestinations: ['queue', 'agent', 'entryPoint', 'dialNumber'] as ConsultTransferDestinationType[],
     };
 
-    const screen = await render(<ConsultTransferPopoverComponent {...averaProps} />);
-    expect(screen.getByRole('button', {name: 'Queues'})).toBeInTheDocument();
+    const screen = await render(<ConsultTransferPopoverComponent {...orderedProps} />);
+    const categoryLabels = Array.from(screen.container.querySelectorAll('.consult-category-buttons button')).map(
+      (button) => button.textContent
+    );
+
+    expect(categoryLabels).toEqual(['Queues', 'Agents', 'Entry Point', 'Dial Number']);
+    expect(screen.getByRole('button', {name: 'Queues'})).toHaveClass('consult-category-button-active');
   });
 
-  it('shows entry point tab on Transfer when accessEntryPoint allows it', async () => {
+  it('renders an empty state without looping when the SDK exposes no destinations', async () => {
+    const screen = await render(<ConsultTransferPopoverComponent {...baseProps} availableDestinations={[]} />);
+
+    expect(screen.container.querySelectorAll('.consult-category-buttons button')).toHaveLength(0);
+    expect(screen.getByText('No data available for consult transfer.')).toBeInTheDocument();
+  });
+
+  it('shows entry point when it is included in the SDK controls', async () => {
     const transferProps = {
       ...baseProps,
-      heading: 'Transfer',
-      accessEntryPoint: 'SPECIFIC',
-      isTelephony: true,
+      action: 'Transfer' as const,
       consultTransferOptions: {showEntryPointTab: true},
     };
 

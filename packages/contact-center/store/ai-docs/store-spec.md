@@ -111,6 +111,7 @@ Compatibility notes:
 | `STORE-R-019` | Conference helpers (`getIsConferenceInProgress`, `getConferenceParticipants`, `getConferenceParticipantsCount`) count only active agent participants, excluding `Customer`/`Supervisor`/`VVA` and those who left | Accurate conference participant display | `src/task-utils.ts:148-247`, `src/constants.ts:33` | `tests/task-utils.ts` ("getIsConferenceInProgress", "getConferenceParticipants", "getConferenceParticipantsCount") | none | PRESENT |
 | `STORE-R-020` | `findHoldTimestamp`/`findHoldStatus` resolve hold state per media type, remapping to `mainCall` for secondary EP-DN agents | Hold timers align with Agent Desktop across consult/conference | `src/task-utils.ts:285-362` | `tests/task-utils.ts` ("findHoldTimestamp") | `findHoldStatus` direct coverage is a gap | PRESENT |
 | `STORE-R-021` | `handleRealtimeTranscription` upserts transcript lines keyed by `messageId`, normalizing role/timestamp and dropping empty content | Live transcription panel needs deduped, ordered lines | `src/storeEventsWrapper.ts:891-922` | None found | No dedicated transcription test located | WEAK |
+| `STORE-R-022` | The store must not mirror or project `allowConsultToQueue`, `accessQueue`, `accessEntryPoint`, or `accessBuddyTeam`; destination visibility/order is consumed from each SDK Task's `uiControls.consultTransferDestinations`. | Raw profile duplication gives widgets a second policy source and can drift from SDK task/media/direction decisions. | `src/store.ts`, `src/store.types.ts`, `src/storeEventsWrapper.ts`, `src/util.ts` | `tests/storeEventsWrapper.ts`, `tests/util.ts` | The SDK continues to ingest these profile values internally when computing Task controls. | PRESENT |
 
 ## Design Overview
 The store is deliberately split into a thin observable core and a thick wrapper. `Store` (`store.ts`) holds only field declarations + `makeAutoObservable` (with `cc` as `observable.ref` so the SDK object itself is not deeply observed) and the two lifecycle methods `init`/`registerCC`. Everything reactive and event-driven lives in `StoreWrapper` (`storeEventsWrapper.ts`), which composes the singleton via `Store.getInstance()` and re-exposes each field through a getter. This keeps the observable schema in one place while concentrating SDK coupling, event wiring, and mutation discipline in the wrapper.
@@ -287,9 +288,9 @@ The store is a single MobX `makeAutoObservable` instance. Observable slices (all
 - **Session / profile:** `agentId`, `agentProfile`, `isAgentLoggedIn`, `deviceType`, `dialNumber`, `teamId`, `teams`, `loginOptions`, `idleCodes`, `wrapupCodes`, `featureFlags`, `dataCenter`.
 - **Agent state:** `currentState`, `customState`, `lastStateChangeTimestamp`, `lastIdleCodeChangeTimestamp`, `showMultipleLoginAlert`.
 - **Tasks:** `taskList` (`Record<interactionId, ITask>`), `currentTask`, `acceptedCampaignIds` (`Set<string>`), `realtimeTranscriptionData`.
-- **Call/consult control:** `isMuted`, `callControlAudio`, `isQueueConsultInProgress`, `currentConsultQueueId`, `consultStartTimeStamp`, `isDeclineButtonEnabled`, `isEndConsultEnabled`, `allowConsultToQueue`, `accessQueue`, `accessEntryPoint`, `accessBuddyTeam`, `isDigitalChannelsInitialized`.
+- **Call/consult control:** `isMuted`, `callControlAudio`, `isQueueConsultInProgress`, `currentConsultQueueId`, `consultStartTimeStamp`, `isDeclineButtonEnabled`, `isEndConsultEnabled`, `isDigitalChannelsInitialized`. Destination availability/order remains on the SDK Task's `uiControls` rather than duplicated store observables.
 - **`getQueues` / `getEntryPoints`:** forward current-task media plus pagination/search and return `ConsultTransferListResponse` from the SDK specialized methods. They do not add eligibility/view/sort flags or reinterpret the projected `id`/`name`/optional-`dbId` rows.
-- **`getBuddyAgents`:** returns agents sorted by `agentName` ascending (client-side; full list, no pagination).
+- **`getBuddyAgents`:** returns the SDK `agentList` unchanged (full list, no pagination).
 - **Misc:** `currentTheme`, `cc` (`observable.ref` — not deeply observed), `isAddressBookEnabled`.
 
 Transition triggers: SDK CC/task events drive the session/agent/task slices via the wrapper's handlers (`handleStateChange`, `handleTaskAssigned`, `refreshTaskList`, `cleanUpStore`, campaign-preview handlers). Widget-initiated mutators (`setDeviceType`, `setDialNumber`, `setTeamId`, `setState`, `setCurrentTheme`, etc.) drive UI-local slices. All writes pass through `runInAction`.
@@ -345,6 +346,7 @@ Unit tests are split by source file. `tests/store.ts` covers the singleton defau
 | `STORE-R-019` | `tests/task-utils.ts` (conference helpers) | none |
 | `STORE-R-020` | `tests/task-utils.ts` (findHoldTimestamp) | `findHoldStatus` untested |
 | `STORE-R-021` | None found | `handleRealtimeTranscription` untested |
+| `STORE-R-022` | `tests/storeEventsWrapper.ts` no longer exposes raw collaboration-policy getters | Add a widget integration assertion for direct Task destination controls if the store ever begins adapting task UI controls. |
 
 ## Traceability
 - Repo architecture: [`ARCHITECTURE.md`](../../../../ai-docs/ARCHITECTURE.md) · Registry: [`SPEC_INDEX.md`](../../../../ai-docs/SPEC_INDEX.md) · Contracts: [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md)

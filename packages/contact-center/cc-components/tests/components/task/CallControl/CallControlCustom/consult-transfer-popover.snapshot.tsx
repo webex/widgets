@@ -2,7 +2,7 @@ import React from 'react';
 import '@testing-library/jest-dom';
 import {render, fireEvent, act, waitFor} from '@testing-library/react';
 import ConsultTransferPopoverComponent from '../../../../../src/components/task/CallControl/CallControlCustom/consult-transfer-popover';
-import {ConsultTransferDestination} from '@webex/cc-store';
+import {ConsultTransferDestination, ConsultTransferDestinationType} from '@webex/cc-store';
 
 const mockUIDProps = (container) => {
   container
@@ -60,7 +60,8 @@ describe('ConsultTransferPopoverComponent Snapshots', () => {
     onQueueSelect: mockOnQueueSelect,
     onDialNumberSelect: jest.fn(),
     onEntryPointSelect: jest.fn(),
-    allowConsultToQueue: true,
+    action: 'Consult' as const,
+    availableDestinations: ['agent', 'queue', 'dialNumber', 'entryPoint'] as ConsultTransferDestinationType[],
     loadingBuddyAgents: false,
     logger: mockLogger,
   };
@@ -143,8 +144,12 @@ describe('ConsultTransferPopoverComponent Snapshots', () => {
       expect(container).toMatchSnapshot();
     });
 
-    it('should render with allowConsultToQueue false for Consult', async () => {
-      const noQueueConsultProps = {...defaultProps, heading: 'Consult', allowConsultToQueue: false};
+    it('should render when SDK controls omit queues', async () => {
+      const noQueueConsultProps = {
+        ...defaultProps,
+        heading: 'Consult',
+        availableDestinations: ['agent', 'dialNumber', 'entryPoint'] as ConsultTransferDestinationType[],
+      };
       let screen;
       await act(async () => {
         screen = render(<ConsultTransferPopoverComponent {...noQueueConsultProps} />);

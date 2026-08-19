@@ -182,22 +182,6 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.isEndConsultEnabled;
   }
 
-  get allowConsultToQueue() {
-    return this.store.allowConsultToQueue;
-  }
-
-  get accessQueue() {
-    return this.store.accessQueue;
-  }
-
-  get accessEntryPoint() {
-    return this.store.accessEntryPoint;
-  }
-
-  get accessBuddyTeam() {
-    return this.store.accessBuddyTeam;
-  }
-
   get agentProfile() {
     return this.store.agentProfile;
   }

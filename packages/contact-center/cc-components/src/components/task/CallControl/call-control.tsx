@@ -57,11 +57,6 @@ function CallControlComponent(props: CallControlComponentProps) {
     consultTransfer,
     callControlAudio,
     setConsultAgentName,
-    allowConsultToQueue,
-    accessQueue,
-    accessEntryPoint,
-    accessBuddyTeam,
-    interactionContext,
     setLastTargetType,
     controls,
     logger,
@@ -245,21 +240,13 @@ function CallControlComponent(props: CallControlComponentProps) {
                         onDialNumberSelect={(dialNumber, allowParticipantsToInteract) =>
                           handleTargetSelect(dialNumber, dialNumber, 'dialNumber', allowParticipantsToInteract)
                         }
-                        allowConsultToQueue={allowConsultToQueue}
-                        accessQueue={accessQueue}
-                        accessEntryPoint={accessEntryPoint}
-                        accessBuddyTeam={accessBuddyTeam}
-                        interactionContext={interactionContext}
-                        isTelephony={isTelephony}
-                        consultTransferOptions={
-                          isTelephony
-                            ? consultTransferOptions
-                            : {
-                                ...consultTransferOptions,
-                                showDialNumberTab: false,
-                                showEntryPointTab: false,
-                              }
+                        action={button.menuType === 'Transfer' ? 'Transfer' : 'Consult'}
+                        availableDestinations={
+                          button.menuType === 'Transfer'
+                            ? controls.consultTransferDestinations.transfer
+                            : controls.consultTransferDestinations.consult
                         }
+                        consultTransferOptions={consultTransferOptions}
                         isConferenceInProgress={controls?.main?.exitConference?.isVisible ?? false}
                         logger={logger}
                       />

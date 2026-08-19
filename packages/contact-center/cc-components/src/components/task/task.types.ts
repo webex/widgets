@@ -6,7 +6,9 @@ import {
   BuddyDetails,
   DestinationType,
   ContactServiceQueue,
+  ConsultTransferAction,
   ConsultTransferDestination,
+  ConsultTransferDestinationType,
   AddressBookEntry,
   FetchPaginatedList,
   Participant,
@@ -464,23 +466,6 @@ export interface ControlProps {
   isEndConsultEnabled: boolean;
 
   /**
-   * Flag to determine if the consulting to queue is enabled for the agent
-   */
-  allowConsultToQueue: boolean;
-
-  /** Desktop Profile collaboration access for queues */
-  accessQueue?: string;
-
-  /** Desktop Profile collaboration access for entry points */
-  accessEntryPoint?: string;
-
-  /** Desktop Profile collaboration access for buddy teams */
-  accessBuddyTeam?: string;
-
-  /** Interaction context for Consult/Transfer tab visibility */
-  interactionContext?: ConsultTransferInteractionContext;
-
-  /**
    * Flag to enable or disable conference feature
    */
   conferenceEnabled: boolean;
@@ -564,11 +549,6 @@ export type CallControlComponentProps = Pick<
   | 'stateTimerTimestamp'
   | 'consultTimerLabel'
   | 'consultTimerTimestamp'
-  | 'allowConsultToQueue'
-  | 'accessQueue'
-  | 'accessEntryPoint'
-  | 'accessBuddyTeam'
-  | 'interactionContext'
   | 'lastTargetType'
   | 'setLastTargetType'
   | 'controls'
@@ -682,15 +662,6 @@ export interface ConsultTransferDialNumberComponentProps {
 }
 
 /**
- * Interaction fields used for Consult/Transfer tab visibility (Agent Desktop parity).
- */
-export type ConsultTransferInteractionContext = {
-  contactDirectionType?: string;
-  outdialTransferToQueueEnabled?: boolean;
-  mediaType?: string;
-};
-
-/**
  * Interface representing the properties for ConsultTransferPopover component.
  */
 export interface ConsultTransferPopoverComponentProps {
@@ -698,7 +669,7 @@ export interface ConsultTransferPopoverComponentProps {
   buttonIcon: string;
   buddyAgents: BuddyDetails[];
   loadingBuddyAgents: boolean;
-  loadBuddyAgents?: (action?: 'Consult' | 'Transfer') => Promise<void>;
+  loadBuddyAgents?: (action?: ConsultTransferAction) => Promise<void>;
   getAddressBookEntries?: FetchPaginatedList<AddressBookEntry>;
   getEntryPoints?: FetchPaginatedList<ConsultTransferDestination>;
   getQueues?: FetchPaginatedList<ConsultTransferDestination>;
@@ -706,12 +677,8 @@ export interface ConsultTransferPopoverComponentProps {
   onQueueSelect: (queueId: string, queueName: string, allowParticipantsToInteract: boolean) => void;
   onEntryPointSelect: (entryPointId: string, entryPointName: string, allowParticipantsToInteract: boolean) => void;
   onDialNumberSelect: (dialNumber: string, allowParticipantsToInteract: boolean) => void;
-  allowConsultToQueue: boolean;
-  accessQueue?: string;
-  accessEntryPoint?: string;
-  accessBuddyTeam?: string;
-  interactionContext?: ConsultTransferInteractionContext;
-  isTelephony?: boolean;
+  action: ConsultTransferAction;
+  availableDestinations: ConsultTransferDestinationType[];
   /** Options governing popover visibility/behavior */
   consultTransferOptions?: ConsultTransferOptions;
   isConferenceInProgress?: boolean;
@@ -915,8 +882,7 @@ export const CATEGORY_AGENTS: CategoryType = 'Agents';
  * Parameters for `useConsultTransferPopover` hook.
  */
 export type UseConsultTransferParams = {
-  showDialNumberTab: boolean;
-  showEntryPointTab: boolean;
+  availableCategories: CategoryType[];
   getAddressBookEntries?: FetchPaginatedList<AddressBookEntry>;
   getEntryPoints?: FetchPaginatedList<ConsultTransferDestination>;
   getQueues?: FetchPaginatedList<ConsultTransferDestination>;

@@ -49,10 +49,6 @@ class Store implements IStore {
   featureFlags: {[key: string]: boolean} = {};
   isEndConsultEnabled: boolean = false;
   isAddressBookEnabled: boolean = false;
-  allowConsultToQueue: boolean = false;
-  accessQueue?: string;
-  accessEntryPoint?: string;
-  accessBuddyTeam?: string;
   agentProfile: AgentLoginProfile = {};
   isMuted: boolean = false;
   isDigitalChannelsInitialized: boolean = false;
@@ -120,15 +116,6 @@ class Store implements IStore {
         this.isEndConsultEnabled = response.isEndConsultEnabled;
         // TODO: Remove this once SDK performs the validation
         this.isAddressBookEnabled = Boolean(response.addressBookId);
-        this.allowConsultToQueue = response.allowConsultToQueue;
-        const collaborationProfile = response as Profile & {
-          accessQueue?: string;
-          accessEntryPoint?: string;
-          accessBuddyTeam?: string;
-        };
-        this.accessQueue = collaborationProfile.accessQueue;
-        this.accessEntryPoint = collaborationProfile.accessEntryPoint;
-        this.accessBuddyTeam = collaborationProfile.accessBuddyTeam;
         this.agentProfile.agentName = response.agentName;
         this.agentProfile.isTimeoutDesktopInactivityEnabled = response.isTimeoutDesktopInactivityEnabled;
         this.agentProfile.timeoutDesktopInactivityMins = response.timeoutDesktopInactivityMins;

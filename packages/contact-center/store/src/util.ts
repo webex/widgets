@@ -31,7 +31,6 @@ export function getFeatureFlags(agentProfile: Profile) {
     'isAnalyzerEnabled',
     'webRtcEnabled',
     'isRecordingManagementEnabled',
-    'allowConsultToQueue',
   ];
 
   const keyValuePairs = featureFlagkeys.reduce((acc, key) => {

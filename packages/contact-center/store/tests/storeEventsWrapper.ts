@@ -104,7 +104,6 @@ jest.mock('../src/store', () => ({
     isQueueConsultInProgress: false,
     currentConsultQueueId: null,
     isEndConsultEnabled: true,
-    allowConsultToQueue: false,
     isDeclineButtonEnabled: false,
     isDigitalChannelsInitialized: false,
     acceptedCampaignIds: new Set<string>(),
@@ -263,10 +262,6 @@ describe('storeEventsWrapper', () => {
 
     it('should proxy isEndConsultEnabled', () => {
       expect(storeWrapper.isEndConsultEnabled).toBe(storeWrapper['store'].isEndConsultEnabled);
-    });
-
-    it('should proxy allowConsultToQueue', () => {
-      expect(storeWrapper.allowConsultToQueue).toBe(storeWrapper['store'].allowConsultToQueue);
     });
 
     it('should proxy isDeclineButtonEnabled', () => {

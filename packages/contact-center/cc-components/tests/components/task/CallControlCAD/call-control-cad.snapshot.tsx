@@ -150,7 +150,6 @@ describe('CallControlCADComponent Snapshots', () => {
     stateTimerTimestamp: 0,
     consultTimerLabel: 'Consulting',
     consultTimerTimestamp: 0,
-    allowConsultToQueue: true,
     lastTargetType: TARGET_TYPE.AGENT,
     setLastTargetType: jest.fn(),
     isHeld: false,

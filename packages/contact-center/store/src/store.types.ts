@@ -12,6 +12,8 @@ import {
   EntryPointListResponse,
   EntryPointSearchParams,
   ConsultTransferAction,
+  ConsultTransferDestinationControls,
+  ConsultTransferDestinationType,
   ConsultTransferDestination,
   ConsultTransferListResponse,
   ConsultTransferListOptions,
@@ -203,10 +205,6 @@ interface IStore {
   consultStartTimeStamp?: number;
   callControlAudio: MediaStream | null;
   isEndConsultEnabled: boolean;
-  allowConsultToQueue: boolean;
-  accessQueue?: string;
-  accessEntryPoint?: string;
-  accessBuddyTeam?: string;
   agentProfile: AgentLoginProfile;
   isMuted: boolean;
   isAddressBookEnabled: boolean;
@@ -314,13 +312,10 @@ type PaginatedListParams = {
   search?: string;
 };
 
-// Generic fetch/transform helpers for paginated APIs
+// Generic fetch helper for paginated APIs
 type FetchPaginatedList<T> = (
   params: PaginatedListParams
 ) => Promise<{data: T[]; meta?: {page?: number; totalPages?: number}}>;
-
-// Generic transform function for paginated APIs
-type TransformPaginatedData<T, U> = (item: T, page: number, index: number) => U;
 
 // Utility consts
 const DIAL_NUMBER: string = 'AGENT_DN';
@@ -370,6 +365,8 @@ export type {
   EntryPointListResponse,
   EntryPointSearchParams,
   ConsultTransferAction,
+  ConsultTransferDestinationControls,
+  ConsultTransferDestinationType,
   ConsultTransferDestination,
   ConsultTransferListResponse,
   ConsultTransferListOptions,
@@ -382,7 +379,6 @@ export type {
   IWebex,
   PaginatedListParams,
   FetchPaginatedList,
-  TransformPaginatedData,
   TaskUIControls,
   TaskUIControlState,
   InteractionUIControls,

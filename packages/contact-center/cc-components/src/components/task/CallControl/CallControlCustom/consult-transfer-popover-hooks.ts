@@ -5,7 +5,6 @@ import {
   ILogger,
   FetchPaginatedList,
   PaginatedListParams,
-  TransformPaginatedData,
 } from '@webex/cc-store';
 import {
   CategoryType,
@@ -19,24 +18,21 @@ import {debounce} from './call-control-custom.utils';
 import {DEFAULT_PAGE_SIZE} from '../../constants';
 
 /**
- * React hook to load, transform and manage paginated data with optional search.
+ * React hook to load and manage paginated SDK data with optional search.
  *
- * @template T - The item type returned by the provided `fetchFunction` (raw API/entity).
- * @template U - The transformed item type stored internally and returned to consumers.
+ * @template T - The item type returned by the provided `fetchFunction`.
  * @param fetchFunction - Fetcher that returns a paginated list of items of type T.
- * @param transformFunction - Mapper that converts each T into U for UI consumption.
  * @param categoryName - Human-readable name used for logging/telemetry.
  * @param logger - Optional logger instance for diagnostics.
- * @returns An object containing the transformed data (U[]), pagination state and helpers.
+ * @returns An object containing SDK response data, pagination state and helpers.
  */
-export const usePaginatedData = <T, U extends {name?: string}>(
+export const usePaginatedData = <T extends {name?: string}>(
   fetchFunction: FetchPaginatedList<T> | undefined,
-  transformFunction: TransformPaginatedData<T, U>,
   categoryName: string,
   logger?: ILogger
 ) => {
   const MODULE = 'cc-components#consult-transfer-popover-hooks.ts';
-  const [data, setData] = useState<U[]>([]);
+  const [data, setData] = useState<T[]>([]);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -83,12 +79,10 @@ export const usePaginatedData = <T, U extends {name?: string}>(
           method: 'usePaginatedData#loadData',
         });
 
-        const transformedEntries = response.data.map((entry, index) => transformFunction(entry, currentPage, index));
-
         if (reset || currentPage === 0) {
-          setData(transformedEntries);
+          setData(response.data);
         } else {
-          setData((prev) => [...prev, ...transformedEntries]);
+          setData((prev) => [...prev, ...response.data]);
         }
 
         const newPage = response.meta?.page ?? currentPage;
@@ -116,7 +110,7 @@ export const usePaginatedData = <T, U extends {name?: string}>(
         setLoading(false);
       }
     },
-    [fetchFunction, transformFunction, logger, categoryName]
+    [fetchFunction, logger, categoryName]
   );
 
   const reset = useCallback(() => {
@@ -129,14 +123,13 @@ export const usePaginatedData = <T, U extends {name?: string}>(
 };
 
 export function useConsultTransferPopover({
-  showDialNumberTab,
-  showEntryPointTab,
+  availableCategories,
   getAddressBookEntries,
   getEntryPoints,
   getQueues,
   logger,
 }: UseConsultTransferParams) {
-  const [selectedCategory, setSelectedCategory] = useState<CategoryType>(CATEGORY_AGENTS);
+  const [selectedCategory, setSelectedCategory] = useState<CategoryType>(availableCategories[0] ?? CATEGORY_AGENTS);
   const [searchQuery, setSearchQuery] = useState('');
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
@@ -147,20 +140,7 @@ export function useConsultTransferPopover({
     loading: loadingDialNumbers,
     loadData: loadDialNumbers,
     reset: resetDialNumbers,
-  } = usePaginatedData<AddressBookEntry, AddressBookEntry>(
-    getAddressBookEntries,
-    (entry) => ({
-      id: entry.id,
-      name: entry.name,
-      number: entry.number,
-      organizationId: entry.organizationId,
-      version: entry.version,
-      createdTime: entry.createdTime,
-      lastUpdatedTime: entry.lastUpdatedTime,
-    }),
-    CATEGORY_DIAL_NUMBER,
-    logger
-  );
+  } = usePaginatedData<AddressBookEntry>(getAddressBookEntries, CATEGORY_DIAL_NUMBER, logger);
 
   const {
     data: entryPoints,
@@ -169,12 +149,7 @@ export function useConsultTransferPopover({
     loading: loadingEntryPoints,
     loadData: loadEntryPoints,
     reset: resetEntryPoints,
-  } = usePaginatedData<ConsultTransferDestination, {id: string; name: string}>(
-    getEntryPoints,
-    (entry) => ({id: entry.id, name: entry.name}),
-    CATEGORY_ENTRY_POINT,
-    logger
-  );
+  } = usePaginatedData<ConsultTransferDestination>(getEntryPoints, CATEGORY_ENTRY_POINT, logger);
 
   const {
     data: queuesData,
@@ -183,12 +158,7 @@ export function useConsultTransferPopover({
     loading: loadingQueues,
     loadData: loadQueues,
     reset: resetQueues,
-  } = usePaginatedData<ConsultTransferDestination, {id: string; name: string}>(
-    getQueues,
-    (entry) => ({id: entry.id, name: entry.name}),
-    CATEGORY_QUEUES,
-    logger
-  );
+  } = usePaginatedData<ConsultTransferDestination>(getQueues, CATEGORY_QUEUES, logger);
 
   const loadNextPage = useCallback(() => {
     if (!canLoadCategory(selectedCategory)) return;
@@ -248,11 +218,12 @@ export function useConsultTransferPopover({
     [resetDialNumbers, resetEntryPoints, resetQueues]
   );
 
-  const createCategoryClickHandler = (category: CategoryType) => () => handleCategoryChange(category);
-  const handleAgentsClick = createCategoryClickHandler(CATEGORY_AGENTS);
-  const handleQueuesClick = createCategoryClickHandler(CATEGORY_QUEUES);
-  const handleDialNumberClick = createCategoryClickHandler(CATEGORY_DIAL_NUMBER);
-  const handleEntryPointClick = createCategoryClickHandler(CATEGORY_ENTRY_POINT);
+  useEffect(() => {
+    const firstAvailableCategory = availableCategories[0];
+    if (firstAvailableCategory && !availableCategories.includes(selectedCategory)) {
+      handleCategoryChange(firstAvailableCategory);
+    }
+  }, [availableCategories, handleCategoryChange, selectedCategory]);
 
   // Helper: determines if the given category can load next page now
   const canLoadCategory = (category: CategoryType): boolean => {
@@ -305,14 +276,26 @@ export function useConsultTransferPopover({
   }, [loadNextPage]);
 
   useEffect(() => {
-    if (selectedCategory === CATEGORY_DIAL_NUMBER && showDialNumberTab && dialNumbers.length === 0) {
+    if (
+      selectedCategory === CATEGORY_DIAL_NUMBER &&
+      availableCategories.includes(CATEGORY_DIAL_NUMBER) &&
+      dialNumbers.length === 0
+    ) {
       loadCategory(CATEGORY_DIAL_NUMBER, 0, '', true);
-    } else if (selectedCategory === CATEGORY_ENTRY_POINT && showEntryPointTab && entryPoints.length === 0) {
+    } else if (
+      selectedCategory === CATEGORY_ENTRY_POINT &&
+      availableCategories.includes(CATEGORY_ENTRY_POINT) &&
+      entryPoints.length === 0
+    ) {
       loadCategory(CATEGORY_ENTRY_POINT, 0, '', true);
-    } else if (selectedCategory === CATEGORY_QUEUES && queuesData.length === 0) {
+    } else if (
+      selectedCategory === CATEGORY_QUEUES &&
+      availableCategories.includes(CATEGORY_QUEUES) &&
+      queuesData.length === 0
+    ) {
       loadCategory(CATEGORY_QUEUES, 0, '', true);
     }
-  }, [selectedCategory]);
+  }, [availableCategories, selectedCategory]);
 
   const handleReload = useCallback(() => {
     logger?.info(`CC-Components: Reloading ${selectedCategory} data`, {
@@ -336,10 +319,7 @@ export function useConsultTransferPopover({
     hasMoreQueues,
     loadingQueues,
     handleSearchChange,
-    handleAgentsClick,
-    handleQueuesClick,
-    handleDialNumberClick,
-    handleEntryPointClick,
+    handleCategoryChange,
     handleReload,
   };
 }
