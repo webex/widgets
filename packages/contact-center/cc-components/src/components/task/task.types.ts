@@ -6,8 +6,8 @@ import {
   BuddyDetails,
   DestinationType,
   ContactServiceQueue,
+  EntryPointRecord,
   ConsultTransferAction,
-  ConsultTransferDestination,
   ConsultTransferDestinationType,
   AddressBookEntry,
   FetchPaginatedList,
@@ -498,10 +498,10 @@ export interface ControlProps {
   getAddressBookEntries?: FetchPaginatedList<AddressBookEntry>;
 
   /** Fetch paginated entry points */
-  getEntryPoints?: FetchPaginatedList<ConsultTransferDestination>;
+  getEntryPoints?: FetchPaginatedList<EntryPointRecord>;
 
   /** Fetch paginated consult/transfer queues from the SDK-owned policy */
-  getQueuesFetcher?: FetchPaginatedList<ConsultTransferDestination>;
+  getQueuesFetcher?: FetchPaginatedList<ContactServiceQueue>;
 
   /**
    * Options to configure consult/transfer popover behavior.
@@ -671,8 +671,8 @@ export interface ConsultTransferPopoverComponentProps {
   loadingBuddyAgents: boolean;
   loadBuddyAgents?: (action?: ConsultTransferAction) => Promise<void>;
   getAddressBookEntries?: FetchPaginatedList<AddressBookEntry>;
-  getEntryPoints?: FetchPaginatedList<ConsultTransferDestination>;
-  getQueues?: FetchPaginatedList<ConsultTransferDestination>;
+  getEntryPoints?: FetchPaginatedList<EntryPointRecord>;
+  getQueues?: FetchPaginatedList<ContactServiceQueue>;
   onAgentSelect: (agentId: string, agentName: string, allowParticipantsToInteract: boolean) => void;
   onQueueSelect: (queueId: string, queueName: string, allowParticipantsToInteract: boolean) => void;
   onEntryPointSelect: (entryPointId: string, entryPointName: string, allowParticipantsToInteract: boolean) => void;
@@ -884,8 +884,8 @@ export const CATEGORY_AGENTS: CategoryType = 'Agents';
 export type UseConsultTransferParams = {
   availableCategories: CategoryType[];
   getAddressBookEntries?: FetchPaginatedList<AddressBookEntry>;
-  getEntryPoints?: FetchPaginatedList<ConsultTransferDestination>;
-  getQueues?: FetchPaginatedList<ConsultTransferDestination>;
+  getEntryPoints?: FetchPaginatedList<EntryPointRecord>;
+  getQueues?: FetchPaginatedList<ContactServiceQueue>;
   logger?: ILogger;
 };
 

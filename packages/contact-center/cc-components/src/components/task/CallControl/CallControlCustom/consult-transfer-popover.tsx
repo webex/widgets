@@ -88,13 +88,13 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
     logger,
   });
   const [allowParticipantsToInteract, setAllowParticipantsToInteract] = useState<boolean>(false);
-  const renderList = <T extends {id: string; name: string; number?: string}>(
+  const renderList = <T extends {id?: string; name: string; number?: string}>(
     items: T[],
     onButtonPress: (item: T) => void
   ) => (
     <ListNext listSize={items.length} className="agent-list">
       {items.map((item) => (
-        <div key={item.id} onMouseDown={(e) => e.stopPropagation()} className="consult-list-item-wrapper">
+        <div key={item.id ?? item.name} onMouseDown={(e) => e.stopPropagation()} className="consult-list-item-wrapper">
           <ConsultTransferListComponent
             title={item.name}
             subtitle={item.number}
@@ -249,7 +249,9 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
           ) : (
             <div>
               {renderList(queuesData, (item) =>
-                handleQueueSelection(item.id, item.name, allowParticipantsToInteract, onQueueSelect, logger)
+                item.id
+                  ? handleQueueSelection(item.id, item.name, allowParticipantsToInteract, onQueueSelect, logger)
+                  : undefined
               )}
               {hasMoreQueues && (
                 <div ref={loadMoreRef} className="consult-load-more">

@@ -16,9 +16,11 @@ import {
   RESERVED_LABEL,
   RESERVED_USERNAME,
   ConsultTransferAction,
-  ConsultTransferListResponse,
-  ConsultTransferListOptions,
   ConsultTransferMediaType,
+  ContactServiceQueuesResponse,
+  ContactServiceQueueSearchParams,
+  EntryPointListResponse,
+  EntryPointSearchParams,
   AddressBookEntriesResponse,
   AddressBookEntrySearchParams,
   Profile,
@@ -37,6 +39,24 @@ import {
 import {runInAction} from 'mobx';
 import {isIncomingTask} from './task-utils';
 import {SUGGESTED_RESPONSE_EVENT, TASK_MULTI_LOGIN_HYDRATE} from './constants';
+
+const CONSULT_TRANSFER_CHANNELS: Record<ConsultTransferMediaType, string> = {
+  telephony: 'TELEPHONY',
+  chat: 'CHAT',
+  social: 'SOCIAL_CHANNEL',
+  email: 'EMAIL',
+};
+
+const getTaskChannelFilter = (entityType: 'queue' | 'entryPoint', mediaType?: string): string | undefined => {
+  const normalizedMediaType = typeof mediaType === 'string' ? mediaType.toLowerCase() : '';
+  const channelType = CONSULT_TRANSFER_CHANNELS[normalizedMediaType as ConsultTransferMediaType];
+
+  if (!channelType || channelType === 'TELEPHONY') return undefined;
+
+  const typeField = entityType === 'queue' ? 'queueType' : 'entryPointType';
+
+  return `${typeField}==INBOUND;channelType==${channelType};active==true`;
+};
 
 class StoreWrapper implements IStoreWrapper {
   store: IStore;
@@ -1078,13 +1098,14 @@ class StoreWrapper implements IStoreWrapper {
     }
   };
 
-  getQueues = async (params?: Omit<ConsultTransferListOptions, 'mediaType'>): Promise<ConsultTransferListResponse> => {
+  getQueues = async (params?: ContactServiceQueueSearchParams): Promise<ContactServiceQueuesResponse> => {
     try {
       const mediaType = this.currentTask?.data?.interaction?.mediaType;
+      const filter = getTaskChannelFilter('queue', mediaType);
 
-      return await this.store.cc.getConsultTransferQueues({
+      return await this.store.cc.getQueues({
+        ...(filter ? {filter} : {}),
         ...(params ?? {}),
-        ...(mediaType ? {mediaType: mediaType as ConsultTransferMediaType} : {}),
       });
     } catch (error) {
       this.store.logger.error('Error fetching queues:', error);
@@ -1092,15 +1113,14 @@ class StoreWrapper implements IStoreWrapper {
     }
   };
 
-  getEntryPoints = async (
-    params?: Omit<ConsultTransferListOptions, 'mediaType'>
-  ): Promise<ConsultTransferListResponse> => {
+  getEntryPoints = async (params?: EntryPointSearchParams): Promise<EntryPointListResponse> => {
     try {
       const mediaType = this.currentTask?.data?.interaction?.mediaType;
+      const filter = getTaskChannelFilter('entryPoint', mediaType);
 
-      return await this.store.cc.getConsultTransferEntryPoints({
+      return await this.store.cc.getEntryPoints({
+        ...(filter ? {filter} : {}),
         ...(params ?? {}),
-        ...(mediaType ? {mediaType: mediaType as ConsultTransferMediaType} : {}),
       });
     } catch (error) {
       this.store.logger.error('Error fetching entry points:', error);

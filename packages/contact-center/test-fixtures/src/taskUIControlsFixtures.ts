@@ -24,12 +24,8 @@ export function createMockTaskUIControls(overrides?: {
     main: {...base.main, ...overrides?.main},
     consult: {...base.consult, ...overrides?.consult},
     consultTransferDestinations: {
-      consult:
-        overrides?.consultTransferDestinations?.consult ??
-        base.consultTransferDestinations.consult,
-      transfer:
-        overrides?.consultTransferDestinations?.transfer ??
-        base.consultTransferDestinations.transfer,
+      consult: overrides?.consultTransferDestinations?.consult ?? base.consultTransferDestinations.consult,
+      transfer: overrides?.consultTransferDestinations?.transfer ?? base.consultTransferDestinations.transfer,
     },
   };
 }

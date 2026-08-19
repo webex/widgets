@@ -1034,35 +1034,45 @@ describe('storeEventsWrapper', () => {
       ];
       const response = {data: queueList, meta: {page: 0, totalPages: 1}};
       storeWrapper['store'].currentTask = {data: {interaction: {mediaType: 'telephony'}}} as ITask;
-      storeWrapper['store'].cc.getConsultTransferQueues = jest.fn().mockResolvedValue(response);
+      storeWrapper['store'].cc.getQueues = jest.fn().mockResolvedValue(response);
 
       const result = await storeWrapper.getQueues();
 
       expect(result.data).toEqual(queueList);
-      expect(storeWrapper['store'].cc.getConsultTransferQueues).toHaveBeenCalledWith({
-        mediaType: 'telephony',
-      });
+      expect(storeWrapper['store'].cc.getQueues).toHaveBeenCalledWith({});
     });
 
     it('should pass only runtime context and list inputs when getQueues is called with params', async () => {
       const queueList = [{id: 'queue1', name: 'Queue 1', channelType: 'TELEPHONY'}];
       storeWrapper['store'].currentTask = {data: {interaction: {mediaType: 'telephony'}}} as ITask;
-      storeWrapper['store'].cc.getConsultTransferQueues = jest
+      storeWrapper['store'].cc.getQueues = jest
         .fn()
         .mockResolvedValue({data: queueList, meta: {page: 1, totalPages: 1}});
 
       await storeWrapper.getQueues({page: 1, pageSize: 25});
 
-      expect(storeWrapper['store'].cc.getConsultTransferQueues).toHaveBeenCalledWith({
+      expect(storeWrapper['store'].cc.getQueues).toHaveBeenCalledWith({
         page: 1,
         pageSize: 25,
-        mediaType: 'telephony',
+      });
+    });
+
+    it('should use the existing queue filter parameter for a non-telephony task', async () => {
+      storeWrapper['store'].currentTask = {data: {interaction: {mediaType: 'social'}}} as ITask;
+      storeWrapper['store'].cc.getQueues = jest.fn().mockResolvedValue({data: [], meta: {page: 0, totalPages: 0}});
+
+      await storeWrapper.getQueues({page: 0, pageSize: 25});
+
+      expect(storeWrapper['store'].cc.getQueues).toHaveBeenCalledWith({
+        filter: 'queueType==INBOUND;channelType==SOCIAL_CHANNEL;active==true',
+        page: 0,
+        pageSize: 25,
       });
     });
 
     it('should handle error in getQueues and throw error', async () => {
       storeWrapper['store'].currentTask = null;
-      storeWrapper['store'].cc.getConsultTransferQueues = jest.fn().mockRejectedValue(new Error('queue error'));
+      storeWrapper['store'].cc.getQueues = jest.fn().mockRejectedValue(new Error('queue error'));
 
       await expect(storeWrapper.getQueues()).rejects.toThrow('queue error');
     });
@@ -1074,12 +1084,12 @@ describe('storeEventsWrapper', () => {
       ];
       const response = {data: queueList, meta: {page: 1, pageSize: 50, totalRecords: 2, totalPages: 1}};
       storeWrapper['store'].currentTask = null;
-      storeWrapper['store'].cc.getConsultTransferQueues = jest.fn().mockResolvedValue(response);
+      storeWrapper['store'].cc.getQueues = jest.fn().mockResolvedValue(response);
 
       const result = await storeWrapper.getQueues();
 
       expect(result).toEqual(response);
-      expect(storeWrapper['store'].cc.getConsultTransferQueues).toHaveBeenCalledWith({});
+      expect(storeWrapper['store'].cc.getQueues).toHaveBeenCalledWith({});
     });
 
     it('should handle consultQueueCancelled event', () => {
@@ -1095,20 +1105,35 @@ describe('storeEventsWrapper', () => {
 
     it('should fetch entry points successfully', async () => {
       storeWrapper['store'].currentTask = {data: {interaction: {mediaType: 'telephony'}}} as ITask;
-      storeWrapper['store'].cc.getConsultTransferEntryPoints = jest.fn().mockResolvedValue(mockEntryPointsResponse);
+      storeWrapper['store'].cc.getEntryPoints = jest.fn().mockResolvedValue(mockEntryPointsResponse);
 
       const result = await storeWrapper.getEntryPoints({page: 0, pageSize: 25});
-      expect(storeWrapper['store'].cc.getConsultTransferEntryPoints).toHaveBeenCalledWith({
+      expect(storeWrapper['store'].cc.getEntryPoints).toHaveBeenCalledWith({
         page: 0,
         pageSize: 25,
-        mediaType: 'telephony',
       });
       expect(result).toEqual(mockEntryPointsResponse);
     });
 
+    it('should use the existing entry-point filter parameter for a non-telephony task', async () => {
+      storeWrapper['store'].currentTask = {data: {interaction: {mediaType: 'chat'}}} as ITask;
+      storeWrapper['store'].cc.getEntryPoints = jest.fn().mockResolvedValue({
+        data: [],
+        meta: {page: 0, totalPages: 0},
+      });
+
+      await storeWrapper.getEntryPoints({page: 0, pageSize: 25});
+
+      expect(storeWrapper['store'].cc.getEntryPoints).toHaveBeenCalledWith({
+        filter: 'entryPointType==INBOUND;channelType==CHAT;active==true',
+        page: 0,
+        pageSize: 25,
+      });
+    });
+
     it('should handle error while fetching entry points', async () => {
       storeWrapper['store'].currentTask = null;
-      storeWrapper['store'].cc.getConsultTransferEntryPoints = jest.fn().mockRejectedValue(new Error('ep error'));
+      storeWrapper['store'].cc.getEntryPoints = jest.fn().mockRejectedValue(new Error('ep error'));
       await expect(storeWrapper.getEntryPoints({page: 0, pageSize: 25})).rejects.toThrow('ep error');
     });
 

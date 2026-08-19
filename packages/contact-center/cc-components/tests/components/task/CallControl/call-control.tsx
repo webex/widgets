@@ -467,7 +467,13 @@ describe('CallControlComponent', () => {
       const screen = await render(
         <CallControlComponent
           {...defaultProps}
-          controls={createEnabledMainTaskUIControls({transfer: disabledControl})}
+          controls={{
+            ...createEnabledMainTaskUIControls({transfer: disabledControl}),
+            consultTransferDestinations: {
+              consult: ['agent', 'queue', 'dialNumber', 'entryPoint'],
+              transfer: [],
+            },
+          }}
           consultTransferOptions={{showDialNumberTab: false}}
         />
       );
@@ -501,7 +507,13 @@ describe('CallControlComponent', () => {
       const screen = await render(
         <CallControlComponent
           {...defaultProps}
-          controls={createEnabledMainTaskUIControls({transfer: disabledControl})}
+          controls={{
+            ...createEnabledMainTaskUIControls({transfer: disabledControl}),
+            consultTransferDestinations: {
+              consult: ['agent', 'queue'],
+              transfer: [],
+            },
+          }}
         />
       );
 

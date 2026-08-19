@@ -2,7 +2,7 @@ import React from 'react';
 import '@testing-library/jest-dom';
 import {render, fireEvent, act, waitFor} from '@testing-library/react';
 import ConsultTransferPopoverComponent from '../../../../../src/components/task/CallControl/CallControlCustom/consult-transfer-popover';
-import {ConsultTransferDestination, ConsultTransferDestinationType} from '@webex/cc-store';
+import {ContactServiceQueue, ConsultTransferDestinationType} from '@webex/cc-store';
 
 const mockUIDProps = (container) => {
   container
@@ -29,10 +29,7 @@ describe('ConsultTransferPopoverComponent Snapshots', () => {
   const mockOnAgentSelect = jest.fn();
   const mockOnQueueSelect = jest.fn();
 
-  const buildQueue = (id: string, name: string): ConsultTransferDestination => ({
-    id,
-    name,
-  });
+  const buildQueue = (id: string, name: string): ContactServiceQueue => ({id, name}) as ContactServiceQueue;
 
   const defaultProps = {
     heading: 'Select an Agent',

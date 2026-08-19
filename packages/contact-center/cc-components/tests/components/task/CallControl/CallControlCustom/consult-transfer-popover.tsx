@@ -2,12 +2,7 @@ import React from 'react';
 import {render, fireEvent, waitFor, act} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import ConsultTransferPopoverComponent from '../../../../../src/components/task/CallControl/CallControlCustom/consult-transfer-popover';
-import {
-  AddressBookEntry,
-  ConsultTransferDestination,
-  ConsultTransferDestinationType,
-  EntryPointRecord,
-} from '@webex/cc-store';
+import {AddressBookEntry, ContactServiceQueue, ConsultTransferDestinationType, EntryPointRecord} from '@webex/cc-store';
 import {DEFAULT_PAGE_SIZE} from '../../../../../src/components/task/constants';
 
 const loggerMock = {
@@ -55,8 +50,8 @@ describe('ConsultTransferPopoverComponent', () => {
     ],
     getQueues: async () => ({
       data: [
-        {id: 'queue1', name: 'Queue One'} as ConsultTransferDestination,
-        {id: 'queue2', name: 'Queue Two'} as ConsultTransferDestination,
+        {id: 'queue1', name: 'Queue One'} as ContactServiceQueue,
+        {id: 'queue2', name: 'Queue Two'} as ContactServiceQueue,
       ],
       meta: {page: 0, totalPages: 1},
     }),
@@ -298,8 +293,8 @@ describe('ConsultTransferPopoverComponent', () => {
     it('debounces and triggers queue search on 2+ chars and on clear', async () => {
       const getQueuesMock = jest.fn().mockResolvedValue({
         data: [
-          {id: 'queue1', name: 'Queue One'} as ConsultTransferDestination,
-          {id: 'queue2', name: 'Queue Two'} as ConsultTransferDestination,
+          {id: 'queue1', name: 'Queue One'} as ContactServiceQueue,
+          {id: 'queue2', name: 'Queue Two'} as ContactServiceQueue,
         ],
         meta: {page: 0, totalPages: 1},
       });
@@ -379,8 +374,8 @@ describe('ConsultTransferPopoverComponent', () => {
     it('reloads queues when reload button clicked on Queues tab', async () => {
       const getQueuesMock = jest.fn().mockResolvedValue({
         data: [
-          {id: 'queue1', name: 'Queue One'} as ConsultTransferDestination,
-          {id: 'queue2', name: 'Queue Two'} as ConsultTransferDestination,
+          {id: 'queue1', name: 'Queue One'} as ContactServiceQueue,
+          {id: 'queue2', name: 'Queue Two'} as ContactServiceQueue,
         ],
         meta: {page: 0, totalPages: 1},
       });
@@ -511,8 +506,8 @@ describe('ConsultTransferPopoverComponent', () => {
     it('shows spinner in load more area when loading more queues', async () => {
       const getQueuesMock = jest.fn().mockResolvedValue({
         data: [
-          {id: 'queue1', name: 'Queue One'} as ConsultTransferDestination,
-          {id: 'queue2', name: 'Queue Two'} as ConsultTransferDestination,
+          {id: 'queue1', name: 'Queue One'} as ContactServiceQueue,
+          {id: 'queue2', name: 'Queue Two'} as ContactServiceQueue,
         ],
         meta: {page: 0, totalPages: 2},
       });
@@ -556,7 +551,7 @@ describe('ConsultTransferPopoverComponent', () => {
 
     it('reloads with current search query on Queues tab', async () => {
       const getQueuesMock = jest.fn().mockResolvedValue({
-        data: [{id: 'queue1', name: 'Queue One'} as ConsultTransferDestination],
+        data: [{id: 'queue1', name: 'Queue One'} as ContactServiceQueue],
         meta: {page: 0, totalPages: 1},
       });
 
