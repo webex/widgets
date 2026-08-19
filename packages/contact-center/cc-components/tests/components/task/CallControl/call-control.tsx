@@ -338,6 +338,7 @@ describe('CallControlComponent', () => {
 
       // After clicking, the popover should be expanded
       expect(transferButton).toHaveAttribute('aria-expanded', 'true');
+      expect(modifiedProps.loadBuddyAgents).toHaveBeenCalledWith('Transfer');
 
       // Verify buttons maintain their CSS classes after interactions
       expect(transferButton).toHaveClass('call-control-button');
@@ -476,6 +477,7 @@ describe('CallControlComponent', () => {
       fireEvent.click(consultButton);
 
       await screen.findByRole('button', {name: 'Agents'});
+      expect(defaultProps.loadBuddyAgents).toHaveBeenCalledWith('Consult');
       expect(screen.getByRole('button', {name: 'Queues'})).toBeInTheDocument();
       expect(screen.getByRole('button', {name: 'Entry Point'})).toBeInTheDocument();
       expect(screen.queryByRole('button', {name: 'Dial Number'})).not.toBeInTheDocument();

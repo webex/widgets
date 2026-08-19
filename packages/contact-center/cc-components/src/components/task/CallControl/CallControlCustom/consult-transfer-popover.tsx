@@ -11,6 +11,12 @@ import {
   getAgentsForDisplay,
 } from './call-control-custom.utils';
 import {useConsultTransferPopover} from './consult-transfer-popover-hooks';
+import {
+  isAgentsTabVisible,
+  isEntryPointTabVisible,
+  isQueuesTabVisible,
+  ConsultTransferAction,
+} from './consult-transfer-tab.utils';
 
 import {
   SEARCH_PLACEHOLDER,
@@ -34,12 +40,26 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
   onDialNumberSelect,
   onEntryPointSelect,
   allowConsultToQueue,
+  accessQueue,
+  accessEntryPoint,
+  accessBuddyTeam,
+  interactionContext,
+  isTelephony = true,
   consultTransferOptions,
   isConferenceInProgress,
   logger,
 }) => {
   const {showDialNumberTab = true, showEntryPointTab = true} = consultTransferOptions || {};
-  const isEntryPointTabVisible = showEntryPointTab && heading === 'Consult';
+  const action: ConsultTransferAction = heading === 'Transfer' ? 'Transfer' : 'Consult';
+  const isQueueTabVisible = isQueuesTabVisible(
+    action,
+    allowConsultToQueue,
+    accessQueue,
+    interactionContext ?? {},
+    isTelephony
+  );
+  const isAgentsTabVisibleFlag = isAgentsTabVisible(accessBuddyTeam);
+  const isEntryPointTabVisibleFlag = isEntryPointTabVisible(showEntryPointTab, accessEntryPoint, isTelephony);
   const {
     selectedCategory,
     searchQuery,
@@ -61,7 +81,7 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
     handleReload,
   } = useConsultTransferPopover({
     showDialNumberTab,
-    showEntryPointTab: isEntryPointTabVisible,
+    showEntryPointTab: isEntryPointTabVisibleFlag,
     getAddressBookEntries,
     getEntryPoints,
     getQueues,
@@ -92,13 +112,13 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
     </ListNext>
   );
 
-  const noQueues = !allowConsultToQueue || queuesData.length === 0;
+  const noQueues = !isQueueTabVisible || queuesData.length === 0;
   const noDialNumbers = !showDialNumberTab || dialNumbers.length === 0;
-  const noEntryPoints = !isEntryPointTabVisible || entryPoints.length === 0;
+  const noEntryPoints = !isEntryPointTabVisibleFlag || entryPoints.length === 0;
 
   const consultTransferManualAction = shouldAddConsultTransferAction(
     selectedCategory,
-    isEntryPointTabVisible,
+    isEntryPointTabVisibleFlag,
     allowParticipantsToInteract,
     searchQuery,
     entryPoints,
@@ -133,7 +153,7 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
                 data-testid="consult-reload-button"
                 onPress={() => {
                   if (selectedCategory === CATEGORY_AGENTS && loadBuddyAgents) {
-                    loadBuddyAgents();
+                    loadBuddyAgents(action);
                   } else {
                     handleReload();
                   }
@@ -180,17 +200,19 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
       </div>
 
       <div className="consult-category-buttons">
-        <Button
-          variant={selectedCategory === CATEGORY_AGENTS ? 'primary' : 'secondary'}
-          size="small"
-          onClick={handleAgentsClick}
-          className={`consult-category-button-standard ${
-            selectedCategory === CATEGORY_AGENTS ? 'consult-category-button-active' : ''
-          }`}
-        >
-          {CATEGORY_AGENTS}
-        </Button>
-        {allowConsultToQueue && (
+        {isAgentsTabVisibleFlag && (
+          <Button
+            variant={selectedCategory === CATEGORY_AGENTS ? 'primary' : 'secondary'}
+            size="small"
+            onClick={handleAgentsClick}
+            className={`consult-category-button-standard ${
+              selectedCategory === CATEGORY_AGENTS ? 'consult-category-button-active' : ''
+            }`}
+          >
+            {CATEGORY_AGENTS}
+          </Button>
+        )}
+        {isQueueTabVisible && (
           <Button
             variant={selectedCategory === CATEGORY_QUEUES ? 'primary' : 'secondary'}
             size="small"
@@ -214,7 +236,7 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
             {CATEGORY_DIAL_NUMBER}
           </Button>
         )}
-        {isEntryPointTabVisible && (
+        {isEntryPointTabVisibleFlag && (
           <Button
             variant={selectedCategory === CATEGORY_ENTRY_POINT ? 'primary' : 'secondary'}
             size="small"
@@ -309,7 +331,7 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
             </div>
           ))}
 
-        {isEntryPointTabVisible &&
+        {isEntryPointTabVisibleFlag &&
           selectedCategory === CATEGORY_ENTRY_POINT &&
           (loadingEntryPoints && entryPoints.length === 0 ? (
             <div className="consult-loading-spinner">

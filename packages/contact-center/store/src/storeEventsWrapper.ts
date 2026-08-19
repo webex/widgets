@@ -15,10 +15,10 @@ import {
   ENGAGED_USERNAME,
   RESERVED_LABEL,
   RESERVED_USERNAME,
-  ContactServiceQueue,
-  ContactServiceQueueSearchParams,
+  ContactServiceQueuesResponse,
   EntryPointListResponse,
-  EntryPointSearchParams,
+  ConsultTransferAction,
+  ConsultTransferListSearchParams,
   AddressBookEntriesResponse,
   AddressBookEntrySearchParams,
   Profile,
@@ -32,8 +32,6 @@ import Store from './store';
 import {
   DEVICE_TYPE_BROWSER,
   MEDIA_TYPE_TELEPHONY_LOWER,
-  MEDIA_TYPE_TELEPHONY_UPPER,
-  AGENT_STATE_AVAILABLE,
   CAMPAIGN_PREVIEW_OUTBOUND_TYPES,
   CAMPAIGN_PREVIEW_CAMPAIGN_TYPES,
 } from './store.types';
@@ -195,6 +193,18 @@ class StoreWrapper implements IStoreWrapper {
 
   get allowConsultToQueue() {
     return this.store.allowConsultToQueue;
+  }
+
+  get accessQueue() {
+    return this.store.accessQueue;
+  }
+
+  get accessEntryPoint() {
+    return this.store.accessEntryPoint;
+  }
+
+  get accessBuddyTeam() {
+    return this.store.accessBuddyTeam;
   }
 
   get agentProfile() {
@@ -1246,14 +1256,12 @@ class StoreWrapper implements IStoreWrapper {
     });
   };
 
-  getBuddyAgents = async (
-    mediaType: string = this.currentTask.data.interaction.mediaType
-  ): Promise<Array<BuddyDetails>> => {
+  getBuddyAgents = async (action: ConsultTransferAction = 'Consult'): Promise<Array<BuddyDetails>> => {
     try {
+      const mediaType = this.currentTask?.data?.interaction?.mediaType;
       const response = await this.store.cc.getBuddyAgents({
-        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
-        mediaType: mediaType ?? MEDIA_TYPE_TELEPHONY_LOWER,
-        state: AGENT_STATE_AVAILABLE,
+        action,
+        ...(mediaType ? {mediaType} : {}),
       });
       return 'data' in response ? response.data.agentList : [];
     } catch (error) {
@@ -1262,35 +1270,23 @@ class StoreWrapper implements IStoreWrapper {
     }
   };
 
-  getQueues = async (
-    mediaType: string = this.currentTask.data.interaction.mediaType ?? MEDIA_TYPE_TELEPHONY_UPPER,
-    params?: ContactServiceQueueSearchParams
-  ): Promise<{
-    data: ContactServiceQueue[];
-    meta: {page: number; pageSize: number; total: number; totalPages: number};
-  }> => {
+  getQueues = async (params?: ConsultTransferListSearchParams): Promise<ContactServiceQueuesResponse> => {
     try {
-      const upperMediaType = mediaType.toUpperCase();
-      const response = await this.store.cc.getQueues(params);
-      const data = Array.isArray(response) ? response : response.data;
-      const filtered = data.filter((queue) => queue.channelType === upperMediaType);
-      const page = Array.isArray(response) ? 0 : (response.meta?.page ?? 0);
-      const totalPages = Array.isArray(response) ? 1 : (response.meta?.totalPages ?? 1);
-      const pageSize = Array.isArray(response) ? filtered.length : (response.meta?.pageSize ?? filtered.length);
-      const total = Array.isArray(response)
-        ? filtered.length
-        : ((response as {meta?: {total?: number}}).meta?.total ?? filtered.length);
-      return {data: filtered, meta: {page, pageSize, total, totalPages}};
+      const mediaType = this.currentTask?.data?.interaction?.mediaType;
+
+      return await this.store.cc.getConsultTransferQueues({
+        ...(params ?? {}),
+        ...(mediaType ? {mediaType} : {}),
+      });
     } catch (error) {
       this.store.logger.error('Error fetching queues:', error);
       throw error;
     }
   };
 
-  getEntryPoints = async (params?: EntryPointSearchParams): Promise<EntryPointListResponse> => {
+  getEntryPoints = async (params?: ConsultTransferListSearchParams): Promise<EntryPointListResponse> => {
     try {
-      const response: EntryPointListResponse = await this.store.cc.getEntryPoints(params);
-      return response;
+      return await this.store.cc.getConsultTransferEntryPoints(params);
     } catch (error) {
       this.store.logger.error('Error fetching entry points:', error);
       throw error;
@@ -1302,8 +1298,7 @@ class StoreWrapper implements IStoreWrapper {
       if (!this.store.isAddressBookEnabled) {
         return {data: [], meta: {page: 0, totalPages: 0}};
       }
-      const response: AddressBookEntriesResponse = await this.store.cc.addressBook.getEntries(params ?? {});
-      return response;
+      return await this.store.cc.addressBook.getEntries(params ?? {});
     } catch (error) {
       this.store.logger.error('Error fetching address book entries:', error);
       throw error;

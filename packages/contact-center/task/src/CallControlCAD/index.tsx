@@ -7,6 +7,29 @@ import {useCallControl} from '../helper';
 import {CallControlProps} from '../task.types';
 import {CallControlCADComponent} from '@webex/cc-components';
 import {isUnacceptedCampaignPreview} from '../Utils/task-util';
+import {ITask} from '@webex/contact-center';
+
+type ConsultTransferInteractionContext = {
+  contactDirectionType?: string;
+  outdialTransferToQueueEnabled?: boolean;
+  mediaType?: string;
+};
+
+const buildConsultTransferInteractionContext = (currentTask?: ITask): ConsultTransferInteractionContext => {
+  const interaction = currentTask?.data?.interaction as
+    | {
+        contactDirection?: {type?: string};
+        outdialTransferToQueueEnabled?: boolean;
+        mediaType?: string;
+      }
+    | undefined;
+
+  return {
+    contactDirectionType: interaction?.contactDirection?.type,
+    outdialTransferToQueueEnabled: interaction?.outdialTransferToQueueEnabled,
+    mediaType: interaction?.mediaType,
+  };
+};
 
 const CallControlCADInternal: React.FunctionComponent<CallControlProps> = observer(
   ({
@@ -27,6 +50,9 @@ const CallControlCADInternal: React.FunctionComponent<CallControlProps> = observ
       consultStartTimeStamp,
       callControlAudio,
       allowConsultToQueue,
+      accessQueue,
+      accessEntryPoint,
+      accessBuddyTeam,
       isMuted,
       agentId,
       acceptedCampaignIds,
@@ -57,6 +83,10 @@ const CallControlCADInternal: React.FunctionComponent<CallControlProps> = observ
       callControlClassName,
       callControlConsultClassName,
       allowConsultToQueue,
+      accessQueue,
+      accessEntryPoint,
+      accessBuddyTeam,
+      interactionContext: buildConsultTransferInteractionContext(currentTask),
       logger,
       consultTransferOptions,
     };

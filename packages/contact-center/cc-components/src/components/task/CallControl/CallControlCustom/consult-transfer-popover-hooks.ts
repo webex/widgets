@@ -30,7 +30,7 @@ import {DEFAULT_PAGE_SIZE} from '../../constants';
  * @param logger - Optional logger instance for diagnostics.
  * @returns An object containing the transformed data (U[]), pagination state and helpers.
  */
-export const usePaginatedData = <T, U>(
+export const usePaginatedData = <T, U extends {name?: string}>(
   fetchFunction: FetchPaginatedList<T> | undefined,
   transformFunction: TransformPaginatedData<T, U>,
   categoryName: string,

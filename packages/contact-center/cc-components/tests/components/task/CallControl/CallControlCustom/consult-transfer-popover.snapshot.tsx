@@ -164,8 +164,8 @@ describe('ConsultTransferPopoverComponent Snapshots', () => {
       expect(container).toMatchSnapshot();
     });
 
-    it('should render with allowConsultToQueue false', async () => {
-      const noQueueConsultProps = {...defaultProps, allowConsultToQueue: false};
+    it('should render with allowConsultToQueue false for Consult', async () => {
+      const noQueueConsultProps = {...defaultProps, heading: 'Consult', allowConsultToQueue: false};
       let screen;
       await act(async () => {
         screen = render(<ConsultTransferPopoverComponent {...noQueueConsultProps} />);

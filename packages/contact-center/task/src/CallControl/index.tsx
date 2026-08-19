@@ -7,6 +7,29 @@ import {useCallControl} from '../helper';
 import {CallControlProps} from '../task.types';
 import {CallControlComponent} from '@webex/cc-components';
 import {isUnacceptedCampaignPreview} from '../Utils/task-util';
+import {ITask} from '@webex/contact-center';
+
+type ConsultTransferInteractionContext = {
+  contactDirectionType?: string;
+  outdialTransferToQueueEnabled?: boolean;
+  mediaType?: string;
+};
+
+const buildConsultTransferInteractionContext = (currentTask?: ITask): ConsultTransferInteractionContext => {
+  const interaction = currentTask?.data?.interaction as
+    | {
+        contactDirection?: {type?: string};
+        outdialTransferToQueueEnabled?: boolean;
+        mediaType?: string;
+      }
+    | undefined;
+
+  return {
+    contactDirectionType: interaction?.contactDirection?.type,
+    outdialTransferToQueueEnabled: interaction?.outdialTransferToQueueEnabled,
+    mediaType: interaction?.mediaType,
+  };
+};
 
 const CallControlInternal: React.FunctionComponent<CallControlProps> = observer(
   ({onHoldResume, onEnd, onWrapUp, onRecordingToggle, onToggleMute, consultTransferOptions, conferenceEnabled}) => {
@@ -17,6 +40,9 @@ const CallControlInternal: React.FunctionComponent<CallControlProps> = observer(
       consultStartTimeStamp,
       callControlAudio,
       allowConsultToQueue,
+      accessQueue,
+      accessEntryPoint,
+      accessBuddyTeam,
       isMuted,
       agentId,
       acceptedCampaignIds,
@@ -48,6 +74,10 @@ const CallControlInternal: React.FunctionComponent<CallControlProps> = observer(
       consultStartTimeStamp,
       callControlAudio,
       allowConsultToQueue,
+      accessQueue,
+      accessEntryPoint,
+      accessBuddyTeam,
+      interactionContext: buildConsultTransferInteractionContext(currentTask),
       logger,
       consultTransferOptions,
     };
