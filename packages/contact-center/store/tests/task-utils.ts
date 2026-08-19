@@ -1033,6 +1033,175 @@ describe('getConferenceParticipantDropRoster', () => {
     ]);
   });
 
+  it('prefers a newer configured consult leg from the state snapshot over retained observable media', () => {
+    const task = createDropRosterTask({state: 'consulting', consultHold: false});
+    task.data.consultMediaResourceId = 'consult';
+    task.data.destinationType = 'entryPoint';
+    task.data.interaction.media.main.participants = ['agent1', 'customer1'];
+    task.data.interaction.media.consult.participants = ['agent1', 'old-entry-point'];
+    (task.data.interaction.media.consult as unknown as Record<string, unknown>).lastUpdated = 1000;
+    task.data.interaction.participants['old-entry-point'] = {
+      ...activeParticipant('+15550000011', 'entry-point-id', 'EP-DN'),
+      type: 'EpDn',
+      hasJoined: false,
+    };
+
+    const snapshotTaskData = {
+      ...task.data,
+      consultMediaResourceId: 'new-consult',
+      interaction: {
+        ...task.data.interaction,
+        media: {
+          ...task.data.interaction.media,
+          'new-consult': {
+            mediaResourceId: 'new-consult',
+            mediaType: 'telephony',
+            mediaMgr: 'aqm',
+            mType: 'consult',
+            isHold: false,
+            holdTimestamp: null,
+            lastUpdated: 2000,
+            participants: ['agent1', 'new-entry-point'],
+          },
+        },
+        participants: {
+          ...task.data.interaction.participants,
+          'new-entry-point': {
+            ...activeParticipant('+15550000012', 'entry-point-id', 'EP-DN'),
+            type: 'EpDn',
+            hasJoined: false,
+          },
+        },
+      },
+    };
+
+    (
+      task as ITask & {
+        state: {context: {taskData: ITask['data']}};
+      }
+    ).state = {context: {taskData: snapshotTaskData}};
+
+    expect(getConferenceParticipantDropRoster(task, currentAgentId)?.participants).toEqual([
+      expect.objectContaining({
+        displayName: '+15550000012',
+        dropTargetId: '+15550000012',
+      }),
+    ]);
+  });
+
+  it('keeps a newer observable consult leg when the state snapshot is stale', () => {
+    const task = createDropRosterTask({state: 'consulting', consultHold: false});
+    task.data.consultMediaResourceId = 'consult';
+    task.data.destinationType = 'entryPoint';
+    task.data.interaction.media.main.participants = ['agent1', 'customer1'];
+    task.data.interaction.media.consult.participants = ['agent1', 'current-entry-point'];
+    (task.data.interaction.media.consult as unknown as Record<string, unknown>).lastUpdated = 2000;
+    task.data.interaction.participants['current-entry-point'] = {
+      ...activeParticipant('+15550000013', 'entry-point-id', 'EP-DN'),
+      type: 'EpDn',
+      hasJoined: false,
+    };
+
+    const snapshotTaskData = {
+      ...task.data,
+      consultMediaResourceId: 'old-consult',
+      interaction: {
+        ...task.data.interaction,
+        media: {
+          ...task.data.interaction.media,
+          'old-consult': {
+            mediaResourceId: 'old-consult',
+            mediaType: 'telephony',
+            mediaMgr: 'aqm',
+            mType: 'consult',
+            isHold: false,
+            holdTimestamp: null,
+            participants: ['agent1', 'old-entry-point'],
+          },
+        },
+        participants: {
+          ...task.data.interaction.participants,
+          'old-entry-point': {
+            ...activeParticipant('+15550000014', 'entry-point-id', 'EP-DN'),
+            type: 'EpDn',
+            hasJoined: false,
+          },
+        },
+      },
+    };
+
+    (
+      task as ITask & {
+        state: {context: {taskData: ITask['data']}};
+      }
+    ).state = {context: {taskData: snapshotTaskData}};
+
+    expect(getConferenceParticipantDropRoster(task, currentAgentId)?.participants).toEqual([
+      expect.objectContaining({
+        displayName: '+15550000013',
+        dropTargetId: '+15550000013',
+      }),
+    ]);
+  });
+
+  it('preserves observable data for the same leg unless the snapshot is demonstrably newer', () => {
+    const task = createDropRosterTask({state: 'consulting', consultHold: false});
+    task.data.consultMediaResourceId = 'consult';
+    task.data.destinationType = 'entryPoint';
+    task.data.interaction.media.main.participants = ['agent1', 'customer1'];
+    task.data.interaction.media.consult.participants = ['agent1', 'observable-entry-point'];
+    task.data.interaction.participants['observable-entry-point'] = {
+      ...activeParticipant('+15550000015', 'entry-point-id', 'EP-DN'),
+      type: 'EpDn',
+      hasJoined: false,
+    };
+
+    const snapshotTaskData = {
+      ...task.data,
+      interaction: {
+        ...task.data.interaction,
+        media: {
+          ...task.data.interaction.media,
+          consult: {
+            ...task.data.interaction.media.consult,
+            participants: ['agent1', 'snapshot-entry-point'],
+          },
+        },
+        participants: {
+          ...task.data.interaction.participants,
+          'snapshot-entry-point': {
+            ...activeParticipant('+15550000016', 'entry-point-id', 'EP-DN'),
+            type: 'EpDn',
+            hasJoined: false,
+          },
+        },
+      },
+    };
+
+    (
+      task as ITask & {
+        state: {context: {taskData: ITask['data']}};
+      }
+    ).state = {context: {taskData: snapshotTaskData}};
+
+    expect(getConferenceParticipantDropRoster(task, currentAgentId)?.participants).toEqual([
+      expect.objectContaining({
+        displayName: '+15550000015',
+        dropTargetId: '+15550000015',
+      }),
+    ]);
+
+    (task.data.interaction.media.consult as unknown as Record<string, unknown>).lastUpdated = 1000;
+    (snapshotTaskData.interaction.media.consult as unknown as Record<string, unknown>).lastUpdated = 2000;
+
+    expect(getConferenceParticipantDropRoster(task, currentAgentId)?.participants).toEqual([
+      expect.objectContaining({
+        displayName: '+15550000016',
+        dropTargetId: '+15550000016',
+      }),
+    ]);
+  });
+
   it('does not revive a stale pending EP-DN consult leg', () => {
     const task = createDropRosterTask({state: 'connected', consultHold: false});
     task.data.consultMediaResourceId = 'consult';

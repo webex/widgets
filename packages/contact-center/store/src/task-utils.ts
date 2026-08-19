@@ -145,6 +145,7 @@ const TERMINAL_CONFERENCE_STATES = new Set(['ended', 'disconnected', 'terminated
 type RosterTaskData = ITask['data'];
 type RosterInteraction = RosterTaskData['interaction'];
 type RosterParticipant = NonNullable<RosterInteraction['participants']>[string];
+type RosterMedia = NonNullable<RosterInteraction['media']>[string];
 
 type TaskWithStateSnapshot = ITask & {
   state?: {
@@ -197,7 +198,7 @@ const isEligibleConference = (task: ITask, mainParticipantIds: string[], agentId
   );
 };
 
-const getMediaRecencyScore = (media: Record<string, unknown>, fallbackIndex: number): number => {
+const getMediaRecencyTimestamp = (media: Record<string, unknown>): number | undefined => {
   const candidateTimestamps = [
     media.lastUpdated,
     media.joinTimestamp,
@@ -213,29 +214,90 @@ const getMediaRecencyScore = (media: Record<string, unknown>, fallbackIndex: num
     }
   }
 
-  return fallbackIndex;
+  return undefined;
 };
 
-const getConsultMediaEntry = (taskData: RosterTaskData, fallbackConsultMediaId?: string) => {
+const getMediaRecencyScore = (media: Record<string, unknown>, fallbackIndex: number): number =>
+  getMediaRecencyTimestamp(media) ?? fallbackIndex;
+
+type ConsultMediaEntry = {
+  mediaId: string;
+  media: RosterMedia;
+  interaction: RosterInteraction;
+  taskData: RosterTaskData;
+  isConfiguredMedia: boolean;
+  source: 'observable' | 'snapshot';
+};
+
+const getConsultMediaEntry = (
+  taskData: RosterTaskData,
+  source: ConsultMediaEntry['source']
+): ConsultMediaEntry | undefined => {
   const interaction = taskData?.interaction;
-  const configuredConsultMediaId = taskData?.consultMediaResourceId || fallbackConsultMediaId;
-  const configuredConsultMedia = configuredConsultMediaId ? interaction?.media?.[configuredConsultMediaId] : undefined;
+  const configuredConsultMediaId = taskData?.consultMediaResourceId;
+  const matchingMedia = Object.entries(interaction?.media ?? {}).filter(([, media]) => media.mType === 'consult');
 
-  if (configuredConsultMedia?.mType === 'consult') {
-    return configuredConsultMedia;
-  }
-
-  const matchingMedia = Object.values(interaction?.media ?? {}).filter((media) => media.mType === 'consult');
-
-  if (matchingMedia.length === 0) {
+  if (!interaction || matchingMedia.length === 0) {
     return undefined;
   }
 
-  return matchingMedia.reduce((latest, media, index) => {
-    const latestScore = getMediaRecencyScore(latest as Record<string, unknown>, index - 1);
-    const currentScore = getMediaRecencyScore(media as Record<string, unknown>, index);
-    return currentScore >= latestScore ? media : latest;
-  });
+  const configuredEntry = configuredConsultMediaId
+    ? matchingMedia.find(
+        ([mediaId, media]) => mediaId === configuredConsultMediaId || media.mediaResourceId === configuredConsultMediaId
+      )
+    : undefined;
+  const [mediaId, media] =
+    configuredEntry ??
+    matchingMedia.reduce((latest, current, index) => {
+      const latestScore = getMediaRecencyScore(latest[1] as Record<string, unknown>, index - 1);
+      const currentScore = getMediaRecencyScore(current[1] as Record<string, unknown>, index);
+      return currentScore >= latestScore ? current : latest;
+    });
+
+  return {
+    mediaId: media.mediaResourceId || mediaId,
+    media,
+    interaction,
+    taskData,
+    isConfiguredMedia: Boolean(configuredEntry),
+    source,
+  };
+};
+
+const selectCurrentConsultMediaEntry = (
+  current: ConsultMediaEntry,
+  candidate: ConsultMediaEntry
+): ConsultMediaEntry => {
+  const currentTimestamp = getMediaRecencyTimestamp(current.media as Record<string, unknown>);
+  const candidateTimestamp = getMediaRecencyTimestamp(candidate.media as Record<string, unknown>);
+
+  if (current.mediaId === candidate.mediaId) {
+    if (currentTimestamp !== undefined && candidateTimestamp !== undefined && candidateTimestamp > currentTimestamp) {
+      return candidate;
+    }
+
+    // Preserve the existing observable-data behavior when both sources describe
+    // the same leg and there is no positive evidence that the snapshot is newer.
+    return current;
+  }
+
+  if (currentTimestamp !== candidateTimestamp) {
+    if (currentTimestamp !== undefined && candidateTimestamp !== undefined) {
+      return candidateTimestamp > currentTimestamp ? candidate : current;
+    }
+
+    if (current.isConfiguredMedia === candidate.isConfiguredMedia) {
+      return candidateTimestamp !== undefined ? candidate : current;
+    }
+  }
+
+  if (current.isConfiguredMedia !== candidate.isConfiguredMedia) {
+    return candidate.isConfiguredMedia ? candidate : current;
+  }
+
+  // The state-machine context can advance before observable task hydration.
+  // Prefer it when recency and current-media signals cannot distinguish the legs.
+  return candidate.source === 'snapshot' ? candidate : current;
 };
 
 const getCurrentConsultMediaEntry = (task: ITask) => {
@@ -249,21 +311,12 @@ const getCurrentConsultMediaEntry = (task: ITask) => {
     return undefined;
   }
 
-  // Prefer the observable task data when it already contains the current leg;
-  // fall back to the state-machine snapshot during the brief hydration gap.
-  const taskDataCandidates = [task.data, snapshotTaskData].filter((taskData): taskData is RosterTaskData =>
-    Boolean(taskData?.interaction)
-  );
+  const candidates = [
+    getConsultMediaEntry(task.data, 'observable'),
+    snapshotTaskData ? getConsultMediaEntry(snapshotTaskData, 'snapshot') : undefined,
+  ].filter((candidate): candidate is ConsultMediaEntry => Boolean(candidate));
 
-  for (const taskData of taskDataCandidates) {
-    const media = getConsultMediaEntry(taskData, task.data.consultMediaResourceId);
-
-    if (media) {
-      return {media, interaction: taskData.interaction, taskData};
-    }
-  }
-
-  return undefined;
+  return candidates.length > 0 ? candidates.reduce(selectCurrentConsultMediaEntry) : undefined;
 };
 
 const hasActiveNonHeldConsult = (task: ITask): boolean => {
