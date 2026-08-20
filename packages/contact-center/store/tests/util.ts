@@ -8,6 +8,7 @@ describe('getFeatureFlags', () => {
       isCampaignManagementEnabled: true,
       agentPersonalStatsEnabled: true,
       webRtcEnabled: true,
+      isEndTaskEnabled: true,
       isEndConsultEnabled: true,
       isOutboundEnabledForAgent: false,
       isOutboundEnabledForTenant: false,

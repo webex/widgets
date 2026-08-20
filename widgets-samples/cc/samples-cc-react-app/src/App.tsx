@@ -729,10 +729,9 @@ function App() {
                             }}
                           >
                             <strong>Note:</strong> Disabling WebRTC registration prevents browser-based calling. When
-                            enabled, the Incoming Task, Task List, Call Control, and Call Control with CAD
-                            widgets will be unchecked and disabled because they depend on call handling. Set this
-                            option before clicking the Init Widgets button - changes after SDK initialization will
-                            not take effect.
+                            enabled, the Incoming Task, Task List, Call Control, and Call Control with CAD widgets will
+                            be unchecked and disabled because they depend on call handling. Set this option before
+                            clicking the Init Widgets button - changes after SDK initialization will not take effect.
                           </div>
                         </Text>
                       </PopoverNext>
@@ -892,6 +891,14 @@ function App() {
                             hideDesktopLogin={hideDesktopLogin}
                             allowInternationalDn={allowInternationalDn}
                           />
+                        </div>
+                        <div style={{marginTop: '15px'}}>
+                          <Button
+                            data-testid="samples:show-e911-modal-button"
+                            onClick={() => store.setShowE911Modal(true)}
+                          >
+                            Show E911 Modal (debug)
+                          </Button>
                         </div>
                       </fieldset>
                     </section>
