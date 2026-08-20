@@ -69,6 +69,8 @@ describe('CallControlCAD Component', () => {
       consultTimerLabel: 'Consulting',
       consultTimerTimestamp: 0,
       isCampaignCall: false,
+      telephonyToast: null,
+      dismissTelephonyToast: jest.fn(),
     });
 
     render(
@@ -95,6 +97,7 @@ describe('CallControlCAD Component', () => {
       isMuted: false,
       conferenceEnabled: undefined,
       agentId: store.agentId,
+      enableWxBetterTogether: false,
     });
   });
 
@@ -141,6 +144,8 @@ describe('CallControlCAD Component', () => {
       consultTimerLabel: 'Consulting',
       consultTimerTimestamp: 0,
       isCampaignCall: false,
+      telephonyToast: null,
+      dismissTelephonyToast: jest.fn(),
     });
 
     render(<CallControlCAD onHoldResume={onHoldResumeCb} onEnd={onEndCb} onWrapUp={onWrapUpCb} />);
@@ -195,6 +200,8 @@ describe('CallControlCAD Component', () => {
       consultTimerLabel: 'Consulting',
       consultTimerTimestamp: 0,
       isCampaignCall: false,
+      telephonyToast: null,
+      dismissTelephonyToast: jest.fn(),
     });
 
     render(
@@ -252,6 +259,8 @@ describe('CallControlCAD Component', () => {
       consultTimerLabel: 'Consulting',
       consultTimerTimestamp: 0,
       isCampaignCall: false,
+      telephonyToast: null,
+      dismissTelephonyToast: jest.fn(),
     });
 
     const {container} = render(

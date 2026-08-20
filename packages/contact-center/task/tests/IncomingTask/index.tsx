@@ -41,6 +41,8 @@ describe('IncomingTask Component', () => {
       reject: jest.fn(),
       acceptControl: {isVisible: true, isEnabled: true},
       declineControl: {isVisible: true, isEnabled: true},
+      offerActionError: null,
+      clearOfferActionError: jest.fn(),
     });
 
     const staleTask = {...mockTask, uiControls: {main: {accept: {isVisible: true, isEnabled: false}}}};
@@ -66,6 +68,8 @@ describe('IncomingTask Component', () => {
       reject: jest.fn(),
       acceptControl: {isVisible: true, isEnabled: true},
       declineControl: {isVisible: true, isEnabled: true},
+      offerActionError: null,
+      clearOfferActionError: jest.fn(),
     });
 
     render(<IncomingTask incomingTask={mockTask} onAccepted={onAcceptedCb} onRejected={onRejectedCb} />);

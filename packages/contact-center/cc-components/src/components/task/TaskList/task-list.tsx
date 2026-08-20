@@ -30,6 +30,7 @@ const TaskListComponent: React.FunctionComponent<TaskListComponentProps> = (prop
     cc,
     hasCampaignPreviewEnabled = true,
     acceptedCampaignIds,
+    taskActionErrors,
   } = props;
 
   // Early return for empty task list
@@ -93,9 +94,12 @@ const TaskListComponent: React.FunctionComponent<TaskListComponentProps> = (prop
           );
         }
 
+        const interactionId = task.data.interactionId;
+        const actionError = taskActionErrors?.[interactionId] ?? null;
+
         return (
           <Task
-            interactionId={task.data.interactionId}
+            interactionId={interactionId}
             title={taskData.title}
             state={taskData.displayState}
             startTimeStamp={startTimeStamp}
@@ -113,6 +117,7 @@ const TaskListComponent: React.FunctionComponent<TaskListComponentProps> = (prop
             declineText={taskData.declineText}
             mediaType={taskData.mediaType as MEDIA_CHANNEL}
             mediaChannel={taskData.mediaChannel as MEDIA_CHANNEL}
+            actionError={actionError}
           />
         );
       })}

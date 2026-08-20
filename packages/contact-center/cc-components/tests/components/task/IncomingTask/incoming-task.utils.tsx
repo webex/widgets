@@ -249,6 +249,21 @@ describe('incoming-task.utils', () => {
         mockTask.data.interaction.outboundType = originalOutboundType;
       });
 
+      it('should show Calling... for wxApp outdial while answer is pending', () => {
+        const originalOutboundType = mockTask.data.interaction.outboundType;
+        const originalMediaType = mockTask.data.interaction.mediaType;
+
+        mockTask.data.interaction.mediaType = MEDIA_CHANNEL.TELEPHONY;
+        mockTask.data.interaction.outboundType = OUTBOUND_TYPE.OUTDIAL;
+
+        const result = extractIncomingTaskData(mockTask, logger, visibleDisabledAccept, enabledControl, false, false);
+
+        expect(result.acceptText).toBe('Calling...');
+
+        mockTask.data.interaction.outboundType = originalOutboundType;
+        mockTask.data.interaction.mediaType = originalMediaType;
+      });
+
       it.skip('should extract correct button states for outdial telephony on non-browser', () => {
         const originalMediaType = mockTask.data.interaction.mediaType;
         const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;

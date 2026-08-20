@@ -180,7 +180,16 @@ export type IncomingTaskComponentProps = Pick<TaskProps, 'accept' | 'reject' | '
     declineControl?: {isVisible: boolean; isEnabled: boolean};
     isDeclineButtonEnabled?: boolean;
     isBrowser?: boolean;
+    offerActionError?: WxAppTelephonyErrorDisplay | null;
+    clearOfferActionError?: () => void;
   };
+
+export type WxAppTelephonyErrorDisplay = {
+  message: string;
+  trackingId?: string;
+  status?: number | string;
+  isWxAppTelephonyError: boolean;
+};
 
 export type TaskListComponentProps = Pick<
   TaskProps,
@@ -189,6 +198,8 @@ export type TaskListComponentProps = Pick<
   Partial<Pick<TaskProps, 'currentTask' | 'taskList' | 'hasCampaignPreviewEnabled' | 'acceptedCampaignIds'>> & {
     isDeclineButtonEnabled?: boolean;
     isBrowser?: boolean;
+    taskActionErrors?: Record<string, WxAppTelephonyErrorDisplay | null>;
+    clearTaskActionError?: (interactionId: string) => void;
   };
 
 export interface RealTimeTranscriptEntry {
@@ -520,6 +531,16 @@ export interface ControlProps {
    * Agent ID of the logged-in user
    */
   agentId: string;
+
+  /**
+   * Host init flag for wxApp thick-client main-bar Mute/Keypad visibility gating only.
+   */
+  enableWxBetterTogether?: boolean;
+
+  /**
+   * Logged-in agent device type (BROWSER, EXTENSION, AGENT_DN) for Extension-only ghost control suppression.
+   */
+  agentDeviceType?: string;
 }
 
 export type CallControlComponentProps = Pick<
@@ -578,6 +599,16 @@ export type CallControlComponentProps = Pick<
    * "Campaign call" label instead of the standard media type.
    */
   isCampaignCall?: boolean;
+
+  /**
+   * Host init flag for wxApp thick-client main-bar Mute/Keypad visibility gating only.
+   */
+  enableWxBetterTogether?: boolean;
+
+  /**
+   * Logged-in agent device type for Extension-only ghost control suppression.
+   */
+  agentDeviceType?: string;
 };
 
 export type OutdialAniEntry = {
@@ -710,6 +741,8 @@ export interface CallControlConsultComponentsProps {
   controls: TaskUIControls;
   toggleConsultMute: () => void;
   conferenceEnabled: boolean;
+  enableWxBetterTogether?: boolean;
+  currentTask?: ITask | null;
 }
 
 /**

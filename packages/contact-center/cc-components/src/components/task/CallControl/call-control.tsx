@@ -25,6 +25,7 @@ import {
   filterButtonsForConsultation,
   getConsultFilterPhase,
   updateCallStateFromTask,
+  applyWxAppTelephonyControlVisibility,
 } from './call-control.utils';
 import {withMetrics} from '@webex/cc-ui-logging';
 
@@ -70,6 +71,8 @@ function CallControlComponent(props: CallControlComponentProps) {
     getQueuesFetcher,
     consultTransferOptions,
     conferenceEnabled = true,
+    enableWxBetterTogether = false,
+    agentDeviceType,
   } = props;
 
   useEffect(() => {
@@ -147,8 +150,17 @@ function CallControlComponent(props: CallControlComponentProps) {
     conferenceEnabled
   );
 
+  const wxAppGatedButtons = applyWxAppTelephonyControlVisibility(
+    buttons,
+    currentTask,
+    controls,
+    isTelephony,
+    enableWxBetterTogether,
+    agentDeviceType
+  );
+
   const consultFilterPhase = getConsultFilterPhase(currentTask, controls);
-  const filteredButtons = filterButtonsForConsultation(buttons, consultFilterPhase, isTelephony, logger);
+  const filteredButtons = filterButtonsForConsultation(wxAppGatedButtons, consultFilterPhase, isTelephony, logger);
 
   if (!currentTask) return null;
 

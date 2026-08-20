@@ -5,8 +5,17 @@ import {withMetrics} from '@webex/cc-ui-logging';
 import {extractIncomingTaskData} from './incoming-task.utils';
 
 const IncomingTaskComponent: React.FunctionComponent<IncomingTaskComponentProps> = (props) => {
-  const {incomingTask, accept, reject, logger, acceptControl, declineControl, isDeclineButtonEnabled, isBrowser} =
-    props;
+  const {
+    incomingTask,
+    accept,
+    reject,
+    logger,
+    acceptControl,
+    declineControl,
+    isDeclineButtonEnabled,
+    isBrowser,
+    offerActionError,
+  } = props;
   if (!incomingTask) {
     return <></>; // hidden component
   }
@@ -46,6 +55,7 @@ const IncomingTaskComponent: React.FunctionComponent<IncomingTaskComponentProps>
       styles="task-list-hover"
       mediaType={taskData.mediaType as MEDIA_CHANNEL}
       mediaChannel={taskData.mediaChannel as MEDIA_CHANNEL}
+      actionError={offerActionError}
     />
   );
 };

@@ -199,6 +199,7 @@ interface IStore {
   allowConsultToQueue: boolean;
   agentProfile: AgentLoginProfile;
   isMuted: boolean;
+  enableWxBetterTogether: boolean;
   isAddressBookEnabled: boolean;
   isDigitalChannelsInitialized: boolean;
   dataCenter: string;

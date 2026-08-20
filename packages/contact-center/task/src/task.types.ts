@@ -50,7 +50,12 @@ export type useCallControlProps = Pick<
   ControlProps,
   'currentTask' | 'logger' | 'isMuted' | 'conferenceEnabled' | 'agentId'
 > &
-  Partial<Pick<ControlProps, 'onHoldResume' | 'onEnd' | 'onWrapUp' | 'onRecordingToggle' | 'onToggleMute'>>;
+  Partial<
+    Pick<
+      ControlProps,
+      'onHoldResume' | 'onEnd' | 'onWrapUp' | 'onRecordingToggle' | 'onToggleMute' | 'enableWxBetterTogether'
+    >
+  >;
 
 export type useOutdialCallProps = Pick<OutdialCallProps, 'cc' | 'logger'>;
 

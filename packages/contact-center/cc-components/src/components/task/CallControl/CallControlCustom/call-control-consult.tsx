@@ -18,6 +18,8 @@ const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> =
   controls,
   toggleConsultMute,
   conferenceEnabled = true,
+  enableWxBetterTogether = false,
+  currentTask = null,
 }) => {
   // Use the label and timestamp calculated in helper.ts
   // Stable key based on timestamp to prevent timer resets
@@ -35,7 +37,9 @@ const CallControlConsultComponent: React.FC<CallControlConsultComponentsProps> =
     consultConference,
     switchToMainCall,
     logger,
-    conferenceEnabled
+    conferenceEnabled,
+    enableWxBetterTogether,
+    currentTask
   );
 
   // Filter buttons that should be shown, then map them

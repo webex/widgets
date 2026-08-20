@@ -1,64 +1,16 @@
-import {ITask, TaskUIControls} from '@webex/contact-center';
+import {ITask} from '@webex/contact-center';
 
 /**
- * WxApp thick-client telephony methods on ITask (SDK @webex/contact-center — WXCC-6026).
- * Duck-typed until SDK types publish acceptOnWebex / transmitDtmfOnWebex on ITask.
+ * UI visibility helpers for wxApp thick-client telephony (WXCC-6026).
+ * Telephony routing is owned by the SDK via task.accept/decline/toggleMute/transmitDtmf.
  */
-export type WxAppTelephonyTask = ITask & {
-  isWebexAppCallingOffer?: () => boolean;
-  acceptOnWebex?: () => Promise<unknown>;
-  rejectOnWebex?: () => Promise<unknown>;
-  toggleMuteOnWebex?: (options?: {lineOwnerId?: string; muted?: boolean}) => Promise<void>;
-  transmitDtmfOnWebex?: (options: {dtmf: string; lineOwnerId?: string}) => Promise<void>;
-  getWebexCallingCallId?: () => string | null | undefined;
-};
-
-/** SDK P0 keypad control — may exist on main leg before InteractionUIControls ships keypad. */
-export type TaskMainControlsWithKeypad = TaskUIControls['main'] & {
-  keypad?: {isVisible: boolean; isEnabled: boolean};
-};
-
-export const getKeypadControl = (controls: TaskUIControls | undefined) =>
-  (controls?.main as TaskMainControlsWithKeypad | undefined)?.keypad;
-
-export const isWxAppCallingOffer = (task: ITask | null | undefined): boolean => {
-  const wxTask = task as WxAppTelephonyTask | null | undefined;
-  return typeof wxTask?.isWebexAppCallingOffer === 'function' && !!wxTask.isWebexAppCallingOffer();
-};
-
 export const isWxAppEngagedCall = (task: ITask | null | undefined): boolean => {
-  const wxTask = task as WxAppTelephonyTask | null | undefined;
-  return typeof wxTask?.getWebexCallingCallId === 'function' && !!wxTask.getWebexCallingCallId();
+  const voiceTask = task as ITask & {getWebexCallingCallId?: () => string | null | undefined};
+  return typeof voiceTask?.getWebexCallingCallId === 'function' && !!voiceTask.getWebexCallingCallId();
 };
 
-export const acceptTaskForOffer = (task: ITask): Promise<unknown> => {
-  const wxTask = task as WxAppTelephonyTask;
-  if (isWxAppCallingOffer(task) && typeof wxTask.acceptOnWebex === 'function') {
-    return wxTask.acceptOnWebex();
-  }
-  return task.accept();
-};
-
-export const rejectTaskForOffer = (task: ITask): Promise<unknown> => {
-  const wxTask = task as WxAppTelephonyTask;
-  if (isWxAppCallingOffer(task) && typeof wxTask.rejectOnWebex === 'function') {
-    return wxTask.rejectOnWebex();
-  }
-  return task.decline();
-};
-
-export const toggleMuteForTask = (task: ITask, muted: boolean): Promise<void> => {
-  const wxTask = task as WxAppTelephonyTask;
-  if (isWxAppEngagedCall(task) && typeof wxTask.toggleMuteOnWebex === 'function') {
-    return wxTask.toggleMuteOnWebex({muted});
-  }
-  return task.toggleMute();
-};
-
-export const transmitDtmfForTask = (task: ITask, dtmf: string): Promise<void> => {
-  const wxTask = task as WxAppTelephonyTask;
-  if (isWxAppEngagedCall(task) && typeof wxTask.transmitDtmfOnWebex === 'function') {
-    return wxTask.transmitDtmfOnWebex({dtmf});
-  }
-  return Promise.resolve();
-};
+/** Thick-client main-bar Mute/Keypad visibility gate — does not affect mute API routing. */
+export const shouldShowWxAppTelephonyControls = (
+  enableWxBetterTogether: boolean,
+  task: ITask | null | undefined
+): boolean => enableWxBetterTogether === true && isWxAppEngagedCall(task);

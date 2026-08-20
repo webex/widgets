@@ -1,0 +1,11 @@
+.wxapp-offer-action-error {
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.25rem;
+  background-color: var(--alertbg-error, #fce8e6);
+  color: var(--label-error-text, #a12b2f);
+}
+
+.wxapp-offer-action-error-message {
+  margin: 0;
+}

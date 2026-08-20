@@ -27,13 +27,14 @@ import store, {
   MEDIA_TYPE_TELEPHONY_LOWER,
   RealTimeTranscriptionData,
 } from '@webex/cc-store';
+import {shouldShowWxAppTelephonyControls} from './wxapp-task.utils';
 import {
-  acceptTaskForOffer,
-  getKeypadControl,
-  rejectTaskForOffer,
-  toggleMuteForTask,
-  transmitDtmfForTask,
-} from './wxapp-task.utils';
+  getTelephonyToastDisplay,
+  reportWxAppTelephonyFailure,
+  TelephonyToastAction,
+  withOfferActionUserMessage,
+  WxAppTelephonyErrorDisplay,
+} from './wxapp-error.utils';
 import {
   TIMER_LABEL_CONSULTING,
   TIMER_LABEL_CONSULT_REQUESTED,
@@ -79,6 +80,24 @@ const mapTranscriptLineToEntry = (
 // Hook for managing the task list
 export const useTaskList = (props: UseTaskListProps) => {
   const {onTaskAccepted, onTaskDeclined, onTaskSelected, logger, taskList} = props;
+  const [taskActionErrors, setTaskActionErrors] = useState<Record<string, WxAppTelephonyErrorDisplay | null>>({});
+
+  const clearTaskActionError = useCallback((interactionId: string) => {
+    setTaskActionErrors((prev) => {
+      if (!prev[interactionId]) return prev;
+      const next = {...prev};
+      delete next[interactionId];
+      return next;
+    });
+  }, []);
+
+  const setTaskActionError = useCallback(
+    (interactionId: string, error: unknown, action: string) => {
+      const parsed = reportWxAppTelephonyFailure(error, {widget: 'TaskList', action}, logger, store.onErrorCallback);
+      setTaskActionErrors((prev) => ({...prev, [interactionId]: withOfferActionUserMessage(parsed, action)}));
+    },
+    [logger]
+  );
 
   const logError = (message: string, method: string) => {
     logger.error(message, {
@@ -149,7 +168,8 @@ export const useTaskList = (props: UseTaskListProps) => {
         module: 'useTaskList',
         method: 'acceptTask',
       });
-      acceptTaskForOffer(task).catch((error) => {
+      task.accept().catch((error) => {
+        setTaskActionError(task.data.interactionId, error, 'acceptTask');
         logError(`CC-Widgets: Error accepting task: ${error}`, 'acceptTask');
       });
     } catch (error) {
@@ -166,7 +186,8 @@ export const useTaskList = (props: UseTaskListProps) => {
         module: 'useTaskList',
         method: 'declineTask',
       });
-      rejectTaskForOffer(task).catch((error) => {
+      task.decline().catch((error) => {
+        setTaskActionError(task.data.interactionId, error, 'declineTask');
         logError(`CC-Widgets: Error declining task: ${error}`, 'declineTask');
       });
       logger.log(`CC-Widgets: incoming task declined for ${task.data.interactionId}`, {
@@ -191,7 +212,7 @@ export const useTaskList = (props: UseTaskListProps) => {
     }
   };
 
-  return {taskList, acceptTask, declineTask, onTaskSelect};
+  return {taskList, acceptTask, declineTask, onTaskSelect, taskActionErrors, clearTaskActionError};
 };
 
 export const useRealTimeTranscript = (props: UseRealTimeTranscriptInternalProps) => {
@@ -215,6 +236,15 @@ export const useRealTimeTranscript = (props: UseRealTimeTranscriptInternalProps)
 
 export const useIncomingTask = (props: UseTaskProps) => {
   const {onAccepted, onRejected, incomingTask, logger} = props;
+  const [offerActionError, setOfferActionError] = useState<WxAppTelephonyErrorDisplay | null>(null);
+
+  const clearOfferActionError = useCallback(() => {
+    setOfferActionError(null);
+  }, []);
+
+  useEffect(() => {
+    setOfferActionError(null);
+  }, [incomingTask?.data?.interactionId]);
 
   const acceptControl = incomingTask?.uiControls?.main?.accept ?? {isVisible: false, isEnabled: false};
   const sdkDeclineControl = incomingTask?.uiControls?.main?.decline ?? {isVisible: false, isEnabled: false};
@@ -308,7 +338,14 @@ export const useIncomingTask = (props: UseTaskProps) => {
         method: 'accept',
       });
       if (!incomingTask?.data.interactionId) return;
-      acceptTaskForOffer(incomingTask).catch((error) => {
+      incomingTask.accept().catch((error) => {
+        const parsed = reportWxAppTelephonyFailure(
+          error,
+          {widget: 'IncomingTask', action: 'accept'},
+          logger,
+          store.onErrorCallback
+        );
+        setOfferActionError(withOfferActionUserMessage(parsed, 'accept'));
         logError(`CC-Widgets: Error accepting incoming task: ${error}`, 'accept');
       });
       logger.log(`CC-Widgets: incomingTask accepted`, {
@@ -330,7 +367,14 @@ export const useIncomingTask = (props: UseTaskProps) => {
         method: 'reject',
       });
       if (!incomingTask?.data.interactionId) return;
-      rejectTaskForOffer(incomingTask).catch((error) => {
+      incomingTask.decline().catch((error) => {
+        const parsed = reportWxAppTelephonyFailure(
+          error,
+          {widget: 'IncomingTask', action: 'reject'},
+          logger,
+          store.onErrorCallback
+        );
+        setOfferActionError(withOfferActionUserMessage(parsed, 'reject'));
         logError(`CC-Widgets: Error rejecting incoming task: ${error}`, 'reject');
       });
       logger.log(`CC-Widgets: incomingTask rejected`, {
@@ -351,6 +395,8 @@ export const useIncomingTask = (props: UseTaskProps) => {
     reject,
     acceptControl,
     declineControl,
+    offerActionError,
+    clearOfferActionError,
   };
 };
 
@@ -366,6 +412,7 @@ export const useCallControl = (props: useCallControlProps) => {
     isMuted,
     agentId,
     conferenceEnabled = true,
+    enableWxBetterTogether = false,
   } = props;
   const [isRecording, setIsRecording] = useState(true);
   const [controls, setControls] = useState<TaskUIControls>(currentTask?.uiControls ?? getDefaultUIControls());
@@ -375,6 +422,22 @@ export const useCallControl = (props: useCallControlProps) => {
   const [consultAgentName, setConsultAgentName] = useState<string>('Consult Agent');
   const [startTimestamp, setStartTimestamp] = useState<number>(0);
   const [secondsUntilAutoWrapup, setsecondsUntilAutoWrapup] = useState<number | null>(null);
+  const [telephonyToast, setTelephonyToast] = useState<{
+    error: WxAppTelephonyErrorDisplay;
+    action: TelephonyToastAction;
+  } | null>(null);
+
+  const showTelephonyToast = useCallback(
+    (error: unknown, action: TelephonyToastAction) => {
+      const parsed = reportWxAppTelephonyFailure(error, {widget: 'CallControl', action}, logger, store.onErrorCallback);
+      setTelephonyToast({error: getTelephonyToastDisplay(parsed, action), action});
+    },
+    [logger]
+  );
+
+  const dismissTelephonyToast = useCallback(() => {
+    setTelephonyToast(null);
+  }, []);
 
   // State timer labels and timestamps
   const [stateTimerLabel, setStateTimerLabel] = useState<string | null>(null);
@@ -830,7 +893,11 @@ export const useCallControl = (props: useCallControlProps) => {
 
   const toggleMute = async () => {
     try {
-      if (!controls?.main?.mute?.isVisible) {
+      if (
+        !controls?.main?.mute?.isVisible &&
+        !controls?.consult?.mute?.isVisible &&
+        !shouldShowWxAppTelephonyControls(enableWxBetterTogether, currentTask)
+      ) {
         logger.warn('Mute control not available', {module: 'useCallControl', method: 'toggleMute'});
         return;
       }
@@ -841,7 +908,7 @@ export const useCallControl = (props: useCallControlProps) => {
       const intendedMuteState = !isMuted;
 
       try {
-        await toggleMuteForTask(currentTask, intendedMuteState);
+        await currentTask.toggleMute({muted: intendedMuteState});
 
         // Only update state after successful SDK call
         store.setIsMuted(intendedMuteState);
@@ -856,6 +923,7 @@ export const useCallControl = (props: useCallControlProps) => {
         logger.info(`Mute state toggled to: ${intendedMuteState}`, {module: 'useCallControl', method: 'toggleMute'});
       } catch (error) {
         logger.error(`toggleMute failed: ${error}`, {module: 'useCallControl', method: 'toggleMute'});
+        showTelephonyToast(error, intendedMuteState ? 'mute' : 'unmute');
 
         if (onToggleMute) {
           onToggleMute({
@@ -874,16 +942,20 @@ export const useCallControl = (props: useCallControlProps) => {
 
   const sendDtmf = async (digit: string) => {
     try {
-      if (!getKeypadControl(controls)?.isVisible) {
+      if (
+        !controls?.main?.keypad?.isVisible &&
+        !shouldShowWxAppTelephonyControls(enableWxBetterTogether, currentTask)
+      ) {
         logger.warn('Keypad control not available', {module: 'useCallControl', method: 'sendDtmf'});
         return;
       }
 
       logger.info(`sendDtmf(${digit}) called`, {module: 'useCallControl', method: 'sendDtmf'});
 
-      await transmitDtmfForTask(currentTask, digit);
+      await currentTask.transmitDtmf({dtmf: digit});
     } catch (error) {
       logger.error(`sendDtmf failed: ${error}`, {module: 'useCallControl', method: 'sendDtmf'});
+      showTelephonyToast(error, 'dtmf');
     }
   };
 
@@ -1296,6 +1368,8 @@ export const useCallControl = (props: useCallControlProps) => {
     getEntryPoints,
     getQueuesFetcher,
     isCampaignCall,
+    telephonyToast,
+    dismissTelephonyToast,
   };
 };
 

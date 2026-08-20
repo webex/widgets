@@ -3,7 +3,8 @@ import {ButtonPill, ListItemBase, ListItemBaseSection, Text} from '@momentum-ui/
 import {Avatar, Brandvisual, Tooltip} from '@momentum-design/components/dist/react';
 import {PressEvent} from '@react-types/shared';
 import TaskTimer from '../TaskTimer';
-import type {MEDIA_CHANNEL as MediaChannelType} from '../task.types';
+import type {MEDIA_CHANNEL as MediaChannelType, WxAppTelephonyErrorDisplay} from '../task.types';
+import WxAppOfferActionError from '../WxAppOfferActionError/wxapp-offer-action-error';
 import {extractTaskComponentData, getTaskListItemClasses} from './task.utils';
 import './styles.scss';
 
@@ -26,6 +27,7 @@ export interface TaskProps {
   styles?: string;
   mediaType?: MediaChannelType;
   mediaChannel?: MediaChannelType;
+  actionError?: WxAppTelephonyErrorDisplay | null;
 }
 
 const Task: React.FC<TaskProps> = ({
@@ -47,6 +49,7 @@ const Task: React.FC<TaskProps> = ({
   declineText,
   mediaType,
   mediaChannel,
+  actionError,
 }) => {
   // Extract all computed data using the utility function
   const taskData = extractTaskComponentData({
@@ -99,94 +102,97 @@ const Task: React.FC<TaskProps> = ({
   };
 
   return (
-    <ListItemBase
-      className={getTaskListItemClasses(selected, styles)}
-      onPress={onTaskSelect ? onTaskSelect : undefined}
-      id={interactionId}
-    >
-      <ListItemBaseSection position="start">
-        {taskData.currentMediaType.isBrandVisual ? (
-          <div className="brand-visual-background">
-            <Brandvisual name={taskData.currentMediaType.iconName} className={taskData.currentMediaType.className} />
+    <>
+      <ListItemBase
+        className={getTaskListItemClasses(selected, styles)}
+        onPress={onTaskSelect ? onTaskSelect : undefined}
+        id={interactionId}
+      >
+        <ListItemBaseSection position="start">
+          {taskData.currentMediaType.isBrandVisual ? (
+            <div className="brand-visual-background">
+              <Brandvisual name={taskData.currentMediaType.iconName} className={taskData.currentMediaType.className} />
+            </div>
+          ) : (
+            <Avatar icon-name={taskData.currentMediaType.iconName} className={taskData.currentMediaType.className} />
+          )}
+        </ListItemBaseSection>
+
+        <ListItemBaseSection position="fill">
+          <section className="task-details">
+            {renderTitle()}
+            {taskData.shouldShowState && (
+              <Text
+                tagName="span"
+                type="body-midsize-regular"
+                className="task-text"
+                data-testid={`${interactionId}-state`}
+              >
+                {taskData.capitalizedState}
+              </Text>
+            )}
+
+            {taskData.shouldShowQueue && (
+              <Text
+                tagName="span"
+                type="body-midsize-regular"
+                className="task-text"
+                data-testid={`${interactionId}-queue`}
+              >
+                {taskData.capitalizedQueue}
+              </Text>
+            )}
+
+            {/* Handle Time should render if it's an incoming call without ronaTimeout OR if it's not an incoming call */}
+            {taskData.shouldShowHandleTime && (
+              <Text
+                tagName="span"
+                type="body-midsize-regular"
+                className="task-text"
+                data-testid={`${interactionId}-handle-time`}
+              >
+                Handle Time: {'  '}
+                <TaskTimer startTimeStamp={startTimeStamp} data-testid="task-list:timer" />
+              </Text>
+            )}
+
+            {/* Time Left should render if it's an incoming call with ronaTimeout */}
+            {taskData.shouldShowTimeLeft && (
+              <Text
+                tagName="span"
+                type="body-midsize-regular"
+                className="task-text"
+                data-testid={`${interactionId}-time-left`}
+              >
+                Time Left: {'  '}
+                <TaskTimer countdown={true} ronaTimeout={ronaTimeout} />
+              </Text>
+            )}
+          </section>
+        </ListItemBaseSection>
+
+        <ListItemBaseSection position="end">
+          <div className="task-button-container">
+            {acceptText ? (
+              <ButtonPill onPress={acceptTask} color="join" disabled={disableAccept} data-testid="task:accept-button">
+                {acceptText}
+              </ButtonPill>
+            ) : null}
+            {declineText ? (
+              <ButtonPill
+                onPress={declineTask}
+                color="cancel"
+                disabled={disableDecline}
+                data-testid="task:decline-button"
+              >
+                {declineText}
+              </ButtonPill>
+            ) : null}
           </div>
-        ) : (
-          <Avatar icon-name={taskData.currentMediaType.iconName} className={taskData.currentMediaType.className} />
-        )}
-      </ListItemBaseSection>
-
-      <ListItemBaseSection position="fill">
-        <section className="task-details">
-          {renderTitle()}
-          {taskData.shouldShowState && (
-            <Text
-              tagName="span"
-              type="body-midsize-regular"
-              className="task-text"
-              data-testid={`${interactionId}-state`}
-            >
-              {taskData.capitalizedState}
-            </Text>
-          )}
-
-          {taskData.shouldShowQueue && (
-            <Text
-              tagName="span"
-              type="body-midsize-regular"
-              className="task-text"
-              data-testid={`${interactionId}-queue`}
-            >
-              {taskData.capitalizedQueue}
-            </Text>
-          )}
-
-          {/* Handle Time should render if it's an incoming call without ronaTimeout OR if it's not an incoming call */}
-          {taskData.shouldShowHandleTime && (
-            <Text
-              tagName="span"
-              type="body-midsize-regular"
-              className="task-text"
-              data-testid={`${interactionId}-handle-time`}
-            >
-              Handle Time: {'  '}
-              <TaskTimer startTimeStamp={startTimeStamp} data-testid="task-list:timer" />
-            </Text>
-          )}
-
-          {/* Time Left should render if it's an incoming call with ronaTimeout */}
-          {taskData.shouldShowTimeLeft && (
-            <Text
-              tagName="span"
-              type="body-midsize-regular"
-              className="task-text"
-              data-testid={`${interactionId}-time-left`}
-            >
-              Time Left: {'  '}
-              <TaskTimer countdown={true} ronaTimeout={ronaTimeout} />
-            </Text>
-          )}
-        </section>
-      </ListItemBaseSection>
-
-      <ListItemBaseSection position="end">
-        <div className="task-button-container">
-          {acceptText ? (
-            <ButtonPill onPress={acceptTask} color="join" disabled={disableAccept} data-testid="task:accept-button">
-              {acceptText}
-            </ButtonPill>
-          ) : null}
-          {declineText ? (
-            <ButtonPill
-              onPress={declineTask}
-              color="cancel"
-              disabled={disableDecline}
-              data-testid="task:decline-button"
-            >
-              {declineText}
-            </ButtonPill>
-          ) : null}
-        </div>
-      </ListItemBaseSection>
-    </ListItemBase>
+        </ListItemBaseSection>
+      </ListItemBase>
+      {actionError ? <WxAppOfferActionError error={actionError} /> : null}
+    </>
   );
 };
 

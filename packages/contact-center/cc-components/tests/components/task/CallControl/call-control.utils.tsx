@@ -18,6 +18,7 @@ import {
   handleAudioRef,
   onInputDialNumber,
   handleButtonPress,
+  applyWxAppTelephonyControlVisibility,
 } from '../../../../src/components/task/CallControl/call-control.utils';
 import * as utils from '../../../../src/utils';
 
@@ -868,6 +869,196 @@ describe('CallControl Utils', () => {
       expect(transferConsultButton?.disabled).toBe(false);
 
       expect(transferMenuButton?.isVisible).toBe(false);
+    });
+  });
+
+  describe('applyWxAppTelephonyControlVisibility', () => {
+    const wxAppTask = {
+      getWebexCallingCallId: () => 'call-123',
+    } as ITask;
+
+    const baseButtons = buildCallControlButtons(
+      false,
+      false,
+      false,
+      mockMediaTypeInfo,
+      {
+        ...mockControls,
+        main: {
+          ...mockControls.main,
+          mute: {isVisible: true, isEnabled: true},
+          keypad: {isVisible: true, isEnabled: true},
+        },
+      },
+      false,
+      jest.fn(),
+      jest.fn(),
+      jest.fn(),
+      jest.fn(),
+      jest.fn(),
+      jest.fn(),
+      jest.fn(),
+      jest.fn()
+    );
+
+    it('passes through SDK visibility when enableWxBetterTogether is false', () => {
+      const controlsWithDisabledKeypad = {
+        ...mockControls,
+        main: {
+          ...mockControls.main,
+          mute: {isVisible: true, isEnabled: false},
+          keypad: {isVisible: true, isEnabled: false},
+        },
+      };
+
+      const buttons = buildCallControlButtons(
+        false,
+        false,
+        false,
+        mockMediaTypeInfo,
+        controlsWithDisabledKeypad,
+        false,
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn()
+      );
+
+      const result = applyWxAppTelephonyControlVisibility(buttons, wxAppTask, controlsWithDisabledKeypad, true, false);
+
+      expect(result.find((b) => b.id === 'mute')?.isVisible).toBe(true);
+      expect(result.find((b) => b.id === 'keypad')?.isVisible).toBe(true);
+    });
+
+    it('hides mute and keypad when flag is on, wxApp not engaged, and SDK shows disabled controls', () => {
+      const controlsWithDisabled = {
+        ...mockControls,
+        main: {
+          ...mockControls.main,
+          mute: {isVisible: true, isEnabled: false},
+          keypad: {isVisible: true, isEnabled: false},
+        },
+      };
+
+      const buttons = buildCallControlButtons(
+        false,
+        false,
+        false,
+        mockMediaTypeInfo,
+        controlsWithDisabled,
+        false,
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn()
+      );
+
+      const result = applyWxAppTelephonyControlVisibility(
+        buttons,
+        {} as ITask,
+        controlsWithDisabled,
+        true,
+        true,
+        'EXTENSION'
+      );
+
+      expect(result.find((b) => b.id === 'mute')?.isVisible).toBe(false);
+      expect(result.find((b) => b.id === 'keypad')?.isVisible).toBe(false);
+    });
+
+    it('passes through BROWSER mute when flag is on, wxApp not engaged, and SDK shows disabled controls', () => {
+      const controlsWithDisabled = {
+        ...mockControls,
+        main: {
+          ...mockControls.main,
+          mute: {isVisible: true, isEnabled: false},
+          keypad: {isVisible: true, isEnabled: false},
+        },
+      };
+
+      const buttons = buildCallControlButtons(
+        false,
+        false,
+        false,
+        mockMediaTypeInfo,
+        controlsWithDisabled,
+        false,
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn()
+      );
+
+      const result = applyWxAppTelephonyControlVisibility(
+        buttons,
+        {} as ITask,
+        controlsWithDisabled,
+        true,
+        true,
+        'BROWSER'
+      );
+
+      expect(result.find((b) => b.id === 'mute')?.isVisible).toBe(true);
+      expect(result.find((b) => b.id === 'keypad')?.isVisible).toBe(true);
+    });
+
+    it('passes through SDK visibility when flag is on but wxApp is not engaged and controls are enabled', () => {
+      const result = applyWxAppTelephonyControlVisibility(baseButtons, {} as ITask, mockControls, true, true);
+
+      expect(result.find((b) => b.id === 'mute')?.isVisible).toBe(true);
+      expect(result.find((b) => b.id === 'keypad')?.isVisible).toBe(true);
+    });
+
+    it('passes through SDK visibility when wxApp is engaged and SDK enables controls', () => {
+      const result = applyWxAppTelephonyControlVisibility(baseButtons, wxAppTask, mockControls, true, true);
+
+      expect(result.find((b) => b.id === 'mute')?.isVisible).toBe(true);
+      expect(result.find((b) => b.id === 'keypad')?.isVisible).toBe(true);
+    });
+
+    it('hides mute and keypad when wxApp is engaged but SDK disables controls during consult/hold', () => {
+      const controlsWithDisabled = {
+        ...mockControls,
+        main: {
+          ...mockControls.main,
+          mute: {isVisible: true, isEnabled: false},
+          keypad: {isVisible: true, isEnabled: false},
+        },
+      };
+
+      const buttons = buildCallControlButtons(
+        false,
+        false,
+        false,
+        mockMediaTypeInfo,
+        controlsWithDisabled,
+        false,
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn()
+      );
+
+      const result = applyWxAppTelephonyControlVisibility(buttons, wxAppTask, controlsWithDisabled, true, true);
+
+      expect(result.find((b) => b.id === 'mute')?.isVisible).toBe(false);
+      expect(result.find((b) => b.id === 'keypad')?.isVisible).toBe(false);
     });
   });
 

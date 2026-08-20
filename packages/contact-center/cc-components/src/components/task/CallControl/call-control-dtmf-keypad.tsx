@@ -10,7 +10,7 @@ export type CallControlDtmfKeypadProps = {
 
 /**
  * In-call DTMF keypad for wxApp telephony sessions (Extension login).
- * Each key press sends a single tone via SDK transmitDtmfOnWebex().
+ * Each key press sends a single tone via SDK task.transmitDtmf().
  */
 const CallControlDtmfKeypad: React.FunctionComponent<CallControlDtmfKeypadProps> = ({onDigitPress, logger}) => {
   const handleDigitPress = (digit: string) => {

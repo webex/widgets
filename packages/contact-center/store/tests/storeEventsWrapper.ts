@@ -603,6 +603,10 @@ describe('storeEventsWrapper', () => {
 
       storeWrapper['store'].taskList = {interaction2: mockTaskWithJoined};
       storeWrapper.setCurrentTask(mockTaskWithJoined);
+      storeWrapper['store'].cc.taskManager.getAllTasks = jest.fn().mockReturnValue({
+        [mockTaskWithJoined.data.interactionId]: mockTaskWithJoined,
+        [mockTask2.data.interactionId]: mockTask2,
+      });
 
       // Call the method under test
       storeWrapper.handleIncomingTask(mockTask2);
@@ -1026,6 +1030,108 @@ describe('storeEventsWrapper', () => {
 
       storeWrapper.handleTaskRemove(task);
       expect(task.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_WXAPP_MUTE_STATE_UPDATED, listenerCalls[0][1]);
+    });
+
+    it('should seed isMuted from syncWxAppMuteFromCallDetails on setCurrentTask', async () => {
+      storeWrapper['store'].agentId = 'mockAgentId';
+      const interactionId = 'interaction-wxapp-mute-seed';
+      const task = makeMockTask({
+        data: {
+          interactionId,
+          agentId: 'mockAgentId',
+          interaction: {
+            state: 'connected',
+            participants: {
+              mockAgentId: {hasJoined: true},
+            },
+          },
+        },
+      }) as ITask & {
+        syncWxAppMuteFromCallDetails: jest.Mock;
+        getWxAppMuted: jest.Mock;
+      };
+      task.syncWxAppMuteFromCallDetails = jest.fn().mockResolvedValue(true);
+      task.getWxAppMuted = jest.fn().mockReturnValue(true);
+
+      storeWrapper['store'].cc.taskManager.getAllTasks = jest.fn().mockReturnValue({
+        [interactionId]: task,
+      });
+
+      storeWrapper.setCurrentTask(task);
+      await waitFor(() => {
+        expect(task.syncWxAppMuteFromCallDetails).toHaveBeenCalled();
+      });
+      expect(storeWrapper.isMuted).toBe(true);
+    });
+
+    it('should not re-seed isMuted when setCurrentTask is called with the same interactionId', async () => {
+      const interactionId = 'interaction-wxapp-mute-dedupe';
+      storeWrapper['store'].agentId = 'mockAgentId';
+      const task = makeMockTask({
+        data: {
+          interactionId,
+          agentId: 'mockAgentId',
+          interaction: {
+            state: 'connected',
+            participants: {
+              mockAgentId: {hasJoined: true},
+            },
+          },
+        },
+      }) as ITask & {
+        syncWxAppMuteFromCallDetails: jest.Mock;
+        getWxAppMuted: jest.Mock;
+      };
+      task.syncWxAppMuteFromCallDetails = jest.fn().mockResolvedValue(true);
+      task.getWxAppMuted = jest.fn().mockReturnValue(true);
+
+      storeWrapper['store'].cc.taskManager.getAllTasks = jest.fn().mockReturnValue({
+        [interactionId]: task,
+      });
+
+      storeWrapper.setCurrentTask(task);
+      await waitFor(() => {
+        expect(task.syncWxAppMuteFromCallDetails).toHaveBeenCalledTimes(1);
+      });
+
+      task.syncWxAppMuteFromCallDetails.mockClear();
+      storeWrapper.setCurrentTask(task);
+      expect(task.syncWxAppMuteFromCallDetails).not.toHaveBeenCalled();
+    });
+
+    it('should not trigger additional mute sync when refreshTaskList re-promotes the same current task', async () => {
+      storeWrapper['store'].agentId = 'mockAgentId';
+      const interactionId = 'interaction-wxapp-mute-refresh';
+      const task = makeMockTask({
+        data: {
+          interactionId,
+          agentId: 'mockAgentId',
+          interaction: {
+            state: 'connected',
+            participants: {
+              mockAgentId: {hasJoined: true},
+            },
+          },
+        },
+      }) as ITask & {
+        syncWxAppMuteFromCallDetails: jest.Mock;
+        getWxAppMuted: jest.Mock;
+      };
+      task.syncWxAppMuteFromCallDetails = jest.fn().mockResolvedValue(true);
+      task.getWxAppMuted = jest.fn().mockReturnValue(false);
+
+      storeWrapper['store'].cc.taskManager.getAllTasks = jest.fn().mockReturnValue({
+        [interactionId]: task,
+      });
+
+      storeWrapper.setCurrentTask(task);
+      await waitFor(() => {
+        expect(task.syncWxAppMuteFromCallDetails).toHaveBeenCalledTimes(1);
+      });
+
+      task.syncWxAppMuteFromCallDetails.mockClear();
+      storeWrapper.refreshTaskList();
+      expect(task.syncWxAppMuteFromCallDetails).not.toHaveBeenCalled();
     });
 
     it('should handle task removal', () => {

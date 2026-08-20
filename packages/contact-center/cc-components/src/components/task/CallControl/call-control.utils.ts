@@ -172,6 +172,67 @@ export const getMediaType = (mediaType: MediaChannelType, mediaChannel: MediaCha
   }
 };
 
+/** Duck-type wxApp engaged call — visibility only; avoid upstream import from task package. */
+type WxAppTelephonyTaskForVisibility = ITask & {
+  getWebexCallingCallId?: () => string | null | undefined;
+};
+
+export const isWxAppEngagedCall = (task: ITask | null | undefined): boolean => {
+  const wxTask = task as WxAppTelephonyTaskForVisibility | null | undefined;
+  return typeof wxTask?.getWebexCallingCallId === 'function' && !!wxTask.getWebexCallingCallId();
+};
+
+/** Thick-client main-bar Mute/Keypad visibility gate — visibility only; not mute API routing. */
+export const shouldShowWxAppTelephonyControls = (
+  enableWxBetterTogether: boolean,
+  task: ITask | null | undefined
+): boolean => enableWxBetterTogether === true && isWxAppEngagedCall(task);
+
+/**
+ * Thin defense layer for thick-client flag ON: suppresses visible+disabled ghost controls.
+ * SDK owns isVisible/isEnabled for wxApp engaged calls; widgets pass through when SDK is correct.
+ */
+export const applyWxAppTelephonyControlVisibility = (
+  buttons: CallControlButton[],
+  task: ITask | null | undefined,
+  controls: TaskUIControls | undefined,
+  isTelephony: boolean,
+  enableWxBetterTogether?: boolean,
+  agentDeviceType?: string
+): CallControlButton[] => {
+  if (enableWxBetterTogether !== true) {
+    return buttons;
+  }
+
+  const mainCtrl = controls?.main as TaskMainControlsWithKeypad | undefined;
+  const wxAppEngaged = isTelephony && isWxAppEngagedCall(task);
+  const isExtensionAgent = agentDeviceType != null && agentDeviceType !== 'BROWSER';
+
+  return buttons.map((button) => {
+    if (button.id !== 'mute' && button.id !== 'keypad') {
+      return button;
+    }
+
+    const ctrl = button.id === 'mute' ? mainCtrl?.mute : mainCtrl?.keypad;
+
+    if (!ctrl?.isVisible || ctrl.isEnabled) {
+      return button;
+    }
+
+    // Extension ghost controls when flag ON but wxApp telephony not active.
+    if (isExtensionAgent && !wxAppEngaged) {
+      return {...button, isVisible: false};
+    }
+
+    // wxApp engaged: hide stale visible+disabled if SDK payload briefly desyncs.
+    if (wxAppEngaged) {
+      return {...button, isVisible: false};
+    }
+
+    return button;
+  });
+};
+
 /**
  * Checks if the media type is telephony
  */

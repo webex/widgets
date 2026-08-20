@@ -11,6 +11,8 @@ import CampaignTaskComponent from './components/task/CampaignTask/campaign-task'
 import RealTimeTranscriptComponent from './components/task/RealTimeTranscript/real-time-transcript';
 import E911Modal from './components/StationLogin/E911Modal/e911-modal';
 import AIAssistantComponent from './components/AIAssistant/ai-assistant';
+import TelephonyActionToast from './components/task/TelephonyActionToast/telephony-action-toast';
+import WxAppOfferActionError from './components/task/WxAppOfferActionError/wxapp-offer-action-error';
 
 export {
   UserStateComponent,
@@ -26,6 +28,8 @@ export {
   RealTimeTranscriptComponent,
   E911Modal,
   AIAssistantComponent,
+  TelephonyActionToast,
+  WxAppOfferActionError,
 };
 export * from './components/StationLogin/constants';
 export * from './components/StationLogin/E911Modal/e911-modal.types';

@@ -66,6 +66,8 @@ describe('CallControl Component', () => {
       consultTimerLabel: 'Consulting',
       consultTimerTimestamp: 0,
       isCampaignCall: false,
+      telephonyToast: null,
+      dismissTelephonyToast: jest.fn(),
     });
 
     render(
@@ -89,6 +91,7 @@ describe('CallControl Component', () => {
       isMuted: false,
       onToggleMute: undefined,
       agentId: store.agentId,
+      enableWxBetterTogether: false,
     });
   });
 

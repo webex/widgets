@@ -5,7 +5,7 @@ import {ErrorBoundary} from 'react-error-boundary';
 import store from '@webex/cc-store';
 import {useCallControl} from '../helper';
 import {CallControlProps} from '../task.types';
-import {CallControlCADComponent} from '@webex/cc-components';
+import {CallControlCADComponent, TelephonyActionToast} from '@webex/cc-components';
 import {isUnacceptedCampaignPreview} from '../Utils/task-util';
 
 const CallControlCADInternal: React.FunctionComponent<CallControlProps> = observer(
@@ -30,13 +30,15 @@ const CallControlCADInternal: React.FunctionComponent<CallControlProps> = observ
       isMuted,
       agentId,
       acceptedCampaignIds,
+      enableWxBetterTogether,
+      deviceType,
     } = store;
 
     if (currentTask && isUnacceptedCampaignPreview(currentTask, acceptedCampaignIds)) {
       return <></>;
     }
 
-    const callControlProps = useCallControl({
+    const {telephonyToast, dismissTelephonyToast, ...callControlHookProps} = useCallControl({
       currentTask,
       onHoldResume,
       onEnd,
@@ -47,10 +49,11 @@ const CallControlCADInternal: React.FunctionComponent<CallControlProps> = observ
       isMuted,
       conferenceEnabled,
       agentId,
+      enableWxBetterTogether,
     });
 
     const result = {
-      ...callControlProps,
+      ...callControlHookProps,
       wrapupCodes,
       consultStartTimeStamp,
       callControlAudio,
@@ -59,13 +62,22 @@ const CallControlCADInternal: React.FunctionComponent<CallControlProps> = observ
       allowConsultToQueue,
       logger,
       consultTransferOptions,
+      enableWxBetterTogether,
+      agentDeviceType: deviceType,
     };
 
     if (!currentTask) {
       return <></>;
     }
 
-    return <CallControlCADComponent {...result} />;
+    return (
+      <>
+        <CallControlCADComponent {...result} />
+        {telephonyToast ? (
+          <TelephonyActionToast error={telephonyToast.error} onDismiss={dismissTelephonyToast} />
+        ) : null}
+      </>
+    );
   }
 );
 

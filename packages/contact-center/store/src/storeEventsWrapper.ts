@@ -174,6 +174,10 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.isEmergencyModalAlreadyDisplayed;
   }
 
+  get enableWxBetterTogether() {
+    return this.store.enableWxBetterTogether;
+  }
+
   get realTimeAssist() {
     return this.store.realTimeAssist;
   }
@@ -264,6 +268,45 @@ class StoreWrapper implements IStoreWrapper {
     this.store.isAgentLoggedIn = value;
   };
 
+  private getCanonicalTask(task: ITask): ITask {
+    const interactionId = task.data?.interactionId;
+    if (!interactionId) {
+      return task;
+    }
+
+    const tasks = this.store.cc?.taskManager?.getAllTasks?.();
+    return tasks?.[interactionId] ?? task;
+  }
+
+  private seedWxAppMuteFromTask(task: ITask): void {
+    const interactionId = task.data?.interactionId;
+    if (!interactionId) {
+      return;
+    }
+
+    const canonicalTask = this.getCanonicalTask(task) as ITask & {
+      syncWxAppMuteFromCallDetails?: () => Promise<boolean | undefined>;
+      getWxAppMuted?: () => boolean;
+    };
+    const sync = canonicalTask.syncWxAppMuteFromCallDetails?.bind(canonicalTask);
+    if (typeof sync !== 'function') {
+      return;
+    }
+
+    void sync()
+      .then(() => {
+        if (this.currentTask?.data?.interactionId !== interactionId) {
+          return;
+        }
+
+        const muted = canonicalTask.getWxAppMuted?.();
+        if (typeof muted === 'boolean') {
+          this.setIsMuted(muted);
+        }
+      })
+      .catch(() => undefined);
+  }
+
   setCurrentTask = (task: ITask | null, isClicked: boolean = false): void => {
     // Don't assign the task as current task is incoming
     if (isIncomingTask(task, this.agentId)) return;
@@ -296,6 +339,10 @@ class StoreWrapper implements IStoreWrapper {
 
       // Update the current task
       this.store.currentTask = task ? Object.assign(Object.create(Object.getPrototypeOf(task)), task) : null;
+
+      if (task && !isSameTask) {
+        this.seedWxAppMuteFromTask(task);
+      }
 
       if (this.onTaskSelected && !isSameTask && typeof isClicked !== 'undefined') {
         this.onTaskSelected(task, isClicked);
