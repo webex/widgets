@@ -110,6 +110,7 @@ describe('CallControlComponent Snapshots', () => {
     stateTimerTimestamp: 0,
     consultTimerLabel: 'Consulting',
     consultTimerTimestamp: 0,
+    allowConsultToQueue: mockProfile.allowConsultToQueue,
     lastTargetType: TARGET_TYPE.AGENT,
     setLastTargetType: jest.fn(),
     isHeld: false,

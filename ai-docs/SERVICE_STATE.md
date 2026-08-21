@@ -37,6 +37,7 @@ Feature flags are not owned or defaulted by this repo — they are read from the
 | `isAnalyzerEnabled` | Analyzer-backed features | SDK-provided | Webex CC back end | SDK stops emitting it |
 | `webRtcEnabled` | WebRTC (browser) device option | SDK-provided | Webex CC back end | SDK stops emitting it |
 | `isRecordingManagementEnabled` | Recording toggle in CallControl | SDK-provided | Webex CC back end | SDK stops emitting it |
+| `allowConsultToQueue` | Consult-to-queue option | SDK-provided | Webex CC back end | SDK stops emitting it |
 
 ## Compliance / Certifications
 - FedRAMP: PR template (`.github/PULL_REQUEST_TEMPLATE.md`) compliance is mandatory and must not be regressed (COMPLETES, Change Type, test scenarios, GAI Policy, Checklist sections).

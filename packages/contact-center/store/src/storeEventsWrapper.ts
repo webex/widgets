@@ -215,6 +215,10 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.isEndConsultEnabled;
   }
 
+  get allowConsultToQueue() {
+    return this.store.allowConsultToQueue;
+  }
+
   get agentProfile() {
     return this.store.agentProfile;
   }
@@ -1315,7 +1319,8 @@ class StoreWrapper implements IStoreWrapper {
 
   getEntryPoints = async (params?: EntryPointSearchParams): Promise<EntryPointListResponse> => {
     try {
-      return await this.store.cc.getEntryPoints(params);
+      const response: EntryPointListResponse = await this.store.cc.getEntryPoints(params);
+      return response;
     } catch (error) {
       this.store.logger.error('Error fetching entry points:', error);
       throw error;
@@ -1327,7 +1332,8 @@ class StoreWrapper implements IStoreWrapper {
       if (!this.store.isAddressBookEnabled) {
         return {data: [], meta: {page: 0, totalPages: 0}};
       }
-      return await this.store.cc.addressBook.getEntries(params ?? {});
+      const response: AddressBookEntriesResponse = await this.store.cc.addressBook.getEntries(params ?? {});
+      return response;
     } catch (error) {
       this.store.logger.error('Error fetching address book entries:', error);
       throw error;

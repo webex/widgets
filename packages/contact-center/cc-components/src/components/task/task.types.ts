@@ -6,8 +6,8 @@ import {
   BuddyDetails,
   DestinationType,
   ContactServiceQueue,
-  EntryPointRecord,
   AddressBookEntry,
+  EntryPointRecord,
   FetchPaginatedList,
   Participant,
   AddressBookEntrySearchParams,
@@ -464,6 +464,11 @@ export interface ControlProps {
   isEndConsultEnabled: boolean;
 
   /**
+   * Flag to determine if the consulting to queue is enabled for the agent
+   */
+  allowConsultToQueue: boolean;
+
+  /**
    * Flag to enable or disable conference feature
    */
   conferenceEnabled: boolean;
@@ -547,6 +552,7 @@ export type CallControlComponentProps = Pick<
   | 'stateTimerTimestamp'
   | 'consultTimerLabel'
   | 'consultTimerTimestamp'
+  | 'allowConsultToQueue'
   | 'lastTargetType'
   | 'setLastTargetType'
   | 'controls'

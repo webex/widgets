@@ -109,6 +109,7 @@ jest.mock('../src/store', () => ({
     isQueueConsultInProgress: false,
     currentConsultQueueId: null,
     isEndConsultEnabled: true,
+    allowConsultToQueue: false,
     isDeclineButtonEnabled: false,
     isDigitalChannelsInitialized: false,
     acceptedCampaignIds: new Set<string>(),
@@ -269,6 +270,10 @@ describe('storeEventsWrapper', () => {
 
     it('should proxy isEndConsultEnabled', () => {
       expect(storeWrapper.isEndConsultEnabled).toBe(storeWrapper['store'].isEndConsultEnabled);
+    });
+
+    it('should proxy allowConsultToQueue', () => {
+      expect(storeWrapper.allowConsultToQueue).toBe(storeWrapper['store'].allowConsultToQueue);
     });
 
     it('should proxy isDeclineButtonEnabled', () => {
@@ -1178,25 +1183,8 @@ describe('storeEventsWrapper', () => {
       storeWrapper['store'].cc.getEntryPoints = jest.fn().mockResolvedValue(mockEntryPointsResponse);
 
       const result = await storeWrapper.getEntryPoints({page: 0, pageSize: 25});
-      expect(storeWrapper['store'].cc.getEntryPoints).toHaveBeenCalledWith({
-        page: 0,
-        pageSize: 25,
-      });
+      expect(storeWrapper['store'].cc.getEntryPoints).toHaveBeenCalledWith({page: 0, pageSize: 25});
       expect(result).toEqual(mockEntryPointsResponse);
-    });
-
-    it('should delegate entry-point parameters without widget-owned media filtering', async () => {
-      storeWrapper['store'].cc.getEntryPoints = jest.fn().mockResolvedValue({
-        data: [],
-        meta: {page: 0, totalPages: 0},
-      });
-
-      await storeWrapper.getEntryPoints({page: 0, pageSize: 25});
-
-      expect(storeWrapper['store'].cc.getEntryPoints).toHaveBeenCalledWith({
-        page: 0,
-        pageSize: 25,
-      });
     });
 
     it('should handle error while fetching entry points', async () => {
@@ -1207,19 +1195,16 @@ describe('storeEventsWrapper', () => {
 
     it('should fetch address book entries successfully', async () => {
       storeWrapper['store'].isAddressBookEnabled = true;
-      storeWrapper['store'].cc.addressBook.getEntries = jest.fn().mockResolvedValue(mockAddressBookEntriesResponse);
+      jest.spyOn(storeWrapper['store'].cc.addressBook, 'getEntries').mockResolvedValue(mockAddressBookEntriesResponse);
 
       const result = await storeWrapper.getAddressBookEntries({page: 0, pageSize: 25});
-      expect(storeWrapper['store'].cc.addressBook.getEntries).toHaveBeenCalledWith({
-        page: 0,
-        pageSize: 25,
-      });
+      expect(storeWrapper['store'].cc.addressBook.getEntries).toHaveBeenCalledWith({page: 0, pageSize: 25});
       expect(result).toEqual(mockAddressBookEntriesResponse);
     });
 
     it('should handle error while fetching address book entries', async () => {
       storeWrapper['store'].isAddressBookEnabled = true;
-      storeWrapper['store'].cc.addressBook.getEntries = jest.fn().mockRejectedValue(new Error('ab error'));
+      jest.spyOn(storeWrapper['store'].cc.addressBook, 'getEntries').mockRejectedValue(new Error('ab error'));
       await expect(storeWrapper.getAddressBookEntries({page: 0, pageSize: 25})).rejects.toThrow('ab error');
     });
 

@@ -16,6 +16,7 @@ const CallControlInternal: React.FunctionComponent<CallControlProps> = observer(
       wrapupCodes,
       consultStartTimeStamp,
       callControlAudio,
+      allowConsultToQueue,
       isMuted,
       agentId,
       acceptedCampaignIds,
@@ -46,6 +47,7 @@ const CallControlInternal: React.FunctionComponent<CallControlProps> = observer(
       wrapupCodes,
       consultStartTimeStamp,
       callControlAudio,
+      allowConsultToQueue,
       logger,
       consultTransferOptions,
     };

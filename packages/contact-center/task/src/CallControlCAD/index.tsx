@@ -26,6 +26,7 @@ const CallControlCADInternal: React.FunctionComponent<CallControlProps> = observ
       wrapupCodes,
       consultStartTimeStamp,
       callControlAudio,
+      allowConsultToQueue,
       isMuted,
       agentId,
       acceptedCampaignIds,
@@ -55,6 +56,7 @@ const CallControlCADInternal: React.FunctionComponent<CallControlProps> = observ
       callControlAudio,
       callControlClassName,
       callControlConsultClassName,
+      allowConsultToQueue,
       logger,
       consultTransferOptions,
     };

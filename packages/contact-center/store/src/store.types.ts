@@ -196,6 +196,7 @@ interface IStore {
   consultStartTimeStamp?: number;
   callControlAudio: MediaStream | null;
   isEndConsultEnabled: boolean;
+  allowConsultToQueue: boolean;
   agentProfile: AgentLoginProfile;
   isMuted: boolean;
   isAddressBookEnabled: boolean;
@@ -317,6 +318,9 @@ type FetchPaginatedList<T> = (
   params: PaginatedListParams
 ) => Promise<{data: T[]; meta?: {page?: number; totalPages?: number}}>;
 
+// Generic transform function for paginated APIs
+type TransformPaginatedData<T, U> = (item: T, page: number, index: number) => U;
+
 // Utility consts
 const DIAL_NUMBER: string = 'AGENT_DN';
 const EXTENSION: string = 'EXTENSION';
@@ -372,6 +376,7 @@ export type {
   IWebex,
   PaginatedListParams,
   FetchPaginatedList,
+  TransformPaginatedData,
   TaskUIControls,
   TaskUIControlState,
   InteractionUIControls,

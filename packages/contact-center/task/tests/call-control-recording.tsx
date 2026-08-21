@@ -2,7 +2,7 @@ import React from 'react';
 import {render, screen, act} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import {EventEmitter} from 'events';
-import store, {TASK_EVENTS, IContactCenter, ITask} from '@webex/cc-store';
+import store, {TASK_EVENTS, IContactCenter} from '@webex/cc-store';
 import {mockTask, mockCC, createEnabledMainTaskUIControls} from '@webex/test-fixtures';
 import {CallControl} from '../src/CallControl';
 
@@ -76,8 +76,8 @@ const promoteTask = (task: FakeTask) => {
   store.store.agentId = AGENT_ID;
   // Registers the store's own task listeners (refreshTaskList on recording
   // pause/resume, etc.) exactly as production does.
-  store.handleIncomingTask(task as unknown as ITask);
-  store.setCurrentTask(task as unknown as ITask);
+  store.handleIncomingTask(task);
+  store.setCurrentTask(task);
 };
 
 /** What the SDK does when the ContactRecordingPaused websocket event arrives. */
@@ -104,6 +104,7 @@ describe('CallControl recording pause/resume state', () => {
       info: jest.fn(),
       warn: jest.fn(),
       error: jest.fn(),
+      debug: jest.fn(),
       trace: jest.fn(),
     };
   });
