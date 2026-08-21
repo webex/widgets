@@ -88,16 +88,21 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
     logger,
   });
   const [allowParticipantsToInteract, setAllowParticipantsToInteract] = useState<boolean>(false);
-  const renderList = <T extends {id?: string; name: string; number?: string}>(
+  const renderList = <T extends {id?: string; name: string; number?: string; presence?: 'active' | 'away'}>(
     items: T[],
     onButtonPress: (item: T) => void
   ) => (
     <ListNext listSize={items.length} className="agent-list">
       {items.map((item) => (
-        <div key={item.id ?? item.name} onMouseDown={(e) => e.stopPropagation()} className="consult-list-item-wrapper">
+        <div
+          key={`${item.id ?? item.name}-${item.number ?? ''}`}
+          onMouseDown={(e) => e.stopPropagation()}
+          className="consult-list-item-wrapper"
+        >
           <ConsultTransferListComponent
             title={item.name}
             subtitle={item.number}
+            presence={item.presence}
             buttonIcon={buttonIcon}
             onButtonPress={() => onButtonPress(item)}
             logger={logger}
@@ -233,6 +238,7 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
               getAgentsForDisplay(selectedCategory, buddyAgents, searchQuery).map((agent) => ({
                 id: agent.agentId,
                 name: agent.agentName,
+                presence: agent.state?.toLowerCase() === 'available' ? ('active' as const) : ('away' as const),
               })),
               (item) => handleAgentSelection(item.id, item.name, allowParticipantsToInteract, onAgentSelect, logger)
             )

@@ -641,6 +641,7 @@ export type OutdialCallComponentProps = Pick<
 export interface ConsultTransferListComponentProps {
   title: string;
   subtitle?: string;
+  presence?: 'active' | 'away';
   buttonIcon: string;
   onButtonPress: () => void;
   className?: string;

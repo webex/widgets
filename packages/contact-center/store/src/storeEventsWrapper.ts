@@ -54,15 +54,13 @@ const getSupportedMediaType = (mediaType?: string): keyof typeof CONSULT_TRANSFE
     : undefined;
 };
 
-const getTaskChannelFilter = (entityType: 'queue' | 'entryPoint', mediaType?: string): string | undefined => {
+const getTaskQueueChannelFilter = (mediaType?: string): string | undefined => {
   const supportedMediaType = getSupportedMediaType(mediaType);
   const channelType = supportedMediaType ? CONSULT_TRANSFER_CHANNELS[supportedMediaType] : undefined;
 
   if (!channelType || channelType === 'TELEPHONY') return undefined;
 
-  const typeField = entityType === 'queue' ? 'queueType' : 'entryPointType';
-
-  return `${typeField}==INBOUND;channelType==${channelType};active==true`;
+  return `queueType==INBOUND;channelType==${channelType};active==true`;
 };
 
 class StoreWrapper implements IStoreWrapper {
@@ -1283,7 +1281,7 @@ class StoreWrapper implements IStoreWrapper {
   getQueues = async (params?: ContactServiceQueueSearchParams): Promise<ContactServiceQueuesResponse> => {
     try {
       const mediaType = this.currentTask?.data?.interaction?.mediaType;
-      const filter = getTaskChannelFilter('queue', mediaType);
+      const filter = getTaskQueueChannelFilter(mediaType);
 
       return await this.store.cc.getQueues({
         ...(filter ? {filter} : {}),
@@ -1297,13 +1295,7 @@ class StoreWrapper implements IStoreWrapper {
 
   getEntryPoints = async (params?: EntryPointSearchParams): Promise<EntryPointListResponse> => {
     try {
-      const mediaType = this.currentTask?.data?.interaction?.mediaType;
-      const filter = getTaskChannelFilter('entryPoint', mediaType);
-
-      return await this.store.cc.getEntryPoints({
-        ...(filter ? {filter} : {}),
-        ...(params ?? {}),
-      });
+      return await this.store.cc.getEntryPoints(params);
     } catch (error) {
       this.store.logger.error('Error fetching entry points:', error);
       throw error;

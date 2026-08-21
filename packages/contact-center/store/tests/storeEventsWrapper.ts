@@ -1120,7 +1120,6 @@ describe('storeEventsWrapper', () => {
     });
 
     it('should fetch entry points successfully', async () => {
-      storeWrapper['store'].currentTask = {data: {interaction: {mediaType: 'telephony'}}} as ITask;
       storeWrapper['store'].cc.getEntryPoints = jest.fn().mockResolvedValue(mockEntryPointsResponse);
 
       const result = await storeWrapper.getEntryPoints({page: 0, pageSize: 25});
@@ -1131,8 +1130,7 @@ describe('storeEventsWrapper', () => {
       expect(result).toEqual(mockEntryPointsResponse);
     });
 
-    it('should use the existing entry-point filter parameter for a non-telephony task', async () => {
-      storeWrapper['store'].currentTask = {data: {interaction: {mediaType: 'chat'}}} as ITask;
+    it('should delegate entry-point parameters without widget-owned media filtering', async () => {
       storeWrapper['store'].cc.getEntryPoints = jest.fn().mockResolvedValue({
         data: [],
         meta: {page: 0, totalPages: 0},
@@ -1141,7 +1139,6 @@ describe('storeEventsWrapper', () => {
       await storeWrapper.getEntryPoints({page: 0, pageSize: 25});
 
       expect(storeWrapper['store'].cc.getEntryPoints).toHaveBeenCalledWith({
-        filter: 'entryPointType==INBOUND;channelType==CHAT;active==true',
         page: 0,
         pageSize: 25,
       });

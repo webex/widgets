@@ -17,21 +17,10 @@ exports[`ConsultTransferListComponent Snapshots Interactions should render compo
     class="call-control-list-item-start"
     data-position="start"
   >
-    <div
-      aria-hidden="false"
-      aria-label=""
-      class="md-avatar-wrapper"
-      data-color="default"
-      data-size="32"
-      role="img"
-    >
-      <span
-        aria-hidden="true"
-        class="md-avatar-wrapper-children"
-      >
-        JD
-      </span>
-    </div>
+    <mdc-avatar
+      aria-hidden="true"
+      size="32"
+    />
   </div>
   <div
     class="call-control-list-item-middle"
@@ -98,21 +87,10 @@ exports[`ConsultTransferListComponent Snapshots Interactions should render compo
     class="call-control-list-item-start"
     data-position="start"
   >
-    <div
-      aria-hidden="false"
-      aria-label=""
-      class="md-avatar-wrapper"
-      data-color="default"
-      data-size="32"
-      role="img"
-    >
-      <span
-        aria-hidden="true"
-        class="md-avatar-wrapper-children"
-      >
-        JD
-      </span>
-    </div>
+    <mdc-avatar
+      aria-hidden="true"
+      size="32"
+    />
   </div>
   <div
     class="call-control-list-item-middle"
@@ -179,21 +157,10 @@ exports[`ConsultTransferListComponent Snapshots Interactions should render compo
     class="call-control-list-item-start"
     data-position="start"
   >
-    <div
-      aria-hidden="false"
-      aria-label=""
-      class="md-avatar-wrapper"
-      data-color="default"
-      data-size="32"
-      role="img"
-    >
-      <span
-        aria-hidden="true"
-        class="md-avatar-wrapper-children"
-      >
-        JD
-      </span>
-    </div>
+    <mdc-avatar
+      aria-hidden="true"
+      size="32"
+    />
   </div>
   <div
     class="call-control-list-item-middle"
@@ -260,21 +227,10 @@ exports[`ConsultTransferListComponent Snapshots Rendering - Tests for UI element
     class="call-control-list-item-start"
     data-position="start"
   >
-    <div
-      aria-hidden="false"
-      aria-label=""
-      class="md-avatar-wrapper"
-      data-color="default"
-      data-size="32"
-      role="img"
-    >
-      <span
-        aria-hidden="true"
-        class="md-avatar-wrapper-children"
-      >
-        JD
-      </span>
-    </div>
+    <mdc-avatar
+      aria-hidden="true"
+      size="32"
+    />
   </div>
   <div
     class="call-control-list-item-middle"
@@ -341,21 +297,10 @@ exports[`ConsultTransferListComponent Snapshots Rendering - Tests for UI element
     class="call-control-list-item-start"
     data-position="start"
   >
-    <div
-      aria-hidden="false"
-      aria-label=""
-      class="md-avatar-wrapper"
-      data-color="default"
-      data-size="32"
-      role="img"
-    >
-      <span
-        aria-hidden="true"
-        class="md-avatar-wrapper-children"
-      >
-        JD
-      </span>
-    </div>
+    <mdc-avatar
+      aria-hidden="true"
+      size="32"
+    />
   </div>
   <div
     class="call-control-list-item-middle"
@@ -422,21 +367,10 @@ exports[`ConsultTransferListComponent Snapshots Rendering - Tests for UI element
     class="call-control-list-item-start"
     data-position="start"
   >
-    <div
-      aria-hidden="false"
-      aria-label=""
-      class="md-avatar-wrapper"
-      data-color="default"
-      data-size="32"
-      role="img"
-    >
-      <span
-        aria-hidden="true"
-        class="md-avatar-wrapper-children"
-      >
-        JD
-      </span>
-    </div>
+    <mdc-avatar
+      aria-hidden="true"
+      size="32"
+    />
   </div>
   <div
     class="call-control-list-item-middle"
@@ -503,21 +437,10 @@ exports[`ConsultTransferListComponent Snapshots Rendering - Tests for UI element
     class="call-control-list-item-start"
     data-position="start"
   >
-    <div
-      aria-hidden="false"
-      aria-label=""
-      class="md-avatar-wrapper"
-      data-color="default"
-      data-size="32"
-      role="img"
-    >
-      <span
-        aria-hidden="true"
-        class="md-avatar-wrapper-children"
-      >
-        AB
-      </span>
-    </div>
+    <mdc-avatar
+      aria-hidden="true"
+      size="32"
+    />
   </div>
   <div
     class="call-control-list-item-middle"
@@ -584,21 +507,10 @@ exports[`ConsultTransferListComponent Snapshots Rendering - Tests for UI element
     class="call-control-list-item-start"
     data-position="start"
   >
-    <div
-      aria-hidden="false"
-      aria-label=""
-      class="md-avatar-wrapper"
-      data-color="default"
-      data-size="32"
-      role="img"
-    >
-      <span
-        aria-hidden="true"
-        class="md-avatar-wrapper-children"
-      >
-        JD
-      </span>
-    </div>
+    <mdc-avatar
+      aria-hidden="true"
+      size="32"
+    />
   </div>
   <div
     class="call-control-list-item-middle"
@@ -665,21 +577,10 @@ exports[`ConsultTransferListComponent Snapshots Rendering - Tests for UI element
     class="call-control-list-item-start"
     data-position="start"
   >
-    <div
-      aria-hidden="false"
-      aria-label=""
-      class="md-avatar-wrapper"
-      data-color="default"
-      data-size="32"
-      role="img"
-    >
-      <span
-        aria-hidden="true"
-        class="md-avatar-wrapper-children"
-      >
-        J
-      </span>
-    </div>
+    <mdc-avatar
+      aria-hidden="true"
+      size="32"
+    />
   </div>
   <div
     class="call-control-list-item-middle"
@@ -746,21 +647,10 @@ exports[`ConsultTransferListComponent Snapshots Rendering - Tests for UI element
     class="call-control-list-item-start"
     data-position="start"
   >
-    <div
-      aria-hidden="false"
-      aria-label=""
-      class="md-avatar-wrapper"
-      data-color="default"
-      data-size="32"
-      role="img"
-    >
-      <span
-        aria-hidden="true"
-        class="md-avatar-wrapper-children"
-      >
-        JO
-      </span>
-    </div>
+    <mdc-avatar
+      aria-hidden="true"
+      size="32"
+    />
   </div>
   <div
     class="call-control-list-item-middle"
@@ -827,21 +717,10 @@ exports[`ConsultTransferListComponent Snapshots Rendering - Tests for UI element
     class="call-control-list-item-start"
     data-position="start"
   >
-    <div
-      aria-hidden="false"
-      aria-label=""
-      class="md-avatar-wrapper"
-      data-color="default"
-      data-size="32"
-      role="img"
-    >
-      <span
-        aria-hidden="true"
-        class="md-avatar-wrapper-children"
-      >
-        JD
-      </span>
-    </div>
+    <mdc-avatar
+      aria-hidden="true"
+      size="32"
+    />
   </div>
   <div
     class="call-control-list-item-middle"
@@ -908,21 +787,10 @@ exports[`ConsultTransferListComponent Snapshots Rendering - Tests for UI element
     class="call-control-list-item-start"
     data-position="start"
   >
-    <div
-      aria-hidden="false"
-      aria-label=""
-      class="md-avatar-wrapper"
-      data-color="default"
-      data-size="32"
-      role="img"
-    >
-      <span
-        aria-hidden="true"
-        class="md-avatar-wrapper-children"
-      >
-        JD
-      </span>
-    </div>
+    <mdc-avatar
+      aria-hidden="true"
+      size="32"
+    />
   </div>
   <div
     class="call-control-list-item-middle"
@@ -982,21 +850,10 @@ exports[`ConsultTransferListComponent Snapshots State Management should update w
     class="call-control-list-item-start"
     data-position="start"
   >
-    <div
-      aria-hidden="false"
-      aria-label=""
-      class="md-avatar-wrapper"
-      data-color="default"
-      data-size="32"
-      role="img"
-    >
-      <span
-        aria-hidden="true"
-        class="md-avatar-wrapper-children"
-      >
-        JD
-      </span>
-    </div>
+    <mdc-avatar
+      aria-hidden="true"
+      size="32"
+    />
   </div>
   <div
     class="call-control-list-item-middle"
@@ -1063,21 +920,10 @@ exports[`ConsultTransferListComponent Snapshots State Management should update w
     class="call-control-list-item-start"
     data-position="start"
   >
-    <div
-      aria-hidden="false"
-      aria-label=""
-      class="md-avatar-wrapper"
-      data-color="default"
-      data-size="32"
-      role="img"
-    >
-      <span
-        aria-hidden="true"
-        class="md-avatar-wrapper-children"
-      >
-        JD
-      </span>
-    </div>
+    <mdc-avatar
+      aria-hidden="true"
+      size="32"
+    />
   </div>
   <div
     class="call-control-list-item-middle"
@@ -1144,21 +990,10 @@ exports[`ConsultTransferListComponent Snapshots State Management should update w
     class="call-control-list-item-start"
     data-position="start"
   >
-    <div
-      aria-hidden="false"
-      aria-label=""
-      class="md-avatar-wrapper"
-      data-color="default"
-      data-size="32"
-      role="img"
-    >
-      <span
-        aria-hidden="true"
-        class="md-avatar-wrapper-children"
-      >
-        JS
-      </span>
-    </div>
+    <mdc-avatar
+      aria-hidden="true"
+      size="32"
+    />
   </div>
   <div
     class="call-control-list-item-middle"
