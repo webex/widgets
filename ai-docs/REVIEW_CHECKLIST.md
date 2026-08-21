@@ -20,7 +20,7 @@
 | # | Check | When it applies | What it verifies | Severity |
 |---|---|---|---|---|
 | K1 | Regression guard | Modifying a weakly covered module (DRAFT/PARTIAL), or any MODIFIED/REMOVED requirement | A characterization baseline exists; invariants the change claims NOT to alter still hold (positive + negative) | Blocking |
-| K2 | Grounding | Weakly covered (DRAFT) module — all modules are DRAFT during migration | Claims cite real code (file path), not memory; uncovered public surfaces flagged `[NEEDS HUMAN INPUT]` | Important |
+| K2 | Grounding | Weakly covered module — all tracked modules are `Partial` during migration (`.sdd/manifest.json` `coverage_status`); per `coverage_status_definitions`, a Partial spec is a hint, so cross-check code | Claims cite real code (file path), not memory; uncovered public surfaces flagged `[NEEDS HUMAN INPUT]` | Important |
 | K3 | Drift threshold | Any tracked module | Module drift is within its status threshold (DRAFT 25% / PARTIAL 15% / AUTHORITATIVE 5%; see `RULES.md` / `.sdd/coverage-policy.defaults.yaml`) | Important |
 | K4 | Coverage-state accuracy | Coverage-state change proposed | The recorded `.sdd/manifest.json` coverage state matches the evidence; promotion/demotion rules honored | Medium |
 

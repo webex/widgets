@@ -27,8 +27,8 @@ wrapper and its tests; the meeting UI, adapter, and SDK live in external package
 ## Source Material Register
 | Source doc | Scope | Decision | Detail location or disposition |
 |---|---|---|---|
-| `ai-docs/_archive/pre-sdlc-migration/packages/@webex/widgets/ai-docs/AGENTS.md` | overview / API / examples | reconciled | Orientation → Overview/Purpose; props → Public Surface; capabilities → Use Cases. External-package API tables (adapter/control methods) retained as reference under Class/Component Relationships and Sequence Diagrams; they describe `@webex/sdk-component-adapter`, not this repo's code. |
-| `ai-docs/_archive/pre-sdlc-migration/packages/@webex/widgets/ai-docs/ARCHITECTURE.md` | architecture / flows / state | reconciled | Three-repo layering → Design Overview/Data Flow; event flows → Sequence Diagram(s); state machine → State Machine; troubleshooting → Pitfalls. Component table is external (`@webex/components`) and kept as reference, not as owned design. |
+| Archived pre-migration agent guide | overview / API / examples | reconciled | Orientation → Overview/Purpose; props → Public Surface; capabilities → Use Cases. External-package API tables (adapter/control methods) retained as reference under Class/Component Relationships and Sequence Diagrams; they describe `@webex/sdk-component-adapter`, not this repo's code. |
+| Archived pre-migration architecture guide | architecture / flows / state | reconciled | Three-repo layering → Design Overview/Data Flow; event flows → Sequence Diagram(s); state machine → State Machine; troubleshooting → Pitfalls. Component table is external (`@webex/components`) and kept as reference, not as owned design. |
 | `packages/@webex/widgets/src/widgets/WebexMeetings/README.md` | overview / usage | reference-only | Layout values, custom-controls contract, and browser limitations folded into Public Surface, UI Flow, and Pitfalls. |
 | `ai-docs/CONTRACTS.md` | API/contract index | conflicting / not applicable | The root contracts catalog documents the Contact Center widget family only; it does NOT list `@webex/widgets`. This spec routes Public Surface to the package entry point (`packages/@webex/widgets/src/index.js`) instead of a CONTRACTS anchor. Flagged as a gap for human follow-up. |
 
@@ -202,14 +202,51 @@ flowchart TD
     Adapter -->|RxJS BehaviorSubject emits meeting state| Meeting
 ```
 
-## Sequence Diagram(s)
-Sequence coverage:
+The two directional chains (external adapter/components; retained as reference boundaries):
 
-| Operation group | Diagram | Failure / recovery coverage |
-|---|---|---|
-| Bootstrap + render branch (this repo's code) | "Mount → adapter factory → permission branch" | Loading state when adapter not ready; ASKING permission shows prompt instead of meeting |
-| Join / authenticate (external adapter + components) | "Join meeting with optional password" | alt branch for password required / invalid password |
-| State transition to JOINED / LOBBY (external) | "Waiting for host (LOBBY)" | Catch-all `else` renders WebexWaitingForHost for non-terminal states |
+Outbound (user action → backend):
+```
+User clicks control button
+  → Component (WebexMeetingControl)
+    → useMeetingControl hook
+      → Control.action({ meetingID })
+        → sdk-component-adapter method
+          → webex-js-sdk meeting method
+            → Backend (REST/WebSocket)
+```
+
+Inbound (backend → UI update):
+```
+Backend processes request
+  → WebSocket event delivered to webex-js-sdk
+    → sdk-component-adapter detects change
+      → RxJS BehaviorSubject emits new meeting state
+        → useMeeting hook receives update
+          → Component re-renders
+```
+
+## Sequence Diagram(s)
+The diagrams below preserve each distinct operation group from the source event-flow set. Group 1 is
+this repo's owned bootstrap/render-branch behavior (verified in `WebexMeetings.jsx`); groups 2–11
+document the external adapter/components operation ordering the widget integrates with. They are
+retained as reference boundaries (they describe `@webex/sdk-component-adapter` and `@webex/components`,
+not in-repo code) and are kept as separate diagrams because each describes a distinct operation group,
+actor set, and failure/recovery path.
+
+| # | Operation group | Diagram | Failure / recovery coverage |
+|---|---|---|---|
+| 1 | Bootstrap + render branch (this repo's code) | "Mount → adapter factory → permission branch" | Loading state when adapter not ready; ASKING permission shows prompt instead of meeting |
+| 2 | SDK initialization (external adapter) | "SDK initialization — connect()" | Device register → mercury → meetings register/sync ordering; loading until meetings ready |
+| 3 | Meeting creation & interstitial (external) | "Meeting creation & interstitial" | Meeting created with `state=NOT_JOINED`; interstitial controls shown |
+| 4 | Join / authenticate (external adapter + components) | "Join meeting with optional password" | alt branch for password required / invalid password |
+| 5 | Mute / unmute audio (external `AudioControl`) | "Mute / unmute audio" | Toggling `localAudio.muting`; muted↔unmuted display emit |
+| 6 | Start / stop video (external `VideoControl`) | "Start / stop video" | Toggling `localVideo.muting`; on↔off display emit |
+| 7 | Start / stop screen share (external `ShareControl`) | "Start / stop screen share" | `getDisplayMedia` picker; stop path returns to receive-only |
+| 8 | Toggle member roster (external `RosterControl`) | "Toggle member roster" | Client-side only; no backend call |
+| 9 | Toggle settings & switch camera (external) | "Toggle settings & switch camera" | `settings.visible` toggle; `updateVideo/updateAudio` only when joined |
+| 10 | Leave meeting (external `ExitControl`) | "Leave meeting" | `removeMedia` stops local streams; emits `state: LEFT` |
+| 11 | Guest / host authentication (external `JoinControl`) | "Guest/host authentication" | alt correct→JOINED / incorrect→invalidPassword; host-pin alternative |
+| 12 | State transition to JOINED / LOBBY (external) | "Waiting for host (LOBBY)" | Catch-all `else` renders WebexWaitingForHost for non-terminal states |
 
 ```mermaid
 sequenceDiagram
@@ -277,6 +314,301 @@ sequenceDiagram
     Meeting->>Meeting: transition WaitingForHost -> in-meeting
 ```
 
+### SDK initialization (external adapter `connect()`)
+The distinct SDK-registration ordering: `device.register()` → `mercury.connect()` → `meetings.register()` + `syncMeetings()`. The widget's factory only builds `new Webex()` + `new WebexSDKAdapter()`; `connect()` runs in the `withAdapter` HOC.
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Component as WebexMeeting
+    participant Adapter as sdk-component-adapter
+    participant SDK as webex-js-sdk
+    participant Backend
+
+    User->>Component: Mount widget with accessToken
+    Component->>SDK: new Webex({ credentials: { access_token } })
+    Component->>Adapter: new WebexSDKAdapter(webex)
+    Adapter->>Adapter: Create MeetingsSDKAdapter(webex) with controls
+
+    Component->>Adapter: sdkAdapter.connect()
+    Adapter->>SDK: sdk.internal.device.register()
+    SDK->>Backend: Register device
+    Backend-->>SDK: Device registered
+    Adapter->>SDK: sdk.internal.mercury.connect()
+    SDK->>Backend: Open WebSocket
+    Backend-->>SDK: WebSocket connected
+    Adapter->>SDK: webex.meetings.register() + syncMeetings()
+    SDK-->>Adapter: Meetings ready
+
+    Component->>Component: Render with AdapterContext.Provider
+```
+
+### Meeting creation & interstitial (external)
+```mermaid
+sequenceDiagram
+    participant User
+    participant Component as WebexMeeting
+    participant Adapter as sdk-component-adapter
+    participant SDK as webex-js-sdk
+    participant Backend
+
+    User->>Component: Provide meeting destination (URL/SIP/PMR)
+    Component->>Adapter: createMeeting(destination)
+    Adapter->>SDK: webex.meetings.create(destination)
+    SDK->>Backend: Resolve meeting info, check active sessions, get user profile
+    Backend-->>SDK: Meeting info (title, sipUri), user profile
+
+    Note over SDK: Meeting object created with state=NOT_JOINED
+
+    SDK-->>Adapter: Meeting object
+    Adapter->>Adapter: Create meeting observable (RxJS)
+    Adapter-->>Component: meetingID
+
+    Component->>Component: Render WebexInterstitialMeeting
+    Component->>Component: Show local media preview
+    Component->>Component: Show controls [mute-audio, mute-video, settings, join-meeting]
+```
+
+### Mute / unmute audio (external `AudioControl`)
+```mermaid
+sequenceDiagram
+    participant User
+    participant Component as WebexMeetingControlBar
+    participant Adapter as AudioControl
+    participant SDK as webex-js-sdk
+    participant Backend
+
+    Note over User: Audio is currently UNMUTED
+
+    User->>Component: Click microphone button
+    Component->>Adapter: action({ meetingID })
+    Adapter->>Adapter: handleLocalAudio(ID)
+    Adapter->>Adapter: Set localAudio.muting = true
+    Adapter->>SDK: sdkMeeting.muteAudio()
+    SDK->>Backend: Update media state (audio -> receive-only)
+    Backend-->>SDK: Confirmed
+
+    Adapter->>Adapter: Emit { disabledLocalAudio: stream, localAudio.stream: null }
+    Adapter-->>Component: display() emits { icon: microphone-muted, text: Unmute, state: ACTIVE }
+    Component->>Component: Re-render with muted icon
+
+    Note over User: Audio is now MUTED — click again to unmute
+
+    User->>Component: Click microphone button
+    Component->>Adapter: action({ meetingID })
+    Adapter->>Adapter: handleLocalAudio(ID)
+    Adapter->>Adapter: Set localAudio.muting = false
+    Adapter->>SDK: sdkMeeting.unmuteAudio()
+    SDK->>Backend: Update media state (audio -> send+receive)
+    Backend-->>SDK: Confirmed
+
+    Adapter->>Adapter: Emit { disabledLocalAudio: null, localAudio.stream: stream }
+    Adapter-->>Component: display() emits { icon: microphone, text: Mute, state: INACTIVE }
+    Component->>Component: Re-render with unmuted icon
+```
+
+### Start / stop video (external `VideoControl`)
+```mermaid
+sequenceDiagram
+    participant User
+    participant Component as WebexMeetingControlBar
+    participant Adapter as VideoControl
+    participant SDK as webex-js-sdk
+    participant Backend
+
+    Note over User: Video is currently ON
+
+    User->>Component: Click camera button
+    Component->>Adapter: action({ meetingID })
+    Adapter->>Adapter: handleLocalVideo(ID)
+    Adapter->>Adapter: Set localVideo.muting = true
+    Adapter->>SDK: sdkMeeting.muteVideo()
+    SDK->>Backend: Update media state (video -> receive-only)
+    Backend-->>SDK: Confirmed
+
+    Adapter->>Adapter: Emit { disabledLocalVideo: stream, localVideo.stream: null }
+    Adapter-->>Component: display() emits { icon: camera-muted, text: Start video, state: ACTIVE }
+
+    Note over User: Video is now OFF — click again to start
+
+    User->>Component: Click camera button
+    Component->>Adapter: action({ meetingID })
+    Adapter->>Adapter: handleLocalVideo(ID)
+    Adapter->>Adapter: Set localVideo.muting = false
+    Adapter->>SDK: sdkMeeting.unmuteVideo()
+    SDK->>Backend: Update media state (video -> send+receive)
+    Backend-->>SDK: Confirmed
+
+    Adapter->>Adapter: Emit { disabledLocalVideo: null, localVideo.stream: stream }
+    Adapter-->>Component: display() emits { icon: camera, text: Stop video, state: INACTIVE }
+```
+
+### Start / stop screen share (external `ShareControl`)
+```mermaid
+sequenceDiagram
+    participant User
+    participant Component as WebexMeetingControlBar
+    participant Adapter as ShareControl
+    participant SDK as webex-js-sdk
+    participant Backend
+
+    User->>Component: Click share screen button
+    Component->>Adapter: action({ meetingID })
+    Adapter->>Adapter: handleLocalShare(ID)
+    Adapter->>SDK: sdkMeeting.getMediaStreams({ sendShare: true })
+    SDK->>User: Browser screen picker dialog (getDisplayMedia)
+    User->>SDK: Select screen/window/tab
+    SDK-->>Adapter: [, localShareStream]
+    Adapter->>SDK: sdkMeeting.updateShare({ stream, sendShare: true, receiveShare: true })
+    SDK->>Backend: Update media state (share -> send+receive)
+    Backend-->>SDK: Confirmed
+
+    Adapter->>Adapter: Emit { localShare.stream: localShareStream }
+    Adapter-->>Component: display() emits { text: Stop sharing, state: ACTIVE }
+
+    Note over User: Sharing active — click again to stop
+
+    User->>Component: Click stop sharing
+    Component->>Adapter: action({ meetingID })
+    Adapter->>Adapter: handleLocalShare(ID)
+    Adapter->>Adapter: stopStream(localShare.stream)
+    Adapter->>SDK: sdkMeeting.updateShare({ sendShare: false, receiveShare: true })
+    SDK->>Backend: Update media state (share -> receive-only)
+    Backend-->>SDK: Confirmed
+
+    Adapter->>Adapter: Emit { localShare.stream: null }
+    Adapter-->>Component: display() emits { text: Start sharing, state: INACTIVE }
+```
+
+### Toggle member roster (external `RosterControl`)
+```mermaid
+sequenceDiagram
+    participant User
+    participant Component as WebexMeeting
+    participant Adapter as RosterControl
+
+    Note over Adapter: Client-side only — no Backend call
+
+    User->>Component: Click roster button
+    Component->>Adapter: action({ meetingID })
+    Adapter->>Adapter: toggleRoster(ID)
+    Adapter->>Adapter: meeting.showRoster = !meeting.showRoster
+    Adapter->>Adapter: Emit observable { showRoster: true }
+    Adapter-->>Component: Observable emits
+    Component->>Component: Render WebexMemberRoster panel
+
+    User->>Component: Click roster button (close)
+    Component->>Adapter: action({ meetingID })
+    Adapter->>Adapter: toggleRoster(ID)
+    Adapter->>Adapter: Emit { showRoster: false }
+    Adapter-->>Component: Observable emits
+    Component->>Component: Remove WebexMemberRoster panel
+```
+
+### Toggle settings & switch camera (external)
+```mermaid
+sequenceDiagram
+    participant User
+    participant Component as WebexMeeting
+    participant Adapter as sdk-component-adapter
+    participant SDK as webex-js-sdk
+
+    User->>Component: Click settings button
+    Component->>Adapter: SettingsControl.action({ meetingID })
+    Adapter->>Adapter: toggleSettings(ID)
+    Adapter->>Adapter: Clone current streams to settings.preview
+    Adapter->>Adapter: Emit { settings.visible: true }
+    Adapter-->>Component: Observable emits
+    Component->>Component: Open WebexSettings modal
+
+    Note over User: User selects a different camera
+
+    User->>Component: Select new camera from dropdown
+    Component->>Adapter: SwitchCameraControl.action({ meetingID, cameraId })
+    Adapter->>Adapter: switchCamera(ID, cameraId)
+    Adapter->>SDK: sdkMeeting.getMediaStreams({ sendVideo: true }, { video: { deviceId } })
+    SDK->>SDK: getUserMedia with new deviceId
+    SDK-->>Adapter: New video MediaStream
+    Adapter->>Adapter: Emit { settings.preview.video: newStream, cameraID }
+    Adapter-->>Component: Settings preview re-renders with new camera
+
+    User->>Component: Close settings modal
+    Component->>Adapter: SettingsControl.action({ meetingID })
+    Adapter->>Adapter: toggleSettings(ID)
+    Adapter->>Adapter: Replace meeting streams with preview streams
+
+    alt Meeting is joined
+        Adapter->>SDK: sdkMeeting.updateVideo({ stream, receiveVideo, sendVideo })
+        Adapter->>SDK: sdkMeeting.updateAudio({ stream, receiveAudio, sendAudio })
+    end
+
+    Adapter->>Adapter: Emit { settings.visible: false }
+    Component->>Component: Close modal
+```
+
+### Leave meeting (external `ExitControl`)
+```mermaid
+sequenceDiagram
+    participant User
+    participant Component as WebexMeetingControlBar
+    participant Adapter as ExitControl
+    participant SDK as webex-js-sdk
+    participant Backend
+
+    User->>Component: Click leave meeting button
+    Component->>Adapter: action({ meetingID })
+    Adapter->>Adapter: leaveMeeting(ID)
+    Adapter->>Adapter: removeMedia(ID) — stop all local streams
+    Adapter->>SDK: sdkMeeting.leave()
+    SDK->>Backend: Leave session
+    Backend-->>SDK: Confirmed
+
+    SDK-->>Adapter: Meeting state updated
+    Adapter->>Adapter: Emit { state: LEFT }
+    Adapter-->>Component: Observable emits
+
+    Component->>Component: Show "You've successfully left the meeting"
+```
+
+### Guest / host authentication (external `JoinControl`)
+```mermaid
+sequenceDiagram
+    participant User
+    participant Component as WebexMeeting
+    participant Adapter as JoinControl
+    participant SDK as webex-js-sdk
+    participant Backend
+
+    Note over Component: Meeting has passwordRequired=true
+
+    Component->>Component: Detect passwordRequired from observable
+    Component->>Component: Open WebexMeetingGuestAuthentication modal
+
+    User->>Component: Enter password, click "Join as Guest"
+    Component->>Adapter: action({ meetingID })
+    Adapter->>SDK: joinMeeting(ID, { password })
+    SDK->>Backend: Verify password and join
+    Backend-->>SDK: Result
+
+    alt Password Correct
+        SDK-->>Adapter: state -> JOINED
+        Adapter-->>Component: Observable emits
+        Component->>Component: Close auth modal, show in-meeting view
+    else Password Incorrect
+        SDK-->>Adapter: Error / invalidPassword flag
+        Adapter-->>Component: Observable emits { invalidPassword: true }
+        Component->>Component: Show error in auth modal
+    end
+
+    Note over User: Alternative: "I'm the host"
+
+    User->>Component: Click "I'm the host"
+    Component->>Component: Switch to WebexMeetingHostAuthentication modal
+    User->>Component: Enter host pin, click "Start Meeting"
+    Component->>Adapter: action({ meetingID })
+    Adapter->>SDK: joinMeeting(ID, { hostKey: hostPin })
+```
+
 ## Class / Component Relationships
 The only repo-owned types are `WebexMeetingsWidget` (class) and `WebexLogo` (function component). Everything
 else is imported. The diagram shows the owned class, the HOC wrap, and the external collaborators it renders
@@ -321,7 +653,312 @@ Reference (external, not repo-owned): `WebexMeeting` further orchestrates `Webex
 `ExitControl`, `RosterControl`, `SettingsControl`, switch-device controls). These live in
 `@webex/components` and `@webex/sdk-component-adapter`; see those repos for their internals.
 
+### Full layer architecture (reference)
+The complete three-repo composition below is external (UI layer = `@webex/components`, adapter layer =
+`@webex/sdk-component-adapter`, SDK layer = `webex`). It is retained as a dependency-boundary reference,
+not as in-repo design; only the widget entry point (`W`) is repo-owned.
+
+```mermaid
+graph TB
+    subgraph "Widget Layer"
+        W[Widget Entry Point]
+    end
+
+    subgraph "UI Layer (components repo)"
+        WM[WebexMeeting]
+        WIM[WebexInterstitialMeeting]
+        WIN[WebexInMeeting]
+        WFH[WebexWaitingForHost]
+        MCB[WebexMeetingControlBar]
+        WLM[WebexLocalMedia]
+        WRM[WebexRemoteMedia]
+        WMR[WebexMemberRoster]
+        WS[WebexSettings]
+        WGA[WebexMeetingGuestAuthentication]
+        WHA[WebexMeetingHostAuthentication]
+        WMI[WebexMeetingInfo]
+        WMA[WebexMediaAccess]
+    end
+
+    subgraph "Adapter Layer (sdk-component-adapter)"
+        ADAPT[MeetingsSDKAdapter]
+        AC[AudioControl]
+        VC[VideoControl]
+        SC[ShareControl]
+        JC[JoinControl]
+        EC[ExitControl]
+        RC[RosterControl]
+        STC[SettingsControl]
+        SCC[SwitchCameraControl]
+        SMC[SwitchMicrophoneControl]
+        SSC[SwitchSpeakerControl]
+    end
+
+    subgraph "SDK Layer (webex-js-sdk)"
+        SDK[Webex Instance]
+    end
+
+    subgraph "Backend"
+        BE[Backend]
+    end
+
+    W -->|creates| SDK
+    W -->|creates| ADAPT
+    W -->|AdapterContext| WM
+    W --> WMA
+    WM --> WIM
+    WM --> WIN
+    WM --> WFH
+    WM --> MCB
+    WM --> WMR
+    WM --> WS
+    WM --> WGA
+    WM --> WHA
+    WIN --> WLM
+    WIN --> WRM
+    WIN --> WMI
+    WIN --> WGA
+    WIN --> WHA
+    WIM --> WMI
+    WFH --> WMI
+    MCB --> AC & VC & SC & JC & EC & RC & STC
+    STC --> SCC & SMC & SSC
+    AC & VC & SC & JC & EC & RC & STC & SCC & SMC & SSC --> ADAPT
+    ADAPT --> SDK
+    SDK --> BE
+```
+
+### External component catalog (reference)
+All components below are from `@webex/components` (`src/components/`). Render conditions are decided by
+the parent; internal data comes from each component's own hooks. Retained as reference; not repo-owned.
+
+| Component | Folder | Purpose | Render Condition (parent decides) | Internal Data Source (own hooks) |
+|---|---|---|---|---|
+| `WebexMeeting` | `WebexMeeting/` | Master orchestrator — renders correct view based on meeting state | Always (top-level) | `useMeeting(meetingID)` → `ID`, `localAudio`, `localVideo`, `state`, `showRoster`, `settings`, `passwordRequired` |
+| `WebexInterstitialMeeting` | `WebexInterstitialMeeting/` | Pre-join lobby with local media preview | `state === NOT_JOINED` | `useMeeting(meetingID)` → `localVideo` |
+| `WebexInMeeting` | `WebexInMeeting/` | Active meeting view with remote + local media | `state === JOINED` | `useMeeting(meetingID)` → `remoteShare`, `localShare`, `passwordRequired`, `state` |
+| `WebexWaitingForHost` | `WebexWaitingForHost/` | Waiting room when host hasn't started (renders for `LOBBY` state) | `else` (not JOINED/NOT_JOINED/LEFT — typically `LOBBY`) | `useMeeting(meetingID)` → `ID`; uses `AdapterContext` → `leaveMeeting(ID)` |
+| `WebexMeetingControlBar` | `WebexMeetingControlBar/` | Renders meeting control buttons | Always (when state is truthy and not LEFT) | `useMeeting(meetingID)` → `state`; computes `isActive = state === JOINED` to select controls |
+| `WebexMeetingControl` | `WebexMeetingControl/` | Individual control button | Rendered by `WebexMeetingControlBar` | `useMeetingControl(type, meetingID)` → `[action, display]` |
+| `WebexMeetingInfo` | `WebexMeetingInfo/` | Meeting title and time overlay | Rendered inside `WebexInMeeting`, `WebexInterstitialMeeting`, `WebexWaitingForHost` | `useMeeting(meetingID)` → `ID`, `startTime`, `endTime`, `title` |
+| `WebexMediaAccess` | `WebexMediaAccess/` | Browser media permission prompt (camera/microphone) | `localAudio.permission === 'ASKING'` or `localVideo.permission === 'ASKING'` (in widget) | `useMeeting(meetingID)` → `ID`; uses `AdapterContext` → `ignoreVideoAccessPrompt` / `ignoreAudioAccessPrompt` |
+| `WebexLocalMedia` | `WebexLocalMedia/` | Local camera/screen/preview video | Rendered inside `WebexInMeeting`, `WebexInterstitialMeeting`, `WebexWaitingForHost` | `useMeeting(meetingID)` → `localVideo`, `localShare`, `settings`; also `useMe()` → `ID` |
+| `WebexRemoteMedia` | `WebexRemoteMedia/` | Remote participant video, audio, and share | Rendered inside `WebexInMeeting` | `useMeeting(meetingID)` → `remoteAudio`, `remoteVideo`, `remoteShare`, `error`, `speakerID`; also `useMembers()` |
+| `WebexMemberRoster` | `WebexMemberRoster/` | Participant list panel | `showRoster === true` (in `WebexMeeting`) | `useMembers(destinationID, destinationType)`; `useMe()` → `orgID`. Does NOT use `useMeeting` |
+| `WebexSettings` | `WebexSettings/` | Audio/video device settings modal (tabs) | `settings.visible === true` (in `WebexMeeting`) | None — delegates to `WebexAudioSettings` + `WebexVideoSettings` children |
+| `WebexMeetingGuestAuthentication` | `WebexMeetingGuestAuthentication/` | Guest password entry (rendered in both `WebexMeeting` and `WebexInMeeting`) | `passwordRequired && !meetingPasswordOrPin && state === NOT_JOINED` | `useMeeting(meetingID)` → `ID`, `failureReason`, `invalidPassword`, `requiredCaptcha`; uses `AdapterContext` → `joinMeeting`, `clearInvalidPasswordFlag`, `refreshCaptcha` |
+| `WebexMeetingHostAuthentication` | `WebexMeetingHostAuthentication/` | Host pin entry (rendered in both `WebexMeeting` and `WebexInMeeting`) | User clicks "I'm the host" in guest modal | `useMeeting(meetingID)` → `ID`, `invalidHostKey`; uses `AdapterContext` → `joinMeeting`, `clearInvalidHostKeyFlag` |
+
+### SDK ↔ adapter ↔ control map (reference)
+The per-operation mapping from adapter method to underlying SDK methods and the owning control class.
+External to this repo (`@webex/sdk-component-adapter` → `src/MeetingsSDKAdapter.js` and
+`src/MeetingsSDKAdapter/controls/`); retained as a dependency-boundary reference.
+
+| Area | SDK Methods | Adapter Methods | Control Class |
+|---|---|---|---|
+| Initialization | `new Webex()`, `device.register()`, `mercury.connect()` | `sdkAdapter.connect()` → calls `meetings.register()` + `syncMeetings()` | — |
+| Meeting creation | `webex.meetings.create(destination)` | `adapter.meetingsAdapter.createMeeting(dest)` | — |
+| Join | `sdkMeeting.verifyPassword()`, `sdkMeeting.join({ pin, moderator, alias })` | `adapter.meetingsAdapter.joinMeeting(ID, options)` | `JoinControl` |
+| Leave | `sdkMeeting.leave()` | `adapter.meetingsAdapter.leaveMeeting(ID)` (also calls `removeMedia`) | `ExitControl` |
+| Mute/Unmute Audio | `sdkMeeting.muteAudio()`, `sdkMeeting.unmuteAudio()` | `adapter.meetingsAdapter.handleLocalAudio(ID)` | `AudioControl` |
+| Mute/Unmute Video | `sdkMeeting.muteVideo()`, `sdkMeeting.unmuteVideo()` | `adapter.meetingsAdapter.handleLocalVideo(ID)` | `VideoControl` |
+| Screen Share | `sdkMeeting.getMediaStreams()`, `sdkMeeting.updateShare()` * | `adapter.meetingsAdapter.handleLocalShare(ID)` | `ShareControl` |
+| Toggle Roster | — (client-side) | `adapter.meetingsAdapter.toggleRoster(ID)` | `RosterControl` |
+| Toggle Settings | `sdkMeeting.updateVideo()`, `sdkMeeting.updateAudio()` (on close, if joined) | `adapter.meetingsAdapter.toggleSettings(ID)` | `SettingsControl` |
+| Switch Camera | `sdkMeeting.getMediaStreams()` * | `adapter.switchCamera(ID, cameraID)` | `SwitchCameraControl` |
+| Switch Microphone | `sdkMeeting.getMediaStreams()` * | `adapter.switchMicrophone(ID, microphoneID)` | `SwitchMicrophoneControl` |
+| Switch Speaker | — (client-side, updates meeting state only) | `adapter.switchSpeaker(ID, speakerID)` | `SwitchSpeakerControl` |
+| Cleanup | `meetings.unregister()`, `mercury.disconnect()`, `device.unregister()` | `sdkAdapter.disconnect()` → calls `meetingsAdapter.disconnect()` then SDK cleanup | — |
+
+\* `getMediaStreams()` and `updateShare()` are the SDK methods invoked by the adapter source code. In newer SDK versions, equivalent functionality is provided by `media.getUserMedia()`, `addMedia()`, `publishStreams()`, and `updateMedia()`.
+
+### Control IDs for the control bar (reference)
+The `controls` prop returns a subset of these IDs. They are registered in
+`@webex/sdk-component-adapter` (`src/MeetingsSDKAdapter.js`) and rendered by
+`WebexMeetingControlBar` from `@webex/components`. Availability = which meeting phase the control
+appears in. Retained one-for-one as a dependency-boundary reference; not repo-owned.
+
+| Control ID | Class | Type | Available |
+|---|---|---|---|
+| `mute-audio` | `AudioControl` | BUTTON | Pre-join + In-meeting |
+| `mute-video` | `VideoControl` | BUTTON | Pre-join + In-meeting |
+| `share-screen` | `ShareControl` | TOGGLE | In-meeting only |
+| `join-meeting` | `JoinControl` | JOIN | Pre-join only |
+| `leave-meeting` | `ExitControl` | CANCEL | In-meeting only |
+| `member-roster` | `RosterControl` | TOGGLE | In-meeting only |
+| `settings` | `SettingsControl` | BUTTON | Pre-join + In-meeting |
+| `switch-camera` | `SwitchCameraControl` | MULTISELECT | Settings panel |
+| `switch-microphone` | `SwitchMicrophoneControl` | MULTISELECT | Settings panel |
+| `switch-speaker` | `SwitchSpeakerControl` | MULTISELECT | Settings panel |
+
+Default control sets (`src/widgets/WebexMeetings/README.md:104-116`): in-meeting = `mute-audio`,
+`mute-video`, `share-screen`, `member-roster`, `settings`, `leave-meeting`; not-joined (interstitial)
+= `mute-audio`, `mute-video`, `settings`, `join-meeting`.
+
+### Component hooks (reference)
+The UI consumes meeting state through `@webex/components` hooks (`src/components/hooks/`). The widget
+itself does not call these; they are listed so the meeting-object reads have context. External; not
+repo-owned.
+
+| Hook | Parameters | Returns | Purpose |
+|---|---|---|---|
+| `useMeeting(meetingID)` | `meetingID: string` | Meeting object (see Adapter meeting object shape) | Subscribes to the adapter's meeting observable |
+| `useMeetingControl(type, meetingID)` | `type: string, meetingID: string` | `[action, display]` | Action function + display state for a control |
+| `useMeetingDestination(meetingDestination)` | `meetingDestination: string` | Meeting object | Creates a meeting from the destination and subscribes to its observable |
+
+Meeting destinations accepted by `meetingDestination` (`src/widgets/WebexMeetings/README.md:37-45`):
+SIP URIs (Webex Meetings, Personal Meeting Rooms, cloud-registered devices), a Webex user email
+address, People IDs, or Room IDs.
+
+### Adapter meeting object shape (reference)
+The real shape emitted by `adapter.meetingsAdapter.getMeeting(ID)`. The widget only reads `ID` and the two
+`permission` fields; the full shape is retained as an external reference so the read fields have context.
+
+```
+{
+  ID:                  string
+  title:               string
+  state:               'NOT_JOINED' | 'LOBBY' | 'JOINED' | 'LEFT'
+
+  localAudio: {
+    stream:            MediaStream | null
+    permission:        string | null          // 'ASKING' | 'ALLOWED' | 'DISMISSED' | 'DENIED' | 'DISABLED' | 'IGNORED' | 'ERROR' | null
+    muting:            boolean | undefined    // true = muting in progress, false = unmuting, undefined = idle
+    ignoreMediaAccessPrompt: Function | undefined  // callback to dismiss the media access prompt and proceed without audio
+  }
+  localVideo: {
+    stream:            MediaStream | null
+    permission:        string | null          // 'ASKING' | 'ALLOWED' | 'DISMISSED' | 'DENIED' | 'DISABLED' | 'IGNORED' | 'ERROR' | null
+    muting:            boolean | undefined
+    error:             string | null          // e.g. 'Video not supported on iOS 15.1'
+    ignoreMediaAccessPrompt: Function | undefined  // callback to dismiss the media access prompt and proceed without video
+  }
+  localShare: {
+    stream:            MediaStream | null
+  }
+
+  remoteAudio:         MediaStream | null
+  remoteVideo:         MediaStream | null
+  remoteShare:         MediaStream | null
+
+  disabledLocalAudio:  MediaStream | null     // stores the stream when audio is muted
+  disabledLocalVideo:  MediaStream | null     // stores the stream when video is muted
+
+  showRoster:          boolean | null
+  settings: {
+    visible:           boolean
+    preview: {
+      audio:           MediaStream | null
+      video:           MediaStream | null
+    }
+  }
+
+  passwordRequired:    boolean
+  requiredCaptcha:     object
+  remoteShareStream:   MediaStream | null     // raw remote share stream (may differ from remoteShare timing)
+  remoteSharing:       boolean                // true when remote participant is sharing
+
+  invalidPassword:     boolean                // true when entered password was wrong
+  invalidHostKey:      boolean                // true when entered host key was wrong
+  failureReason:       string | undefined     // reason from server when password verification fails
+
+  cameraID:            string | null
+  microphoneID:        string | null
+  speakerID:           string | null          // '' on creation, null after removeMedia
+}
+```
+
+### Control display states (reference)
+The control button display matrices are owned by `@webex/sdk-component-adapter`
+(`src/MeetingsSDKAdapter/controls/`). Retained one-for-one as reference.
+
+**AudioControl**
+
+| State | Icon | Text | Tooltip | Control State |
+|---|---|---|---|---|
+| unmuted | `microphone` | Mute | Mute audio | INACTIVE |
+| muted | `microphone-muted` | Unmute | Unmute audio | ACTIVE |
+| muting | `microphone` | Muting... | Muting audio | DISABLED |
+| unmuting | `microphone-muted` | Unmuting... | Unmuting audio | DISABLED |
+| noMicrophone | `microphone-muted` | No microphone | No microphone available | DISABLED |
+
+**VideoControl**
+
+| State | Icon | Text | Tooltip | Control State |
+|---|---|---|---|---|
+| unmuted | `camera` | Stop video | Stop video | INACTIVE |
+| muted | `camera-muted` | Start video | Start video | ACTIVE |
+| muting | `camera` | Stopping... | Stopping video | DISABLED |
+| unmuting | `camera-muted` | Starting... | Starting video | DISABLED |
+| noCamera | `camera-muted` | No camera | No camera available * | DISABLED |
+
+\* If `localVideo.error` is set (e.g. `'Video not supported on iOS 15.1'`), the tooltip shows the error string instead of "No camera available".
+
+**ShareControl**
+
+| State | Icon | Text | Tooltip | Control State | Type |
+|---|---|---|---|---|---|
+| inactive | `share-screen-presence-stroke` | Start sharing | Start sharing content | INACTIVE | TOGGLE |
+| active | `share-screen-presence-stroke` | Stop sharing | Stop sharing content | ACTIVE | TOGGLE |
+| notSupported | `share-screen-presence-stroke` | Start sharing | Share screen not supported | DISABLED | TOGGLE |
+
+**JoinControl**
+
+| Text | Tooltip | Hint | Control State | Type |
+|---|---|---|---|---|
+| Join meeting | Join meeting | {Muted/Unmuted}, {video on/off} | ACTIVE (if NOT_JOINED) / DISABLED | JOIN |
+
+**ExitControl** — renders as a CANCEL type button.
+
 ## Use Cases
+
+### Usage examples
+Basic usage — the widget bootstraps SDK, adapter, and meeting internally; consumers import and render
+with the two required props (`src/widgets/WebexMeetings/README.md:13-19`):
+
+```jsx
+import {WebexMeetingsWidget} from '@webex/widgets';
+
+function App() {
+  return (
+    <WebexMeetingsWidget
+      accessToken="your-access-token"
+      meetingDestination="user@example.com"
+    />
+  );
+}
+```
+
+With all optional props (sizing via `style`, layout, fedramp, custom class):
+
+```jsx
+<WebexMeetingsWidget
+  accessToken={token}
+  meetingDestination={destination}
+  meetingPasswordOrPin={pinOrPassword}
+  participantName="Guest User"
+  layout="Grid"
+  fedramp={false}
+  className="my-custom-class"
+  style={{height: '100vh'}}
+/>
+```
+
+Custom controls — `controls` is a function that receives `inMeeting: boolean` and returns the control
+IDs to render; `controlsCollapseRangeStart`/`controlsCollapseRangeEnd` are zero-based indices (negative
+counts from the end) marking the collapsible range (`src/widgets/WebexMeetings/README.md:100-137`):
+
+```jsx
+const myControls = (inMeeting) => (inMeeting ? ['leave-meeting'] : ['join-meeting']);
+
+<WebexMeetingsWidget
+  accessToken="<WEBEX_ACCESS_TOKEN>"
+  meetingDestination="<MEETING_DESTINATION>"
+  controls={myControls}
+  controlsCollapseRangeEnd={-2}
+/>
+```
+
 - **UC-1 Embed and bootstrap a meeting:** Host renders `<WebexMeetingsWidget accessToken meetingDestination/>` → `withAdapter` builds SDK+adapter and connects → `withMeeting` creates the meeting → widget renders `WebexMeeting`. Outcome: a live meeting UI. Evidence: `WebexMeetings.jsx:259-278`, `tests/WebexMeetings/WebexMeetings.test.jsx:151-178,516-570`.
   - UI flow: host sizes the widget via `style`/`className` (fluid by default — `README.md`); the meeting view fills the root.
   - Cross-service: SDK `connect()` registers device + opens Mercury WebSocket before the meeting renders (external HOC).
@@ -362,6 +999,11 @@ stateDiagram-v2
 - **`SettingsControl` display state never toggles** — a known `@webex/sdk-component-adapter` inconsistency: `display()` reads `showSettings` but `toggleSettings()` writes `settings.visible`. Cosmetic only; the modal still opens/closes. (External; archived ARCHITECTURE.md.)
 - **Browser limitations (external SDK):** microphone switching is disabled in Firefox (single active mic limit); screen share requires `getDisplayMedia` (HTTPS, no mobile/IE); iOS 15.1 refreshes the page on join with camera permission granted due to missing video codecs (`src/widgets/WebexMeetings/README.md:139-156`).
 - **Pinned dependency versions:** `webex`, `@webex/components`, and `@webex/sdk-component-adapter` are pinned exactly (no caret) in `package.json`. Bumping one without the others can break the adapter/SDK contract.
+- **UI stops updating after control actions (external).** Symptom: the UI doesn't change after a control action. Causes: the Mercury WebSocket connection dropped, the observable subscription was lost, or the adapter stopped emitting updates. Check WebSocket status in the network tab, confirm the observable subscription is active, and look for WebSocket events in the network inspector. This is downstream of the adapter, not the widget class.
+- **`AdapterContext` not provided (external).** Symptom: components crash with "Cannot read property of undefined". Causes: `AdapterContext.Provider` is not wrapping `WebexMeeting`, or the adapter is not yet initialized when components render. Ensure `<AdapterContext.Provider value={adapter}>` wraps all components and that the adapter is ready before rendering — both are managed by the `withAdapter` HOC.
+- **Widget stuck on loading (external).** Symptom: loading state never resolves and no meeting UI appears. Causes: invalid/expired access token, backend connectivity, or device-registration failure. Verify the token, check network connectivity, and inspect the browser console for SDK errors.
+- **Audio/video not working after join (external).** Symptom: joined but no media; controls show "No camera"/"No microphone". Causes: browser denied `getUserMedia`, media negotiation (SDP/ROAP) failed, or the media server is unreachable. Check the browser permission prompts, verify `getUserMedia` works, and review SDK logs.
+- **Screen share not available (external).** Symptom: the share button is disabled and shows "Share screen not supported". Causes: the browser does not support `getDisplayMedia`, the app is served over HTTP instead of HTTPS, or `navigator.mediaDevices.getDisplayMedia` is undefined. `ShareControl` checks `navigator.mediaDevices.getDisplayMedia` availability before enabling and renders DISABLED when absent. Verify HTTPS and browser compatibility (Chrome ≥72, Edge ≥79, Firefox ≥66, Opera ≥60, Safari ≥13; not mobile/IE) (`src/widgets/WebexMeetings/README.md:149-152`).
 
 ## Module Do's / Don'ts
 - DO: keep SDK construction inside the `adapterFactory` argument of `withAdapter` (`WebexMeetings.jsx:259`); the class must stay free of SDK lifecycle.

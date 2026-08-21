@@ -26,10 +26,10 @@ as approved unknowns only when the human explicitly defers or does not know.
 
 ## Source Material Register
 
-| Source doc                                                                                          | Scope          | Decision   | Detail location or disposition                                                                                                                                                                                                                                                                                                                         |
-| --------------------------------------------------------------------------------------------------- | -------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `ai-docs/_archive/pre-sdlc-migration/packages/contact-center/station-login/ai-docs/AGENTS.md`       | overview / API | migrated   | Orientation → Overview/Purpose; props → Public Surface; usage examples → Use Cases; error callback → Error Handling                                                                                                                                                                                                                                    |
-| `ai-docs/_archive/pre-sdlc-migration/packages/contact-center/station-login/ai-docs/ARCHITECTURE.md` | architecture   | reconciled | Layer table → Class/Component Relationships; data flow + sequences → Data Flow / Sequence Diagram(s); troubleshooting → Pitfalls. Old "renders blank screen" / silent-fail notes mapped to Error Handling; over-generalized `store.login()` arrow in the archived diagram corrected — the hook calls `cc.stationLogin()` directly, not `store.login()` |
+| Source category                    | Scope          | Decision   | Detail location or disposition                                                                                                                                                                                                                                                                                                              |
+| ---------------------------------- | -------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Pre-migration module agent guide   | overview / API | migrated   | Orientation → Overview/Purpose; props → Public Surface; error callback → Error Handling; basic / profile-mode / multiple-login / custom-error-handling code examples → Use Cases § Usage Examples (host integration variants), including the `allowMultiLogin` store-init fact for multi-login                                                                                                                                                                                                                         |
+| Pre-migration module architecture  | architecture   | reconciled | Layer table → Class/Component Relationships; data flow + sequences → Data Flow / Sequence Diagram(s). Troubleshooting guide's six symptom→cause→remedy units → Error Handling § Operational diagnostics (blank widget/store-not-init, silent login failure, profile-save disabled/failed, multi-login alert not dismissing, callbacks not firing, ErrorBoundary empty screen); recurring "trust the current code" guidance → Pitfalls. Two corrections: the archived "callbacks not firing" remedy told hosts to add a `removeCCCallback` unmount cleanup, but current code intentionally omits it (shared store event wrapper) — remedy corrected; over-generalized `store.login()` arrow in the archived diagram corrected — the hook calls `cc.stationLogin()` directly, not `store.login()` |
 
 ## Overview
 
@@ -316,6 +316,63 @@ cc-components, so prop shapes never diverge.
 - **UC-4 CC sign-out:** Agent clicks Sign Out → `handleCCSignOut()` conditionally logs out + deregisters, then `onCCSignOut()`. Evidence: `src/helper.ts`, `tests/helper.ts`.
 - **UC-5 Multiple-login Continue:** Agent already logged in elsewhere → store sets `showMultipleLoginAlert` → alert shown → agent clicks Continue → `handleContinue()` clears alert + `registerCC()` takes over the session. Evidence: `src/helper.ts`, `tests/helper.ts`. UI flow: alert dialog → Continue → logged-in view.
 
+### Usage Examples (host integration variants)
+
+The widget is imported from `@webex/cc-widgets`; the store must be initialized (`store.init(...)`) before it renders. The following are the supported mount variants.
+
+**Basic login/logout (`profileMode={false}`)** — the common agent-desktop mount; wire the lifecycle callbacks and (optionally) `doStationLogout`:
+
+```tsx
+import {StationLogin} from '@webex/cc-widgets';
+
+<StationLogin
+  profileMode={false}
+  onLogin={() => navigateToDesktop()}
+  onLogout={() => navigateToLogin()}
+  onCCSignOut={() => performFullSignOut()}
+  doStationLogout={false}
+/>;
+```
+
+**Profile mode (`profileMode={true}`)** — a settings/profile widget that updates login options without a full re-login; surface the save lifecycle via `onSaveStart`/`onSaveEnd` and typically pass `doStationLogout={false}` so signing out here does not drop the station:
+
+```tsx
+<StationLogin
+  profileMode={true}
+  onSaveStart={() => showSpinner()}
+  onSaveEnd={(success) => {
+    hideSpinner();
+    showNotification(success ? 'Profile updated' : 'Update failed');
+  }}
+  teamId={currentTeamId}
+  doStationLogout={false}
+/>;
+```
+
+**Multiple-login sessions** — the widget detects an agent already logged in elsewhere and drives the alert/Continue flow internally (UC-5). To enable it, the store must be initialized with the `allowMultiLogin` flag set to `true`; the widget only needs the lifecycle callbacks:
+
+```tsx
+// store.init({ ...webexConfig, allowMultiLogin: true }) must have run first
+<StationLogin
+  profileMode={false}
+  onLogin={() => console.log('Successfully continued session')}
+/>;
+```
+
+**Custom error handling** — configure `store.onErrorCallback` before rendering; the widget calls it with component name `'StationLogin'` and the error object whenever a render/hook error is caught (R-009):
+
+```tsx
+import store from '@webex/cc-store';
+
+store.onErrorCallback = (component, error) => {
+  if (component === 'StationLogin') {
+    showToast(error.userMessage ?? 'Unable to complete station login. Please try again.');
+  }
+};
+
+<StationLogin profileMode={false} />;
+```
+
 ## UI Flow
 
 - **Login screen (logged out):** Team dropdown, login-option/device-type selector (`EXTENSION`, `AGENT_DN`, Desktop/`BROWSER`), dial-number field (shown for non-`BROWSER` types), Login button. Desktop option hidden when `hideDesktopLogin` is set.
@@ -335,6 +392,17 @@ cc-components, so prop shapes never diverge.
 | `stationLogout`/`deregister` fail during CC sign-out | Logged; `onCCSignOut()` still invoked                                           | Host proceeds with app sign-out               |
 | `registerCC()` fails on Continue                     | Logged ("Agent Relogin Failed" / caught error)                                  | Agent retries Continue                        |
 | Render/hook throws                                   | ErrorBoundary → empty fragment + `store.onErrorCallback('StationLogin', error)` | Host's error callback surfaces a notification |
+
+### Operational diagnostics (symptom → cause → remedy)
+
+Concrete host-side remedies for the common non-happy paths. These are integration/operational fixes, not internal state transitions.
+
+- **Widget renders a blank screen, no error.** Cause: the store was not initialized (or the SDK instance is not set) before the widget mounted. Remedy: gate rendering on store readiness — `await store.init({webexConfig, access_token})` and only render `<StationLogin>` once that resolves; confirm required peer deps (`react`/`react-dom` `>=18.3.1`, `@momentum-ui/react-collaboration`) are present. Evidence: `src/station-login/index.tsx`, `Host Integration & Theming` above.
+- **Login appears to do nothing (fails silently).** Cause: SDK not initialized, a network failure, or invalid credentials — `cc.stationLogin()` rejects and only `loginFailure` is set. Remedy: verify `store.logger` is defined and surface `loginFailure` in the UI so the rejection is visible; check the SDK connection/credentials. Evidence: `src/helper.ts` (`login`).
+- **Profile Save button stays disabled / changes not persisted / `onSaveEnd(false)`.** Cause: `profileMode` is not `true`, no real change was made (so `isLoginOptionsChanged` is false and the save short-circuits), or `cc.updateAgentProfile()` rejected. Remedy: pass `profileMode={true}`, make an actual login-option change (remember `dialNumber` is ignored for `BROWSER`), and read `saveError` to see the reject reason. Evidence: `src/helper.ts` (`saveLoginOptions`, `isLoginOptionsChanged`), R-004/R-005/R-006.
+- **Multiple-login alert will not dismiss after Continue.** Cause: `handleContinue()` did not run or `registerCC()` failed, so `showMultipleLoginAlert` stays true. Remedy: confirm Continue is wired to `handleContinue()`; on re-register failure the hook logs "Agent Relogin Failed" — inspect that log and retry Continue. Evidence: `src/helper.ts` (`handleContinue`), R-007.
+- **`onLogin`/`onLogout`/`onSaveEnd` callbacks never fire.** Cause: the store CC-callback registry did not deliver the `AGENT_STATION_LOGIN_SUCCESS`/`AGENT_LOGOUT_SUCCESS` events. Remedy: pass stable callback references and verify the store's `setCCCallback` wiring; do NOT add a `removeCCCallback` unmount cleanup to "fix" this — that tears down the shared store-level event wrapper for all consumers (see Pitfalls). Evidence: `src/helper.ts` (`setCCCallback` effect), R-003.
+- **ErrorBoundary shows an empty screen.** Cause: a hook/render/store-access error was caught and the boundary collapsed the widget to an empty fragment. Remedy: implement `store.onErrorCallback('StationLogin', error)` to log the error and surface a user-facing notification instead of a blank widget. Evidence: `src/station-login/index.tsx` (`ErrorBoundary`), R-009.
 
 ## Pitfalls
 

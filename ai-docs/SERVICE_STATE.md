@@ -14,7 +14,7 @@ This is a client-side widget library, not a network service. It exposes no HTTP 
 | `react` / `react-dom` 18, `mobx` / `mobx-react-lite`, `@r2wc/react-to-web-component` | Runtime peers: component rendering, store reactivity, custom-element wrapping (`packages/contact-center/cc-widgets/src/wc.ts`). | N/A (in-process libraries) | N/A |
 
 ## Feature Flags (current)
-Feature flags are not owned or defaulted by this repo — they are read from the SDK-provided agent `Profile` and surfaced read-only via `getFeatureFlags()` to drive UI visibility (`packages/contact-center/store/src/util.ts:3-36`). Defaults and ownership live with the back end / SDK profile; "Current default" below is therefore **SDK-provided (per-agent)**.
+Feature flags are not owned or defaulted by this repo — they are read from the SDK-provided agent `Profile` and surfaced read-only via `getFeatureFlags()` to drive UI visibility (`packages/contact-center/store/src/util.ts:13-60`). Defaults and ownership live with the back end / SDK profile; "Current default" below is therefore **SDK-provided (per-agent)**.
 
 | Flag | Gates | Current default | Owner | Safe to remove when |
 |---|---|---|---|---|
@@ -22,7 +22,7 @@ Feature flags are not owned or defaulted by this repo — they are read from the
 | `isOutboundEnabledForAgent` | Outdial UI at agent level | SDK-provided | Webex CC back end | SDK stops emitting it |
 | `isAdhocDialingEnabled` | Ad-hoc dial entry in OutdialCall | SDK-provided | Webex CC back end | SDK stops emitting it |
 | `isCampaignManagementEnabled` | Campaign management UI | SDK-provided | Webex CC back end | SDK stops emitting it |
-| `isEndCallEnabled` | End-call action in CallControl | SDK-provided | Webex CC back end | SDK stops emitting it |
+| `isEndTaskEnabled` | End-task action in CallControl | SDK-provided | Webex CC back end | SDK stops emitting it |
 | `isEndConsultEnabled` | End-consult action | SDK-provided | Webex CC back end | SDK stops emitting it |
 | `agentPersonalStatsEnabled` | Agent personal stats UI | SDK-provided | Webex CC back end | SDK stops emitting it |
 | `isCallMonitoringEnabled` | Call monitoring controls | SDK-provided | Webex CC back end | SDK stops emitting it |
@@ -38,6 +38,7 @@ Feature flags are not owned or defaulted by this repo — they are read from the
 | `webRtcEnabled` | WebRTC (browser) device option | SDK-provided | Webex CC back end | SDK stops emitting it |
 | `isRecordingManagementEnabled` | Recording toggle in CallControl | SDK-provided | Webex CC back end | SDK stops emitting it |
 | `allowConsultToQueue` | Consult-to-queue option | SDK-provided | Webex CC back end | SDK stops emitting it |
+| `isSuggestedResponsesEnabled` | AI suggested-response feature; derived by `getFeatureFlags()` projecting the first boolean found at `aiFeature.suggestedResponses.enable`, `agentConfig.aiFeature.suggestedResponses.enable`, or `isSuggestedResponsesEnabled` onto the flat `AI_FEATURE_SUGGESTED_RESPONSES_KEY` (`packages/contact-center/store/src/util.ts:45-57`, `packages/contact-center/store/src/constants.ts:21`) | SDK-provided | Webex CC back end | SDK stops emitting all three source paths |
 
 ## Compliance / Certifications
 - FedRAMP: PR template (`.github/PULL_REQUEST_TEMPLATE.md`) compliance is mandatory and must not be regressed (COMPLETES, Change Type, test scenarios, GAI Policy, Checklist sections).

@@ -7,9 +7,9 @@
 > manifest-routed module spec, source-local as `<module-path>/ai-docs/<module-name>-spec.md` — not in an `AGENTS.md`.
 
 ## Repo Overview
-**webex-widgets** is a Yarn (PnP) monorepo of Webex Contact Center UI widgets — TypeScript, React 18,
-MobX, and Web Components (r2wc) — that embed agent-desktop capabilities (login, state, call/task control)
-into host applications.
+**webex-widgets** is a Yarn 4.5.1 workspaces monorepo (node-modules linker) of Webex Contact Center UI
+widgets — TypeScript, React 18, MobX, and Web Components (r2wc) — that embed agent-desktop capabilities
+(login, state, call/task control) into host applications.
 
 **What it is:**
 - A library monorepo publishing CC widget packages + r2wc Web Component wrappers.
@@ -22,7 +22,7 @@ into host applications.
 
 ## Tech Stack
 - TypeScript, React 18, MobX, Web Components via `@r2wc/react-to-web-component`.
-- Yarn 4.5.1 (PnP, workspaces); Webpack + Babel build.
+- Yarn 4.5.1 workspaces (`nodeLinker: node-modules`, per `.yarnrc.yml`); Webpack + Babel build.
 - Jest + React Testing Library (unit); Playwright (E2E). Momentum UI design system.
 
 ## Architecture
@@ -77,16 +77,78 @@ playwright/               # E2E suites
 | Lint / styles | `yarn test:styles` |
 | E2E | `yarn test:e2e` |
 
-Always use `yarn workspace` commands for tests — never `npx jest` directly. Worktrees need
-`yarn install` + `yarn build:dev` before anything works (no node_modules by default).
+Always use `yarn workspace` commands for tests — never `npx jest` directly. A fresh clone/worktree
+needs `yarn install` (populates `node_modules` via the node-modules linker) + `yarn build:dev` before
+anything works.
+
+## Task Routing
+This root file is an orchestrator: identify the task type, load the working scope's package
+`ai-docs/AGENTS.md` (+ `ARCHITECTURE.md`), then open the matching template and complete its
+**mandatory pre-step** before writing code. Split multi-part prompts into scoped subtasks and
+handle them sequentially; do not generate code until pre-steps are done or the developer waives them.
+
+| Task type | Template | Mandatory pre-step (before code) |
+|---|---|---|
+| A. New widget | [templates/new-widget/00-master.md](./ai-docs/templates/new-widget/00-master.md) | Design input (Figma/mockup/spec) + [01-pre-questions.md](./ai-docs/templates/new-widget/01-pre-questions.md) — no code without design reference |
+| B. Fix bug | [templates/existing-widget/bug-fix.md](./ai-docs/templates/existing-widget/bug-fix.md) | Pre-Fix questions (bug info, scope, impact, existing tests) + root-cause first |
+| C. Add feature | [templates/existing-widget/feature-enhancement.md](./ai-docs/templates/existing-widget/feature-enhancement.md) | Pre-Enhancement questions (requirements, backward compatibility, design input) |
+| D. Docs only | [templates/documentation/create-agent-md.md](./ai-docs/templates/documentation/create-agent-md.md) · [create-architecture-md.md](./ai-docs/templates/documentation/create-architecture-md.md) | Confirm scope (no code change) |
+| E. Understand | that scope's package `ai-docs/AGENTS.md` + `ARCHITECTURE.md` | None (read-only) |
+| F. Playwright E2E | [templates/playwright/00-master.md](./ai-docs/templates/playwright/00-master.md) | [01-pre-questions.md](./ai-docs/templates/playwright/01-pre-questions.md) (scope, scenarios, setup, stability) |
+
+Before code generation also load the repo-wide patterns ([ai-docs/patterns/](./ai-docs/patterns/):
+typescript, react, mobx, testing) and verify any SDK method against the installed types
+(`node_modules/@webex/contact-center/dist/types/index.d.ts`) before using it.
 
 ## Common Gotchas
 1. Cross-package TypeScript imports require `yarn build:dev` first — a fresh clone/worktree fails type-check
    until packages are built.
-2. Pre-commit hooks run the full test suite, so commits can take a while — don't assume a hang.
+2. The pre-commit hook (`.husky/pre-commit`) runs `yarn run test:unit` then `yarn run test:styles`
+   (all package unit tests + style checks; E2E is not run pre-commit), so commits can take a while —
+   don't assume a hang.
 3. The store is a singleton (`Store.getInstance()`); tests that mutate it must reset state or they leak
    across cases.
 4. `@webex/widgets` (meetings) is a separate widget family — CC rules and the store do not apply to it.
+
+## Playwright E2E Framework
+E2E suites live in `playwright/`; run them with `yarn test:e2e` (`yarn playwright test`). Test sets and
+their suite wiring are declared in `playwright/test-data.ts` as `USER_SETS` (`SET_1`…`SET_9`); each set
+maps agents, a queue/entry-point, and one `TEST_SUITE`. Do not assume additional sets/suites exist —
+they must be present in `test-data.ts`.
+
+Shared framework files: `playwright/test-manager.ts` (per-scenario setup/cleanup capability),
+`playwright/global.setup.ts` (OAuth token collection + `.env` upsert), plus `constants.ts` and
+`Utils/*`. When adding scenarios that need new behavior, update the set mapping and framework wiring
+in the same task, then wire suites through `TEST_SUITE`.
+
+**OAuth setup model** (`global.setup.ts`, one `OAuth` setup test): user sets are chunked into groups
+via `OAUTH_SET_GROUP_SIZE = 2` (`SET_1..SET_9` → 5 groups: `[1,2] [3,4] [5,6] [7,8] [9]`), each group's
+tokens fetched in batches of `OAUTH_BATCH_SIZE = 4`, an optional dial-number token is collected when
+`PW_DIAL_NUMBER_LOGIN_*` env vars are set, and all env/token updates are written once via a single
+`.env` upsert. Sets `SET_7`–`SET_9` carry 4 agents each for multiparty-conference coverage.
+
+**Flakiness & recovery rules** (`playwright/Utils/helperUtils.ts`, `playwright/Utils/conferenceUtils.ts`):
+`pageSetup` performs a single bounded station logout/re-login recovery if `state-select` does not
+appear after telephony login — it is one recovery attempt, not a retry loop. Conference suites run
+conference-state cleanup sequentially across shared-call agents (not in parallel) to avoid leg
+ownership races.
+
+**Conference skip & consolidation policy** (`multiparty-conference-set-{7,8,9}-test.spec.ts`):
+`EP_DN`/`EPDN` scenarios and scenarios requiring more than 4 agents are retained as `test.skip(...)`.
+Repeated call-init flows are merged into single tests only when scenario steps are sequentially
+compatible; consolidated scenario IDs remain explicit in the test names for traceability
+(e.g. `CTS-TC-09 and CTS-TC-10 ...`).
+→ Playwright workflow templates: **[ai-docs/templates/playwright/00-master.md](./ai-docs/templates/playwright/00-master.md)**
+
+## Sample Apps
+Widgets are exercised by sample apps under `widgets-samples/cc/` — `samples-cc-react-app` (React) and
+`samples-cc-wc-app` (Web Component). Both are excluded from `build`/`test:cc-widgets`; serve them with
+`yarn samples:serve-react` / `yarn samples:serve-wc`. Integrate every widget in both. In the React
+sample, import from `@webex/cc-widgets`, add the widget to `defaultWidgets` (default `false` for opt-in),
+expose a selection checkbox, and render inside the standard `box > section-box > fieldset > legend-box`
+layout using Momentum CSS variables (never hardcode colors/spacing). Every widget must wire an `onError`
+callback. Theme is driven by `@momentum-design`'s `ThemeProvider` from `store.currentTheme`
+(`LIGHT`/`DARK`), and widgets update automatically through the provider.
 
 ## Pre-Commit Checklist
 - [ ] Tests pass (`yarn test:cc-widgets` or the touched package); coverage meets the repo bar.
@@ -104,4 +166,5 @@ Always use `yarn workspace` commands for tests — never `npx jest` directly. Wo
 ---
 **SDD coverage:** this repo's per-module coverage state lives in `.sdd/manifest.json` (human mirror in
 [`ai-docs/SPEC_INDEX.md`](ai-docs/SPEC_INDEX.md)). Use that state to decide whether a spec is authoritative
-or code must be cross-checked. All module specs are currently `DRAFT` (freshly generated) — cross-check code.
+or code must be cross-checked. Every documented module is currently `Partial` (spec is a hint,
+cross-check code — no module is `Specced` yet), so treat code as the source of truth for high-risk changes.

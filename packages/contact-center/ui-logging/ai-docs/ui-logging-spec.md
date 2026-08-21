@@ -27,10 +27,10 @@ conflicting, ask a focused discovery question before finalizing the requirement;
 as approved unknowns only when the human explicitly defers or does not know.
 
 ## Source Material Register
-| Source doc | Scope | Decision | Detail location or disposition |
+| Source category | Scope | Decision | Detail location or disposition |
 |---|---|---|---|
-| `ai-docs/_archive/pre-sdlc-migration/packages/contact-center/ui-logging/ai-docs/AGENTS.md` | overview / API | migrated | Overview, Purpose, Public Surface, Use Cases. `logMetrics`/`havePropsChanged` documented as public API in the archive but are NOT exported from `src/index.ts` — reconciled to internal in Public Surface. |
-| `ai-docs/_archive/pre-sdlc-migration/packages/contact-center/ui-logging/ai-docs/ARCHITECTURE.md` | architecture / tests | reconciled | Design Overview, Data Flow, Sequence Diagram(s), Pitfalls. Archive's `WidgetMetrics` example omits `event` union, `props`, `additionalContext` — corrected from `src/metricsLogger.ts`. `PROPS_UPDATED` is documented as a future event; code confirms it is unused (TODO CAI-6890 in `src/withMetrics.tsx`). |
+| Archived pre-migration agent guide (ui-logging) | overview / API / examples | migrated | Overview, Purpose, Public Surface (usage examples: basic HOC wrap, `logMetrics` record, `setLogger` wiring), Use Cases (lifecycle wrap, exact mount/unmount payloads, observer-internal integration). `logMetrics`/`havePropsChanged` were documented as public API in the archived guide but are NOT exported from `src/index.ts` — reconciled to internal in Public Surface. |
+| Archived pre-migration architecture doc (ui-logging) | architecture / tests / troubleshooting | reconciled | Design Overview, Data Flow, Sequence Diagram(s), Pitfalls, Troubleshooting (symptom→cause→remedy units: logger not wired, unstable-reference re-render, missing unmount, event-union type errors). The archived `WidgetMetrics` example omitted the `event` union, `props`, `additionalContext` — corrected from `src/metricsLogger.ts`. `PROPS_UPDATED` was documented as a future event; code confirms it is unused (TODO CAI-6890 in `src/withMetrics.tsx`). |
 
 ## Overview
 `ui-logging` is the metrics/telemetry utility for Webex Contact Center widgets, published as
@@ -95,6 +95,58 @@ export barrel — they are internal.
 Compatibility notes:
 - Adding a new value to the `event` union or a new optional field on `WidgetMetrics` is additive (minor).
 - Removing/renaming `withMetrics`, narrowing the `event` union, or changing the `withMetrics` parameter order is breaking (major) — every widget package imports `withMetrics`.
+
+### Usage
+
+`withMetrics` is the only public runtime symbol — import it and wrap a presentational component with a `widgetName`:
+
+```typescript
+import {withMetrics} from '@webex/cc-ui-logging';
+import MyWidget from './MyWidget';
+
+// Wrap your widget with metrics tracking
+const MyWidgetWithMetrics = withMetrics(MyWidget, 'MyWidget');
+
+// Use the wrapped component; props pass through unchanged
+function App() {
+  return <MyWidgetWithMetrics prop1="value" />;
+}
+
+// Automatically logs:
+// - WIDGET_MOUNTED when the component mounts
+// - WIDGET_UNMOUNTED when the component unmounts
+```
+
+The internal `logMetrics` formatter (not exported; exercised via the HOC and tests) accepts a full
+`WidgetMetrics` record. The optional `props`/`additionalContext` fields exist on the type but must be
+sanitized by the caller before use (see Pitfalls). Evidence: `packages/contact-center/ui-logging/src/metricsLogger.ts`.
+
+```typescript
+// Shape logMetrics forwards to store.logger (internal helper)
+logMetrics({
+  widgetName: 'CallControl',
+  event: 'WIDGET_MOUNTED',
+  props: {callId: '123'},
+  timestamp: Date.now(),
+  additionalContext: {userId: 'user123'},
+});
+```
+
+The store logger must be wired before widgets mount, otherwise early metrics are dropped with a console
+warning (`ui-logging-R-006`). Evidence: `packages/contact-center/store/src/store.ts` sets
+`store.logger` from `cc.LoggerProxy`.
+
+```typescript
+import store from '@webex/cc-store';
+
+// store.logger must be set before ui-logging can forward metrics
+store.setLogger({
+  log: (...args) => console.log(...args),
+  error: (...args) => console.error(...args),
+  warn: (...args) => console.warn(...args),
+  info: (...args) => console.info(...args),
+});
+```
 
 ## Requires (dependencies)
 - `@webex/cc-store` (`workspace:*`) — for `store.logger` (`ILogger`, set from `cc.LoggerProxy` in `packages/contact-center/store/src/store.ts:83`). `logMetrics` reads `store.logger` at call time and degrades gracefully (warns, returns) if it is absent. No fallback sink.
@@ -213,10 +265,61 @@ payloads. There are no classes — the module is functional/HOC-based.
   a `WIDGET_UNMOUNTED` metric is logged, props pass through untouched. Evidence:
   `packages/contact-center/ui-logging/src/withMetrics.tsx`,
   `packages/contact-center/ui-logging/tests/withMetrics.test.tsx`.
+
+  ```typescript
+  import {withMetrics} from '@webex/cc-ui-logging';
+  import {StationLogin} from '@webex/cc-widget';
+
+  // Automatically tracks mount/unmount
+  const StationLoginWithMetrics = withMetrics(StationLogin, 'StationLogin');
+
+  // When used in app:
+  <StationLoginWithMetrics />
+  ```
+
+  The exact payloads emitted (only `widgetName`, `event`, `timestamp` — never raw props, per
+  `ui-logging-R-008`):
+
+  ```json
+  // Logged on mount
+  {"widgetName": "StationLogin", "event": "WIDGET_MOUNTED", "timestamp": 1700000000000}
+  // Logged on unmount
+  {"widgetName": "StationLogin", "event": "WIDGET_UNMOUNTED", "timestamp": 1700000100000}
+  ```
+
 - **UC-2 Render gating:** parent re-renders with shallow-equal props → the memoized wrapper skips
   re-rendering the wrapped component; only changed props trigger a re-render. Evidence:
   `packages/contact-center/ui-logging/src/withMetrics.tsx` (comparator),
   `packages/contact-center/ui-logging/tests/withMetrics.test.tsx` (re-render cases).
+
+- **UC-3 Wrap an observer-backed widget internal:** the common integration pattern builds an
+  `observer()` internal that reads store data, then wraps it with `withMetrics` at module scope so the
+  exported widget carries lifecycle telemetry. Evidence:
+  `packages/contact-center/ui-logging/src/withMetrics.tsx`.
+
+  ```typescript
+  import {withMetrics} from '@webex/cc-ui-logging';
+  import {observer} from 'mobx-react-lite';
+  import {UserStateComponent} from '@webex/cc-components';
+  import store from '@webex/cc-store';
+
+  // 1. Create internal component
+  const UserStateInternal = observer(({onStateChange}) => {
+    const props = {
+      idleCodes: store.idleCodes,
+      currentState: store.currentState,
+      setAgentStatus: (code) => store.setCurrentState(code),
+      onStateChange,
+    };
+
+    return <UserStateComponent {...props} />;
+  });
+
+  // 2. Wrap with metrics HOC
+  const UserState = withMetrics(UserStateInternal, 'UserState');
+
+  export {UserState};
+  ```
 
 ## Error Handling & Failure Modes
 | Condition | Signal (error/code/result) | Caller recovery |
@@ -241,6 +344,70 @@ The module raises no errors callers must catch; its only failure mode is a silen
   early mount metrics are dropped with only a console warning (no retry/buffer).
 - `PROPS_UPDATED` is in the `event` union but never emitted (TODO CAI-6890). Do not assume it fires.
 
+### Troubleshooting
+
+Concrete symptom → cause → remedy units for the module's known failure modes. Evidence:
+`packages/contact-center/ui-logging/src/metricsLogger.ts`, `packages/contact-center/ui-logging/src/withMetrics.tsx`.
+
+**1. Metrics not logging (silent failures).** Cause: `store.logger` not initialized before widgets
+mount, so `logMetrics` warns and returns (`ui-logging-R-006`). Remedy — verify and wire the logger:
+
+```typescript
+import store from '@webex/cc-store';
+console.log('Logger exists:', store.logger !== undefined);
+
+// Set the logger if missing
+store.setLogger({
+  log: console.log,
+  error: console.error,
+  warn: console.warn,
+  info: console.info,
+});
+```
+
+**2. Component re-rendering too often.** Cause: unstable prop references (new object/function each
+parent render) defeat the shallow `havePropsChanged` comparator (`ui-logging-R-007`). Remedy — memoize:
+
+```typescript
+import {useCallback, useMemo} from 'react';
+
+const Parent = () => {
+  const handleChange = useCallback(() => {}, []);        // ✅ stable callback
+  const config = useMemo(() => ({option: 'value'}), []); // ✅ stable object
+  return <WidgetWithMetrics onChange={handleChange} config={config} />;
+};
+
+// ❌ Avoid inline functions/objects — new reference every render:
+// <WidgetWithMetrics onChange={() => {}} config={{option: 'value'}} />
+```
+
+**3. `WIDGET_UNMOUNTED` never logged.** Cause: the component never unmounts, the `useEffect` cleanup
+did not run, or the page refreshed before unmount. Remedy — confirm the cleanup runs; for full page
+navigation the unmount metric will not fire because React cleanup does not run on hard reload:
+
+```typescript
+useEffect(() => {
+  console.log('Component mounted');
+  return () => {
+    console.log('Component cleanup'); // should see this on unmount
+  };
+}, []);
+```
+
+**4. TypeScript errors on `WidgetMetrics.event`.** Cause: using a value outside the `event` union or a
+missing type import. Remedy — import the type and use one of `WIDGET_MOUNTED | ERROR |
+WIDGET_UNMOUNTED | PROPS_UPDATED`:
+
+```typescript
+import type {WidgetMetrics} from '@webex/cc-ui-logging';
+
+const metric: WidgetMetrics = {
+  widgetName: 'MyWidget',
+  event: 'WIDGET_MOUNTED', // must be an allowed event value
+  timestamp: Date.now(),
+};
+```
+
 ## Module Do's / Don'ts
 - DO: wrap widget components with `withMetrics(Component, 'Name')` from `@webex/cc-ui-logging` for lifecycle telemetry.
 - DO: keep the HOC's emitted metric to non-PII fields (`widgetName`, `event`, `timestamp`).
@@ -255,12 +422,6 @@ to `WidgetMetrics` or a new `event` union value is a minor (additive) change; re
 `withMetrics`, changing its parameter order, narrowing the `event` union, or removing a `WidgetMetrics`
 field is a major (breaking) change because every widget package imports `withMetrics`. `logMetrics` and
 `havePropsChanged` are NOT exported and may change without a major bump.
-
-## Host Integration & Theming
-N/A — the HOC is consumed by other widget packages within the monorepo, not mounted directly into a
-host application, and renders no UI of its own (it returns the wrapped component verbatim:
-`<Component {...props} />` in `packages/contact-center/ui-logging/src/withMetrics.tsx`). It has no
-theming, custom-element, or provider requirements.
 
 ## Key Design Trade-off
 - Shallow comparison over deep comparison in `havePropsChanged`: favors privacy + simplicity over

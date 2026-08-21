@@ -9,17 +9,17 @@
 ## Module Registry
 | Module | Responsibility | Manifest coverage state | Start here |
 |---|---|---|---|
-| `store/` | MobX singleton; global CC state; proxies SDK events; sole SDK access point | DRAFT | `packages/contact-center/store/ai-docs/store-spec.md` |
-| `cc-components/` | Shared presentational React UI primitives | DRAFT | `packages/contact-center/cc-components/ai-docs/cc-components-spec.md` |
-| `cc-widgets/` | r2wc Web Component wrappers (aggregator) | DRAFT | `packages/contact-center/cc-widgets/ai-docs/cc-widgets-spec.md` |
-| `cc-digital-channels/` | Digital channels (chat/email/social) widget | DRAFT | `packages/contact-center/cc-digital-channels/ai-docs/cc-digital-channels-spec.md` |
-| `station-login/` | Agent login: team + device selection | DRAFT | `packages/contact-center/station-login/ai-docs/station-login-spec.md` |
-| `user-state/` | Agent state: state, idle codes, timer | DRAFT | `packages/contact-center/user-state/ai-docs/user-state-spec.md` |
-| `task/` | Task widget bundle: CallControl, IncomingTask, OutdialCall, TaskList, CallControlCAD | DRAFT | `packages/contact-center/task/ai-docs/task-spec.md` |
-| `ai-assistant/` | AI Assistant widget: chrome + Real-time Assist requests, transcript, feedback | DRAFT | `packages/contact-center/ai-assistant/ai-docs/ai-assistant-spec.md` |
-| `ui-logging/` | Metrics/telemetry: `withMetrics`, `metricsLogger` | DRAFT | `packages/contact-center/ui-logging/ai-docs/ui-logging-spec.md` |
-| `test-fixtures/` | Shared test mocks/helpers | DRAFT | `packages/contact-center/test-fixtures/ai-docs/test-fixtures-spec.md` |
-| `@webex/widgets/` | Legacy meetings widgets (separate family) | DRAFT | `packages/@webex/widgets/ai-docs/widgets-spec.md` |
+| `packages/@webex/widgets/` | Legacy meetings widgets (separate family) | Partial | `packages/@webex/widgets/ai-docs/widgets-spec.md` |
+| `packages/contact-center/ai-assistant/` | AI Assistant widget: chrome + Real-time Assist requests, transcript, feedback | Partial | `packages/contact-center/ai-assistant/ai-docs/ai-assistant-spec.md` |
+| `packages/contact-center/cc-components/` | Shared presentational React UI primitives | Partial | `packages/contact-center/cc-components/ai-docs/cc-components-spec.md` |
+| `packages/contact-center/cc-digital-channels/` | Digital channels (chat/email/social) widget | Partial | `packages/contact-center/cc-digital-channels/ai-docs/cc-digital-channels-spec.md` |
+| `packages/contact-center/cc-widgets/` | r2wc Web Component wrappers (aggregator) | Partial | `packages/contact-center/cc-widgets/ai-docs/cc-widgets-spec.md` |
+| `packages/contact-center/station-login/` | Agent login: team + device selection | Partial | `packages/contact-center/station-login/ai-docs/station-login-spec.md` |
+| `packages/contact-center/store/` | MobX singleton; global CC state; proxies SDK events; sole SDK access point | Partial | `packages/contact-center/store/ai-docs/store-spec.md` |
+| `packages/contact-center/task/` | Task widget bundle: CallControl, IncomingTask, OutdialCall, TaskList, CallControlCAD | Partial | `packages/contact-center/task/ai-docs/task-spec.md` |
+| `packages/contact-center/test-fixtures/` | Shared test mocks/helpers | Partial | `packages/contact-center/test-fixtures/ai-docs/test-fixtures-spec.md` |
+| `packages/contact-center/ui-logging/` | Metrics/telemetry: `withMetrics`, `metricsLogger` | Partial | `packages/contact-center/ui-logging/ai-docs/ui-logging-spec.md` |
+| `packages/contact-center/user-state/` | Agent state: state, idle codes, timer | Partial | `packages/contact-center/user-state/ai-docs/user-state-spec.md` |
 
 ## Task Routing
 | If the task is… | Load |

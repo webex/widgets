@@ -46,7 +46,7 @@
 | HOC | Higher-Order Component | React wrapping pattern; used for `observer()` and `withMetrics`. |
 | MobX | (product name) | The reactive state library backing the store; mutations go through `runInAction`. |
 | RTL | React Testing Library | Component/unit test library paired with Jest. |
-| PnP | Plug'n'Play | Yarn 4.5.1 module resolution mode used by this monorepo (no `node_modules` by default). |
+| PnP | Plug'n'Play | Yarn's Plug'n'Play resolution mode. Not active here: this repo sets `nodeLinker: node-modules` in `.yarnrc.yml`, so a `node_modules` tree is installed. |
 | CAD | Call-Associated Data | Interaction metadata surfaced by the CallControlCAD widget. |
 | E2E | End-to-End | Playwright browser tests under `playwright/`. |
 | PII | Personally Identifiable Information | Must never be logged (see `RULES.md` Logging/Security). |

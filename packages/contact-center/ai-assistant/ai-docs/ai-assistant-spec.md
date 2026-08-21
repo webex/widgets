@@ -18,6 +18,12 @@
 Every requirement below cites concrete source evidence using `file path`. Source evidence, test evidence,
 and gaps are kept separate so validators and future agents can distinguish truth from context.
 
+## Source Material Register
+| Source material | Scope | Decision | Detail location or disposition |
+|---|---|---|---|
+| `packages/contact-center/ai-assistant/ai-docs/ai-assistant-spec.md` (prior 0.1.0-draft spec) | overview / architecture / API / tests | verified | Requirements, design, flows, and tests migrated by meaning into the matching sections below; no stale units found. |
+| `packages/contact-center/ai-assistant/src/` | overview / architecture / API | verified | Code-grounded against the container, hooks, and types; cited inline as `file path` evidence throughout. |
+
 ## Overview
 `ai-assistant` is the AI Assistant widget for Webex Contact Center, published as `@webex/cc-ai-assistant`.
 It owns the assistant's chrome (launcher → open → minimized → fullscreen) and the **Real-time Assist**
@@ -166,11 +172,40 @@ sequenceDiagram
     end
 ```
 
+## Class / Component Relationships
+```mermaid
+graph TD
+    Container["AIAssistant container (index.tsx, observer)"] -->|composes| UseAI["useAiAssistant (helper.ts)"]
+    UseAI -->|composes| Chrome["useAIAssistantChrome"]
+    UseAI -->|composes| RTA["useRealTimeAssist"]
+    Container -->|spreads result onto| Comp["AIAssistantComponent (@webex/cc-components)"]
+    Container -->|reads| Store["@webex/cc-store"]
+    RTA -->|store.cc.apiAIAssistant| Store
+    Container -->|IAIAssistantProps| Props["ai-assistant.types.ts"]
+```
+The container is a thin `observer` that composes the two behavior hooks through `useAiAssistant` and
+spreads the result onto the presentational `AIAssistantComponent`. `useAIAssistantChrome` owns pure UI
+chrome state; `useRealTimeAssist` owns the SDK-backed request lifecycle. Neither hook renders markup —
+all view types come from `@webex/cc-components`, and the host contract is `IAIAssistantProps`
+(`src/ai-assistant.types.ts`).
+
 ## Use Cases
 - **UC-1 Ask for a suggestion:** agent opens the panel during a call and clicks "Get Assistance" → spinner → listening mode with the assistant greeting; cards stream in as the conversation progresses.
 - **UC-2 Refine with context:** agent types context and sends → an `ADD_SUGGESTIONS_EXTRA_CONTEXT` request goes out, the message appears in the transcript, and the panel remains in listening mode whether or not it succeeds.
 - **UC-3 Give feedback:** agent likes/dislikes/copies a card → the SDK records the action and the icon then shows as selected; a failure leaves it unselected so the agent can retry.
 - **UC-4 No active call:** agent opens the panel with no interaction or the feature disabled → landing view listing AI features, no error state.
+
+## Concurrency & Reactive Flow
+- The request lifecycle is asynchronous: `requestRealTimeAssist` awaits `getRealTimeAssistance`, and
+  `isRequesting` is held true for the duration so the UI blocks the request controls and duplicate SDK
+  calls cannot fan out (`src/helper.ts`).
+- Suggestion payloads arrive out-of-band through the observable `store.realTimeAssist` array. A dedicated
+  effect keyed on that array advances a cursor and replays every unseen entry exactly once, so several
+  payloads landing before React commits are all delivered and none are dropped (`ai-assistant-R-005`).
+- Refs (`pendingRequestRef`, `requestStatusRef`, `onRealTimeAssistReceivedRef`) keep the response effect
+  dependent on `realTimeAssist` alone; unrelated state changes must not re-run it and replay payloads.
+- Ordering guarantee: `hasInitialRequestSucceeded` is flipped only after the first request resolves, so a
+  late failure never unwinds an established listening session.
 
 ## Error Handling & Failure Modes
 | Condition | Signal | Recovery |

@@ -26,14 +26,15 @@ as approved unknowns only when the human explicitly defers or does not know.
 | Source doc | Scope | Decision | Detail location or disposition |
 |---|---|---|---|
 | `ai-docs/_archive/pre-sdlc-migration/packages/contact-center/cc-widgets/ai-docs/AGENTS.md` | overview / API | migrated | Orientation → Overview/Purpose; React + Web Component export inventory → Public Surface; usage patterns → Use Cases; dual-bundle note → Export Stability / Host Integration. |
-| `ai-docs/_archive/pre-sdlc-migration/packages/contact-center/cc-widgets/ai-docs/ARCHITECTURE.md` | architecture | reconciled | r2wc registration flow → Data Flow / Sequence Diagram(s); widget→tag mapping → Public Surface (corrected against `src/wc.ts`); troubleshooting → Pitfalls. Archived `OutdialCall` was missing `RealTimeTranscript`, `DigitalChannels`, `CallControlCAD` tag and `hasCampaignPreviewEnabled` prop — current code is source of truth. |
+| `ai-docs/_archive/pre-sdlc-migration/packages/contact-center/cc-widgets/ai-docs/ARCHITECTURE.md` | architecture | reconciled | r2wc registration flow → Data Flow / Sequence Diagram(s); widget→tag mapping → Public Surface (corrected against `src/wc.ts`); troubleshooting → Pitfalls. Archived docs omitted the `RealTimeTranscript`, `DigitalChannels`, `CallControlCAD`, and `AIAssistant` (tag `widget-cc-ai-assistant`) exports/tags and the `hasCampaignPreviewEnabled` and `conferenceEnabled` prop mappings — current `src/index.ts` and `src/wc.ts` are source of truth. |
 
 ## Overview
 `cc-widgets` is the aggregator and distribution surface for the Webex Contact Center widget suite. It
 owns no widget UI or business logic of its own; instead it re-exports the React components produced by
 the individual widget packages (`@webex/cc-station-login`, `@webex/cc-user-state`, `@webex/cc-task`,
-`@webex/cc-digital-channels`) plus the shared MobX `store`, and it converts those same React components
-into framework-agnostic custom elements via `@r2wc/react-to-web-component` (r2wc).
+`@webex/cc-digital-channels`, `@webex/cc-ai-assistant`) plus the shared MobX `store`, and it converts
+those same React components into framework-agnostic custom elements via
+`@r2wc/react-to-web-component` (r2wc).
 
 The package has exactly two source files. `src/index.ts` is the React entry point (`main` /
 `dist/index.js`): a re-export barrel that also imports Momentum UI base CSS so React consumers get
@@ -82,12 +83,13 @@ boundary (see `src/wc.ts`).
 | `cc-widgets.StationLogin` | SDK | React export `StationLogin`; tag `widget-cc-station-login` (props `onLogin`, `onLogout`) | Agent station login UI | stable; removing/renaming export or tag = major | `src/index.ts`, `src/wc.ts` | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
 | `cc-widgets.UserState` | SDK | React export `UserState`; tag `widget-cc-user-state` (prop `onStateChange`) | Agent state management UI | stable; export/tag change = major | `src/index.ts`, `src/wc.ts` | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
 | `cc-widgets.IncomingTask` | SDK | React export `IncomingTask`; tag `widget-cc-incoming-task` (props `incomingTask:json`, `onAccepted`, `onRejected`) | Incoming task notification UI | stable; export/tag change = major | `src/index.ts`, `src/wc.ts` | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
-| `cc-widgets.CallControl` | SDK | React export `CallControl`; tag `widget-cc-call-control` (props `onHoldResume`, `onEnd`, `onWrapUp`, `onRecordingToggle`) | Active-call control buttons | stable; export/tag change = major | `src/index.ts`, `src/wc.ts` | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
-| `cc-widgets.CallControlCAD` | SDK | React export `CallControlCAD`; tag `widget-cc-call-control-cad` (props `onHoldResume`, `onEnd`, `onWrapUp`, `onRecordingToggle`) | CAD-enabled call control | stable; export/tag change = major | `src/index.ts`, `src/wc.ts` | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
+| `cc-widgets.CallControl` | SDK | React export `CallControl`; tag `widget-cc-call-control` (props `onHoldResume`, `onEnd`, `onWrapUp`, `onRecordingToggle`, `conferenceEnabled:boolean`) | Active-call control buttons | stable; export/tag change = major | `src/index.ts`, `src/wc.ts` | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
+| `cc-widgets.CallControlCAD` | SDK | React export `CallControlCAD`; tag `widget-cc-call-control-cad` (props `onHoldResume`, `onEnd`, `onWrapUp`, `onRecordingToggle`, `conferenceEnabled:boolean`) | CAD-enabled call control | stable; export/tag change = major | `src/index.ts`, `src/wc.ts` | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
 | `cc-widgets.TaskList` | SDK | React export `TaskList`; tag `widget-cc-task-list` (props `onTaskAccepted`, `onTaskDeclined`, `onTaskSelected`, `hasCampaignPreviewEnabled:boolean`) | Active tasks list UI | stable; export/tag change = major | `src/index.ts`, `src/wc.ts` | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
 | `cc-widgets.OutdialCall` | SDK | React export `OutdialCall`; tag `widget-cc-outdial-call` (no mapped props; store-driven) | Outbound dialing UI | stable; export/tag change = major | `src/index.ts`, `src/wc.ts` | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
 | `cc-widgets.RealTimeTranscript` | SDK | React export `RealTimeTranscript`; tag `widget-cc-realtime-transcript` (props `liveTranscriptEntries:json`, `className:string`) | Live transcript UI | stable; export/tag change = major | `src/index.ts`, `src/wc.ts` | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
 | `cc-widgets.DigitalChannels` | SDK | React export `DigitalChannels`; tag `widget-cc-digital-channels` (no mapped props; store-driven) | Digital channels UI | stable; export/tag change = major | `src/index.ts`, `src/wc.ts` | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
+| `cc-widgets.AIAssistant` | SDK | React export `AIAssistant`; tag `widget-cc-ai-assistant` (props `onOpen`, `onMinimize`, `onRestore`, `onClose`, `onFullScreenToggle`, `onRealTimeAssistReceived`, `className:string`) | AI assistant / real-time assist UI | stable; export/tag change = major | `src/index.ts`, `src/wc.ts` | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
 | `cc-widgets.store` | SDK | React export `store`; also re-exported from `src/wc.ts` | Shared MobX singleton (`@webex/cc-store`) callers init before mounting widgets | stable; the single shared store instance | `src/index.ts`, `src/wc.ts` | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
 
 Compatibility notes:
@@ -96,11 +98,98 @@ Compatibility notes:
 - Web Component tags are registered guarded by `customElements.get(name)` — importing `./wc` twice is
   safe and does not throw a redefinition error (`src/wc.ts`).
 
+### Component Mapping (widget package → React export → tag → mapped props)
+This is the complete registration map from `src/index.ts` (React exports) and `src/wc.ts` (r2wc wrappers +
+tags + prop maps). It is corrected against current code, which is the source of truth — the archived docs
+omitted `CallControlCAD`, `RealTimeTranscript`, `DigitalChannels`, `AIAssistant` and the
+`hasCampaignPreviewEnabled` / `conferenceEnabled` props.
+
+| Widget package | React export | Web Component tag | Mapped props (r2wc type) |
+|---|---|---|---|
+| `@webex/cc-station-login` | `StationLogin` | `widget-cc-station-login` | `onLogin:function`, `onLogout:function` |
+| `@webex/cc-user-state` | `UserState` | `widget-cc-user-state` | `onStateChange:function` |
+| `@webex/cc-task` → IncomingTask | `IncomingTask` | `widget-cc-incoming-task` | `incomingTask:json`, `onAccepted:function`, `onRejected:function` |
+| `@webex/cc-task` → TaskList | `TaskList` | `widget-cc-task-list` | `onTaskAccepted:function`, `onTaskDeclined:function`, `onTaskSelected:function`, `hasCampaignPreviewEnabled:boolean` |
+| `@webex/cc-task` → CallControl | `CallControl` | `widget-cc-call-control` | `onHoldResume:function`, `onEnd:function`, `onWrapUp:function`, `onRecordingToggle:function`, `conferenceEnabled:boolean` |
+| `@webex/cc-task` → CallControlCAD | `CallControlCAD` | `widget-cc-call-control-cad` | `onHoldResume:function`, `onEnd:function`, `onWrapUp:function`, `onRecordingToggle:function`, `conferenceEnabled:boolean` |
+| `@webex/cc-task` → OutdialCall | `OutdialCall` | `widget-cc-outdial-call` | None (store-driven; empty prop map) |
+| `@webex/cc-task` → RealTimeTranscript | `RealTimeTranscript` | `widget-cc-realtime-transcript` | `liveTranscriptEntries:json`, `className:string` |
+| `@webex/cc-digital-channels` | `DigitalChannels` | `widget-cc-digital-channels` | None (store-driven; empty prop map) |
+| `@webex/cc-ai-assistant` | `AIAssistant` | `widget-cc-ai-assistant` | `onOpen:function`, `onMinimize:function`, `onRestore:function`, `onClose:function`, `onFullScreenToggle:function`, `onRealTimeAssistReceived:function`, `className:string` |
+| `@webex/cc-store` | `store` | (re-exported in both entries; not an element) | N/A |
+
+### r2wc Type Mapping Rules
+How each declared r2wc prop type crosses the Web Component boundary (`src/wc.ts`):
+
+| React prop type | r2wc prop type | HTML attribute | JavaScript property |
+|---|---|---|---|
+| `() => void` (callback) | `'function'` | N/A — cannot be set via attribute | assign as property: `el.onLogin = fn` |
+| `string` | implicit / `'string'` | `class-name="value"` (kebab-case) | `el.className = 'value'` |
+| `boolean` | implicit / `'boolean'` | `conference-enabled` (presence) | `el.conferenceEnabled = true` |
+| `object` | `'json'` | N/A — cannot be a string attribute | assign as property: `el.incomingTask = obj` |
+
+The `props` map passed to `r2wc(Component, {props})` is what tells r2wc which coercion to apply; `function`
+and `json` props MUST be assigned as element properties, not attributes, or the widget never receives them.
+
+### Consumption examples
+React named imports (`src/index.ts`):
+```typescript
+import {StationLogin, UserState, TaskList, store} from '@webex/cc-widgets';
+import React from 'react';
+
+function MyApp() {
+  return (
+    <div>
+      <StationLogin onLogin={() => console.log('Logged in')} />
+      <UserState onStateChange={(state) => console.log('State:', state)} />
+      <TaskList onTaskSelected={(id) => console.log('Task:', id)} />
+    </div>
+  );
+}
+```
+
+Web Component / HTML usage (`./wc` bundle, `src/wc.ts`):
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Contact Center Widgets</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@momentum-ui/core/css/momentum-ui.min.css" />
+  </head>
+  <body>
+    <widget-cc-station-login></widget-cc-station-login>
+    <widget-cc-user-state></widget-cc-user-state>
+    <widget-cc-task-list></widget-cc-task-list>
+
+    <!-- Loading this bundle registers every widget-cc-* element at import time -->
+    <script src="path/to/cc-widgets/dist/wc.js"></script>
+    <script>
+      // Initialize the shared store BEFORE using any widget
+      const store = window['ccWidgetStore'];
+      store.init({access_token: '<YOUR_ACCESS_TOKEN>', webexConfig: {/* ... */}});
+    </script>
+  </body>
+</html>
+```
+
+Framework-agnostic embedding (Angular/Vue/vanilla) works the same — the custom elements render anywhere:
+```html
+<!-- Angular, Vue, or vanilla JS app -->
+<div id="app">
+  <widget-cc-user-state></widget-cc-user-state>
+  <widget-cc-call-control></widget-cc-call-control>
+</div>
+<script src="cc-widgets/dist/wc.js"></script>
+<script>
+  store.init({webexConfig, access_token: '<YOUR_ACCESS_TOKEN>'});
+</script>
+```
+
 ## Requires (dependencies)
 - Internal widget packages (workspace `*`): `@webex/cc-station-login`, `@webex/cc-user-state`,
   `@webex/cc-task` (provides `IncomingTask`, `TaskList`, `CallControl`, `CallControlCAD`, `OutdialCall`,
-  `RealTimeTranscript`), `@webex/cc-digital-channels`. Source: `package.json` dependencies, `src/index.ts`,
-  `src/wc.ts`.
+  `RealTimeTranscript`), `@webex/cc-digital-channels`, `@webex/cc-ai-assistant` (provides `AIAssistant`).
+  Source: `package.json` dependencies, `src/index.ts`, `src/wc.ts`.
 - `@webex/cc-store` (workspace `*`) — the shared MobX singleton re-exported to consumers.
 - `@r2wc/react-to-web-component` `2.0.3` — React→custom-element conversion (`src/wc.ts`).
 - Peer dependencies (host-provided): `react >=18.3.1`, `react-dom >=18.3.1`,
@@ -111,10 +200,10 @@ Compatibility notes:
 ## Requirements
 | ID | WHAT | WHY | Source Evidence | Test / Example Evidence | Assumptions / Gaps | Confidence |
 |---|---|---|---|---|---|---|
-| `cc-widgets-R-001` | Re-export the React widgets `StationLogin`, `UserState`, `IncomingTask`, `CallControl`, `CallControlCAD`, `TaskList`, `OutdialCall`, `RealTimeTranscript`, `DigitalChannels`, and `store` from the package root. | Single-package install: consumers import the whole suite + store from `@webex/cc-widgets` without tracking each widget package. | `packages/contact-center/cc-widgets/src/index.ts` | None found | No unit test exists (`tests/` absent; `passWithNoTests` set). | WEAK |
-| `cc-widgets-R-002` | Register each widget as a custom element under a `widget-cc-*` tag (`widget-cc-user-state`, `widget-cc-station-login`, `widget-cc-incoming-task`, `widget-cc-task-list`, `widget-cc-call-control`, `widget-cc-outdial-call`, `widget-cc-call-control-cad`, `widget-cc-realtime-transcript`, `widget-cc-digital-channels`) when `./wc` is loaded. | Framework-agnostic embedding: HTML/Angular/Vue/vanilla hosts use the suite without React. | `packages/contact-center/cc-widgets/src/wc.ts` | None found | No test verifies registration. | WEAK |
+| `cc-widgets-R-001` | Re-export the React widgets `StationLogin`, `UserState`, `IncomingTask`, `CallControl`, `CallControlCAD`, `TaskList`, `OutdialCall`, `RealTimeTranscript`, `DigitalChannels`, `AIAssistant`, and `store` from the package root. | Single-package install: consumers import the whole suite + store from `@webex/cc-widgets` without tracking each widget package. | `packages/contact-center/cc-widgets/src/index.ts` | None found | No unit test exists (`tests/` absent; `passWithNoTests` set). | WEAK |
+| `cc-widgets-R-002` | Register each widget as a custom element under a `widget-cc-*` tag (`widget-cc-user-state`, `widget-cc-station-login`, `widget-cc-incoming-task`, `widget-cc-task-list`, `widget-cc-call-control`, `widget-cc-outdial-call`, `widget-cc-call-control-cad`, `widget-cc-realtime-transcript`, `widget-cc-digital-channels`, `widget-cc-ai-assistant`) when `./wc` is loaded. | Framework-agnostic embedding: HTML/Angular/Vue/vanilla hosts use the suite without React. | `packages/contact-center/cc-widgets/src/wc.ts` | None found | No test verifies registration. | WEAK |
 | `cc-widgets-R-003` | Guard each `customElements.define` with `customElements.get(name)` so re-importing the WC bundle does not throw a duplicate-definition error. | Importing the bundle more than once (multiple micro-frontends/scripts) must be idempotent. | `packages/contact-center/cc-widgets/src/wc.ts` | None found | No regression test for double-import. | WEAK |
-| `cc-widgets-R-004` | Map complex/callback props across the WC boundary with explicit r2wc prop types: `function` callbacks, `json` for object props (`incomingTask`, `liveTranscriptEntries`), `boolean` (`hasCampaignPreviewEnabled`), and `string` (`className`). | HTML attributes are strings only; functions and objects must be set as element properties with the right r2wc coercion or the widget won't receive them. | `packages/contact-center/cc-widgets/src/wc.ts` | None found | Prop maps are the WC public contract; no test asserts the type map. | WEAK |
+| `cc-widgets-R-004` | Map complex/callback props across the WC boundary with explicit r2wc prop types: `function` callbacks, `json` for object props (`incomingTask`, `liveTranscriptEntries`), `boolean` (`hasCampaignPreviewEnabled`, `conferenceEnabled` on both `CallControl` and `CallControlCAD`), and `string` (`className`). | HTML attributes are strings only; functions and objects must be set as element properties with the right r2wc coercion or the widget won't receive them. | `packages/contact-center/cc-widgets/src/wc.ts` | None found | Prop maps are the WC public contract; no test asserts the type map. | WEAK |
 | `cc-widgets-R-005` | Import Momentum UI base CSS in the React entry so React consumers get widget styling without a separate import. | Avoids unstyled widgets in React hosts (a documented prior support issue). | `packages/contact-center/cc-widgets/src/index.ts` | None found | CSS side-effect import is untested. | WEAK |
 | `cc-widgets-R-006` | Treat React/ReactDOM as peer dependencies (`>=18.3.1`) rather than bundled runtime deps for the React export. | A single host React instance prevents "Invalid hook call" / duplicate-React failures. | `packages/contact-center/cc-widgets/package.json` | None found | Peer-dep enforcement is by package manager, not tested here. | WEAK |
 
@@ -149,6 +238,7 @@ graph LR
         US["@webex/cc-user-state"]
         TASK["@webex/cc-task"]
         DC["@webex/cc-digital-channels"]
+        AIA["@webex/cc-ai-assistant"]
         STORE["@webex/cc-store"]
     end
 
@@ -166,12 +256,14 @@ graph LR
     US --> IDX
     TASK --> IDX
     DC --> IDX
+    AIA --> IDX
     STORE --> IDX
 
     SL --> WC
     US --> WC
     TASK --> WC
     DC --> WC
+    AIA --> WC
     STORE --> WC
 
     IDX -->|named exports| REACT
@@ -238,6 +330,7 @@ graph TD
         WebOutdialCall["WebOutdialCall"]
         WebRealTimeTranscript["WebRealTimeTranscript"]
         WebDigitalChannels["WebDigitalChannels"]
+        WebAIAssistant["WebAIAssistant"]
         components["components[] {name, component}"]
     end
 
@@ -250,6 +343,7 @@ graph TD
     OutdialCall -->|r2wc| WebOutdialCall
     RealTimeTranscript -->|r2wc| WebRealTimeTranscript
     DigitalChannels -->|r2wc| WebDigitalChannels
+    AIAssistant -->|r2wc| WebAIAssistant
 
     WebStationLogin --> components
     WebUserState --> components
@@ -260,6 +354,7 @@ graph TD
     WebOutdialCall --> components
     WebRealTimeTranscript --> components
     WebDigitalChannels --> components
+    WebAIAssistant --> components
 
     components -->|customElements.define| Registry["CustomElements registry"]
 
@@ -285,6 +380,54 @@ relates to the same widget components purely by re-export.
   component with `r2wc` and a prop map in `wc.ts`, and appends `{name, component}` to the `components`
   array. Outcome: the widget is available in both consumption modes. Evidence: `src/index.ts`, `src/wc.ts`.
   No test.
+- **UC-4 Share one store across micro-frontends:** A host imports `{StationLogin, UserState, store}`,
+  calls `store.init({...})` once, and exposes it (`window.ccStore = store`) so independently loaded
+  micro-frontends read the same singleton instead of initializing their own. Outcome: single source of
+  truth for agent state/tasks across the page. Evidence: `src/index.ts` (`store` re-export). No test.
+
+### Store initialization before widget use (both modes)
+Widgets read the shared `store` singleton and render empty until it is initialized, so init must complete
+before mounting:
+```typescript
+import {store} from '@webex/cc-widgets';
+
+async function initialize() {
+  await store.init({webexConfig, access_token: '<ACCESS_TOKEN>'});
+  // Widgets are only ready after init resolves
+  renderWidgets();
+}
+```
+
+### Assigning Web Component event handlers as properties
+Web Components use **property assignment** for callbacks (not `setAttribute` and not string attributes).
+Assign the callback functions declared in the r2wc prop map directly to element properties, then append
+to the DOM:
+```javascript
+// Create references to Web Components
+const ccStationLogin = document.createElement('widget-cc-station-login');
+const ccUserState = document.createElement('widget-cc-user-state');
+const ccIncomingTask = document.createElement('widget-cc-incoming-task');
+const ccTaskList = document.createElement('widget-cc-task-list');
+const ccCallControl = document.createElement('widget-cc-call-control');
+
+// Assign event-handler callbacks directly to properties
+ccStationLogin.onLogin = () => showAgentDashboard();
+ccStationLogin.onLogout = () => showLoginScreen();
+ccUserState.onStateChange = (status) => updateStatusIndicator(status);
+ccIncomingTask.onAccepted = () => console.log('Task accepted');
+ccIncomingTask.onRejected = () => console.log('Task rejected');
+ccTaskList.onTaskAccepted = () => console.log('Task accepted from task list');
+ccTaskList.onTaskDeclined = () => console.log('Task declined from task list');
+ccCallControl.onHoldResume = () => console.log('Hold/Resume toggled');
+ccCallControl.onEnd = () => console.log('Call ended');
+ccCallControl.onWrapUp = (params) => console.log('Wrap-up completed', params);
+
+// Append after assigning handlers
+document.body.appendChild(ccStationLogin);
+document.body.appendChild(ccUserState);
+document.body.appendChild(ccTaskList);
+document.body.appendChild(ccCallControl);
+```
 
 ## Pitfalls
 - **WC props are properties, not attributes.** `function` and `json` props (callbacks, `incomingTask`,
@@ -301,8 +444,96 @@ relates to the same widget components purely by re-export.
 - **Tag names are public API.** They live only in the `components` array in `src/wc.ts`; renaming a tag is
   a breaking change with no compile-time signal in consumer HTML.
 - **Archived docs drift.** The pre-migration ARCHITECTURE/AGENTS docs omitted `CallControlCAD`,
-  `RealTimeTranscript`, and `DigitalChannels` tags and the `hasCampaignPreviewEnabled` prop. Trust
-  `src/wc.ts` over those docs.
+  `RealTimeTranscript`, `DigitalChannels`, and `AIAssistant` tags and the `hasCampaignPreviewEnabled`
+  and `conferenceEnabled` props. Trust `src/wc.ts` over those docs.
+
+### Troubleshooting (common failure paths)
+
+**1. Web Components not rendering.** Symptoms: custom elements show as `undefined`; elements appear as
+empty tags. Possible causes: `wc.js` not loaded; script loaded after DOM parsing; custom elements not
+supported. Solutions — ensure the bundle is loaded and verify the element is defined:
+```html
+<script src="path/to/wc.js"></script>
+<!-- or as a module -->
+<script type="module">
+  import './path/to/wc.js';
+</script>
+<script>
+  console.log(customElements.get('widget-cc-station-login'));
+  // Should return a class definition, not undefined
+</script>
+```
+
+**2. Props not updating in Web Components.** Symptoms: changing attributes doesn't update the widget;
+callbacks not firing. Possible causes: using attributes instead of properties for complex types; incorrect
+attribute names (camelCase vs kebab-case). Solution — use property assignment for `function` and `json`
+props:
+```javascript
+const widget = document.querySelector('widget-cc-task-list');
+
+// ❌ Wrong - functions can't be set via attributes
+widget.setAttribute('onTaskSelected', myFunction);
+// ✅ Correct - property assignment
+widget.onTaskSelected = myFunction;
+
+// ❌ Wrong - objects can't be string attributes
+widget.setAttribute('incoming-task', JSON.stringify(task));
+// ✅ Correct - property assignment
+widget.incomingTask = task;
+```
+
+**3. Multiple React instances conflict.** Symptoms: "Invalid hook call" errors; React context not working;
+duplicate React warning. Possible causes: both the React bundle and the WC bundle loaded; multiple React
+versions in `node_modules`. Solution — choose exactly one consumption mode:
+```typescript
+// Option 1: React components only (React bundle)
+import {StationLogin} from '@webex/cc-widgets';
+// Do NOT also load wc.js
+
+// Option 2: Web Components only (WC bundle)
+// <script src="wc.js"></script>
+// Do NOT also import '@webex/cc-widgets' in React
+
+// Check for duplicate React
+// yarn why react
+```
+
+**4. Store not initialized.** Symptoms: widgets render but show no data; console warnings about missing
+`store.cc`. Possible causes: store not configured before widget use; SDK not initialized. Solution —
+initialize before rendering and verify:
+```typescript
+import {store} from '@webex/cc-widgets';
+import {ContactCenter} from '@webex/contact-center';
+
+async function setup() {
+  const cc = await ContactCenter.init({token, region});
+  store.setCC(cc);
+  console.log('Store initialized:', store.cc !== undefined);
+  // Now render widgets
+}
+```
+
+**5. Styles not loading.** Symptoms: components render but look unstyled; missing icons or layout.
+Possible causes: Momentum UI CSS not imported; webpack not configured for CSS. Solution — import the
+Momentum base CSS (the React entry does this automatically via `src/index.ts`; WC/other hosts add it):
+```typescript
+// In your app entry point
+import '@momentum-ui/core/css/momentum-ui.min.css';
+// Or via HTML:
+// <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@momentum-ui/core/css/momentum-ui.min.css">
+```
+
+**6. Web Component events not firing.** Symptoms: `addEventListener` doesn't work; no callbacks triggered.
+Possible causes: wrong event name; listeners added before the element is defined; using React prop names
+instead of event names. Solution — wait for definition and use the correct (lowercase) event name:
+```javascript
+customElements.whenDefined('widget-cc-station-login').then(() => {
+  const widget = document.querySelector('widget-cc-station-login');
+  // ✅ Correct event name (lowercase)
+  widget.addEventListener('login', () => console.log('Login event fired'));
+  // ❌ Wrong - 'onLogin' is the prop name, not the event name
+});
+```
 
 ## Module Do's / Don'ts
 - DO: keep `cc-widgets` aggregation-only — re-export and register; put behavior changes in the upstream
@@ -326,7 +557,7 @@ potentially breaking change for hosts.
 This module is the host-mount surface for the widget suite.
 - **Custom-element tags:** `widget-cc-user-state`, `widget-cc-station-login`, `widget-cc-incoming-task`,
   `widget-cc-task-list`, `widget-cc-call-control`, `widget-cc-call-control-cad`, `widget-cc-outdial-call`,
-  `widget-cc-realtime-transcript`, `widget-cc-digital-channels` (`src/wc.ts`).
+  `widget-cc-realtime-transcript`, `widget-cc-digital-channels`, `widget-cc-ai-assistant` (`src/wc.ts`).
 - **Mount contract (WC mode):** load `@webex/cc-widgets/wc` (registers the elements at import time),
   initialize the shared `store`, then place the custom elements in the DOM and assign callbacks/objects as
   element properties.

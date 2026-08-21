@@ -20,10 +20,10 @@ Coverage score: `Pending coverage assessment` before the first report; after ass
 Every generated requirement below must cite concrete source evidence using `file path`. Separate source evidence, test evidence, examples, assumptions, and gaps so validators and future agents can distinguish truth from context. Test evidence is preferred for WHY. Commit evidence is allowed only when the repository policy says history is reliable, and must include the commit hash. If evidence is missing or conflicting, ask a focused discovery question before finalizing the requirement; record unresolved answers as approved unknowns only when the human explicitly defers or does not know.
 
 ## Source Material Register
-| Source doc | Scope | Decision | Detail location or disposition |
+| Source category | Scope | Decision | Detail location or disposition |
 |---|---|---|---|
-| `ai-docs/_archive/pre-sdlc-migration/packages/contact-center/user-state/ai-docs/AGENTS.md` | overview / API | migrated | Orientation → Overview/Purpose/Stack; props → Public Surface; examples → Use Cases. Routing preamble dropped (root `AGENTS.md` now owns it). |
-| `ai-docs/_archive/pre-sdlc-migration/packages/contact-center/user-state/ai-docs/ARCHITECTURE.md` | architecture / tests | reconciled | Layer/data flow → Design Overview + Data Flow + Sequence Diagrams; worker timer detail → State Model + State Machine; troubleshooting → Pitfalls. The dual-timer "shows -1/0 on Available" claim reconciled against code: idle timer emits `-1` on stop (`src/helper.ts`). |
+| Pre-SDLC per-package agent guide (archived) | overview / API | migrated | Orientation → Overview/Purpose/Stack; props → Public Surface; all eight code examples (basic, web component, state tracking, status display, validation, error handling, agent desktop, idle-code management) → Use Cases § Usage Examples, reconciled to current exports/tag (`widget-cc-user-state`). Routing preamble dropped (root `AGENTS.md` now owns it). |
+| Pre-SDLC per-package architecture doc (archived) | architecture / tests | reconciled | Layer/data flow → Design Overview + Data Flow + Sequence Diagrams (all four source sequence diagrams preserved, incl. initialization/timer-start); worker timer detail → State Model + State Machine; six troubleshooting scenarios (timer, persistence, idle codes, callback, worker leak, dual-timer) → Pitfalls § Troubleshooting with diagnostic remedies. The dual-timer "shows -1/0 on Available" claim reconciled against code: idle timer emits `-1` on stop (`src/helper.ts`). |
 
 ## Overview
 `user-state` is the agent-availability widget for the Webex Contact Center desktop. It lets an agent change their presence (Available, or Idle with an aux/idle code) from a dropdown, shows how long the agent has been in the current state via a live elapsed timer, and tracks a second timer for time since the last idle-code change. State selection round-trips through the SDK so the backend stays authoritative.
@@ -136,9 +136,36 @@ Sequence coverage:
 
 | Operation group | Diagram | Failure / recovery coverage |
 |---|---|---|
+| Mount → worker init → first render → timer tick | "Initialization & timer start" | worker construction wrapped in try/catch (logged); timers stay at 0 if init fails |
 | State selection → persist → timer reset | "State change & timer reset" | `alt` branch: `setAgentState` rejects → revert `currentState`, log error |
 | Custom/external state → callback | "Custom state callback" | `alt` branch on `developerName` presence |
 | Mount/unmount worker lifecycle | "Worker lifecycle" | cleanup wrapped in try/catch (logged, non-throwing) |
+
+Initialization & timer start — the mount path builds the worker, reads store fields, renders the component, and propagates the first per-second tick to the UI (distinct from the reset flow, which is timestamp-driven):
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant Widget as UserState widget
+    participant Hook as useUserState
+    participant Worker
+    participant Comp as UserStateComponent
+    participant Store
+
+    User->>Widget: Load widget
+    Widget->>Hook: useUserState(store fields)
+    Hook->>Store: read idleCodes, currentState, timestamps
+    Store-->>Hook: {idleCodes, currentState, timestamps}
+    Hook->>Worker: new Worker(Blob)
+    Hook->>Worker: postMessage(start, startTime=Date.now())
+    Hook->>Worker: postMessage(startIdleCode, startTime=Date.now())
+    Hook-->>Widget: {state, handlers, timers}
+    Widget->>Comp: render (state dropdown, timer 00:00)
+    Note over Worker,Comp: Timer updates every 1s
+    Worker->>Hook: postMessage(elapsedTime, X)
+    Hook->>Hook: setElapsedTime(X > 0 ? X : 0)
+    Hook-->>Comp: updated timer value
+```
 
 ```mermaid
 sequenceDiagram
@@ -246,8 +273,228 @@ classDiagram
 - **UC-3 Rejected state change:** SDK rejects → `currentState` reverts to the previous value, error logged, loading flag cleared. Evidence: `src/helper.ts`, `tests/helper.ts` "should handle errors from setAgentState and revert state".
 - **UC-4 External/custom state applied:** Store `customState` set with a `developerName` (e.g. RONA) → `customState` effect fires `onStateChange(customState)` directly. Evidence: `src/helper.ts`, `tests/helper.ts` "should call onStateChange with customState if provided".
 
-## UI Flow
-- Primary surface is a single state dropdown rendered by `UserStateComponent`: lists Available plus the store's `idleCodes`. While a change is in flight, `isSettingAgentStatus` is `true` (loading). The state-duration timer shows `elapsedTime` (seconds, clamped ≥ 0); the idle-code timer shows `lastIdleStateChangeElapsedTime` and is hidden when that value is `-1` (Available). On a render error the widget shows nothing (empty fragment). Detailed presentation belongs to `cc-components` (`UserStateComponent`).
+### Usage Examples
+Concrete integration snippets. `onStateChange` receives an `IdleCode` (matched from `idleCodes`) or an `ICustomState` (when the store holds a `customState` with a `developerName`) — see Public Surface. Evidence: `packages/contact-center/user-state/src/helper.ts` (`callOnStateChange`), `src/index.ts`.
+
+**Basic usage (React):**
+
+```typescript
+import { UserState } from '@webex/cc-user-state';
+import React from 'react';
+
+function MyApp() {
+  const handleStateChange = (newState) => {
+    console.log('Agent state changed to:', newState);
+    // Update your application state
+  };
+
+  return (
+    <UserState
+      onStateChange={handleStateChange}
+    />
+  );
+}
+```
+
+**Web Component usage:** the widget is registered by `cc-widgets` as the custom element `widget-cc-user-state` (`packages/contact-center/cc-widgets/src/wc.ts`); mount it in any HTML host and observe state changes via the r2wc-exposed `onStateChange`.
+
+```html
+<!-- Include the widget bundle -->
+<script src="path/to/cc-widgets.js"></script>
+
+<!-- Use the web component (tag registered by cc-widgets) -->
+<widget-cc-user-state></widget-cc-user-state>
+
+<script>
+  const widget = document.querySelector('widget-cc-user-state');
+
+  widget.addEventListener('statechange', (event) => {
+    console.log('Agent state changed:', event.detail);
+  });
+</script>
+```
+
+**With state-change tracking:** keep a local history of state transitions off the callback.
+
+```typescript
+import { UserState } from '@webex/cc-user-state';
+import React, { useState } from 'react';
+
+function AgentDashboard() {
+  const [currentState, setCurrentState] = useState(null);
+  const [stateHistory, setStateHistory] = useState([]);
+
+  const handleStateChange = (newState) => {
+    setCurrentState(newState);
+    setStateHistory(prev => [...prev, {
+      state: newState,
+      timestamp: new Date()
+    }]);
+    console.log('State changed to:', newState.name);
+  };
+
+  return (
+    <div>
+      <h2>Current State: {currentState?.name || 'Unknown'}</h2>
+      <UserState onStateChange={handleStateChange} />
+
+      <div>
+        <h3>State History</h3>
+        {stateHistory.map((entry, idx) => (
+          <div key={idx}>
+            {entry.state.name} - {entry.timestamp.toLocaleString()}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+```
+
+**Agent status display (observer + store):** read live store fields alongside the widget.
+
+```typescript
+// Display agent's current status with timer
+import { UserState } from '@webex/cc-user-state';
+import { observer } from 'mobx-react-lite';
+import store from '@webex/cc-store';
+
+const AgentStatusPanel = observer(() => {
+  const { currentState, idleCodes } = store;
+
+  const handleStateChange = (newState) => {
+    console.log(`Agent changed to: ${newState.name}`);
+    // Store automatically updates
+  };
+
+  return (
+    <div className="agent-panel">
+      <h3>Your Status</h3>
+      <UserState onStateChange={handleStateChange} />
+      <p>Current: {currentState}</p>
+    </div>
+  );
+});
+```
+
+**State-change validation / audit:** inspect the incoming state before reacting. Note the widget itself always writes the store and lets the `currentState` effect drive the SDK; a consumer callback cannot veto the change — the store/SDK is authoritative and reverts on rejection.
+
+```typescript
+// Inspect state changes and record an audit trail
+import { UserState } from '@webex/cc-user-state';
+import store from '@webex/cc-store';
+
+function ValidatedUserState() {
+  const handleStateChange = (newState) => {
+    // Check if agent has pending tasks
+    if (newState.name === 'Idle' && store.hasActiveTasks) {
+      showWarning('Please complete active tasks before going idle');
+      return;
+    }
+
+    // Log state change
+    auditLog('State change', {
+      agent: store.agentId,
+      from: store.currentState,
+      to: newState.name,
+      timestamp: Date.now()
+    });
+
+    console.log('State change observed:', newState);
+  };
+
+  return <UserState onStateChange={handleStateChange} />;
+}
+```
+
+**Custom error handling:** register `store.onErrorCallback` before render; the widget's `ErrorBoundary` routes render errors to it as `('UserState', error)`.
+
+```typescript
+import store from '@webex/cc-store';
+
+// Set error callback before rendering widget
+store.onErrorCallback = (componentName, error) => {
+  console.error(`Error in ${componentName}:`, error);
+
+  // Notify user
+  showErrorNotification('Failed to update state. Please try again.');
+
+  // Send to error tracking
+  trackError(componentName, error);
+};
+
+// Widget will call this callback on render errors
+<UserState onStateChange={handleStateChange} />
+```
+
+**Integration — agent desktop shell:** gate the widget behind login state.
+
+```typescript
+import { UserState } from '@webex/cc-user-state';
+import { observer } from 'mobx-react-lite';
+import store from '@webex/cc-store';
+
+const AgentDesktop = observer(() => {
+  const { isAgentLoggedIn, currentState } = store;
+
+  const handleStateChange = (newState) => {
+    // Update local UI
+    updateHeaderStatus(newState.name);
+
+    // Log to analytics
+    logStateChange(newState);
+  };
+
+  if (!isAgentLoggedIn) {
+    return <LoginScreen />;
+  }
+
+  return (
+    <div className="desktop">
+      <header>
+        <UserState onStateChange={handleStateChange} />
+      </header>
+      <main>
+        <TaskPanel />
+        <CustomerInfo />
+      </main>
+    </div>
+  );
+});
+```
+
+**Integration — idle-code management:** distinguish idle codes from Available in the callback.
+
+```typescript
+import { UserState } from '@webex/cc-user-state';
+import { observer } from 'mobx-react-lite';
+import store from '@webex/cc-store';
+
+const StateManager = observer(() => {
+  const { idleCodes, currentState } = store;
+
+  const handleStateChange = (state) => {
+    console.log('State changed:', state);
+
+    // Log idle code if applicable
+    if (state.name !== 'Available' && 'id' in state) {
+      console.log('Idle code selected:', state.id);
+      logIdleCode(state.id, state.name);
+    }
+  };
+
+  return (
+    <div>
+      <UserState onStateChange={handleStateChange} />
+
+      <div className="info">
+        <p>Available idle codes: {idleCodes.length}</p>
+        <p>Current state: {currentState}</p>
+      </div>
+    </div>
+  );
+});
+```
 
 ## State Model
 The hook holds client-side UI state in React `useState`/`useRef` (all in `src/helper.ts`); it does not own domain data (that is the store's).
@@ -278,6 +525,9 @@ stateDiagram-v2
 ```
 States/transitions: the **state timer** is always Running from mount until `stop`; `reset` re-bases its start time (used after a confirmed state change). The **idle-code timer** toggles between Ticking and Stopped based on whether the idle timestamp differs from the state timestamp. Terminal: `terminate()` after `stop`. Invalid: there is no path that emits idle ticks while Stopped — `stopIdleCode` clears the interval before the next tick.
 
+## UI Flow
+- Primary surface is a single state dropdown rendered by `UserStateComponent`: lists Available plus the store's `idleCodes`. While a change is in flight, `isSettingAgentStatus` is `true` (loading). The state-duration timer shows `elapsedTime` (seconds, clamped ≥ 0); the idle-code timer shows `lastIdleStateChangeElapsedTime` and is hidden when that value is `-1` (Available). On a render error the widget shows nothing (empty fragment). Detailed presentation belongs to `cc-components` (`UserStateComponent`).
+
 ## Error Handling & Failure Modes
 | Condition | Signal (error/code/result) | Caller recovery |
 |---|---|---|
@@ -293,11 +543,90 @@ States/transitions: the **state timer** is always Running from mount until `stop
 - **Timer reset is timestamp-driven, not click-driven.** Timers reset off `lastStateChangeTimestamp`/`lastIdleCodeChangeTimestamp` from the SDK response, not local time. If the response omits `data`, timestamps don't update and timers won't reset — confirm the SDK contract returns timestamps.
 - **`updateAgentState` assumes the selected id resolves to an idle code.** It does `idleCodes.filter(c => c.id === selectedCode)[0]` and reads `.id`/`.name`; an unknown id throws (caught + logged) and no SDK call is made. Keep `idleCodes` and `currentState` in sync.
 
+### Troubleshooting
+Symptom → likely cause → concrete remedy. Behavior evidence: `packages/contact-center/user-state/src/helper.ts`, `src/user-state/index.tsx`.
+
+**1. Timer not updating (shows 00:00, never increments; or freezes after a state change).**
+Likely cause: the Web Worker failed to construct (CSP blocks `blob:`/`worker-src`, or `Worker`/`URL.createObjectURL` unavailable), so `workerRef` stayed null and no ticks arrive — init is caught and logged, not thrown (`src/helper.ts`, initial `useEffect`). Remedy: confirm worker support and inspect the init log; a state timer only re-bases on a confirmed timestamp change.
+
+```typescript
+// Confirm Web Worker support in the host
+if (typeof Worker === 'undefined') {
+  console.error('Web Workers not supported in this browser');
+}
+
+// Look for the caught init failure in logs:
+//   "CC-Widgets: UserState: Error initializing worker - ..."
+// Timers are timestamp-driven; a confirmed change re-bases the state timer:
+store.setLastStateChangeTimestamp(Date.now());
+```
+
+**2. State change not persisting (UI reverts; `isSettingAgentStatus` appears stuck).**
+Likely cause: `cc.setAgentState` rejected (SDK not initialized, agent not logged in, invalid idle code, or network) — the hook reverts `currentState` to `prevStateRef.current` and logs `"Error setting agent state: ..."` (`src/helper.ts`, `updateAgentState.catch`). `isSettingAgentStatus` is cleared in `finally`, so a "stuck" flag means the promise never settled. Remedy: verify SDK/store readiness.
+
+```typescript
+import store from '@webex/cc-store';
+
+console.log('CC instance:', store.cc);            // SDK present?
+console.log('Agent logged in:', store.isAgentLoggedIn);
+console.log('Current state:', store.currentState);
+console.log('Idle codes:', store.idleCodes);       // selected id must match a code
+```
+
+**3. Idle codes not displaying (dropdown empty; only "Available" shows).**
+Likely cause: `idleCodes` was never populated in the store (backend/config not loaded, or store not initialized). The widget renders whatever `store.idleCodes` holds. Remedy: inspect the store.
+
+```typescript
+import store from '@webex/cc-store';
+
+console.log('Idle codes:', store.idleCodes);
+console.log('Idle codes count:', store.idleCodes.length);
+console.log('Store initialized:', store.cc !== undefined);
+```
+
+**4. `onStateChange` not firing.**
+Likely cause: no callback was passed, or the selected `currentState` id does not match any entry in `idleCodes` (and there is no `customState.developerName`), so `callOnStateChange` finds nothing to emit (`src/helper.ts`, `callOnStateChange`). Also note the callback fires only after the SDK promise resolves for a `currentState` change. Remedy: pass a stable handler and keep ids in sync.
+
+```typescript
+// Provide a stable callback reference
+const handleStateChange = useCallback((state) => {
+  console.log('State changed:', state);
+}, []);
+
+<UserState onStateChange={handleStateChange} />
+// If it never fires: confirm currentState matches an idleCodes[].id,
+// or that customState carries a truthy developerName.
+```
+
+**5. Memory leak / multiple workers over time.**
+Likely cause: repeated mounts without cleanup, or more than one `UserState` instance. The hook's cleanup posts `stop`/`stopIdleCode`, calls `terminate()`, and nulls `workerRef` (`src/helper.ts`, initial `useEffect` return). Remedy: ensure a single instance and that unmount runs cleanup.
+
+```typescript
+// The hook already terminates on unmount; verify it runs:
+//   "CC-Widgets: useUserState cleanup: terminating worker"
+// Render only one UserState widget at a time, and take a
+// DevTools > Performance > Memory snapshot to confirm no orphaned workers.
+```
+
+**6. Dual-timer mismatch (idle-code timer keeps running on Available, or values look wrong).**
+Likely cause: on a confirmed change the timestamp effect posts `resetIdleCode` only when `lastIdleCodeChangeTimestamp !== lastStateChangeTimestamp`; when they are equal it posts `stopIdleCode`, and the worker's `stopIdleCodeTimer` makes the hook set `lastIdleStateChangeElapsedTime = -1` (`src/helper.ts`). Remedy: treat `-1` as "idle timer off" (hide it), not a duration, and verify the timestamps.
+
+```typescript
+console.log('State timestamp:', store.lastStateChangeTimestamp);
+console.log('Idle code timestamp:', store.lastIdleCodeChangeTimestamp);
+console.log('Elapsed time:', elapsedTime);
+console.log('Idle elapsed time:', lastIdleStateChangeElapsedTime);
+// On Available the two timestamps are equal → idle timer stops → value is -1 (hidden).
+```
+
 ## Module Do's / Don'ts
 - DO: route every state change through `store.setCurrentState` and let the `currentState` effect own the SDK call — never call `cc.setAgentState` directly from the widget.
 - DO: terminate the worker in the cleanup return and null `workerRef`; reuse the existing try/catch logging pattern for any new effect.
 - DON'T: treat `lastIdleStateChangeElapsedTime === -1` as elapsed seconds — it's the "idle timer off" sentinel.
 - DON'T: redefine prop types locally — `Pick` from `cc-components`' `IUserState` (`src/user-state.types.ts`).
+
+## Export Stability
+This package is published (`@webex/cc-user-state`); the public surface is the `UserState` React component re-exported from `src/index.ts` and its prop type `IUserStateProps` (a `Pick` of the canonical `IUserState`). Semver: adding an optional prop is additive (minor); removing or renaming `UserState`, removing/renaming the `onStateChange` prop, or changing the object passed to `onStateChange` (`IdleCode` vs `ICustomState`) is breaking (major). The `widget-cc-user-state` custom-element tag is registered by `cc-widgets`, so renaming it is a breaking change owned there, not here. Evidence: `packages/contact-center/user-state/src/index.ts`, `src/user-state.types.ts`, `package.json`.
 
 ## Host Integration & Theming
 Consumed two ways: as the React `UserState` export, or as the `widget-cc-user-state` custom element registered by `cc-widgets` (`packages/contact-center/cc-widgets/src/wc.ts`). Both require the singleton store to be initialized (the widget reads `store.cc`, `store.agentId`, `store.idleCodes`, etc. at render). Theming/presentation is delegated to `UserStateComponent` in `cc-components`; this package passes `logger`/`customState` through and renders nothing else. Peer React `>=18.3.1`.

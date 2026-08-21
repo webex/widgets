@@ -8,20 +8,21 @@
 
 ## Coverage Map (which docs/specs to trust)
 
-Coverage state is mirrored from `.sdd/manifest.json`. Every module is currently `DRAFT`: specs were generated fresh during the SDLC migration (2026-06-29) and have not been validated. **Cross-check code before relying on any spec claim** (drift tolerance ≤ 25%, see below).
+Coverage state is mirrored from `.sdd/manifest.json`. Every module is currently `Partial`: canonical specs exist and are code-grounded, but were migrated from prior 0.1.0-draft docs and have not been independently validated (last assessed 2026-08-14). **Cross-check code before relying on any spec claim** (PARTIAL drift tolerance ≤ 15%, see below).
 
 | Module                                                                                              | Manifest coverage state | What it means here                                                                                                                                                                                                |
 | --------------------------------------------------------------------------------------------------- | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `store` (`@webex/cc-store`, `packages/contact-center/store`)                                        | DRAFT                   | Tier-1, sole SDK access point (`store.ts` `getInstance`). Spec `store/ai-docs/store-spec.md` is unvalidated — verify observables/SDK proxying against `store/src/store.ts` and `store/src/storeEventsWrapper.ts`. |
-| `cc-components` (`@webex/cc-components`, `packages/contact-center/cc-components`)                   | DRAFT                   | Tier-1 presentational primitives. Verify prop contracts against `cc-components/src/` before trusting the spec.                                                                                                    |
-| `cc-widgets` (`@webex/cc-widgets`, `packages/contact-center/cc-widgets`)                            | DRAFT                   | Tier-1 r2wc aggregator. The custom-element registry lives in `cc-widgets/src/wc.ts` — cross-check element names/attrs there.                                                                                      |
-| `cc-digital-channels` (`@webex/cc-digital-channels`, `packages/contact-center/cc-digital-channels`) | DRAFT                   | Tier-1 digital-channels widget (`widget-cc-digital-channels`). Verify against `cc-digital-channels/src/`.                                                                                                         |
-| `station-login` (`@webex/cc-station-login`, `packages/contact-center/station-login`)                | DRAFT                   | Tier-1 widget. Verify against `station-login/src/`.                                                                                                                                                               |
-| `user-state` (`@webex/cc-user-state`, `packages/contact-center/user-state`)                         | DRAFT                   | Tier-1 widget. Verify state/idle-code logic against `user-state/src/helper.ts`.                                                                                                                                   |
-| `task` (`@webex/cc-task`, `packages/contact-center/task`)                                           | DRAFT                   | Tier-1 bundle of sub-widgets CallControl, CallControlCAD, IncomingTask, OutdialCall, TaskList. Verify per-widget behavior against `task/src/{Widget}/index.tsx` and `task/src/helper.ts`.                         |
-| `ui-logging` (`@webex/cc-ui-logging`, `packages/contact-center/ui-logging`)                         | DRAFT                   | Tier-2 telemetry. `withMetrics` HOC + `metricsLogger` in `ui-logging/src/`.                                                                                                                                       |
-| `test-fixtures` (`@webex/test-fixtures`, `packages/contact-center/test-fixtures`)                   | DRAFT                   | Tier-2 shared mocks/helpers in `test-fixtures/src/`.                                                                                                                                                              |
-| `meetings-widgets` (`@webex/widgets`, `packages/@webex/widgets`)                                    | DRAFT                   | Tier-2 legacy meetings family, separate from the CC widget family. Out of scope for CC rules below unless explicitly named.                                                                                       |
+| `store` (`@webex/cc-store`, `packages/contact-center/store`)                                        | Partial                 | Tier-1, sole SDK access point (`store.ts` `getInstance`). Spec `store/ai-docs/store-spec.md` is not independently validated — verify observables/SDK proxying against `store/src/store.ts` and `store/src/storeEventsWrapper.ts`. |
+| `cc-components` (`@webex/cc-components`, `packages/contact-center/cc-components`)                   | Partial                 | Tier-1 presentational primitives. Verify prop contracts against `cc-components/src/` before trusting the spec.                                                                                                    |
+| `cc-widgets` (`@webex/cc-widgets`, `packages/contact-center/cc-widgets`)                            | Partial                 | Tier-1 r2wc aggregator. The custom-element registry lives in `cc-widgets/src/wc.ts` — cross-check element names/attrs there.                                                                                      |
+| `cc-digital-channels` (`@webex/cc-digital-channels`, `packages/contact-center/cc-digital-channels`) | Partial                 | Tier-1 digital-channels widget (`widget-cc-digital-channels`). Verify against `cc-digital-channels/src/`.                                                                                                         |
+| `station-login` (`@webex/cc-station-login`, `packages/contact-center/station-login`)                | Partial                 | Tier-1 widget. Verify against `station-login/src/`.                                                                                                                                                               |
+| `user-state` (`@webex/cc-user-state`, `packages/contact-center/user-state`)                         | Partial                 | Tier-1 widget. Verify state/idle-code logic against `user-state/src/helper.ts`.                                                                                                                                   |
+| `task` (`@webex/cc-task`, `packages/contact-center/task`)                                           | Partial                 | Tier-1 bundle of sub-widgets CallControl, CallControlCAD, IncomingTask, OutdialCall, TaskList. Verify per-widget behavior against `task/src/{Widget}/index.tsx` and `task/src/helper.ts`.                         |
+| `ai-assistant` (`@webex/cc-ai-assistant`, `packages/contact-center/ai-assistant`)                   | Partial                 | Tier-1 AI Assistant widget (panel chrome, Real-time Assist requests, transcript, feedback actions). Verify against `ai-assistant/src/`; re-exported via `cc-widgets` and rendered through `AIAssistantComponent` in `cc-components`. |
+| `ui-logging` (`@webex/cc-ui-logging`, `packages/contact-center/ui-logging`)                         | Partial                 | Tier-2 telemetry. `withMetrics` HOC + `metricsLogger` in `ui-logging/src/`.                                                                                                                                       |
+| `test-fixtures` (`@webex/test-fixtures`, `packages/contact-center/test-fixtures`)                   | Partial                 | Tier-2 shared mocks/helpers in `test-fixtures/src/`.                                                                                                                                                              |
+| `meetings-widgets` (`@webex/widgets`, `packages/@webex/widgets`)                                    | Partial                 | Tier-2 legacy meetings family, separate from the CC widget family. Out of scope for CC rules below unless explicitly named.                                                                                       |
 
 ## Autonomy & Ask-First
 
@@ -88,15 +89,15 @@ Grounded in `patterns/testing-patterns.md`:
 - No PII or credentials in logs (see Logging) — agent dial numbers, tokens, session/auth material must never reach `logger`/`console` or telemetry payloads.
 - Reach the SDK only through the store; never import the SDK directly (prevents bypassing the store's auth/state boundary).
 - No hardcoded secrets/tokens/keys anywhere (see Secrets Policy). Sanitize user-provided input rendered in the UI.
-- This repo owns NO persistent datastore — all domain data comes from the SDK at runtime, so there is no at-rest data-handling surface here (N/A by construction). A dedicated `SECURITY.md` is not yet present; these rules are the current security posture.
+- This repo owns NO persistent datastore — all domain data comes from the SDK at runtime, so there is no at-rest data-handling surface here (N/A by construction). The dedicated security baseline lives in [`SECURITY.md`](SECURITY.md) (trust boundaries, auth model, secret handling); these rules are the day-to-day enforcement summary.
 
 ## Spec-Currency & Drift Thresholds
 
 - Update the spec/docs in the SAME change as the code (spec-currency: `.sdd/coverage-policy.defaults.yaml` `specCurrency.sameChangeRequired: true`).
 - Drift thresholds mirror `.sdd/coverage-policy.defaults.yaml` (drift = share of spec claims no longer matching code):
   - AUTHORITATIVE ≤ 5%
-  - PARTIAL ≤ 15%
-  - DRAFT ≤ 25% (current state for ALL modules — cross-check code before relying on a claim)
+  - PARTIAL ≤ 15% (current state for ALL modules — cross-check code before relying on a claim)
+  - DRAFT ≤ 25%
   - NONE — no spec to drift from
 
 ## Secrets Policy
@@ -107,7 +108,7 @@ Grounded in `patterns/testing-patterns.md`:
 
 The repo is reactive (MobX) and event-driven (SDK events), so these apply:
 
-- All store mutations MUST go through `runInAction(() => { ... })` — never mutate observable state directly (`patterns/mobx-patterns.md`; realized in `store/src/storeEventsWrapper.ts`). Severity: high. Verification: review only.
+- Store mutations that happen outside a MobX action — in a promise `.then`, an `async` continuation, an SDK event callback, or a setter helper — MUST go through `runInAction(() => { ... })` (`patterns/mobx-patterns.md`; realized across `store/src/storeEventsWrapper.ts` setters/handlers). Severity: high. Verification: review only. Known exception: the initial `registerCC()` population in `store/src/store.ts` assigns observables directly inside `register().then(...)` without `runInAction`; treat this as legacy to converge on the wrapper's runInAction setters, not as a pattern to copy.
 - Widgets that read store state MUST be wrapped in `observer()` from `mobx-react-lite` so re-renders track observable reads. Severity: high.
 - SDK event subscriptions registered in `useEffect` MUST be torn down in the cleanup return (`cc.on(...)` paired with `cc.off(...)`) to avoid duplicate handlers/leaks (`patterns/react-patterns.md`).
 - `cc` is held as `observable.ref` (`store/src/store.ts`) — replace the reference, don't deep-mutate the SDK instance.

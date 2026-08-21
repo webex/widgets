@@ -1,148 +1,794 @@
 {
-  "$comment": "Machine source of truth for SDD coverage state. Human mirror: ai-docs/SPEC_INDEX.md. Generated during migration to SDLC-Templates component-repo standard 0.1.0-draft on 2026-06-29.",
-  "schemaVersion": "0.1.0-draft",
-  "templateLibraryVersion": "0.1.0-draft",
-  "repo": {
+  "manifest_version": 1,
+  "repository": {
     "name": "webex-widgets",
-    "displayName": "Webex Contact Center Widgets",
-    "type": "monorepo",
-    "packageManager": "yarn@4.5.1",
-    "workspaces": ["packages/**/*", "packages/contact-center/*", "widgets-samples/**/**"],
-    "standingDocsRoot": "ai-docs/",
-    "agentEntry": "AGENTS.md"
+    "purpose": "Monorepo of Webex Contact Center UI widgets (TypeScript/React/MobX/Web Components) plus a legacy meetings widget family.",
+    "category": "cat1-legacy",
+    "primary_languages": ["typescript"]
   },
+  "topology": "Orchestrator-plus-components",
   "commands": {
-    "install": "yarn install",
-    "build": "yarn build:dev",
-    "test": "yarn test:cc-widgets",
-    "testPackage": "yarn workspace @webex/{pkg} test:unit",
-    "lint": "yarn test:styles",
-    "e2e": "yarn test:e2e"
+    "install": { "command": "yarn install", "source_file": "package.json", "role": "install" },
+    "build": { "command": "yarn build:dev", "source_file": "package.json", "role": "build" },
+    "test": { "command": "yarn test:cc-widgets", "source_file": "package.json", "role": "unit-test" },
+    "testPackage": { "command": "yarn workspace @webex/{pkg} test:unit", "source_file": "package.json" },
+    "lint": { "command": "yarn test:styles", "source_file": "package.json", "role": "lint" },
+    "e2e": { "command": "yarn test:e2e", "source_file": "package.json", "role": "e2e" }
   },
-  "coveragePolicy": ".sdd/coverage-policy.defaults.yaml",
-  "coverageStates": {
-    "AUTHORITATIVE": "Spec is validated and trusted; code cross-check not required for routine work.",
-    "PARTIAL": "Spec exists and is code-grounded but not fully validated; cross-check code for high-risk changes.",
-    "DRAFT": "Spec freshly generated during migration; cross-check code before relying on any claim.",
-    "NONE": "No module spec yet."
+  "toolchain": [
+    { "name": "yarn", "version": "4.5.1", "origin": "repo-config", "source_file": "package.json" }
+  ],
+  "tests": {
+    "unit": { "command_ref": "test", "dir": "packages/contact-center", "framework": "jest" },
+    "e2e": { "command_ref": "e2e", "dir": "playwright", "framework": "playwright" }
   },
+  "coverage_status_definitions": {
+    "specced": ">=80% public surface specced, drift <5% — spec is authoritative",
+    "partial": "40-80% specced — spec is a hint, cross-check code",
+    "untracked": "<40% specced — code is the source of truth"
+  },
+  "spec_source_policy": {
+    "mode": "migrate-existing",
+    "migrated_source_disposition": "retain",
+    "disposition_decided_by": "config (deployment-declared automated policy; not human-verified)",
+    "disposition_decided_at": "2026-08-14T00:00:00Z",
+    "decided_by": "config (automated repo-annotation run; not human-verified)",
+    "decided_at": "2026-08-14T00:00:00Z",
+    "decision_record": ".generated/sdd/spec-source-policy/decision.md"
+  },
+  "spec_sources": [
+    { "path": "AGENTS.md", "scope": "repo", "role": "source-material", "canonical": true, "use_by_agents": "source-for-migration", "canonical_target": "AGENTS.md", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Host-attested canonical overlap (root agent entry); updated in place from checkpoint bytes, never a deletion candidate." },
+    { "path": "ai-docs/ARCHITECTURE.md", "scope": "repo", "role": "source-material", "canonical": true, "use_by_agents": "source-for-migration", "canonical_target": "ai-docs/ARCHITECTURE.md", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Canonical overlap standing doc; in-place update." },
+    { "path": "ai-docs/CONTRACTS.md", "scope": "repo", "role": "source-material", "canonical": true, "use_by_agents": "source-for-migration", "canonical_target": "ai-docs/CONTRACTS.md", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Canonical overlap standing doc; links the native SDK API reference at node_modules/@webex/contact-center/dist/types/index.d.ts." },
+    { "path": "ai-docs/GETTING_STARTED.md", "scope": "repo", "role": "source-material", "canonical": true, "use_by_agents": "source-for-migration", "canonical_target": "ai-docs/GETTING_STARTED.md", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Canonical overlap standing doc; in-place update." },
+    { "path": "ai-docs/GLOSSARY.md", "scope": "repo", "role": "source-material", "canonical": true, "use_by_agents": "source-for-migration", "canonical_target": "ai-docs/GLOSSARY.md", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Canonical overlap standing doc; in-place update." },
+    { "path": "ai-docs/REVIEW_CHECKLIST.md", "scope": "repo", "role": "source-material", "canonical": true, "use_by_agents": "source-for-migration", "canonical_target": "ai-docs/REVIEW_CHECKLIST.md", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Canonical overlap standing doc; in-place update." },
+    { "path": "ai-docs/RULES.md", "scope": "repo", "role": "source-material", "canonical": true, "use_by_agents": "source-for-migration", "canonical_target": "ai-docs/RULES.md", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Canonical overlap standing doc; in-place update." },
+    { "path": "ai-docs/SECURITY.md", "scope": "repo", "role": "source-material", "canonical": true, "use_by_agents": "source-for-migration", "canonical_target": "ai-docs/SECURITY.md", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Canonical overlap standing doc; in-place update." },
+    { "path": "ai-docs/SERVICE_STATE.md", "scope": "repo", "role": "source-material", "canonical": true, "use_by_agents": "source-for-migration", "canonical_target": "ai-docs/SERVICE_STATE.md", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Canonical overlap standing doc; in-place update." },
+    { "path": "ai-docs/SPEC_INDEX.md", "scope": "repo", "role": "source-material", "canonical": true, "use_by_agents": "source-for-migration", "canonical_target": "ai-docs/SPEC_INDEX.md", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Canonical overlap standing doc (human mirror of this manifest); in-place update." },
+
+    { "path": "packages/@webex/widgets/ai-docs/widgets-spec.md", "scope": "module", "module": "packages/@webex/widgets", "role": "source-material", "canonical": true, "use_by_agents": "source-for-migration", "canonical_target": "packages/@webex/widgets/ai-docs/widgets-spec.md", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Canonical overlap: module's canonical spec; deterministic module target, in-place update." },
+    { "path": "packages/contact-center/ai-assistant/ai-docs/ai-assistant-spec.md", "scope": "module", "module": "packages/contact-center/ai-assistant", "role": "source-material", "canonical": true, "use_by_agents": "source-for-migration", "canonical_target": "packages/contact-center/ai-assistant/ai-docs/ai-assistant-spec.md", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Canonical overlap: module's canonical spec, in-place update." },
+    { "path": "packages/contact-center/cc-components/ai-docs/cc-components-spec.md", "scope": "module", "module": "packages/contact-center/cc-components", "role": "source-material", "canonical": true, "use_by_agents": "source-for-migration", "canonical_target": "packages/contact-center/cc-components/ai-docs/cc-components-spec.md", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Canonical overlap: module's canonical spec, in-place update." },
+    { "path": "packages/contact-center/cc-digital-channels/ai-docs/cc-digital-channels-spec.md", "scope": "module", "module": "packages/contact-center/cc-digital-channels", "role": "source-material", "canonical": true, "use_by_agents": "source-for-migration", "canonical_target": "packages/contact-center/cc-digital-channels/ai-docs/cc-digital-channels-spec.md", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Canonical overlap: module's canonical spec, in-place update." },
+    { "path": "packages/contact-center/cc-widgets/ai-docs/cc-widgets-spec.md", "scope": "module", "module": "packages/contact-center/cc-widgets", "role": "source-material", "canonical": true, "use_by_agents": "source-for-migration", "canonical_target": "packages/contact-center/cc-widgets/ai-docs/cc-widgets-spec.md", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Canonical overlap: module's canonical spec, in-place update." },
+    { "path": "packages/contact-center/station-login/ai-docs/station-login-spec.md", "scope": "module", "module": "packages/contact-center/station-login", "role": "source-material", "canonical": true, "use_by_agents": "source-for-migration", "canonical_target": "packages/contact-center/station-login/ai-docs/station-login-spec.md", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Canonical overlap: module's canonical spec, in-place update." },
+    { "path": "packages/contact-center/store/ai-docs/store-spec.md", "scope": "module", "module": "packages/contact-center/store", "role": "source-material", "canonical": true, "use_by_agents": "source-for-migration", "canonical_target": "packages/contact-center/store/ai-docs/store-spec.md", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Canonical overlap: module's canonical spec, in-place update." },
+    { "path": "packages/contact-center/task/ai-docs/task-spec.md", "scope": "module", "module": "packages/contact-center/task", "role": "source-material", "canonical": true, "use_by_agents": "source-for-migration", "canonical_target": "packages/contact-center/task/ai-docs/task-spec.md", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Canonical overlap: module's canonical spec, in-place update." },
+    { "path": "packages/contact-center/test-fixtures/ai-docs/test-fixtures-spec.md", "scope": "module", "module": "packages/contact-center/test-fixtures", "role": "source-material", "canonical": true, "use_by_agents": "source-for-migration", "canonical_target": "packages/contact-center/test-fixtures/ai-docs/test-fixtures-spec.md", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Canonical overlap: module's canonical spec, in-place update." },
+    { "path": "packages/contact-center/ui-logging/ai-docs/ui-logging-spec.md", "scope": "module", "module": "packages/contact-center/ui-logging", "role": "source-material", "canonical": true, "use_by_agents": "source-for-migration", "canonical_target": "packages/contact-center/ui-logging/ai-docs/ui-logging-spec.md", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Canonical overlap: module's canonical spec, in-place update." },
+    { "path": "packages/contact-center/user-state/ai-docs/user-state-spec.md", "scope": "module", "module": "packages/contact-center/user-state", "role": "source-material", "canonical": true, "use_by_agents": "source-for-migration", "canonical_target": "packages/contact-center/user-state/ai-docs/user-state-spec.md", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Canonical overlap: module's canonical spec, in-place update." },
+
+    { "path": "ai-docs/_archive/pre-sdlc-migration/root/AGENTS.md", "scope": "repo", "role": "source-material", "canonical": false, "use_by_agents": "source-for-migration", "canonical_target": "AGENTS.md", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Archived pre-SDLC root agent guide; migrated source for the root agent entry, preserved." },
+    { "path": "ai-docs/_archive/pre-sdlc-migration/packages/playwright/ai-docs/AGENTS.md", "scope": "repo", "role": "source-material", "canonical": false, "use_by_agents": "source-for-migration", "canonical_target": "AGENTS.md", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Archived playwright/e2e agent guide (no dedicated module); migrated into repo agent/architecture docs, preserved." },
+    { "path": "ai-docs/_archive/pre-sdlc-migration/packages/playwright/ai-docs/ARCHITECTURE.md", "scope": "repo", "role": "source-material", "canonical": false, "use_by_agents": "source-for-migration", "canonical_target": "ai-docs/ARCHITECTURE.md", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Archived playwright/e2e architecture; migrated into repo architecture doc, preserved." },
+    { "path": "ai-docs/_archive/pre-sdlc-migration/packages/widgets-samples/cc/samples-cc-react-app/ai-docs/AGENTS.md", "scope": "repo", "role": "source-material", "canonical": false, "use_by_agents": "source-for-migration", "canonical_target": "AGENTS.md", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Archived sample-app agent guide (sample, not a documented module); migrated into repo agent doc, preserved." },
+    { "path": "ai-docs/_archive/pre-sdlc-migration/packages/@webex/widgets/ai-docs/AGENTS.md", "scope": "module", "module": "packages/@webex/widgets", "role": "source-material", "canonical": false, "use_by_agents": "source-for-migration", "canonical_target": "packages/@webex/widgets/ai-docs/widgets-spec.md", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Archived pre-SDLC module agent guide; migrated into the module canonical spec, preserved." },
+    { "path": "ai-docs/_archive/pre-sdlc-migration/packages/@webex/widgets/ai-docs/ARCHITECTURE.md", "scope": "module", "module": "packages/@webex/widgets", "role": "source-material", "canonical": false, "use_by_agents": "source-for-migration", "canonical_target": "packages/@webex/widgets/ai-docs/widgets-spec.md", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Archived pre-SDLC module architecture; migrated into the module canonical spec, preserved." },
+    { "path": "ai-docs/_archive/pre-sdlc-migration/packages/contact-center/cc-components/ai-docs/AGENTS.md", "scope": "module", "module": "packages/contact-center/cc-components", "role": "source-material", "canonical": false, "use_by_agents": "source-for-migration", "canonical_target": "packages/contact-center/cc-components/ai-docs/cc-components-spec.md", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Archived pre-SDLC module agent guide; migrated into the module canonical spec, preserved." },
+    { "path": "ai-docs/_archive/pre-sdlc-migration/packages/contact-center/cc-components/ai-docs/ARCHITECTURE.md", "scope": "module", "module": "packages/contact-center/cc-components", "role": "source-material", "canonical": false, "use_by_agents": "source-for-migration", "canonical_target": "packages/contact-center/cc-components/ai-docs/cc-components-spec.md", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Archived pre-SDLC module architecture; migrated into the module canonical spec, preserved." },
+    { "path": "ai-docs/_archive/pre-sdlc-migration/packages/contact-center/cc-widgets/ai-docs/AGENTS.md", "scope": "module", "module": "packages/contact-center/cc-widgets", "role": "source-material", "canonical": false, "use_by_agents": "source-for-migration", "canonical_target": "packages/contact-center/cc-widgets/ai-docs/cc-widgets-spec.md", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Archived pre-SDLC module agent guide; migrated into the module canonical spec, preserved." },
+    { "path": "ai-docs/_archive/pre-sdlc-migration/packages/contact-center/cc-widgets/ai-docs/ARCHITECTURE.md", "scope": "module", "module": "packages/contact-center/cc-widgets", "role": "source-material", "canonical": false, "use_by_agents": "source-for-migration", "canonical_target": "packages/contact-center/cc-widgets/ai-docs/cc-widgets-spec.md", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Archived pre-SDLC module architecture; migrated into the module canonical spec, preserved." },
+    { "path": "ai-docs/_archive/pre-sdlc-migration/packages/contact-center/station-login/ai-docs/AGENTS.md", "scope": "module", "module": "packages/contact-center/station-login", "role": "source-material", "canonical": false, "use_by_agents": "source-for-migration", "canonical_target": "packages/contact-center/station-login/ai-docs/station-login-spec.md", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Archived pre-SDLC module agent guide; migrated into the module canonical spec, preserved." },
+    { "path": "ai-docs/_archive/pre-sdlc-migration/packages/contact-center/station-login/ai-docs/ARCHITECTURE.md", "scope": "module", "module": "packages/contact-center/station-login", "role": "source-material", "canonical": false, "use_by_agents": "source-for-migration", "canonical_target": "packages/contact-center/station-login/ai-docs/station-login-spec.md", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Archived pre-SDLC module architecture; migrated into the module canonical spec, preserved." },
+    { "path": "ai-docs/_archive/pre-sdlc-migration/packages/contact-center/store/ai-docs/AGENTS.md", "scope": "module", "module": "packages/contact-center/store", "role": "source-material", "canonical": false, "use_by_agents": "source-for-migration", "canonical_target": "packages/contact-center/store/ai-docs/store-spec.md", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Archived pre-SDLC module agent guide; migrated into the module canonical spec, preserved." },
+    { "path": "ai-docs/_archive/pre-sdlc-migration/packages/contact-center/store/ai-docs/ARCHITECTURE.md", "scope": "module", "module": "packages/contact-center/store", "role": "source-material", "canonical": false, "use_by_agents": "source-for-migration", "canonical_target": "packages/contact-center/store/ai-docs/store-spec.md", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Archived pre-SDLC module architecture; migrated into the module canonical spec, preserved." },
+    { "path": "ai-docs/_archive/pre-sdlc-migration/packages/contact-center/task/ai-docs/widgets/CallControl/AGENTS.md", "scope": "module", "module": "packages/contact-center/task", "role": "source-material", "canonical": false, "use_by_agents": "source-for-migration", "canonical_target": "packages/contact-center/task/ai-docs/task-spec.md", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Archived CallControl sub-widget agent guide; migrated into the task module canonical spec, preserved." },
+    { "path": "ai-docs/_archive/pre-sdlc-migration/packages/contact-center/task/ai-docs/widgets/CallControl/ARCHITECTURE.md", "scope": "module", "module": "packages/contact-center/task", "role": "source-material", "canonical": false, "use_by_agents": "source-for-migration", "canonical_target": "packages/contact-center/task/ai-docs/task-spec.md", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Archived CallControl sub-widget architecture; migrated into the task module canonical spec, preserved." },
+    { "path": "ai-docs/_archive/pre-sdlc-migration/packages/contact-center/task/ai-docs/widgets/IncomingTask/AGENTS.md", "scope": "module", "module": "packages/contact-center/task", "role": "source-material", "canonical": false, "use_by_agents": "source-for-migration", "canonical_target": "packages/contact-center/task/ai-docs/task-spec.md", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Archived IncomingTask sub-widget agent guide; migrated into the task module canonical spec, preserved." },
+    { "path": "ai-docs/_archive/pre-sdlc-migration/packages/contact-center/task/ai-docs/widgets/IncomingTask/ARCHITECTURE.md", "scope": "module", "module": "packages/contact-center/task", "role": "source-material", "canonical": false, "use_by_agents": "source-for-migration", "canonical_target": "packages/contact-center/task/ai-docs/task-spec.md", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Archived IncomingTask sub-widget architecture; migrated into the task module canonical spec, preserved." },
+    { "path": "ai-docs/_archive/pre-sdlc-migration/packages/contact-center/task/ai-docs/widgets/OutdialCall/AGENTS.md", "scope": "module", "module": "packages/contact-center/task", "role": "source-material", "canonical": false, "use_by_agents": "source-for-migration", "canonical_target": "packages/contact-center/task/ai-docs/task-spec.md", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Archived OutdialCall sub-widget agent guide; migrated into the task module canonical spec, preserved." },
+    { "path": "ai-docs/_archive/pre-sdlc-migration/packages/contact-center/task/ai-docs/widgets/OutdialCall/ARCHITECTURE.md", "scope": "module", "module": "packages/contact-center/task", "role": "source-material", "canonical": false, "use_by_agents": "source-for-migration", "canonical_target": "packages/contact-center/task/ai-docs/task-spec.md", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Archived OutdialCall sub-widget architecture; migrated into the task module canonical spec, preserved." },
+    { "path": "ai-docs/_archive/pre-sdlc-migration/packages/contact-center/task/ai-docs/widgets/TaskList/AGENTS.md", "scope": "module", "module": "packages/contact-center/task", "role": "source-material", "canonical": false, "use_by_agents": "source-for-migration", "canonical_target": "packages/contact-center/task/ai-docs/task-spec.md", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Archived TaskList sub-widget agent guide; migrated into the task module canonical spec, preserved." },
+    { "path": "ai-docs/_archive/pre-sdlc-migration/packages/contact-center/task/ai-docs/widgets/TaskList/ARCHITECTURE.md", "scope": "module", "module": "packages/contact-center/task", "role": "source-material", "canonical": false, "use_by_agents": "source-for-migration", "canonical_target": "packages/contact-center/task/ai-docs/task-spec.md", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Archived TaskList sub-widget architecture; migrated into the task module canonical spec, preserved." },
+    { "path": "ai-docs/_archive/pre-sdlc-migration/packages/contact-center/test-fixtures/ai-docs/AGENTS.md", "scope": "module", "module": "packages/contact-center/test-fixtures", "role": "source-material", "canonical": false, "use_by_agents": "source-for-migration", "canonical_target": "packages/contact-center/test-fixtures/ai-docs/test-fixtures-spec.md", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Archived pre-SDLC module agent guide; migrated into the module canonical spec, preserved." },
+    { "path": "ai-docs/_archive/pre-sdlc-migration/packages/contact-center/test-fixtures/ai-docs/ARCHITECTURE.md", "scope": "module", "module": "packages/contact-center/test-fixtures", "role": "source-material", "canonical": false, "use_by_agents": "source-for-migration", "canonical_target": "packages/contact-center/test-fixtures/ai-docs/test-fixtures-spec.md", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Archived pre-SDLC module architecture; migrated into the module canonical spec, preserved." },
+    { "path": "ai-docs/_archive/pre-sdlc-migration/packages/contact-center/ui-logging/ai-docs/AGENTS.md", "scope": "module", "module": "packages/contact-center/ui-logging", "role": "source-material", "canonical": false, "use_by_agents": "source-for-migration", "canonical_target": "packages/contact-center/ui-logging/ai-docs/ui-logging-spec.md", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Archived pre-SDLC module agent guide; migrated into the module canonical spec, preserved." },
+    { "path": "ai-docs/_archive/pre-sdlc-migration/packages/contact-center/ui-logging/ai-docs/ARCHITECTURE.md", "scope": "module", "module": "packages/contact-center/ui-logging", "role": "source-material", "canonical": false, "use_by_agents": "source-for-migration", "canonical_target": "packages/contact-center/ui-logging/ai-docs/ui-logging-spec.md", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Archived pre-SDLC module architecture; migrated into the module canonical spec, preserved." },
+    { "path": "ai-docs/_archive/pre-sdlc-migration/packages/contact-center/user-state/ai-docs/AGENTS.md", "scope": "module", "module": "packages/contact-center/user-state", "role": "source-material", "canonical": false, "use_by_agents": "source-for-migration", "canonical_target": "packages/contact-center/user-state/ai-docs/user-state-spec.md", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Archived pre-SDLC module agent guide; migrated into the module canonical spec, preserved." },
+    { "path": "ai-docs/_archive/pre-sdlc-migration/packages/contact-center/user-state/ai-docs/ARCHITECTURE.md", "scope": "module", "module": "packages/contact-center/user-state", "role": "source-material", "canonical": false, "use_by_agents": "source-for-migration", "canonical_target": "packages/contact-center/user-state/ai-docs/user-state-spec.md", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Archived pre-SDLC module architecture; migrated into the module canonical spec, preserved." },
+
+    { "path": "ai-docs/README.md", "scope": "reference", "role": "reference-only", "canonical": false, "use_by_agents": "context-only", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Protected reference (docs index); context-only, never a deletion candidate." },
+    { "path": "ai-docs/_archive/pre-sdlc-migration/README.md", "scope": "reference", "role": "reference-only", "canonical": false, "use_by_agents": "context-only", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Protected reference (archive index); context-only." },
+    { "path": "ai-docs/adr/0001-one-directional-dependency-flow.md", "scope": "reference", "role": "reference-only", "canonical": false, "use_by_agents": "context-only", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Protected ADR reference document; retained, never a deletion candidate." },
+    { "path": "ai-docs/adr/README.md", "scope": "reference", "role": "reference-only", "canonical": false, "use_by_agents": "context-only", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Protected ADR index; context-only." },
+    { "path": "ai-docs/patterns/README.md", "scope": "reference", "role": "reference-only", "canonical": false, "use_by_agents": "context-only", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Protected patterns index; context-only." },
+    { "path": "ai-docs/patterns/mobx-patterns.md", "scope": "reference", "role": "reference-only", "canonical": false, "use_by_agents": "context-only", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Protected pattern reference document; retained." },
+    { "path": "ai-docs/patterns/react-patterns.md", "scope": "reference", "role": "reference-only", "canonical": false, "use_by_agents": "context-only", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Protected pattern reference document; retained." },
+    { "path": "ai-docs/patterns/testing-patterns.md", "scope": "reference", "role": "reference-only", "canonical": false, "use_by_agents": "context-only", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Protected pattern reference document; retained." },
+    { "path": "ai-docs/patterns/typescript-patterns.md", "scope": "reference", "role": "reference-only", "canonical": false, "use_by_agents": "context-only", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Protected pattern reference document; retained." },
+    { "path": "ai-docs/rules/README.md", "scope": "reference", "role": "reference-only", "canonical": false, "use_by_agents": "context-only", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Protected rules index; context-only." },
+    { "path": "ai-docs/rules/css-rem-units.md", "scope": "reference", "role": "reference-only", "canonical": false, "use_by_agents": "context-only", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Protected rule reference document; retained." },
+    { "path": "ai-docs/rules/sdk-access-via-store.md", "scope": "reference", "role": "reference-only", "canonical": false, "use_by_agents": "context-only", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Protected rule reference document; retained." },
+    { "path": "ai-docs/templates/README.md", "scope": "reference", "role": "reference-only", "canonical": false, "use_by_agents": "context-only", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Protected authoring-template reference; context-only." },
+    { "path": "ai-docs/templates/documentation/create-agent-md.md", "scope": "reference", "role": "reference-only", "canonical": false, "use_by_agents": "context-only", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Protected authoring-template reference; context-only." },
+    { "path": "ai-docs/templates/documentation/create-architecture-md.md", "scope": "reference", "role": "reference-only", "canonical": false, "use_by_agents": "context-only", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Protected authoring-template reference; context-only." },
+    { "path": "ai-docs/templates/existing-widget/bug-fix.md", "scope": "reference", "role": "reference-only", "canonical": false, "use_by_agents": "context-only", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Protected workflow-template reference; context-only." },
+    { "path": "ai-docs/templates/existing-widget/feature-enhancement.md", "scope": "reference", "role": "reference-only", "canonical": false, "use_by_agents": "context-only", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Protected workflow-template reference; context-only." },
+    { "path": "ai-docs/templates/new-widget/00-master.md", "scope": "reference", "role": "reference-only", "canonical": false, "use_by_agents": "context-only", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Protected workflow-template reference; context-only." },
+    { "path": "ai-docs/templates/new-widget/01-pre-questions.md", "scope": "reference", "role": "reference-only", "canonical": false, "use_by_agents": "context-only", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Protected workflow-template reference; context-only." },
+    { "path": "ai-docs/templates/new-widget/02-code-generation.md", "scope": "reference", "role": "reference-only", "canonical": false, "use_by_agents": "context-only", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Protected workflow-template reference; context-only." },
+    { "path": "ai-docs/templates/new-widget/03-component-generation.md", "scope": "reference", "role": "reference-only", "canonical": false, "use_by_agents": "context-only", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Protected workflow-template reference; context-only." },
+    { "path": "ai-docs/templates/new-widget/04-integration.md", "scope": "reference", "role": "reference-only", "canonical": false, "use_by_agents": "context-only", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Protected workflow-template reference; context-only." },
+    { "path": "ai-docs/templates/new-widget/05-test-generation.md", "scope": "reference", "role": "reference-only", "canonical": false, "use_by_agents": "context-only", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Protected workflow-template reference; context-only." },
+    { "path": "ai-docs/templates/new-widget/06-validation.md", "scope": "reference", "role": "reference-only", "canonical": false, "use_by_agents": "context-only", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Protected workflow-template reference; context-only." },
+    { "path": "ai-docs/templates/playwright/00-master.md", "scope": "reference", "role": "reference-only", "canonical": false, "use_by_agents": "context-only", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Protected workflow-template reference; context-only." },
+    { "path": "ai-docs/templates/playwright/01-pre-questions.md", "scope": "reference", "role": "reference-only", "canonical": false, "use_by_agents": "context-only", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Protected workflow-template reference; context-only." },
+    { "path": "ai-docs/templates/playwright/02-test-implementation.md", "scope": "reference", "role": "reference-only", "canonical": false, "use_by_agents": "context-only", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Protected workflow-template reference; context-only." },
+    { "path": "ai-docs/templates/playwright/03-framework-and-doc-updates.md", "scope": "reference", "role": "reference-only", "canonical": false, "use_by_agents": "context-only", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Protected workflow-template reference; context-only." },
+    { "path": "ai-docs/templates/playwright/04-validation.md", "scope": "reference", "role": "reference-only", "canonical": false, "use_by_agents": "context-only", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Protected workflow-template reference; context-only." },
+    { "path": "ai-docs/templates/playwright/README.md", "scope": "reference", "role": "reference-only", "canonical": false, "use_by_agents": "context-only", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Protected workflow-template index; context-only." },
+    { "path": "packages/contact-center/ai-docs/migration/call-control-hook-migration.md", "scope": "reference", "role": "reference-only", "canonical": false, "use_by_agents": "context-only", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Protected migration reference note; retained." },
+    { "path": "packages/contact-center/ai-docs/migration/component-layer-migration.md", "scope": "reference", "role": "reference-only", "canonical": false, "use_by_agents": "context-only", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Protected migration reference note; retained." },
+    { "path": "packages/contact-center/ai-docs/migration/incoming-task-migration.md", "scope": "reference", "role": "reference-only", "canonical": false, "use_by_agents": "context-only", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Protected migration reference note; retained." },
+    { "path": "packages/contact-center/ai-docs/migration/migration-overview.md", "scope": "reference", "role": "reference-only", "canonical": false, "use_by_agents": "context-only", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Protected migration reference note; retained." },
+    { "path": "packages/contact-center/ai-docs/migration/store-event-wiring-migration.md", "scope": "reference", "role": "reference-only", "canonical": false, "use_by_agents": "context-only", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Protected migration reference note; retained." },
+    { "path": "packages/contact-center/ai-docs/migration/store-task-utils-migration.md", "scope": "reference", "role": "reference-only", "canonical": false, "use_by_agents": "context-only", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Protected migration reference note; retained." },
+    { "path": "packages/contact-center/ai-docs/migration/task-list-migration.md", "scope": "reference", "role": "reference-only", "canonical": false, "use_by_agents": "context-only", "post_migration_action": "retain", "deletion_status": "not-applicable", "notes": "Protected migration reference note; retained." }
+  ],
   "modules": [
     {
-      "id": "store",
-      "package": "@webex/cc-store",
       "path": "packages/contact-center/store",
-      "spec": "packages/contact-center/store/ai-docs/store-spec.md",
-      "responsibility": "MobX singleton holding global CC state; proxies SDK events; sole SDK access point.",
-      "coverageState": "DRAFT",
-      "tier": 1
+      "coverage_status": "Partial",
+      "coverage_evidence": "Canonical spec exists and is code-grounded against packages/contact-center/store/src/ (MobX singleton, sole SDK access point); migrated from prior 0.1.0-draft docs and not yet independently validated, so cross-check code for high-risk changes. Tier-1 core module.",
+      "canonical_spec": "packages/contact-center/store/ai-docs/store-spec.md",
+      "contracts": {
+        "provides": [
+          "default (store singleton) [value] export `default` from packages/contact-center/store/src/index.ts — MobX singleton re-exported from ./storeEventsWrapper; sole SDK access point (Store.getInstance()).",
+          "store.types [type-namespace] export `* from './store.types'` from packages/contact-center/store/src/index.ts — public store type surface.",
+          "task-utils [namespace] export `* from './task-utils'` from packages/contact-center/store/src/index.ts — task helper utilities."
+        ],
+        "requires": [
+          "@webex/contact-center [package @3.12.0-next.96] from packages/contact-center/store/package.json — Webex Contact Center SDK wrapped by the store.",
+          "mobx [package @6.13.5] from packages/contact-center/store/package.json — observable state runtime."
+        ]
+      },
+      "last_assessed": "2026-08-14",
+      "section_profile": {
+        "has_ui": false,
+        "has_tiers": false,
+        "crosses_service_boundaries": true,
+        "holds_client_state": true,
+        "enforces_domain_rules": false,
+        "is_concurrent_async": true,
+        "owns_persistence": false,
+        "stateful_transitions": false,
+        "exposes_wire_protocol": false,
+        "ui_multi_screen": false,
+        "large_data_model": false,
+        "returns_caller_errors": false,
+        "module_specific_conventions": true,
+        "published_package": true,
+        "embedded_in_host": false,
+        "has_design_tradeoff": false,
+        "has_submodules": false,
+        "resolved_by": "claude-cli (assess-only automated inference; config-fallback, not human-verified)",
+        "resolved_at": "2026-08-14T00:00:00Z"
+      },
+      "source_policy": {
+        "mode": "migrate-existing",
+        "existing_sources": [
+          "packages/contact-center/store/ai-docs/store-spec.md",
+          "ai-docs/_archive/pre-sdlc-migration/packages/contact-center/store/ai-docs/AGENTS.md",
+          "ai-docs/_archive/pre-sdlc-migration/packages/contact-center/store/ai-docs/ARCHITECTURE.md"
+        ],
+        "conflict_status": "none",
+        "decision_record": ".generated/sdd/spec-source-policy/decision.md"
+      }
     },
     {
-      "id": "cc-components",
-      "package": "@webex/cc-components",
       "path": "packages/contact-center/cc-components",
-      "spec": "packages/contact-center/cc-components/ai-docs/cc-components-spec.md",
-      "responsibility": "Shared presentational React UI primitives consumed by widget packages.",
-      "coverageState": "DRAFT",
-      "tier": 1
+      "coverage_status": "Partial",
+      "coverage_evidence": "Canonical spec exists and is code-grounded against packages/contact-center/cc-components/ (shared presentational React UI primitives); migrated from prior 0.1.0-draft docs, not yet independently validated. Tier-1 shared module.",
+      "canonical_spec": "packages/contact-center/cc-components/ai-docs/cc-components-spec.md",
+      "contracts": {
+        "provides": [
+          "UserStateComponent [react-component] export `UserStateComponent` from packages/contact-center/cc-components/src/index.ts",
+          "StationLoginComponent [react-component] export `StationLoginComponent` from packages/contact-center/cc-components/src/index.ts",
+          "CallControlComponent [react-component] export `CallControlComponent` from packages/contact-center/cc-components/src/index.ts",
+          "CallControlCADComponent [react-component] export `CallControlCADComponent` from packages/contact-center/cc-components/src/index.ts",
+          "IncomingTaskComponent [react-component] export `IncomingTaskComponent` from packages/contact-center/cc-components/src/index.ts",
+          "TaskListComponent [react-component] export `TaskListComponent` from packages/contact-center/cc-components/src/index.ts",
+          "OutdialCallComponent [react-component] export `OutdialCallComponent` from packages/contact-center/cc-components/src/index.ts",
+          "CampaignErrorDialogComponent [react-component] export `CampaignErrorDialogComponent` from packages/contact-center/cc-components/src/index.ts",
+          "CampaignCountdownComponent [react-component] export `CampaignCountdownComponent` from packages/contact-center/cc-components/src/index.ts",
+          "CampaignTaskComponent [react-component] export `CampaignTaskComponent` from packages/contact-center/cc-components/src/index.ts",
+          "RealTimeTranscriptComponent [react-component] export `RealTimeTranscriptComponent` from packages/contact-center/cc-components/src/index.ts",
+          "E911Modal [react-component] export `E911Modal` from packages/contact-center/cc-components/src/index.ts",
+          "AIAssistantComponent [react-component] export `AIAssistantComponent` from packages/contact-center/cc-components/src/index.ts",
+          "component types [type-namespace] export `* from StationLogin/UserState/task/AIAssistant *.types` from packages/contact-center/cc-components/src/index.ts — re-exports constants + prop/types for the presentational components."
+        ],
+        "requires": [
+          "@webex/cc-store [workspace-package @workspace:*] from packages/contact-center/cc-components/package.json",
+          "@webex/cc-ui-logging [workspace-package @workspace:*] from packages/contact-center/cc-components/package.json",
+          "@r2wc/react-to-web-component [package @2.0.3] from packages/contact-center/cc-components/package.json",
+          "react [peer-package @>=18.3.1] from packages/contact-center/cc-components/package.json"
+        ]
+      },
+      "last_assessed": "2026-08-14",
+      "section_profile": {
+        "has_ui": true,
+        "has_tiers": false,
+        "crosses_service_boundaries": false,
+        "holds_client_state": true,
+        "enforces_domain_rules": false,
+        "is_concurrent_async": false,
+        "owns_persistence": false,
+        "stateful_transitions": false,
+        "exposes_wire_protocol": false,
+        "ui_multi_screen": true,
+        "large_data_model": false,
+        "returns_caller_errors": false,
+        "module_specific_conventions": true,
+        "published_package": true,
+        "embedded_in_host": true,
+        "has_design_tradeoff": false,
+        "has_submodules": false,
+        "resolved_by": "claude-cli (assess-only automated inference; config-fallback, not human-verified)",
+        "resolved_at": "2026-08-14T00:00:00Z"
+      },
+      "source_policy": {
+        "mode": "migrate-existing",
+        "existing_sources": [
+          "packages/contact-center/cc-components/ai-docs/cc-components-spec.md",
+          "ai-docs/_archive/pre-sdlc-migration/packages/contact-center/cc-components/ai-docs/AGENTS.md",
+          "ai-docs/_archive/pre-sdlc-migration/packages/contact-center/cc-components/ai-docs/ARCHITECTURE.md"
+        ],
+        "conflict_status": "none",
+        "decision_record": ".generated/sdd/spec-source-policy/decision.md"
+      }
     },
     {
-      "id": "cc-widgets",
-      "package": "@webex/cc-widgets",
       "path": "packages/contact-center/cc-widgets",
-      "spec": "packages/contact-center/cc-widgets/ai-docs/cc-widgets-spec.md",
-      "responsibility": "r2wc Web Component wrappers aggregating widget packages for framework-agnostic consumption.",
-      "coverageState": "DRAFT",
-      "tier": 1
+      "coverage_status": "Partial",
+      "coverage_evidence": "Canonical spec exists and is code-grounded against packages/contact-center/cc-widgets/ (r2wc Web Component wrappers aggregating widget packages); migrated from prior 0.1.0-draft docs, not yet independently validated. Tier-1 aggregator module.",
+      "canonical_spec": "packages/contact-center/cc-widgets/ai-docs/cc-widgets-spec.md",
+      "contracts": {
+        "provides": [
+          "StationLogin [widget] export `StationLogin` from packages/contact-center/cc-widgets/src/index.ts — re-exported from @webex/cc-station-login.",
+          "UserState [widget] export `UserState` from packages/contact-center/cc-widgets/src/index.ts — re-exported from @webex/cc-user-state.",
+          "IncomingTask [widget] export `IncomingTask` from packages/contact-center/cc-widgets/src/index.ts — re-exported from @webex/cc-task.",
+          "CallControl [widget] export `CallControl` from packages/contact-center/cc-widgets/src/index.ts — re-exported from @webex/cc-task.",
+          "CallControlCAD [widget] export `CallControlCAD` from packages/contact-center/cc-widgets/src/index.ts — re-exported from @webex/cc-task.",
+          "TaskList [widget] export `TaskList` from packages/contact-center/cc-widgets/src/index.ts — re-exported from @webex/cc-task.",
+          "OutdialCall [widget] export `OutdialCall` from packages/contact-center/cc-widgets/src/index.ts — re-exported from @webex/cc-task.",
+          "RealTimeTranscript [widget] export `RealTimeTranscript` from packages/contact-center/cc-widgets/src/index.ts — re-exported from @webex/cc-task.",
+          "DigitalChannels [widget] export `DigitalChannels` from packages/contact-center/cc-widgets/src/index.ts — re-exported from @webex/cc-digital-channels.",
+          "AIAssistant [widget] export `AIAssistant` from packages/contact-center/cc-widgets/src/index.ts — re-exported from @webex/cc-ai-assistant.",
+          "store [value] export `store` from packages/contact-center/cc-widgets/src/index.ts — re-exported @webex/cc-store singleton."
+        ],
+        "requires": [
+          "@webex/cc-station-login [workspace-package @workspace:*] from packages/contact-center/cc-widgets/package.json",
+          "@webex/cc-user-state [workspace-package @workspace:*] from packages/contact-center/cc-widgets/package.json",
+          "@webex/cc-task [workspace-package @workspace:*] from packages/contact-center/cc-widgets/package.json",
+          "@webex/cc-digital-channels [workspace-package @workspace:*] from packages/contact-center/cc-widgets/package.json",
+          "@webex/cc-ai-assistant [workspace-package @workspace:*] from packages/contact-center/cc-widgets/package.json",
+          "@webex/cc-store [workspace-package @workspace:*] from packages/contact-center/cc-widgets/package.json",
+          "@r2wc/react-to-web-component [package @2.0.3] from packages/contact-center/cc-widgets/package.json"
+        ]
+      },
+      "last_assessed": "2026-08-14",
+      "section_profile": {
+        "has_ui": true,
+        "has_tiers": false,
+        "crosses_service_boundaries": false,
+        "holds_client_state": false,
+        "enforces_domain_rules": false,
+        "is_concurrent_async": false,
+        "owns_persistence": false,
+        "stateful_transitions": false,
+        "exposes_wire_protocol": false,
+        "ui_multi_screen": false,
+        "large_data_model": false,
+        "returns_caller_errors": false,
+        "module_specific_conventions": true,
+        "published_package": true,
+        "embedded_in_host": true,
+        "has_design_tradeoff": false,
+        "has_submodules": false,
+        "resolved_by": "claude-cli (assess-only automated inference; config-fallback, not human-verified)",
+        "resolved_at": "2026-08-14T00:00:00Z"
+      },
+      "source_policy": {
+        "mode": "migrate-existing",
+        "existing_sources": [
+          "packages/contact-center/cc-widgets/ai-docs/cc-widgets-spec.md",
+          "ai-docs/_archive/pre-sdlc-migration/packages/contact-center/cc-widgets/ai-docs/AGENTS.md",
+          "ai-docs/_archive/pre-sdlc-migration/packages/contact-center/cc-widgets/ai-docs/ARCHITECTURE.md"
+        ],
+        "conflict_status": "none",
+        "decision_record": ".generated/sdd/spec-source-policy/decision.md"
+      }
     },
     {
-      "id": "cc-digital-channels",
-      "package": "@webex/cc-digital-channels",
       "path": "packages/contact-center/cc-digital-channels",
-      "spec": "packages/contact-center/cc-digital-channels/ai-docs/cc-digital-channels-spec.md",
-      "responsibility": "Digital channels (chat/email/social) widget; embeds the digital-interactions experience via the store.",
-      "coverageState": "DRAFT",
-      "tier": 1
+      "coverage_status": "Partial",
+      "coverage_evidence": "Canonical spec exists and is code-grounded against packages/contact-center/cc-digital-channels/ (digital channels widget embedding the digital-interactions experience via the store); migrated from prior 0.1.0-draft docs, not yet independently validated. Tier-1 widget module.",
+      "canonical_spec": "packages/contact-center/cc-digital-channels/ai-docs/cc-digital-channels-spec.md",
+      "contracts": {
+        "provides": [
+          "DigitalChannels [widget] export `DigitalChannels` from packages/contact-center/cc-digital-channels/src/index.ts — named and default export; digital channels widget.",
+          "default (DigitalChannels) [widget] export `default` from packages/contact-center/cc-digital-channels/src/index.ts"
+        ],
+        "requires": [
+          "@webex/cc-store [workspace-package @workspace:*] from packages/contact-center/cc-digital-channels/package.json",
+          "cc-digital-interactions [package @3.0.8-beta.2] from packages/contact-center/cc-digital-channels/package.json — embedded digital-interactions experience.",
+          "mobx-react-lite [package @^4.1.0] from packages/contact-center/cc-digital-channels/package.json"
+        ]
+      },
+      "last_assessed": "2026-08-14",
+      "section_profile": {
+        "has_ui": true,
+        "has_tiers": false,
+        "crosses_service_boundaries": true,
+        "holds_client_state": false,
+        "enforces_domain_rules": false,
+        "is_concurrent_async": false,
+        "owns_persistence": false,
+        "stateful_transitions": false,
+        "exposes_wire_protocol": false,
+        "ui_multi_screen": false,
+        "large_data_model": false,
+        "returns_caller_errors": true,
+        "module_specific_conventions": true,
+        "published_package": true,
+        "embedded_in_host": true,
+        "has_design_tradeoff": false,
+        "has_submodules": false,
+        "resolved_by": "claude-cli (assess-only automated inference; config-fallback, not human-verified)",
+        "resolved_at": "2026-08-14T00:00:00Z"
+      },
+      "source_policy": {
+        "mode": "migrate-existing",
+        "existing_sources": [
+          "packages/contact-center/cc-digital-channels/ai-docs/cc-digital-channels-spec.md"
+        ],
+        "conflict_status": "none",
+        "decision_record": ".generated/sdd/spec-source-policy/decision.md"
+      }
     },
     {
-      "id": "station-login",
-      "package": "@webex/cc-station-login",
       "path": "packages/contact-center/station-login",
-      "spec": "packages/contact-center/station-login/ai-docs/station-login-spec.md",
-      "responsibility": "Agent login widget: team and device selection.",
-      "coverageState": "DRAFT",
-      "tier": 1
+      "coverage_status": "Partial",
+      "coverage_evidence": "Canonical spec exists and is code-grounded against packages/contact-center/station-login/ (agent login: team + device selection, incl. e911 modal); migrated from prior 0.1.0-draft docs, not yet independently validated. Tier-1 widget module.",
+      "canonical_spec": "packages/contact-center/station-login/ai-docs/station-login-spec.md",
+      "contracts": {
+        "provides": [
+          "StationLogin [widget] export `StationLogin` from packages/contact-center/station-login/src/index.ts — agent login widget (team/device selection, e911 modal)."
+        ],
+        "requires": [
+          "@webex/cc-components [workspace-package @workspace:*] from packages/contact-center/station-login/package.json",
+          "@webex/cc-store [workspace-package @workspace:*] from packages/contact-center/station-login/package.json",
+          "mobx-react-lite [package @^4.1.0] from packages/contact-center/station-login/package.json",
+          "react-error-boundary [package @^6.0.0] from packages/contact-center/station-login/package.json"
+        ]
+      },
+      "last_assessed": "2026-08-14",
+      "section_profile": {
+        "has_ui": true,
+        "has_tiers": false,
+        "crosses_service_boundaries": true,
+        "holds_client_state": false,
+        "enforces_domain_rules": false,
+        "is_concurrent_async": false,
+        "owns_persistence": false,
+        "stateful_transitions": false,
+        "exposes_wire_protocol": false,
+        "ui_multi_screen": true,
+        "large_data_model": false,
+        "returns_caller_errors": true,
+        "module_specific_conventions": true,
+        "published_package": true,
+        "embedded_in_host": true,
+        "has_design_tradeoff": false,
+        "has_submodules": false,
+        "resolved_by": "claude-cli (assess-only automated inference; config-fallback, not human-verified)",
+        "resolved_at": "2026-08-14T00:00:00Z"
+      },
+      "source_policy": {
+        "mode": "migrate-existing",
+        "existing_sources": [
+          "packages/contact-center/station-login/ai-docs/station-login-spec.md",
+          "ai-docs/_archive/pre-sdlc-migration/packages/contact-center/station-login/ai-docs/AGENTS.md",
+          "ai-docs/_archive/pre-sdlc-migration/packages/contact-center/station-login/ai-docs/ARCHITECTURE.md"
+        ],
+        "conflict_status": "none",
+        "decision_record": ".generated/sdd/spec-source-policy/decision.md"
+      }
     },
     {
-      "id": "user-state",
-      "package": "@webex/cc-user-state",
       "path": "packages/contact-center/user-state",
-      "spec": "packages/contact-center/user-state/ai-docs/user-state-spec.md",
-      "responsibility": "Agent state widget: state selection, idle codes, elapsed timer.",
-      "coverageState": "DRAFT",
-      "tier": 1
+      "coverage_status": "Partial",
+      "coverage_evidence": "Canonical spec exists and is code-grounded against packages/contact-center/user-state/ (agent state: state selection, idle codes, elapsed timer); migrated from prior 0.1.0-draft docs, not yet independently validated. Tier-1 widget module.",
+      "canonical_spec": "packages/contact-center/user-state/ai-docs/user-state-spec.md",
+      "contracts": {
+        "provides": [
+          "UserState [widget] export `UserState` from packages/contact-center/user-state/src/index.ts — agent state widget (state selection, idle codes, elapsed timer)."
+        ],
+        "requires": [
+          "@webex/cc-components [workspace-package @workspace:*] from packages/contact-center/user-state/package.json",
+          "@webex/cc-store [workspace-package @workspace:*] from packages/contact-center/user-state/package.json",
+          "mobx-react-lite [package @^4.1.0] from packages/contact-center/user-state/package.json",
+          "react-error-boundary [package @^6.0.0] from packages/contact-center/user-state/package.json"
+        ]
+      },
+      "last_assessed": "2026-08-14",
+      "section_profile": {
+        "has_ui": true,
+        "has_tiers": false,
+        "crosses_service_boundaries": true,
+        "holds_client_state": true,
+        "enforces_domain_rules": false,
+        "is_concurrent_async": false,
+        "owns_persistence": false,
+        "stateful_transitions": true,
+        "exposes_wire_protocol": false,
+        "ui_multi_screen": true,
+        "large_data_model": false,
+        "returns_caller_errors": true,
+        "module_specific_conventions": true,
+        "published_package": true,
+        "embedded_in_host": true,
+        "has_design_tradeoff": false,
+        "has_submodules": false,
+        "resolved_by": "claude-cli (assess-only automated inference; config-fallback, not human-verified)",
+        "resolved_at": "2026-08-14T00:00:00Z"
+      },
+      "source_policy": {
+        "mode": "migrate-existing",
+        "existing_sources": [
+          "packages/contact-center/user-state/ai-docs/user-state-spec.md",
+          "ai-docs/_archive/pre-sdlc-migration/packages/contact-center/user-state/ai-docs/AGENTS.md",
+          "ai-docs/_archive/pre-sdlc-migration/packages/contact-center/user-state/ai-docs/ARCHITECTURE.md"
+        ],
+        "conflict_status": "none",
+        "decision_record": ".generated/sdd/spec-source-policy/decision.md"
+      }
     },
     {
-      "id": "task",
-      "package": "@webex/cc-task",
       "path": "packages/contact-center/task",
-      "spec": "packages/contact-center/task/ai-docs/task-spec.md",
-      "responsibility": "Task widget bundle: CallControl, CallControlCAD, IncomingTask, OutdialCall, TaskList.",
-      "coverageState": "DRAFT",
-      "tier": 1,
-      "subWidgets": ["CallControl", "CallControlCAD", "IncomingTask", "OutdialCall", "TaskList"]
+      "coverage_status": "Partial",
+      "coverage_evidence": "Canonical spec exists and is code-grounded against packages/contact-center/task/ (task widget bundle: CallControl, CallControlCAD, IncomingTask, OutdialCall, TaskList — sub-widgets documented within this one canonical spec, no separate module specs); migrated from prior 0.1.0-draft docs, not yet independently validated. Tier-1 widget module.",
+      "canonical_spec": "packages/contact-center/task/ai-docs/task-spec.md",
+      "contracts": {
+        "provides": [
+          "IncomingTask [widget] export `IncomingTask` from packages/contact-center/task/src/index.ts",
+          "TaskList [widget] export `TaskList` from packages/contact-center/task/src/index.ts",
+          "CallControl [widget] export `CallControl` from packages/contact-center/task/src/index.ts",
+          "OutdialCall [widget] export `OutdialCall` from packages/contact-center/task/src/index.ts",
+          "CallControlCAD [widget] export `CallControlCAD` from packages/contact-center/task/src/index.ts",
+          "RealTimeTranscript [widget] export `RealTimeTranscript` from packages/contact-center/task/src/index.ts"
+        ],
+        "requires": [
+          "@webex/cc-components [workspace-package @workspace:*] from packages/contact-center/task/package.json",
+          "@webex/cc-store [workspace-package @workspace:*] from packages/contact-center/task/package.json",
+          "mobx-react-lite [package @^4.1.0] from packages/contact-center/task/package.json",
+          "react-error-boundary [package @^6.0.0] from packages/contact-center/task/package.json"
+        ]
+      },
+      "last_assessed": "2026-08-14",
+      "section_profile": {
+        "has_ui": true,
+        "has_tiers": false,
+        "crosses_service_boundaries": true,
+        "holds_client_state": true,
+        "enforces_domain_rules": true,
+        "is_concurrent_async": false,
+        "owns_persistence": false,
+        "stateful_transitions": true,
+        "exposes_wire_protocol": false,
+        "ui_multi_screen": true,
+        "large_data_model": false,
+        "returns_caller_errors": true,
+        "module_specific_conventions": true,
+        "published_package": false,
+        "embedded_in_host": true,
+        "has_design_tradeoff": false,
+        "has_submodules": false,
+        "resolved_by": "claude-cli (assess-only automated inference; config-fallback, not human-verified)",
+        "resolved_at": "2026-08-14T00:00:00Z"
+      },
+      "source_policy": {
+        "mode": "migrate-existing",
+        "existing_sources": [
+          "packages/contact-center/task/ai-docs/task-spec.md",
+          "ai-docs/_archive/pre-sdlc-migration/packages/contact-center/task/ai-docs/widgets/CallControl/AGENTS.md",
+          "ai-docs/_archive/pre-sdlc-migration/packages/contact-center/task/ai-docs/widgets/CallControl/ARCHITECTURE.md",
+          "ai-docs/_archive/pre-sdlc-migration/packages/contact-center/task/ai-docs/widgets/IncomingTask/AGENTS.md",
+          "ai-docs/_archive/pre-sdlc-migration/packages/contact-center/task/ai-docs/widgets/IncomingTask/ARCHITECTURE.md",
+          "ai-docs/_archive/pre-sdlc-migration/packages/contact-center/task/ai-docs/widgets/OutdialCall/AGENTS.md",
+          "ai-docs/_archive/pre-sdlc-migration/packages/contact-center/task/ai-docs/widgets/OutdialCall/ARCHITECTURE.md",
+          "ai-docs/_archive/pre-sdlc-migration/packages/contact-center/task/ai-docs/widgets/TaskList/AGENTS.md",
+          "ai-docs/_archive/pre-sdlc-migration/packages/contact-center/task/ai-docs/widgets/TaskList/ARCHITECTURE.md"
+        ],
+        "conflict_status": "none",
+        "decision_record": ".generated/sdd/spec-source-policy/decision.md"
+      }
     },
     {
-      "id": "ai-assistant",
-      "package": "@webex/cc-ai-assistant",
       "path": "packages/contact-center/ai-assistant",
-      "spec": "packages/contact-center/ai-assistant/ai-docs/ai-assistant-spec.md",
-      "responsibility": "AI Assistant widget: panel chrome, Real-time Assist requests, transcript, feedback actions.",
-      "coverageState": "DRAFT",
-      "tier": 1
+      "coverage_status": "Partial",
+      "coverage_evidence": "Canonical spec exists and is code-grounded against packages/contact-center/ai-assistant/ (AI Assistant widget: panel chrome, Real-time Assist requests, transcript, feedback actions); migrated from prior 0.1.0-draft docs, not yet independently validated. Tier-1 widget module.",
+      "canonical_spec": "packages/contact-center/ai-assistant/ai-docs/ai-assistant-spec.md",
+      "contracts": {
+        "provides": [
+          "AIAssistant [widget] export `AIAssistant` from packages/contact-center/ai-assistant/src/index.ts — AI Assistant widget (panel, real-time assist, transcript, feedback).",
+          "ai-assistant.types [type-namespace] export `* from './ai-assistant.types'` from packages/contact-center/ai-assistant/src/index.ts"
+        ],
+        "requires": [
+          "@webex/cc-components [workspace-package @workspace:*] from packages/contact-center/ai-assistant/package.json",
+          "@webex/cc-store [workspace-package @workspace:*] from packages/contact-center/ai-assistant/package.json",
+          "@webex/cc-ui-logging [workspace-package @workspace:*] from packages/contact-center/ai-assistant/package.json",
+          "mobx-react-lite [package @^4.1.0] from packages/contact-center/ai-assistant/package.json",
+          "react-error-boundary [package @^6.0.0] from packages/contact-center/ai-assistant/package.json"
+        ]
+      },
+      "last_assessed": "2026-08-14",
+      "section_profile": {
+        "has_ui": true,
+        "has_tiers": false,
+        "crosses_service_boundaries": true,
+        "holds_client_state": false,
+        "enforces_domain_rules": false,
+        "is_concurrent_async": true,
+        "owns_persistence": false,
+        "stateful_transitions": false,
+        "exposes_wire_protocol": false,
+        "ui_multi_screen": false,
+        "large_data_model": false,
+        "returns_caller_errors": true,
+        "module_specific_conventions": true,
+        "published_package": false,
+        "embedded_in_host": false,
+        "has_design_tradeoff": false,
+        "has_submodules": false,
+        "resolved_by": "claude-cli (assess-only automated inference; config-fallback, not human-verified)",
+        "resolved_at": "2026-08-14T00:00:00Z"
+      },
+      "source_policy": {
+        "mode": "migrate-existing",
+        "existing_sources": [
+          "packages/contact-center/ai-assistant/ai-docs/ai-assistant-spec.md"
+        ],
+        "conflict_status": "none",
+        "decision_record": ".generated/sdd/spec-source-policy/decision.md"
+      }
     },
     {
-      "id": "ui-logging",
-      "package": "@webex/cc-ui-logging",
       "path": "packages/contact-center/ui-logging",
-      "spec": "packages/contact-center/ui-logging/ai-docs/ui-logging-spec.md",
-      "responsibility": "Metrics/telemetry: withMetrics HOC and metricsLogger.",
-      "coverageState": "DRAFT",
-      "tier": 2
+      "coverage_status": "Partial",
+      "coverage_evidence": "Canonical spec exists and is code-grounded against packages/contact-center/ui-logging/ (metrics/telemetry: withMetrics HOC and metricsLogger); migrated from prior 0.1.0-draft docs, not yet independently validated. Tier-2 shared module.",
+      "canonical_spec": "packages/contact-center/ui-logging/ai-docs/ui-logging-spec.md",
+      "contracts": {
+        "provides": [
+          "withMetrics [hoc] export `withMetrics` from packages/contact-center/ui-logging/src/index.ts — metrics HOC wrapping widgets.",
+          "WidgetMetrics [type] export `type WidgetMetrics` from packages/contact-center/ui-logging/src/index.ts — metrics logger type from ./metricsLogger."
+        ],
+        "requires": [
+          "@webex/cc-store [workspace-package @workspace:*] from packages/contact-center/ui-logging/package.json"
+        ]
+      },
+      "last_assessed": "2026-08-14",
+      "section_profile": {
+        "has_ui": false,
+        "has_tiers": false,
+        "crosses_service_boundaries": false,
+        "holds_client_state": false,
+        "enforces_domain_rules": false,
+        "is_concurrent_async": false,
+        "owns_persistence": false,
+        "stateful_transitions": false,
+        "exposes_wire_protocol": false,
+        "ui_multi_screen": false,
+        "large_data_model": false,
+        "returns_caller_errors": true,
+        "module_specific_conventions": true,
+        "published_package": true,
+        "embedded_in_host": false,
+        "has_design_tradeoff": true,
+        "has_submodules": false,
+        "resolved_by": "claude-cli (assess-only automated inference; config-fallback, not human-verified)",
+        "resolved_at": "2026-08-14T00:00:00Z"
+      },
+      "source_policy": {
+        "mode": "migrate-existing",
+        "existing_sources": [
+          "packages/contact-center/ui-logging/ai-docs/ui-logging-spec.md",
+          "ai-docs/_archive/pre-sdlc-migration/packages/contact-center/ui-logging/ai-docs/AGENTS.md",
+          "ai-docs/_archive/pre-sdlc-migration/packages/contact-center/ui-logging/ai-docs/ARCHITECTURE.md"
+        ],
+        "conflict_status": "none",
+        "decision_record": ".generated/sdd/spec-source-policy/decision.md"
+      }
     },
     {
-      "id": "test-fixtures",
-      "package": "@webex/test-fixtures",
       "path": "packages/contact-center/test-fixtures",
-      "spec": "packages/contact-center/test-fixtures/ai-docs/test-fixtures-spec.md",
-      "responsibility": "Shared test mocks and helpers across CC packages.",
-      "coverageState": "DRAFT",
-      "tier": 2
+      "coverage_status": "Partial",
+      "coverage_evidence": "Canonical spec exists and is code-grounded against packages/contact-center/test-fixtures/ (shared test mocks and helpers across CC packages); migrated from prior 0.1.0-draft docs, not yet independently validated. Tier-2 shared module.",
+      "canonical_spec": "packages/contact-center/test-fixtures/ai-docs/test-fixtures-spec.md",
+      "contracts": {
+        "provides": [
+          "fixtures [namespace] export `* from './fixtures'` from packages/contact-center/test-fixtures/src/index.ts — shared store/SDK mocks.",
+          "incomingTaskFixtures [namespace] export `* from './incomingTaskFixtures'` from packages/contact-center/test-fixtures/src/index.ts",
+          "taskListFixtures [namespace] export `* from './taskListFixtures'` from packages/contact-center/test-fixtures/src/index.ts",
+          "taskUIControlsFixtures [namespace] export `* from './taskUIControlsFixtures'` from packages/contact-center/test-fixtures/src/index.ts",
+          "outdialCallFixtures [namespace] export `* from './components/task/outdialCallFixtures'` from packages/contact-center/test-fixtures/src/index.ts"
+        ],
+        "requires": [
+          "@webex/cc-store [workspace-package @workspace:*] from packages/contact-center/test-fixtures/package.json"
+        ]
+      },
+      "last_assessed": "2026-08-14",
+      "section_profile": {
+        "has_ui": false,
+        "has_tiers": false,
+        "crosses_service_boundaries": false,
+        "holds_client_state": false,
+        "enforces_domain_rules": false,
+        "is_concurrent_async": false,
+        "owns_persistence": false,
+        "stateful_transitions": false,
+        "exposes_wire_protocol": false,
+        "ui_multi_screen": false,
+        "large_data_model": false,
+        "returns_caller_errors": false,
+        "module_specific_conventions": true,
+        "published_package": true,
+        "embedded_in_host": false,
+        "has_design_tradeoff": false,
+        "has_submodules": false,
+        "resolved_by": "claude-cli (assess-only automated inference; config-fallback, not human-verified)",
+        "resolved_at": "2026-08-14T00:00:00Z"
+      },
+      "source_policy": {
+        "mode": "migrate-existing",
+        "existing_sources": [
+          "packages/contact-center/test-fixtures/ai-docs/test-fixtures-spec.md",
+          "ai-docs/_archive/pre-sdlc-migration/packages/contact-center/test-fixtures/ai-docs/AGENTS.md",
+          "ai-docs/_archive/pre-sdlc-migration/packages/contact-center/test-fixtures/ai-docs/ARCHITECTURE.md"
+        ],
+        "conflict_status": "none",
+        "decision_record": ".generated/sdd/spec-source-policy/decision.md"
+      }
     },
     {
-      "id": "meetings-widgets",
-      "package": "@webex/widgets",
       "path": "packages/@webex/widgets",
-      "spec": "packages/@webex/widgets/ai-docs/widgets-spec.md",
-      "responsibility": "Legacy meetings widgets (non-CC); separate widget family in the monorepo.",
-      "coverageState": "DRAFT",
-      "tier": 2
+      "coverage_status": "Partial",
+      "coverage_evidence": "Canonical spec exists and is code-grounded against packages/@webex/widgets/ (legacy meetings widgets — a separate, non-CC widget family in the monorepo); migrated from prior 0.1.0-draft docs, not yet independently validated. Tier-2 legacy module.",
+      "canonical_spec": "packages/@webex/widgets/ai-docs/widgets-spec.md",
+      "contracts": {
+        "provides": [
+          "WebexMeetingsWidget [react-component] export `WebexMeetingsWidget` from packages/@webex/widgets/src/index.js — default export of ./widgets/WebexMeetings/WebexMeetings; legacy meetings widget."
+        ],
+        "requires": [
+          "@webex/components [package @1.277.1] from packages/@webex/widgets/package.json",
+          "@webex/component-adapter-interfaces [package @^1.30.5] from packages/@webex/widgets/package.json",
+          "@webex/sdk-component-adapter [package @1.113.3] from packages/@webex/widgets/package.json",
+          "webex [peer-package @2.60.4] from packages/@webex/widgets/package.json",
+          "react [peer-package @18.3.1] from packages/@webex/widgets/package.json"
+        ]
+      },
+      "last_assessed": "2026-08-14",
+      "section_profile": {
+        "has_ui": true,
+        "has_tiers": false,
+        "crosses_service_boundaries": false,
+        "holds_client_state": false,
+        "enforces_domain_rules": false,
+        "is_concurrent_async": false,
+        "owns_persistence": false,
+        "stateful_transitions": true,
+        "exposes_wire_protocol": false,
+        "ui_multi_screen": true,
+        "large_data_model": false,
+        "returns_caller_errors": false,
+        "module_specific_conventions": true,
+        "published_package": true,
+        "embedded_in_host": true,
+        "has_design_tradeoff": false,
+        "has_submodules": false,
+        "resolved_by": "claude-cli (assess-only automated inference; config-fallback, not human-verified)",
+        "resolved_at": "2026-08-14T00:00:00Z"
+      },
+      "source_policy": {
+        "mode": "migrate-existing",
+        "existing_sources": [
+          "packages/@webex/widgets/ai-docs/widgets-spec.md",
+          "ai-docs/_archive/pre-sdlc-migration/packages/@webex/widgets/ai-docs/AGENTS.md",
+          "ai-docs/_archive/pre-sdlc-migration/packages/@webex/widgets/ai-docs/ARCHITECTURE.md"
+        ],
+        "conflict_status": "none",
+        "decision_record": ".generated/sdd/spec-source-policy/decision.md"
+      }
     }
   ],
-  "contracts": {
-    "index": "ai-docs/CONTRACTS.md",
-    "sdkApiReference": "node_modules/@webex/contact-center/dist/types/index.d.ts"
+  "spec_policy": {
+    "delta_grammar": {
+      "added": "## ADDED Requirements",
+      "modified": "## MODIFIED Requirements",
+      "removed": "## REMOVED Requirements"
+    },
+    "require_what_and_why": true,
+    "require_provenance": true,
+    "protected_specs": [
+      "packages/contact-center/store/ai-docs/store-spec.md",
+      "packages/contact-center/cc-components/ai-docs/cc-components-spec.md",
+      "packages/contact-center/cc-widgets/ai-docs/cc-widgets-spec.md",
+      "packages/contact-center/cc-digital-channels/ai-docs/cc-digital-channels-spec.md",
+      "packages/contact-center/station-login/ai-docs/station-login-spec.md",
+      "packages/contact-center/user-state/ai-docs/user-state-spec.md",
+      "packages/contact-center/task/ai-docs/task-spec.md",
+      "packages/contact-center/ai-assistant/ai-docs/ai-assistant-spec.md",
+      "packages/contact-center/ui-logging/ai-docs/ui-logging-spec.md",
+      "packages/contact-center/test-fixtures/ai-docs/test-fixtures-spec.md",
+      "packages/@webex/widgets/ai-docs/widgets-spec.md"
+    ],
+    "required_sections_by_change_class": {
+      "core_always": ["Intent (WHAT)", "Rationale (WHY)", "Scope/Out-of-scope", "Acceptance criteria", "Contracts delta"],
+      "security_or_contract_or_perf_critical": ["Data", "Error Matrix", "Resilience", "Observability", "Operations"]
+    }
   },
-  "standingDocs": {
-    "AGENTS.md": "AGENTS.md",
-    "ARCHITECTURE.md": "ai-docs/ARCHITECTURE.md",
-    "SPEC_INDEX.md": "ai-docs/SPEC_INDEX.md",
-    "RULES.md": "ai-docs/RULES.md",
-    "GLOSSARY.md": "ai-docs/GLOSSARY.md",
-    "SECURITY.md": "ai-docs/SECURITY.md",
-    "CONTRACTS.md": "ai-docs/CONTRACTS.md",
-    "SERVICE_STATE.md": "ai-docs/SERVICE_STATE.md",
-    "GETTING_STARTED.md": "ai-docs/GETTING_STARTED.md",
-    "REVIEW_CHECKLIST.md": "ai-docs/REVIEW_CHECKLIST.md",
-    "DATA_MODEL.md": "N/A — repo owns no persistent datastore; all domain data is fetched from the @webex/contact-center SDK at runtime."
+  "validation": {
+    "generator_runtime": "claude-cli",
+    "generator_model": "us.anthropic.claude-opus-4-8",
+    "generator_runtime_source": "invocation-input",
+    "minimum_independence": "different-runtime",
+    "blocking_severities": ["Blocking"],
+    "generator_run_id": "7262c26e-bae6-4dae-9a6e-eabb8cdb9442"
+  },
+  "layout": {
+    "sdd_root": ".sdd",
+    "docs_root": "ai-docs",
+    "agent_entry_path": "AGENTS.md",
+    "standing_docs_root": "ai-docs",
+    "spec_index_path": "ai-docs/SPEC_INDEX.md",
+    "module_docs_strategy": "source-local",
+    "module_docs_folder_name": "ai-docs",
+    "template_profile": "sdd-legacy",
+    "template_roots": {
+      "canonical": ".sdd/templates",
+      "extensions": [".sdd/templates/extensions"]
+    },
+    "repo_skills_root": ".sdd/skills",
+    "contracts_strategy": "root-index-module-detail"
+  },
+  "tooling": {
+    "sdlc_skills": {
+      "source_repo": "WebexDevPlatform/RepoAnnotation-Templates",
+      "source_ref": "0aa65d93f019e5313ec2ddfac9b0c7352a2882cc",
+      "install_mode": "copy",
+      "installed_at": "2026-08-14T00:00:00Z",
+      "plugins": ["repo-annotation@1.0.4+workflow.1"]
+    }
+  },
+  "coverage_ratchet": {
+    "enabled": true
+  },
+  "substrate": {
+    "source": "WebexTools/repo-standards",
+    "consumed": ["lint/format configs", "standard files (PR template, README)"],
+    "compliance_tier": "legacy"
+  },
+  "section_profiles": {
+    "repo": {
+      "owns_datastore": false,
+      "holds_client_state": true,
+      "components_interact": true,
+      "domain_data_across_components": false,
+      "caches_data": false,
+      "observability_convention": true,
+      "deploys_to_infra": false,
+      "shared_base_libs": false,
+      "is_monorepo": true,
+      "multi_platform": false,
+      "published_package": true,
+      "embedded_in_host": true,
+      "cross_repo_deps_material": false,
+      "security_arch_warranted": true,
+      "exposes_commands_or_artifacts": true
+    },
+    "resolved_by": "claude-cli (assess-only automated inference; config-fallback, not human-verified)",
+    "resolved_at": "2026-08-14T00:00:00Z"
   }
 }
