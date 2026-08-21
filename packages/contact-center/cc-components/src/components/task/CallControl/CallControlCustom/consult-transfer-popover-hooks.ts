@@ -27,7 +27,7 @@ import {DEFAULT_PAGE_SIZE} from '../../constants';
  * @param logger - Optional logger instance for diagnostics.
  * @returns An object containing SDK response data, pagination state and helpers.
  */
-export const usePaginatedData = <T extends {name?: string}>(
+export const usePaginatedData = <T>(
   fetchFunction: FetchPaginatedList<T> | undefined,
   categoryName: string,
   logger?: ILogger
@@ -37,9 +37,12 @@ export const usePaginatedData = <T extends {name?: string}>(
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
+  const latestRequestIdRef = useRef(0);
 
   const loadData = useCallback(
     async (currentPage = 0, search = '', reset = false) => {
+      const requestId = ++latestRequestIdRef.current;
+
       if (!fetchFunction) {
         setData([]);
         setHasMore(false);
@@ -62,6 +65,8 @@ export const usePaginatedData = <T extends {name?: string}>(
           method: 'usePaginatedData#loadData',
         });
         const response = await fetchFunction(apiParams);
+
+        if (requestId !== latestRequestIdRef.current) return;
 
         if (!response || !response.data) {
           logger?.error(`CC-Components: No data received from fetch function for ${categoryName}`, {
@@ -103,21 +108,24 @@ export const usePaginatedData = <T extends {name?: string}>(
           method: 'usePaginatedData#loadData',
           error: errorMessage,
         });
+        if (requestId !== latestRequestIdRef.current) return;
         if (reset || currentPage === 0) {
           setData([]);
         }
         setHasMore(false);
       } finally {
-        setLoading(false);
+        if (requestId === latestRequestIdRef.current) setLoading(false);
       }
     },
     [fetchFunction, logger, categoryName]
   );
 
   const reset = useCallback(() => {
+    latestRequestIdRef.current += 1;
     setData([]);
     setPage(0);
     setHasMore(true);
+    setLoading(false);
   }, []);
 
   return {data, page, hasMore, loading, loadData, reset};

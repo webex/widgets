@@ -2407,6 +2407,52 @@ describe('useCallControl', () => {
     getBuddyAgentsSpy.mockRestore();
   });
 
+  it('should ignore a stale buddy-agent response after the action changes', async () => {
+    let resolveConsult!: (agents: typeof mockAgents) => void;
+    let resolveTransfer!: (agents: typeof mockAgents) => void;
+    const consultResponse = new Promise<typeof mockAgents>((resolve) => {
+      resolveConsult = resolve;
+    });
+    const transferResponse = new Promise<typeof mockAgents>((resolve) => {
+      resolveTransfer = resolve;
+    });
+    jest
+      .spyOn(store, 'getBuddyAgents')
+      .mockImplementation((action) => (action === 'Transfer' ? transferResponse : consultResponse));
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: mockCurrentTask,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+        isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
+      })
+    );
+
+    let consultRequest!: Promise<void>;
+    let transferRequest!: Promise<void>;
+    act(() => {
+      consultRequest = result.current.loadBuddyAgents('Consult');
+      transferRequest = result.current.loadBuddyAgents('Transfer');
+    });
+
+    await act(async () => {
+      resolveTransfer([mockAgents[1]]);
+      await transferRequest;
+    });
+    expect(result.current.buddyAgents).toEqual([mockAgents[1]]);
+
+    await act(async () => {
+      resolveConsult([mockAgents[0]]);
+      await consultRequest;
+    });
+    expect(result.current.buddyAgents).toEqual([mockAgents[1]]);
+    expect(result.current.loadingBuddyAgents).toBe(false);
+  });
+
   it('should call transferCall successfully', async () => {
     const transferSpy = jest.fn().mockResolvedValue('Transferred');
     const currentTaskSuccess = {...mockCurrentTask, transfer: transferSpy};
@@ -5697,10 +5743,7 @@ describe('useOutdialCall', () => {
     });
 
     expect(mockOutdialCallProps.startOutdial).toHaveBeenCalledWith(destination);
-    expect(logger.info).toHaveBeenCalledWith('Outdial call started', {
-      module: 'widget-OutdialCall#helper.ts',
-      method: 'startOutdial',
-    });
+    expect(logger.info).toHaveBeenCalledWith('Outdial call started', 'Success');
   });
 
   it('should successfully start an outdial call with origin', async () => {
@@ -5717,10 +5760,7 @@ describe('useOutdialCall', () => {
     });
 
     expect(mockOutdialCallProps.startOutdial).toHaveBeenCalledWith(destination, origin);
-    expect(logger.info).toHaveBeenCalledWith('Outdial call started', {
-      module: 'widget-OutdialCall#helper.ts',
-      method: 'startOutdial',
-    });
+    expect(logger.info).toHaveBeenCalledWith('Outdial call started', 'Success');
   });
 
   it('should show alert when destination is empty or only contains spaces', async () => {

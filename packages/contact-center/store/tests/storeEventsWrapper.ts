@@ -1027,6 +1027,17 @@ describe('storeEventsWrapper', () => {
       });
     });
 
+    it('should preserve the legacy media-type buddy-agent call', async () => {
+      storeWrapper['store'].cc.getBuddyAgents = jest.fn().mockResolvedValue({data: {agentList: []}});
+
+      await storeWrapper.getBuddyAgents('chat');
+
+      expect(storeWrapper['store'].cc.getBuddyAgents).toHaveBeenCalledWith({
+        mediaType: 'chat',
+        state: 'Available',
+      });
+    });
+
     it('should omit an unsupported task media type and use the SDK default', async () => {
       storeWrapper['store'].currentTask = {data: {interaction: {mediaType: 'video'}}} as ITask;
       storeWrapper['store'].cc.getBuddyAgents = jest.fn().mockResolvedValue({data: {agentList: []}});
@@ -1084,6 +1095,50 @@ describe('storeEventsWrapper', () => {
         page: 0,
         pageSize: 25,
       });
+    });
+
+    it('should combine a caller filter with the active task channel filter', async () => {
+      storeWrapper['store'].currentTask = {data: {interaction: {mediaType: 'chat'}}} as ITask;
+      storeWrapper['store'].cc.getQueues = jest.fn().mockResolvedValue({data: [], meta: {page: 0, totalPages: 0}});
+
+      await storeWrapper.getQueues({filter: 'name==Support', page: 0});
+
+      expect(storeWrapper['store'].cc.getQueues).toHaveBeenCalledWith({
+        filter: 'queueType==INBOUND;channelType==CHAT;active==true;name==Support',
+        page: 0,
+      });
+    });
+
+    it('should preserve the legacy media-type and params queue call', async () => {
+      storeWrapper['store'].currentTask = null;
+      storeWrapper['store'].cc.getQueues = jest.fn().mockResolvedValue({data: [], meta: {page: 0, totalPages: 0}});
+
+      await storeWrapper.getQueues('social', {page: 2, search: 'support'});
+
+      expect(storeWrapper['store'].cc.getQueues).toHaveBeenCalledWith({
+        filter: 'queueType==INBOUND;channelType==SOCIAL_CHANNEL;active==true',
+        page: 2,
+        search: 'support',
+      });
+    });
+
+    it('should preserve telephony scoping for the legacy queue call when a caller filter is supplied', async () => {
+      storeWrapper['store'].cc.getQueues = jest.fn().mockResolvedValue({data: [], meta: {page: 0, totalPages: 0}});
+
+      await storeWrapper.getQueues('telephony', {filter: 'name==Support'});
+
+      expect(storeWrapper['store'].cc.getQueues).toHaveBeenCalledWith({
+        filter: 'queueType==INBOUND;channelType==TELEPHONY;active==true;name==Support',
+      });
+    });
+
+    it('should preserve an explicit empty filter in the params-only queue call', async () => {
+      storeWrapper['store'].currentTask = {data: {interaction: {mediaType: 'telephony'}}} as ITask;
+      storeWrapper['store'].cc.getQueues = jest.fn().mockResolvedValue({data: [], meta: {page: 0, totalPages: 0}});
+
+      await storeWrapper.getQueues({filter: ''});
+
+      expect(storeWrapper['store'].cc.getQueues).toHaveBeenCalledWith({filter: ''});
     });
 
     it('should handle error in getQueues and throw error', async () => {

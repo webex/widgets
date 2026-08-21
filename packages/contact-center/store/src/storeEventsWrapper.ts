@@ -32,6 +32,7 @@ import Store from './store';
 import {
   DEVICE_TYPE_BROWSER,
   MEDIA_TYPE_TELEPHONY_LOWER,
+  AGENT_STATE_AVAILABLE,
   CAMPAIGN_PREVIEW_OUTBOUND_TYPES,
   CAMPAIGN_PREVIEW_CAMPAIGN_TYPES,
 } from './store.types';
@@ -48,17 +49,16 @@ const CONSULT_TRANSFER_CHANNELS = {
 
 const getSupportedMediaType = (mediaType?: string): keyof typeof CONSULT_TRANSFER_CHANNELS | undefined => {
   const normalizedMediaType = typeof mediaType === 'string' ? mediaType.toLowerCase() : '';
+  const channel = CONSULT_TRANSFER_CHANNELS[normalizedMediaType as keyof typeof CONSULT_TRANSFER_CHANNELS];
 
-  return normalizedMediaType in CONSULT_TRANSFER_CHANNELS
-    ? (normalizedMediaType as keyof typeof CONSULT_TRANSFER_CHANNELS)
-    : undefined;
+  return typeof channel === 'string' ? (normalizedMediaType as keyof typeof CONSULT_TRANSFER_CHANNELS) : undefined;
 };
 
-const getTaskQueueChannelFilter = (mediaType?: string): string | undefined => {
+const getQueueChannelFilter = (mediaType?: string): string | undefined => {
   const supportedMediaType = getSupportedMediaType(mediaType);
   const channelType = supportedMediaType ? CONSULT_TRANSFER_CHANNELS[supportedMediaType] : undefined;
 
-  if (!channelType || channelType === 'TELEPHONY') return undefined;
+  if (!channelType) return undefined;
 
   return `queueType==INBOUND;channelType==${channelType};active==true`;
 };
@@ -1264,13 +1264,22 @@ class StoreWrapper implements IStoreWrapper {
     });
   };
 
-  getBuddyAgents = async (action: 'Consult' | 'Transfer' = 'Consult'): Promise<Array<BuddyDetails>> => {
+  getBuddyAgents = async (actionOrMediaType?: string): Promise<Array<BuddyDetails>> => {
     try {
-      const mediaType = getSupportedMediaType(this.currentTask?.data?.interaction?.mediaType);
-      const response = await this.store.cc.getBuddyAgents({
-        action,
-        ...(mediaType ? {mediaType} : {}),
-      });
+      const isAction = actionOrMediaType === 'Consult' || actionOrMediaType === 'Transfer';
+      const taskMediaType = getSupportedMediaType(this.currentTask?.data?.interaction?.mediaType);
+      const mediaType = isAction ? taskMediaType : (getSupportedMediaType(actionOrMediaType) ?? taskMediaType);
+      const response = await this.store.cc.getBuddyAgents(
+        isAction
+          ? {
+              action: actionOrMediaType,
+              ...(mediaType ? {mediaType} : {}),
+            }
+          : {
+              mediaType: mediaType ?? MEDIA_TYPE_TELEPHONY_LOWER,
+              state: AGENT_STATE_AVAILABLE,
+            }
+      );
       return 'data' in response ? response.data.agentList : [];
     } catch (error) {
       this.store.logger.error('Error fetching buddy agents:', error);
@@ -1278,14 +1287,25 @@ class StoreWrapper implements IStoreWrapper {
     }
   };
 
-  getQueues = async (params?: ContactServiceQueueSearchParams): Promise<ContactServiceQueuesResponse> => {
+  getQueues = async (
+    mediaTypeOrParams?: string | ContactServiceQueueSearchParams,
+    legacyParams?: ContactServiceQueueSearchParams
+  ): Promise<ContactServiceQueuesResponse> => {
     try {
-      const mediaType = this.currentTask?.data?.interaction?.mediaType;
-      const filter = getTaskQueueChannelFilter(mediaType);
+      const usesLegacyMediaSignature = typeof mediaTypeOrParams === 'string' || legacyParams !== undefined;
+      const params = typeof mediaTypeOrParams === 'string' ? legacyParams : (mediaTypeOrParams ?? legacyParams);
+      const mediaType =
+        typeof mediaTypeOrParams === 'string' ? mediaTypeOrParams : this.currentTask?.data?.interaction?.mediaType;
+      const supportedMediaType = getSupportedMediaType(mediaType);
+      const taskFilter =
+        usesLegacyMediaSignature || (supportedMediaType && supportedMediaType !== 'telephony')
+          ? getQueueChannelFilter(mediaType)
+          : undefined;
+      const filter = taskFilter && params?.filter ? `${taskFilter};${params.filter}` : (taskFilter ?? params?.filter);
 
       return await this.store.cc.getQueues({
-        ...(filter ? {filter} : {}),
         ...(params ?? {}),
+        ...(filter !== undefined ? {filter} : {}),
       });
     } catch (error) {
       this.store.logger.error('Error fetching queues:', error);

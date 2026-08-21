@@ -71,7 +71,6 @@ interface IContactCenter {
   setAgentState(data: StateChange): Promise<SetStateResponse>;
   getOutdialAniEntries(params: OutdialAniParams): Promise<OutdialAniEntriesResponse>;
   getAccessToken(): Promise<string>;
-  startOutdial(destination: string, origin?: string): Promise<TaskResponse>;
   acceptPreviewContact(payload: PreviewContactPayload): Promise<TaskResponse>;
   skipPreviewContact(payload: PreviewContactPayload): Promise<TaskResponse>;
   removePreviewContact(payload: PreviewContactPayload): Promise<TaskResponse>;
@@ -216,8 +215,13 @@ interface IStoreWrapper extends IStore {
   onErrorCallback?: (widgetName: string, error: Error) => void;
   setCurrentTask(task: ITask): void;
   refreshTaskList(): void;
-  getBuddyAgents(action?: 'Consult' | 'Transfer'): Promise<BuddyDetails[]>;
+  getBuddyAgents(action: 'Consult' | 'Transfer'): Promise<BuddyDetails[]>;
+  getBuddyAgents(mediaType?: string): Promise<BuddyDetails[]>;
   getQueues(params?: ContactServiceQueueSearchParams): Promise<ContactServiceQueuesResponse>;
+  getQueues(
+    mediaType: string | undefined,
+    params?: ContactServiceQueueSearchParams
+  ): Promise<ContactServiceQueuesResponse>;
   getEntryPoints(params?: EntryPointSearchParams): Promise<EntryPointListResponse>;
   getAddressBookEntries(params?: AddressBookEntrySearchParams): Promise<AddressBookEntriesResponse>;
   setDeviceType(option: string): void;

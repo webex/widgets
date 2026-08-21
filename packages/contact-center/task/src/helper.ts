@@ -575,11 +575,17 @@ export const useCallControl = (props: useCallControlProps) => {
     }
   }, [currentTask, agentId, extractConsultingAgent]);
 
+  const buddyAgentsRequestIdRef = useRef(0);
+
   const loadBuddyAgents = useCallback(
     async (action: 'Consult' | 'Transfer' = 'Consult') => {
+      const requestId = ++buddyAgentsRequestIdRef.current;
+
       try {
         setLoadingBuddyAgents(true);
         const agents = await store.getBuddyAgents(action);
+        if (requestId !== buddyAgentsRequestIdRef.current) return;
+
         logger.info(`Loaded ${agents.length} buddy agents`, {module: 'helper.ts', method: 'loadBuddyAgents'});
         setBuddyAgents(agents);
       } catch (error) {
@@ -587,9 +593,13 @@ export const useCallControl = (props: useCallControlProps) => {
           module: 'useCallControl',
           method: 'loadBuddyAgents',
         });
+        if (requestId !== buddyAgentsRequestIdRef.current) return;
+
         setBuddyAgents([]);
       } finally {
-        setLoadingBuddyAgents(false);
+        if (requestId === buddyAgentsRequestIdRef.current) {
+          setLoadingBuddyAgents(false);
+        }
       }
     },
     [logger]
@@ -1306,14 +1316,12 @@ export const useOutdialCall = (props: useOutdialCallProps) => {
         return;
       }
 
-      const outdialPromise = origin ? cc.startOutdial(destination, origin) : cc.startOutdial(destination);
+      // Only pass origin if it's defined and not empty
+      const outdialArgs = origin ? [destination, origin] : [destination];
 
-      outdialPromise
-        .then(() => {
-          logger.info('Outdial call started', {
-            module: 'widget-OutdialCall#helper.ts',
-            method: 'startOutdial',
-          });
+      cc.startOutdial(...outdialArgs)
+        .then((response) => {
+          logger.info('Outdial call started', response);
         })
         .catch((error: Error) => {
           logger.error(`${error}`, {
