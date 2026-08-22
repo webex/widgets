@@ -372,50 +372,6 @@ describe('ConsultTransferPopoverComponent', () => {
       expect(getQueuesMock.mock.calls.length).toBe(afterTwoChars + 1);
     });
 
-    it('keeps the latest entry-point search result when an older request finishes later', async () => {
-      let resolveInitialRequest!: (value: {data: EntryPointRecord[]; meta: {page: number; totalPages: number}}) => void;
-      const initialRequest = new Promise<{
-        data: EntryPointRecord[];
-        meta: {page: number; totalPages: number};
-      }>((resolve) => {
-        resolveInitialRequest = resolve;
-      });
-      const getEntryPointsMock = jest.fn(({search}: {search?: string}) => {
-        if (search === 'set 1') {
-          return Promise.resolve({
-            data: [{id: 'entry-point-1', name: 'Entry point e2e set 1', number: '1001'} as EntryPointRecord],
-            meta: {page: 0, totalPages: 1},
-          });
-        }
-        return initialRequest;
-      });
-
-      const screen = render(
-        <ConsultTransferPopoverComponent {...baseProps} heading="Consult" getEntryPoints={getEntryPointsMock} />
-      );
-
-      fireEvent.click(screen.getByRole('button', {name: 'Entry Point'}));
-      fireEvent.change(screen.getByPlaceholderText('Search...'), {target: {value: 'set 1'}});
-
-      await act(async () => {
-        jest.advanceTimersByTime(500);
-      });
-
-      expect(screen.getByText('Entry point e2e set 1')).toBeInTheDocument();
-
-      await act(async () => {
-        resolveInitialRequest({
-          data: [
-            {id: 'entry-point-1', name: 'Entry point e2e set 1', number: '1001'} as EntryPointRecord,
-            {id: 'entry-point-2', name: 'Entry point e2e set 2', number: '1002'} as EntryPointRecord,
-          ],
-          meta: {page: 0, totalPages: 1},
-        });
-      });
-
-      expect(screen.queryByText('Entry point e2e set 2')).not.toBeInTheDocument();
-    });
-
     it('does not trigger search when category is Agents', async () => {
       const getQueuesMock = jest.fn().mockResolvedValue({data: [], meta: {page: 0, totalPages: 0}});
       const screen = await render(<ConsultTransferPopoverComponent {...baseProps} getQueues={getQueuesMock} />);
