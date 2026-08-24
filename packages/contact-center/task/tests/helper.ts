@@ -5743,7 +5743,7 @@ describe('useOutdialCall', () => {
     });
 
     expect(mockOutdialCallProps.startOutdial).toHaveBeenCalledWith(destination);
-    expect(logger.info).toHaveBeenCalledWith('Outdial call started', 'Success');
+    expect(logger.info).toHaveBeenCalledWith('Outdial call started');
   });
 
   it('should successfully start an outdial call with origin', async () => {
@@ -5760,7 +5760,7 @@ describe('useOutdialCall', () => {
     });
 
     expect(mockOutdialCallProps.startOutdial).toHaveBeenCalledWith(destination, origin);
-    expect(logger.info).toHaveBeenCalledWith('Outdial call started', 'Success');
+    expect(logger.info).toHaveBeenCalledWith('Outdial call started');
   });
 
   it('should show alert when destination is empty or only contains spaces', async () => {

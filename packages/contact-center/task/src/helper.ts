@@ -1317,11 +1317,11 @@ export const useOutdialCall = (props: useOutdialCallProps) => {
       }
 
       // Only pass origin if it's defined and not empty
-      const outdialArgs = origin ? [destination, origin] : [destination];
+      const outdialRequest = origin ? cc.startOutdial(destination, origin) : cc.startOutdial(destination);
 
-      cc.startOutdial(...outdialArgs)
-        .then((response) => {
-          logger.info('Outdial call started', response);
+      outdialRequest
+        .then(() => {
+          logger.info('Outdial call started');
         })
         .catch((error: Error) => {
           logger.error(`${error}`, {
