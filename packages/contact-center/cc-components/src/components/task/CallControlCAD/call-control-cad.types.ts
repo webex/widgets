@@ -7,5 +7,5 @@ export type ParticipantRosterSectionProps = {
   pendingParticipantDropId: string | null;
   participantDropIsPending: boolean;
   rosterDropDisabled: boolean;
-  onParticipantDropRequest: (target: ConferenceParticipantDropTarget, trigger: HTMLElement) => void;
+  onParticipantDropRequest: (target: ConferenceParticipantDropTarget) => void;
 };

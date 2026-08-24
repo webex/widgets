@@ -112,11 +112,8 @@
 }
 
 .vertical-divider {
-  width: 0.0625rem;
   height: 0.875rem;
-  background-color: var(--mds-color-theme-outline-secondary-normal);
   margin: 0 0.5rem;
-  opacity: 0.7;
 }
 
 .participants-section {
@@ -126,53 +123,42 @@
   gap: 0.25rem;
 }
 
-.participants-icon {
-  color: var(--mds-color-theme-text-primary-normal);
-}
-
-.participants-count {
-  font-size: 0.875rem;
-  color: var(--mds-color-theme-text-secondary-normal);
-  white-space: nowrap;
-  font-weight: 500;
-}
-
 .participants-select-button {
-  display: inline-flex;
-  align-items: center;
+  --mdc-button-background: var(--mds-color-theme-button-secondary-hover);
+
   flex: 0 0 auto;
-  gap: 0.3rem;
-  padding: 0 0.4rem;
-  min-height: 1.5rem;
   width: max-content;
   white-space: nowrap;
-  border-radius: 62.4375rem;
-  background: transparent !important;
-  border: 1px solid var(--mds-color-theme-outline-secondary-normal) !important;
-  color: var(--mds-color-theme-text-secondary-normal);
-
-  &:hover,
-  &.hover {
-    background: var(--mds-color-theme-background-secondary-hover) !important;
-  }
 }
 
-.participants-select-button::part(button-text) {
-  display: inline-flex;
-  align-items: center;
-  white-space: nowrap;
+.participants-select-button:hover {
+  --mdc-button-background: var(--mds-color-theme-button-secondary-pressed);
+}
+
+.participants-select-button:active,
+.participants-select-button.pressed {
+  --mdc-button-background: var(--mds-color-theme-button-secondary-active-hover);
 }
 
 .participants-select-button::part(postfix-icon) {
-  width: 0.75rem;
-  height: 0.75rem;
-  color: var(--mds-color-theme-text-secondary-normal);
-  flex: 0 0 auto;
   transition: transform 0.15s ease;
 }
 
 .participants-select-button[aria-expanded='true']::part(postfix-icon) {
   transform: rotate(180deg);
+}
+
+.participants-select-button[aria-expanded='true'] {
+  --mdc-button-background: var(--mds-color-theme-button-secondary-active-normal);
+}
+
+.participants-select-button[aria-expanded='true']:hover {
+  --mdc-button-background: var(--mds-color-theme-button-secondary-active-hover);
+}
+
+.participants-select-button[aria-expanded='true']:active,
+.participants-select-button[aria-expanded='true'].pressed {
+  --mdc-button-background: var(--mds-color-theme-button-secondary-active-pressed);
 }
 
 .call-status {
@@ -310,165 +296,63 @@
 }
 
 .participants-popover {
-  background: var(--mds-color-theme-background-solid-primary-normal) !important;
-  align-items: normal;
-  width: 100%;
-  padding: 0 !important;
-  border: 0.0625rem solid var(--mds-color-theme-outline-secondary-normal);
-
-  &::part(popover-content) {
-    background: var(--mds-color-theme-background-solid-primary-normal);
-    border-radius: 0.75rem;
-    border: 1px solid var(--mds-color-theme-outline-secondary-normal);
-    box-shadow: var(--md-globals-elevation-2);
-    padding: 0;
-    width: 16.125rem; /* 258px */
-    overflow: hidden;
-  }
+  --mdc-popover-width: 16.125rem;
+  --mdc-popover-max-height: 18rem;
 
   .participants-menu {
-    padding: 0.5rem;
-    max-height: 18rem;
-    min-width: 16.125rem;
-    max-width: 16.125rem;
+    max-height: 16.5rem;
     overflow-y: auto;
     overflow-x: hidden;
   }
 
-  .participant-roster-section + .participant-roster-section {
-    border-top: 0.0625rem solid var(--mds-color-theme-outline-secondary-normal);
-    margin-top: 0.5rem;
-    padding-top: 0.5rem;
-  }
-
   .participant-roster-heading {
-    margin: 0 0 0.25rem;
-    padding: 0 0.25rem;
-    font-weight: 700;
+    margin: 0 0 0.25rem 0.25rem;
+
+    &::part(text) {
+      margin: 0;
+    }
   }
 
   .participant-roster-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
+    width: 100%;
   }
 
   .participant-menu-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 0.25rem;
-    font-size: 0.875rem;
-    color: var(--mds-color-theme-text-primary-normal);
-    border-radius: 0.5rem;
-    min-width: 0;
-    max-width: 100%;
+    --mdc-listitem-padding-left-right: 0.25rem;
+    --mdc-listitem-padding-top-bottom: 0.5rem;
   }
 
-  .participant-menu-identity {
-    flex: 1 1 auto;
-    min-width: 0;
-  }
-
-  .participant-menu-text {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .participant-drop-button {
-    background: transparent;
-    border: 0.0625rem solid var(--mds-color-theme-outline-button-normal);
-    border-radius: 1rem;
-    color: var(--mds-color-theme-text-error-normal);
-    cursor: pointer;
-    flex: 0 0 auto;
-    font: inherit;
-    padding: 0.25rem 0.625rem;
-
-    &:hover:not(:disabled) {
-      background: var(--mds-color-theme-background-alert-error-normal);
-    }
-
-    &:focus-visible {
-      outline: 0.125rem solid var(--mds-color-theme-outline-input-focus);
-      outline-offset: 0.125rem;
-    }
-
-    &:disabled {
-      cursor: not-allowed;
-      opacity: 0.55;
-    }
-  }
-}
-
-.participant-drop-dialog {
-  background: var(--mds-color-theme-background-solid-primary-normal);
-  border: 0.0625rem solid var(--mds-color-theme-outline-secondary-normal);
-  border-radius: 0.75rem;
-  color: var(--mds-color-theme-text-primary-normal);
-  max-width: min(25rem, calc(100vw - 2rem));
-  padding: 1.5rem;
-
-  &::backdrop {
-    background: var(--mds-color-theme-background-overlay);
-  }
-
-  h2,
-  p {
-    margin: 0;
-  }
-
-  p {
-    margin-top: 0.75rem;
+  .participant-roster-divider {
+    margin: 0.5rem 0;
   }
 }
 
 .participant-drop-dialog-actions {
   display: flex;
-  gap: 0.5rem;
+  align-items: center;
   justify-content: flex-end;
-  margin-top: 1.5rem;
-
-  button {
-    border: 0.0625rem solid var(--mds-color-theme-outline-button-normal);
-    border-radius: 1rem;
-    cursor: pointer;
-    font: inherit;
-    padding: 0.5rem 1rem;
-
-    &:focus-visible {
-      outline: 0.125rem solid var(--mds-color-theme-outline-input-focus);
-      outline-offset: 0.125rem;
-    }
-
-    &:disabled {
-      cursor: not-allowed;
-      opacity: 0.55;
-    }
-  }
+  gap: 0.5rem;
+  width: 100%;
 }
 
-.participant-drop-dialog-cancel {
-  background: var(--mds-color-theme-background-solid-primary-normal);
-  color: var(--mds-color-theme-text-primary-normal);
-}
-
-.participant-drop-dialog-confirm {
-  background: var(--mds-color-theme-background-alert-error-normal);
-  color: var(--mds-color-theme-text-error-normal);
+// Momentum Dialog defaults to absolute positioning. Keep this modal centered in the viewport
+// when CallControlCAD is rendered inside a relatively positioned or scrollable widget container.
+.participant-drop-dialog {
+  position: fixed;
 }
 
 .participant-drop-feedback {
-  p {
-    margin: 0.5rem 0 0;
+  margin-top: 0.5rem;
+
+  mdc-text::part(text) {
+    margin: 0;
   }
 
-  [role='status'] {
+  .participant-drop-feedback-success {
     color: var(--mds-color-theme-text-success-normal);
   }
 
-  [role='alert'] {
+  .participant-drop-feedback-error {
     color: var(--mds-color-theme-text-error-normal);
   }
 }

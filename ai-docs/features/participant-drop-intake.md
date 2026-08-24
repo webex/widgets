@@ -53,13 +53,15 @@ For EP-DN cross-channel lifecycle ordering, `ContactMerged` replaces the child t
 - On success announce `Participant removed from the conference.`
 - On failure announce `Unable to drop participant from the call. Try again.` and invoke the existing `CallControlCAD` host error callback with a sanitized error.
 
+The `CallControlCAD` participant surface uses the installed Momentum Design primitives throughout: a compact tertiary `Button` with Momentum secondary-button background tokens triggers a focus-trapped `Popover`; `List`/`ListItem`, `Icon`, `Text`, and `Divider` render the roster; `primary-participant-regular` identifies the primary agent while `meet-regular` remains on other rows; compact secondary/negative `Button` components render Drop actions; and a controlled `Dialog` with Momentum footer actions handles Customer confirmation. The installed Dialog version forces its named footer-button slots to the default color, so its documented custom footer slot is used to preserve the destructive primary/negative Drop action; the remaining footer CSS controls layout only. The participant Popover closes before Customer confirmation so two focus traps never overlap. The Dialog is positioned against the viewport and focus is explicitly restored to the stable participant trigger, falling back to end-call when hydration removes the roster. Momentum owns overlay visuals, keyboard dismissal, and focus trapping. Other component CSS is restricted to compact layout, sizing, overflow/truncation, overlay positioning, and theme-token colors; visible live-region feedback is not duplicated with a screen-reader announcer.
+
 Backend authorization remains mandatory. Owner-based UI visibility is not an authorization boundary.
 
 ## Public surfaces and compatibility
 
 Only the existing React `CallControlCAD` export and `widget-cc-call-control-cad` custom element gain behavior. Standard `CallControl` remains visually unchanged. No widget prop, custom-element attribute/property, initialization option, or callback is added.
 
-The widget change must use a local, untracked SDK link during development. Before PR readiness, replace `@webex/contact-center@3.12.0-next.96` in `@webex/cc-store` with the exact published SDK `next` version, update `yarn.lock`, remove the local link, and verify from a clean install. Absolute paths, portals, tarballs, and temporary resolutions must never be committed.
+The widget consumes published `@webex/contact-center@3.12.0-next.106` from `@webex/cc-store`; local links, absolute paths, portals, tarballs, and temporary resolutions must never be committed.
 
 ## Verification
 

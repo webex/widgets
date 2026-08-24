@@ -11,17 +11,33 @@ import {
 import {BuddyDetails, ConferenceParticipantDropRoster} from '@webex/cc-store';
 import '@testing-library/jest-dom';
 
-jest.mock('@momentum-ui/react-collaboration', () => {
-  const actual = jest.requireActual('@momentum-ui/react-collaboration');
-  const react = jest.requireActual('react');
+type MomentumElement = HTMLElement & {
+  ariaLabelledby?: string;
+  color?: string;
+  delay?: string;
+  descriptionText?: string;
+  focusBackToTrigger?: boolean;
+  focusTrap?: boolean;
+  headerText?: string;
+  hideOnEscape?: boolean;
+  hideOnOutsideClick?: boolean;
+  interactive?: boolean;
+  name?: string;
+  offset?: number;
+  placement?: string;
+  showArrow?: boolean;
+  size?: number | string;
+  tagname?: string;
+  trigger?: string;
+  triggerID?: string;
+  type?: string;
+  variant?: string;
+  visible?: boolean;
+};
 
-  const popover = ({triggerComponent, children}: {triggerComponent: React.ReactNode; children: React.ReactNode}) =>
-    react.createElement(react.Fragment, null, triggerComponent, children);
-
-  return new Proxy(actual, {
-    get: (target, property) => (property === 'PopoverNext' ? popover : Reflect.get(target, property)),
-  });
-});
+type MomentumPopoverElement = MomentumElement & {
+  hide: () => void;
+};
 
 // Mock MediaStream for testing
 Object.defineProperty(window, 'MediaStream', {
@@ -172,18 +188,6 @@ describe('CallControlCADComponent', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    Object.defineProperty(HTMLDialogElement.prototype, 'showModal', {
-      configurable: true,
-      value: function showModal() {
-        this.setAttribute('open', '');
-      },
-    });
-    Object.defineProperty(HTMLDialogElement.prototype, 'close', {
-      configurable: true,
-      value: function close() {
-        this.removeAttribute('open');
-      },
-    });
   });
 
   it('should render telephony call control with all basic information', () => {
@@ -484,8 +488,6 @@ describe('CallControlCADComponent', () => {
       });
       const screen = render(<CallControlCADComponent {...renderProps()} />);
 
-      fireEvent.click(screen.getByTestId('call-control:participants-trigger'));
-
       return {
         screen,
         requestParticipantDrop,
@@ -498,15 +500,44 @@ describe('CallControlCADComponent', () => {
 
     it('renders Customer and Participants sections and immediately drops an Agent target', () => {
       const {screen, requestParticipantDrop} = renderRoster();
-      const participantsTrigger = screen.getByTestId('call-control:participants-trigger');
+      const participantsTrigger = screen.getByTestId('call-control:participants-trigger') as MomentumElement;
+      const participantsPopover = screen.getByTestId('call-control:participants-popover') as MomentumElement;
+      const customerHeading = screen.getByText('Customer') as MomentumElement;
+      const participantsHeading = screen.getByText('Participants') as MomentumElement;
+      const agentDropButton = screen.getByLabelText('Drop agent Agent Two') as MomentumElement;
+      const participantIcons = Array.from(screen.container.querySelectorAll('.participant-menu-icon'));
 
       expect(participantsTrigger).toHaveAttribute('postfix-icon', 'arrow-down-bold');
-      expect(screen.getByRole('heading', {name: 'Customer'})).toBeInTheDocument();
-      expect(screen.getByRole('heading', {name: 'Participants'})).toBeInTheDocument();
+      expect(participantsTrigger.variant).toBe('tertiary');
+      expect(participantsTrigger.size).toBe(24);
+      expect(participantsPopover.triggerID).toBe(participantsTrigger.id);
+      expect(participantsPopover.trigger).toBe('click');
+      expect(participantsPopover.placement).toBe('bottom-end');
+      expect(participantsPopover.color).toBe('tonal');
+      expect(participantsPopover.delay).toBe('0,0');
+      expect(participantsPopover.offset).toBe(6);
+      expect(participantsPopover.showArrow).toBe(false);
+      expect(participantsPopover.interactive).toBe(true);
+      expect(participantsPopover.focusTrap).toBe(true);
+      expect(participantsPopover.hideOnEscape).toBe(true);
+      expect(participantsPopover.hideOnOutsideClick).toBe(true);
+      expect(participantsPopover.focusBackToTrigger).toBe(true);
+      expect(customerHeading.tagname).toBe('h4');
+      expect(customerHeading.type).toBe('body-midsize-bold');
+      expect(participantsHeading.tagname).toBe('h4');
+      expect(participantsHeading.type).toBe('body-midsize-bold');
+      expect(screen.container.querySelectorAll('mdc-list')).toHaveLength(2);
+      expect(screen.container.querySelectorAll('mdc-listitem')).toHaveLength(2);
+      expect(screen.container.querySelectorAll('mdc-divider')).toHaveLength(2);
       expect(screen.getByText('+15551234567')).toBeInTheDocument();
       expect(screen.getByText('Agent Two')).toBeInTheDocument();
+      expect(participantIcons.map((icon) => (icon as MomentumElement).name)).toEqual(['meet-regular', 'meet-regular']);
+      expect(agentDropButton.variant).toBe('secondary');
+      expect(agentDropButton.color).toBe('negative');
+      expect(agentDropButton.size).toBe(24);
+      expect(agentDropButton).toHaveAttribute('slot', 'trailing-controls');
 
-      fireEvent.click(screen.getByRole('button', {name: 'Drop agent Agent Two'}));
+      fireEvent.click(agentDropButton);
 
       expect(requestParticipantDrop).toHaveBeenCalledWith(ownerDropRoster.participants[0]);
     });
@@ -531,11 +562,11 @@ describe('CallControlCADComponent', () => {
         },
       });
 
-      expect(screen.queryByRole('heading', {name: 'Customer'})).not.toBeInTheDocument();
-      expect(screen.getByRole('heading', {name: 'Participants'})).toBeInTheDocument();
+      expect(screen.queryByText('Customer')).not.toBeInTheDocument();
+      expect(screen.getByText('Participants')).toBeInTheDocument();
       expect(screen.getByText('Agent Two')).toBeInTheDocument();
       expect(screen.getByText('Agent Three')).toBeInTheDocument();
-      expect(screen.getByRole('button', {name: 'Drop agent Agent Two'})).toBeEnabled();
+      expect(screen.getByLabelText('Drop agent Agent Two')).toBeEnabled();
     });
 
     it('keeps a valid multiparty roster visible when wrap-up controls appear', () => {
@@ -544,34 +575,54 @@ describe('CallControlCADComponent', () => {
       });
 
       expect(screen.getByTestId('call-control:participants-trigger')).toBeInTheDocument();
-      expect(screen.getByRole('heading', {name: 'Customer'})).toBeInTheDocument();
-      expect(screen.getByRole('heading', {name: 'Participants'})).toBeInTheDocument();
+      expect(screen.getByText('Customer')).toBeInTheDocument();
+      expect(screen.getByText('Participants')).toBeInTheDocument();
     });
 
-    it('requires confirmation for Customer Drop and cancel restores focus without confirming', async () => {
+    it('requires confirmation for Customer Drop and connects Momentum focus restoration through triggerID', async () => {
       const {screen, requestParticipantDrop, cancelParticipantDropConfirmation, rerenderRoster} = renderRoster();
-      const customerDropButton = screen.getByRole('button', {name: 'Drop customer +15551234567'});
+      const customerDropButton = screen.getByLabelText('Drop customer +15551234567');
+      const participantsTrigger = screen.getByTestId('call-control:participants-trigger');
+      const participantsPopover = screen.getByTestId('call-control:participants-popover') as MomentumPopoverElement;
+      const hideParticipantsPopover = jest.spyOn(participantsPopover, 'hide');
 
       fireEvent.click(customerDropButton);
       expect(requestParticipantDrop).toHaveBeenCalledWith(ownerDropRoster.customer);
+      expect(hideParticipantsPopover).toHaveBeenCalledTimes(1);
       rerenderRoster({participantDropConfirmationTarget: ownerDropRoster.customer});
 
-      const dialog = screen.getByTestId('call-control:customer-drop-dialog');
-      expect(dialog).toHaveAttribute('open');
-      expect(screen.getByRole('heading', {name: 'Drop customer from conference?'})).toBeInTheDocument();
+      const dialog = screen.getByTestId('call-control:customer-drop-dialog') as MomentumElement;
+      const cancelButton = screen.getByTestId('call-control:customer-drop-cancel') as MomentumElement;
+      const confirmButton = screen.getByTestId('call-control:customer-drop-confirm') as MomentumElement;
+      expect(dialog.visible).toBe(true);
+      expect(dialog.headerText).toBe('Drop customer from conference?');
+      expect(dialog.descriptionText).toBe(
+        'The customer will be removed from this conference. The remaining participants can continue the call.'
+      );
+      expect(dialog.triggerID).toBe(participantsTrigger.id);
+      expect(dialog).toHaveClass('participant-drop-dialog');
+      expect(cancelButton.parentElement).toHaveAttribute('slot', 'footer');
+      await waitFor(() => {
+        expect(cancelButton.variant).toBe('secondary');
+        expect(cancelButton.color).toBe('default');
+        expect(confirmButton.variant).toBe('primary');
+        expect(confirmButton.color).toBe('negative');
+      });
 
-      fireEvent.click(screen.getByRole('button', {name: 'Cancel'}));
+      fireEvent.click(cancelButton);
 
       expect(cancelParticipantDropConfirmation).toHaveBeenCalledTimes(1);
-      await waitFor(() => expect(customerDropButton).toHaveFocus());
+      rerenderRoster({participantDropConfirmationTarget: null});
+      expect((screen.getByTestId('call-control:customer-drop-dialog') as MomentumElement).visible).toBe(false);
+      await waitFor(() => expect(participantsTrigger).toHaveFocus());
     });
 
     it('restores focus to the roster trigger when the confirmed Customer row disappears', async () => {
       const {screen, rerenderRoster} = renderRoster();
 
-      fireEvent.click(screen.getByRole('button', {name: 'Drop customer +15551234567'}));
+      fireEvent.click(screen.getByLabelText('Drop customer +15551234567'));
       rerenderRoster({participantDropConfirmationTarget: ownerDropRoster.customer});
-      expect(screen.getByTestId('call-control:customer-drop-dialog')).toHaveAttribute('open');
+      expect((screen.getByTestId('call-control:customer-drop-dialog') as MomentumElement).visible).toBe(true);
 
       rerenderRoster({
         conferenceParticipantDropRoster: {...ownerDropRoster, customer: null},
@@ -584,46 +635,51 @@ describe('CallControlCADComponent', () => {
     it('restores focus to a stable call control when the roster disappears after confirmation', async () => {
       const {screen, rerenderRoster} = renderRoster();
 
-      fireEvent.click(screen.getByRole('button', {name: 'Drop customer +15551234567'}));
+      fireEvent.click(screen.getByLabelText('Drop customer +15551234567'));
       rerenderRoster({participantDropConfirmationTarget: ownerDropRoster.customer});
-      expect(screen.getByTestId('call-control:customer-drop-dialog')).toHaveAttribute('open');
+      expect((screen.getByTestId('call-control:customer-drop-dialog') as MomentumElement).visible).toBe(true);
 
       rerenderRoster({conferenceParticipantDropRoster: null, participantDropConfirmationTarget: null});
 
       await waitFor(() => expect(screen.getByTestId('call-control:end-call')).toHaveFocus());
     });
 
-    it('confirms Customer Drop and supports Escape cancellation', () => {
+    it('confirms Customer Drop and routes Momentum close or Escape through cancellation', () => {
       const {screen, confirmParticipantDrop, cancelParticipantDropConfirmation, rerenderRoster} = renderRoster();
-      const customerDropButton = screen.getByRole('button', {name: 'Drop customer +15551234567'});
+      const customerDropButton = screen.getByLabelText('Drop customer +15551234567');
 
       fireEvent.click(customerDropButton);
       rerenderRoster({participantDropConfirmationTarget: ownerDropRoster.customer});
-      fireEvent.click(screen.getByRole('button', {name: 'Drop'}));
+      fireEvent.click(screen.getByTestId('call-control:customer-drop-confirm'));
       expect(confirmParticipantDrop).toHaveBeenCalledTimes(1);
 
+      rerenderRoster({participantDropConfirmationTarget: null});
       fireEvent.click(customerDropButton);
       rerenderRoster({participantDropConfirmationTarget: ownerDropRoster.customer});
       const dialog = screen.getByTestId('call-control:customer-drop-dialog');
-      fireEvent(dialog, new Event('cancel', {cancelable: true}));
+      fireEvent(dialog, new CustomEvent('close'));
       expect(cancelParticipantDropConfirmation).toHaveBeenCalledTimes(1);
     });
 
-    it('globally disables Drop controls and shows loading only on the selected row', () => {
+    it('globally disables Drop controls and shows loading only on the selected row', async () => {
       const {screen} = renderRoster({pendingParticipantDropId: 'agent-2'});
 
-      expect(screen.getByRole('button', {name: 'Drop agent Agent Two'})).toHaveTextContent('Dropping…');
-      expect(screen.getByRole('button', {name: 'Drop agent Agent Two'})).toBeDisabled();
-      expect(screen.getByRole('button', {name: 'Drop customer +15551234567'})).toBeDisabled();
+      expect(screen.getByLabelText('Drop agent Agent Two')).toHaveTextContent('Dropping…');
+      await waitFor(() => {
+        expect(screen.getByLabelText('Drop agent Agent Two')).toBeDisabled();
+        expect(screen.getByLabelText('Drop customer +15551234567')).toBeDisabled();
+      });
     });
 
-    it('disables all owner Drop controls during an active non-held consult', () => {
+    it('disables all owner Drop controls during an active non-held consult', async () => {
       const {screen} = renderRoster({
         conferenceParticipantDropRoster: {...ownerDropRoster, isDropDisabled: true},
       });
 
-      expect(screen.getByRole('button', {name: 'Drop agent Agent Two'})).toBeDisabled();
-      expect(screen.getByRole('button', {name: 'Drop customer +15551234567'})).toBeDisabled();
+      await waitFor(() => {
+        expect(screen.getByLabelText('Drop agent Agent Two')).toBeDisabled();
+        expect(screen.getByLabelText('Drop customer +15551234567')).toBeDisabled();
+      });
     });
 
     it('renders non-owner and Supervisor rows without Drop actions or read-only labels', () => {
@@ -644,15 +700,23 @@ describe('CallControlCADComponent', () => {
         isDropDisabled: false,
       };
       const {screen} = renderRoster({conferenceParticipantDropRoster: readOnlyRoster});
+      const participantIcons = Array.from(screen.container.querySelectorAll('.participant-menu-icon'));
 
       expect(screen.getByText('Agent Two (Primary)')).toBeInTheDocument();
       expect(screen.getByText('Supervisor One')).toBeInTheDocument();
+      expect(participantIcons.map((icon) => (icon as MomentumElement).name)).toEqual([
+        'meet-regular',
+        'primary-participant-regular',
+        'meet-regular',
+      ]);
       expect(screen.queryByText('Read only')).not.toBeInTheDocument();
       expect(document.querySelector('.participant-menu-type')).not.toBeInTheDocument();
-      expect(screen.queryByRole('button', {name: /Drop (agent|customer|supervisor)/})).not.toBeInTheDocument();
+      expect(screen.queryByLabelText('Drop agent Agent Two')).not.toBeInTheDocument();
+      expect(screen.queryByLabelText('Drop customer +15551234567')).not.toBeInTheDocument();
+      expect(screen.queryByLabelText('Drop supervisor Supervisor One')).not.toBeInTheDocument();
     });
 
-    it('counts visible non-customer rows and disables a pending EP-DN action', () => {
+    it('counts visible non-customer rows and disables a pending EP-DN action', async () => {
       const pendingEpDn = {
         participantType: 'EP-DN' as const,
         displayName: '+15551230000',
@@ -679,13 +743,13 @@ describe('CallControlCADComponent', () => {
       });
 
       expect(screen.getByTestId('call-control:participants-trigger')).toHaveTextContent('+3 Participants');
-      const pendingDrop = screen.getByRole('button', {name: 'Drop ep-dn +15551230000'});
-      expect(pendingDrop).toBeDisabled();
+      const pendingDrop = screen.getByLabelText('Drop ep-dn +15551230000');
+      await waitFor(() => expect(pendingDrop).toBeDisabled());
       fireEvent.click(pendingDrop);
       expect(requestParticipantDrop).not.toHaveBeenCalled();
     });
 
-    it('renders an answered Entry Point agent as disabled until conference merge', () => {
+    it('renders an answered Entry Point agent as disabled until conference merge', async () => {
       const answeredEntryPointAgent = {
         participantType: 'Agent' as const,
         displayName: 'Support Agent',
@@ -705,8 +769,8 @@ describe('CallControlCADComponent', () => {
 
       expect(screen.getByTestId('call-control:participants-trigger')).toHaveTextContent('+1 Participant');
       expect(screen.getByText('Support Agent')).toBeInTheDocument();
-      const answeredAgentDrop = screen.getByRole('button', {name: 'Drop agent Support Agent'});
-      expect(answeredAgentDrop).toBeDisabled();
+      const answeredAgentDrop = screen.getByLabelText('Drop agent Support Agent');
+      await waitFor(() => expect(answeredAgentDrop).toBeDisabled());
       fireEvent.click(answeredAgentDrop);
       expect(requestParticipantDrop).not.toHaveBeenCalled();
     });
