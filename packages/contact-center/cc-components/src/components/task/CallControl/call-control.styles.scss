@@ -27,6 +27,28 @@
   margin-top: 1rem;
 }
 
+.call-control-dtmf-keypad {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 12rem;
+}
+
+.call-control-dtmf-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.5rem 0;
+}
+
+.call-control-dtmf-input {
+  flex: 1;
+}
+
+.call-control-dtmf-spinner {
+  flex-shrink: 0;
+}
+
 .call-control-dtmf-keys {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -34,12 +56,32 @@
   list-style: none;
   padding: 0.5rem;
   margin: 0;
-  min-width: 12rem;
 }
 
 .call-control-dtmf-key {
   width: 100%;
-  min-height: 2.5rem;
+  aspect-ratio: 1;
+  min-height: 2.75rem;
+  border-radius: 50%;
+  padding: 0.25rem;
+}
+
+.call-control-dtmf-key-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.1;
+}
+
+.call-control-dtmf-key-digit {
+  font-size: 1rem;
+}
+
+.call-control-dtmf-key-label {
+  font-size: 0.5rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
 }
 
 
