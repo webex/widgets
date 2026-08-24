@@ -21,6 +21,7 @@ yarn-debug.log*
 yarn-error.log*
 .node_repl_history
 reports/
+.generated/
 
 #IDEs
 .project

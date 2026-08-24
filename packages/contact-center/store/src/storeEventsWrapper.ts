@@ -15,7 +15,7 @@ import {
   ENGAGED_USERNAME,
   RESERVED_LABEL,
   RESERVED_USERNAME,
-  ContactServiceQueue,
+  ContactServiceQueuesResponse,
   ContactServiceQueueSearchParams,
   EntryPointListResponse,
   EntryPointSearchParams,
@@ -32,7 +32,6 @@ import Store from './store';
 import {
   DEVICE_TYPE_BROWSER,
   MEDIA_TYPE_TELEPHONY_LOWER,
-  MEDIA_TYPE_TELEPHONY_UPPER,
   AGENT_STATE_AVAILABLE,
   CAMPAIGN_PREVIEW_OUTBOUND_TYPES,
   CAMPAIGN_PREVIEW_CAMPAIGN_TYPES,
@@ -40,6 +39,29 @@ import {
 import {runInAction} from 'mobx';
 import {isIncomingTask} from './task-utils';
 import {SUGGESTED_RESPONSE_EVENT, TASK_MULTI_LOGIN_HYDRATE} from './constants';
+
+const CONSULT_TRANSFER_CHANNELS = {
+  telephony: 'TELEPHONY',
+  chat: 'CHAT',
+  social: 'SOCIAL_CHANNEL',
+  email: 'EMAIL',
+} as const;
+
+const getSupportedMediaType = (mediaType?: string): keyof typeof CONSULT_TRANSFER_CHANNELS | undefined => {
+  const normalizedMediaType = typeof mediaType === 'string' ? mediaType.toLowerCase() : '';
+  const channel = CONSULT_TRANSFER_CHANNELS[normalizedMediaType as keyof typeof CONSULT_TRANSFER_CHANNELS];
+
+  return typeof channel === 'string' ? (normalizedMediaType as keyof typeof CONSULT_TRANSFER_CHANNELS) : undefined;
+};
+
+const getQueueChannelFilter = (mediaType?: string): string | undefined => {
+  const supportedMediaType = getSupportedMediaType(mediaType);
+  const channelType = supportedMediaType ? CONSULT_TRANSFER_CHANNELS[supportedMediaType] : undefined;
+
+  if (!channelType) return undefined;
+
+  return `queueType==INBOUND;channelType==${channelType};active==true`;
+};
 
 class StoreWrapper implements IStoreWrapper {
   store: IStore;
@@ -1246,15 +1268,22 @@ class StoreWrapper implements IStoreWrapper {
     });
   };
 
-  getBuddyAgents = async (
-    mediaType: string = this.currentTask.data.interaction.mediaType
-  ): Promise<Array<BuddyDetails>> => {
+  getBuddyAgents = async (actionOrMediaType?: string): Promise<Array<BuddyDetails>> => {
     try {
-      const response = await this.store.cc.getBuddyAgents({
-        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
-        mediaType: mediaType ?? MEDIA_TYPE_TELEPHONY_LOWER,
-        state: AGENT_STATE_AVAILABLE,
-      });
+      const isAction = actionOrMediaType === 'Consult' || actionOrMediaType === 'Transfer';
+      const taskMediaType = getSupportedMediaType(this.currentTask?.data?.interaction?.mediaType);
+      const mediaType = isAction ? taskMediaType : (getSupportedMediaType(actionOrMediaType) ?? taskMediaType);
+      const response = await this.store.cc.getBuddyAgents(
+        isAction
+          ? {
+              action: actionOrMediaType,
+              ...(mediaType ? {mediaType} : {}),
+            }
+          : {
+              mediaType: mediaType ?? MEDIA_TYPE_TELEPHONY_LOWER,
+              state: AGENT_STATE_AVAILABLE,
+            }
+      );
       return 'data' in response ? response.data.agentList : [];
     } catch (error) {
       this.store.logger.error('Error fetching buddy agents:', error);
@@ -1263,24 +1292,25 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   getQueues = async (
-    mediaType: string = this.currentTask.data.interaction.mediaType ?? MEDIA_TYPE_TELEPHONY_UPPER,
-    params?: ContactServiceQueueSearchParams
-  ): Promise<{
-    data: ContactServiceQueue[];
-    meta: {page: number; pageSize: number; total: number; totalPages: number};
-  }> => {
+    mediaTypeOrParams?: string | ContactServiceQueueSearchParams,
+    legacyParams?: ContactServiceQueueSearchParams
+  ): Promise<ContactServiceQueuesResponse> => {
     try {
-      const upperMediaType = mediaType.toUpperCase();
-      const response = await this.store.cc.getQueues(params);
-      const data = Array.isArray(response) ? response : response.data;
-      const filtered = data.filter((queue) => queue.channelType === upperMediaType);
-      const page = Array.isArray(response) ? 0 : (response.meta?.page ?? 0);
-      const totalPages = Array.isArray(response) ? 1 : (response.meta?.totalPages ?? 1);
-      const pageSize = Array.isArray(response) ? filtered.length : (response.meta?.pageSize ?? filtered.length);
-      const total = Array.isArray(response)
-        ? filtered.length
-        : ((response as {meta?: {total?: number}}).meta?.total ?? filtered.length);
-      return {data: filtered, meta: {page, pageSize, total, totalPages}};
+      const usesLegacyMediaSignature = typeof mediaTypeOrParams === 'string' || legacyParams !== undefined;
+      const params = typeof mediaTypeOrParams === 'string' ? legacyParams : (mediaTypeOrParams ?? legacyParams);
+      const mediaType =
+        typeof mediaTypeOrParams === 'string' ? mediaTypeOrParams : this.currentTask?.data?.interaction?.mediaType;
+      const supportedMediaType = getSupportedMediaType(mediaType);
+      const taskFilter =
+        usesLegacyMediaSignature || (supportedMediaType && supportedMediaType !== 'telephony')
+          ? getQueueChannelFilter(mediaType)
+          : undefined;
+      const filter = taskFilter && params?.filter ? `${taskFilter};${params.filter}` : (taskFilter ?? params?.filter);
+
+      return await this.store.cc.getQueues({
+        ...(params ?? {}),
+        ...(filter !== undefined ? {filter} : {}),
+      });
     } catch (error) {
       this.store.logger.error('Error fetching queues:', error);
       throw error;

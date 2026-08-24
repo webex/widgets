@@ -57,7 +57,6 @@ function CallControlComponent(props: CallControlComponentProps) {
     consultTransfer,
     callControlAudio,
     setConsultAgentName,
-    allowConsultToQueue,
     setLastTargetType,
     controls,
     logger,
@@ -164,6 +163,12 @@ function CallControlComponent(props: CallControlComponentProps) {
               if (!button.isVisible) return null;
 
               if (button.menuType) {
+                const action = button.menuType === 'Transfer' ? 'Transfer' : 'Consult';
+                const availableDestinations =
+                  action === 'Transfer'
+                    ? controls.consultTransferDestinations.transfer
+                    : controls.consultTransferDestinations.consult;
+
                 return (
                   <PopoverNext
                     key={index}
@@ -174,7 +179,9 @@ function CallControlComponent(props: CallControlComponentProps) {
                       });
                       setShowAgentMenu(true);
                       setAgentMenuType(button.menuType as CallControlMenuType);
-                      loadBuddyAgents();
+                      if (availableDestinations.includes('agent')) {
+                        loadBuddyAgents(action);
+                      }
                     }}
                     onHide={() => {
                       setShowAgentMenu(false);
@@ -241,16 +248,9 @@ function CallControlComponent(props: CallControlComponentProps) {
                         onDialNumberSelect={(dialNumber, allowParticipantsToInteract) =>
                           handleTargetSelect(dialNumber, dialNumber, 'dialNumber', allowParticipantsToInteract)
                         }
-                        allowConsultToQueue={allowConsultToQueue}
-                        consultTransferOptions={
-                          isTelephony
-                            ? consultTransferOptions
-                            : {
-                                ...consultTransferOptions,
-                                showDialNumberTab: false,
-                                showEntryPointTab: false,
-                              }
-                        }
+                        action={action}
+                        availableDestinations={availableDestinations}
+                        consultTransferOptions={consultTransferOptions}
                         isConferenceInProgress={controls?.main?.exitConference?.isVisible ?? false}
                         logger={logger}
                       />

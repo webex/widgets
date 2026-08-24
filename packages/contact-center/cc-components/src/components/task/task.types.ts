@@ -340,7 +340,7 @@ export interface ControlProps {
   /**
    * Function to load buddy agents
    */
-  loadBuddyAgents: () => Promise<void>;
+  loadBuddyAgents: (action?: 'Consult' | 'Transfer') => Promise<void>;
 
   /**
    * Function to transfer the call to a destination.
@@ -503,7 +503,7 @@ export interface ControlProps {
   /** Fetch paginated entry points */
   getEntryPoints?: FetchPaginatedList<EntryPointRecord>;
 
-  /** Fetch paginated queues (filtered by media type in store) */
+  /** Fetch paginated consult/transfer queues from the SDK-owned policy */
   getQueuesFetcher?: FetchPaginatedList<ContactServiceQueue>;
 
   /**
@@ -647,6 +647,7 @@ export type OutdialCallComponentProps = Pick<
 export interface ConsultTransferListComponentProps {
   title: string;
   subtitle?: string;
+  presence?: 'active' | 'away';
   buttonIcon: string;
   onButtonPress: () => void;
   className?: string;
@@ -673,7 +674,7 @@ export interface ConsultTransferPopoverComponentProps {
   buttonIcon: string;
   buddyAgents: BuddyDetails[];
   loadingBuddyAgents: boolean;
-  loadBuddyAgents?: () => Promise<void>;
+  loadBuddyAgents?: (action?: 'Consult' | 'Transfer') => Promise<void>;
   getAddressBookEntries?: FetchPaginatedList<AddressBookEntry>;
   getEntryPoints?: FetchPaginatedList<EntryPointRecord>;
   getQueues?: FetchPaginatedList<ContactServiceQueue>;
@@ -681,7 +682,8 @@ export interface ConsultTransferPopoverComponentProps {
   onQueueSelect: (queueId: string, queueName: string, allowParticipantsToInteract: boolean) => void;
   onEntryPointSelect: (entryPointId: string, entryPointName: string, allowParticipantsToInteract: boolean) => void;
   onDialNumberSelect: (dialNumber: string, allowParticipantsToInteract: boolean) => void;
-  allowConsultToQueue: boolean;
+  action: 'Consult' | 'Transfer';
+  availableDestinations: TaskUIControls['consultTransferDestinations']['consult'];
   /** Options governing popover visibility/behavior */
   consultTransferOptions?: ConsultTransferOptions;
   isConferenceInProgress?: boolean;
@@ -885,8 +887,7 @@ export const CATEGORY_AGENTS: CategoryType = 'Agents';
  * Parameters for `useConsultTransferPopover` hook.
  */
 export type UseConsultTransferParams = {
-  showDialNumberTab: boolean;
-  showEntryPointTab: boolean;
+  availableCategories: CategoryType[];
   getAddressBookEntries?: FetchPaginatedList<AddressBookEntry>;
   getEntryPoints?: FetchPaginatedList<EntryPointRecord>;
   getQueues?: FetchPaginatedList<ContactServiceQueue>;

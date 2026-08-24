@@ -575,22 +575,35 @@ export const useCallControl = (props: useCallControlProps) => {
     }
   }, [currentTask, agentId, extractConsultingAgent]);
 
-  const loadBuddyAgents = useCallback(async () => {
-    try {
-      setLoadingBuddyAgents(true);
-      const agents = await store.getBuddyAgents();
-      logger.info(`Loaded ${agents.length} buddy agents`, {module: 'helper.ts', method: 'loadBuddyAgents'});
-      setBuddyAgents(agents);
-    } catch (error) {
-      logger?.error(`CC-Widgets: Task: Error loading buddy agents - ${error.message || error}`, {
-        module: 'useCallControl',
-        method: 'loadBuddyAgents',
-      });
-      setBuddyAgents([]);
-    } finally {
-      setLoadingBuddyAgents(false);
-    }
-  }, [logger]);
+  const buddyAgentsRequestIdRef = useRef(0);
+
+  const loadBuddyAgents = useCallback(
+    async (action: 'Consult' | 'Transfer' = 'Consult') => {
+      const requestId = ++buddyAgentsRequestIdRef.current;
+
+      try {
+        setLoadingBuddyAgents(true);
+        const agents = await store.getBuddyAgents(action);
+        if (requestId !== buddyAgentsRequestIdRef.current) return;
+
+        logger.info(`Loaded ${agents.length} buddy agents`, {module: 'helper.ts', method: 'loadBuddyAgents'});
+        setBuddyAgents(agents);
+      } catch (error) {
+        logger?.error(`CC-Widgets: Task: Error loading buddy agents - ${error.message || error}`, {
+          module: 'useCallControl',
+          method: 'loadBuddyAgents',
+        });
+        if (requestId !== buddyAgentsRequestIdRef.current) return;
+
+        setBuddyAgents([]);
+      } finally {
+        if (requestId === buddyAgentsRequestIdRef.current) {
+          setLoadingBuddyAgents(false);
+        }
+      }
+    },
+    [logger]
+  );
 
   const getAddressBookEntries = useCallback(
     async ({page, pageSize, search}: PaginatedListParams) => {
@@ -625,8 +638,7 @@ export const useCallControl = (props: useCallControlProps) => {
   const getQueuesFetcher = useCallback(
     async ({page, pageSize, search}: PaginatedListParams) => {
       try {
-        const mediaType = currentTask?.data?.interaction?.mediaType;
-        return await store.getQueues(mediaType, {page, pageSize, search});
+        return await store.getQueues({page, pageSize, search});
       } catch (error) {
         logger?.error(`CC-Widgets: Task: Error fetching queues (paginated) - ${error.message || error}`, {
           module: 'useCallControl',
@@ -635,7 +647,7 @@ export const useCallControl = (props: useCallControlProps) => {
         return {data: [], meta: {page: 0, totalPages: 0}};
       }
     },
-    [logger, currentTask]
+    [logger]
   );
 
   const holdCallback = () => {
@@ -1305,11 +1317,11 @@ export const useOutdialCall = (props: useOutdialCallProps) => {
       }
 
       // Only pass origin if it's defined and not empty
-      const outdialArgs = origin ? [destination, origin] : [destination];
+      const outdialRequest = origin ? cc.startOutdial(destination, origin) : cc.startOutdial(destination);
 
-      cc.startOutdial(...outdialArgs)
-        .then((response) => {
-          logger.info('Outdial call started', response);
+      outdialRequest
+        .then(() => {
+          logger.info('Outdial call started');
         })
         .catch((error: Error) => {
           logger.error(`${error}`, {

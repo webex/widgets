@@ -96,6 +96,8 @@ Host ──call──> Widget(observer) ──call──> Hook(helper.ts) ──
 SDK  ──event(CC_EVENTS/TASK_EVENTS)──> Store(runInAction) ──observable change──> Widget(observer) re-render
 Hook ──call──> cc-components (props) ──call──> ui-logging(withMetrics)
 ```
+For Consult/Transfer, `Task.uiControls.consultTransferDestinations` is the visibility and ordering source of truth. Task widgets pass the matching action array to `cc-components`; the store does not mirror Desktop Profile collaboration flags, and components do not derive policy from raw task/profile data.
+
 | From | To | Kind | Purpose |
 |---|---|---|---|
 | Widget (observer) | Custom hook (`helper.ts`) | call | Read derived state, obtain action callbacks |

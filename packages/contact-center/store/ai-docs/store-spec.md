@@ -44,7 +44,7 @@ A maintainer should start at `src/store.ts` to understand the observable shape a
 Owns Contact Center client-side state and the SDK boundary: initialize/register with `@webex/contact-center`, subscribe to CC and task events, expose reactive observables and mutators, fetch domain lists (buddy agents, queues, entry points, address book), and centralize the error callback. It does NOT own UI rendering, business validation, or any direct network protocol beyond delegating to the SDK.
 
 ## Stack
-TypeScript 5.6.3, MobX 6.13.5 (`makeAutoObservable`, `observable.ref`, `runInAction`). Consumed in React 18 via `mobx-react-lite` `observer()` in downstream packages (not a dependency of this package itself). SDK peer `@webex/contact-center` 3.12.0-next.96. Tests: Jest 29 + ts compile (`tsc --project tsconfig.test.json && jest --coverage`). Build target: `dist/index.js` (Webpack). Evidence: `packages/contact-center/store/package.json`.
+TypeScript 5.6.3, MobX 6.13.5 (`makeAutoObservable`, `observable.ref`, `runInAction`). Consumed in React 18 via `mobx-react-lite` `observer()` in downstream packages (not a dependency of this package itself). SDK dependency `@webex/contact-center` 3.12.0-next.106. Tests: Jest 29 + ts compile (`tsc --project tsconfig.test.json && jest --coverage`). Build target: `dist/index.js` (Webpack). Evidence: `packages/contact-center/store/package.json`.
 
 ## Folder / Package Structure
 ```
@@ -74,7 +74,7 @@ This module is consumed as an imported SDK/code API (the `@webex/cc-store` packa
 | Contract ID | Type | Surface | Purpose | Compatibility / deprecation | Schema / detail link | Root index |
 |---|---|---|---|---|---|---|
 | `store.instance` | SDK | default export `store` (StoreWrapper singleton); `init(options, setupEventListeners)`, `registerCC(webex?)`, observable getters, mutators, `getBuddyAgents/getQueues/getEntryPoints/getAddressBookEntries`, `setOnError`, `setCCCallback/removeCCCallback`, `setTaskCallback/removeTaskCallback` | Sole SDK access point and shared reactive state for all CC widgets | stable semver; observable getter set is additive | `packages/contact-center/store/src/storeEventsWrapper.ts`, `src/store.ts` | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
-| `store.types` | SDK | type re-exports (`IContactCenter`, `ITask`, `Profile`, `Team`, `IStore`, `IStoreWrapper`, `InitParams`, `RealTimeTranscriptionData`, ~20 more) | Typed domain surface for widget code | stable semver; SDK-shaped types track the SDK | `packages/contact-center/store/src/store.types.ts:334-366`; SDK: `@webex/contact-center` types (`node_modules/@webex/contact-center/dist/types/index.d.ts`) | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
+| `store.types` | SDK | type re-exports including the existing `ContactServiceQueue`, `ContactServiceQueuesResponse`, `ContactServiceQueueSearchParams`, `EntryPointRecord`, `EntryPointListResponse`, and `EntryPointSearchParams` contracts plus Task destination controls | Typed SDK-backed domain surface using the SDK's established entity and list types directly | stable semver; SDK-shaped types track the SDK | `packages/contact-center/store/src/store.types.ts`; SDK: `@webex/contact-center` types (`node_modules/@webex/contact-center/dist/types/index.d.ts`) | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
 | `store.constants` | SDK | value/enum exports (`CC_EVENTS`, `TASK_EVENTS`, `ConsultStatus`, `LoginOptions`, `CAMPAIGN_PREVIEW_*`, `DESKTOP`/`EXTENSION`/`DIAL_NUMBER`) | Event names + domain enums for widgets | stable semver | `packages/contact-center/store/src/store.types.ts:368-403` | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
 | `store.task-utils` | SDK | pure selectors (`isIncomingTask`, `getTaskStatus`, `getConsultStatus`, `getConferenceParticipants`, `getConferenceParticipantsCount`, `isInteractionOnHold`, `findHoldStatus`, `findHoldTimestamp`, etc.) | Read-only derivations over `ITask` | stable semver | `packages/contact-center/store/src/task-utils.ts` | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
 
@@ -83,7 +83,7 @@ Compatibility notes:
 - The `CC_EVENTS` / `TASK_EVENTS` enums are locally declared until the SDK exports them (see `// TODO: remove this once cc sdk exports this enum`, `store.types.ts:247`). They must stay byte-identical to the SDK's emitted event strings.
 
 ## Requires (dependencies)
-- `@webex/contact-center` SDK (peer, floor pinned in `package.json` at `3.12.0-next.96`) — the entire CC runtime: `Webex.init()`, `webex.cc.*` methods, the CC/task event stream, agent `Profile`, `webex.credentials.getUserToken()`. Consumed ONLY through the store. Fallback on unavailability: `Store.init()` rejects after a 6000ms timeout (`src/store.ts:140-142`); the wrapper wraps the rejection and invokes `onErrorCallback('Store', err)` (`src/storeEventsWrapper.ts:442-452`).
+- `@webex/contact-center` SDK (pinned in `package.json` at `3.12.0-next.106`) — the entire CC runtime: `Webex.init()`, `webex.cc.*` methods, the CC/task event stream, agent `Profile`, `webex.credentials.getUserToken()`. Consumed ONLY through the store. Fallback on unavailability: `Store.init()` rejects after a 6000ms timeout (`src/store.ts:140-142`); the wrapper wraps the rejection and invokes `onErrorCallback('Store', err)` (`src/storeEventsWrapper.ts:442-452`).
 - `mobx` ^6.13.5 — observable state and `runInAction` for all mutations.
 - Internal: none upstream. The store is the lowest widget-layer dependency (`cc-components → widget packages → store → SDK`); it imports no widget package.
 
@@ -104,13 +104,14 @@ Compatibility notes:
 | `STORE-R-012` | `handleTaskRemove` detaches every task listener, clears `realtimeTranscriptionData` for the removed current task, drops accepted-campaign tracking, resets custom state, and refreshes the list | Prevent listener/audio/state leaks across task lifecycles | `src/storeEventsWrapper.ts:458-521` | `tests/storeEventsWrapper.ts` ("handleTaskRemove — campaign ID cleanup") | Per-listener detach is asserted only partially; full leak audit is a gap | PRESENT |
 | `STORE-R-013` | `agent:logoutSuccess` triggers `cleanUpStore()` which resets session observables and removes CC SDK listeners; `agent:multiLogin` sets `showMultipleLoginAlert` | Clean session teardown and multi-login warning | `src/storeEventsWrapper.ts:811-819,1003-1024,1029-1066` | `tests/storeEventsWrapper.ts` ("storeEventsWrapper events reactions") | none | PRESENT |
 | `STORE-R-014` | `agent:stateChange` (type `AgentStateChangeSuccess`) updates `currentState` (defaulting `auxCodeId` `''`→`'0'`) and both state-change timestamps | Drives the agent-state widget and timers | `src/storeEventsWrapper.ts:797-809` | `tests/storeEventsWrapper.ts` ("storeEventsWrapper events reactions") | none | PRESENT |
-| `STORE-R-015` | List fetchers proxy the SDK and propagate errors after logging; `getQueues` filters by upper-cased channel type; `getAddressBookEntries` returns empty when `isAddressBookEnabled` is false | Centralize SDK fetch + transform so widgets stay SDK-agnostic | `src/storeEventsWrapper.ts:924-1001` | `tests/storeEventsWrapper.ts` ("storeEventsWrapper", "getAccessToken") | `getBuddyAgents`/`getQueues` happy-path filtering covered; address-book disabled branch coverage is a gap | PRESENT |
+| `STORE-R-015` | Consult/transfer fetchers use the existing SDK `getBuddyAgents`, `getQueues`, and `getEntryPoints` methods and return their established entity/list responses without local result filtering, sorting, projection, or metadata reconstruction. Telephony calls rely on SDK defaults; for a non-telephony active task the store supplies only a complete channel eligibility expression through the existing `filter` parameter. Errors are logged and rethrown; `getAddressBookEntries` returns empty when `isAddressBookEnabled` is false. | Keep ordinary list policy in the SDK and preserve backend order while carrying the one piece of per-task context an SDK-global list method cannot infer without a new signature. | `src/storeEventsWrapper.ts`, `src/store.types.ts` | `tests/storeEventsWrapper.ts` | Address-book-disabled branch coverage is a gap. | PRESENT |
 | `STORE-R-016` | `setOnError` wraps the caller callback to also submit a behavioral metrics event before invoking it | Consistent telemetry on widget errors | `src/storeEventsWrapper.ts:285-301` | None found | Negative/telemetry-path test missing | WEAK |
 | `STORE-R-017` | `isIncomingTask` returns true only when the task is not wrap-up-required, the agent has not joined, and the interaction state is `new`/`consult`/`connected`/`conference` | Gates whether a task is treated as an unanswered incoming offer | `src/task-utils.ts:26-37` | `tests/task-utils.ts` ("isIncomingTask" — incoming / not incoming / edge cases) | none | PRESENT |
 | `STORE-R-018` | `getConsultStatus`/`getTaskStatus` map participant `consultState` + interaction state to a `ConsultStatus`, with special handling for secondary EP-DN agents | Consult/conference UI relies on a single derived status | `src/task-utils.ts:39-146` | None found (direct `getConsultStatus` test) | Only `isIncomingTask`, conference, and hold helpers are directly tested; consult-status helper is a gap | WEAK |
 | `STORE-R-019` | Conference helpers (`getIsConferenceInProgress`, `getConferenceParticipants`, `getConferenceParticipantsCount`) count only active agent participants, excluding `Customer`/`Supervisor`/`VVA` and those who left | Accurate conference participant display | `src/task-utils.ts:148-247`, `src/constants.ts:33` | `tests/task-utils.ts` ("getIsConferenceInProgress", "getConferenceParticipants", "getConferenceParticipantsCount") | none | PRESENT |
 | `STORE-R-020` | `findHoldTimestamp`/`findHoldStatus` resolve hold state per media type, remapping to `mainCall` for secondary EP-DN agents | Hold timers align with Agent Desktop across consult/conference | `src/task-utils.ts:285-362` | `tests/task-utils.ts` ("findHoldTimestamp") | `findHoldStatus` direct coverage is a gap | PRESENT |
 | `STORE-R-021` | `handleRealtimeTranscription` upserts transcript lines keyed by `messageId`, normalizing role/timestamp and dropping empty content | Live transcription panel needs deduped, ordered lines | `src/storeEventsWrapper.ts:891-922` | None found | No dedicated transcription test located | WEAK |
+| `STORE-R-022` | Retain the existing `allowConsultToQueue` observable, wrapper getter, feature-flag entry, and call-control prop solely for public compatibility, but do not use them for destination visibility or order. Do not mirror `accessQueue`, `accessEntryPoint`, or `accessBuddyTeam`; the UI consumes destination policy only from each SDK Task's `uiControls.consultTransferDestinations`. | Preserving the established store surface avoids a patch-release break while keeping one authoritative policy source for current UI behavior. | `src/store.ts`, `src/store.types.ts`, `src/storeEventsWrapper.ts`, `src/util.ts` | `tests/storeEventsWrapper.ts`, `tests/util.ts` | The SDK continues to ingest collaboration profile values internally when computing Task controls. | PRESENT |
 
 ## Design Overview
 The store is deliberately split into a thin observable core and a thick wrapper. `Store` (`store.ts`) holds only field declarations + `makeAutoObservable` (with `cc` as `observable.ref` so the SDK object itself is not deeply observed) and the two lifecycle methods `init`/`registerCC`. Everything reactive and event-driven lives in `StoreWrapper` (`storeEventsWrapper.ts`), which composes the singleton via `Store.getInstance()` and re-exposes each field through a getter. This keeps the observable schema in one place while concentrating SDK coupling, event wiring, and mutation discipline in the wrapper.
@@ -244,12 +245,11 @@ sequenceDiagram
   participant W as StoreWrapper
   participant SDK as "@webex/contact-center"
 
-  Widget->>W: getQueues(mediaType, params)
-  W->>SDK: cc.getQueues(params)
+  Widget->>W: getQueues(params) / getEntryPoints(params)
+  W->>SDK: getQueues/getEntryPoints(existing params)
   alt resolves
-    SDK-->>W: queues
-    W->>W: filter by channelType == mediaType.toUpperCase()
-    W-->>Widget: {data, meta}
+    SDK-->>W: existing full-record paginated response
+    W-->>Widget: unchanged {data, meta}
   else rejects
     SDK-->>W: error
     W->>W: logger.error(...)
@@ -281,14 +281,16 @@ classDiagram
 - **UC-3 Observe agent/session state in React:** Widget wraps in `observer()` and reads `store.agentId`, `store.isAgentLoggedIn`, `store.deviceType`, `store.currentState` → re-renders on mutation. Evidence: `src/storeEventsWrapper.ts:56-187`, `_archive/.../AGENTS.md` usage.
 - **UC-4 Handle an incoming task through to wrap-up:** SDK `task:incoming` → listeners registered + `onIncomingTask` fired → `task:assigned` sets ENGAGED/current → `task:end` + `handleTaskRemove` cleans up. Evidence: `src/storeEventsWrapper.ts:585-762`, `tests/storeEventsWrapper.ts` ("events reactions").
 - **UC-5 Campaign-preview accept flow:** `task:campaignPreviewReservation` puts a preview in RESERVED; preview stays out of `currentTask` until accepted (`acceptedCampaignIds`), then transitions to ENGAGED. Evidence: `src/storeEventsWrapper.ts:243-283,537-583,772-795`, `tests/storeEventsWrapper.ts` ("campaign preview task lifecycle").
-- **UC-6 Fetch a domain list for a widget dropdown:** Transfer/Consult widget calls `getBuddyAgents()`/`getQueues()`; Outdial calls `getEntryPoints()`/`getAddressBookEntries()` → store proxies the SDK, transforms/filters, returns. Evidence: `src/storeEventsWrapper.ts:924-1001`, `tests/storeEventsWrapper.ts`.
+- **UC-6 Fetch a domain list for a widget dropdown:** Transfer/Consult calls the existing `getBuddyAgents()`/`getQueues()`/`getEntryPoints()` methods and Outdial calls `getAddressBookEntries()`. The store relies on SDK telephony defaults, supplies an existing filter only for a non-telephony active task, and returns full-record data/metadata unchanged. Evidence: `src/storeEventsWrapper.ts`, `tests/storeEventsWrapper.ts`.
 
 ## State Model
 The store is a single MobX `makeAutoObservable` instance. Observable slices (all in `src/store.ts:23-56`):
 - **Session / profile:** `agentId`, `agentProfile`, `isAgentLoggedIn`, `deviceType`, `dialNumber`, `teamId`, `teams`, `loginOptions`, `idleCodes`, `wrapupCodes`, `featureFlags`, `dataCenter`.
 - **Agent state:** `currentState`, `customState`, `lastStateChangeTimestamp`, `lastIdleCodeChangeTimestamp`, `showMultipleLoginAlert`.
 - **Tasks:** `taskList` (`Record<interactionId, ITask>`), `currentTask`, `acceptedCampaignIds` (`Set<string>`), `realtimeTranscriptionData`.
-- **Call/consult control:** `isMuted`, `callControlAudio`, `isQueueConsultInProgress`, `currentConsultQueueId`, `consultStartTimeStamp`, `isDeclineButtonEnabled`, `isEndConsultEnabled`, `allowConsultToQueue`, `isDigitalChannelsInitialized`.
+- **Call/consult control:** `isMuted`, `callControlAudio`, `isQueueConsultInProgress`, `currentConsultQueueId`, `consultStartTimeStamp`, `isDeclineButtonEnabled`, `isEndConsultEnabled`, `allowConsultToQueue`, `isDigitalChannelsInitialized`. `allowConsultToQueue` remains a compatibility pass-through only; destination availability/order comes from the SDK Task's `uiControls`.
+- **`getQueues` / `getEntryPoints`:** call the same-named SDK methods and return `ContactServiceQueuesResponse` / `EntryPointListResponse`. Telephony uses SDK defaults; non-telephony tasks use the existing `filter` parameter. They do not sort, filter returned rows, project fields, or reinterpret metadata.
+- **`getBuddyAgents`:** returns the SDK `agentList` unchanged (full list, no pagination).
 - **Misc:** `currentTheme`, `cc` (`observable.ref` — not deeply observed), `isAddressBookEnabled`.
 
 Transition triggers: SDK CC/task events drive the session/agent/task slices via the wrapper's handlers (`handleStateChange`, `handleTaskAssigned`, `refreshTaskList`, `cleanUpStore`, campaign-preview handlers). Widget-initiated mutators (`setDeviceType`, `setDialNumber`, `setTeamId`, `setState`, `setCurrentTheme`, etc.) drive UI-local slices. All writes pass through `runInAction`.
@@ -305,7 +307,7 @@ Transition triggers: SDK CC/task events drive the session/agent/task slices via 
 - **Event enums are local copies (`store.types.ts:204-259`):** `CC_EVENTS`/`TASK_EVENTS` string values must match the SDK exactly; an SDK rename will silently stop a handler from firing.
 - **Pending campaign previews must not become `currentTask`:** `setCurrentTask` clears `currentTask` for a preview in state `new` that is not in `acceptedCampaignIds` (`storeEventsWrapper.ts:255-267`). Bypassing this (e.g. calling SDK methods directly) re-introduces the bug where CallControl renders for an unaccepted preview.
 - **Listener leaks:** every `task.on(...)` in `registerTaskEventListeners` has a matching `task.off(...)` in `handleTaskRemove`. Adding a listener in one without the other leaks handlers and can double-fire `refreshTaskList`.
-- **`getBuddyAgents`/`getQueues` default args dereference `this.currentTask.data.interaction.mediaType` (`storeEventsWrapper.ts:925,941`):** calling them with no `currentTask` set throws. Callers should pass an explicit `mediaType` when no task is active.
+- **Task media is SDK-originated but broadly typed on `ITask`:** the store validates it against the supported media keys before passing the existing `BuddyAgents` option; absent or unknown media uses the SDK telephony default.
 - **`@ts-expect-error` markers tie to SDK gaps:** several casts (e.g. `response.teams`, credentials API) are pinned to `CAI-6762`; removing the workaround before the SDK fix breaks the build.
 
 ## Module Do's / Don'ts
@@ -337,13 +339,14 @@ Unit tests are split by source file. `tests/store.ts` covers the singleton defau
 | `STORE-R-012` | `tests/storeEventsWrapper.ts` (handleTaskRemove cleanup) | full per-listener detach not exhaustively asserted |
 | `STORE-R-013` | `tests/storeEventsWrapper.ts` (events reactions) | none |
 | `STORE-R-014` | `tests/storeEventsWrapper.ts` (events reactions) | none |
-| `STORE-R-015` | `tests/storeEventsWrapper.ts` (list fetchers, getAccessToken) | address-book-disabled branch not directly asserted |
+| `STORE-R-015` | `tests/storeEventsWrapper.ts` (existing-method delegation, non-telephony existing-filter use, unchanged order/metadata, errors) | address-book-disabled branch not directly asserted |
 | `STORE-R-016` | None found | missing telemetry-path test |
 | `STORE-R-017` | `tests/task-utils.ts` (isIncomingTask) | none |
 | `STORE-R-018` | None found | `getConsultStatus`/`getTaskStatus` untested |
 | `STORE-R-019` | `tests/task-utils.ts` (conference helpers) | none |
 | `STORE-R-020` | `tests/task-utils.ts` (findHoldTimestamp) | `findHoldStatus` untested |
 | `STORE-R-021` | None found | `handleRealtimeTranscription` untested |
+| `STORE-R-022` | `tests/storeEventsWrapper.ts` no longer exposes raw collaboration-policy getters | Add a widget integration assertion for direct Task destination controls if the store ever begins adapting task UI controls. |
 
 ## Traceability
 - Repo architecture: [`ARCHITECTURE.md`](../../../../ai-docs/ARCHITECTURE.md) · Registry: [`SPEC_INDEX.md`](../../../../ai-docs/SPEC_INDEX.md) · Contracts: [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md)
