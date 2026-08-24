@@ -44,7 +44,7 @@ A maintainer should start at `src/store.ts` to understand the observable shape a
 Owns Contact Center client-side state and the SDK boundary: initialize/register with `@webex/contact-center`, subscribe to CC and task events, expose reactive observables and mutators, fetch domain lists (buddy agents, queues, entry points, address book), and centralize the error callback. It does NOT own UI rendering, business validation, or any direct network protocol beyond delegating to the SDK.
 
 ## Stack
-TypeScript 5.6.3, MobX 6.13.5 (`makeAutoObservable`, `observable.ref`, `runInAction`). Consumed in React 18 via `mobx-react-lite` `observer()` in downstream packages (not a dependency of this package itself). SDK peer `@webex/contact-center` 3.12.0-next.96. Tests: Jest 29 + ts compile (`tsc --project tsconfig.test.json && jest --coverage`). Build target: `dist/index.js` (Webpack). Evidence: `packages/contact-center/store/package.json`.
+TypeScript 5.6.3, MobX 6.13.5 (`makeAutoObservable`, `observable.ref`, `runInAction`). Consumed in React 18 via `mobx-react-lite` `observer()` in downstream packages (not a dependency of this package itself). SDK dependency `@webex/contact-center` 3.12.0-next.106. Tests: Jest 29 + ts compile (`tsc --project tsconfig.test.json && jest --coverage`). Build target: `dist/index.js` (Webpack). Evidence: `packages/contact-center/store/package.json`.
 
 ## Folder / Package Structure
 ```
@@ -83,7 +83,7 @@ Compatibility notes:
 - The `CC_EVENTS` / `TASK_EVENTS` enums are locally declared until the SDK exports them (see `// TODO: remove this once cc sdk exports this enum`, `store.types.ts:247`). They must stay byte-identical to the SDK's emitted event strings.
 
 ## Requires (dependencies)
-- `@webex/contact-center` SDK (peer, floor pinned in `package.json` at `3.12.0-next.96`) — the entire CC runtime: `Webex.init()`, `webex.cc.*` methods, the CC/task event stream, agent `Profile`, `webex.credentials.getUserToken()`. Consumed ONLY through the store. Fallback on unavailability: `Store.init()` rejects after a 6000ms timeout (`src/store.ts:140-142`); the wrapper wraps the rejection and invokes `onErrorCallback('Store', err)` (`src/storeEventsWrapper.ts:442-452`).
+- `@webex/contact-center` SDK (pinned in `package.json` at `3.12.0-next.106`) — the entire CC runtime: `Webex.init()`, `webex.cc.*` methods, the CC/task event stream, agent `Profile`, `webex.credentials.getUserToken()`. Consumed ONLY through the store. Fallback on unavailability: `Store.init()` rejects after a 6000ms timeout (`src/store.ts:140-142`); the wrapper wraps the rejection and invokes `onErrorCallback('Store', err)` (`src/storeEventsWrapper.ts:442-452`).
 - `mobx` ^6.13.5 — observable state and `runInAction` for all mutations.
 - Internal: none upstream. The store is the lowest widget-layer dependency (`cc-components → widget packages → store → SDK`); it imports no widget package.
 

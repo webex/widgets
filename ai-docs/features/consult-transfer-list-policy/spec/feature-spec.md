@@ -21,7 +21,7 @@ Related context: [repository architecture](../../../ARCHITECTURE.md) · [specifi
 | Work type | Defect |
 | Change class | Contract / UI |
 | Source/intake | Developer-approved consult/transfer behavior review and current code/tests |
-| Last verified | 2026-08-21 in the approved SDK/widgets worktrees |
+| Last verified | 2026-08-24 with `@webex/contact-center` 3.12.0-next.106 |
 
 ## Applicability
 
@@ -68,7 +68,7 @@ There are no open product decisions for this delta.
 - Load dial numbers through the generic SDK AddressBook service and rely on its default backend ordering.
 - Preserve the SDK's `data` order and pagination metadata without local sorting, channel filtering, or metadata reconstruction.
 - Keep loading, empty, and error behavior in the existing widget layers.
-- Use the locally linked SDK worktree while verifying the coordinated change.
+- Use the pinned `@webex/contact-center` 3.12.0-next.106 dependency containing the coordinated SDK change.
 
 ### Out of scope
 
@@ -142,11 +142,11 @@ There are no open product decisions for this delta.
 - [x] Queue and entry-point fetchers delegate to existing SDK methods, while dial numbers use AddressBook, without local returned-data sort/filter/metadata logic (`MOD-001`, `WIDGET-LIST-R-001`, `WIDGET-LIST-R-004`).
 - [x] Params-only telephony queue requests rely on SDK defaults; active non-telephony requests supply a complete channel filter, and legacy media-plus-params calls preserve their channel scope and caller filter. Entry-point requests always delegate directly, and no list request contains widget-selected sorting, projection, or profile-view flags (`MOD-001`, `WIDGET-LIST-R-003`).
 - [x] Store errors are rethrown and task-hook errors retain the existing empty-result behavior (`WIDGET-LIST-R-005`).
-- [x] Store, task, test-fixtures, and cc-components build/type surfaces agree with the linked SDK (`WIDGET-LIST-R-006`).
+- [x] Store, task, test-fixtures, and cc-components build/type surfaces agree with `@webex/contact-center` 3.12.0-next.106 (`WIDGET-LIST-R-006`).
 - [x] Agent rows show active/away presence from buddy state, and dial-number/entry-point rows show their typed secondary identifiers (`WIDGET-LIST-R-008`).
 - [x] A late buddy-agent response from a previous Consult/Transfer action cannot overwrite the current action's list or loading state (`WIDGET-LIST-R-009`).
-- [x] Store and task unit suites, focused consult/transfer cc-components tests, and touched package build/style checks pass with the coordinated SDK worktree.
-- [x] The complete cc-components unit suite and the focused consult/transfer suites pass with the locally linked SDK.
+- [x] Store and task unit suites, focused consult/transfer cc-components tests, and touched package build/style checks pass with `@webex/contact-center` 3.12.0-next.106.
+- [x] The complete cc-components unit suite and the focused consult/transfer suites pass with `@webex/contact-center` 3.12.0-next.106.
 
 ## Scenarios and applicable change views
 
@@ -243,7 +243,7 @@ No event contract changes.
 
 | Risk or assumption | Evidence | Mitigation or decision owner |
 | --- | --- | --- |
-| Widgets are run with an SDK lacking the corrected defaults and action-aware buddy policy. | `packages/contact-center/store/package.json` | Coordinate the SDK dependency/release; use the approved local worktree link for testing. |
+| Widgets are run with an SDK lacking the corrected defaults and action-aware buddy policy. | `packages/contact-center/store/package.json` | Pin the store to the compatible SDK release; currently `3.12.0-next.106`. |
 | A future widget reintroduces local sorting/filtering. | `packages/contact-center/store/tests/storeEventsWrapper.ts` | Retain delegation and exact-response assertions. |
 | Transfer action is lost during reload. | `packages/contact-center/cc-components/tests/components/task/CallControl/CallControlCustom/consult-transfer-popover.tsx` | Retain the action-specific reload assertion. |
 | A Consult buddy request completes after the user switches to Transfer. | `packages/contact-center/task/src/helper.ts` | Track the newest buddy request and ignore older data, error fallback, and loading-state updates. |
@@ -272,7 +272,7 @@ No event contract changes.
 
 ## Operations
 
-- Build/link the paired SDK before widgets so the corrected defaults and existing types resolve.
+- Install the pinned SDK dependency before building widgets so the corrected defaults and existing types resolve.
 - Run the store, task, and cc-components unit suites plus touched package builds/styles before release.
 - Roll back widgets and SDK together if the coordinated behavior is incompatible; no data migration or cleanup is required.
 
@@ -280,7 +280,7 @@ No event contract changes.
 
 - Compatibility: queue, entry-point, and legacy buddy-agent callers retain their existing methods and call forms; action-aware buddy loading and params-only queue loading are additive overloads.
 - Data or consumer transition: release a compatible SDK before or with the store, then task and component packages.
-- Coexistence period: local development uses the approved SDK worktree link; published packages must use a released compatible SDK.
+- Coexistence period: local development and published packages resolve the compatible SDK version pinned by the store.
 - Completion and rollback outcome: all packages resolve the existing types and list methods; rollback is a coordinated dependency/code rollback with no persisted state.
 
 ## Serviceability

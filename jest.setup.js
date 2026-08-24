@@ -21,6 +21,10 @@ jest.mock('@webex/contact-center', () => ({
     activeLeg: 'main',
     main: {},
     consult: {},
+    consultTransferDestinations: {
+      consult: [],
+      transfer: [],
+    },
   }),
 }));
 
