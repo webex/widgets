@@ -414,8 +414,13 @@ describe('Call Control Custom Utils', () => {
       expect(createInitials('John')).toBe('J');
     });
 
-    it('should create initials from multiple names, taking first two', () => {
-      expect(createInitials('John Michael Doe')).toBe('JM');
+    it('should create initials from the first and last words', () => {
+      expect(createInitials('John Michael Doe')).toBe('JD');
+    });
+
+    it('should use the first and last tokens for multi-token destination initials', () => {
+      expect(createInitials('Queue e2e 1')).toBe('Q1');
+      expect(createInitials('Entry point e2e set 1')).toBe('E1');
     });
 
     it('should handle empty string', () => {

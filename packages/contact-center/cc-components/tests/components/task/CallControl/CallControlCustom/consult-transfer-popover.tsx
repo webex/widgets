@@ -2,8 +2,10 @@ import React from 'react';
 import {render, fireEvent, waitFor, act} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import ConsultTransferPopoverComponent from '../../../../../src/components/task/CallControl/CallControlCustom/consult-transfer-popover';
-import {ContactServiceQueue, EntryPointRecord, AddressBookEntry} from '@webex/cc-store';
+import {AddressBookEntry, ContactServiceQueue, EntryPointRecord, TaskUIControls} from '@webex/cc-store';
 import {DEFAULT_PAGE_SIZE} from '../../../../../src/components/task/constants';
+
+type AvailableDestinations = TaskUIControls['consultTransferDestinations']['consult'];
 
 const loggerMock = {
   log: jest.fn(),
@@ -43,7 +45,7 @@ describe('ConsultTransferPopoverComponent', () => {
         agentId: 'agent2',
         agentName: 'Agent Two',
         dn: '1002',
-        state: 'Available',
+        state: 'Idle',
         teamId: 'team1',
         siteId: 'site1',
       },
@@ -59,7 +61,8 @@ describe('ConsultTransferPopoverComponent', () => {
     onQueueSelect: mockOnQueueSelect,
     onDialNumberSelect: jest.fn(),
     onEntryPointSelect: jest.fn(),
-    allowConsultToQueue: true,
+    action: 'Consult' as const,
+    availableDestinations: ['agent', 'queue', 'dialNumber', 'entryPoint'] as AvailableDestinations,
     loadingBuddyAgents: false,
     logger: loggerMock,
   };
@@ -108,6 +111,11 @@ describe('ConsultTransferPopoverComponent', () => {
     expect(listItems[0]).toHaveTextContent('Agent One');
     expect(listItems[1]).toHaveTextContent('Agent Two');
 
+    const availableAvatar = listItems[0].querySelector('mdc-avatar') as HTMLElement & {presence?: string};
+    const awayAvatar = listItems[1].querySelector('mdc-avatar') as HTMLElement & {presence?: string};
+    expect(availableAvatar.presence).toBe('active');
+    expect(awayAvatar.presence).toBe('away');
+
     // Verify list item wrappers render
     const listItemContainers = screen.container.querySelectorAll('.consult-list-item-wrapper');
     expect(listItemContainers).toHaveLength(2);
@@ -135,6 +143,41 @@ describe('ConsultTransferPopoverComponent', () => {
     const firstQueueButton = screen.container.querySelectorAll('.call-control-list-item button')[0];
     fireEvent.click(firstQueueButton);
     expect(mockOnQueueSelect).toHaveBeenCalledWith('queue1', 'Queue One', false);
+  });
+
+  it('shows the number below dial-number and entry-point names', async () => {
+    const screen = render(
+      <ConsultTransferPopoverComponent
+        {...baseProps}
+        heading="Consult"
+        getAddressBookEntries={async () => ({
+          data: [
+            {
+              id: 'dn1',
+              name: 'Dial Number One',
+              number: '12345',
+            } as AddressBookEntry,
+          ],
+          meta: {page: 0, totalPages: 1},
+        })}
+        getEntryPoints={async () => ({
+          data: [
+            {
+              id: 'ep1',
+              name: 'Entry Point One',
+              number: '67890',
+            } as EntryPointRecord,
+          ],
+          meta: {page: 0, totalPages: 1},
+        })}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', {name: 'Dial Number'}));
+    await waitFor(() => expect(screen.getByText('12345')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByRole('button', {name: 'Entry Point'}));
+    await waitFor(() => expect(screen.getByText('67890')).toBeInTheDocument());
   });
 
   it('hides Dial Number tab when consultTransferOptions.showDialNumberTab is false', async () => {
@@ -223,15 +266,49 @@ describe('ConsultTransferPopoverComponent', () => {
     expect(screen.container.querySelectorAll('.call-control-list-item').length).toBe(0);
   });
 
-  it('hides queue tab when allowConsultToQueue is false', async () => {
+  it('hides a category omitted by the SDK controls', async () => {
     const propsWithoutQueue = {
       ...baseProps,
-      allowConsultToQueue: false,
+      availableDestinations: ['agent', 'dialNumber', 'entryPoint'] as AvailableDestinations,
     };
 
     const screen = await render(<ConsultTransferPopoverComponent {...propsWithoutQueue} />);
     const maybeQueuesButton = screen.queryByRole('button', {name: 'Queues'}) as HTMLButtonElement | null;
     expect(maybeQueuesButton).toBeNull();
+  });
+
+  it('renders category tabs in the order supplied by the SDK controls', async () => {
+    const orderedProps = {
+      ...baseProps,
+      action: 'Transfer' as const,
+      availableDestinations: ['queue', 'agent', 'entryPoint', 'dialNumber'] as AvailableDestinations,
+    };
+
+    const screen = await render(<ConsultTransferPopoverComponent {...orderedProps} />);
+    const categoryLabels = Array.from(screen.container.querySelectorAll('.consult-category-buttons button')).map(
+      (button) => button.textContent
+    );
+
+    expect(categoryLabels).toEqual(['Queues', 'Agents', 'Entry Point', 'Dial Number']);
+    expect(screen.getByRole('button', {name: 'Queues'})).toHaveClass('consult-category-button-active');
+  });
+
+  it('renders an empty state without looping when the SDK exposes no destinations', async () => {
+    const screen = await render(<ConsultTransferPopoverComponent {...baseProps} availableDestinations={[]} />);
+
+    expect(screen.container.querySelectorAll('.consult-category-buttons button')).toHaveLength(0);
+    expect(screen.getByText('No data available for consult transfer.')).toBeInTheDocument();
+  });
+
+  it('shows entry point when it is included in the SDK controls', async () => {
+    const transferProps = {
+      ...baseProps,
+      action: 'Transfer' as const,
+      consultTransferOptions: {showEntryPointTab: true},
+    };
+
+    const screen = await render(<ConsultTransferPopoverComponent {...transferProps} />);
+    expect(screen.getByRole('button', {name: 'Entry Point'})).toBeInTheDocument();
   });
 
   it('covers edge case for empty items in renderList (line 50)', async () => {
@@ -333,6 +410,7 @@ describe('ConsultTransferPopoverComponent', () => {
       fireEvent.click(reloadButton);
 
       expect(mockLoadBuddyAgents).toHaveBeenCalledTimes(1);
+      expect(mockLoadBuddyAgents).toHaveBeenCalledWith('Consult');
     });
 
     it('reloads queues when reload button clicked on Queues tab', async () => {

@@ -1192,53 +1192,167 @@ describe('storeEventsWrapper', () => {
     });
 
     it('should return buddy agents list', async () => {
-      const buddyAgents = [{name: 'agent1'}, {name: 'agent2'}];
+      const buddyAgents = [
+        {agentName: 'Zeta Agent', agentId: '3'},
+        {agentName: 'Alpha Agent', agentId: '1'},
+        {agentName: 'Beta Agent', agentId: '2'},
+      ];
+      storeWrapper['store'].currentTask = {data: {interaction: {mediaType: 'telephony'}}} as ITask;
       storeWrapper['store'].cc.getBuddyAgents = jest.fn().mockResolvedValue({data: {agentList: buddyAgents}});
-      const result = await storeWrapper.getBuddyAgents('telephony');
+      const result = await storeWrapper.getBuddyAgents('Consult');
       expect(result).toEqual(buddyAgents);
+      expect(storeWrapper['store'].cc.getBuddyAgents).toHaveBeenCalledWith({
+        action: 'Consult',
+        mediaType: 'telephony',
+      });
+    });
+
+    it('should pass the transfer intent to the SDK', async () => {
+      storeWrapper['store'].currentTask = {data: {interaction: {mediaType: 'telephony'}}} as ITask;
+      storeWrapper['store'].cc.getBuddyAgents = jest.fn().mockResolvedValue({data: {agentList: []}});
+
+      await storeWrapper.getBuddyAgents('Transfer');
+
+      expect(storeWrapper['store'].cc.getBuddyAgents).toHaveBeenCalledWith({
+        action: 'Transfer',
+        mediaType: 'telephony',
+      });
+    });
+
+    it('should preserve the legacy media-type buddy-agent call', async () => {
+      storeWrapper['store'].cc.getBuddyAgents = jest.fn().mockResolvedValue({data: {agentList: []}});
+
+      await storeWrapper.getBuddyAgents('chat');
+
+      expect(storeWrapper['store'].cc.getBuddyAgents).toHaveBeenCalledWith({
+        mediaType: 'chat',
+        state: 'Available',
+      });
+    });
+
+    it('should omit an unsupported task media type and use the SDK default', async () => {
+      storeWrapper['store'].currentTask = {data: {interaction: {mediaType: 'video'}}} as ITask;
+      storeWrapper['store'].cc.getBuddyAgents = jest.fn().mockResolvedValue({data: {agentList: []}});
+
+      await storeWrapper.getBuddyAgents('Consult');
+
+      expect(storeWrapper['store'].cc.getBuddyAgents).toHaveBeenCalledWith({action: 'Consult'});
     });
 
     it('should handle error in getBuddyAgents and throw error', async () => {
+      storeWrapper['store'].currentTask = null;
       storeWrapper['store'].cc.getBuddyAgents = jest.fn().mockRejectedValue(new Error('error'));
-      await expect(storeWrapper.getBuddyAgents('telephony')).rejects.toThrow('error');
+      await expect(storeWrapper.getBuddyAgents('Consult')).rejects.toThrow('error');
     });
 
     it('should return contact service queues list', async () => {
       const queueList = [
         {id: 'queue1', name: 'Queue 1', channelType: 'TELEPHONY'},
         {id: 'queue2', name: 'Queue 2', channelType: 'TELEPHONY'},
-        {id: 'queue3', name: 'Queue 3', channelType: 'CHAT'}, // This one should be filtered out
+        {id: 'queue3', name: 'Queue 3', channelType: 'CHAT'},
       ];
-      storeWrapper['store'].cc.getQueues = jest.fn().mockResolvedValue(queueList);
+      const response = {data: queueList, meta: {page: 0, totalPages: 1}};
+      storeWrapper['store'].currentTask = {data: {interaction: {mediaType: 'telephony'}}} as ITask;
+      storeWrapper['store'].cc.getQueues = jest.fn().mockResolvedValue(response);
 
-      const result = await storeWrapper.getQueues('telephony');
+      const result = await storeWrapper.getQueues();
 
-      expect(result.data).toEqual([
-        {id: 'queue1', name: 'Queue 1', channelType: 'TELEPHONY'},
-        {id: 'queue2', name: 'Queue 2', channelType: 'TELEPHONY'},
-      ]);
-      expect(storeWrapper['store'].cc.getQueues).toHaveBeenCalled();
+      expect(result.data).toEqual(queueList);
+      expect(storeWrapper['store'].cc.getQueues).toHaveBeenCalledWith({});
+    });
+
+    it('should pass only runtime context and list inputs when getQueues is called with params', async () => {
+      const queueList = [{id: 'queue1', name: 'Queue 1', channelType: 'TELEPHONY'}];
+      storeWrapper['store'].currentTask = {data: {interaction: {mediaType: 'telephony'}}} as ITask;
+      storeWrapper['store'].cc.getQueues = jest
+        .fn()
+        .mockResolvedValue({data: queueList, meta: {page: 1, totalPages: 1}});
+
+      await storeWrapper.getQueues({page: 1, pageSize: 25});
+
+      expect(storeWrapper['store'].cc.getQueues).toHaveBeenCalledWith({
+        page: 1,
+        pageSize: 25,
+      });
+    });
+
+    it('should use the existing queue filter parameter for a non-telephony task', async () => {
+      storeWrapper['store'].currentTask = {data: {interaction: {mediaType: 'social'}}} as ITask;
+      storeWrapper['store'].cc.getQueues = jest.fn().mockResolvedValue({data: [], meta: {page: 0, totalPages: 0}});
+
+      await storeWrapper.getQueues({page: 0, pageSize: 25});
+
+      expect(storeWrapper['store'].cc.getQueues).toHaveBeenCalledWith({
+        filter: 'queueType==INBOUND;channelType==SOCIAL_CHANNEL;active==true',
+        page: 0,
+        pageSize: 25,
+      });
+    });
+
+    it('should combine a caller filter with the active task channel filter', async () => {
+      storeWrapper['store'].currentTask = {data: {interaction: {mediaType: 'chat'}}} as ITask;
+      storeWrapper['store'].cc.getQueues = jest.fn().mockResolvedValue({data: [], meta: {page: 0, totalPages: 0}});
+
+      await storeWrapper.getQueues({filter: 'name==Support', page: 0});
+
+      expect(storeWrapper['store'].cc.getQueues).toHaveBeenCalledWith({
+        filter: 'queueType==INBOUND;channelType==CHAT;active==true;name==Support',
+        page: 0,
+      });
+    });
+
+    it('should preserve the legacy media-type and params queue call', async () => {
+      storeWrapper['store'].currentTask = null;
+      storeWrapper['store'].cc.getQueues = jest.fn().mockResolvedValue({data: [], meta: {page: 0, totalPages: 0}});
+
+      await storeWrapper.getQueues('social', {page: 2, search: 'support'});
+
+      expect(storeWrapper['store'].cc.getQueues).toHaveBeenCalledWith({
+        filter: 'queueType==INBOUND;channelType==SOCIAL_CHANNEL;active==true',
+        page: 2,
+        search: 'support',
+      });
+    });
+
+    it('should preserve telephony scoping for the legacy queue call when a caller filter is supplied', async () => {
+      storeWrapper['store'].cc.getQueues = jest.fn().mockResolvedValue({data: [], meta: {page: 0, totalPages: 0}});
+
+      await storeWrapper.getQueues('telephony', {filter: 'name==Support'});
+
+      expect(storeWrapper['store'].cc.getQueues).toHaveBeenCalledWith({
+        filter: 'queueType==INBOUND;channelType==TELEPHONY;active==true;name==Support',
+      });
+    });
+
+    it('should preserve an explicit empty filter in the params-only queue call', async () => {
+      storeWrapper['store'].currentTask = {data: {interaction: {mediaType: 'telephony'}}} as ITask;
+      storeWrapper['store'].cc.getQueues = jest.fn().mockResolvedValue({data: [], meta: {page: 0, totalPages: 0}});
+
+      await storeWrapper.getQueues({filter: ''});
+
+      expect(storeWrapper['store'].cc.getQueues).toHaveBeenCalledWith({filter: ''});
     });
 
     it('should handle error in getQueues and throw error', async () => {
+      storeWrapper['store'].currentTask = null;
       storeWrapper['store'].cc.getQueues = jest.fn().mockRejectedValue(new Error('queue error'));
 
-      await expect(storeWrapper.getQueues('telephony')).rejects.toThrow('queue error');
+      await expect(storeWrapper.getQueues()).rejects.toThrow('queue error');
     });
 
     it('should return contact service queues list when SDK returns paginated response', async () => {
       const queueList = [
-        {...mockQueueDetails[0], channelType: 'TELEPHONY'},
-        {...mockQueueDetails[1], channelType: 'CHAT'},
+        {id: mockQueueDetails[0].id, name: mockQueueDetails[0].name},
+        {id: mockQueueDetails[1].id, name: mockQueueDetails[1].name},
       ];
-      storeWrapper['store'].cc.getQueues = jest
-        .fn()
-        .mockResolvedValue({data: queueList, meta: {page: 1, pageSize: 50, total: 2, totalPages: 1}});
+      const response = {data: queueList, meta: {page: 1, pageSize: 50, totalRecords: 2, totalPages: 1}};
+      storeWrapper['store'].currentTask = null;
+      storeWrapper['store'].cc.getQueues = jest.fn().mockResolvedValue(response);
 
-      const result = await storeWrapper.getQueues('telephony');
+      const result = await storeWrapper.getQueues();
 
-      expect(result.data).toEqual([{...mockQueueDetails[0], channelType: 'TELEPHONY'}]);
-      expect(storeWrapper['store'].cc.getQueues).toHaveBeenCalled();
+      expect(result).toEqual(response);
+      expect(storeWrapper['store'].cc.getQueues).toHaveBeenCalledWith({});
     });
 
     it('should handle consultQueueCancelled event', () => {
@@ -1261,6 +1375,7 @@ describe('storeEventsWrapper', () => {
     });
 
     it('should handle error while fetching entry points', async () => {
+      storeWrapper['store'].currentTask = null;
       storeWrapper['store'].cc.getEntryPoints = jest.fn().mockRejectedValue(new Error('ep error'));
       await expect(storeWrapper.getEntryPoints({page: 0, pageSize: 25})).rejects.toThrow('ep error');
     });

@@ -3,6 +3,11 @@ import {render, fireEvent} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import ConsultTransferListComponent from '../../../../../src/components/task/CallControl/CallControlCustom/consult-transfer-list-item';
 
+type AvatarElement = HTMLElement & {
+  initials?: string;
+  presence?: 'active' | 'away';
+};
+
 const loggerMock = {
   log: jest.fn(),
   info: jest.fn(),
@@ -54,18 +59,11 @@ describe('CallControlListItemPresentational', () => {
     expect(listItem).toHaveAttribute('tabindex', '0');
 
     // Verify avatar section
-    const avatarWrapper = screen.container.querySelector('.md-avatar-wrapper');
-    expect(avatarWrapper).toBeInTheDocument();
-    expect(avatarWrapper).toHaveAttribute('role', 'img');
-    expect(avatarWrapper).toHaveAttribute('data-size', '32');
-    expect(avatarWrapper).toHaveAttribute('data-color', 'default');
-    expect(avatarWrapper).toHaveAttribute('aria-hidden', 'false');
-
-    // Verify initials display
-    const initialsSpan = screen.container.querySelector('.md-avatar-wrapper-children');
-    expect(initialsSpan).toBeInTheDocument();
-    expect(initialsSpan).toHaveTextContent('JD');
-    expect(initialsSpan).toHaveAttribute('aria-hidden', 'true');
+    const avatar = screen.container.querySelector('mdc-avatar') as AvatarElement;
+    expect(avatar).toBeInTheDocument();
+    expect(avatar).toHaveAttribute('aria-hidden', 'true');
+    expect(avatar.initials).toBe('JD');
+    expect(avatar).toHaveAttribute('size', '32');
 
     // Verify middle section with title and subtitle (class-based layout)
     const middleSection = screen.container.querySelector('[data-position="middle"]');
@@ -131,5 +129,14 @@ describe('CallControlListItemPresentational', () => {
     const titleOnlyElements = screen.container.querySelectorAll('mdc-text');
     expect(titleOnlyElements).toHaveLength(1);
     expect(titleOnlyElements[0]).toHaveTextContent('John Doe');
+  });
+
+  it.each([['active' as const], ['away' as const]])('passes %s presence to the avatar', (presence) => {
+    const screen = render(<ConsultTransferListComponent {...defaultProps} presence={presence} />);
+    const listItem = screen.container.querySelector('.call-control-list-item');
+    const avatar = screen.container.querySelector('mdc-avatar') as AvatarElement;
+
+    expect(listItem).toHaveAttribute('aria-label', 'John Doe');
+    expect(avatar.presence).toBe(presence);
   });
 });

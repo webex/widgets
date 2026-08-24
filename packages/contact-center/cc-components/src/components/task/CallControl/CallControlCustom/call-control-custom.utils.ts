@@ -121,12 +121,14 @@ export const getVisibleButtons = (buttons: ButtonConfig[], logger?): ButtonConfi
  */
 export const createInitials = (name: string, logger?): string => {
   try {
-    return name
-      .split(' ')
-      .map((word) => word[0])
-      .join('')
-      .slice(0, 2)
-      .toUpperCase();
+    const words = name.trim().split(/\s+/).filter(Boolean);
+
+    if (words.length === 0) {
+      return '';
+    }
+
+    const lastInitial = words.length > 1 ? words[words.length - 1][0] : '';
+    return `${words[0][0]}${lastInitial}`.toUpperCase();
   } catch (error) {
     logger?.error('CC-Widgets: CallControlCustom: Error in createInitials', {
       module: 'cc-components#call-control-custom.utils.ts',

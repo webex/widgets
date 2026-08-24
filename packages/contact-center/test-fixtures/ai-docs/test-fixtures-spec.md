@@ -47,6 +47,7 @@ test-fixtures/src/
 ├── fixtures.ts                             # Core SDK-shaped mocks: mockCC, mockProfile, mockTask, queues, agents, address book, campaign tasks
 ├── incomingTaskFixtures.ts                 # mockIncomingTaskData — incoming-task UI data by channel scenario
 ├── taskListFixtures.ts                     # mockTaskData — task-list UI data by scenario (active/incoming/action/selection)
+├── taskUIControlsFixtures.ts               # TaskUIControls factories with per-leg and destination overrides
 └── components/task/
     └── outdialCallFixtures.ts              # Outdial mocks composed from mockCC: mockOutdialCallProps, mockAniEntries, mockCCWithAni
 ```
@@ -59,6 +60,7 @@ test-fixtures/src/
 | `packages/contact-center/test-fixtures/src/fixtures.ts` | Core fixture values and their type annotations (`IContactCenter`, `Profile`, `ITask`, etc.). Never re-infer these shapes elsewhere. |
 | `packages/contact-center/test-fixtures/src/incomingTaskFixtures.ts` | `mockIncomingTaskData` and its `MEDIA_CHANNEL` source import. |
 | `packages/contact-center/test-fixtures/src/taskListFixtures.ts` | `mockTaskData` and its `MEDIA_CHANNEL` source import. |
+| `packages/contact-center/test-fixtures/src/taskUIControlsFixtures.ts` | Typed `TaskUIControls` factories, including consult/transfer destination-control overrides. |
 | `packages/contact-center/test-fixtures/src/components/task/outdialCallFixtures.ts` | Outdial fixtures derived from `mockCC`. |
 | `packages/contact-center/test-fixtures/package.json` | Dependency list and the `deploy:npm` no-op. |
 
@@ -82,6 +84,7 @@ Internal Surface — consumed only by other packages' Jest tests in this monorep
 | `test-fixtures.mockCallAssociatedData` | data export | `mockCallAssociatedData` | Call-associated-data variants (global, viewable/hidden, secure) | Additive keys safe | `src/fixtures.ts` | internal (`src/index.ts`) |
 | `test-fixtures.mockIncomingTaskData` | data export | `mockIncomingTaskData` | Incoming-task UI data keyed `webRTC`/`extension`/`social`/`chat` | Additive scenario keys safe | `src/incomingTaskFixtures.ts` | internal (`src/index.ts`) |
 | `test-fixtures.mockTaskData` | data export | `mockTaskData` | Task-list UI data keyed `active`/`incoming`/`action`/`selection` | Additive scenario keys safe | `src/taskListFixtures.ts` | internal (`src/index.ts`) |
+| `test-fixtures.createMockTaskUIControls` | factory export | `createMockTaskUIControls(overrides?): TaskUIControls` | Produces SDK-shaped task controls with independent main/consult/active-leg and ordered consult/transfer destination overrides | Track `TaskUIControls`; additive override fields are safe | `src/taskUIControlsFixtures.ts` | internal (`src/index.ts`) |
 | `test-fixtures.mockOutdialCallProps` | data export | `mockOutdialCallProps` | `mockCC` spread + `startOutdial`/`getOutdialANIEntries` jest mocks | Spread of `mockCC` | `src/components/task/outdialCallFixtures.ts` | internal (`src/index.ts`) |
 | `test-fixtures.mockAniEntries` | data export | `mockAniEntries` | Outdial ANI entry list | Additive fields safe | `src/components/task/outdialCallFixtures.ts` | internal (`src/index.ts`) |
 | `test-fixtures.mockCCWithAni` | data export | `mockCCWithAni` | `mockCC` + `agentConfig.outdialANIId` + ANI-resolving `getOutdialAniEntries` | Spread of `mockCC` | `src/components/task/outdialCallFixtures.ts` | internal (`src/index.ts`) |
@@ -108,6 +111,7 @@ Compatibility notes:
 | `test-fixtures-R-005` | `mockIncomingTaskData` and `mockTaskData` expose UI-data variants keyed by scenario (incoming: `webRTC`/`extension`/`social`/`chat`; list: `active`/`incoming`/`action`/`selection`) using the shared `MEDIA_CHANNEL` enum. | Task widget tests render against named, channel-correct scenarios rather than ad-hoc literals. | `src/incomingTaskFixtures.ts`, `src/taskListFixtures.ts` | none found | none | PRESENT |
 | `test-fixtures-R-006` | Outdial fixtures (`mockOutdialCallProps`, `mockCCWithAni`) are composed by spreading `mockCC` and adding outdial-specific jest mocks/config, keeping a single source of SDK shape. | Avoids a divergent second SDK mock; outdial tests inherit the canonical `mockCC`. | `src/components/task/outdialCallFixtures.ts` | none found | none | PRESENT |
 | `test-fixtures-R-007` | Every fixture and factory is re-exported through the barrel `src/index.ts`; non-barrelled internals (`mockAddressBook`, `mockQueuesResponse`) are not part of the public surface. | Consumers import from the package root; the barrel is the stability boundary. | `src/index.ts`, `src/fixtures.ts` (export list) | none found | none | PRESENT |
+| `test-fixtures-R-008` | `createMockTaskUIControls` starts from the SDK defaults, applies independent per-leg and active-leg overrides, and preserves or overrides the ordered `consultTransferDestinations.consult` and `.transfer` arrays. | Component tests must represent the same task-owned destination visibility and ordering contract used at runtime without rebuilding that policy in test code. | `src/taskUIControlsFixtures.ts` | Consumed by call-control tests in `packages/contact-center/cc-components/tests` | No package-local unit test; type and shape are checked by package builds and consumers. | PRESENT |
 
 Do not record raw data/schema inventory as requirements. The per-field contents of each mock are descriptive data in `src/`, not behavioral requirements.
 
@@ -221,6 +225,7 @@ The package ships no tests of its own (no `tests/` directory; confirmed by tree)
 | `test-fixtures-R-005` (scenario UI data) | None found | Consumed indirectly by task widget tests only |
 | `test-fixtures-R-006` (outdial composition) | None found | Consumed by outdial widget tests only |
 | `test-fixtures-R-007` (barrel surface) | None found | No test guarding the public export list |
+| `test-fixtures-R-008` (task UI controls) | Call-control consumer tests; `@webex/test-fixtures` and `@webex/cc-components` builds | No package-local assertion for destination override merging |
 
 ## Traceability
 - Repo architecture: [`ARCHITECTURE.md`](../../../../ai-docs/ARCHITECTURE.md) · Registry: [`SPEC_INDEX.md`](../../../../ai-docs/SPEC_INDEX.md)
