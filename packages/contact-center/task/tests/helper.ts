@@ -1038,7 +1038,7 @@ describe('useCallControl', () => {
       if (!pendingTarget) throw new Error('Expected pending EP-DN target');
 
       await act(async () => {
-        await result.current.dropConferenceParticipant(pendingTarget);
+        await result.current.requestParticipantDrop(pendingTarget);
       });
 
       expect(dropRequest).not.toHaveBeenCalled();
@@ -1097,7 +1097,7 @@ describe('useCallControl', () => {
       if (!target) throw new Error('Expected Agent Drop target');
       let requestPromise!: Promise<void>;
       act(() => {
-        requestPromise = result.current.dropConferenceParticipant(target);
+        requestPromise = result.current.requestParticipantDrop(target);
       });
 
       expect(dropRequest).toHaveBeenCalledWith({participantId: 'agent2'});
@@ -1114,6 +1114,142 @@ describe('useCallControl', () => {
         type: 'success',
         message: 'Participant removed from the conference.',
       });
+    });
+
+    it('preserves the pending lock and feedback across a same-interaction task clone', async () => {
+      let resolveDrop!: () => void;
+      const dropRequest = jest.fn(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveDrop = resolve;
+          })
+      );
+      const clonedDropRequest = jest.fn().mockResolvedValue(undefined);
+      let activeTask = createParticipantDropTask(dropRequest);
+      const {result, rerender} = renderHook(() =>
+        useCallControl({
+          currentTask: activeTask,
+          logger: mockLogger,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'agent1',
+        })
+      );
+      const target = result.current.conferenceParticipantDropRoster?.participants[0];
+      if (!target) throw new Error('Expected Agent Drop target');
+      let requestPromise!: Promise<void>;
+
+      act(() => {
+        requestPromise = result.current.requestParticipantDrop(target);
+      });
+
+      activeTask = createParticipantDropTask(clonedDropRequest);
+      rerender();
+
+      expect(result.current.pendingParticipantDropId).toBe('agent2');
+      const clonedTarget = result.current.conferenceParticipantDropRoster?.participants[0];
+      if (!clonedTarget) throw new Error('Expected cloned Agent Drop target');
+
+      await act(async () => {
+        await result.current.requestParticipantDrop(clonedTarget);
+      });
+
+      expect(dropRequest).toHaveBeenCalledTimes(1);
+      expect(clonedDropRequest).not.toHaveBeenCalled();
+
+      await act(async () => {
+        resolveDrop();
+        await requestPromise;
+      });
+
+      expect(result.current.pendingParticipantDropId).toBeNull();
+      expect(result.current.participantDropAnnouncement).toEqual({
+        type: 'success',
+        message: 'Participant removed from the conference.',
+      });
+    });
+
+    it('publishes a failure from the original request after a same-interaction task clone', async () => {
+      let rejectDrop!: (error: Error) => void;
+      const dropRequest = jest.fn(
+        () =>
+          new Promise<void>((_resolve, reject) => {
+            rejectDrop = reject;
+          })
+      );
+      const clonedDropRequest = jest.fn().mockResolvedValue(undefined);
+      let activeTask = createParticipantDropTask(dropRequest);
+      const {result, rerender} = renderHook(() =>
+        useCallControl({
+          currentTask: activeTask,
+          logger: mockLogger,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'agent1',
+        })
+      );
+      const target = result.current.conferenceParticipantDropRoster?.participants[0];
+      if (!target) throw new Error('Expected Agent Drop target');
+      let requestPromise!: Promise<void>;
+
+      act(() => {
+        requestPromise = result.current.requestParticipantDrop(target);
+      });
+
+      activeTask = createParticipantDropTask(clonedDropRequest);
+      rerender();
+
+      await act(async () => {
+        rejectDrop(new Error('routing failure'));
+        await requestPromise;
+      });
+
+      expect(clonedDropRequest).not.toHaveBeenCalled();
+      expect(result.current.pendingParticipantDropId).toBeNull();
+      expect(result.current.participantDropAnnouncement).toEqual({
+        type: 'error',
+        message: 'Unable to drop participant from the call. Try again.',
+      });
+    });
+
+    it('owns Customer confirmation state and invokes Drop only after confirmation', async () => {
+      const dropRequest = jest.fn().mockResolvedValue(undefined);
+      const task = createParticipantDropTask(dropRequest);
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: task,
+          logger: mockLogger,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'agent1',
+        })
+      );
+      const customerTarget = result.current.conferenceParticipantDropRoster?.customer;
+      if (!customerTarget) throw new Error('Expected Customer Drop target');
+
+      await act(async () => {
+        await result.current.requestParticipantDrop(customerTarget);
+      });
+
+      expect(dropRequest).not.toHaveBeenCalled();
+      expect(result.current.participantDropConfirmationTarget).toEqual(customerTarget);
+      expect(result.current.participantDropConfirmationDisabled).toBe(false);
+
+      act(() => {
+        result.current.cancelParticipantDropConfirmation();
+      });
+      expect(result.current.participantDropConfirmationTarget).toBeNull();
+
+      await act(async () => {
+        await result.current.requestParticipantDrop(customerTarget);
+      });
+
+      await act(async () => {
+        await result.current.confirmParticipantDrop();
+      });
+
+      expect(dropRequest).toHaveBeenCalledWith({participantId: customerTarget.dropTargetId});
+      expect(result.current.participantDropConfirmationTarget).toBeNull();
     });
 
     it('globally serializes same-target and cross-target requests', async () => {
@@ -1140,9 +1276,9 @@ describe('useCallControl', () => {
       let firstRequest!: Promise<void>;
 
       act(() => {
-        firstRequest = result.current.dropConferenceParticipant(agentTarget);
-        void result.current.dropConferenceParticipant(agentTarget);
-        void result.current.dropConferenceParticipant(customerTarget);
+        firstRequest = result.current.requestParticipantDrop(agentTarget);
+        void result.current.requestParticipantDrop(agentTarget);
+        void result.current.requestParticipantDrop(customerTarget);
       });
 
       expect(dropRequest).toHaveBeenCalledTimes(1);
@@ -1178,7 +1314,7 @@ describe('useCallControl', () => {
       if (!target) throw new Error('Expected Agent Drop target');
 
       await act(async () => {
-        await result.current.dropConferenceParticipant(target);
+        await result.current.requestParticipantDrop(target);
       });
 
       expect(result.current.participantDropAnnouncement).toEqual({
@@ -1219,7 +1355,7 @@ describe('useCallControl', () => {
       let requestPromise!: Promise<void>;
 
       act(() => {
-        requestPromise = result.current.dropConferenceParticipant(target);
+        requestPromise = result.current.requestParticipantDrop(target);
       });
       activeTask = nextTask;
       rerender();
@@ -1236,6 +1372,86 @@ describe('useCallControl', () => {
       nextTask.data.interaction.participants.agent2.hasLeft = true;
       rerender();
       expect(result.current.conferenceParticipantDropRoster).toBeNull();
+    });
+
+    it('clears a pending request when the interaction changes', async () => {
+      let resolveDrop!: () => void;
+      const dropRequest = jest.fn(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveDrop = resolve;
+          })
+      );
+      const firstTask = createParticipantDropTask(dropRequest);
+      const nextTask = createParticipantDropTask();
+      nextTask.data.interactionId = 'next-interaction';
+      nextTask.data.interaction.interactionId = 'next-interaction';
+      let activeTask = firstTask;
+      const {result, rerender} = renderHook(() =>
+        useCallControl({
+          currentTask: activeTask,
+          logger: mockLogger,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'agent1',
+        })
+      );
+      const target = result.current.conferenceParticipantDropRoster?.participants[0];
+      if (!target) throw new Error('Expected Agent Drop target');
+      let requestPromise!: Promise<void>;
+
+      act(() => {
+        requestPromise = result.current.requestParticipantDrop(target);
+      });
+
+      activeTask = nextTask;
+      rerender();
+      expect(result.current.pendingParticipantDropId).toBeNull();
+
+      await act(async () => {
+        resolveDrop();
+        await requestPromise;
+      });
+
+      expect(result.current.participantDropAnnouncement).toBeNull();
+    });
+
+    it('suppresses completion feedback when the current task terminates', async () => {
+      let resolveDrop!: () => void;
+      const dropRequest = jest.fn(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveDrop = resolve;
+          })
+      );
+      const task = createParticipantDropTask(dropRequest);
+      const {result, rerender} = renderHook(() =>
+        useCallControl({
+          currentTask: task,
+          logger: mockLogger,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'agent1',
+        })
+      );
+      const target = result.current.conferenceParticipantDropRoster?.participants[0];
+      if (!target) throw new Error('Expected Agent Drop target');
+      let requestPromise!: Promise<void>;
+
+      act(() => {
+        requestPromise = result.current.requestParticipantDrop(target);
+      });
+
+      task.data.interaction.isTerminated = true;
+      rerender();
+
+      await act(async () => {
+        resolveDrop();
+        await requestPromise;
+      });
+
+      expect(result.current.pendingParticipantDropId).toBeNull();
+      expect(result.current.participantDropAnnouncement).toBeNull();
     });
   });
 

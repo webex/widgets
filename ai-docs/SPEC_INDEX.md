@@ -9,13 +9,13 @@
 ## Module Registry
 | Module | Responsibility | Manifest coverage state | Start here |
 |---|---|---|---|
-| `store/` | MobX singleton; global CC state; SDK event proxy; pure conference Drop roster derivation | DRAFT | `packages/contact-center/store/ai-docs/store-spec.md` |
-| `cc-components/` | Shared presentational React UI primitives, including the CallControlCAD Drop experience | DRAFT | `packages/contact-center/cc-components/ai-docs/cc-components-spec.md` |
-| `cc-widgets/` | r2wc Web Component wrappers; existing CallControlCAD wrapper inherits Drop behavior | DRAFT | `packages/contact-center/cc-widgets/ai-docs/cc-widgets-spec.md` |
+| `store/` | MobX singleton; global CC state; proxies SDK events; sole SDK access point | DRAFT | `packages/contact-center/store/ai-docs/store-spec.md` |
+| `cc-components/` | Shared presentational React UI primitives | DRAFT | `packages/contact-center/cc-components/ai-docs/cc-components-spec.md` |
+| `cc-widgets/` | r2wc Web Component wrappers (aggregator) | DRAFT | `packages/contact-center/cc-widgets/ai-docs/cc-widgets-spec.md` |
 | `cc-digital-channels/` | Digital channels (chat/email/social) widget | DRAFT | `packages/contact-center/cc-digital-channels/ai-docs/cc-digital-channels-spec.md` |
 | `station-login/` | Agent login: team + device selection | DRAFT | `packages/contact-center/station-login/ai-docs/station-login-spec.md` |
 | `user-state/` | Agent state: state, idle codes, timer | DRAFT | `packages/contact-center/user-state/ai-docs/user-state-spec.md` |
-| `task/` | Task widget bundle; CallControlCAD owns participant Drop orchestration | DRAFT | `packages/contact-center/task/ai-docs/task-spec.md` |
+| `task/` | Task widget bundle: CallControl, IncomingTask, OutdialCall, TaskList, CallControlCAD | DRAFT | `packages/contact-center/task/ai-docs/task-spec.md` |
 | `ai-assistant/` | AI Assistant widget: chrome + Real-time Assist requests, transcript, feedback | DRAFT | `packages/contact-center/ai-assistant/ai-docs/ai-assistant-spec.md` |
 | `ui-logging/` | Metrics/telemetry: `withMetrics`, `metricsLogger` | DRAFT | `packages/contact-center/ui-logging/ai-docs/ui-logging-spec.md` |
 | `test-fixtures/` | Shared test mocks/helpers | DRAFT | `packages/contact-center/test-fixtures/ai-docs/test-fixtures-spec.md` |

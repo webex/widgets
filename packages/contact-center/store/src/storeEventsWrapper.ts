@@ -346,6 +346,10 @@ class StoreWrapper implements IStoreWrapper {
     });
   };
 
+  /**
+   * Terminal task events are emitted before the SDK removes the task from its collection.
+   * Defer and coalesce that authoritative read so ended calls disappear without a page refresh.
+   */
   private scheduleTaskListRefresh = (): void => {
     if (this.taskListRefreshScheduled) {
       return;

@@ -806,6 +806,35 @@ describe('getConferenceParticipantDropRoster', () => {
     expect(getConferenceParticipantDropRoster(task, currentAgentId)?.isDropDisabled).toBe(true);
   });
 
+  it('uses main.endConsult to expose the current EP-DN consult and gate Drop until it is held', () => {
+    const task = createDropRosterTask({state: 'conference', consultHold: false});
+    task.data.consultMediaResourceId = 'consult';
+    task.data.destinationType = 'entryPoint';
+    task.data.interaction.media.consult.participants = ['agent1', 'entry-point-route'];
+    task.data.interaction.participants['entry-point-route'] = {
+      ...activeParticipant('+15550000009', 'entry-point-id', 'EP-DN'),
+      type: 'EpDn',
+      dn: '+15550000009',
+      hasJoined: false,
+    };
+    task.uiControls.consult.endConsult = {isVisible: false, isEnabled: false};
+    task.uiControls.main.endConsult = {isVisible: true, isEnabled: true};
+
+    const activeConsultRoster = getConferenceParticipantDropRoster(task, currentAgentId);
+
+    expect(activeConsultRoster?.participants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({dropTargetId: 'agent2', isDropDisabled: false}),
+        expect.objectContaining({dropTargetId: '+15550000009', isDropDisabled: true}),
+      ])
+    );
+    expect(activeConsultRoster?.isDropDisabled).toBe(true);
+
+    task.data.interaction.media.consult.isHold = true;
+
+    expect(getConferenceParticipantDropRoster(task, currentAgentId)?.isDropDisabled).toBe(false);
+  });
+
   it('returns null outside an eligible telephony main call', () => {
     const task = createDropRosterTask();
     task.data.interaction.mediaType = 'chat';

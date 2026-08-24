@@ -16,6 +16,7 @@ import {
   TargetType,
   TARGET_TYPE,
   ParticipantDropAnnouncement,
+  PendingParticipantDropRequest,
 } from './task.types';
 import store, {
   TASK_EVENTS,
@@ -47,12 +48,43 @@ const ENGAGED_USERNAME = 'Engaged';
 const PARTICIPANT_DROP_SUCCESS_MESSAGE = 'Participant removed from the conference.';
 const PARTICIPANT_DROP_FAILURE_MESSAGE = 'Unable to drop participant from the call. Try again.';
 
-type PendingParticipantDropRequest = {
-  token: symbol;
-  taskId: string;
-  task: ITask;
-  dropTargetId: string;
+const getLatestEligibleParticipantDropTarget = (
+  task: ITask,
+  agentId: string,
+  target: ConferenceParticipantDropTarget
+): ConferenceParticipantDropTarget | null => {
+  const latestRoster = getConferenceParticipantDropRoster(task, agentId);
+  const latestTarget = [latestRoster?.customer, ...(latestRoster?.participants ?? [])].find(
+    (candidate) =>
+      candidate?.dropTargetId === target.dropTargetId && candidate.participantType === target.participantType
+  );
+
+  if (
+    !latestRoster ||
+    !latestTarget ||
+    latestTarget.isReadOnly ||
+    latestTarget.isDropDisabled ||
+    latestRoster.isDropDisabled
+  ) {
+    return null;
+  }
+
+  return latestTarget;
 };
+
+const isCurrentParticipantDropRequest = (
+  request: PendingParticipantDropRequest,
+  pendingRequest: PendingParticipantDropRequest | null,
+  task: ITask | undefined,
+  agentId: string | undefined
+): boolean =>
+  Boolean(
+    pendingRequest?.token === request.token &&
+      task?.data?.interactionId === request.taskId &&
+      agentId === request.agentId &&
+      task.data.interaction.owner === request.agentId &&
+      !task.data.interaction.isTerminated
+  );
 
 const getTranscriptSpeaker = (role?: string): string => {
   const normalizedRole = role?.toUpperCase();
@@ -392,6 +424,8 @@ export const useCallControl = (props: useCallControlProps) => {
   const [participantDropAnnouncement, setParticipantDropAnnouncement] = useState<ParticipantDropAnnouncement | null>(
     null
   );
+  const [participantDropConfirmationTarget, setParticipantDropConfirmationTarget] =
+    useState<ConferenceParticipantDropTarget | null>(null);
   const pendingParticipantDropRef = useRef<PendingParticipantDropRequest | null>(null);
   const participantDropTaskRef = useRef(currentTask);
   const participantDropAgentIdRef = useRef(agentId);
@@ -403,6 +437,18 @@ export const useCallControl = (props: useCallControlProps) => {
   const conferenceParticipantDropRoster =
     currentTask && agentId ? getConferenceParticipantDropRoster(currentTask, agentId) : null;
   const participantDropTaskId = currentTask?.data?.interactionId;
+  const latestParticipantDropConfirmationTarget =
+    participantDropConfirmationTarget &&
+    conferenceParticipantDropRoster?.customer?.dropTargetId === participantDropConfirmationTarget.dropTargetId
+      ? conferenceParticipantDropRoster.customer
+      : null;
+  const participantDropConfirmationDisabled = Boolean(
+    pendingParticipantDropId ||
+      conferenceParticipantDropRoster?.isDropDisabled ||
+      !latestParticipantDropConfirmationTarget ||
+      latestParticipantDropConfirmationTarget.isReadOnly ||
+      latestParticipantDropConfirmationTarget.isDropDisabled
+  );
 
   // Subscribe to SDK-computed UI control updates
   useEffect(() => {
@@ -474,13 +520,20 @@ export const useCallControl = (props: useCallControlProps) => {
   useEffect(() => {
     const pendingRequest = pendingParticipantDropRef.current;
 
-    if (pendingRequest && (pendingRequest.taskId !== participantDropTaskId || pendingRequest.task !== currentTask)) {
+    if (pendingRequest && (pendingRequest.taskId !== participantDropTaskId || pendingRequest.agentId !== agentId)) {
       pendingParticipantDropRef.current = null;
     }
 
     setPendingParticipantDropId(null);
     setParticipantDropAnnouncement(null);
-  }, [currentTask, participantDropTaskId]);
+    setParticipantDropConfirmationTarget(null);
+  }, [participantDropTaskId, agentId]);
+
+  useEffect(() => {
+    if (participantDropConfirmationTarget && !latestParticipantDropConfirmationTarget) {
+      setParticipantDropConfirmationTarget(null);
+    }
+  }, [participantDropConfirmationTarget, latestParticipantDropConfirmationTarget]);
   // Function to extract consulting agent information
   const extractConsultingAgent = useCallback(() => {
     try {
@@ -842,7 +895,7 @@ export const useCallControl = (props: useCallControlProps) => {
     }
   };
 
-  const dropConferenceParticipant = useCallback(
+  const executeParticipantDrop = useCallback(
     async (target: ConferenceParticipantDropTarget): Promise<void> => {
       const task = participantDropTaskRef.current;
       const currentAgentId = participantDropAgentIdRef.current;
@@ -851,19 +904,9 @@ export const useCallControl = (props: useCallControlProps) => {
         return;
       }
 
-      const latestRoster = getConferenceParticipantDropRoster(task, currentAgentId);
-      const latestTarget = [latestRoster?.customer, ...(latestRoster?.participants ?? [])].find(
-        (candidate) =>
-          candidate?.dropTargetId === target.dropTargetId && candidate.participantType === target.participantType
-      );
+      const latestTarget = getLatestEligibleParticipantDropTarget(task, currentAgentId, target);
 
-      if (
-        !latestRoster ||
-        !latestTarget ||
-        latestTarget.isReadOnly ||
-        latestTarget.isDropDisabled ||
-        latestRoster.isDropDisabled
-      ) {
+      if (!latestTarget) {
         return;
       }
 
@@ -871,7 +914,7 @@ export const useCallControl = (props: useCallControlProps) => {
       const request: PendingParticipantDropRequest = {
         token: Symbol('participant-drop-request'),
         taskId,
-        task,
+        agentId: currentAgentId,
         dropTargetId: latestTarget.dropTargetId,
       };
 
@@ -882,18 +925,26 @@ export const useCallControl = (props: useCallControlProps) => {
       try {
         await task.dropConferenceParticipant({participantId: latestTarget.dropTargetId});
 
+        const latestTask = participantDropTaskRef.current;
         if (
-          pendingParticipantDropRef.current === request &&
-          participantDropTaskRef.current === request.task &&
-          participantDropTaskRef.current?.data?.interactionId === request.taskId
+          isCurrentParticipantDropRequest(
+            request,
+            pendingParticipantDropRef.current,
+            latestTask,
+            participantDropAgentIdRef.current
+          )
         ) {
           setParticipantDropAnnouncement({type: 'success', message: PARTICIPANT_DROP_SUCCESS_MESSAGE});
         }
       } catch {
+        const latestTask = participantDropTaskRef.current;
         if (
-          pendingParticipantDropRef.current === request &&
-          participantDropTaskRef.current === request.task &&
-          participantDropTaskRef.current?.data?.interactionId === request.taskId
+          isCurrentParticipantDropRequest(
+            request,
+            pendingParticipantDropRef.current,
+            latestTask,
+            participantDropAgentIdRef.current
+          )
         ) {
           const sanitizedError = new Error(PARTICIPANT_DROP_FAILURE_MESSAGE);
 
@@ -905,12 +956,12 @@ export const useCallControl = (props: useCallControlProps) => {
           store.onErrorCallback?.('CallControlCAD', sanitizedError);
         }
       } finally {
-        if (pendingParticipantDropRef.current === request) {
+        if (pendingParticipantDropRef.current?.token === request.token) {
           pendingParticipantDropRef.current = null;
 
           if (
-            participantDropTaskRef.current === request.task &&
-            participantDropTaskRef.current?.data?.interactionId === request.taskId
+            participantDropTaskRef.current?.data?.interactionId === request.taskId &&
+            participantDropAgentIdRef.current === request.agentId
           ) {
             setPendingParticipantDropId(null);
           }
@@ -919,6 +970,45 @@ export const useCallControl = (props: useCallControlProps) => {
     },
     [logger]
   );
+
+  const requestParticipantDrop = useCallback(
+    async (target: ConferenceParticipantDropTarget): Promise<void> => {
+      const task = participantDropTaskRef.current;
+      const currentAgentId = participantDropAgentIdRef.current;
+
+      if (!task || !currentAgentId || pendingParticipantDropRef.current) {
+        return;
+      }
+
+      const latestTarget = getLatestEligibleParticipantDropTarget(task, currentAgentId, target);
+      if (!latestTarget) {
+        return;
+      }
+
+      if (latestTarget.requiresConfirmation) {
+        setParticipantDropConfirmationTarget(latestTarget);
+        return;
+      }
+
+      await executeParticipantDrop(latestTarget);
+    },
+    [executeParticipantDrop]
+  );
+
+  const confirmParticipantDrop = useCallback(async (): Promise<void> => {
+    const target = latestParticipantDropConfirmationTarget;
+
+    if (!target || participantDropConfirmationDisabled) {
+      return;
+    }
+
+    setParticipantDropConfirmationTarget(null);
+    await executeParticipantDrop(target);
+  }, [executeParticipantDrop, latestParticipantDropConfirmationTarget, participantDropConfirmationDisabled]);
+
+  const cancelParticipantDropConfirmation = useCallback((): void => {
+    setParticipantDropConfirmationTarget(null);
+  }, []);
 
   const toggleMute = async () => {
     try {
@@ -1371,7 +1461,11 @@ export const useCallControl = (props: useCallControlProps) => {
     conferenceParticipantDropRoster,
     pendingParticipantDropId,
     participantDropAnnouncement,
-    dropConferenceParticipant,
+    participantDropConfirmationTarget: latestParticipantDropConfirmationTarget,
+    participantDropConfirmationDisabled,
+    requestParticipantDrop,
+    confirmParticipantDrop,
+    cancelParticipantDropConfirmation,
     getAddressBookEntries,
     getEntryPoints,
     getQueuesFetcher,

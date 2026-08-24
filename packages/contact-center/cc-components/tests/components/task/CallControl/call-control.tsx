@@ -166,7 +166,7 @@ describe('CallControlComponent', () => {
         <CallControlComponent
           {...defaultProps}
           conferenceParticipantDropRoster={{customer: null, participants: [], isDropDisabled: false}}
-          dropConferenceParticipant={jest.fn()}
+          requestParticipantDrop={jest.fn()}
         />
       );
 

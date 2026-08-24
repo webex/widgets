@@ -146,7 +146,7 @@
   min-height: 1.5rem;
   width: max-content;
   white-space: nowrap;
-  border-radius: 999px;
+  border-radius: 62.4375rem;
   background: transparent !important;
   border: 1px solid var(--mds-color-theme-outline-secondary-normal) !important;
   color: var(--mds-color-theme-text-secondary-normal);
@@ -310,17 +310,17 @@
 }
 
 .participants-popover {
-  background: var(--mds-color-theme-background-solid-primary-normal, #ffffff) !important;
+  background: var(--mds-color-theme-background-solid-primary-normal) !important;
   align-items: normal;
   width: 100%;
   padding: 0 !important;
-  border: var(--mds-color-theme-outline-secondary-normal);
+  border: 0.0625rem solid var(--mds-color-theme-outline-secondary-normal);
 
   &::part(popover-content) {
-    background: var(--mds-color-theme-background-solid-primary-normal, #ffffff);
+    background: var(--mds-color-theme-background-solid-primary-normal);
     border-radius: 0.75rem;
     border: 1px solid var(--mds-color-theme-outline-secondary-normal);
-    box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.08);
+    box-shadow: var(--md-globals-elevation-2);
     padding: 0;
     width: 16.125rem; /* 258px */
     overflow: hidden;
@@ -359,7 +359,7 @@
     gap: 0.5rem;
     padding: 0.5rem 0.25rem;
     font-size: 0.875rem;
-    color: var(--mds-color-theme-text-primary-normal, #000000f2);
+    color: var(--mds-color-theme-text-primary-normal);
     border-radius: 0.5rem;
     min-width: 0;
     max-width: 100%;
@@ -411,7 +411,7 @@
   padding: 1.5rem;
 
   &::backdrop {
-    background: var(--mds-color-theme-background-overlay, rgb(0 0 0 / 45%));
+    background: var(--mds-color-theme-background-overlay);
   }
 
   h2,

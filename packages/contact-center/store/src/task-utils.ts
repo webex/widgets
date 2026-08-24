@@ -172,6 +172,16 @@ const participantHasType = (participant: RosterParticipant, participantType: str
 const hasVisibleControls = (controls: ITask['uiControls']['consult'] | undefined): boolean =>
   Boolean(controls && Object.values(controls).some((control) => control?.isVisible));
 
+const hasActiveConsultSignal = (task: ITask): boolean => {
+  const interactionState = task?.data?.interaction?.state?.toLowerCase();
+
+  return Boolean(
+    hasVisibleControls(task?.uiControls?.consult) ||
+      task?.uiControls?.main?.endConsult?.isVisible ||
+      ['consult', 'consulting'].includes(interactionState)
+  );
+};
+
 const isViewingAgentActiveOnMainLeg = (task: ITask, mainParticipantIds: string[], agentId: string): boolean => {
   const participants = task?.data?.interaction?.participants ?? {};
   return mainParticipantIds.some((participantId) => {
@@ -303,11 +313,8 @@ const selectCurrentConsultMediaEntry = (
 const getCurrentConsultMediaEntry = (task: ITask) => {
   const taskWithSnapshot = task as TaskWithStateSnapshot;
   const snapshotTaskData = taskWithSnapshot.state?.context?.taskData;
-  const interactionState = task?.data?.interaction?.state?.toLowerCase();
-  const consultIsActive =
-    hasVisibleControls(task?.uiControls?.consult) || ['consult', 'consulting'].includes(interactionState);
 
-  if (!consultIsActive) {
+  if (!hasActiveConsultSignal(task)) {
     return undefined;
   }
 
@@ -320,16 +327,11 @@ const getCurrentConsultMediaEntry = (task: ITask) => {
 };
 
 const hasActiveNonHeldConsult = (task: ITask): boolean => {
-  const interaction = task?.data?.interaction;
-  const consultMediaResourceId = findMediaResourceId(task, 'consult');
-  const consultMedia = consultMediaResourceId ? interaction?.media?.[consultMediaResourceId] : undefined;
-  const interactionState = interaction?.state?.toLowerCase();
-  const consultIsActive =
-    hasVisibleControls(task?.uiControls?.consult) || ['consult', 'consulting'].includes(interactionState);
+  const consultMedia = getCurrentConsultMediaEntry(task)?.media;
 
   // Treat an active consult without a hydrated media leg conservatively as non-held.
   // Drop becomes available again once the SDK explicitly reports that consult leg held.
-  return Boolean(consultIsActive && consultMedia?.isHold !== true);
+  return Boolean(hasActiveConsultSignal(task) && consultMedia?.isHold !== true);
 };
 
 const getCustomerDropTargetId = (task: ITask): string => {

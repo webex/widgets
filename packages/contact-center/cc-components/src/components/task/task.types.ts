@@ -513,8 +513,20 @@ export interface ControlProps {
   /** Generic screen-reader and visible feedback for the most recent Drop request. */
   participantDropAnnouncement: ParticipantDropAnnouncement | null;
 
-  /** Requests removal of one currently eligible conference participant. */
-  dropConferenceParticipant: (target: ConferenceParticipantDropTarget) => Promise<void>;
+  /** Customer target currently awaiting explicit confirmation. */
+  participantDropConfirmationTarget: ConferenceParticipantDropTarget | null;
+
+  /** Whether the current Customer confirmation action is unavailable. */
+  participantDropConfirmationDisabled: boolean;
+
+  /** Validates a Drop target, opening confirmation for Customer or invoking Drop immediately. */
+  requestParticipantDrop: (target: ConferenceParticipantDropTarget) => Promise<void>;
+
+  /** Confirms and invokes the currently selected Customer Drop. */
+  confirmParticipantDrop: () => Promise<void>;
+
+  /** Cancels the currently selected Customer Drop. */
+  cancelParticipantDropConfirmation: () => void;
 
   /** Fetch paginated address book entries for dial numbers */
   getAddressBookEntries?: FetchPaginatedList<AddressBookEntry>;
@@ -591,7 +603,11 @@ export type CallControlComponentProps = Pick<
       | 'conferenceParticipantDropRoster'
       | 'pendingParticipantDropId'
       | 'participantDropAnnouncement'
-      | 'dropConferenceParticipant'
+      | 'participantDropConfirmationTarget'
+      | 'participantDropConfirmationDisabled'
+      | 'requestParticipantDrop'
+      | 'confirmParticipantDrop'
+      | 'cancelParticipantDropConfirmation'
     >
   > & {
     /**

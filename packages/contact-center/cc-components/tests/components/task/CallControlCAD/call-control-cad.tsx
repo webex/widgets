@@ -464,27 +464,40 @@ describe('CallControlCADComponent', () => {
 
   describe('conference participant Drop', () => {
     const renderRoster = (overrides: Partial<CallControlComponentProps> = {}) => {
-      const dropConferenceParticipant = jest.fn().mockResolvedValue(undefined);
-      const screen = render(
-        <CallControlCADComponent
-          {...defaultProps}
-          controls={createEnabledMainTaskUIControls({exitConference: {isVisible: true, isEnabled: true}})}
-          conferenceParticipants={[{id: 'agent-2', name: 'Agent Two', pType: 'Agent'}]}
-          conferenceParticipantDropRoster={ownerDropRoster}
-          pendingParticipantDropId={null}
-          participantDropAnnouncement={null}
-          dropConferenceParticipant={dropConferenceParticipant}
-          {...overrides}
-        />
-      );
+      const requestParticipantDrop = jest.fn().mockResolvedValue(undefined);
+      const confirmParticipantDrop = jest.fn().mockResolvedValue(undefined);
+      const cancelParticipantDropConfirmation = jest.fn();
+      const renderProps = (nextOverrides: Partial<CallControlComponentProps> = {}) => ({
+        ...defaultProps,
+        controls: createEnabledMainTaskUIControls({exitConference: {isVisible: true, isEnabled: true}}),
+        conferenceParticipants: [{id: 'agent-2', name: 'Agent Two', pType: 'Agent'}],
+        conferenceParticipantDropRoster: ownerDropRoster,
+        pendingParticipantDropId: null,
+        participantDropAnnouncement: null,
+        participantDropConfirmationTarget: null,
+        participantDropConfirmationDisabled: false,
+        requestParticipantDrop,
+        confirmParticipantDrop,
+        cancelParticipantDropConfirmation,
+        ...overrides,
+        ...nextOverrides,
+      });
+      const screen = render(<CallControlCADComponent {...renderProps()} />);
 
       fireEvent.click(screen.getByTestId('call-control:participants-trigger'));
 
-      return {screen, dropConferenceParticipant};
+      return {
+        screen,
+        requestParticipantDrop,
+        confirmParticipantDrop,
+        cancelParticipantDropConfirmation,
+        rerenderRoster: (nextOverrides: Partial<CallControlComponentProps>) =>
+          screen.rerender(<CallControlCADComponent {...renderProps(nextOverrides)} />),
+      };
     };
 
     it('renders Customer and Participants sections and immediately drops an Agent target', () => {
-      const {screen, dropConferenceParticipant} = renderRoster();
+      const {screen, requestParticipantDrop} = renderRoster();
       const participantsTrigger = screen.getByTestId('call-control:participants-trigger');
 
       expect(participantsTrigger).toHaveAttribute('postfix-icon', 'arrow-down-bold');
@@ -495,7 +508,7 @@ describe('CallControlCADComponent', () => {
 
       fireEvent.click(screen.getByRole('button', {name: 'Drop agent Agent Two'}));
 
-      expect(dropConferenceParticipant).toHaveBeenCalledWith(ownerDropRoster.participants[0]);
+      expect(requestParticipantDrop).toHaveBeenCalledWith(ownerDropRoster.participants[0]);
     });
 
     it('keeps the Participants section when the Customer row is removed', () => {
@@ -535,11 +548,13 @@ describe('CallControlCADComponent', () => {
       expect(screen.getByRole('heading', {name: 'Participants'})).toBeInTheDocument();
     });
 
-    it('requires confirmation for Customer Drop and cancel restores focus without invoking the SDK callback', async () => {
-      const {screen, dropConferenceParticipant} = renderRoster();
+    it('requires confirmation for Customer Drop and cancel restores focus without confirming', async () => {
+      const {screen, requestParticipantDrop, cancelParticipantDropConfirmation, rerenderRoster} = renderRoster();
       const customerDropButton = screen.getByRole('button', {name: 'Drop customer +15551234567'});
 
       fireEvent.click(customerDropButton);
+      expect(requestParticipantDrop).toHaveBeenCalledWith(ownerDropRoster.customer);
+      rerenderRoster({participantDropConfirmationTarget: ownerDropRoster.customer});
 
       const dialog = screen.getByTestId('call-control:customer-drop-dialog');
       expect(dialog).toHaveAttribute('open');
@@ -547,23 +562,51 @@ describe('CallControlCADComponent', () => {
 
       fireEvent.click(screen.getByRole('button', {name: 'Cancel'}));
 
-      expect(dropConferenceParticipant).not.toHaveBeenCalled();
+      expect(cancelParticipantDropConfirmation).toHaveBeenCalledTimes(1);
       await waitFor(() => expect(customerDropButton).toHaveFocus());
     });
 
+    it('restores focus to the roster trigger when the confirmed Customer row disappears', async () => {
+      const {screen, rerenderRoster} = renderRoster();
+
+      fireEvent.click(screen.getByRole('button', {name: 'Drop customer +15551234567'}));
+      rerenderRoster({participantDropConfirmationTarget: ownerDropRoster.customer});
+      expect(screen.getByTestId('call-control:customer-drop-dialog')).toHaveAttribute('open');
+
+      rerenderRoster({
+        conferenceParticipantDropRoster: {...ownerDropRoster, customer: null},
+        participantDropConfirmationTarget: null,
+      });
+
+      await waitFor(() => expect(screen.getByTestId('call-control:participants-trigger')).toHaveFocus());
+    });
+
+    it('restores focus to a stable call control when the roster disappears after confirmation', async () => {
+      const {screen, rerenderRoster} = renderRoster();
+
+      fireEvent.click(screen.getByRole('button', {name: 'Drop customer +15551234567'}));
+      rerenderRoster({participantDropConfirmationTarget: ownerDropRoster.customer});
+      expect(screen.getByTestId('call-control:customer-drop-dialog')).toHaveAttribute('open');
+
+      rerenderRoster({conferenceParticipantDropRoster: null, participantDropConfirmationTarget: null});
+
+      await waitFor(() => expect(screen.getByTestId('call-control:end-call')).toHaveFocus());
+    });
+
     it('confirms Customer Drop and supports Escape cancellation', () => {
-      const {screen, dropConferenceParticipant} = renderRoster();
+      const {screen, confirmParticipantDrop, cancelParticipantDropConfirmation, rerenderRoster} = renderRoster();
       const customerDropButton = screen.getByRole('button', {name: 'Drop customer +15551234567'});
 
       fireEvent.click(customerDropButton);
+      rerenderRoster({participantDropConfirmationTarget: ownerDropRoster.customer});
       fireEvent.click(screen.getByRole('button', {name: 'Drop'}));
-      expect(dropConferenceParticipant).toHaveBeenCalledWith(ownerDropRoster.customer);
+      expect(confirmParticipantDrop).toHaveBeenCalledTimes(1);
 
-      dropConferenceParticipant.mockClear();
       fireEvent.click(customerDropButton);
+      rerenderRoster({participantDropConfirmationTarget: ownerDropRoster.customer});
       const dialog = screen.getByTestId('call-control:customer-drop-dialog');
       fireEvent(dialog, new Event('cancel', {cancelable: true}));
-      expect(dropConferenceParticipant).not.toHaveBeenCalled();
+      expect(cancelParticipantDropConfirmation).toHaveBeenCalledTimes(1);
     });
 
     it('globally disables Drop controls and shows loading only on the selected row', () => {
@@ -628,7 +671,7 @@ describe('CallControlCADComponent', () => {
         isDropDisabled: false,
         requiresConfirmation: false,
       };
-      const {screen, dropConferenceParticipant} = renderRoster({
+      const {screen, requestParticipantDrop} = renderRoster({
         conferenceParticipantDropRoster: {
           ...ownerDropRoster,
           participants: [...ownerDropRoster.participants, pendingEpDn, supervisor],
@@ -639,7 +682,7 @@ describe('CallControlCADComponent', () => {
       const pendingDrop = screen.getByRole('button', {name: 'Drop ep-dn +15551230000'});
       expect(pendingDrop).toBeDisabled();
       fireEvent.click(pendingDrop);
-      expect(dropConferenceParticipant).not.toHaveBeenCalled();
+      expect(requestParticipantDrop).not.toHaveBeenCalled();
     });
 
     it('renders an answered Entry Point agent as disabled until conference merge', () => {
@@ -652,7 +695,7 @@ describe('CallControlCADComponent', () => {
         isDropDisabled: true,
         requiresConfirmation: false,
       };
-      const {screen, dropConferenceParticipant} = renderRoster({
+      const {screen, requestParticipantDrop} = renderRoster({
         conferenceParticipantDropRoster: {
           customer: null,
           participants: [answeredEntryPointAgent],
@@ -665,7 +708,7 @@ describe('CallControlCADComponent', () => {
       const answeredAgentDrop = screen.getByRole('button', {name: 'Drop agent Support Agent'});
       expect(answeredAgentDrop).toBeDisabled();
       fireEvent.click(answeredAgentDrop);
-      expect(dropConferenceParticipant).not.toHaveBeenCalled();
+      expect(requestParticipantDrop).not.toHaveBeenCalled();
     });
 
     it('keeps generic live feedback mounted when the roster disappears', () => {

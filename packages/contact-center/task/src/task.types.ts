@@ -32,6 +32,13 @@ export type UseRealTimeTranscriptInternalProps = RealTimeTranscriptProps & {
   realtimeTranscriptionData?: Partial<RealTimeTranscriptionData>[];
 };
 
+export type PendingParticipantDropRequest = {
+  token: symbol;
+  taskId: string;
+  agentId: string;
+  dropTargetId: string;
+};
+
 export type CallControlProps = Partial<
   Pick<
     ControlProps,
