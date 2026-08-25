@@ -51,9 +51,6 @@ node_modules/
 .yarn/*
 !.yarn/releases
 
-# Local feature intake drafts (not for repo commit)
-packages/contact-center/ai-docs/features/thick-client-answer/intake.md
-
 # Playwright reports
 **/test-results/
 **/playwright-report
