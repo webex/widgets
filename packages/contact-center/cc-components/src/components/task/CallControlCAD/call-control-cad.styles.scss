@@ -112,57 +112,53 @@
 }
 
 .vertical-divider {
-  width: 0.0625rem;
   height: 0.875rem;
-  background-color: var(--mds-color-theme-outline-secondary-normal);
   margin: 0 0.5rem;
-  opacity: 0.7;
 }
 
 .participants-section {
   display: flex;
   align-items: center;
+  flex: 0 0 auto;
   gap: 0.25rem;
 }
 
-.participants-icon {
-  color: var(--mds-color-theme-text-primary-normal);
-}
-
-.participants-count {
-  font-size: 0.875rem;
-  color: var(--mds-color-theme-text-secondary-normal);
-  white-space: nowrap;
-  font-weight: 500;
-}
-
 .participants-select-button {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  padding: 0 0.4rem;
-  min-height: 1.5rem;
-  border-radius: 999px;
-  background: transparent !important;
-  border: 1px solid var(--mds-color-theme-outline-secondary-normal) !important;
-  color: var(--mds-color-theme-text-secondary-normal);
+  --mdc-button-background: var(--mds-color-theme-button-secondary-hover);
 
-  &:hover,
-  &.hover {
-    background: var(--mds-color-theme-background-secondary-hover) !important;
-  }
+  flex: 0 0 auto;
+  width: max-content;
+  white-space: nowrap;
 }
 
-.dropdown-arrow {
-  width: 0.75rem;
-  height: 0.75rem;
-  color: var(--mds-color-theme-text-secondary-normal);
-  margin-top: 0.0625rem;
+.participants-select-button:hover {
+  --mdc-button-background: var(--mds-color-theme-button-secondary-pressed);
+}
+
+.participants-select-button:active,
+.participants-select-button.pressed {
+  --mdc-button-background: var(--mds-color-theme-button-secondary-active-hover);
+}
+
+.participants-select-button::part(postfix-icon) {
   transition: transform 0.15s ease;
 }
 
-.participants-select-button[aria-expanded='true'] .dropdown-arrow {
+.participants-select-button[aria-expanded='true']::part(postfix-icon) {
   transform: rotate(180deg);
+}
+
+.participants-select-button[aria-expanded='true'] {
+  --mdc-button-background: var(--mds-color-theme-button-secondary-active-normal);
+}
+
+.participants-select-button[aria-expanded='true']:hover {
+  --mdc-button-background: var(--mds-color-theme-button-secondary-active-hover);
+}
+
+.participants-select-button[aria-expanded='true']:active,
+.participants-select-button[aria-expanded='true'].pressed {
+  --mdc-button-background: var(--mds-color-theme-button-secondary-active-pressed);
 }
 
 .call-status {
@@ -300,59 +296,63 @@
 }
 
 .participants-popover {
-  background: var(--mds-color-theme-background-solid-primary-normal, #ffffff) !important;
-  align-items: normal;
-  width: 100%;
-  padding: 0 !important;
-  border: var(--mds-color-theme-outline-secondary-normal);
-
-  &::part(popover-content) {
-    background: var(--mds-color-theme-background-solid-primary-normal, #ffffff);
-    border-radius: 0.75rem;
-    border: 1px solid var(--mds-color-theme-outline-secondary-normal);
-    box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.08);
-    padding: 0;
-    width: 16.125rem; /* 258px */
-    overflow: hidden;
-  }
+  --mdc-popover-width: 16.125rem;
+  --mdc-popover-max-height: 18rem;
 
   .participants-menu {
-    padding: 0.125rem;
-    max-height: 12.5rem;
-    min-width: 16.125rem;
-    max-width: 16.125rem;
+    max-height: 16.5rem;
     overflow-y: auto;
     overflow-x: hidden;
   }
 
-  .participant-menu-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.4rem 0.6rem;
-    font-size: 0.875rem;
-    cursor: pointer;
-    color: var(--mds-color-theme-text-primary-normal, #000000f2);
-    border-radius: 0.5rem;
-    min-width: 0;
-    max-width: 100%;
-    white-space: nowrap;
+  .participant-roster-heading {
+    margin: 0 0 0.25rem 0.25rem;
 
-    &:hover {
-      background-color: var(--mds-color-theme-background-secondary-hover);
-    }
-
-    &:focus-visible {
-      background-color: var(--mds-color-theme-background-secondary-normal);
-      outline: 0.0625rem solid var(--mds-color-theme-outline-input-focus);
-      outline-offset: -0.0625rem;
+    &::part(text) {
+      margin: 0;
     }
   }
 
-  .participant-menu-text {
-    flex: 1 1 auto;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  .participant-roster-list {
+    width: 100%;
+  }
+
+  .participant-menu-item {
+    --mdc-listitem-padding-left-right: 0.25rem;
+    --mdc-listitem-padding-top-bottom: 0.5rem;
+  }
+
+  .participant-roster-divider {
+    margin: 0.5rem 0;
+  }
+}
+
+.participant-drop-dialog-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+// Momentum Dialog defaults to absolute positioning. Keep this modal centered in the viewport
+// when CallControlCAD is rendered inside a relatively positioned or scrollable widget container.
+.participant-drop-dialog {
+  position: fixed;
+}
+
+.participant-drop-feedback {
+  margin-top: 0.5rem;
+
+  mdc-text::part(text) {
+    margin: 0;
+  }
+
+  .participant-drop-feedback-success {
+    color: var(--mds-color-theme-text-success-normal);
+  }
+
+  .participant-drop-feedback-error {
+    color: var(--mds-color-theme-text-error-normal);
   }
 }

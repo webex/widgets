@@ -93,6 +93,26 @@ exports[`CallControlCADComponent Snapshots should handle edge cases and control 
       </mdc-text>
     </div>
   </div>
+  <mdc-dialog
+    class="participant-drop-dialog"
+    data-testid="call-control:customer-drop-dialog"
+  >
+    <div
+      class="participant-drop-dialog-actions"
+      slot="footer"
+    >
+      <mdc-button
+        data-testid="call-control:customer-drop-cancel"
+      >
+        Cancel
+      </mdc-button>
+      <mdc-button
+        data-testid="call-control:customer-drop-confirm"
+      >
+        Drop
+      </mdc-button>
+    </div>
+  </mdc-dialog>
   <div
     class="call-control-consult-container custom-consult-control"
   >

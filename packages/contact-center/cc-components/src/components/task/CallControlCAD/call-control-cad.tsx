@@ -1,13 +1,27 @@
-import React, {useRef} from 'react';
+import React, {useEffect, useRef} from 'react';
 import CallControlComponent from '../CallControl/call-control';
-import {Text, PopoverNext} from '@momentum-ui/react-collaboration';
-import {Avatar, Brandvisual, Icon, Tooltip, Button} from '@momentum-design/components/dist/react';
+import {Text} from '@momentum-ui/react-collaboration';
+import {
+  Avatar,
+  Brandvisual,
+  Button,
+  Dialog,
+  Divider,
+  Icon,
+  List,
+  ListItem,
+  Popover,
+  Text as MomentumText,
+  Tooltip,
+} from '@momentum-design/components/dist/react';
 import './call-control-cad.styles.scss';
 import TaskTimer from '../TaskTimer/index';
 import CallControlConsultComponent from '../CallControl/CallControlCustom/call-control-consult';
 import {MEDIA_CHANNEL as MediaChannelType, CallControlComponentProps, CallAssociatedDataMap} from '../task.types';
+import {ConferenceParticipantDropTarget} from '@webex/cc-store';
 import {getAgentViewableGlobalVariables} from '../Task/task.utils';
 import GlobalVariablesPanel from '../GlobalVariablesPanel/global-variables-panel';
+import {ParticipantRosterSectionProps} from './call-control-cad.types';
 
 import {getMediaTypeInfo} from '../../../utils';
 import {
@@ -22,7 +36,65 @@ import {
   CAMPAIGN_CALL,
 } from '../constants';
 import {withMetrics} from '@webex/cc-ui-logging';
-import {isSecondaryAgent} from '@webex/cc-store';
+
+const ParticipantRosterSection: React.FC<ParticipantRosterSectionProps> = ({
+  heading,
+  headingId,
+  targets,
+  pendingParticipantDropId,
+  participantDropIsPending,
+  rosterDropDisabled,
+  onParticipantDropRequest,
+}) => (
+  <section className="participant-roster-section" aria-labelledby={headingId}>
+    <MomentumText className="participant-roster-heading" id={headingId} tagname="h4" type="body-midsize-bold">
+      {heading}
+    </MomentumText>
+    <List className="participant-roster-list" loop="false">
+      {targets.map((target) => {
+        const dropIsDisabled = target.isDropDisabled || participantDropIsPending || rosterDropDisabled;
+
+        return (
+          <ListItem
+            className="participant-menu-item"
+            key={`${target.participantType}-${target.dropTargetId}`}
+            variant="inset-rectangle"
+          >
+            <Icon
+              slot="leading-controls"
+              name={target.isPrimary ? 'primary-participant-regular' : 'meet-regular'}
+              size={1.125}
+              className="participant-menu-icon"
+            />
+            <MomentumText slot="leading-text-primary-label" tagname="span" type="body-midsize-regular">
+              {target.displayName}
+              {target.isPrimary ? ' (Primary)' : ''}
+            </MomentumText>
+            {!target.isReadOnly && (
+              <Button
+                slot="trailing-controls"
+                type="button"
+                size={24}
+                variant="secondary"
+                color="negative"
+                aria-label={`Drop ${target.participantType.toLowerCase()} ${target.displayName}`}
+                aria-busy={pendingParticipantDropId === target.dropTargetId}
+                disabled={dropIsDisabled}
+                onClick={() => {
+                  if (!dropIsDisabled) {
+                    onParticipantDropRequest(target);
+                  }
+                }}
+              >
+                {pendingParticipantDropId === target.dropTargetId ? 'Dropping…' : 'Drop'}
+              </Button>
+            )}
+          </ListItem>
+        );
+      })}
+    </List>
+  </section>
+);
 
 const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => {
   const {
@@ -46,7 +118,14 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
     logger,
     isMuted,
     toggleMute,
-    conferenceParticipants,
+    conferenceParticipantDropRoster = null,
+    pendingParticipantDropId = null,
+    participantDropAnnouncement = null,
+    participantDropConfirmationTarget = null,
+    participantDropConfirmationDisabled = true,
+    requestParticipantDrop = async () => undefined,
+    confirmParticipantDrop = async () => undefined,
+    cancelParticipantDropConfirmation = () => undefined,
     conferenceEnabled = true,
     isCampaignCall = false,
   } = props;
@@ -65,16 +144,17 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
   const mediaChannel = currentTask.data.interaction.mediaType as MediaChannelType;
   const isSocial = mediaChannel === MediaChannelType.SOCIAL;
   const isTelephony = mediaChannel === MediaChannelType.TELEPHONY;
-  const participantsCount = conferenceParticipants?.length || 1;
+  const participantsCount = conferenceParticipantDropRoster?.participants.length ?? 0;
   const participantsLabel = participantsCount === 1 ? 'Participant' : 'Participants';
-  const interactionState = currentTask?.data?.interaction?.state;
-  const isConferenceActive =
-    controls?.main?.exitConference?.isVisible ||
-    currentTask?.data?.isConferenceInProgress === true ||
-    interactionState === 'conference';
-  const isConsultOnlyAgent = isSecondaryAgent(currentTask);
-  const shouldShowParticipantsList =
-    isConferenceActive && !isConsultOnlyAgent && (conferenceParticipants?.length ?? 0) > 0;
+  const shouldShowParticipantsList = Boolean(conferenceParticipantDropRoster);
+  const participantMenuTriggerRef = useRef<HTMLElement | null>(null);
+  const callControlContainerRef = useRef<HTMLDivElement | null>(null);
+  const customerDropDialogWasOpenRef = useRef(false);
+  const participantPopoverRef = useRef<React.ElementRef<typeof Popover> | null>(null);
+  const participantDropIsPending = pendingParticipantDropId !== null;
+  const interactionId = currentTask.data.interaction.interactionId;
+  const participantsTriggerId = `participants-trigger-${interactionId}`;
+  const participantsPopoverId = `participants-popover-${interactionId}`;
 
   const customerName = currentTask?.data?.interaction?.callAssociatedDetails?.customerName;
 
@@ -96,7 +176,6 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
   // variables.  Variables are never cleared mid-call by the backend.
   // Reset when the interaction changes so stale CAD from a previous task
   // is never shown on a new call.
-  const interactionId = currentTask.data.interaction.interactionId;
   const globalVariablesRef = useRef(latestGlobalVariables);
   const prevInteractionIdRef = useRef(interactionId);
   if (prevInteractionIdRef.current !== interactionId) {
@@ -106,6 +185,43 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
     globalVariablesRef.current = latestGlobalVariables;
   }
   const globalVariables = globalVariablesRef.current;
+
+  const restoreCustomerDropFocusFallback = () => {
+    // Closing the roster before opening the Dialog makes its Customer button unavailable for
+    // focus restoration. Return focus to the stable participant trigger, or to end-call if
+    // hydration removed the entire roster while the confirmation was open.
+    participantPopoverRef.current?.hide();
+    globalThis.setTimeout(() => {
+      const participantMenuTrigger = participantMenuTriggerRef.current;
+      const stableCallControl = callControlContainerRef.current?.querySelector<HTMLElement>(
+        '[data-testid="call-control:end-call"]'
+      );
+
+      (participantMenuTrigger?.isConnected ? participantMenuTrigger : stableCallControl)?.focus();
+    }, 0);
+  };
+
+  useEffect(() => {
+    if (participantDropConfirmationTarget) {
+      customerDropDialogWasOpenRef.current = true;
+      return;
+    }
+
+    if (customerDropDialogWasOpenRef.current) {
+      customerDropDialogWasOpenRef.current = false;
+      restoreCustomerDropFocusFallback();
+    }
+  }, [participantDropConfirmationTarget]);
+
+  const handleParticipantDropRequest = (target: ConferenceParticipantDropTarget) => {
+    if (target.requiresConfirmation) {
+      // Avoid stacking two focus-trapped Momentum overlays. The customer confirmation dialog
+      // becomes the only active overlay and returns focus to the stable participant trigger.
+      participantPopoverRef.current?.hide();
+    }
+
+    void requestParticipantDrop(target);
+  };
 
   // Create unique IDs for tooltips
   const customerNameTriggerId = `customer-name-trigger-${currentTask.data.interaction.interactionId}`;
@@ -199,7 +315,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
 
   return (
     <>
-      <div className={`call-control-container ${callControlClassName || ''}`}>
+      <div ref={callControlContainerRef} className={`call-control-container ${callControlClassName || ''}`}>
         {/* Caller Information */}
         <div className="caller-info">
           <div className="call-icon-background">
@@ -226,51 +342,73 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
                     </>
                   )}
                 </Text>
-                {shouldShowParticipantsList && !controls?.main?.wrapup?.isVisible && (
+                {shouldShowParticipantsList && (
                   <>
-                    <div className="vertical-divider"></div>
+                    <Divider className="vertical-divider" orientation="vertical" />
                     <div className="participants-section">
-                      <PopoverNext
-                        color="secondary"
-                        delay={[0, 0]}
-                        placement="bottom-end"
-                        showArrow={false}
+                      <Button
+                        ref={(element) => {
+                          participantMenuTriggerRef.current = element as HTMLElement | null;
+                        }}
+                        id={participantsTriggerId}
+                        aria-label="Conference participants"
+                        data-testid="call-control:participants-trigger"
+                        className="participants-select-button"
+                        color="default"
+                        variant="tertiary"
+                        size={24}
+                        postfix-icon="arrow-down-bold"
+                      >
+                        +{participantsCount} {participantsLabel}
+                      </Button>
+                      <Popover
+                        ref={participantPopoverRef}
+                        id={participantsPopoverId}
+                        triggerID={participantsTriggerId}
                         trigger="click"
-                        variant="medium"
+                        placement="bottom-end"
+                        color="tonal"
+                        delay="0,0"
+                        offset={6}
+                        showArrow={false}
                         interactive
-                        offsetDistance={6}
+                        focusTrap
+                        hideOnEscape
+                        hideOnOutsideClick
+                        focusBackToTrigger
+                        ariaLabelledby={participantsTriggerId}
                         className="participants-popover"
-                        triggerComponent={
-                          <Button
-                            id="participants-trigger"
-                            aria-label="Select Participant"
-                            data-testid="call-control:participants-trigger"
-                            className="participants-select-button"
-                            color="default"
-                            variant="tertiary"
-                          >
-                            <Text type="body-secondary" tagName={'small'} className="participants-count">
-                              +{participantsCount} {participantsLabel}
-                            </Text>
-                            <Icon name="arrow-down-bold" className="dropdown-arrow" />
-                          </Button>
-                        }
+                        data-testid="call-control:participants-popover"
                       >
                         <div className="participants-menu">
-                          {conferenceParticipants?.map((participant) => (
-                            <div
-                              key={participant.id}
-                              className="participant-menu-item"
-                              role="menuitem"
-                              tabIndex={0}
-                              data-testid={`call-control:participant-${participant.name?.toLowerCase()}`}
-                            >
-                              <Icon name="meet-regular" size={1.125} className="participant-menu-icon" />
-                              <span className="participant-menu-text">{participant.name}</span>
-                            </div>
-                          ))}
+                          {conferenceParticipantDropRoster?.customer && (
+                            <ParticipantRosterSection
+                              heading="Customer"
+                              headingId={`${participantsPopoverId}-customer-heading`}
+                              targets={[conferenceParticipantDropRoster.customer]}
+                              pendingParticipantDropId={pendingParticipantDropId}
+                              participantDropIsPending={participantDropIsPending}
+                              rosterDropDisabled={Boolean(conferenceParticipantDropRoster.isDropDisabled)}
+                              onParticipantDropRequest={handleParticipantDropRequest}
+                            />
+                          )}
+                          {conferenceParticipantDropRoster?.customer &&
+                            conferenceParticipantDropRoster.participants.length > 0 && (
+                              <Divider className="participant-roster-divider" />
+                            )}
+                          {conferenceParticipantDropRoster?.participants.length ? (
+                            <ParticipantRosterSection
+                              heading="Participants"
+                              headingId={`${participantsPopoverId}-participants-heading`}
+                              targets={conferenceParticipantDropRoster.participants}
+                              pendingParticipantDropId={pendingParticipantDropId}
+                              participantDropIsPending={participantDropIsPending}
+                              rosterDropDisabled={Boolean(conferenceParticipantDropRoster.isDropDisabled)}
+                              onParticipantDropRequest={handleParticipantDropRequest}
+                            />
+                          ) : null}
                         </div>
-                      </PopoverNext>
+                      </Popover>
                     </div>
                   </>
                 )}
@@ -306,6 +444,74 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
         </div>
         <GlobalVariablesPanel variables={globalVariables} className="cad-global-variables" />
       </div>
+      <Dialog
+        className="participant-drop-dialog"
+        visible={Boolean(participantDropConfirmationTarget)}
+        size="small"
+        triggerID={
+          participantDropConfirmationTarget || customerDropDialogWasOpenRef.current ? participantsTriggerId : undefined
+        }
+        headerText="Drop customer from conference?"
+        descriptionText="The customer will be removed from this conference. The remaining participants can continue the call."
+        closeButtonAriaLabel="Cancel customer Drop"
+        data-testid="call-control:customer-drop-dialog"
+        onClose={cancelParticipantDropConfirmation}
+      >
+        <div slot="footer" className="participant-drop-dialog-actions">
+          <Button
+            type="button"
+            size={32}
+            variant="secondary"
+            color="default"
+            data-testid="call-control:customer-drop-cancel"
+            onClick={cancelParticipantDropConfirmation}
+          >
+            Cancel
+          </Button>
+          <Button
+            type="button"
+            size={32}
+            variant="primary"
+            color="negative"
+            disabled={participantDropConfirmationDisabled}
+            data-testid="call-control:customer-drop-confirm"
+            onClick={() => {
+              if (!participantDropConfirmationDisabled) {
+                void confirmParticipantDrop();
+              }
+            }}
+          >
+            Drop
+          </Button>
+        </div>
+      </Dialog>
+      {participantDropAnnouncement && (
+        <div className="participant-drop-feedback">
+          {participantDropAnnouncement.type === 'success' ? (
+            <MomentumText
+              tagname="p"
+              type="body-midsize-regular"
+              className="participant-drop-feedback-success"
+              role="status"
+              aria-live="polite"
+              data-testid="call-control:participant-drop-success"
+            >
+              {participantDropAnnouncement.message}
+            </MomentumText>
+          ) : (
+            <MomentumText
+              tagname="p"
+              type="body-midsize-regular"
+              className="participant-drop-feedback-error"
+              role="alert"
+              aria-live="assertive"
+              data-testid="call-control:participant-drop-error"
+            >
+              {participantDropAnnouncement.message}
+            </MomentumText>
+          )}
+        </div>
+      )}
       {(controls?.consult?.endConsult?.isVisible || controls?.main?.endConsult?.isVisible) &&
         !controls?.main?.wrapup?.isVisible && (
           <div className={`call-control-consult-container ${callControlConsultClassName || ''}`}>

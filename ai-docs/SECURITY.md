@@ -18,7 +18,7 @@ This repo is a client-side React/Web-Component widget library. It hosts no netwo
 
 ## Authentication & Authorization Model
 - **Authentication:** Owned by the host app and the Webex SDK, not this repo. The host supplies either a live `webex` instance or `{webexConfig, access_token}`; the store passes the token to `Webex.init({credentials: {access_token}})` and otherwise treats identity as opaque (`packages/contact-center/store/src/store.ts:144-151`). Token retrieval for downstream SDK features delegates to the SDK: `getAccessToken()` calls `webex.credentials.getUserToken()` (`packages/contact-center/store/src/storeEventsWrapper.ts:988-998`).
-- **Authorization:** Owned by the SDK / back end. The store surfaces the agent's capabilities as read-only feature flags derived from the SDK-provided `Profile` (`packages/contact-center/store/src/util.ts:3-36`); widgets use these only to show/hide UI. There is no access-decision logic enforced in this repo.
+- **Authorization:** Owned by the SDK / back end. The store surfaces the agent's capabilities as read-only feature flags derived from the SDK-provided `Profile` (`packages/contact-center/store/src/util.ts:3-36`); widgets use these only to show/hide UI. Participant Drop additionally hides actions unless `interaction.owner === currentAgentId`, but that client rule is not an authorization boundary; the backend must authorize every request.
 - **Default posture:** Widgets are inert until the host completes `Store.init()`; with no valid host-supplied session the SDK never initializes (`Webex.init` rejects after a 6s timeout — `packages/contact-center/store/src/store.ts:140-142`), so no agent data flows.
 
 ## Secret & Credential Handling
@@ -42,6 +42,7 @@ This repo is a client-side React/Web-Component widget library. It hosts no netwo
 |---|---|---|---|
 | `ui-logging` metrics props | Widget props are logged without sanitization — acknowledged in the `havePropsChanged` JSDoc `@remarks` (`metricsLogger.ts:73-76`) | Callers must not pass PII-bearing objects as metrics props; sanitization is noted as a future enhancement | cc-ui-logging maintainers |
 | `getAccessToken()` SDK gap | `webex.credentials.getUserToken()` is `@ts-expect-error`-typed (SDK API not yet typed) (`storeEventsWrapper.ts:990-992`) | Token value is returned to the caller and never logged; failures log only an error message | cc-store maintainers |
+| Participant Drop identity | Target IDs can be agent identifiers or customer ANI/DNIS and therefore may be sensitive | Derive in memory, pass only to `task.dropConferenceParticipant`, render through React text escaping, and log only static context plus generic feedback | cc-store / cc-task maintainers |
 
 ## Reporting & Review
 - Security-relevant changes (anything touching the store init/credential path, the `@webex/contact-center` SDK boundary, logging, or the public export/custom-element surface) require review by the package CODEOWNERS on the `next`-targeted PR, following `.github/PULL_REQUEST_TEMPLATE.md` (FedRAMP/GAI sections). Suspected vulnerabilities: report through the Webex internal security channel, not a public issue.
