@@ -10,6 +10,8 @@ import {
   EntryPointRecord,
   FetchPaginatedList,
   Participant,
+  ConferenceParticipantDropRoster,
+  ConferenceParticipantDropTarget,
   AddressBookEntrySearchParams,
   AddressBookEntriesResponse,
   TaskUIControls,
@@ -52,6 +54,11 @@ export const TARGET_TYPE = {
 } as const;
 
 export type TargetType = (typeof TARGET_TYPE)[keyof typeof TARGET_TYPE];
+
+export type ParticipantDropAnnouncement = {
+  type: 'success' | 'error';
+  message: string;
+};
 
 /**
  * Interface representing the TaskProps of a user.
@@ -513,6 +520,30 @@ export interface ControlProps {
    */
   conferenceParticipants: Participant[];
 
+  /** Owner-aware conference roster used by the CallControlCAD Drop menu. */
+  conferenceParticipantDropRoster: ConferenceParticipantDropRoster | null;
+
+  /** Drop target currently waiting for routing-event completion. */
+  pendingParticipantDropId: string | null;
+
+  /** Generic screen-reader and visible feedback for the most recent Drop request. */
+  participantDropAnnouncement: ParticipantDropAnnouncement | null;
+
+  /** Customer target currently awaiting explicit confirmation. */
+  participantDropConfirmationTarget: ConferenceParticipantDropTarget | null;
+
+  /** Whether the current Customer confirmation action is unavailable. */
+  participantDropConfirmationDisabled: boolean;
+
+  /** Validates a Drop target, opening confirmation for Customer or invoking Drop immediately. */
+  requestParticipantDrop: (target: ConferenceParticipantDropTarget) => Promise<void>;
+
+  /** Confirms and invokes the currently selected Customer Drop. */
+  confirmParticipantDrop: () => Promise<void>;
+
+  /** Cancels the currently selected Customer Drop. */
+  cancelParticipantDropConfirmation: () => void;
+
   /** Fetch paginated address book entries for dial numbers */
   getAddressBookEntries?: FetchPaginatedList<AddressBookEntry>;
 
@@ -592,24 +623,37 @@ export type CallControlComponentProps = Pick<
   | 'getQueuesFetcher'
   | 'consultTransferOptions'
   | 'conferenceEnabled'
-> & {
-  /**
-   * Whether the current task is an accepted campaign preview call.
-   * When `true`, the header renders the campaign icon and
-   * "Campaign call" label instead of the standard media type.
-   */
-  isCampaignCall?: boolean;
+> &
+  Partial<
+    Pick<
+      ControlProps,
+      | 'conferenceParticipantDropRoster'
+      | 'pendingParticipantDropId'
+      | 'participantDropAnnouncement'
+      | 'participantDropConfirmationTarget'
+      | 'participantDropConfirmationDisabled'
+      | 'requestParticipantDrop'
+      | 'confirmParticipantDrop'
+      | 'cancelParticipantDropConfirmation'
+    >
+  > & {
+    /**
+     * Whether the current task is an accepted campaign preview call.
+     * When `true`, the header renders the campaign icon and
+     * "Campaign call" label instead of the standard media type.
+     */
+    isCampaignCall?: boolean;
 
-  /**
-   * Host init flag for wxApp thick-client main-bar Mute/Keypad visibility gating only.
-   */
-  enableWxBetterTogether?: boolean;
+    /**
+     * Host init flag for wxApp thick-client main-bar Mute/Keypad visibility gating only.
+     */
+    enableWxBetterTogether?: boolean;
 
-  /**
-   * Logged-in agent device type for Extension-only ghost control suppression.
-   */
-  agentDeviceType?: string;
-};
+    /**
+     * Logged-in agent device type for Extension-only ghost control suppression.
+     */
+    agentDeviceType?: string;
+  };
 
 export type OutdialAniEntry = {
   /** Unique identifier for the ANI entry */

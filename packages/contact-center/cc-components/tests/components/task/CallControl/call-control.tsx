@@ -162,6 +162,18 @@ describe('CallControlComponent', () => {
     jest.restoreAllMocks();
   });
   describe('Rendering', () => {
+    it('does not render the CallControlCAD participant roster surface', () => {
+      const screen = render(
+        <CallControlComponent
+          {...defaultProps}
+          conferenceParticipantDropRoster={{customer: null, participants: [], isDropDisabled: false}}
+          requestParticipantDrop={jest.fn()}
+        />
+      );
+
+      expect(screen.queryByTestId('call-control:participants-trigger')).not.toBeInTheDocument();
+    });
+
     it('renders mute and hold buttons and responds to user interactions', async () => {
       const modifiedProps = {
         ...defaultProps,

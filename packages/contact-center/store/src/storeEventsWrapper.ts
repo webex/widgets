@@ -72,6 +72,7 @@ class StoreWrapper implements IStoreWrapper {
   onTaskSelected?: (task: ITask, isClicked: boolean) => void;
   onErrorCallback?: (widgetName: string, error: Error) => void;
   private realtimeTranscriptionListeners: Record<string, (payload: RealTimeTranscriptionEventPayload) => void> = {};
+  private taskListRefreshScheduled = false;
   // Keyed by interactionId; the task is tracked alongside the listener so a
   // replacement task object (task:hydrate / task:merged) gets rebound.
   private realTimeAssistListeners: Record<string, {task: ITask; listener: (payload: RealTimeAssistPayload) => void}> =
@@ -412,6 +413,22 @@ class StoreWrapper implements IStoreWrapper {
         }
         this.setCurrentTask(this.store.taskList[taskListKeys[0]]);
       }
+    });
+  };
+
+  /**
+   * Terminal task events are emitted before the SDK removes the task from its collection.
+   * Defer and coalesce that authoritative read so ended calls disappear without a page refresh.
+   */
+  private scheduleTaskListRefresh = (): void => {
+    if (this.taskListRefreshScheduled) {
+      return;
+    }
+
+    this.taskListRefreshScheduled = true;
+    queueMicrotask(() => {
+      this.taskListRefreshScheduled = false;
+      this.refreshTaskList();
     });
   };
 
@@ -876,8 +893,7 @@ class StoreWrapper implements IStoreWrapper {
   handleTaskEnd = () => {
     this.setIsDeclineButtonEnabled(false);
     this.setIsMuted(false);
-
-    this.refreshTaskList();
+    this.scheduleTaskListRefresh();
   };
 
   handleTaskAssigned = (event) => {
@@ -950,8 +966,8 @@ class StoreWrapper implements IStoreWrapper {
     this.setIsQueueConsultInProgress(false);
     this.setCurrentConsultQueueId(null);
     this.setLastConsultDestination(null);
-    this.refreshTaskList();
     this.setConsultStartTimeStamp(null);
+    this.scheduleTaskListRefresh();
   };
 
   handleConsultOffer = () => {

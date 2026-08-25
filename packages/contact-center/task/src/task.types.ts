@@ -4,6 +4,7 @@ import {
   OutdialCallProps,
   RealTimeTranscriptComponentProps,
   RealTimeTranscriptEntry,
+  ParticipantDropAnnouncement,
 } from '@webex/cc-components';
 import {RealTimeTranscriptionData} from '@webex/cc-store';
 
@@ -29,6 +30,13 @@ export type RealTimeTranscriptProps = Pick<RealTimeTranscriptComponentProps, 'li
 export type UseRealTimeTranscriptInternalProps = RealTimeTranscriptProps & {
   currentTaskId?: string;
   realtimeTranscriptionData?: Partial<RealTimeTranscriptionData>[];
+};
+
+export type PendingParticipantDropRequest = {
+  token: symbol;
+  taskId: string;
+  agentId: string;
+  dropTargetId: string;
 };
 
 export type CallControlProps = Partial<
@@ -62,7 +70,7 @@ export type useOutdialCallProps = Pick<OutdialCallProps, 'cc' | 'logger'>;
 // Re-exported from store — single source of truth.
 export {CAMPAIGN_PREVIEW_OUTBOUND_TYPES, CAMPAIGN_PREVIEW_CAMPAIGN_TYPES} from '@webex/cc-store';
 
-export type {RealTimeTranscriptEntry};
+export type {RealTimeTranscriptEntry, ParticipantDropAnnouncement};
 export interface OutdialProps {
   /**
    * Flag to determine if the address book is enabled.
