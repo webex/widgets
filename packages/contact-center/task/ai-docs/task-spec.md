@@ -27,8 +27,6 @@ Every generated requirement below must cite concrete source evidence using `file
 | `ai-docs/_archive/.../task/ai-docs/widgets/OutdialCall/AGENTS.md` + `ARCHITECTURE.md` | architecture / overview / API | reconciled | Outdial + ANI flow → Sequence Diagram(s); login-mode behavior → Use Cases / Pitfalls. |
 | `ai-docs/_archive/.../task/ai-docs/widgets/TaskList/AGENTS.md` + `ARCHITECTURE.md` | architecture / overview / API | reconciled | Task selection / accept / decline flow → Sequence Diagram(s). |
 | `packages/contact-center/ai-docs/migration/*.md` (7 files) | architecture (planned refactor) | reference-only | Describes a planned SDK `task.uiControls` migration that is NOT in current code. Used only to mark conflicts; current behavior documented as-is. |
-| `packages/contact-center/ai-docs/features/thick-client-answer/intake.md` | feature intake (WXCC-6026) | reference-only (implemented) | wxApp Answer/Decline/Mute + Mercury mute sync — see § Feature: Accept on Webex thick client |
-
 ## Overview
 `task` is the largest CC widget bundle: it exports six React/Web-Component widgets that together cover the full agent interaction lifecycle — being offered a task, accepting/declining it, controlling an active call (hold, mute, record, consult, transfer, conference, wrap-up), placing outbound calls, listing concurrent tasks, and rendering a live transcript. Each widget follows the repo-standard layering: a thin `observer()` widget wraps an `ErrorBoundary`, reads MobX state from `@webex/cc-store`, delegates business logic to a custom hook in `helper.ts`, and renders a presentational component from `@webex/cc-components`. The hook is the only place that touches the SDK (`task.*` / `store.cc.*`) and registers/unregisters store task-event callbacks.
 
@@ -89,8 +87,6 @@ Compatibility notes:
 
 ### Feature: Accept on Webex thick client (implemented — WXCC-6026)
 
-Canonical spec: [`intake.md`](../../ai-docs/features/thick-client-answer/intake.md).
-
 | Surface | Change |
 |---|---|
 | **Host init** | `webexConfig.cc.enableAnswerOnWebex: boolean` (default `false`) — set **before** `store.init()`; persisted on store for **UI visibility gating only** |
@@ -99,7 +95,7 @@ Canonical spec: [`intake.md`](../../ai-docs/features/thick-client-answer/intake.
 | **TaskList** | Inline Accept / Decline — same unified `task.accept()` / `task.decline()` as IncomingTask |
 | **wxapp-task.utils.ts** | UI visibility helpers only: `isWxAppEngagedCall`, `shouldShowWxAppTelephonyControls` |
 
-**SDK follow-up (uiControls):** SDK must enable `main.mute/keypad` through consult/hold/conference when wxApp engaged; BROWSER login ignores init flag for uiControls. See [intake.md §7.6–§7.7](../../ai-docs/features/thick-client-answer/intake.md).
+**SDK follow-up (uiControls):** SDK must enable `main.mute/keypad` through consult/hold/conference when wxApp engaged; BROWSER login ignores init flag for uiControls.
 
 **SDK scope:** telephony REST, uiControls, usersub publish, **Mercury mute sync** (`TASK_WXAPP_MUTE_STATE_UPDATED`).
 
