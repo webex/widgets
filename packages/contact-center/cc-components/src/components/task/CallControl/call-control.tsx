@@ -42,7 +42,7 @@ function CallControlComponent(props: CallControlComponentProps) {
     toggleHold,
     toggleRecording,
     toggleMute,
-    sendDtmf,
+    sendDtmf = () => undefined,
     isMuted,
     endCall,
     wrapupCall,
@@ -243,7 +243,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                     }
                   >
                     {showAgentMenu && agentMenuType === button.menuType && button.menuType === 'Keypad' ? (
-                      <CallControlDtmfKeypad onDigitPress={sendDtmf} logger={logger} />
+                      <CallControlDtmfKeypad onDigitPress={sendDtmf} logger={logger} disabled={button.disabled} />
                     ) : showAgentMenu && agentMenuType === button.menuType ? (
                       <ConsultTransferPopoverComponent
                         heading={button.menuType}

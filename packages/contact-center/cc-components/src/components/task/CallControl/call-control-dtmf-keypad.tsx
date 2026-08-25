@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useRef, useState} from 'react';
 import {Button, Input, Spinner} from '@momentum-design/components/dist/react';
 import {DIALPAD_BUTTONS, DTMF_KEYPAD_PLACEHOLDER} from '../OutdialCall/constants';
 import type {ILogger} from '@webex/cc-store';
@@ -9,28 +9,38 @@ const DTMF_INPUT_SANITIZE = /[^0-9*#]/g;
 export type CallControlDtmfKeypadProps = {
   onDigitPress: (digit: string) => void | Promise<void>;
   logger?: ILogger;
+  disabled?: boolean;
 };
 
 /**
  * In-call DTMF keypad for wxApp telephony sessions (Extension login).
  * Each key press sends a single tone via SDK task.transmitDtmf().
  */
-const CallControlDtmfKeypad: React.FunctionComponent<CallControlDtmfKeypadProps> = ({onDigitPress, logger}) => {
+const CallControlDtmfKeypad: React.FunctionComponent<CallControlDtmfKeypadProps> = ({
+  onDigitPress,
+  logger,
+  disabled = false,
+}) => {
   const [dialNumber, setDialNumber] = useState('');
-  const [showSpinner, setShowSpinner] = useState(false);
+  const [pendingCount, setPendingCount] = useState(0);
+  const transmissionQueueRef = useRef<Promise<void>>(Promise.resolve());
 
-  const transmitDigit = async (digit: string) => {
+  const transmitDigit = (digit: string) => {
+    if (disabled) return;
+
     setDialNumber((prev) => prev + digit);
     logger?.info(`CC-Widgets: CallControl: DTMF digit pressed`, {
       module: 'call-control-dtmf-keypad.tsx',
       method: 'transmitDigit',
     });
-    setShowSpinner(true);
-    try {
-      await onDigitPress(digit);
-    } finally {
-      setShowSpinner(false);
-    }
+
+    setPendingCount((count) => count + 1);
+    transmissionQueueRef.current = transmissionQueueRef.current
+      .then(() => onDigitPress(digit))
+      .catch(() => undefined)
+      .finally(() => {
+        setPendingCount((count) => Math.max(0, count - 1));
+      });
   };
 
   const handleInputChange = (e: unknown) => {
@@ -39,12 +49,13 @@ const CallControlDtmfKeypad: React.FunctionComponent<CallControlDtmfKeypadProps>
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (disabled) return;
     if (e.key === 'Backspace' || e.key === 'Delete') {
       return;
     }
     if (DTMF_DIGIT_PATTERN.test(e.key)) {
       e.preventDefault();
-      void transmitDigit(e.key);
+      transmitDigit(e.key);
     }
   };
 
@@ -61,8 +72,9 @@ const CallControlDtmfKeypad: React.FunctionComponent<CallControlDtmfKeypadProps>
           onInput={handleInputChange}
           onKeyDown={handleKeyDown}
           aria-label={DTMF_KEYPAD_PLACEHOLDER}
+          disabled={disabled}
         />
-        {showSpinner && (
+        {pendingCount > 0 && (
           <Spinner className="call-control-dtmf-spinner" size="small" data-testid="call-control-keypad-spinner" />
         )}
       </div>
@@ -71,8 +83,9 @@ const CallControlDtmfKeypad: React.FunctionComponent<CallControlDtmfKeypadProps>
           <li key={val}>
             <Button
               className="call-control-dtmf-key"
-              onClick={() => void transmitDigit(val)}
+              onClick={() => transmitDigit(val)}
               aria-label={`DTMF ${val}`}
+              disabled={disabled}
             >
               <span className="call-control-dtmf-key-content">
                 <span className="call-control-dtmf-key-digit">{val}</span>

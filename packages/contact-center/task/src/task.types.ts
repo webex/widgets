@@ -63,7 +63,9 @@ export type useCallControlProps = Pick<
       ControlProps,
       'onHoldResume' | 'onEnd' | 'onWrapUp' | 'onRecordingToggle' | 'onToggleMute' | 'enableWxBetterTogether'
     >
-  >;
+  > & {
+    widgetName?: 'CallControl' | 'CallControlCAD';
+  };
 
 export type useOutdialCallProps = Pick<OutdialCallProps, 'cc' | 'logger'>;
 

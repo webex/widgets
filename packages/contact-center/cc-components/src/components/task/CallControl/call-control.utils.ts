@@ -215,6 +215,10 @@ export const applyWxAppTelephonyControlVisibility = (
 
     const ctrl = button.id === 'mute' ? mainCtrl?.mute : mainCtrl?.keypad;
 
+    if (wxAppEngaged && ctrl?.isEnabled) {
+      return {...button, isVisible: true, disabled: false};
+    }
+
     if (!ctrl?.isVisible || ctrl.isEnabled) {
       return button;
     }

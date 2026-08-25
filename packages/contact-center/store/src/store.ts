@@ -139,6 +139,9 @@ class Store implements IStore {
   init(options: InitParams, setupEventListeners): Promise<void> {
     if ('webexConfig' in options) {
       this.enableWxBetterTogether = options.webexConfig?.cc?.enableWxBetterTogether === true;
+    } else if ('webex' in options) {
+      const webexWithConfig = options.webex as {config?: {cc?: {enableWxBetterTogether?: boolean}}};
+      this.enableWxBetterTogether = webexWithConfig.config?.cc?.enableWxBetterTogether === true;
     } else {
       this.enableWxBetterTogether = false;
     }

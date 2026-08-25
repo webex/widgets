@@ -309,7 +309,7 @@ export interface ControlProps {
   /**
    * Sends a DTMF tone on wxApp engaged telephony calls.
    */
-  sendDtmf: (digit: string) => void;
+  sendDtmf?: (digit: string) => void;
 
   /**
    * Function to handle ending the call.

@@ -43,6 +43,7 @@ const CallControlInternal: React.FunctionComponent<CallControlProps> = observer(
       conferenceEnabled,
       agentId,
       enableWxBetterTogether,
+      widgetName: 'CallControl',
     });
 
     const result = {

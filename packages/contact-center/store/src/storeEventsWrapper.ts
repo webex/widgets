@@ -77,7 +77,8 @@ class StoreWrapper implements IStoreWrapper {
   // replacement task object (task:hydrate / task:merged) gets rebound.
   private realTimeAssistListeners: Record<string, {task: ITask; listener: (payload: RealTimeAssistPayload) => void}> =
     {};
-  private wxAppMuteStateListeners: Record<string, (payload: {muted: boolean}) => void> = {};
+  private wxAppMuteStateListeners: Record<string, {task: ITask; listener: (payload: {muted: boolean}) => void}> = {};
+  private taskEndListeners: Record<string, {task: ITask; listener: () => void}> = {};
 
   constructor() {
     this.store = Store.getInstance();
@@ -549,11 +550,11 @@ class StoreWrapper implements IStoreWrapper {
     this.store.cc.off(event);
   };
 
-  removeTaskCallback = (event: TASK_EVENTS, callback, taskId: string) => {
+  removeTaskCallback = (event: TASK_EVENTS, callback, taskId: string, task?: ITask) => {
     if (!callback) return;
-    const task = this.store.taskList[taskId];
-    if (!task) return;
-    task.off(event, callback);
+    const taskToDetach = task ?? this.store.taskList[taskId];
+    if (!taskToDetach) return;
+    taskToDetach.off(event, callback);
   };
 
   init(options: InitParams): Promise<void> {
@@ -586,12 +587,17 @@ class StoreWrapper implements IStoreWrapper {
         delete this.realtimeTranscriptionListeners[taskId];
       }
       taskToRemove.off(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
-      taskToRemove.off(TASK_EVENTS.TASK_END, this.handleTaskEnd);
+      if (taskId && this.taskEndListeners[taskId]) {
+        const {task: endTask, listener: endListener} = this.taskEndListeners[taskId];
+        (endTask ?? taskToRemove).off(TASK_EVENTS.TASK_END, endListener);
+        delete this.taskEndListeners[taskId];
+      }
       taskToRemove.off(TASK_EVENTS.TASK_REJECT, (reason) => this.handleTaskReject(taskToRemove, reason));
       taskToRemove.off(TASK_EVENTS.TASK_OUTDIAL_FAILED, (reason) => this.handleOutdialFailed(reason));
       taskToRemove.off(TASK_EVENTS.TASK_UI_CONTROLS_UPDATED, this.handleUIControlsUpdated);
       if (taskId && this.wxAppMuteStateListeners[taskId]) {
-        taskToRemove.off(TASK_EVENTS.TASK_WXAPP_MUTE_STATE_UPDATED, this.wxAppMuteStateListeners[taskId]);
+        const {task: muteTask, listener: muteListener} = this.wxAppMuteStateListeners[taskId];
+        (muteTask ?? taskToRemove).off(TASK_EVENTS.TASK_WXAPP_MUTE_STATE_UPDATED, muteListener);
         delete this.wxAppMuteStateListeners[taskId];
       }
       taskToRemove.off(TASK_EVENTS.TASK_WRAPPEDUP, this.refreshTaskList);
@@ -890,9 +896,11 @@ class StoreWrapper implements IStoreWrapper {
     this.refreshTaskList();
   };
 
-  handleTaskEnd = () => {
+  handleTaskEnd = (endedTask: ITask) => {
     this.setIsDeclineButtonEnabled(false);
-    this.setIsMuted(false);
+    if (this.currentTask?.data?.interactionId === endedTask?.data?.interactionId) {
+      this.setIsMuted(false);
+    }
     this.scheduleTaskListRefresh();
   };
 
@@ -1035,7 +1043,18 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   private registerTaskEventListeners = (task: ITask): void => {
-    task.on(TASK_EVENTS.TASK_END, this.handleTaskEnd);
+    const taskId = task.data?.interactionId;
+    if (taskId) {
+      const existingEnd = this.taskEndListeners[taskId];
+      if (existingEnd?.task !== task) {
+        existingEnd?.task?.off(TASK_EVENTS.TASK_END, existingEnd.listener);
+        const endListener = () => this.handleTaskEnd(task);
+        this.taskEndListeners[taskId] = {task, listener: endListener};
+        task.on(TASK_EVENTS.TASK_END, endListener);
+      }
+    } else {
+      task.on(TASK_EVENTS.TASK_END, () => this.handleTaskEnd(task));
+    }
     task.on(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
     task.on(TASK_EVENTS.TASK_REJECT, (reason) => this.handleTaskReject(task, reason));
     task.on(TASK_EVENTS.TASK_OUTDIAL_FAILED, (reason) => this.handleOutdialFailed(reason));
@@ -1080,11 +1099,14 @@ class StoreWrapper implements IStoreWrapper {
     task.on(TASK_EVENTS.TASK_CAMPAIGN_PREVIEW_RESERVATION, this.handleCampaignPreviewReservation);
     task.on(TASK_EVENTS.TASK_CAMPAIGN_CONTACT_UPDATED, this.refreshTaskList);
 
-    const taskId = task.data?.interactionId;
-    if (taskId && !this.wxAppMuteStateListeners[taskId]) {
-      const wxAppMuteListener = (payload: {muted: boolean}) => this.handleWxAppMuteStateUpdated(payload, task);
-      this.wxAppMuteStateListeners[taskId] = wxAppMuteListener;
-      task.on(TASK_EVENTS.TASK_WXAPP_MUTE_STATE_UPDATED, wxAppMuteListener);
+    if (taskId) {
+      const existingMute = this.wxAppMuteStateListeners[taskId];
+      if (existingMute?.task !== task) {
+        existingMute?.task?.off(TASK_EVENTS.TASK_WXAPP_MUTE_STATE_UPDATED, existingMute.listener);
+        const wxAppMuteListener = (payload: {muted: boolean}) => this.handleWxAppMuteStateUpdated(payload, task);
+        this.wxAppMuteStateListeners[taskId] = {task, listener: wxAppMuteListener};
+        task.on(TASK_EVENTS.TASK_WXAPP_MUTE_STATE_UPDATED, wxAppMuteListener);
+      }
     }
     if (taskId && !this.realtimeTranscriptionListeners[taskId]) {
       this.realtimeTranscriptionListeners[taskId] = (payload: RealTimeTranscriptionEventPayload) =>

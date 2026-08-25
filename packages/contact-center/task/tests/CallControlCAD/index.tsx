@@ -106,6 +106,7 @@ describe('CallControlCAD Component', () => {
       conferenceEnabled: undefined,
       agentId: store.agentId,
       enableWxBetterTogether: false,
+      widgetName: 'CallControlCAD',
     });
   });
 

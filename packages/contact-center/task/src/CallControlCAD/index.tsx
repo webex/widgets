@@ -50,6 +50,7 @@ const CallControlCADInternal: React.FunctionComponent<CallControlProps> = observ
       conferenceEnabled,
       agentId,
       enableWxBetterTogether,
+      widgetName: 'CallControlCAD',
     });
 
     const result = {

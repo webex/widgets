@@ -712,12 +712,25 @@ describe('storeEventsWrapper', () => {
         expect(storeWrapper.isMuted).toBe(false);
       });
 
-      it('resets isMuted on task end', () => {
+      it('resets isMuted on task end when ended task is current', () => {
         storeWrapper['store'].isMuted = true;
+        storeWrapper['store'].currentTask = mockTask;
 
-        storeWrapper.handleTaskEnd();
+        storeWrapper.handleTaskEnd(mockTask);
 
         expect(storeWrapper.isMuted).toBe(false);
+      });
+
+      it('does not reset isMuted when a non-current task ends', () => {
+        const otherTask = makeMockTask({
+          data: {interactionId: 'other-interaction', interaction: {state: 'connected'}},
+        });
+        storeWrapper['store'].isMuted = true;
+        storeWrapper['store'].currentTask = mockTask;
+
+        storeWrapper.handleTaskEnd(otherTask);
+
+        expect(storeWrapper.isMuted).toBe(true);
       });
     });
 
@@ -1033,6 +1046,50 @@ describe('storeEventsWrapper', () => {
       expect(task.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_WXAPP_MUTE_STATE_UPDATED, listenerCalls[0][1]);
     });
 
+    it('rebinds wxApp mute listener when a replacement task object is registered', () => {
+      const interactionId = 'interaction-wxapp-mute-rebind';
+      const oldTask = makeMockTask({
+        data: {interactionId, interaction: {state: 'connected'}},
+      });
+      const newTask = makeMockTask({
+        data: {interactionId, interaction: {state: 'connected'}},
+      });
+      const registerTaskEventListeners = storeWrapper as unknown as {
+        registerTaskEventListeners: (taskToRegister: ITask) => void;
+      };
+
+      registerTaskEventListeners.registerTaskEventListeners(oldTask);
+      registerTaskEventListeners.registerTaskEventListeners(newTask);
+
+      const oldListenerCalls = (oldTask.on as jest.Mock).mock.calls.filter(
+        ([event]) => event === TASK_EVENTS.TASK_WXAPP_MUTE_STATE_UPDATED
+      );
+      const newListenerCalls = (newTask.on as jest.Mock).mock.calls.filter(
+        ([event]) => event === TASK_EVENTS.TASK_WXAPP_MUTE_STATE_UPDATED
+      );
+
+      expect(oldListenerCalls).toHaveLength(1);
+      expect(newListenerCalls).toHaveLength(1);
+      expect(oldTask.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_WXAPP_MUTE_STATE_UPDATED, oldListenerCalls[0][1]);
+    });
+
+    it('removeTaskCallback detaches from the supplied task object when taskList has been replaced', () => {
+      const interactionId = 'interaction-callback-detach';
+      const registeredTask = makeMockTask({
+        data: {interactionId, interaction: {state: 'connected'}},
+      });
+      const replacementTask = makeMockTask({
+        data: {interactionId, interaction: {state: 'connected'}},
+      });
+      const callback = jest.fn();
+
+      storeWrapper['store'].taskList = {[interactionId]: replacementTask};
+      storeWrapper.removeTaskCallback(TASK_EVENTS.TASK_ASSIGNED, callback, interactionId, registeredTask);
+
+      expect(registeredTask.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, callback);
+      expect(replacementTask.off).not.toHaveBeenCalled();
+    });
+
     it('should seed isMuted from syncWxAppMuteFromCallDetails on setCurrentTask', async () => {
       storeWrapper['store'].agentId = 'mockAgentId';
       const interactionId = 'interaction-wxapp-mute-seed';
@@ -1138,12 +1195,16 @@ describe('storeEventsWrapper', () => {
     it('should handle task removal', () => {
       const refreshTaskListSpy = jest.spyOn(storeWrapper, 'refreshTaskList');
       const setCurrentTaskSpy = jest.spyOn(storeWrapper, 'setCurrentTask');
+      const registerTaskEventListeners = storeWrapper as unknown as {
+        registerTaskEventListeners: (taskToRegister: ITask) => void;
+      };
 
       storeWrapper['store'].cc.taskManager.getAllTasks = jest
         .fn()
         .mockReturnValue({[mockTask.data.interactionId]: mockTask});
       storeWrapper.refreshTaskList();
       storeWrapper['store'].currentTask = mockTask;
+      registerTaskEventListeners.registerTaskEventListeners(mockTask);
 
       storeWrapper.handleTaskRemove(mockTask);
 
@@ -2830,7 +2891,7 @@ describe('storeEventsWrapper', () => {
 
         const refreshSpy = jest.spyOn(storeWrapper, 'refreshTaskList');
 
-        storeWrapper.handleTaskEnd();
+        storeWrapper.handleTaskEnd(task);
 
         expect(refreshSpy).not.toHaveBeenCalled();
         await Promise.resolve();
@@ -2848,7 +2909,7 @@ describe('storeEventsWrapper', () => {
 
         const refreshSpy = jest.spyOn(storeWrapper, 'refreshTaskList');
 
-        storeWrapper.handleTaskEnd();
+        storeWrapper.handleTaskEnd(task);
 
         // acceptedCampaignIds should NOT be cleaned up here (deferred to handleTaskRemove)
         expect(storeWrapper['store'].acceptedCampaignIds.has('campaign-accepted')).toBe(true);
@@ -2903,7 +2964,7 @@ describe('storeEventsWrapper', () => {
 
         const refreshSpy = jest.spyOn(storeWrapper, 'refreshTaskList');
 
-        storeWrapper.handleTaskEnd();
+        storeWrapper.handleTaskEnd(regularTask);
 
         expect(refreshSpy).not.toHaveBeenCalled();
         await Promise.resolve();
@@ -2915,9 +2976,12 @@ describe('storeEventsWrapper', () => {
       it('coalesces consult-end and task-end into one deferred refresh', async () => {
         const refreshSpy = jest.spyOn(storeWrapper, 'refreshTaskList');
         const setQueueProgressSpy = jest.spyOn(storeWrapper, 'setIsQueueConsultInProgress');
+        const endedTask = makeMockTask({
+          data: {interactionId: 'coalesced-end', interaction: {state: 'connected'}},
+        });
 
         storeWrapper.handleConsultEnd();
-        storeWrapper.handleTaskEnd();
+        storeWrapper.handleTaskEnd(endedTask);
 
         expect(setQueueProgressSpy).toHaveBeenCalledWith(false);
         expect(storeWrapper.consultStartTimeStamp).toBeNull();
@@ -2936,7 +3000,7 @@ describe('storeEventsWrapper', () => {
         storeWrapper['store'].currentTask = regularTask;
         storeWrapper['store'].cc.taskManager.getAllTasks = jest.fn().mockReturnValue({});
 
-        storeWrapper.handleTaskEnd();
+        storeWrapper.handleTaskEnd(regularTask);
 
         expect(storeWrapper.currentTask).toBe(regularTask);
         await Promise.resolve();

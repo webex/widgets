@@ -93,9 +93,9 @@ describe('useIncomingTask Hook', () => {
     });
 
     // Mock the implementation of removeTaskCallback to also call the offSpy for testing
-    removeTaskCallbackSpy.mockImplementation((event, callback) => {
+    removeTaskCallbackSpy.mockImplementation((event, callback, _taskId, task) => {
       // Make sure off is called on the task mock
-      taskMock.off(event, callback);
+      (task ?? taskMock).off(event, callback);
     });
 
     const {unmount} = renderHook(() =>
@@ -128,23 +128,41 @@ describe('useIncomingTask Hook', () => {
       unmount();
     });
 
-    expect(removeTaskCallbackSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function), 'interaction1');
-    expect(removeTaskCallbackSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_REJECT, expect.any(Function), 'interaction1');
-    expect(removeTaskCallbackSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function), 'interaction1');
+    expect(removeTaskCallbackSpy).toHaveBeenCalledWith(
+      TASK_EVENTS.TASK_ASSIGNED,
+      expect.any(Function),
+      'interaction1',
+      taskMock
+    );
+    expect(removeTaskCallbackSpy).toHaveBeenCalledWith(
+      TASK_EVENTS.TASK_REJECT,
+      expect.any(Function),
+      'interaction1',
+      taskMock
+    );
+    expect(removeTaskCallbackSpy).toHaveBeenCalledWith(
+      TASK_EVENTS.TASK_END,
+      expect.any(Function),
+      'interaction1',
+      taskMock
+    );
     expect(removeTaskCallbackSpy).toHaveBeenCalledWith(
       TASK_EVENTS.TASK_CONSULT_ACCEPTED,
       expect.any(Function),
-      'interaction1'
+      'interaction1',
+      taskMock
     );
     expect(removeTaskCallbackSpy).toHaveBeenCalledWith(
       TASK_EVENTS.TASK_CONSULT_END,
       expect.any(Function),
-      'interaction1'
+      'interaction1',
+      taskMock
     );
     expect(removeTaskCallbackSpy).toHaveBeenCalledWith(
       TASK_EVENTS.TASK_OUTDIAL_FAILED,
       expect.any(Function),
-      'interaction1'
+      'interaction1',
+      taskMock
     );
     expect(removeTaskCallbackSpy).toHaveBeenCalledTimes(6);
 
@@ -7962,6 +7980,42 @@ describe('WXCC-6026 wxApp thick-client hooks', () => {
     expect(toggleMute).toHaveBeenCalledWith({muted: true});
   });
 
+  it('useCallControl sendDtmf calls task.transmitDtmf for engaged wxApp calls when keypad is enabled but not visible', async () => {
+    const transmitDtmf = jest.fn().mockResolvedValue(undefined);
+    const wxAppTask = {
+      ...mockTask,
+      data: {...mockTask.data, interactionId: 'wxapp-interaction'},
+      getWebexCallingCallId: jest.fn().mockReturnValue('call-123'),
+      transmitDtmf,
+      uiControls: {
+        ...createEnabledMainTaskUIControls(),
+        main: {
+          ...createEnabledMainTaskUIControls().main,
+          keypad: {isVisible: false, isEnabled: true},
+        },
+      },
+      on: jest.fn(),
+      off: jest.fn(),
+    };
+
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: wxAppTask,
+        logger: mockCC.LoggerProxy,
+        isMuted: false,
+        conferenceEnabled: false,
+        agentId: 'agent1',
+        enableWxBetterTogether: true,
+      })
+    );
+
+    await act(async () => {
+      await result.current.sendDtmf('5');
+    });
+
+    expect(transmitDtmf).toHaveBeenCalledWith({dtmf: '5'});
+  });
+
   it('useCallControl sendDtmf no-ops when keypad control is not visible', async () => {
     const transmitDtmf = jest.fn().mockResolvedValue(undefined);
     const wxAppTask = {
@@ -7987,6 +8041,7 @@ describe('WXCC-6026 wxApp thick-client hooks', () => {
         isMuted: false,
         conferenceEnabled: false,
         agentId: 'agent1',
+        enableWxBetterTogether: true,
       })
     );
 

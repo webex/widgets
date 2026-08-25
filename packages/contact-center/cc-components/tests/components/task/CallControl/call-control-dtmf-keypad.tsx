@@ -121,4 +121,45 @@ describe('CallControlDtmfKeypad', () => {
       expect(screen.queryByTestId('call-control-keypad-spinner')).not.toBeInTheDocument();
     });
   });
+
+  it('serializes rapid digit presses through the transmission queue', async () => {
+    const callOrder: string[] = [];
+    let resolveFirst: (() => void) | undefined;
+    const firstPress = new Promise<void>((resolve) => {
+      resolveFirst = resolve;
+    });
+    const onDigitPress = jest
+      .fn()
+      .mockImplementationOnce(() => firstPress)
+      .mockImplementation(async (digit: string) => {
+        callOrder.push(digit);
+      });
+
+    render(<CallControlDtmfKeypad onDigitPress={onDigitPress} logger={logger} />);
+
+    const keypad = await screen.findByTestId('call-control-keypad-keys');
+    fireEvent.click(within(keypad).getByText('1', {selector: '.call-control-dtmf-key-digit'}));
+    fireEvent.click(within(keypad).getByText('2', {selector: '.call-control-dtmf-key-digit'}));
+
+    await waitFor(() => {
+      expect(onDigitPress).toHaveBeenCalledTimes(1);
+    });
+
+    resolveFirst?.();
+    await waitFor(() => {
+      expect(onDigitPress).toHaveBeenCalledTimes(2);
+    });
+    await waitFor(() => {
+      expect(callOrder).toEqual(['2']);
+    });
+  });
+
+  it('does not transmit digits when disabled', async () => {
+    render(<CallControlDtmfKeypad onDigitPress={onDigitPress} logger={logger} disabled />);
+
+    const keypad = await screen.findByTestId('call-control-keypad-keys');
+    fireEvent.click(within(keypad).getByText('1', {selector: '.call-control-dtmf-key-digit'}));
+
+    expect(onDigitPress).not.toHaveBeenCalled();
+  });
 });

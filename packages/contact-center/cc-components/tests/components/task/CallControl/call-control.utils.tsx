@@ -1028,6 +1028,39 @@ describe('CallControl Utils', () => {
       expect(result.find((b) => b.id === 'keypad')?.isVisible).toBe(true);
     });
 
+    it('force-shows mute and keypad when wxApp is engaged and SDK enables controls even if not visible', () => {
+      const controlsWithEnabledButHidden = {
+        ...mockControls,
+        main: {
+          ...mockControls.main,
+          mute: {isVisible: false, isEnabled: true},
+          keypad: {isVisible: false, isEnabled: true},
+        },
+      };
+
+      const buttons = buildCallControlButtons(
+        false,
+        false,
+        false,
+        mockMediaTypeInfo,
+        controlsWithEnabledButHidden,
+        false,
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn()
+      );
+
+      const result = applyWxAppTelephonyControlVisibility(buttons, wxAppTask, controlsWithEnabledButHidden, true, true);
+
+      expect(result.find((b) => b.id === 'mute')?.isVisible).toBe(true);
+      expect(result.find((b) => b.id === 'keypad')?.isVisible).toBe(true);
+    });
+
     it('hides mute and keypad when wxApp is engaged but SDK disables controls during consult/hold', () => {
       const controlsWithDisabled = {
         ...mockControls,

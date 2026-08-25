@@ -100,6 +100,7 @@ describe('CallControl Component', () => {
       onToggleMute: undefined,
       agentId: store.agentId,
       enableWxBetterTogether: false,
+      widgetName: 'CallControl',
     });
   });
 
