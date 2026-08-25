@@ -21,7 +21,7 @@ Related context: [repository architecture](../../../ARCHITECTURE.md) · [specifi
 | Work type | Defect |
 | Change class | Contract / UI |
 | Source/intake | Developer-approved consult/transfer behavior review and current code/tests |
-| Last verified | 2026-08-24 with `@webex/contact-center` 3.12.0-next.106 |
+| Last verified | 2026-08-25 with `@webex/contact-center` 3.12.0-next.109 |
 
 ## Applicability
 
@@ -68,7 +68,7 @@ There are no open product decisions for this delta.
 - Load dial numbers through the generic SDK AddressBook service and rely on its default backend ordering.
 - Preserve the SDK's `data` order and pagination metadata without local sorting, channel filtering, or metadata reconstruction.
 - Keep loading, empty, and error behavior in the existing widget layers.
-- Use the pinned `@webex/contact-center` 3.12.0-next.106 dependency containing the coordinated SDK change.
+- Use the pinned `@webex/contact-center` 3.12.0-next.109 dependency containing the coordinated SDK change.
 
 ### Out of scope
 
@@ -142,11 +142,11 @@ There are no open product decisions for this delta.
 - [x] Queue and entry-point fetchers delegate to existing SDK methods, while dial numbers use AddressBook, without local returned-data sort/filter/metadata logic (`MOD-001`, `WIDGET-LIST-R-001`, `WIDGET-LIST-R-004`).
 - [x] Params-only telephony queue requests rely on SDK defaults; active non-telephony requests supply a complete channel filter, and legacy media-plus-params calls preserve their channel scope and caller filter. Entry-point requests always delegate directly, and no list request contains widget-selected sorting, projection, or profile-view flags (`MOD-001`, `WIDGET-LIST-R-003`).
 - [x] Store errors are rethrown and task-hook errors retain the existing empty-result behavior (`WIDGET-LIST-R-005`).
-- [x] Store, task, test-fixtures, and cc-components build/type surfaces agree with `@webex/contact-center` 3.12.0-next.106 (`WIDGET-LIST-R-006`).
+- [x] Store, task, test-fixtures, and cc-components build/type surfaces agree with `@webex/contact-center` 3.12.0-next.109 (`WIDGET-LIST-R-006`).
 - [x] Agent rows show active/away presence from buddy state, and dial-number/entry-point rows show their typed secondary identifiers (`WIDGET-LIST-R-008`).
 - [x] A late buddy-agent response from a previous Consult/Transfer action cannot overwrite the current action's list or loading state (`WIDGET-LIST-R-009`).
-- [x] Store and task unit suites, focused consult/transfer cc-components tests, and touched package build/style checks pass with `@webex/contact-center` 3.12.0-next.106.
-- [x] The complete cc-components unit suite and the focused consult/transfer suites pass with `@webex/contact-center` 3.12.0-next.106.
+- [x] Store and task unit suites, focused consult/transfer cc-components tests, and touched package build/style checks pass with `@webex/contact-center` 3.12.0-next.109.
+- [x] The complete cc-components unit suite and the focused consult/transfer suites pass with `@webex/contact-center` 3.12.0-next.109.
 
 ## Scenarios and applicable change views
 
@@ -243,7 +243,7 @@ No event contract changes.
 
 | Risk or assumption | Evidence | Mitigation or decision owner |
 | --- | --- | --- |
-| Widgets are run with an SDK lacking the corrected defaults and action-aware buddy policy. | `packages/contact-center/store/package.json` | Pin the store to the compatible SDK release; currently `3.12.0-next.106`. |
+| Widgets are run with an SDK lacking the corrected defaults and action-aware buddy policy. | `packages/contact-center/store/package.json` | Pin the store to the compatible SDK release; currently `3.12.0-next.109`. |
 | A future widget reintroduces local sorting/filtering. | `packages/contact-center/store/tests/storeEventsWrapper.ts` | Retain delegation and exact-response assertions. |
 | Transfer action is lost during reload. | `packages/contact-center/cc-components/tests/components/task/CallControl/CallControlCustom/consult-transfer-popover.tsx` | Retain the action-specific reload assertion. |
 | A Consult buddy request completes after the user switches to Transfer. | `packages/contact-center/task/src/helper.ts` | Track the newest buddy request and ignore older data, error fallback, and loading-state updates. |

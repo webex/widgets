@@ -26,6 +26,7 @@ import {CC_EVENTS, TASK_EVENTS} from '../src/store.types';
 import type {RealTimeAssistPayload} from '../src/store.types';
 import storeWrapper from '../src/storeEventsWrapper';
 import {ITask} from '../src/store.types';
+import {getConferenceParticipantDropRoster} from '../src/task-utils';
 import {
   mockCC,
   mockTask as mockTaskFixture,
@@ -2331,6 +2332,132 @@ describe('storeEventsWrapper', () => {
       expect(storeWrapper['store'].cc.taskManager.getAllTasks).toHaveBeenCalled();
       expect(setCurrentTaskSpy).toHaveBeenCalledTimes(1);
       expect(setCurrentTaskSpy).toHaveBeenCalledWith(mockTask);
+    });
+  });
+
+  describe('owner-change hydration', () => {
+    const interactionId = 'owner-change-main';
+    const oldOwnerId = 'agent1';
+    const promotedOwnerId = 'agent2';
+    const survivingSecondaryId = 'agent3';
+    let originalAgentId: (typeof storeWrapper)['store']['agentId'];
+    let originalCurrentTask: (typeof storeWrapper)['store']['currentTask'];
+    let originalDeviceType: (typeof storeWrapper)['store']['deviceType'];
+    let originalGetAllTasks: (typeof storeWrapper)['store']['cc']['taskManager']['getAllTasks'];
+    let originalTaskList: (typeof storeWrapper)['store']['taskList'];
+
+    const participant = (id: string, name: string, hasLeft = false) => ({
+      id,
+      name,
+      pType: 'Agent',
+      type: 'Agent',
+      hasJoined: true,
+      hasLeft,
+      isInPredial: false,
+    });
+
+    const createOwnerTask = (owner: string, oldOwnerHasLeft = false): ITask =>
+      makeMockTask({
+        data: {
+          interactionId,
+          agentId: survivingSecondaryId,
+          isConferenceInProgress: true,
+          interaction: {
+            interactionId,
+            mediaType: 'telephony',
+            state: 'conference',
+            owner,
+            contactDirection: {type: 'inbound'},
+            callAssociatedDetails: {ani: '+15550000001'},
+            participants: {
+              [oldOwnerId]: participant(oldOwnerId, 'Original Owner', oldOwnerHasLeft),
+              [promotedOwnerId]: participant(promotedOwnerId, 'Promoted Owner'),
+              [survivingSecondaryId]: participant(survivingSecondaryId, 'Surviving Secondary'),
+              customer1: {
+                id: 'customer1',
+                name: 'Customer',
+                pType: 'Customer',
+                type: 'Customer',
+                hasJoined: true,
+                hasLeft: false,
+                isInPredial: false,
+              },
+            },
+            media: {
+              [interactionId]: {
+                mediaResourceId: interactionId,
+                mediaType: 'telephony',
+                mediaMgr: 'aqm',
+                mType: 'mainCall',
+                isHold: false,
+                holdTimestamp: null,
+                participants: oldOwnerHasLeft
+                  ? [promotedOwnerId, survivingSecondaryId, 'customer1']
+                  : [oldOwnerId, promotedOwnerId, survivingSecondaryId, 'customer1'],
+              },
+            },
+          },
+        },
+      });
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      originalAgentId = storeWrapper['store'].agentId;
+      originalCurrentTask = storeWrapper['store'].currentTask;
+      originalDeviceType = storeWrapper['store'].deviceType;
+      originalGetAllTasks = storeWrapper['store'].cc.taskManager.getAllTasks;
+      originalTaskList = storeWrapper['store'].taskList;
+
+      storeWrapper['store'].agentId = survivingSecondaryId;
+      storeWrapper['store'].currentTask = null;
+      storeWrapper['store'].taskList = {};
+      storeWrapper['store'].deviceType = 'EXTENSION';
+    });
+
+    afterEach(() => {
+      storeWrapper['store'].agentId = originalAgentId;
+      storeWrapper['store'].currentTask = originalCurrentTask;
+      storeWrapper['store'].deviceType = originalDeviceType;
+      storeWrapper['store'].cc.taskManager.getAllTasks = originalGetAllTasks;
+      storeWrapper['store'].taskList = originalTaskList;
+    });
+
+    it('immediately replaces the cloned task and derives the authoritative promoted owner', () => {
+      const staleTask = createOwnerTask(oldOwnerId);
+      const hydratedTask = createOwnerTask(promotedOwnerId, true);
+      storeWrapper['store'].cc.taskManager.getAllTasks = jest.fn().mockReturnValue({[interactionId]: staleTask});
+
+      storeWrapper.setCurrentTask(staleTask);
+      const staleCurrentTask = storeWrapper.currentTask as ITask;
+      const staleSecondaryRoster = getConferenceParticipantDropRoster(staleCurrentTask, survivingSecondaryId);
+
+      expect(staleCurrentTask).not.toBe(staleTask);
+      expect(staleSecondaryRoster?.participants.find(({dropTargetId}) => dropTargetId === oldOwnerId)?.isPrimary).toBe(
+        true
+      );
+
+      // An owner-change task:hydrate is sufficient; no participant-join event or page refresh is needed.
+      storeWrapper.handleTaskHydrate(hydratedTask);
+
+      const currentTask = storeWrapper.currentTask as ITask;
+      const secondaryRoster = getConferenceParticipantDropRoster(currentTask, survivingSecondaryId);
+      const promotedOwnerRoster = getConferenceParticipantDropRoster(currentTask, promotedOwnerId);
+
+      expect(currentTask).not.toBe(staleCurrentTask);
+      expect(currentTask).not.toBe(hydratedTask);
+      expect(currentTask.data.interaction.owner).toBe(promotedOwnerId);
+      expect(secondaryRoster?.participants).not.toEqual(
+        expect.arrayContaining([expect.objectContaining({dropTargetId: oldOwnerId})])
+      );
+      expect(secondaryRoster?.participants.find(({dropTargetId}) => dropTargetId === promotedOwnerId)).toMatchObject({
+        isPrimary: true,
+        isReadOnly: true,
+      });
+      expect(secondaryRoster?.customer?.isReadOnly).toBe(true);
+      expect(
+        promotedOwnerRoster?.participants.find(({dropTargetId}) => dropTargetId === survivingSecondaryId)
+      ).toMatchObject({isPrimary: false, isReadOnly: false});
+      expect(promotedOwnerRoster?.customer?.isReadOnly).toBe(false);
     });
   });
 

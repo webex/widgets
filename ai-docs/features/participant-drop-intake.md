@@ -36,6 +36,8 @@ Completion is event-correlated: `ParticipantLeftConference` resolves, `Participa
 
 For EP-DN cross-channel lifecycle ordering, `ContactMerged` replaces the child task with the main-interaction task and publishes `task:merged`. `ParticipantLeftConference` and `AgentConsultEnded` first use exact task correlation, then one unique `mainInteractionId`/`parentInteractionId` relationship. Updated `mainCall` membership is authoritative for whether the current Agent ended, independent of consult state or initiator role. Widgets consume the existing terminal events and defer their task-list read by one microtask so SDK final cleanup is visible; they never delete or terminate an SDK task locally.
 
+Primary-agent promotion follows Agent Desktop's two-event flow. `ContactOwnerChanged` carries the authoritative owner to the promoted Agent, while an owner-changing `ContactUpdated` carries it to the other surviving Agents. The SDK normalizes both paths into the existing `task:hydrate` notification. The widget Store replaces its cloned current task from that hydrate, and roster Primary status and Drop permissions recompute solely from `interaction.owner`; widgets never elect or infer the next owner locally.
+
 ## Widget behavior
 
 `@webex/cc-store` derives a Drop-specific roster from the current main-call media leg without changing `getConferenceParticipants` for its existing consumers. The viewing agent must remain active, and any supported non-customer row keeps the roster visible. Main-leg membership remains authoritative when conference state, flags, controls, or wrap-up signals lag behind participant updates.
@@ -61,7 +63,7 @@ Backend authorization remains mandatory. Owner-based UI visibility is not an aut
 
 Only the existing React `CallControlCAD` export and `widget-cc-call-control-cad` custom element gain behavior. Standard `CallControl` remains visually unchanged. No widget prop, custom-element attribute/property, initialization option, or callback is added.
 
-The widget consumes published `@webex/contact-center@3.12.0-next.106` from `@webex/cc-store`; local links, absolute paths, portals, tarballs, and temporary resolutions must never be committed.
+The widget consumes published `@webex/contact-center@3.12.0-next.109` from `@webex/cc-store`; the React sample uses `webex@3.12.0-next.184`, which contains that Contact Center version. Local links, absolute paths, portals, tarballs, and temporary resolutions must never be committed.
 
 ## Verification
 
