@@ -457,7 +457,11 @@ function App() {
   }, []);
 
   useEffect(() => {
-    const handlePageHide = () => {
+    const handlePageHide = (event: PageTransitionEvent) => {
+      if (event.persisted) {
+        return;
+      }
+
       if (!store.isAgentLoggedIn && !isLoggedIn) {
         return;
       }

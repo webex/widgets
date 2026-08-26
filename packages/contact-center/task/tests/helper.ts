@@ -1,5 +1,11 @@
 import {renderHook, act, waitFor} from '@testing-library/react';
-import {useIncomingTask, useTaskList, useCallControl, useOutdialCall} from '../src/helper';
+import {
+  useIncomingTask,
+  useTaskList,
+  useCallControl,
+  useOutdialCall,
+  resetMuteCoordinatorForTests,
+} from '../src/helper';
 import {
   TIMER_LABEL_WRAP_UP,
   TIMER_LABEL_POST_CALL,
@@ -4359,6 +4365,7 @@ describe('useCallControl', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
+      resetMuteCoordinatorForTests();
 
       mockCurrentTask.toggleMute = jest.fn(() => Promise.resolve());
 
@@ -4405,6 +4412,8 @@ describe('useCallControl', () => {
     });
 
     it('should successfully toggle mute from muted to unmuted', async () => {
+      jest.spyOn(store, 'isMuted', 'get').mockImplementation(() => true);
+
       const {result} = renderHook(() =>
         useCallControl({
           currentTask: mockCurrentTask,
@@ -4436,7 +4445,7 @@ describe('useCallControl', () => {
       });
     });
 
-    it('should handle multiple rapid toggleMute calls correctly', async () => {
+    it('should coalesce multiple rapid toggleMute calls to the final intended state', async () => {
       const {result} = renderHook(() =>
         useCallControl({
           currentTask: mockCurrentTask,
@@ -4452,9 +4461,158 @@ describe('useCallControl', () => {
         await Promise.all([result.current.toggleMute(), result.current.toggleMute(), result.current.toggleMute()]);
       });
 
-      expect(mockCurrentTask.toggleMute).toHaveBeenCalledTimes(3);
-      expect(store.setIsMuted).toHaveBeenCalledTimes(3);
-      expect(mockOnToggleMute).toHaveBeenCalledTimes(3);
+      expect(mockCurrentTask.toggleMute).toHaveBeenCalledTimes(1);
+      expect(mockCurrentTask.toggleMute).toHaveBeenCalledWith({muted: true});
+      expect(store.setIsMuted).toHaveBeenCalledTimes(1);
+      expect(store.setIsMuted).toHaveBeenCalledWith(true);
+      expect(mockOnToggleMute).toHaveBeenCalledTimes(1);
+    });
+
+    it('should reverse mute intent when clicked again while SDK request is pending', async () => {
+      let resolveFirstMute!: () => void;
+      mockCurrentTask.toggleMute = jest
+        .fn()
+        .mockImplementationOnce(
+          () =>
+            new Promise<void>((resolve) => {
+              resolveFirstMute = resolve;
+            })
+        )
+        .mockImplementationOnce(() => Promise.resolve());
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: mockCurrentTask,
+          onToggleMute: mockOnToggleMute,
+          logger: mockLogger,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'test-agent-id',
+        })
+      );
+
+      let firstToggle!: Promise<void>;
+      act(() => {
+        firstToggle = result.current.toggleMute();
+      });
+
+      await act(async () => {
+        await Promise.resolve();
+      });
+
+      expect(mockCurrentTask.toggleMute).toHaveBeenCalledTimes(1);
+      expect(mockCurrentTask.toggleMute).toHaveBeenCalledWith({muted: true});
+
+      await act(async () => {
+        void result.current.toggleMute();
+      });
+
+      await act(async () => {
+        resolveFirstMute();
+        await firstToggle;
+      });
+
+      await act(async () => {
+        await Promise.resolve();
+      });
+
+      expect(mockCurrentTask.toggleMute).toHaveBeenCalledTimes(2);
+      expect(mockCurrentTask.toggleMute).toHaveBeenLastCalledWith({muted: false});
+      expect(store.setIsMuted).toHaveBeenLastCalledWith(false);
+    });
+
+    it('should unmute from a second hook instance after muting from the first', async () => {
+      let isMutedState = false;
+      jest.spyOn(store, 'setIsMuted').mockImplementation((value: boolean) => {
+        isMutedState = value;
+      });
+      jest.spyOn(store, 'isMuted', 'get').mockImplementation(() => isMutedState);
+
+      const sharedHookProps = {
+        currentTask: mockCurrentTask,
+        logger: mockLogger,
+        isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
+      };
+
+      const {result: callControlResult} = renderHook(() => useCallControl(sharedHookProps));
+      const {result: callControlCadResult} = renderHook(() =>
+        useCallControl({...sharedHookProps, widgetName: 'CallControlCAD'})
+      );
+
+      await act(async () => {
+        await callControlResult.current.toggleMute();
+      });
+
+      expect(mockCurrentTask.toggleMute).toHaveBeenCalledWith({muted: true});
+      expect(isMutedState).toBe(true);
+
+      mockCurrentTask.toggleMute.mockClear();
+
+      await act(async () => {
+        await callControlCadResult.current.toggleMute();
+      });
+
+      expect(mockCurrentTask.toggleMute).toHaveBeenCalledTimes(1);
+      expect(mockCurrentTask.toggleMute).toHaveBeenCalledWith({muted: false});
+      expect(isMutedState).toBe(false);
+    });
+
+    it('should coalesce cross-widget unmute while first mute SDK request is pending', async () => {
+      let isMutedState = false;
+      jest.spyOn(store, 'setIsMuted').mockImplementation((value: boolean) => {
+        isMutedState = value;
+      });
+      jest.spyOn(store, 'isMuted', 'get').mockImplementation(() => isMutedState);
+
+      let resolveFirstMute!: () => void;
+      mockCurrentTask.toggleMute = jest
+        .fn()
+        .mockImplementationOnce(
+          () =>
+            new Promise<void>((resolve) => {
+              resolveFirstMute = resolve;
+            })
+        )
+        .mockImplementationOnce(() => Promise.resolve());
+
+      const sharedHookProps = {
+        currentTask: mockCurrentTask,
+        logger: mockLogger,
+        isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
+      };
+
+      const {result: callControlResult} = renderHook(() => useCallControl(sharedHookProps));
+      const {result: callControlCadResult} = renderHook(() => useCallControl(sharedHookProps));
+
+      let firstToggle!: Promise<void>;
+      act(() => {
+        firstToggle = callControlResult.current.toggleMute();
+      });
+
+      await act(async () => {
+        await Promise.resolve();
+      });
+
+      expect(mockCurrentTask.toggleMute).toHaveBeenCalledTimes(1);
+      expect(mockCurrentTask.toggleMute).toHaveBeenCalledWith({muted: true});
+
+      await act(async () => {
+        void callControlCadResult.current.toggleMute();
+      });
+
+      await act(async () => {
+        resolveFirstMute();
+        await firstToggle;
+        await Promise.resolve();
+      });
+
+      expect(mockCurrentTask.toggleMute).toHaveBeenCalledTimes(2);
+      expect(mockCurrentTask.toggleMute).toHaveBeenLastCalledWith({muted: false});
+      expect(isMutedState).toBe(false);
     });
 
     it('should not call onToggleMute callback if not provided', async () => {
@@ -4507,6 +4665,7 @@ describe('useCallControl', () => {
     it('should handle errors when toggleMute SDK call fails and call onToggleMute with current state', async () => {
       const toggleMuteError = new Error('SDK Toggle mute failed');
       mockCurrentTask.toggleMute = jest.fn().mockRejectedValue(toggleMuteError);
+      jest.spyOn(store, 'isMuted', 'get').mockImplementation(() => true);
 
       const {result} = renderHook(() =>
         useCallControl({
@@ -7407,7 +7566,7 @@ describe('Task Hook Error Handling and Logging', () => {
       );
     });
 
-    it('should handle synchronous errors in toggleMute', () => {
+    it('should handle synchronous errors in toggleMute', async () => {
       const errorTask = {
         ...mockTaskWithInteraction,
         uiControls: createEnabledMainTaskUIControls(),
@@ -7426,8 +7585,8 @@ describe('Task Hook Error Handling and Logging', () => {
         })
       );
 
-      act(() => {
-        result.current.toggleMute();
+      await act(async () => {
+        await result.current.toggleMute();
       });
 
       expect(logger.error).toHaveBeenCalledWith('toggleMute failed: Error: toggleMute synchronous error', {
@@ -7761,8 +7920,15 @@ describe('Task Hook Error Handling and Logging', () => {
 });
 
 describe('WXCC-6026 wxApp thick-client hooks', () => {
+  beforeEach(() => {
+    resetMuteCoordinatorForTests();
+    jest.spyOn(store, 'setIsMuted').mockImplementation(() => {});
+    jest.spyOn(store, 'isMuted', 'get').mockImplementation(() => false);
+  });
+
   afterEach(() => {
-    jest.clearAllMocks();
+    jest.restoreAllMocks();
+    resetMuteCoordinatorForTests();
   });
 
   it('useIncomingTask accept calls task.accept()', async () => {
@@ -8098,6 +8264,51 @@ describe('WXCC-6026 wxApp thick-client hooks', () => {
     expect(onErrorCallback).toHaveBeenCalledWith('IncomingTask', expect.objectContaining({message: 'Answer failed'}));
   });
 
+  it('useIncomingTask accept retry clears offerActionError before the new attempt', async () => {
+    const telephonyError = Object.assign(new Error('Answer failed'), {
+      isWxAppTelephonyError: true,
+      trackingId: 'track-accept',
+      status: 500,
+    });
+    const accept = jest.fn().mockRejectedValueOnce(telephonyError).mockResolvedValueOnce(undefined);
+    const wxAppTask = {
+      ...taskMock,
+      accept,
+      decline: jest.fn(),
+      on: jest.fn(),
+      off: jest.fn(),
+    };
+
+    const {result} = renderHook(() =>
+      useIncomingTask({
+        incomingTask: wxAppTask,
+        onAccepted: onTaskAccepted,
+        onRejected: onTaskDeclined,
+        logger,
+      })
+    );
+
+    await act(async () => {
+      result.current.accept();
+    });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(result.current.offerActionError).not.toBeNull();
+
+    await act(async () => {
+      result.current.accept();
+    });
+
+    expect(result.current.offerActionError).toBeNull();
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+  });
+
   it('useCallControl toggleMute failure surfaces telephonyToast', async () => {
     const telephonyError = Object.assign(new Error('Mute failed'), {
       isWxAppTelephonyError: true,
@@ -8201,6 +8412,7 @@ describe('WXCC-6026 wxApp thick-client hooks', () => {
     };
 
     jest.spyOn(store, 'setIsMuted').mockImplementation(() => {});
+    jest.spyOn(store, 'isMuted', 'get').mockImplementation(() => false);
 
     const {result} = renderHook(() =>
       useCallControl({

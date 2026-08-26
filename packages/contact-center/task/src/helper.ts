@@ -50,6 +50,9 @@ import {deriveMainCadHoldState} from './Utils/main-cad-hold.util';
 import {writeConsultHoldAnchor, clearConsultHoldAnchor} from './Utils/task-util';
 import {useHoldTimer} from './Utils/useHoldTimer';
 import {OutdialAniEntriesResponse} from '@webex/contact-center/dist/types/services/config/types';
+import {enqueueMuteToggle, resetMuteCoordinator, resetMuteCoordinatorForTests} from './mute-coordinator';
+
+export {resetMuteCoordinatorForTests};
 
 const ENGAGED_LABEL = 'ENGAGED';
 const ENGAGED_USERNAME = 'Engaged';
@@ -387,6 +390,7 @@ export const useIncomingTask = (props: UseTaskProps) => {
 
   const accept = () => {
     try {
+      clearOfferActionError();
       logger.info(`CC-Widgets: incomingTask.accept() called`, {
         module: 'useIncomingTask',
         method: 'accept',
@@ -416,6 +420,7 @@ export const useIncomingTask = (props: UseTaskProps) => {
 
   const reject = () => {
     try {
+      clearOfferActionError();
       logger.info(`CC-Widgets: incomingTask.reject() called`, {
         module: 'useIncomingTask',
         method: 'reject',
@@ -525,6 +530,10 @@ export const useCallControl = (props: useCallControlProps) => {
   const participantDropAgentIdRef = useRef(agentId);
   participantDropTaskRef.current = currentTask;
   participantDropAgentIdRef.current = agentId;
+
+  useEffect(() => {
+    resetMuteCoordinator();
+  }, [currentTask?.data?.interactionId]);
 
   // Derive conference state during render so MobX tracks nested participant and owner changes.
   const conferenceParticipants = currentTask && agentId ? getConferenceParticipants(currentTask, agentId) : [];
@@ -1127,7 +1136,7 @@ export const useCallControl = (props: useCallControlProps) => {
     setParticipantDropConfirmationTarget(null);
   }, []);
 
-  const toggleMute = async () => {
+  const toggleMute = (): Promise<void> => {
     try {
       if (
         !controls?.main?.mute?.isVisible &&
@@ -1135,44 +1144,21 @@ export const useCallControl = (props: useCallControlProps) => {
         !shouldShowWxAppTelephonyControls(enableWxBetterTogether, currentTask)
       ) {
         logger.warn('Mute control not available', {module: 'useCallControl', method: 'toggleMute'});
-        return;
+        return Promise.resolve();
       }
 
       logger.info('toggleMute() called', {module: 'useCallControl', method: 'toggleMute'});
 
-      // Store the intended new state
-      const intendedMuteState = !isMuted;
-
-      try {
-        await currentTask.toggleMute({muted: intendedMuteState});
-
-        // Only update state after successful SDK call
-        store.setIsMuted(intendedMuteState);
-
-        if (onToggleMute) {
-          onToggleMute({
-            isMuted: intendedMuteState,
-            task: currentTask,
-          });
-        }
-
-        logger.info(`Mute state toggled to: ${intendedMuteState}`, {module: 'useCallControl', method: 'toggleMute'});
-      } catch (error) {
-        logger.error(`toggleMute failed: ${error}`, {module: 'useCallControl', method: 'toggleMute'});
-        showTelephonyToast(error, intendedMuteState ? 'mute' : 'unmute');
-
-        if (onToggleMute) {
-          onToggleMute({
-            isMuted: isMuted,
-            task: currentTask,
-          });
-        }
-      }
+      return enqueueMuteToggle({
+        task: currentTask,
+        callbacks: {onToggleMute, logger, showTelephonyToast},
+      });
     } catch (error) {
       logger?.error(`CC-Widgets: Task: Error in toggleMute - ${error.message}`, {
         module: 'useCallControl',
         method: 'toggleMute',
       });
+      return Promise.resolve();
     }
   };
 

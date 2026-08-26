@@ -39,25 +39,22 @@ export const handleToggleHold = (isHeld: boolean, toggleHold: (hold: boolean) =>
 /**
  * Handles mute toggle functionality with disabled state management
  */
-export const handleMuteToggle = (
-  toggleMute: () => void,
+export const handleMuteToggle = async (
+  toggleMute: () => void | Promise<void>,
   setIsMuteButtonDisabled: (disabled: boolean) => void,
   logger: ILogger
-): void => {
+): Promise<void> => {
   setIsMuteButtonDisabled(true);
 
   try {
-    toggleMute();
+    await toggleMute();
   } catch (error) {
     logger.error(`Mute toggle failed: ${error}`, {
       module: 'call-control.tsx',
       method: 'handleMuteToggle',
     });
   } finally {
-    // Re-enable button after operation
-    setTimeout(() => {
-      setIsMuteButtonDisabled(false);
-    }, 500);
+    setIsMuteButtonDisabled(false);
   }
 };
 

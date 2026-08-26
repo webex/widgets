@@ -119,38 +119,49 @@ describe('CallControl Utils', () => {
   });
 
   describe('handleMuteToggle', () => {
-    it('should disable button, call toggleMute, and re-enable button after timeout', () => {
-      const mockToggleMute = jest.fn();
+    it('should disable button, call toggleMute, and re-enable button after completion', async () => {
+      const mockToggleMute = jest.fn().mockResolvedValue(undefined);
       const mockSetIsMuteButtonDisabled = jest.fn();
 
-      handleMuteToggle(mockToggleMute, mockSetIsMuteButtonDisabled, loggerMock);
+      await handleMuteToggle(mockToggleMute, mockSetIsMuteButtonDisabled, loggerMock);
 
       expect(mockSetIsMuteButtonDisabled).toHaveBeenCalledWith(true);
       expect(mockToggleMute).toHaveBeenCalled();
+      expect(mockSetIsMuteButtonDisabled).toHaveBeenCalledWith(false);
+    });
 
-      // Fast-forward timer
-      jest.advanceTimersByTime(500);
+    it('should keep button disabled until toggleMute promise settles', async () => {
+      let resolveMute!: () => void;
+      const mockToggleMute = jest.fn(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveMute = resolve;
+          })
+      );
+      const mockSetIsMuteButtonDisabled = jest.fn();
+
+      const promise = handleMuteToggle(mockToggleMute, mockSetIsMuteButtonDisabled, loggerMock);
+
+      expect(mockSetIsMuteButtonDisabled).toHaveBeenCalledWith(true);
+      expect(mockSetIsMuteButtonDisabled).not.toHaveBeenCalledWith(false);
+
+      resolveMute();
+      await promise;
 
       expect(mockSetIsMuteButtonDisabled).toHaveBeenCalledWith(false);
     });
 
-    it('should handle error and still re-enable button', () => {
-      const mockToggleMute = jest.fn().mockImplementation(() => {
-        throw new Error('Mute failed');
-      });
+    it('should handle error and still re-enable button', async () => {
+      const mockToggleMute = jest.fn().mockRejectedValue(new Error('Mute failed'));
       const mockSetIsMuteButtonDisabled = jest.fn();
 
-      handleMuteToggle(mockToggleMute, mockSetIsMuteButtonDisabled, loggerMock);
+      await handleMuteToggle(mockToggleMute, mockSetIsMuteButtonDisabled, loggerMock);
 
       expect(mockSetIsMuteButtonDisabled).toHaveBeenCalledWith(true);
       expect(loggerMock.error).toHaveBeenCalledWith('Mute toggle failed: Error: Mute failed', {
         module: 'call-control.tsx',
         method: 'handleMuteToggle',
       });
-
-      // Fast-forward timer
-      jest.advanceTimersByTime(500);
-
       expect(mockSetIsMuteButtonDisabled).toHaveBeenCalledWith(false);
     });
   });
