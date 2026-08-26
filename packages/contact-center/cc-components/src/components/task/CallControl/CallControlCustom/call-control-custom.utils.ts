@@ -1,7 +1,7 @@
 import {BuddyDetails, ContactServiceQueue, ILogger, ITask, TaskUIControls} from '@webex/cc-store';
 import {MUTE_CALL, UNMUTE_CALL} from '../../constants';
 import {ButtonConfig} from '../../task.types';
-import {shouldShowWxAppTelephonyControls} from '../call-control.utils';
+import {shouldShowWxAppTelephonyControls} from '../../../../utils/wxapp-telephony.utils';
 
 /**
  * Interface for list item data

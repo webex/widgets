@@ -30,7 +30,7 @@ import store, {
   MEDIA_TYPE_TELEPHONY_LOWER,
   RealTimeTranscriptionData,
 } from '@webex/cc-store';
-import {shouldShowWxAppTelephonyControls} from './wxapp-task.utils';
+import {shouldShowWxAppTelephonyControls} from '@webex/cc-components';
 import {
   getTelephonyToastDisplay,
   reportWxAppTelephonyFailure,

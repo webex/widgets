@@ -39,3 +39,4 @@ export * from './components/task/task.types';
 export * from './components/task/CampaignErrorDialog/campaign-error-dialog.types';
 export * from './components/task/CampaignCountdown/campaign-countdown.types';
 export * from './components/AIAssistant/ai-assistant.types';
+export {isWxAppEngagedCall, shouldShowWxAppTelephonyControls} from './utils/wxapp-telephony.utils';

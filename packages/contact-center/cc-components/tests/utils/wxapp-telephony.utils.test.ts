@@ -1,5 +1,5 @@
 import {ITask} from '@webex/contact-center';
-import {isWxAppEngagedCall, shouldShowWxAppTelephonyControls} from '../src/wxapp-task.utils';
+import {isWxAppEngagedCall, shouldShowWxAppTelephonyControls} from '../../src/utils/wxapp-telephony.utils';
 
 const baseTask = {
   accept: jest.fn().mockResolvedValue(undefined),
@@ -7,7 +7,7 @@ const baseTask = {
   toggleMute: jest.fn().mockResolvedValue(undefined),
 } as unknown as ITask;
 
-describe('wxapp-task.utils', () => {
+describe('wxapp-telephony.utils', () => {
   describe('isWxAppEngagedCall', () => {
     it('returns true when getWebexCallingCallId returns a call id', () => {
       const task = {

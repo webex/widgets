@@ -15,6 +15,7 @@ import {
   MUTE_CALL,
   UNMUTE_CALL,
 } from '../constants';
+import {isWxAppEngagedCall} from '../../../utils/wxapp-telephony.utils';
 
 /** SDK P0 keypad control — may exist on main leg before InteractionUIControls ships keypad. */
 type TaskMainControlsWithKeypad = TaskUIControls['main'] & {
@@ -168,22 +169,6 @@ export const getMediaType = (mediaType: MediaChannelType, mediaChannel: MediaCha
     };
   }
 };
-
-/** Duck-type wxApp engaged call — visibility only; avoid upstream import from task package. */
-type WxAppTelephonyTaskForVisibility = ITask & {
-  getWebexCallingCallId?: () => string | null | undefined;
-};
-
-export const isWxAppEngagedCall = (task: ITask | null | undefined): boolean => {
-  const wxTask = task as WxAppTelephonyTaskForVisibility | null | undefined;
-  return typeof wxTask?.getWebexCallingCallId === 'function' && !!wxTask.getWebexCallingCallId();
-};
-
-/** Thick-client main-bar Mute/Keypad visibility gate — visibility only; not mute API routing. */
-export const shouldShowWxAppTelephonyControls = (
-  enableWxBetterTogether: boolean,
-  task: ITask | null | undefined
-): boolean => enableWxBetterTogether === true && isWxAppEngagedCall(task);
 
 /**
  * Thin defense layer for thick-client flag ON: suppresses visible+disabled ghost controls.
