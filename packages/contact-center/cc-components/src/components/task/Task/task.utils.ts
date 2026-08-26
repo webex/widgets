@@ -201,11 +201,21 @@ export const shouldShowTimeLeft = (isIncomingTask?: boolean, ronaTimeout?: numbe
  * @param styles - Additional styles
  * @returns The combined CSS class string
  */
-export const getTaskListItemClasses = (selected?: boolean, styles?: string, logger?): string => {
+export const getTaskListItemClasses = (
+  selected?: boolean,
+  styles?: string,
+  logger?,
+  hasActionError?: boolean
+): string => {
   try {
     const baseClass = 'task-list-item';
     const selectedClass = selected ? 'task-list-item--selected' : '';
+    const actionErrorClass = hasActionError ? 'task-list-item--has-action-error' : '';
     const additionalStyles = styles || '';
+
+    if (hasActionError) {
+      return [baseClass, selectedClass, actionErrorClass, additionalStyles].filter(Boolean).join(' ');
+    }
 
     return `${baseClass} ${selectedClass} ${additionalStyles}`.trim();
   } catch (error) {

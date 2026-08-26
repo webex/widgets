@@ -74,11 +74,6 @@ function App() {
   const [collapsedTasks, setCollapsedTasks] = React.useState([]);
   const [showLoader, setShowLoader] = useState(false);
   const [toast, setToast] = useState<{type: 'success' | 'error'} | null>(null);
-  const [telephonyError, setTelephonyError] = useState<{
-    widgetName: string;
-    message: string;
-    trackingId?: string;
-  } | null>(null);
   const [integrationEnv, setintegrationEnv] = useState(() => {
     const savedintegrationEnv = window.localStorage.getItem('integrationEnv');
     return savedintegrationEnv === 'true';
@@ -494,16 +489,8 @@ function App() {
   const onError = (widgetName: string, error: Error) => {
     const wxError = error as Error & {isWxAppTelephonyError?: boolean; trackingId?: string};
     if (wxError.isWxAppTelephonyError) {
-      // CallControl / CallControlCAD show TelephonyActionToast — avoid duplicate host toast.
-      if (widgetName === 'CallControl' || widgetName === 'CallControlCAD') {
-        console.log('WxApp telephony error (widget toast):', widgetName, error.message, wxError.trackingId);
-        return;
-      }
-      setTelephonyError({
-        widgetName,
-        message: error.message,
-        trackingId: wxError.trackingId,
-      });
+      // Widgets render inline/toast errors — host only logs for debugging.
+      console.log('WxApp telephony error:', widgetName, error.message, wxError.trackingId);
       return;
     }
     console.log('Error in widgets:', widgetName, error);
@@ -579,28 +566,6 @@ function App() {
                   role="button"
                   aria-label="Close"
                   onClick={() => setToast(null)}
-                  className="toast-close"
-                />
-              </div>
-            )}
-
-            {telephonyError && (
-              <div className="toast toast-error" role="alert" aria-live="polite">
-                <div className="toast-content">
-                  <div className="toast-title">Telephony error ({telephonyError.widgetName})</div>
-                  <div>{telephonyError.message}</div>
-                  {telephonyError.trackingId ? <div>Tracking ID: {telephonyError.trackingId}</div> : null}
-                </div>
-                <Button
-                  size={32}
-                  variant="tertiary"
-                  color="default"
-                  prefix-icon="cancel-bold"
-                  postfix-icon=""
-                  type="button"
-                  role="button"
-                  aria-label="Close"
-                  onClick={() => setTelephonyError(null)}
                   className="toast-close"
                 />
               </div>

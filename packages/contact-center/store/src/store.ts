@@ -15,6 +15,7 @@ import {
   WithWebex,
   RealTimeTranscriptionData,
   RealTimeAssistPayload,
+  OfferActionErrorDisplay,
 } from './store.types';
 
 import {getFeatureFlags} from './util';
@@ -61,6 +62,7 @@ class Store implements IStore {
   showE911Modal: boolean = false;
   isEmergencyModalAlreadyDisplayed: boolean = false;
   realTimeAssist: Record<string, RealTimeAssistPayload[]> = {};
+  offerActionErrors: Record<string, OfferActionErrorDisplay> = {};
 
   constructor() {
     makeAutoObservable(this, {

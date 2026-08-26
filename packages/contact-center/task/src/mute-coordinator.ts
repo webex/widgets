@@ -1,4 +1,4 @@
-import {ITask} from '@webex/contact-center';
+import {ITask} from '@webex/cc-store';
 import store from '@webex/cc-store';
 import {useCallControlProps} from './task.types';
 import {TelephonyToastAction} from './wxapp-error.utils';
@@ -35,8 +35,21 @@ export const resetMuteCoordinator = (): void => {
   muteCallbacksRef = null;
 };
 
-/** Test-only reset for module-level mute serialization state. */
+/** Test-only reset for module-level mute serialization state between Jest cases. */
 export const resetMuteCoordinatorForTests = resetMuteCoordinator;
+
+const isMuteCompletionStillValid = (interactionId: string | null | undefined): boolean => {
+  if (!interactionId || muteTaskRef?.data?.interactionId !== interactionId) {
+    return false;
+  }
+
+  const storeInteractionId = store.currentTask?.data?.interactionId;
+  if (storeInteractionId !== undefined && storeInteractionId !== interactionId) {
+    return false;
+  }
+
+  return true;
+};
 
 export const enqueueMuteToggle = ({task, callbacks}: EnqueueMuteToggleParams): Promise<void> => {
   muteTaskRef = task;
@@ -60,6 +73,7 @@ export const enqueueMuteToggle = ({task, callbacks}: EnqueueMuteToggleParams): P
 
         const activeTask = muteTaskRef;
         const activeCallbacks = muteCallbacksRef;
+        const interactionId = activeTask?.data?.interactionId;
 
         if (!activeTask) {
           break;
@@ -67,6 +81,10 @@ export const enqueueMuteToggle = ({task, callbacks}: EnqueueMuteToggleParams): P
 
         try {
           await activeTask.toggleMute({muted: intendedMuteState});
+
+          if (!isMuteCompletionStillValid(interactionId)) {
+            break;
+          }
 
           store.setIsMuted(intendedMuteState);
 
@@ -83,6 +101,11 @@ export const enqueueMuteToggle = ({task, callbacks}: EnqueueMuteToggleParams): P
           });
         } catch (error) {
           activeMuteTarget = null;
+
+          if (!isMuteCompletionStillValid(interactionId)) {
+            break;
+          }
+
           activeCallbacks?.logger.error(`toggleMute failed: ${error}`, {
             module: 'useCallControl',
             method: 'toggleMute',

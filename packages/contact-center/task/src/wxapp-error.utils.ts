@@ -100,7 +100,7 @@ export const reportWxAppTelephonyFailure = (
     module: 'wxapp-error.utils',
     method: context.action,
     trackingId: parsed.trackingId,
-    status: parsed.status,
+    data: {status: parsed.status},
   });
 
   if (onErrorCallback) {

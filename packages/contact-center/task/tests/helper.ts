@@ -1,11 +1,7 @@
 import {renderHook, act, waitFor} from '@testing-library/react';
-import {
-  useIncomingTask,
-  useTaskList,
-  useCallControl,
-  useOutdialCall,
-  resetMuteCoordinatorForTests,
-} from '../src/helper';
+import {useIncomingTask, useTaskList, useCallControl, useOutdialCall} from '../src/helper';
+import {resetMuteCoordinatorForTests} from '../src/mute-coordinator';
+import {resetOfferActionAttemptsForTests} from '../src/offer-action-attempts';
 import {
   TIMER_LABEL_WRAP_UP,
   TIMER_LABEL_POST_CALL,
@@ -47,6 +43,19 @@ const onTaskDeclined = jest.fn();
 const onTaskSelected = jest.fn().mockImplementation(() => {});
 
 const logger = mockCC.LoggerProxy;
+
+const resetStoreOfferActionErrors = (): void => {
+  if (typeof store.clearOfferActionError === 'function' && store.offerActionErrors) {
+    Object.keys(store.offerActionErrors).forEach((interactionId) => {
+      store.clearOfferActionError(interactionId);
+    });
+    return;
+  }
+
+  if (store.store) {
+    store.store.offerActionErrors = {};
+  }
+};
 
 // Override the wrapupCodes property before your tests run
 beforeAll(() => {
@@ -4521,6 +4530,65 @@ describe('useCallControl', () => {
       expect(store.setIsMuted).toHaveBeenLastCalledWith(false);
     });
 
+    it('should not apply mute state after task switch while SDK mute is pending', async () => {
+      let isMutedState = false;
+      const setIsMutedSpy = jest.spyOn(store, 'setIsMuted').mockImplementation((value: boolean) => {
+        isMutedState = value;
+      });
+      jest.spyOn(store, 'isMuted', 'get').mockImplementation(() => isMutedState);
+
+      let resolveMute!: () => void;
+      const taskA = {
+        ...mockCurrentTask,
+        data: {...mockCurrentTask.data, interactionId: 'interaction-a'},
+        toggleMute: jest.fn(
+          () =>
+            new Promise<void>((resolve) => {
+              resolveMute = resolve;
+            })
+        ),
+      };
+      const taskB = {
+        ...mockCurrentTask,
+        data: {...mockCurrentTask.data, interactionId: 'interaction-b'},
+        toggleMute: jest.fn().mockResolvedValue(undefined),
+      };
+
+      const {result, rerender} = renderHook(
+        (props: {currentTask: typeof taskA}) =>
+          useCallControl({
+            currentTask: props.currentTask,
+            logger: mockLogger,
+            isMuted: false,
+            conferenceEnabled: true,
+            agentId: 'test-agent-id',
+          }),
+        {initialProps: {currentTask: taskA}}
+      );
+
+      let mutePromise!: Promise<void>;
+      act(() => {
+        mutePromise = result.current.toggleMute();
+      });
+
+      await act(async () => {
+        await Promise.resolve();
+      });
+
+      setIsMutedSpy.mockClear();
+      jest.spyOn(store, 'currentTask', 'get').mockReturnValue(taskB as never);
+
+      rerender({currentTask: taskB});
+
+      await act(async () => {
+        resolveMute();
+        await mutePromise;
+      });
+
+      expect(setIsMutedSpy).not.toHaveBeenCalled();
+      expect(isMutedState).toBe(false);
+    });
+
     it('should unmute from a second hook instance after muting from the first', async () => {
       let isMutedState = false;
       jest.spyOn(store, 'setIsMuted').mockImplementation((value: boolean) => {
@@ -7922,6 +7990,8 @@ describe('Task Hook Error Handling and Logging', () => {
 describe('WXCC-6026 wxApp thick-client hooks', () => {
   beforeEach(() => {
     resetMuteCoordinatorForTests();
+    resetOfferActionAttemptsForTests();
+    resetStoreOfferActionErrors();
     jest.spyOn(store, 'setIsMuted').mockImplementation(() => {});
     jest.spyOn(store, 'isMuted', 'get').mockImplementation(() => false);
   });
@@ -7929,6 +7999,8 @@ describe('WXCC-6026 wxApp thick-client hooks', () => {
   afterEach(() => {
     jest.restoreAllMocks();
     resetMuteCoordinatorForTests();
+    resetOfferActionAttemptsForTests();
+    resetStoreOfferActionErrors();
   });
 
   it('useIncomingTask accept calls task.accept()', async () => {
@@ -8239,7 +8311,7 @@ describe('WXCC-6026 wxApp thick-client hooks', () => {
       off: jest.fn(),
     };
 
-    const {result} = renderHook(() =>
+    const {result, rerender} = renderHook(() =>
       useIncomingTask({
         incomingTask: wxAppTask,
         onAccepted: onTaskAccepted,
@@ -8255,6 +8327,8 @@ describe('WXCC-6026 wxApp thick-client hooks', () => {
     await act(async () => {
       await Promise.resolve();
     });
+
+    rerender();
 
     expect(result.current.offerActionError).toMatchObject({
       message: 'Unable to answer the Call. Please try again',
@@ -8279,7 +8353,7 @@ describe('WXCC-6026 wxApp thick-client hooks', () => {
       off: jest.fn(),
     };
 
-    const {result} = renderHook(() =>
+    const {result, rerender} = renderHook(() =>
       useIncomingTask({
         incomingTask: wxAppTask,
         onAccepted: onTaskAccepted,
@@ -8296,16 +8370,139 @@ describe('WXCC-6026 wxApp thick-client hooks', () => {
       await Promise.resolve();
     });
 
+    rerender();
+
     expect(result.current.offerActionError).not.toBeNull();
 
     await act(async () => {
       result.current.accept();
     });
 
+    rerender();
+
     expect(result.current.offerActionError).toBeNull();
 
     await act(async () => {
       await Promise.resolve();
+    });
+  });
+
+  it('useTaskList accept failure syncs offerActionError to store for IncomingTask', async () => {
+    const telephonyError = Object.assign(new Error('Answer failed'), {
+      isWxAppTelephonyError: true,
+      trackingId: 'track-sync',
+      status: 500,
+    });
+    const accept = jest.fn().mockRejectedValue(telephonyError);
+    const wxAppTask = {
+      ...taskMock,
+      data: {...taskMock.data, interactionId: 'sync-interaction'},
+      accept,
+      decline: jest.fn(),
+      on: jest.fn(),
+      off: jest.fn(),
+    };
+
+    const {result: taskListResult, rerender: rerenderTaskList} = renderHook(() =>
+      useTaskList({
+        taskList: {'sync-interaction': wxAppTask},
+        logger,
+        cc: mockCC,
+      })
+    );
+
+    const {result: incomingResult, rerender: rerenderIncoming} = renderHook(() =>
+      useIncomingTask({
+        incomingTask: wxAppTask,
+        onAccepted: onTaskAccepted,
+        onRejected: onTaskDeclined,
+        logger,
+      })
+    );
+
+    await act(async () => {
+      taskListResult.current.acceptTask(wxAppTask);
+    });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    const errorsAfterAccept = store.offerActionErrors;
+    expect(errorsAfterAccept['sync-interaction']).toMatchObject({
+      message: 'Unable to answer the Call. Please try again',
+      trackingId: 'track-sync',
+    });
+
+    rerenderIncoming();
+    expect(incomingResult.current.offerActionError).toMatchObject({
+      message: 'Unable to answer the Call. Please try again',
+    });
+
+    rerenderTaskList();
+    expect(taskListResult.current.taskActionErrors).toBe(errorsAfterAccept);
+    expect(taskListResult.current.taskActionErrors['sync-interaction']).toMatchObject({
+      message: 'Unable to answer the Call. Please try again',
+    });
+  });
+
+  it('useIncomingTask accept failure syncs offerActionError to TaskList via new store map reference', async () => {
+    resetStoreOfferActionErrors();
+    const telephonyError = Object.assign(new Error('Answer failed'), {
+      isWxAppTelephonyError: true,
+      trackingId: 'track-reverse-sync',
+      status: 500,
+    });
+    const accept = jest.fn().mockRejectedValue(telephonyError);
+    const wxAppTask = {
+      ...taskMock,
+      data: {...taskMock.data, interactionId: 'reverse-sync-interaction'},
+      accept,
+      decline: jest.fn(),
+      on: jest.fn(),
+      off: jest.fn(),
+    };
+
+    const {result: taskListResult, rerender: rerenderTaskList} = renderHook(() =>
+      useTaskList({
+        taskList: {'reverse-sync-interaction': wxAppTask},
+        logger,
+        cc: mockCC,
+      })
+    );
+
+    const {result: incomingResult, rerender: rerenderIncoming} = renderHook(() =>
+      useIncomingTask({
+        incomingTask: wxAppTask,
+        onAccepted: onTaskAccepted,
+        onRejected: onTaskDeclined,
+        logger,
+      })
+    );
+
+    const errorsRefBeforeAccept = store.offerActionErrors;
+
+    await act(async () => {
+      incomingResult.current.accept();
+    });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(store.offerActionErrors['reverse-sync-interaction']).toMatchObject({
+      message: 'Unable to answer the Call. Please try again',
+      trackingId: 'track-reverse-sync',
+    });
+    expect(store.offerActionErrors).not.toBe(errorsRefBeforeAccept);
+    rerenderTaskList();
+    expect(taskListResult.current.taskActionErrors).toBe(store.offerActionErrors);
+    expect(taskListResult.current.taskActionErrors['reverse-sync-interaction']).toMatchObject({
+      message: 'Unable to answer the Call. Please try again',
+    });
+    rerenderIncoming();
+    expect(incomingResult.current.offerActionError).toMatchObject({
+      message: 'Unable to answer the Call. Please try again',
     });
   });
 

@@ -27,6 +27,7 @@ import {
   RealTimeTranscriptionEventPayload,
   DesktopPreference,
   RealTimeAssistPayload,
+  OfferActionErrorDisplay,
 } from './store.types';
 import Store from './store';
 import {
@@ -247,6 +248,37 @@ class StoreWrapper implements IStoreWrapper {
   setIsMuted = (value: boolean): void => {
     runInAction(() => {
       this.store.isMuted = value;
+    });
+  };
+
+  get offerActionErrors() {
+    return this.store.offerActionErrors;
+  }
+
+  setOfferActionError = (interactionId: string, error: OfferActionErrorDisplay | null): void => {
+    runInAction(() => {
+      const remaining = {...this.store.offerActionErrors};
+      delete remaining[interactionId];
+      this.store.offerActionErrors = error ? {...remaining, [interactionId]: error} : remaining;
+    });
+  };
+
+  clearOfferActionError = (interactionId: string): void => {
+    this.setOfferActionError(interactionId, null);
+  };
+
+  pruneOfferActionErrors = (activeInteractionIds: Set<string>): void => {
+    runInAction(() => {
+      const currentEntries = Object.entries(this.store.offerActionErrors);
+      const hasStaleEntries = currentEntries.some(([interactionId]) => !activeInteractionIds.has(interactionId));
+
+      if (!hasStaleEntries) {
+        return;
+      }
+
+      this.store.offerActionErrors = Object.fromEntries(
+        currentEntries.filter(([interactionId]) => activeInteractionIds.has(interactionId))
+      );
     });
   };
 

@@ -1,5 +1,123 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Task Component Snapshots Action error display should match snapshot when action error is shown below accept/decline buttons 1`] = `
+<div>
+  <li
+    class="task-list-item task-list-item--has-action-error md-list-item-base-wrapper"
+    data-allow-text-select="false"
+    data-disabled="false"
+    data-interactive="true"
+    data-padded="false"
+    data-shape="rectangle"
+    data-size="auto"
+    id="test-interaction-123"
+    role="listitem"
+    tabindex="0"
+  >
+    <div
+      data-position="start"
+    >
+      <mdc-avatar
+        aria-hidden="true"
+        class="telephony"
+        icon-name="handset-filled"
+        size="32"
+      />
+    </div>
+    <div
+      data-position="fill"
+    >
+      <section
+        class="task-details"
+      >
+        <mdc-text
+          class="md-text-wrapper task-title"
+          data-testid="task:title"
+          tagname="span"
+          type="body-large-medium"
+        >
+          Test Task
+        </mdc-text>
+        <mdc-text
+          class="md-text-wrapper task-text"
+          data-testid="test-interaction-123-handle-time"
+          tagname="span"
+          type="body-midsize-regular"
+        >
+          Handle Time: 
+            
+          <time
+            class="task-text task-text--secondary"
+            datetime="00:00"
+          >
+            00:00
+          </time>
+        </mdc-text>
+      </section>
+    </div>
+    <div
+      data-position="end"
+    >
+      <div
+        class="task-button-container"
+      >
+        <button
+          class="md-button-pill-wrapper md-button-simple-wrapper"
+          data-color="join"
+          data-disabled="false"
+          data-disabled-outline="false"
+          data-ghost="false"
+          data-grown="false"
+          data-inverted="false"
+          data-outline="false"
+          data-shallow-disabled="false"
+          data-size="40"
+          data-testid="task:accept-button"
+          tabindex="-1"
+          type="button"
+        >
+          <span>
+            Accept
+          </span>
+        </button>
+        <button
+          class="md-button-pill-wrapper md-button-simple-wrapper"
+          data-color="cancel"
+          data-disabled="false"
+          data-disabled-outline="false"
+          data-ghost="false"
+          data-grown="false"
+          data-inverted="false"
+          data-outline="false"
+          data-shallow-disabled="false"
+          data-size="40"
+          data-testid="task:decline-button"
+          tabindex="-1"
+          type="button"
+        >
+          <span>
+            Decline
+          </span>
+        </button>
+      </div>
+      <div
+        class="wxapp-offer-action-error"
+        data-testid="wxapp-offer-action-error"
+        role="alert"
+      >
+        <mdc-text
+          class="wxapp-offer-action-error-message"
+          tagname="p"
+          type="body-midsize-regular"
+        >
+          Unable to answer the Call. Please try again
+        </mdc-text>
+      </div>
+    </div>
+  </li>
+</div>
+`;
+
 exports[`Task Component Snapshots Actions should handle accept task action correctly 1`] = `
 <div>
   <li

@@ -25,7 +25,7 @@ const onRejectedCb = jest.fn();
 describe('IncomingTask Component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    store.taskList = {};
+    (store as {taskList: Record<string, unknown>}).taskList = {};
     // Suppress console.error for error boundary tests
     jest.spyOn(console, 'error').mockImplementation(() => {});
   });
@@ -47,7 +47,9 @@ describe('IncomingTask Component', () => {
 
     const staleTask = {...mockTask, uiControls: {main: {accept: {isVisible: true, isEnabled: false}}}};
     const liveTask = {...mockTask, uiControls: {main: {accept: {isVisible: true, isEnabled: true}}}};
-    store.taskList = {[mockTask.data.interactionId]: liveTask as typeof mockTask};
+    (store as {taskList: Record<string, unknown>}).taskList = {
+      [mockTask.data.interactionId]: liveTask as typeof mockTask,
+    };
 
     render(<IncomingTask incomingTask={staleTask} onAccepted={onAcceptedCb} onRejected={onRejectedCb} />);
 

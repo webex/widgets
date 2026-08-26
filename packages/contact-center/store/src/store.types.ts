@@ -139,6 +139,13 @@ type WithWebexConfig = {
 
 type InitParams = WithWebex | WithWebexConfig;
 
+type OfferActionErrorDisplay = {
+  message: string;
+  isWxAppTelephonyError?: boolean;
+  trackingId?: string;
+  status?: number | string;
+};
+
 type IdleCode = {
   name: string;
   id: string;
@@ -209,6 +216,7 @@ interface IStore {
   showE911Modal: boolean;
   isEmergencyModalAlreadyDisplayed: boolean;
   realTimeAssist: Record<string, RealTimeAssistPayload[]>;
+  offerActionErrors: Record<string, OfferActionErrorDisplay>;
   init(params: InitParams, callback: (ccSDK: IContactCenter) => void): Promise<void>;
   registerCC(webex?: WithWebex['webex']): Promise<void>;
 }
@@ -253,6 +261,9 @@ interface IStoreWrapper extends IStore {
   fetchUserPreferences(): Promise<void>;
   updateEmergencyModalAcknowledgment(): Promise<void>;
   clearRealTimeAssist(interactionId: string): void;
+  setOfferActionError(interactionId: string, error: OfferActionErrorDisplay | null): void;
+  clearOfferActionError(interactionId: string): void;
+  pruneOfferActionErrors(activeInteractionIds: Set<string>): void;
 }
 
 interface IWrapupCode {
@@ -389,6 +400,7 @@ export type {
   RealTimeAssistRequestParams,
   RealTimeAssistUserActionId,
   RealTimeAssistUserActionParams,
+  OfferActionErrorDisplay,
 };
 
 export {

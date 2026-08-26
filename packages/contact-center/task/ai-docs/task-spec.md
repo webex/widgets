@@ -92,7 +92,8 @@ Compatibility notes:
 | **Host init** | `webexConfig.cc.enableAnswerOnWebex: boolean` (default `false`) — set **before** `store.init()`; persisted on store for **UI visibility gating only** |
 | **IncomingTask** | Calls SDK `task.accept()` / `task.decline()` — wxApp routing is internal to SDK `Voice` |
 | **CallControl** | Engaged wxApp → `task.toggleMute({ muted })` / `task.transmitDtmf({ dtmf })`; widget force-visible only when wxApp engaged **and** SDK `isEnabled`; hide SDK visible+disabled ghosts; Desktop WebRTC SDK passthrough; CAD consult sub-bar mute hidden only when wxApp engaged; `toggleMute` guard includes `consult.mute.isVisible` |
-| **TaskList** | Inline Accept / Decline — same unified `task.accept()` / `task.decline()` as IncomingTask |
+| **TaskList** | Inline Accept / Decline — same unified `task.accept()` / `task.decline()` as IncomingTask; offer-action errors stored on `@webex/cc-store` (`offerActionErrors`) keyed by `interactionId` so TaskList and IncomingTask stay in sync; store assigns a new map reference on each update so `withMetrics` memo does not block TaskList re-renders |
+| **@webex/cc-store** | `offerActionErrors` map + `setOfferActionError` / `clearOfferActionError` / `pruneOfferActionErrors` — shared wxApp accept/decline inline error state across TaskList and IncomingTask widget instances (immutable map replacement on mutate) |
 | **@webex/cc-components** | Shared wxApp visibility helpers: `isWxAppEngagedCall`, `shouldShowWxAppTelephonyControls` (imported by `helper.ts` for mute/DTMF gates) |
 
 **SDK follow-up (uiControls):** SDK must enable `main.mute/keypad` through consult/hold/conference when wxApp engaged; BROWSER login ignores init flag for uiControls.

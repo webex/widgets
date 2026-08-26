@@ -102,97 +102,96 @@ const Task: React.FC<TaskProps> = ({
   };
 
   return (
-    <>
-      <ListItemBase
-        className={getTaskListItemClasses(selected, styles)}
-        onPress={onTaskSelect ? onTaskSelect : undefined}
-        id={interactionId}
-      >
-        <ListItemBaseSection position="start">
-          {taskData.currentMediaType.isBrandVisual ? (
-            <div className="brand-visual-background">
-              <Brandvisual name={taskData.currentMediaType.iconName} className={taskData.currentMediaType.className} />
-            </div>
-          ) : (
-            <Avatar icon-name={taskData.currentMediaType.iconName} className={taskData.currentMediaType.className} />
-          )}
-        </ListItemBaseSection>
-
-        <ListItemBaseSection position="fill">
-          <section className="task-details">
-            {renderTitle()}
-            {taskData.shouldShowState && (
-              <Text
-                tagName="span"
-                type="body-midsize-regular"
-                className="task-text"
-                data-testid={`${interactionId}-state`}
-              >
-                {taskData.capitalizedState}
-              </Text>
-            )}
-
-            {taskData.shouldShowQueue && (
-              <Text
-                tagName="span"
-                type="body-midsize-regular"
-                className="task-text"
-                data-testid={`${interactionId}-queue`}
-              >
-                {taskData.capitalizedQueue}
-              </Text>
-            )}
-
-            {/* Handle Time should render if it's an incoming call without ronaTimeout OR if it's not an incoming call */}
-            {taskData.shouldShowHandleTime && (
-              <Text
-                tagName="span"
-                type="body-midsize-regular"
-                className="task-text"
-                data-testid={`${interactionId}-handle-time`}
-              >
-                Handle Time: {'  '}
-                <TaskTimer startTimeStamp={startTimeStamp} data-testid="task-list:timer" />
-              </Text>
-            )}
-
-            {/* Time Left should render if it's an incoming call with ronaTimeout */}
-            {taskData.shouldShowTimeLeft && (
-              <Text
-                tagName="span"
-                type="body-midsize-regular"
-                className="task-text"
-                data-testid={`${interactionId}-time-left`}
-              >
-                Time Left: {'  '}
-                <TaskTimer countdown={true} ronaTimeout={ronaTimeout} />
-              </Text>
-            )}
-          </section>
-        </ListItemBaseSection>
-
-        <ListItemBaseSection position="end">
-          <div className="task-button-container">
-            {acceptText ? (
-              <ButtonPill onPress={acceptTask} color="join" disabled={disableAccept} data-testid="task:accept-button">
-                {acceptText}
-              </ButtonPill>
-            ) : null}
-            {declineText ? (
-              <ButtonPill
-                onPress={declineTask}
-                color="cancel"
-                disabled={disableDecline}
-                data-testid="task:decline-button"
-              >
-                {declineText}
-              </ButtonPill>
-            ) : null}
+    <ListItemBase
+      className={getTaskListItemClasses(selected, styles, undefined, Boolean(actionError))}
+      size={actionError ? 'auto' : undefined}
+      onPress={onTaskSelect ? onTaskSelect : undefined}
+      id={interactionId}
+    >
+      <ListItemBaseSection position="start">
+        {taskData.currentMediaType.isBrandVisual ? (
+          <div className="brand-visual-background">
+            <Brandvisual name={taskData.currentMediaType.iconName} className={taskData.currentMediaType.className} />
           </div>
-        </ListItemBaseSection>
-      </ListItemBase>
-      {actionError ? <WxAppOfferActionError error={actionError} /> : null}
-    </>
+        ) : (
+          <Avatar icon-name={taskData.currentMediaType.iconName} className={taskData.currentMediaType.className} />
+        )}
+      </ListItemBaseSection>
+
+      <ListItemBaseSection position="fill">
+        <section className="task-details">
+          {renderTitle()}
+          {taskData.shouldShowState && (
+            <Text
+              tagName="span"
+              type="body-midsize-regular"
+              className="task-text"
+              data-testid={`${interactionId}-state`}
+            >
+              {taskData.capitalizedState}
+            </Text>
+          )}
+
+          {taskData.shouldShowQueue && (
+            <Text
+              tagName="span"
+              type="body-midsize-regular"
+              className="task-text"
+              data-testid={`${interactionId}-queue`}
+            >
+              {taskData.capitalizedQueue}
+            </Text>
+          )}
+
+          {/* Handle Time should render if it's an incoming call without ronaTimeout OR if it's not an incoming call */}
+          {taskData.shouldShowHandleTime && (
+            <Text
+              tagName="span"
+              type="body-midsize-regular"
+              className="task-text"
+              data-testid={`${interactionId}-handle-time`}
+            >
+              Handle Time: {'  '}
+              <TaskTimer startTimeStamp={startTimeStamp} data-testid="task-list:timer" />
+            </Text>
+          )}
+
+          {/* Time Left should render if it's an incoming call with ronaTimeout */}
+          {taskData.shouldShowTimeLeft && (
+            <Text
+              tagName="span"
+              type="body-midsize-regular"
+              className="task-text"
+              data-testid={`${interactionId}-time-left`}
+            >
+              Time Left: {'  '}
+              <TaskTimer countdown={true} ronaTimeout={ronaTimeout} />
+            </Text>
+          )}
+        </section>
+      </ListItemBaseSection>
+
+      <ListItemBaseSection position="end">
+        <div className="task-button-container">
+          {acceptText ? (
+            <ButtonPill onPress={acceptTask} color="join" disabled={disableAccept} data-testid="task:accept-button">
+              {acceptText}
+            </ButtonPill>
+          ) : null}
+          {declineText ? (
+            <ButtonPill
+              onPress={declineTask}
+              color="cancel"
+              disabled={disableDecline}
+              data-testid="task:decline-button"
+            >
+              {declineText}
+            </ButtonPill>
+          ) : null}
+        </div>
+        {actionError ? <WxAppOfferActionError error={actionError} /> : null}
+      </ListItemBaseSection>
+    </ListItemBase>
   );
 };
 

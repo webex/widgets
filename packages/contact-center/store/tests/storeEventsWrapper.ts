@@ -3457,4 +3457,52 @@ describe('storeEventsWrapper', () => {
       });
     });
   });
+
+  describe('offerActionErrors', () => {
+    beforeEach(() => {
+      storeWrapper['store'].offerActionErrors = {};
+    });
+
+    it('setOfferActionError stores and clears display errors by interactionId', () => {
+      const initialRef = storeWrapper.offerActionErrors;
+
+      storeWrapper.setOfferActionError('interaction-1', {
+        message: 'Unable to answer the Call. Please try again',
+        isWxAppTelephonyError: true,
+      });
+
+      expect(storeWrapper.offerActionErrors).not.toBe(initialRef);
+      expect(storeWrapper.offerActionErrors['interaction-1']).toMatchObject({
+        message: 'Unable to answer the Call. Please try again',
+      });
+
+      const withErrorRef = storeWrapper.offerActionErrors;
+      storeWrapper.clearOfferActionError('interaction-1');
+
+      expect(storeWrapper.offerActionErrors).not.toBe(withErrorRef);
+      expect(storeWrapper.offerActionErrors['interaction-1']).toBeUndefined();
+    });
+
+    it('pruneOfferActionErrors removes stale interaction entries and replaces the map reference', () => {
+      storeWrapper.setOfferActionError('active-id', {message: 'Active error'});
+      storeWrapper.setOfferActionError('stale-id', {message: 'Stale error'});
+
+      const beforePruneRef = storeWrapper.offerActionErrors;
+      storeWrapper.pruneOfferActionErrors(new Set(['active-id']));
+
+      expect(storeWrapper.offerActionErrors).not.toBe(beforePruneRef);
+      expect(storeWrapper.offerActionErrors['active-id']).toBeDefined();
+      expect(storeWrapper.offerActionErrors['stale-id']).toBeUndefined();
+    });
+
+    it('pruneOfferActionErrors keeps the map reference when no stale entries exist', () => {
+      storeWrapper.setOfferActionError('active-id', {message: 'Active error'});
+
+      const beforePruneRef = storeWrapper.offerActionErrors;
+      storeWrapper.pruneOfferActionErrors(new Set(['active-id']));
+
+      expect(storeWrapper.offerActionErrors).toBe(beforePruneRef);
+      expect(storeWrapper.offerActionErrors['active-id']).toBeDefined();
+    });
+  });
 });

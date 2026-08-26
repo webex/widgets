@@ -17,7 +17,7 @@ const IncomingTaskInternal: React.FunctionComponent<IncomingTaskProps> = observe
       logger?.info('CC-Widgets: IncomingTask using live task from store.taskList', {
         module: 'IncomingTask',
         method: 'render',
-        acceptEnabled: liveIncomingTask?.uiControls?.main?.accept?.isEnabled,
+        data: {acceptEnabled: liveIncomingTask?.uiControls?.main?.accept?.isEnabled},
       });
     }
 
