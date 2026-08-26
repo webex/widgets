@@ -500,7 +500,7 @@ function App() {
       >
         <IconProvider iconSet="momentum-icons">
           <div className="webexTheme">
-            <h1>Contact Center Widgets in a React app</h1>
+            <h1>Contact Center Widgets in a React App</h1>
             {showLoader && (
               <div className="profile-loader-overlay">
                 <div className="profile-loader-spinner" aria-label="Loading" />
@@ -555,7 +555,7 @@ function App() {
                   <div className="accessTokenTheme" style={{marginTop: '15px'}}>
                     {loginType === 'token' && (
                       <div>
-                        <span>Your access token: </span>
+                        <span>Your Access Token: </span>
                         <input type="text" value={accessToken} onChange={(e) => setAccessToken(e.target.value)} />
                       </div>
                     )}
