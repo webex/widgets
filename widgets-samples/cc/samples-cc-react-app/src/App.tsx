@@ -500,7 +500,7 @@ function App() {
       >
         <IconProvider iconSet="momentum-icons">
           <div className="webexTheme">
-            <h1>Contact Center Widgets in a React app</h1>
+            <h1>Contact Center Widgets in a React App</h1>
             {showLoader && (
               <div className="profile-loader-overlay">
                 <div className="profile-loader-spinner" aria-label="Loading" />
