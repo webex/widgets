@@ -703,7 +703,15 @@ class StoreWrapper implements IStoreWrapper {
     // Each new telephony offer starts unmuted on Webex App / WebRTC media.
     // Widgets track mute locally in store.isMuted — reset so a prior call's mute
     // state does not leak into the next interaction (WXCC-6026 wxApp thick-client).
-    if (isTelephony) {
+    // Background offers must not clobber mute for the currently engaged call.
+    if (!isTelephony) {
+      return;
+    }
+
+    const incomingId = task.data?.interactionId;
+    const currentId = this.currentTask?.data?.interactionId;
+
+    if (!currentId || currentId === incomingId) {
       this.setIsMuted(false);
     }
   };

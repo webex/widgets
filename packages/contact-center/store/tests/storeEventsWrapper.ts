@@ -694,9 +694,41 @@ describe('storeEventsWrapper', () => {
     });
 
     describe('handleTaskMuteState', () => {
-      it('resets isMuted on new incoming telephony task for Extension login', () => {
+      it('resets isMuted on new incoming telephony task when there is no current task', () => {
         storeWrapper['store'].deviceType = 'EXTENSION';
         storeWrapper['store'].isMuted = true;
+        storeWrapper['store'].currentTask = null;
+
+        storeWrapper.handleTaskMuteState(mockTask);
+
+        expect(storeWrapper.isMuted).toBe(false);
+      });
+
+      it('does not reset isMuted when a background telephony offer arrives during an engaged call', () => {
+        const currentTask = makeMockTask({
+          data: {
+            interactionId: 'current-interaction',
+            interaction: {state: 'connected', mediaType: 'telephony'},
+          },
+        });
+        const backgroundOffer = makeMockTask({
+          data: {
+            interactionId: 'background-offer',
+            interaction: {state: 'new', mediaType: 'telephony'},
+          },
+        });
+
+        storeWrapper['store'].isMuted = true;
+        storeWrapper['store'].currentTask = currentTask;
+
+        storeWrapper.handleTaskMuteState(backgroundOffer);
+
+        expect(storeWrapper.isMuted).toBe(true);
+      });
+
+      it('resets isMuted when the incoming telephony task is already current', () => {
+        storeWrapper['store'].isMuted = true;
+        storeWrapper['store'].currentTask = mockTask;
 
         storeWrapper.handleTaskMuteState(mockTask);
 

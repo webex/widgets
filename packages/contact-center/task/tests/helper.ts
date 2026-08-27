@@ -4589,6 +4589,95 @@ describe('useCallControl', () => {
       expect(isMutedState).toBe(false);
     });
 
+    it('should preserve mute coordinator state when a stale task chain settles after switching tasks', async () => {
+      let isMutedState = false;
+      jest.spyOn(store, 'setIsMuted').mockImplementation((value: boolean) => {
+        isMutedState = value;
+      });
+      jest.spyOn(store, 'isMuted', 'get').mockImplementation(() => isMutedState);
+
+      let resolveMuteA!: () => void;
+      let resolveMuteB!: () => void;
+      const taskA = {
+        ...mockCurrentTask,
+        data: {...mockCurrentTask.data, interactionId: 'interaction-a'},
+        toggleMute: jest.fn(
+          () =>
+            new Promise<void>((resolve) => {
+              resolveMuteA = resolve;
+            })
+        ),
+      };
+      const taskB = {
+        ...mockCurrentTask,
+        data: {...mockCurrentTask.data, interactionId: 'interaction-b'},
+        toggleMute: jest
+          .fn()
+          .mockImplementationOnce(
+            () =>
+              new Promise<void>((resolve) => {
+                resolveMuteB = resolve;
+              })
+          )
+          .mockImplementation(() => Promise.resolve()),
+      };
+
+      const {result, rerender} = renderHook(
+        (props: {currentTask: typeof taskA}) =>
+          useCallControl({
+            currentTask: props.currentTask,
+            logger: mockLogger,
+            isMuted: false,
+            conferenceEnabled: true,
+            agentId: 'test-agent-id',
+          }),
+        {initialProps: {currentTask: taskA}}
+      );
+
+      let mutePromiseA!: Promise<void>;
+      act(() => {
+        mutePromiseA = result.current.toggleMute();
+      });
+
+      await act(async () => {
+        await Promise.resolve();
+      });
+
+      jest.spyOn(store, 'currentTask', 'get').mockReturnValue(taskB as never);
+
+      await act(async () => {
+        rerender({currentTask: taskB});
+      });
+
+      let mutePromiseB!: Promise<void>;
+      await act(async () => {
+        mutePromiseB = result.current.toggleMute();
+        await Promise.resolve();
+      });
+
+      await act(async () => {
+        resolveMuteA();
+        await mutePromiseA;
+      });
+
+      await act(async () => {
+        resolveMuteB();
+        await mutePromiseB;
+      });
+
+      expect(taskB.toggleMute).toHaveBeenCalledWith({muted: true});
+      expect(isMutedState).toBe(true);
+
+      taskB.toggleMute.mockClear();
+
+      await act(async () => {
+        await result.current.toggleMute();
+      });
+
+      expect(taskB.toggleMute).toHaveBeenCalledWith({muted: false});
+      expect(isMutedState).toBe(false);
+    });
+
     it('should unmute from a second hook instance after muting from the first', async () => {
       let isMutedState = false;
       jest.spyOn(store, 'setIsMuted').mockImplementation((value: boolean) => {
@@ -8119,6 +8208,78 @@ describe('WXCC-6026 wxApp thick-client hooks', () => {
     });
 
     expect(transmitDtmf).toHaveBeenCalledWith({dtmf: '5'});
+  });
+
+  it('useCallControl sendDtmf does not surface telephonyToast after task switch while transmitDtmf is pending', async () => {
+    const telephonyError = Object.assign(new Error('DTMF failed'), {
+      isWxAppTelephonyError: true,
+      trackingId: 'track-dtmf',
+    });
+    let rejectDtmf!: (error: Error) => void;
+    const transmitDtmf = jest.fn(
+      () =>
+        new Promise<void>((_, reject) => {
+          rejectDtmf = reject;
+        })
+    );
+    const taskA = {
+      ...mockTask,
+      data: {...mockTask.data, interactionId: 'dtmf-interaction-a'},
+      getWebexCallingCallId: jest.fn().mockReturnValue('call-a'),
+      transmitDtmf,
+      uiControls: {
+        ...createEnabledMainTaskUIControls(),
+        main: {
+          ...createEnabledMainTaskUIControls().main,
+          keypad: {isVisible: true, isEnabled: true},
+        },
+      },
+      on: jest.fn(),
+      off: jest.fn(),
+    };
+    const taskB = {
+      ...mockTask,
+      data: {...mockTask.data, interactionId: 'dtmf-interaction-b'},
+      getWebexCallingCallId: jest.fn().mockReturnValue('call-b'),
+      transmitDtmf: jest.fn().mockResolvedValue(undefined),
+      uiControls: taskA.uiControls,
+      on: jest.fn(),
+      off: jest.fn(),
+    };
+
+    const {result, rerender} = renderHook(
+      (props: {currentTask: typeof taskA}) =>
+        useCallControl({
+          currentTask: props.currentTask,
+          logger: mockCC.LoggerProxy,
+          isMuted: false,
+          conferenceEnabled: false,
+          agentId: 'agent1',
+          enableWxBetterTogether: true,
+        }),
+      {initialProps: {currentTask: taskA}}
+    );
+
+    let dtmfPromise!: Promise<void>;
+    await act(async () => {
+      dtmfPromise = result.current.sendDtmf('5');
+      await Promise.resolve();
+    });
+
+    jest.spyOn(store, 'currentTask', 'get').mockReturnValue(taskB as never);
+
+    await act(async () => {
+      rerender({currentTask: taskB});
+    });
+
+    expect(result.current.telephonyToast).toBeNull();
+
+    await act(async () => {
+      rejectDtmf(telephonyError);
+      await dtmfPromise.catch(() => undefined);
+    });
+
+    expect(result.current.telephonyToast).toBeNull();
   });
 
   it('useTaskList acceptTask calls task.accept()', async () => {

@@ -20,6 +20,7 @@ export type EnqueueMuteToggleParams = {
 // per-instance ref would only serialize within one widget, letting a second widget's
 // concurrent toggleMute() race the first and coalesce mute intent incorrectly.
 let muteChain = Promise.resolve();
+let muteGeneration = 0;
 let pendingMuteTarget: boolean | null = null;
 let activeMuteTarget: boolean | null = null;
 let muteChainInFlight = false;
@@ -27,6 +28,7 @@ let muteTaskRef: ITask | null = null;
 let muteCallbacksRef: MuteCoordinatorCallbacks | null = null;
 
 export const resetMuteCoordinator = (): void => {
+  muteGeneration += 1;
   muteChain = Promise.resolve();
   pendingMuteTarget = null;
   activeMuteTarget = null;
@@ -52,6 +54,7 @@ const isMuteCompletionStillValid = (interactionId: string | null | undefined): b
 };
 
 export const enqueueMuteToggle = ({task, callbacks}: EnqueueMuteToggleParams): Promise<void> => {
+  const generation = muteGeneration;
   muteTaskRef = task;
   muteCallbacksRef = callbacks;
 
@@ -63,10 +66,18 @@ export const enqueueMuteToggle = ({task, callbacks}: EnqueueMuteToggleParams): P
   }
 
   muteChain = muteChain.then(async () => {
+    if (generation !== muteGeneration) {
+      return;
+    }
+
     muteChainInFlight = true;
 
     try {
       while (pendingMuteTarget !== null) {
+        if (generation !== muteGeneration) {
+          break;
+        }
+
         const intendedMuteState = pendingMuteTarget;
         pendingMuteTarget = null;
         activeMuteTarget = intendedMuteState;
@@ -122,8 +133,10 @@ export const enqueueMuteToggle = ({task, callbacks}: EnqueueMuteToggleParams): P
         }
       }
     } finally {
-      muteChainInFlight = false;
-      activeMuteTarget = null;
+      if (generation === muteGeneration) {
+        muteChainInFlight = false;
+        activeMuteTarget = null;
+      }
     }
   });
 

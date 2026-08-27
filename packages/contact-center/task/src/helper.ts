@@ -1194,6 +1194,8 @@ export const useCallControl = (props: useCallControlProps) => {
   };
 
   const sendDtmf = async (digit: string) => {
+    const interactionId = currentTask?.data?.interactionId;
+
     try {
       const keypad = controls?.main?.keypad;
       const wxAppAllowed = shouldShowWxAppTelephonyControls(enableWxBetterTogether, currentTask);
@@ -1211,6 +1213,10 @@ export const useCallControl = (props: useCallControlProps) => {
 
       await currentTask.transmitDtmf({dtmf: digit});
     } catch (error) {
+      if (interactionId && store.currentTask?.data?.interactionId !== interactionId) {
+        return;
+      }
+
       logger.error(`sendDtmf failed: ${error}`, {module: 'useCallControl', method: 'sendDtmf'});
       showTelephonyToast(error, 'dtmf');
     }
