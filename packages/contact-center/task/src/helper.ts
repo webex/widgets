@@ -50,7 +50,7 @@ import {deriveMainCadHoldState} from './Utils/main-cad-hold.util';
 import {writeConsultHoldAnchor, clearConsultHoldAnchor} from './Utils/task-util';
 import {useHoldTimer} from './Utils/useHoldTimer';
 import {OutdialAniEntriesResponse} from '@webex/contact-center/dist/types/services/config/types';
-import {enqueueMuteToggle, resetMuteCoordinator} from './mute-coordinator';
+import {enqueueMuteToggle, resetMuteCoordinatorForInteraction} from './mute-coordinator';
 import {isLatestOfferActionAttempt, nextOfferActionAttempt} from './offer-action-attempts';
 
 const ENGAGED_LABEL = 'ENGAGED';
@@ -575,7 +575,7 @@ export const useCallControl = (props: useCallControlProps) => {
   participantDropAgentIdRef.current = agentId;
 
   useEffect(() => {
-    resetMuteCoordinator();
+    resetMuteCoordinatorForInteraction(currentTask?.data?.interactionId);
   }, [currentTask?.data?.interactionId]);
 
   // Derive conference state during render so MobX tracks nested participant and owner changes.
@@ -1222,6 +1222,10 @@ export const useCallControl = (props: useCallControlProps) => {
       }
 
       logger.info('sendDtmf called', {module: 'useCallControl', method: 'sendDtmf'});
+
+      if (interactionId && store.currentTask?.data?.interactionId !== interactionId) {
+        return;
+      }
 
       await currentTask.transmitDtmf({dtmf: digit});
     } catch (error) {

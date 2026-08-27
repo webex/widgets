@@ -4830,6 +4830,57 @@ describe('useCallControl', () => {
       expect(isMutedState).toBe(false);
     });
 
+    it('should not reset mute coordinator when a second hook mounts during pending mute on same interaction', async () => {
+      let isMutedState = false;
+      const setIsMutedSpy = jest.spyOn(store, 'setIsMuted').mockImplementation((value: boolean) => {
+        isMutedState = value;
+      });
+      jest.spyOn(store, 'isMuted', 'get').mockImplementation(() => isMutedState);
+
+      let resolveFirstMute!: () => void;
+      mockCurrentTask.toggleMute = jest.fn(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveFirstMute = resolve;
+          })
+      );
+
+      const sharedHookProps = {
+        currentTask: mockCurrentTask,
+        logger: mockLogger,
+        isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
+      };
+
+      const {result: callControlResult} = renderHook(() => useCallControl(sharedHookProps));
+
+      let firstToggle!: Promise<void>;
+      act(() => {
+        firstToggle = callControlResult.current.toggleMute();
+      });
+
+      await act(async () => {
+        await Promise.resolve();
+      });
+
+      const {unmount: unmountCad} = renderHook(() =>
+        useCallControl({...sharedHookProps, widgetName: 'CallControlCAD'})
+      );
+
+      setIsMutedSpy.mockClear();
+
+      await act(async () => {
+        resolveFirstMute();
+        await firstToggle;
+      });
+
+      expect(setIsMutedSpy).toHaveBeenCalledWith(true);
+      expect(isMutedState).toBe(true);
+
+      unmountCad();
+    });
+
     it('should not call onToggleMute callback if not provided', async () => {
       const {result} = renderHook(() =>
         useCallControl({
@@ -8302,6 +8353,8 @@ describe('WXCC-6026 wxApp thick-client hooks', () => {
       })
     );
 
+    jest.spyOn(store, 'currentTask', 'get').mockReturnValue(wxAppTask as never);
+
     await act(async () => {
       await result.current.sendDtmf('5');
     });
@@ -8359,6 +8412,8 @@ describe('WXCC-6026 wxApp thick-client hooks', () => {
       {initialProps: {currentTask: taskA}}
     );
 
+    jest.spyOn(store, 'currentTask', 'get').mockReturnValue(taskA as never);
+
     let dtmfPromise!: Promise<void>;
     await act(async () => {
       dtmfPromise = result.current.sendDtmf('5');
@@ -8379,6 +8434,53 @@ describe('WXCC-6026 wxApp thick-client hooks', () => {
     });
 
     expect(result.current.telephonyToast).toBeNull();
+  });
+
+  it('useCallControl sendDtmf skips transmitDtmf when store current task no longer matches hook task', async () => {
+    const transmitDtmf = jest.fn().mockResolvedValue(undefined);
+    const taskA = {
+      ...mockTask,
+      data: {...mockTask.data, interactionId: 'dtmf-interaction-a'},
+      getWebexCallingCallId: jest.fn().mockReturnValue('call-a'),
+      transmitDtmf,
+      uiControls: {
+        ...createEnabledMainTaskUIControls(),
+        main: {
+          ...createEnabledMainTaskUIControls().main,
+          keypad: {isVisible: true, isEnabled: true},
+        },
+      },
+      on: jest.fn(),
+      off: jest.fn(),
+    };
+    const taskB = {
+      ...mockTask,
+      data: {...mockTask.data, interactionId: 'dtmf-interaction-b'},
+      getWebexCallingCallId: jest.fn().mockReturnValue('call-b'),
+      transmitDtmf: jest.fn().mockResolvedValue(undefined),
+      uiControls: taskA.uiControls,
+      on: jest.fn(),
+      off: jest.fn(),
+    };
+
+    jest.spyOn(store, 'currentTask', 'get').mockReturnValue(taskB as never);
+
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: taskA,
+        logger: mockCC.LoggerProxy,
+        isMuted: false,
+        conferenceEnabled: false,
+        agentId: 'agent1',
+        enableWxBetterTogether: true,
+      })
+    );
+
+    await act(async () => {
+      await result.current.sendDtmf('5');
+    });
+
+    expect(transmitDtmf).not.toHaveBeenCalled();
   });
 
   it('useTaskList acceptTask calls task.accept()', async () => {
@@ -8506,6 +8608,8 @@ describe('WXCC-6026 wxApp thick-client hooks', () => {
         enableWxBetterTogether: true,
       })
     );
+
+    jest.spyOn(store, 'currentTask', 'get').mockReturnValue(wxAppTask as never);
 
     await act(async () => {
       await result.current.sendDtmf('5');

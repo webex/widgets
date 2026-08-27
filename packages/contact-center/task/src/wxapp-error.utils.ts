@@ -104,7 +104,14 @@ export const reportWxAppTelephonyFailure = (
   });
 
   if (onErrorCallback) {
-    onErrorCallback(context.widget, toWxAppTelephonyError(parsed));
+    try {
+      onErrorCallback(context.widget, toWxAppTelephonyError(parsed));
+    } catch (error) {
+      logger.error(`onErrorCallback failed: ${error}`, {
+        module: 'wxapp-error.utils',
+        method: 'onErrorCallback',
+      });
+    }
   }
 
   return parsed;

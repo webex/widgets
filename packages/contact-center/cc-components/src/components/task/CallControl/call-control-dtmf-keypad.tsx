@@ -1,4 +1,4 @@
-import React, {useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {Button, Input, Spinner} from '@momentum-design/components/dist/react';
 import {DIALPAD_BUTTONS, DTMF_KEYPAD_PLACEHOLDER} from '../OutdialCall/constants';
 import type {ILogger} from '@webex/cc-store';
@@ -24,6 +24,13 @@ const CallControlDtmfKeypad: React.FunctionComponent<CallControlDtmfKeypadProps>
   const [dialNumber, setDialNumber] = useState('');
   const [pendingCount, setPendingCount] = useState(0);
   const transmissionQueueRef = useRef<Promise<void>>(Promise.resolve());
+  const transmissionGenerationRef = useRef(0);
+
+  useEffect(() => {
+    return () => {
+      transmissionGenerationRef.current += 1;
+    };
+  }, []);
 
   const transmitDigit = (digit: string) => {
     if (disabled) return;
@@ -34,11 +41,20 @@ const CallControlDtmfKeypad: React.FunctionComponent<CallControlDtmfKeypadProps>
       method: 'transmitDigit',
     });
 
+    const generation = transmissionGenerationRef.current;
     setPendingCount((count) => count + 1);
     transmissionQueueRef.current = transmissionQueueRef.current
-      .then(() => onDigitPress(digit))
+      .then(async () => {
+        if (generation !== transmissionGenerationRef.current) {
+          return;
+        }
+        await onDigitPress(digit);
+      })
       .catch(() => undefined)
       .finally(() => {
+        if (generation !== transmissionGenerationRef.current) {
+          return;
+        }
         setPendingCount((count) => Math.max(0, count - 1));
       });
   };

@@ -176,4 +176,62 @@ describe('CallControlDtmfKeypad', () => {
 
     expect(await screen.findByTestId('call-control-keypad-input')).toHaveValue('');
   });
+
+  it('discards queued digits when unmounted before transmission completes', async () => {
+    let resolveFirst: (() => void) | undefined;
+    const firstPress = new Promise<void>((resolve) => {
+      resolveFirst = resolve;
+    });
+    const slowOnDigitPress = jest
+      .fn()
+      .mockImplementationOnce(() => firstPress)
+      .mockResolvedValue(undefined);
+
+    const {unmount} = render(<CallControlDtmfKeypad onDigitPress={slowOnDigitPress} logger={logger} />);
+
+    const keypad = await screen.findByTestId('call-control-keypad-keys');
+    fireEvent.click(within(keypad).getByText('1', {selector: '.call-control-dtmf-key-digit'}));
+    fireEvent.click(within(keypad).getByText('2', {selector: '.call-control-dtmf-key-digit'}));
+
+    await waitFor(() => {
+      expect(slowOnDigitPress).toHaveBeenCalledTimes(1);
+    });
+
+    unmount();
+    resolveFirst?.();
+
+    await waitFor(() => {
+      expect(slowOnDigitPress).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it('discards queued digits when remounted with a different key before transmission completes', async () => {
+    let resolveFirst: (() => void) | undefined;
+    const firstPress = new Promise<void>((resolve) => {
+      resolveFirst = resolve;
+    });
+    const slowOnDigitPress = jest
+      .fn()
+      .mockImplementationOnce(() => firstPress)
+      .mockResolvedValue(undefined);
+
+    const {rerender} = render(
+      <CallControlDtmfKeypad key="interaction-a" onDigitPress={slowOnDigitPress} logger={logger} />
+    );
+
+    const keypad = await screen.findByTestId('call-control-keypad-keys');
+    fireEvent.click(within(keypad).getByText('1', {selector: '.call-control-dtmf-key-digit'}));
+    fireEvent.click(within(keypad).getByText('2', {selector: '.call-control-dtmf-key-digit'}));
+
+    await waitFor(() => {
+      expect(slowOnDigitPress).toHaveBeenCalledTimes(1);
+    });
+
+    rerender(<CallControlDtmfKeypad key="interaction-b" onDigitPress={slowOnDigitPress} logger={logger} />);
+    resolveFirst?.();
+
+    await waitFor(() => {
+      expect(slowOnDigitPress).toHaveBeenCalledTimes(1);
+    });
+  });
 });

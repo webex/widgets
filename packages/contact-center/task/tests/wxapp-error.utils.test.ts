@@ -70,6 +70,31 @@ describe('wxapp-error.utils', () => {
       expect(logger.error).toHaveBeenCalled();
       expect(onErrorCallback).toHaveBeenCalledWith('CallControl', expect.objectContaining({message: 'Mute failed'}));
     });
+
+    it('returns parsed display when onErrorCallback throws', () => {
+      const onErrorCallback = jest.fn().mockImplementation(() => {
+        throw new Error('Host metrics failed');
+      });
+      const error = Object.assign(new Error('Mute failed'), {
+        isWxAppTelephonyError: true,
+        trackingId: 'track-mute-throw',
+        status: 503,
+      });
+
+      const parsed = reportWxAppTelephonyFailure(
+        error,
+        {widget: 'CallControl', action: 'Mute'},
+        logger,
+        onErrorCallback
+      );
+
+      expect(parsed.trackingId).toBe('track-mute-throw');
+      expect(onErrorCallback).toHaveBeenCalled();
+      expect(logger.error).toHaveBeenCalledWith('onErrorCallback failed: Error: Host metrics failed', {
+        module: 'wxapp-error.utils',
+        method: 'onErrorCallback',
+      });
+    });
   });
 
   describe('getOfferActionUserMessage', () => {

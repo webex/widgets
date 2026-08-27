@@ -80,6 +80,7 @@ class StoreWrapper implements IStoreWrapper {
     {};
   private wxAppMuteStateListeners: Record<string, {task: ITask; listener: (payload: {muted: boolean}) => void}> = {};
   private taskEndListeners: Record<string, {task: ITask; listener: () => void}> = {};
+  private muteStateByInteractionId: Record<string, boolean> = {};
 
   constructor() {
     this.store = Store.getInstance();
@@ -248,8 +249,56 @@ class StoreWrapper implements IStoreWrapper {
   setIsMuted = (value: boolean): void => {
     runInAction(() => {
       this.store.isMuted = value;
+      this.persistTelephonyMuteCacheForCurrentTask(value);
     });
   };
+
+  private isTelephonyTask(task: ITask | null | undefined): boolean {
+    return task?.data?.interaction?.mediaType === MEDIA_TYPE_TELEPHONY_LOWER;
+  }
+
+  private persistTelephonyMuteCacheForCurrentTask(value: boolean): void {
+    const interactionId = this.currentTask?.data?.interactionId;
+    if (!interactionId || !this.isTelephonyTask(this.currentTask)) {
+      return;
+    }
+
+    this.muteStateByInteractionId[interactionId] = value;
+  }
+
+  private clearTelephonyMuteCache(interactionId: string | undefined): void {
+    if (!interactionId) {
+      return;
+    }
+
+    delete this.muteStateByInteractionId[interactionId];
+  }
+
+  private setIsMutedForTaskSwitch(value: boolean): void {
+    runInAction(() => {
+      this.store.isMuted = value;
+    });
+  }
+
+  private restoreCachedMuteForTelephonyTask(task: ITask): void {
+    if (!this.isTelephonyTask(task)) {
+      return;
+    }
+
+    const interactionId = task.data?.interactionId;
+    if (!interactionId) {
+      return;
+    }
+
+    const cachedMute = this.muteStateByInteractionId[interactionId];
+    if (typeof cachedMute !== 'boolean') {
+      return;
+    }
+
+    runInAction(() => {
+      this.store.isMuted = cachedMute;
+    });
+  }
 
   get offerActionErrors() {
     return this.store.offerActionErrors;
@@ -334,10 +383,26 @@ class StoreWrapper implements IStoreWrapper {
     return tasks?.[interactionId] ?? task;
   }
 
-  private seedWxAppMuteFromTask(task: ITask): void {
+  private isWxAppEngagedTelephonyTask(task: ITask): boolean {
+    if (!this.store.enableWxBetterTogether) {
+      return false;
+    }
+
+    const canonicalTask = this.getCanonicalTask(task) as ITask & {
+      getWebexCallingCallId?: () => string | null | undefined;
+    };
+
+    return typeof canonicalTask.getWebexCallingCallId === 'function' && !!canonicalTask.getWebexCallingCallId();
+  }
+
+  private seedWxAppMuteFromTask(task: ITask): boolean {
+    if (!this.isWxAppEngagedTelephonyTask(task)) {
+      return false;
+    }
+
     const interactionId = task.data?.interactionId;
     if (!interactionId) {
-      return;
+      return false;
     }
 
     const canonicalTask = this.getCanonicalTask(task) as ITask & {
@@ -346,7 +411,7 @@ class StoreWrapper implements IStoreWrapper {
     };
     const sync = canonicalTask.syncWxAppMuteFromCallDetails?.bind(canonicalTask);
     if (typeof sync !== 'function') {
-      return;
+      return false;
     }
 
     void sync()
@@ -361,6 +426,8 @@ class StoreWrapper implements IStoreWrapper {
         }
       })
       .catch(() => undefined);
+
+    return true;
   }
 
   setCurrentTask = (task: ITask | null, isClicked: boolean = false): void => {
@@ -397,8 +464,10 @@ class StoreWrapper implements IStoreWrapper {
       this.store.currentTask = task ? Object.assign(Object.create(Object.getPrototypeOf(task)), task) : null;
 
       if (task && !isSameTask) {
-        this.setIsMuted(false);
-        this.seedWxAppMuteFromTask(task);
+        this.setIsMutedForTaskSwitch(false);
+        if (!this.seedWxAppMuteFromTask(task)) {
+          this.restoreCachedMuteForTelephonyTask(task);
+        }
       }
 
       if (this.onTaskSelected && !isSameTask && typeof isClicked !== 'undefined') {
@@ -609,6 +678,7 @@ class StoreWrapper implements IStoreWrapper {
   handleTaskRemove = (taskToRemove: ITask) => {
     if (taskToRemove) {
       const taskId = taskToRemove.data?.interactionId;
+      this.clearTelephonyMuteCache(taskId);
       // Clean up accepted/dismissed campaign tracking now that the task is
       // fully removed (after wrapup).  This is safe because the task will
       // no longer render in any component.

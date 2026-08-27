@@ -26,6 +26,7 @@ let activeMuteTarget: boolean | null = null;
 let muteChainInFlight = false;
 let muteTaskRef: ITask | null = null;
 let muteCallbacksRef: MuteCoordinatorCallbacks | null = null;
+let coordinatorInteractionId: string | null | undefined;
 
 export const resetMuteCoordinator = (): void => {
   muteGeneration += 1;
@@ -37,8 +38,20 @@ export const resetMuteCoordinator = (): void => {
   muteCallbacksRef = null;
 };
 
+export const resetMuteCoordinatorForInteraction = (interactionId: string | undefined): void => {
+  const next = interactionId ?? null;
+  if (coordinatorInteractionId === next) {
+    return;
+  }
+  coordinatorInteractionId = next;
+  resetMuteCoordinator();
+};
+
 /** Test-only reset for module-level mute serialization state between Jest cases. */
-export const resetMuteCoordinatorForTests = resetMuteCoordinator;
+export const resetMuteCoordinatorForTests = (): void => {
+  coordinatorInteractionId = undefined;
+  resetMuteCoordinator();
+};
 
 const isMuteCompletionStillValid = (interactionId: string | null | undefined): boolean => {
   if (!interactionId || muteTaskRef?.data?.interactionId !== interactionId) {
