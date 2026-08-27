@@ -16,7 +16,8 @@ export const isWxAppEngagedCall = (task: ITask | null | undefined): boolean => {
 
 /**
  * Thick-client main-bar Mute/Keypad visibility gate.
- * Requires host init flag ON and an engaged wxApp call id on the task.
+ * Requires `enableWxBetterTogether` (host init flag at `webexConfig.cc.enableWxBetterTogether`)
+ * and an engaged wxApp call id on the task.
  */
 export const shouldShowWxAppTelephonyControls = (
   enableWxBetterTogether: boolean,

@@ -564,7 +564,8 @@ export interface ControlProps {
   agentId: string;
 
   /**
-   * Host init flag for wxApp thick-client main-bar Mute/Keypad visibility gating only.
+   * Host init flag `enableWxBetterTogether` (`webexConfig.cc.enableWxBetterTogether`) for wxApp
+   * thick-client main-bar Mute/Keypad visibility gating and wxApp mute seed gate.
    */
   enableWxBetterTogether?: boolean;
 
@@ -645,7 +646,8 @@ export type CallControlComponentProps = Pick<
     isCampaignCall?: boolean;
 
     /**
-     * Host init flag for wxApp thick-client main-bar Mute/Keypad visibility gating only.
+     * Host init flag `enableWxBetterTogether` (`webexConfig.cc.enableWxBetterTogether`) for wxApp
+     * thick-client main-bar Mute/Keypad visibility gating and wxApp mute seed gate.
      */
     enableWxBetterTogether?: boolean;
 

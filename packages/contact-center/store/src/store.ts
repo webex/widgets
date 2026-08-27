@@ -53,7 +53,11 @@ class Store implements IStore {
   allowConsultToQueue: boolean = false;
   agentProfile: AgentLoginProfile = {};
   isMuted: boolean = false;
-  /** Host init flag for wxApp thick-client UI gating only — not used for mute API routing. */
+  /**
+   * Host init flag `enableWxBetterTogether` — set at `webexConfig.cc.enableWxBetterTogether`
+   * (or `webex.config.cc.enableWxBetterTogether`) before `store.init()`. Gates wxApp Mute/Keypad
+   * visibility and wxApp mute seed; SDK routes mute/DTMF APIs.
+   */
   enableWxBetterTogether: boolean = false;
   isDigitalChannelsInitialized: boolean = false;
   dataCenter: string = '';
@@ -142,7 +146,7 @@ class Store implements IStore {
     if ('webexConfig' in options) {
       this.enableWxBetterTogether = options.webexConfig?.cc?.enableWxBetterTogether === true;
     } else if ('webex' in options) {
-      const webexWithConfig = options.webex as {config?: {cc?: {enableWxBetterTogether?: boolean}}};
+      const webexWithConfig = options.webex as WithWebex['webex'];
       this.enableWxBetterTogether = webexWithConfig.config?.cc?.enableWxBetterTogether === true;
     } else {
       this.enableWxBetterTogether = false;

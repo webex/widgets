@@ -200,6 +200,7 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.isEmergencyModalAlreadyDisplayed;
   }
 
+  /** Read-only host init flag — see `webexConfig.cc.enableWxBetterTogether` at init. */
   get enableWxBetterTogether() {
     return this.store.enableWxBetterTogether;
   }

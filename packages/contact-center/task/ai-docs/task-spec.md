@@ -89,7 +89,7 @@ Compatibility notes:
 
 | Surface | Change |
 |---|---|
-| **Host init** | `webexConfig.cc.enableAnswerOnWebex: boolean` (default `false`) — set **before** `store.init()`; persisted on store for **UI visibility gating only** |
+| **Host init** | `webexConfig.cc.enableWxBetterTogether: boolean` (default `false`) — set **before** `store.init()`; persisted on store as read-only `enableWxBetterTogether` for **UI visibility gating**, wxApp mute seed gate; SDK owns mute/DTMF API routing |
 | **IncomingTask** | Calls SDK `task.accept()` / `task.decline()` — wxApp routing is internal to SDK `Voice` |
 | **CallControl** | Engaged wxApp → `task.toggleMute({ muted })` / `task.transmitDtmf({ dtmf })`; widget force-visible only when wxApp engaged **and** SDK `isEnabled`; hide SDK visible+disabled ghosts; Desktop WebRTC SDK passthrough; CAD consult sub-bar mute hidden only when wxApp engaged; `toggleMute` guard includes `consult.mute.isVisible` |
 | **TaskList** | Inline Accept / Decline — same unified `task.accept()` / `task.decline()` as IncomingTask; offer-action errors stored on `@webex/cc-store` (`offerActionErrors`) keyed by `interactionId` so TaskList and IncomingTask stay in sync; store assigns a new map reference on each update so `withMetrics` memo does not block TaskList re-renders |

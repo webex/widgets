@@ -128,12 +128,16 @@ type ILogger = {
 };
 
 type WithWebex = {
-  webex: {cc: IContactCenter; logger: ILogger};
+  webex: {cc: IContactCenter; logger: ILogger; config?: {cc?: WebexCcInitConfig}};
+};
+
+/** Host init config read from `webexConfig.cc` before `store.init()`. */
+type WebexCcInitConfig = {
+  enableWxBetterTogether?: boolean;
 };
 
 type WithWebexConfig = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  webexConfig: any;
+  webexConfig: {cc?: WebexCcInitConfig; [key: string]: unknown};
   access_token: string;
 };
 
@@ -207,6 +211,7 @@ interface IStore {
   allowConsultToQueue: boolean;
   agentProfile: AgentLoginProfile;
   isMuted: boolean;
+  /** Read-only host init flag — set at `webexConfig.cc.enableWxBetterTogether` before init. */
   enableWxBetterTogether: boolean;
   isAddressBookEnabled: boolean;
   isDigitalChannelsInitialized: boolean;
@@ -367,6 +372,7 @@ export type {
   Team,
   AgentLogin,
   WithWebex,
+  WebexCcInitConfig,
   IdleCode,
   InitParams,
   IStore,
