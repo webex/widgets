@@ -397,6 +397,7 @@ class StoreWrapper implements IStoreWrapper {
       this.store.currentTask = task ? Object.assign(Object.create(Object.getPrototypeOf(task)), task) : null;
 
       if (task && !isSameTask) {
+        this.setIsMuted(false);
         this.seedWxAppMuteFromTask(task);
       }
 

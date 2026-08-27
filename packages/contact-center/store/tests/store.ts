@@ -168,6 +168,18 @@ describe('Store', () => {
       expect(webexInitSpy).not.toHaveBeenCalled();
     });
 
+    it('sets enableWxBetterTogether from webex.config.cc when init receives a preinitialized webex instance', async () => {
+      const preinitializedWebex = {
+        ...mockWebex,
+        config: {cc: {enableWxBetterTogether: true}},
+      };
+      jest.spyOn(storeInstance, 'registerCC').mockResolvedValue();
+
+      await storeInstance.init({webex: preinitializedWebex}, jest.fn());
+
+      expect(storeInstance.enableWxBetterTogether).toBe(true);
+    });
+
     it('should initialize webex and call registerCC on ready event', async () => {
       //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
       webexInitSpy = jest.spyOn(Webex, 'init').mockReturnValue(mockWebex);

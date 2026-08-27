@@ -1154,6 +1154,115 @@ describe('storeEventsWrapper', () => {
       expect(storeWrapper.isMuted).toBe(true);
     });
 
+    it('should reset isMuted synchronously when switching to a different task before mute sync completes', async () => {
+      storeWrapper['store'].agentId = 'mockAgentId';
+      let resolveSync!: () => void;
+      const taskA = makeMockTask({
+        data: {
+          interactionId: 'interaction-a',
+          agentId: 'mockAgentId',
+          interaction: {
+            state: 'connected',
+            participants: {
+              mockAgentId: {hasJoined: true},
+            },
+          },
+        },
+      });
+      const taskB = makeMockTask({
+        data: {
+          interactionId: 'interaction-b',
+          agentId: 'mockAgentId',
+          interaction: {
+            state: 'connected',
+            participants: {
+              mockAgentId: {hasJoined: true},
+            },
+          },
+        },
+      }) as ITask & {
+        syncWxAppMuteFromCallDetails: jest.Mock;
+        getWxAppMuted: jest.Mock;
+      };
+      taskB.syncWxAppMuteFromCallDetails = jest.fn(
+        () =>
+          new Promise<boolean>((resolve) => {
+            resolveSync = () => resolve(true);
+          })
+      );
+      taskB.getWxAppMuted = jest.fn().mockReturnValue(true);
+
+      storeWrapper['store'].currentTask = taskA;
+      storeWrapper['store'].isMuted = true;
+      storeWrapper['store'].cc.taskManager.getAllTasks = jest.fn().mockReturnValue({
+        'interaction-a': taskA,
+        'interaction-b': taskB,
+      });
+
+      storeWrapper.setCurrentTask(taskB);
+
+      expect(storeWrapper.isMuted).toBe(false);
+
+      await act(async () => {
+        resolveSync();
+        await Promise.resolve();
+      });
+
+      await waitFor(() => {
+        expect(storeWrapper.isMuted).toBe(true);
+      });
+    });
+
+    it('should keep isMuted false when mute sync rejects after switching tasks', async () => {
+      storeWrapper['store'].agentId = 'mockAgentId';
+      const taskA = makeMockTask({
+        data: {
+          interactionId: 'interaction-a-muted',
+          agentId: 'mockAgentId',
+          interaction: {
+            state: 'connected',
+            participants: {
+              mockAgentId: {hasJoined: true},
+            },
+          },
+        },
+      });
+      const taskB = makeMockTask({
+        data: {
+          interactionId: 'interaction-b-unmuted',
+          agentId: 'mockAgentId',
+          interaction: {
+            state: 'connected',
+            participants: {
+              mockAgentId: {hasJoined: true},
+            },
+          },
+        },
+      }) as ITask & {
+        syncWxAppMuteFromCallDetails: jest.Mock;
+        getWxAppMuted: jest.Mock;
+      };
+      taskB.syncWxAppMuteFromCallDetails = jest.fn().mockRejectedValue(new Error('sync failed'));
+      taskB.getWxAppMuted = jest.fn().mockReturnValue(true);
+
+      storeWrapper['store'].currentTask = taskA;
+      storeWrapper['store'].isMuted = true;
+      storeWrapper['store'].cc.taskManager.getAllTasks = jest.fn().mockReturnValue({
+        'interaction-a-muted': taskA,
+        'interaction-b-unmuted': taskB,
+      });
+
+      storeWrapper.setCurrentTask(taskB);
+
+      expect(storeWrapper.isMuted).toBe(false);
+
+      await act(async () => {
+        await Promise.resolve();
+      });
+
+      expect(storeWrapper.isMuted).toBe(false);
+    });
+
     it('should not re-seed isMuted when setCurrentTask is called with the same interactionId', async () => {
       const interactionId = 'interaction-wxapp-mute-dedupe';
       storeWrapper['store'].agentId = 'mockAgentId';

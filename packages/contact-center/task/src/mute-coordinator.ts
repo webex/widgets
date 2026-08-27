@@ -45,12 +45,7 @@ const isMuteCompletionStillValid = (interactionId: string | null | undefined): b
     return false;
   }
 
-  const storeInteractionId = store.currentTask?.data?.interactionId;
-  if (storeInteractionId !== undefined && storeInteractionId !== interactionId) {
-    return false;
-  }
-
-  return true;
+  return store.currentTask?.data?.interactionId === interactionId;
 };
 
 export const enqueueMuteToggle = ({task, callbacks}: EnqueueMuteToggleParams): Promise<void> => {

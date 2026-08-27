@@ -4380,6 +4380,7 @@ describe('useCallControl', () => {
 
       jest.spyOn(store, 'setIsMuted').mockImplementation(() => {});
       jest.spyOn(store, 'isMuted', 'get').mockImplementation(() => false);
+      jest.spyOn(store, 'currentTask', 'get').mockReturnValue(mockCurrentTask as never);
 
       mockOnToggleMute.mockClear();
     });
@@ -4566,6 +4567,8 @@ describe('useCallControl', () => {
         {initialProps: {currentTask: taskA}}
       );
 
+      jest.spyOn(store, 'currentTask', 'get').mockReturnValue(taskA as never);
+
       let mutePromise!: Promise<void>;
       act(() => {
         mutePromise = result.current.toggleMute();
@@ -4579,6 +4582,59 @@ describe('useCallControl', () => {
       jest.spyOn(store, 'currentTask', 'get').mockReturnValue(taskB as never);
 
       rerender({currentTask: taskB});
+
+      await act(async () => {
+        resolveMute();
+        await mutePromise;
+      });
+
+      expect(setIsMutedSpy).not.toHaveBeenCalled();
+      expect(isMutedState).toBe(false);
+    });
+
+    it('should not apply mute state after current task is cleared while SDK mute is pending', async () => {
+      let isMutedState = false;
+      const setIsMutedSpy = jest.spyOn(store, 'setIsMuted').mockImplementation((value: boolean) => {
+        isMutedState = value;
+      });
+      jest.spyOn(store, 'isMuted', 'get').mockImplementation(() => isMutedState);
+
+      let resolveMute!: () => void;
+      const taskA = {
+        ...mockCurrentTask,
+        data: {...mockCurrentTask.data, interactionId: 'interaction-ended'},
+        toggleMute: jest.fn(
+          () =>
+            new Promise<void>((resolve) => {
+              resolveMute = resolve;
+            })
+        ),
+      };
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: taskA,
+          logger: mockLogger,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'test-agent-id',
+        })
+      );
+
+      jest.spyOn(store, 'currentTask', 'get').mockReturnValue(taskA as never);
+
+      let mutePromise!: Promise<void>;
+      act(() => {
+        mutePromise = result.current.toggleMute();
+      });
+
+      await act(async () => {
+        await Promise.resolve();
+      });
+
+      setIsMutedSpy.mockClear();
+      isMutedState = false;
+      jest.spyOn(store, 'currentTask', 'get').mockReturnValue(null as never);
 
       await act(async () => {
         resolveMute();
@@ -4633,6 +4689,8 @@ describe('useCallControl', () => {
           }),
         {initialProps: {currentTask: taskA}}
       );
+
+      jest.spyOn(store, 'currentTask', 'get').mockReturnValue(taskA as never);
 
       let mutePromiseA!: Promise<void>;
       act(() => {
@@ -7742,6 +7800,8 @@ describe('Task Hook Error Handling and Logging', () => {
         })
       );
 
+      jest.spyOn(store, 'currentTask', 'get').mockReturnValue(errorTask as never);
+
       await act(async () => {
         await result.current.toggleMute();
       });
@@ -8685,6 +8745,7 @@ describe('WXCC-6026 wxApp thick-client hooks', () => {
 
     jest.spyOn(store, 'setIsMuted').mockImplementation(() => {});
     jest.spyOn(store, 'isMuted', 'get').mockImplementation(() => false);
+    jest.spyOn(store, 'currentTask', 'get').mockReturnValue(wxAppTask as never);
 
     const {result} = renderHook(() =>
       useCallControl({
@@ -8727,6 +8788,7 @@ describe('WXCC-6026 wxApp thick-client hooks', () => {
 
     jest.spyOn(store, 'setIsMuted').mockImplementation(() => {});
     jest.spyOn(store, 'isMuted', 'get').mockImplementation(() => true);
+    jest.spyOn(store, 'currentTask', 'get').mockReturnValue(wxAppTask as never);
 
     const {result} = renderHook(() =>
       useCallControl({
