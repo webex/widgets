@@ -162,4 +162,18 @@ describe('CallControlDtmfKeypad', () => {
 
     expect(onDigitPress).not.toHaveBeenCalled();
   });
+
+  it('resets dialNumber when remounted with a different key', async () => {
+    const {rerender} = render(
+      <CallControlDtmfKeypad key="interaction-a" onDigitPress={onDigitPress} logger={logger} />
+    );
+
+    const keypad = await screen.findByTestId('call-control-keypad-keys');
+    fireEvent.click(within(keypad).getByText('5', {selector: '.call-control-dtmf-key-digit'}));
+    expect(await screen.findByTestId('call-control-keypad-input')).toHaveValue('5');
+
+    rerender(<CallControlDtmfKeypad key="interaction-b" onDigitPress={onDigitPress} logger={logger} />);
+
+    expect(await screen.findByTestId('call-control-keypad-input')).toHaveValue('');
+  });
 });

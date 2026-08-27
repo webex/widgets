@@ -78,6 +78,11 @@ function CallControlComponent(props: CallControlComponentProps) {
     updateCallStateFromTask(currentTask, setIsRecording, logger);
   }, [currentTask, logger]);
 
+  useEffect(() => {
+    setShowAgentMenu(false);
+    setAgentMenuType(null);
+  }, [currentTask?.data?.interactionId]);
+
   const handletoggleHold = () => {
     handleToggleHoldUtil(isHeld, toggleHold, logger);
   };
@@ -243,7 +248,12 @@ function CallControlComponent(props: CallControlComponentProps) {
                     }
                   >
                     {showAgentMenu && agentMenuType === button.menuType && button.menuType === 'Keypad' ? (
-                      <CallControlDtmfKeypad onDigitPress={sendDtmf} logger={logger} disabled={button.disabled} />
+                      <CallControlDtmfKeypad
+                        key={currentTask?.data?.interactionId ?? 'no-interaction'}
+                        onDigitPress={sendDtmf}
+                        logger={logger}
+                        disabled={button.disabled}
+                      />
                     ) : showAgentMenu && agentMenuType === button.menuType ? (
                       <ConsultTransferPopoverComponent
                         heading={button.menuType}

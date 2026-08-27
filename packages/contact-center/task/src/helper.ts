@@ -209,6 +209,9 @@ export const useTaskList = (props: UseTaskListProps) => {
       task
         .accept()
         .then(() => {
+          if (!isLatestOfferActionAttempt(interactionId, attemptId)) {
+            return;
+          }
           store.clearOfferActionError(interactionId);
         })
         .catch((error) => {
@@ -238,6 +241,9 @@ export const useTaskList = (props: UseTaskListProps) => {
       task
         .decline()
         .then(() => {
+          if (!isLatestOfferActionAttempt(interactionId, attemptId)) {
+            return;
+          }
           store.clearOfferActionError(interactionId);
         })
         .catch((error) => {
@@ -413,6 +419,9 @@ export const useIncomingTask = (props: UseTaskProps) => {
       incomingTask
         .accept()
         .then(() => {
+          if (!isLatestOfferActionAttempt(incomingTask.data.interactionId, attemptId)) {
+            return;
+          }
           store.clearOfferActionError(incomingTask.data.interactionId);
         })
         .catch((error) => {
@@ -452,6 +461,9 @@ export const useIncomingTask = (props: UseTaskProps) => {
       incomingTask
         .decline()
         .then(() => {
+          if (!isLatestOfferActionAttempt(incomingTask.data.interactionId, attemptId)) {
+            return;
+          }
           store.clearOfferActionError(incomingTask.data.interactionId);
         })
         .catch((error) => {

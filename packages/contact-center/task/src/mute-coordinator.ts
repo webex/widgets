@@ -48,6 +48,25 @@ const isMuteCompletionStillValid = (interactionId: string | null | undefined): b
   return store.currentTask?.data?.interactionId === interactionId;
 };
 
+const invokeOnToggleMute = (
+  callbacks: MuteCoordinatorCallbacks | null | undefined,
+  payload: {isMuted: boolean; task: ITask},
+  method: 'toggleMute' | 'toggleMuteCallback'
+): void => {
+  if (!callbacks?.onToggleMute) {
+    return;
+  }
+
+  try {
+    callbacks.onToggleMute(payload);
+  } catch (error) {
+    callbacks.logger.error(`onToggleMute callback failed: ${error}`, {
+      module: 'useCallControl',
+      method,
+    });
+  }
+};
+
 export const enqueueMuteToggle = ({task, callbacks}: EnqueueMuteToggleParams): Promise<void> => {
   const generation = muteGeneration;
   muteTaskRef = task;
@@ -60,80 +79,77 @@ export const enqueueMuteToggle = ({task, callbacks}: EnqueueMuteToggleParams): P
     pendingMuteTarget = !store.isMuted;
   }
 
-  muteChain = muteChain.then(async () => {
-    if (generation !== muteGeneration) {
-      return;
-    }
+  muteChain = muteChain
+    .then(async () => {
+      if (generation !== muteGeneration) {
+        return;
+      }
 
-    muteChainInFlight = true;
+      muteChainInFlight = true;
 
-    try {
-      while (pendingMuteTarget !== null) {
-        if (generation !== muteGeneration) {
-          break;
-        }
-
-        const intendedMuteState = pendingMuteTarget;
-        pendingMuteTarget = null;
-        activeMuteTarget = intendedMuteState;
-
-        const activeTask = muteTaskRef;
-        const activeCallbacks = muteCallbacksRef;
-        const interactionId = activeTask?.data?.interactionId;
-
-        if (!activeTask) {
-          break;
-        }
-
-        try {
-          await activeTask.toggleMute({muted: intendedMuteState});
-
-          if (!isMuteCompletionStillValid(interactionId)) {
+      try {
+        while (pendingMuteTarget !== null) {
+          if (generation !== muteGeneration) {
             break;
           }
 
-          store.setIsMuted(intendedMuteState);
+          const intendedMuteState = pendingMuteTarget;
+          pendingMuteTarget = null;
+          activeMuteTarget = intendedMuteState;
 
-          if (activeCallbacks?.onToggleMute) {
-            activeCallbacks.onToggleMute({
-              isMuted: intendedMuteState,
-              task: activeTask,
-            });
+          const activeTask = muteTaskRef;
+          const activeCallbacks = muteCallbacksRef;
+          const interactionId = activeTask?.data?.interactionId;
+
+          if (!activeTask) {
+            break;
           }
 
-          activeCallbacks?.logger.info(`Mute state toggled to: ${intendedMuteState}`, {
-            module: 'useCallControl',
-            method: 'toggleMute',
-          });
-        } catch (error) {
+          try {
+            await activeTask.toggleMute({muted: intendedMuteState});
+
+            if (!isMuteCompletionStillValid(interactionId)) {
+              break;
+            }
+
+            store.setIsMuted(intendedMuteState);
+
+            invokeOnToggleMute(activeCallbacks, {isMuted: intendedMuteState, task: activeTask}, 'toggleMuteCallback');
+
+            activeCallbacks?.logger.info(`Mute state toggled to: ${intendedMuteState}`, {
+              module: 'useCallControl',
+              method: 'toggleMute',
+            });
+          } catch (error) {
+            activeMuteTarget = null;
+
+            if (!isMuteCompletionStillValid(interactionId)) {
+              break;
+            }
+
+            activeCallbacks?.logger.error(`toggleMute failed: ${error}`, {
+              module: 'useCallControl',
+              method: 'toggleMute',
+            });
+            activeCallbacks?.showTelephonyToast(error, intendedMuteState ? 'mute' : 'unmute');
+
+            invokeOnToggleMute(activeCallbacks, {isMuted: store.isMuted, task: activeTask}, 'toggleMuteCallback');
+            break;
+          }
+        }
+      } finally {
+        if (generation === muteGeneration) {
+          muteChainInFlight = false;
           activeMuteTarget = null;
-
-          if (!isMuteCompletionStillValid(interactionId)) {
-            break;
-          }
-
-          activeCallbacks?.logger.error(`toggleMute failed: ${error}`, {
-            module: 'useCallControl',
-            method: 'toggleMute',
-          });
-          activeCallbacks?.showTelephonyToast(error, intendedMuteState ? 'mute' : 'unmute');
-
-          if (activeCallbacks?.onToggleMute) {
-            activeCallbacks.onToggleMute({
-              isMuted: store.isMuted,
-              task: activeTask,
-            });
-          }
-          break;
         }
       }
-    } finally {
-      if (generation === muteGeneration) {
-        muteChainInFlight = false;
-        activeMuteTarget = null;
-      }
-    }
-  });
+    })
+    .catch((error) => {
+      muteCallbacksRef?.logger.error(`mute coordinator chain failed: ${error}`, {
+        module: 'useCallControl',
+        method: 'toggleMute',
+      });
+    });
 
   return muteChain;
 };

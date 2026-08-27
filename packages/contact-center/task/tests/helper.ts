@@ -4850,6 +4850,45 @@ describe('useCallControl', () => {
       expect(mockOnToggleMute).not.toHaveBeenCalled();
     });
 
+    it('should keep mute queue working when onToggleMute callback throws after SDK success', async () => {
+      mockOnToggleMute
+        .mockImplementationOnce(() => {
+          throw new Error('Host callback failed');
+        })
+        .mockImplementation(() => undefined);
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: mockCurrentTask,
+          onToggleMute: mockOnToggleMute,
+          logger: mockLogger,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'test-agent-id',
+        })
+      );
+
+      await act(async () => {
+        await result.current.toggleMute();
+      });
+
+      expect(store.setIsMuted).toHaveBeenCalledWith(true);
+      expect(mockLogger.error).toHaveBeenCalledWith('onToggleMute callback failed: Error: Host callback failed', {
+        module: 'useCallControl',
+        method: 'toggleMuteCallback',
+      });
+      expect(result.current.telephonyToast).toBeNull();
+
+      mockCurrentTask.toggleMute.mockClear();
+      mockOnToggleMute.mockClear();
+
+      await act(async () => {
+        await result.current.toggleMute();
+      });
+
+      expect(mockCurrentTask.toggleMute).toHaveBeenCalled();
+    });
+
     it('should not call onToggleMute callback on error if not provided', async () => {
       const toggleMuteError = new Error('Toggle mute failed');
       mockCurrentTask.toggleMute = jest.fn().mockRejectedValue(toggleMuteError);
@@ -8605,6 +8644,141 @@ describe('WXCC-6026 wxApp thick-client hooks', () => {
 
     await act(async () => {
       await Promise.resolve();
+    });
+  });
+
+  it('useIncomingTask does not clear newer accept failure when an older accept attempt succeeds', async () => {
+    let resolveFirstAccept!: () => void;
+    const telephonyError = Object.assign(new Error('Answer failed'), {
+      isWxAppTelephonyError: true,
+      trackingId: 'track-accept-stale',
+      status: 500,
+    });
+    const accept = jest
+      .fn()
+      .mockImplementationOnce(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveFirstAccept = resolve;
+          })
+      )
+      .mockRejectedValueOnce(telephonyError);
+    const wxAppTask = {
+      ...taskMock,
+      data: {...taskMock.data, interactionId: 'incoming-overlap-interaction'},
+      accept,
+      decline: jest.fn(),
+      on: jest.fn(),
+      off: jest.fn(),
+    };
+
+    const {result, rerender} = renderHook(() =>
+      useIncomingTask({
+        incomingTask: wxAppTask,
+        onAccepted: onTaskAccepted,
+        onRejected: onTaskDeclined,
+        logger,
+      })
+    );
+
+    act(() => {
+      result.current.accept();
+    });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    act(() => {
+      result.current.accept();
+    });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    rerender();
+
+    expect(result.current.offerActionError).toMatchObject({
+      message: 'Unable to answer the Call. Please try again',
+      trackingId: 'track-accept-stale',
+    });
+
+    await act(async () => {
+      resolveFirstAccept();
+      await Promise.resolve();
+    });
+
+    rerender();
+
+    expect(result.current.offerActionError).toMatchObject({
+      message: 'Unable to answer the Call. Please try again',
+      trackingId: 'track-accept-stale',
+    });
+  });
+
+  it('useTaskList does not clear newer accept failure when an older accept attempt succeeds', async () => {
+    let resolveFirstAccept!: () => void;
+    const telephonyError = Object.assign(new Error('Answer failed'), {
+      isWxAppTelephonyError: true,
+      trackingId: 'track-accept-stale-tasklist',
+      status: 500,
+    });
+    const accept = jest
+      .fn()
+      .mockImplementationOnce(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveFirstAccept = resolve;
+          })
+      )
+      .mockRejectedValueOnce(telephonyError);
+    const wxAppTask = {
+      ...taskMock,
+      data: {...taskMock.data, interactionId: 'tasklist-overlap-interaction'},
+      accept,
+      decline: jest.fn(),
+      on: jest.fn(),
+      off: jest.fn(),
+    };
+
+    const {result} = renderHook(() =>
+      useTaskList({
+        taskList: {'tasklist-overlap-interaction': wxAppTask},
+        logger,
+        cc: mockCC,
+      })
+    );
+
+    act(() => {
+      result.current.acceptTask(wxAppTask);
+    });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    act(() => {
+      result.current.acceptTask(wxAppTask);
+    });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(store.offerActionErrors['tasklist-overlap-interaction']).toMatchObject({
+      message: 'Unable to answer the Call. Please try again',
+      trackingId: 'track-accept-stale-tasklist',
+    });
+
+    await act(async () => {
+      resolveFirstAccept();
+      await Promise.resolve();
+    });
+
+    expect(store.offerActionErrors['tasklist-overlap-interaction']).toMatchObject({
+      message: 'Unable to answer the Call. Please try again',
+      trackingId: 'track-accept-stale-tasklist',
     });
   });
 
