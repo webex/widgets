@@ -10,12 +10,17 @@ export function createMockTaskUIControls(overrides?: {
   main?: Partial<InteractionUIControls>;
   consult?: Partial<InteractionUIControls>;
   activeLeg?: TaskUILeg;
+  consultTransferDestinations?: Partial<TaskUIControls['consultTransferDestinations']>;
 }): TaskUIControls {
   const base = getDefaultUIControls();
   return {
     activeLeg: overrides?.activeLeg ?? base.activeLeg,
     main: {...base.main, ...overrides?.main},
     consult: {...base.consult, ...overrides?.consult},
+    consultTransferDestinations: {
+      consult: overrides?.consultTransferDestinations?.consult ?? base.consultTransferDestinations.consult,
+      transfer: overrides?.consultTransferDestinations?.transfer ?? base.consultTransferDestinations.transfer,
+    },
   };
 }
 

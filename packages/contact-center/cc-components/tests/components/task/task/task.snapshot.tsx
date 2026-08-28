@@ -3,7 +3,6 @@ import {render, fireEvent, getByTestId, getByRole} from '@testing-library/react'
 import '@testing-library/jest-dom';
 import Task, {TaskProps} from '../../../../src/components/task/Task';
 import {MEDIA_CHANNEL, TaskState} from '../../../../src/components/task/task.types';
-import * as taskUtils from '../../../../src/components/task/Task/task.utils';
 
 Object.defineProperty(global, 'Worker', {
   writable: true,
@@ -50,16 +49,10 @@ describe('Task Component Snapshots', () => {
     mediaChannel: MEDIA_CHANNEL.TELEPHONY,
   };
 
-  const extractTaskComponentDataSpy = jest.spyOn(taskUtils, 'extractTaskComponentData');
-  const getTaskListItemClassesSpy = jest.spyOn(taskUtils, 'getTaskListItemClasses');
-
   beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  afterAll(() => {
-    extractTaskComponentDataSpy.mockRestore();
-    getTaskListItemClassesSpy.mockRestore();
+    mockAcceptTask.mockClear();
+    mockDeclineTask.mockClear();
+    mockOnTaskSelect.mockClear();
   });
 
   describe('Rendering', () => {
@@ -594,6 +587,25 @@ describe('Task Component Snapshots', () => {
       const incomingListItem = getByRole(incomingContainer, 'listitem');
       fireEvent.click(incomingListItem);
       expect(incomingContainer).toMatchSnapshot();
+    });
+  });
+
+  describe('Action error display', () => {
+    it('should match snapshot when action error is shown below accept/decline buttons', async () => {
+      const {container} = await render(
+        <Task
+          {...defaultProps}
+          isIncomingTask={true}
+          acceptText="Accept"
+          declineText="Decline"
+          actionError={{
+            message: 'Unable to answer the Call. Please try again',
+            isWxAppTelephonyError: true,
+          }}
+        />
+      );
+
+      expect(container).toMatchSnapshot();
     });
   });
 });

@@ -1,0 +1,15 @@
+.wxapp-offer-action-error {
+  margin-top: 0.5rem;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: none;
+  background-color: transparent;
+  color: var(--mds-color-theme-text-error-normal, #a12b2f);
+}
+
+.wxapp-offer-action-error-message {
+  margin: 0;
+  word-break: break-word;
+  color: var(--mds-color-theme-text-error-normal, #a12b2f);
+}

@@ -3,7 +3,8 @@ import {ButtonPill, ListItemBase, ListItemBaseSection, Text} from '@momentum-ui/
 import {Avatar, Brandvisual, Tooltip} from '@momentum-design/components/dist/react';
 import {PressEvent} from '@react-types/shared';
 import TaskTimer from '../TaskTimer';
-import type {MEDIA_CHANNEL as MediaChannelType} from '../task.types';
+import type {MEDIA_CHANNEL as MediaChannelType, WxAppTelephonyErrorDisplay} from '../task.types';
+import WxAppOfferActionError from '../WxAppOfferActionError/wxapp-offer-action-error';
 import {extractTaskComponentData, getTaskListItemClasses} from './task.utils';
 import './styles.scss';
 
@@ -26,6 +27,7 @@ export interface TaskProps {
   styles?: string;
   mediaType?: MediaChannelType;
   mediaChannel?: MediaChannelType;
+  actionError?: WxAppTelephonyErrorDisplay | null;
 }
 
 const Task: React.FC<TaskProps> = ({
@@ -47,6 +49,7 @@ const Task: React.FC<TaskProps> = ({
   declineText,
   mediaType,
   mediaChannel,
+  actionError,
 }) => {
   // Extract all computed data using the utility function
   const taskData = extractTaskComponentData({
@@ -100,7 +103,8 @@ const Task: React.FC<TaskProps> = ({
 
   return (
     <ListItemBase
-      className={getTaskListItemClasses(selected, styles)}
+      className={getTaskListItemClasses(selected, styles, undefined, Boolean(actionError))}
+      size={actionError ? 'auto' : undefined}
       onPress={onTaskSelect ? onTaskSelect : undefined}
       id={interactionId}
     >
@@ -185,6 +189,7 @@ const Task: React.FC<TaskProps> = ({
             </ButtonPill>
           ) : null}
         </div>
+        {actionError ? <WxAppOfferActionError error={actionError} /> : null}
       </ListItemBaseSection>
     </ListItemBase>
   );

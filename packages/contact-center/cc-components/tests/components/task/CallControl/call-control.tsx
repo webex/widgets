@@ -70,6 +70,7 @@ describe('CallControlComponent', () => {
     toggleHold: jest.fn(),
     toggleRecording: jest.fn(),
     toggleMute: jest.fn(),
+    sendDtmf: jest.fn(),
     isMuted: false,
     endCall: jest.fn(),
     wrapupCall: jest.fn(),
@@ -161,6 +162,18 @@ describe('CallControlComponent', () => {
     jest.restoreAllMocks();
   });
   describe('Rendering', () => {
+    it('does not render the CallControlCAD participant roster surface', () => {
+      const screen = render(
+        <CallControlComponent
+          {...defaultProps}
+          conferenceParticipantDropRoster={{customer: null, participants: [], isDropDisabled: false}}
+          requestParticipantDrop={jest.fn()}
+        />
+      );
+
+      expect(screen.queryByTestId('call-control:participants-trigger')).not.toBeInTheDocument();
+    });
+
     it('renders mute and hold buttons and responds to user interactions', async () => {
       const modifiedProps = {
         ...defaultProps,
@@ -306,6 +319,13 @@ describe('CallControlComponent', () => {
       const modifiedProps = {
         ...defaultProps,
         buddyAgents: mockBuddyAgents,
+        controls: {
+          ...defaultProps.controls,
+          consultTransferDestinations: {
+            consult: [],
+            transfer: ['agent' as const],
+          },
+        },
       };
 
       const screen = await render(<CallControlComponent {...modifiedProps} />);
@@ -338,6 +358,7 @@ describe('CallControlComponent', () => {
 
       // After clicking, the popover should be expanded
       expect(transferButton).toHaveAttribute('aria-expanded', 'true');
+      expect(modifiedProps.loadBuddyAgents).toHaveBeenCalledWith('Transfer');
 
       // Verify buttons maintain their CSS classes after interactions
       expect(transferButton).toHaveClass('call-control-button');
@@ -467,7 +488,13 @@ describe('CallControlComponent', () => {
       const screen = await render(
         <CallControlComponent
           {...defaultProps}
-          controls={createEnabledMainTaskUIControls({transfer: disabledControl})}
+          controls={{
+            ...createEnabledMainTaskUIControls({transfer: disabledControl}),
+            consultTransferDestinations: {
+              consult: ['agent', 'queue', 'dialNumber', 'entryPoint'],
+              transfer: [],
+            },
+          }}
           consultTransferOptions={{showDialNumberTab: false}}
         />
       );
@@ -476,9 +503,44 @@ describe('CallControlComponent', () => {
       fireEvent.click(consultButton);
 
       await screen.findByRole('button', {name: 'Agents'});
+      expect(defaultProps.loadBuddyAgents).toHaveBeenCalledWith('Consult');
       expect(screen.getByRole('button', {name: 'Queues'})).toBeInTheDocument();
       expect(screen.getByRole('button', {name: 'Entry Point'})).toBeInTheDocument();
       expect(screen.queryByRole('button', {name: 'Dial Number'})).not.toBeInTheDocument();
+    });
+
+    it('does not load buddy agents when the SDK omits the Agents destination', async () => {
+      jest.spyOn(callControlUtils, 'filterButtonsForConsultation').mockReturnValue([
+        {
+          id: 'consult',
+          icon: 'consult',
+          tooltip: 'Consult',
+          className: 'call-control-button',
+          disabled: false,
+          menuType: 'Consult',
+          isVisible: true,
+          dataTestId: 'consult-button',
+        },
+      ]);
+
+      const screen = await render(
+        <CallControlComponent
+          {...defaultProps}
+          controls={{
+            ...createEnabledMainTaskUIControls({transfer: disabledControl}),
+            consultTransferDestinations: {
+              consult: ['queue'],
+              transfer: [],
+            },
+          }}
+        />
+      );
+
+      fireEvent.click(screen.getByLabelText('Consult'));
+
+      await screen.findByRole('button', {name: 'Queues'});
+      expect(defaultProps.loadBuddyAgents).not.toHaveBeenCalled();
+      expect(screen.queryByRole('button', {name: 'Agents'})).not.toBeInTheDocument();
     });
 
     it('hides Dial Number and Entry Point tabs for non-telephony media', async () => {
@@ -500,7 +562,13 @@ describe('CallControlComponent', () => {
       const screen = await render(
         <CallControlComponent
           {...defaultProps}
-          controls={createEnabledMainTaskUIControls({transfer: disabledControl})}
+          controls={{
+            ...createEnabledMainTaskUIControls({transfer: disabledControl}),
+            consultTransferDestinations: {
+              consult: ['agent', 'queue'],
+              transfer: [],
+            },
+          }}
         />
       );
 

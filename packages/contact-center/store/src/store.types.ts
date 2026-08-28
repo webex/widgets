@@ -71,6 +71,7 @@ interface IContactCenter {
   setAgentState(data: StateChange): Promise<SetStateResponse>;
   getOutdialAniEntries(params: OutdialAniParams): Promise<OutdialAniEntriesResponse>;
   getAccessToken(): Promise<string>;
+  startOutdial(destination: string, origin?: string): Promise<TaskResponse>;
   acceptPreviewContact(payload: PreviewContactPayload): Promise<TaskResponse>;
   skipPreviewContact(payload: PreviewContactPayload): Promise<TaskResponse>;
   removePreviewContact(payload: PreviewContactPayload): Promise<TaskResponse>;
@@ -127,16 +128,27 @@ type ILogger = {
 };
 
 type WithWebex = {
-  webex: {cc: IContactCenter; logger: ILogger};
+  webex: {cc: IContactCenter; logger: ILogger; config?: {cc?: WebexCcInitConfig}};
+};
+
+/** Host init config read from `webexConfig.cc` before `store.init()`. */
+type WebexCcInitConfig = {
+  enableWxBetterTogether?: boolean;
 };
 
 type WithWebexConfig = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  webexConfig: any;
+  webexConfig: {cc?: WebexCcInitConfig; [key: string]: unknown};
   access_token: string;
 };
 
 type InitParams = WithWebex | WithWebexConfig;
+
+type OfferActionErrorDisplay = {
+  message: string;
+  isWxAppTelephonyError?: boolean;
+  trackingId?: string;
+  status?: number | string;
+};
 
 type IdleCode = {
   name: string;
@@ -199,6 +211,8 @@ interface IStore {
   allowConsultToQueue: boolean;
   agentProfile: AgentLoginProfile;
   isMuted: boolean;
+  /** Read-only host init flag — set at `webexConfig.cc.enableWxBetterTogether` before init. */
+  enableWxBetterTogether: boolean;
   isAddressBookEnabled: boolean;
   isDigitalChannelsInitialized: boolean;
   dataCenter: string;
@@ -207,6 +221,7 @@ interface IStore {
   showE911Modal: boolean;
   isEmergencyModalAlreadyDisplayed: boolean;
   realTimeAssist: Record<string, RealTimeAssistPayload[]>;
+  offerActionErrors: Record<string, OfferActionErrorDisplay>;
   init(params: InitParams, callback: (ccSDK: IContactCenter) => void): Promise<void>;
   registerCC(webex?: WithWebex['webex']): Promise<void>;
 }
@@ -216,8 +231,13 @@ interface IStoreWrapper extends IStore {
   onErrorCallback?: (widgetName: string, error: Error) => void;
   setCurrentTask(task: ITask): void;
   refreshTaskList(): void;
+  getBuddyAgents(action: 'Consult' | 'Transfer'): Promise<BuddyDetails[]>;
   getBuddyAgents(mediaType?: string): Promise<BuddyDetails[]>;
-  getQueues(mediaType?: string, params?: ContactServiceQueueSearchParams): Promise<ContactServiceQueuesResponse>;
+  getQueues(params?: ContactServiceQueueSearchParams): Promise<ContactServiceQueuesResponse>;
+  getQueues(
+    mediaType: string | undefined,
+    params?: ContactServiceQueueSearchParams
+  ): Promise<ContactServiceQueuesResponse>;
   getEntryPoints(params?: EntryPointSearchParams): Promise<EntryPointListResponse>;
   getAddressBookEntries(params?: AddressBookEntrySearchParams): Promise<AddressBookEntriesResponse>;
   setDeviceType(option: string): void;
@@ -246,6 +266,9 @@ interface IStoreWrapper extends IStore {
   fetchUserPreferences(): Promise<void>;
   updateEmergencyModalAcknowledgment(): Promise<void>;
   clearRealTimeAssist(interactionId: string): void;
+  setOfferActionError(interactionId: string, error: OfferActionErrorDisplay | null): void;
+  clearOfferActionError(interactionId: string): void;
+  pruneOfferActionErrors(activeInteractionIds: Set<string>): void;
 }
 
 interface IWrapupCode {
@@ -308,7 +331,7 @@ type PaginatedListParams = {
   search?: string;
 };
 
-// Generic fetch/transform helpers for paginated APIs
+// Generic fetch helper for paginated APIs
 type FetchPaginatedList<T> = (
   params: PaginatedListParams
 ) => Promise<{data: T[]; meta?: {page?: number; totalPages?: number}}>;
@@ -349,6 +372,7 @@ export type {
   Team,
   AgentLogin,
   WithWebex,
+  WebexCcInitConfig,
   IdleCode,
   InitParams,
   IStore,
@@ -382,6 +406,7 @@ export type {
   RealTimeAssistRequestParams,
   RealTimeAssistUserActionId,
   RealTimeAssistUserActionParams,
+  OfferActionErrorDisplay,
 };
 
 export {
@@ -409,6 +434,32 @@ export type Participant = {
   id: string;
   pType: 'Customer' | 'Agent' | string;
   name?: string;
+};
+
+export type ConferenceParticipantDropType = 'Customer' | 'Agent' | 'EP-DN' | 'Supervisor';
+
+/**
+ * Display and authorization data for one participant-drop roster row.
+ * `dropTargetId` is passed to the SDK only when `isReadOnly` is false.
+ */
+export type ConferenceParticipantDropTarget = {
+  participantType: ConferenceParticipantDropType;
+  displayName: string;
+  dropTargetId: string;
+  isPrimary: boolean;
+  isReadOnly: boolean;
+  /** Target is visible with an action, but the conference Drop request is not valid yet. */
+  isDropDisabled: boolean;
+  requiresConfirmation: boolean;
+};
+
+/**
+ * Participant-drop roster derived from the authoritative main-call media leg.
+ */
+export type ConferenceParticipantDropRoster = {
+  customer: ConferenceParticipantDropTarget | null;
+  participants: ConferenceParticipantDropTarget[];
+  isDropDisabled: boolean;
 };
 
 /**

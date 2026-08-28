@@ -290,6 +290,58 @@ describe('task-list.utils', () => {
         mockTask.data.interaction.outboundType = originalOutboundType;
       });
 
+      it('should show Calling... for wxApp outdial while answer is pending', () => {
+        (isIncomingTask as jest.Mock).mockReturnValueOnce(true);
+
+        const originalState = mockTask.data.interaction.state;
+        const originalMediaType = mockTask.data.interaction.mediaType;
+        const originalOutboundType = mockTask.data.interaction.outboundType;
+        const originalUiControls = mockTask.uiControls;
+
+        mockTask.data.interaction.state = 'new';
+        mockTask.data.interaction.mediaType = MEDIA_CHANNEL.TELEPHONY;
+        mockTask.data.interaction.outboundType = OUTBOUND_TYPE.OUTDIAL;
+        mockTask.uiControls = createEnabledMainTaskUIControls({
+          accept: {isVisible: true, isEnabled: false},
+          decline: {isVisible: true, isEnabled: true},
+        });
+
+        const result = extractTaskListItemData(mockTask, mockTask.data.agentId, undefined, undefined, false);
+
+        expect(result.acceptText).toBe('Calling...');
+
+        mockTask.data.interaction.state = originalState;
+        mockTask.data.interaction.mediaType = originalMediaType;
+        mockTask.data.interaction.outboundType = originalOutboundType;
+        mockTask.uiControls = originalUiControls;
+      });
+
+      it('should show Accept for browser outdial while answer is pending', () => {
+        (isIncomingTask as jest.Mock).mockReturnValueOnce(true);
+
+        const originalState = mockTask.data.interaction.state;
+        const originalMediaType = mockTask.data.interaction.mediaType;
+        const originalOutboundType = mockTask.data.interaction.outboundType;
+        const originalUiControls = mockTask.uiControls;
+
+        mockTask.data.interaction.state = 'new';
+        mockTask.data.interaction.mediaType = MEDIA_CHANNEL.TELEPHONY;
+        mockTask.data.interaction.outboundType = OUTBOUND_TYPE.OUTDIAL;
+        mockTask.uiControls = createEnabledMainTaskUIControls({
+          accept: {isVisible: true, isEnabled: false},
+          decline: {isVisible: true, isEnabled: true},
+        });
+
+        const result = extractTaskListItemData(mockTask, mockTask.data.agentId, undefined, undefined, true);
+
+        expect(result.acceptText).toBe('Accept');
+
+        mockTask.data.interaction.state = originalState;
+        mockTask.data.interaction.mediaType = originalMediaType;
+        mockTask.data.interaction.outboundType = originalOutboundType;
+        mockTask.uiControls = originalUiControls;
+      });
+
       it('should fall back to ani when dn is not available for outdial tasks', () => {
         const originalState = mockTask.data.interaction.state;
         const originalCallAssociatedDetails = mockTask.data.interaction.callAssociatedDetails;

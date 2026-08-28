@@ -67,5 +67,6 @@ The intake record confirms scope/modules **against the code** and sets the chang
 | Decision records | `ai-docs/adr/` | Standing ADRs — why the architecture is the way it is |
 | Review catalog | `ai-docs/REVIEW_CHECKLIST.md` | 6-core + 4-coverage + 3-cross-cutting review checks |
 | SDK reference | `@webex/contact-center` types (`node_modules/@webex/contact-center/dist/types/index.d.ts`) | installed SDK `.d.ts` surface — verify every SDK call |
+| Participant Drop intake | `ai-docs/features/participant-drop-intake.md` | Cross-repository SDK/widget contract, behavior, delivery gates, and verification |
 
 _No `DATA_MODEL.md`: this repo owns no persistent datastore (all domain data comes from the SDK at runtime)._

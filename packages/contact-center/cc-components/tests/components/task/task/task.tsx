@@ -3,7 +3,6 @@ import {render, fireEvent, within, getByTestId, getByRole, queryByTestId} from '
 import '@testing-library/jest-dom';
 import Task, {TaskProps} from '../../../../src/components/task/Task';
 import {MEDIA_CHANNEL, TaskState} from '../../../../src/components/task/task.types';
-import * as taskUtils from '../../../../src/components/task/Task/task.utils';
 
 Object.defineProperty(global, 'Worker', {
   writable: true,
@@ -50,16 +49,10 @@ describe('Task Component', () => {
     mediaChannel: MEDIA_CHANNEL.TELEPHONY,
   };
 
-  const extractTaskComponentDataSpy = jest.spyOn(taskUtils, 'extractTaskComponentData');
-  const getTaskListItemClassesSpy = jest.spyOn(taskUtils, 'getTaskListItemClasses');
-
   beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  afterAll(() => {
-    extractTaskComponentDataSpy.mockRestore();
-    getTaskListItemClassesSpy.mockRestore();
+    mockAcceptTask.mockClear();
+    mockDeclineTask.mockClear();
+    mockOnTaskSelect.mockClear();
   });
 
   describe('Rendering', () => {
@@ -930,5 +923,39 @@ describe('Task Component', () => {
       expect(listItem).toHaveAttribute('tabindex', '0');
       expect(listItem).toHaveAttribute('data-interactive', 'true');
     });
+  });
+
+  it('should render action error on a full-width row below task content', async () => {
+    const {container} = await render(
+      <Task
+        {...defaultProps}
+        isIncomingTask={true}
+        acceptText="Accept"
+        declineText="Decline"
+        actionError={{
+          message: 'Unable to answer the Call. Please try again',
+          isWxAppTelephonyError: true,
+        }}
+      />
+    );
+
+    const listItem = getByRole(container, 'listitem');
+    expect(listItem).toHaveClass('task-list-item--has-action-error');
+    expect(listItem).toHaveAttribute('data-size', 'auto');
+
+    const buttonContainer = container.querySelector('.task-button-container');
+    const errorEl = getByTestId(container, 'wxapp-offer-action-error');
+    const messageEl = errorEl.querySelector('.wxapp-offer-action-error-message');
+
+    expect(errorEl).toHaveTextContent('Unable to answer the Call. Please try again');
+    expect(buttonContainer).not.toBeNull();
+    expect(buttonContainer?.compareDocumentPosition(errorEl)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+
+    const errorStyles = window.getComputedStyle(errorEl);
+    expect(errorStyles.backgroundColor).not.toBe('rgb(252, 232, 230)');
+    expect(['', 'transparent', 'rgba(0, 0, 0, 0)']).toContain(errorStyles.backgroundColor);
+
+    expect(messageEl).not.toBeNull();
+    expect(errorEl).not.toHaveStyle({backgroundColor: 'rgb(252, 232, 230)'});
   });
 });

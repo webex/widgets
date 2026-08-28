@@ -9,8 +9,19 @@ import {IncomingTaskProps} from '../task.types';
 
 const IncomingTaskInternal: React.FunctionComponent<IncomingTaskProps> = observer(
   ({incomingTask, onAccepted, onRejected}) => {
-    const {logger, isDeclineButtonEnabled, deviceType} = store;
-    const result = useIncomingTask({incomingTask, onAccepted, onRejected, logger});
+    const {logger, isDeclineButtonEnabled, deviceType, taskList} = store;
+    const interactionId = incomingTask?.data?.interactionId;
+    const liveIncomingTask = interactionId && taskList[interactionId] ? taskList[interactionId] : incomingTask;
+
+    if (interactionId && liveIncomingTask !== incomingTask) {
+      logger?.info('CC-Widgets: IncomingTask using live task from store.taskList', {
+        module: 'IncomingTask',
+        method: 'render',
+        data: {acceptEnabled: liveIncomingTask?.uiControls?.main?.accept?.isEnabled},
+      });
+    }
+
+    const result = useIncomingTask({incomingTask: liveIncomingTask, onAccepted, onRejected, logger});
 
     const props = {
       ...result,

@@ -63,7 +63,15 @@ export const extractIncomingTaskData = (
     // Desktop/WebRTC outdial: accept visible but disabled → show "Accept" (auto-answer handles it)
     // Desktop/WebRTC inbound: accept visible and enabled → show "Accept"
     const showRinging = isTelephony && !accept.isEnabled && !(isBrowser && isOutdial);
-    const acceptText = accept.isVisible ? (showRinging ? 'Ringing...' : 'Accept') : undefined;
+    const showCalling =
+      isTelephony && isOutdial && !isBrowser && accept.isVisible && !accept.isEnabled && decline.isVisible;
+    const acceptText = accept.isVisible
+      ? showCalling
+        ? 'Calling...'
+        : showRinging
+          ? 'Ringing...'
+          : 'Accept'
+      : undefined;
 
     const declineText = decline.isVisible ? 'Decline' : undefined;
 
