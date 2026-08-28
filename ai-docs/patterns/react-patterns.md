@@ -216,31 +216,36 @@ cleanup that unregisters the exact same handler.
 ```typescript
 // from packages/contact-center/task/src/helper.ts
 useEffect(() => {
-  if (!currentTask) return;
+  const registeredTask = currentTask;
+  if (!registeredTask?.data?.interactionId) return;
+  const interactionId = registeredTask.data.interactionId;
 
-  store.setTaskCallback(TASK_EVENTS.TASK_HOLD, holdCallback, currentTask);
-  store.setTaskCallback(TASK_EVENTS.TASK_RESUME, resumeCallback, currentTask);
-  store.setTaskCallback(TASK_EVENTS.TASK_END, endCallCallback, currentTask);
+  store.setTaskCallback(TASK_EVENTS.TASK_HOLD, holdCallback, interactionId, registeredTask);
+  store.setTaskCallback(TASK_EVENTS.TASK_RESUME, resumeCallback, interactionId, registeredTask);
+  store.setTaskCallback(TASK_EVENTS.TASK_END, endCallCallback, interactionId, registeredTask);
 
   return () => {
-    store.removeTaskCallback(TASK_EVENTS.TASK_HOLD, holdCallback, currentTask);
-    store.removeTaskCallback(TASK_EVENTS.TASK_RESUME, resumeCallback, currentTask);
-    store.removeTaskCallback(TASK_EVENTS.TASK_END, endCallCallback, currentTask);
+    store.removeTaskCallback(TASK_EVENTS.TASK_HOLD, holdCallback, interactionId, registeredTask);
+    store.removeTaskCallback(TASK_EVENTS.TASK_RESUME, resumeCallback, interactionId, registeredTask);
+    store.removeTaskCallback(TASK_EVENTS.TASK_END, endCallCallback, interactionId, registeredTask);
   };
 }, [currentTask]);
 ```
 
 Note the repo registers task-scoped listeners through the store's `setTaskCallback` /
-`removeTaskCallback` helpers (not raw `cc.on` / `cc.off` in the widget). Pass the `ITask` object
-itself (not its `interactionId`) as the third argument — passing an ID requires a `store.taskList`
-lookup that can be stale during React 18 StrictMode mount/unmount cycles.
+`removeTaskCallback` helpers (not raw `cc.on` / `cc.off` in the widget). Both take
+`(event, callback, taskId, task?)`: the `taskId` keeps the published API compatible with any
+external/already-shipped consumer still passing only a string ID (it falls back to a
+`store.taskList[taskId]` lookup), but in-repo callers should always also pass the optional `task`
+object — that lookup can be stale during React 18 StrictMode mount/unmount cycles, whereas passing
+the captured task reference registers/removes directly on it.
 
 **Incorrect**
 
 ```typescript
 useEffect(() => {
   store.setTaskCallback(TASK_EVENTS.TASK_HOLD, holdCallback, currentTask.data.interactionId);
-  // no return — handler never removed, and passing an ID risks a stale taskList lookup
+  // no return — handler never removed, and omitting `task` risks a stale taskList lookup
 }, [currentTask]);
 ```
 

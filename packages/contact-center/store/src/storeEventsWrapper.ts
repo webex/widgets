@@ -622,16 +622,18 @@ class StoreWrapper implements IStoreWrapper {
     this.store.cc.on(event, callback);
   };
 
-  setTaskCallback = (event: TASK_EVENTS, callback, task: ITask) => {
-    if (!callback || !task) return;
+  setTaskCallback = (event: TASK_EVENTS, callback, taskId: string, task?: ITask) => {
+    if (!callback) return;
+    const taskToRegister = task ?? this.store.taskList[taskId];
+    if (!taskToRegister) return;
     this.store.logger?.info(
-      `CC-Widgets: setTaskCallback(): registering task event '${event}' for ${task.data?.interactionId}`,
+      `CC-Widgets: setTaskCallback(): registering task event '${event}' for ${taskToRegister.data?.interactionId}`,
       {
         module: 'storeEventsWrapper.ts',
         method: 'setTaskCallback',
       }
     );
-    task.on(event, callback);
+    taskToRegister.on(event, callback);
   };
 
   setAgentProfile = (profile: AgentLoginProfile) => {
@@ -658,16 +660,18 @@ class StoreWrapper implements IStoreWrapper {
     this.store.cc.off(event);
   };
 
-  removeTaskCallback = (event: TASK_EVENTS, callback, task: ITask) => {
-    if (!callback || !task) return;
+  removeTaskCallback = (event: TASK_EVENTS, callback, taskId: string, task?: ITask) => {
+    if (!callback) return;
+    const taskToDetach = task ?? this.store.taskList[taskId];
+    if (!taskToDetach) return;
     this.store.logger?.info(
-      `CC-Widgets: removeTaskCallback(): removing task event '${event}' for ${task.data?.interactionId}`,
+      `CC-Widgets: removeTaskCallback(): removing task event '${event}' for ${taskToDetach.data?.interactionId}`,
       {
         module: 'storeEventsWrapper.ts',
         method: 'removeTaskCallback',
       }
     );
-    task.off(event, callback);
+    taskToDetach.off(event, callback);
   };
 
   init(options: InitParams): Promise<void> {
