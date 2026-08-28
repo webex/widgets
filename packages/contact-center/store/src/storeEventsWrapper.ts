@@ -626,13 +626,10 @@ class StoreWrapper implements IStoreWrapper {
     if (!callback) return;
     const taskToRegister = task ?? this.store.taskList[taskId];
     if (!taskToRegister) return;
-    this.store.logger?.info(
-      `CC-Widgets: setTaskCallback(): registering task event '${event}' for ${taskToRegister.data?.interactionId}`,
-      {
-        module: 'storeEventsWrapper.ts',
-        method: 'setTaskCallback',
-      }
-    );
+    this.store.logger?.info(`CC-Widgets: setTaskCallback(): registering task event '${event}'`, {
+      module: 'storeEventsWrapper.ts',
+      method: 'setTaskCallback',
+    });
     taskToRegister.on(event, callback);
   };
 
@@ -664,13 +661,10 @@ class StoreWrapper implements IStoreWrapper {
     if (!callback) return;
     const taskToDetach = task ?? this.store.taskList[taskId];
     if (!taskToDetach) return;
-    this.store.logger?.info(
-      `CC-Widgets: removeTaskCallback(): removing task event '${event}' for ${taskToDetach.data?.interactionId}`,
-      {
-        module: 'storeEventsWrapper.ts',
-        method: 'removeTaskCallback',
-      }
-    );
+    this.store.logger?.info(`CC-Widgets: removeTaskCallback(): removing task event '${event}'`, {
+      module: 'storeEventsWrapper.ts',
+      method: 'removeTaskCallback',
+    });
     taskToDetach.off(event, callback);
   };
 
