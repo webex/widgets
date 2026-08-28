@@ -128,6 +128,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
     cancelParticipantDropConfirmation = () => undefined,
     conferenceEnabled = true,
     isCampaignCall = false,
+    enableWxBetterTogether = false,
   } = props;
 
   const formatTime = (time: number): string => {
@@ -528,6 +529,8 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
               controls={controls}
               toggleConsultMute={toggleMute}
               conferenceEnabled={conferenceEnabled}
+              enableWxBetterTogether={enableWxBetterTogether}
+              currentTask={currentTask}
             />
           </div>
         )}

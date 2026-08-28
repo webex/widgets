@@ -135,6 +135,9 @@ describe('task.utils', () => {
       expect(getTaskListItemClasses(true, 'custom-class another-class')).toBe(
         'task-list-item task-list-item--selected custom-class another-class'
       );
+      expect(getTaskListItemClasses(false, undefined, undefined, true)).toBe(
+        'task-list-item task-list-item--has-action-error'
+      );
     });
   });
 

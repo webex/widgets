@@ -56,6 +56,7 @@ describe('CallControlCAD Component', () => {
       secondsUntilAutoWrapup: 0,
       cancelAutoWrapup: jest.fn(),
       toggleMute: jest.fn(),
+      sendDtmf: jest.fn(),
       isMuted: false,
       consultConference: jest.fn(),
       exitConference: jest.fn(),
@@ -76,6 +77,8 @@ describe('CallControlCAD Component', () => {
       consultTimerLabel: 'Consulting',
       consultTimerTimestamp: 0,
       isCampaignCall: false,
+      telephonyToast: null,
+      dismissTelephonyToast: jest.fn(),
     });
 
     render(
@@ -102,6 +105,8 @@ describe('CallControlCAD Component', () => {
       isMuted: false,
       conferenceEnabled: undefined,
       agentId: store.agentId,
+      enableWxBetterTogether: false,
+      widgetName: 'CallControlCAD',
     });
   });
 
@@ -135,6 +140,7 @@ describe('CallControlCAD Component', () => {
       secondsUntilAutoWrapup: 0,
       cancelAutoWrapup: jest.fn(),
       toggleMute: jest.fn(),
+      sendDtmf: jest.fn(),
       isMuted: false,
       consultConference: jest.fn(),
       exitConference: jest.fn(),
@@ -155,6 +161,8 @@ describe('CallControlCAD Component', () => {
       consultTimerLabel: 'Consulting',
       consultTimerTimestamp: 0,
       isCampaignCall: false,
+      telephonyToast: null,
+      dismissTelephonyToast: jest.fn(),
     });
 
     render(<CallControlCAD onHoldResume={onHoldResumeCb} onEnd={onEndCb} onWrapUp={onWrapUpCb} />);
@@ -196,6 +204,7 @@ describe('CallControlCAD Component', () => {
       secondsUntilAutoWrapup: 0,
       cancelAutoWrapup: jest.fn(),
       toggleMute: jest.fn(),
+      sendDtmf: jest.fn(),
       isMuted: false,
       consultConference: jest.fn(),
       exitConference: jest.fn(),
@@ -216,6 +225,8 @@ describe('CallControlCAD Component', () => {
       consultTimerLabel: 'Consulting',
       consultTimerTimestamp: 0,
       isCampaignCall: false,
+      telephonyToast: null,
+      dismissTelephonyToast: jest.fn(),
     });
 
     render(
@@ -260,6 +271,7 @@ describe('CallControlCAD Component', () => {
       secondsUntilAutoWrapup: 0,
       cancelAutoWrapup: jest.fn(),
       toggleMute: jest.fn(),
+      sendDtmf: jest.fn(),
       isMuted: false,
       consultConference: jest.fn(),
       exitConference: jest.fn(),
@@ -280,6 +292,8 @@ describe('CallControlCAD Component', () => {
       consultTimerLabel: 'Consulting',
       consultTimerTimestamp: 0,
       isCampaignCall: false,
+      telephonyToast: null,
+      dismissTelephonyToast: jest.fn(),
     });
 
     const {container} = render(

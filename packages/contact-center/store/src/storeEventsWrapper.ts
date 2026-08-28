@@ -27,6 +27,7 @@ import {
   RealTimeTranscriptionEventPayload,
   DesktopPreference,
   RealTimeAssistPayload,
+  OfferActionErrorDisplay,
 } from './store.types';
 import Store from './store';
 import {
@@ -77,6 +78,9 @@ class StoreWrapper implements IStoreWrapper {
   // replacement task object (task:hydrate / task:merged) gets rebound.
   private realTimeAssistListeners: Record<string, {task: ITask; listener: (payload: RealTimeAssistPayload) => void}> =
     {};
+  private wxAppMuteStateListeners: Record<string, {task: ITask; listener: (payload: {muted: boolean}) => void}> = {};
+  private taskEndListeners: Record<string, {task: ITask; listener: () => void}> = {};
+  private muteStateByInteractionId: Record<string, boolean> = {};
 
   constructor() {
     this.store = Store.getInstance();
@@ -196,6 +200,11 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.isEmergencyModalAlreadyDisplayed;
   }
 
+  /** Read-only host init flag — see `webexConfig.cc.enableWxBetterTogether` at init. */
+  get enableWxBetterTogether() {
+    return this.store.enableWxBetterTogether;
+  }
+
   get realTimeAssist() {
     return this.store.realTimeAssist;
   }
@@ -241,6 +250,85 @@ class StoreWrapper implements IStoreWrapper {
   setIsMuted = (value: boolean): void => {
     runInAction(() => {
       this.store.isMuted = value;
+      this.persistTelephonyMuteCacheForCurrentTask(value);
+    });
+  };
+
+  private isTelephonyTask(task: ITask | null | undefined): boolean {
+    return task?.data?.interaction?.mediaType === MEDIA_TYPE_TELEPHONY_LOWER;
+  }
+
+  private persistTelephonyMuteCacheForCurrentTask(value: boolean): void {
+    const interactionId = this.currentTask?.data?.interactionId;
+    if (!interactionId || !this.isTelephonyTask(this.currentTask)) {
+      return;
+    }
+
+    this.muteStateByInteractionId[interactionId] = value;
+  }
+
+  private clearTelephonyMuteCache(interactionId: string | undefined): void {
+    if (!interactionId) {
+      return;
+    }
+
+    delete this.muteStateByInteractionId[interactionId];
+  }
+
+  private setIsMutedForTaskSwitch(value: boolean): void {
+    runInAction(() => {
+      this.store.isMuted = value;
+    });
+  }
+
+  private restoreCachedMuteForTelephonyTask(task: ITask): void {
+    if (!this.isTelephonyTask(task)) {
+      return;
+    }
+
+    const interactionId = task.data?.interactionId;
+    if (!interactionId) {
+      return;
+    }
+
+    const cachedMute = this.muteStateByInteractionId[interactionId];
+    if (typeof cachedMute !== 'boolean') {
+      return;
+    }
+
+    runInAction(() => {
+      this.store.isMuted = cachedMute;
+    });
+  }
+
+  get offerActionErrors() {
+    return this.store.offerActionErrors;
+  }
+
+  setOfferActionError = (interactionId: string, error: OfferActionErrorDisplay | null): void => {
+    runInAction(() => {
+      const remaining = {...this.store.offerActionErrors};
+      delete remaining[interactionId];
+      this.store.offerActionErrors = error ? {...remaining, [interactionId]: error} : remaining;
+    });
+  };
+
+  clearOfferActionError = (interactionId: string): void => {
+    this.setOfferActionError(interactionId, null);
+  };
+
+  pruneOfferActionErrors = (activeInteractionIds: Set<string>): void => {
+    runInAction(() => {
+      const currentEntries = Object.entries(this.store.offerActionErrors);
+      const hasStaleEntries = currentEntries.some(([interactionId]) => !activeInteractionIds.has(interactionId));
+
+      if (!hasStaleEntries) {
+        return;
+      }
+
+      this.store.offerActionErrors = Object.fromEntries(
+        currentEntries.filter(([interactionId]) => activeInteractionIds.has(interactionId))
+      );
     });
   };
 
@@ -286,6 +374,63 @@ class StoreWrapper implements IStoreWrapper {
     this.store.isAgentLoggedIn = value;
   };
 
+  private getCanonicalTask(task: ITask): ITask {
+    const interactionId = task.data?.interactionId;
+    if (!interactionId) {
+      return task;
+    }
+
+    const tasks = this.store.cc?.taskManager?.getAllTasks?.();
+    return tasks?.[interactionId] ?? task;
+  }
+
+  private isWxAppEngagedTelephonyTask(task: ITask): boolean {
+    if (!this.store.enableWxBetterTogether) {
+      return false;
+    }
+
+    const canonicalTask = this.getCanonicalTask(task) as ITask & {
+      getWebexCallingCallId?: () => string | null | undefined;
+    };
+
+    return typeof canonicalTask.getWebexCallingCallId === 'function' && !!canonicalTask.getWebexCallingCallId();
+  }
+
+  private seedWxAppMuteFromTask(task: ITask): boolean {
+    if (!this.isWxAppEngagedTelephonyTask(task)) {
+      return false;
+    }
+
+    const interactionId = task.data?.interactionId;
+    if (!interactionId) {
+      return false;
+    }
+
+    const canonicalTask = this.getCanonicalTask(task) as ITask & {
+      syncWxAppMuteFromCallDetails?: () => Promise<boolean | undefined>;
+      getWxAppMuted?: () => boolean;
+    };
+    const sync = canonicalTask.syncWxAppMuteFromCallDetails?.bind(canonicalTask);
+    if (typeof sync !== 'function') {
+      return false;
+    }
+
+    void sync()
+      .then(() => {
+        if (this.currentTask?.data?.interactionId !== interactionId) {
+          return;
+        }
+
+        const muted = canonicalTask.getWxAppMuted?.();
+        if (typeof muted === 'boolean') {
+          this.setIsMuted(muted);
+        }
+      })
+      .catch(() => undefined);
+
+    return true;
+  }
+
   setCurrentTask = (task: ITask | null, isClicked: boolean = false): void => {
     // Don't assign the task as current task is incoming
     if (isIncomingTask(task, this.agentId)) return;
@@ -318,6 +463,13 @@ class StoreWrapper implements IStoreWrapper {
 
       // Update the current task
       this.store.currentTask = task ? Object.assign(Object.create(Object.getPrototypeOf(task)), task) : null;
+
+      if (task && !isSameTask) {
+        this.setIsMutedForTaskSwitch(false);
+        if (!this.seedWxAppMuteFromTask(task)) {
+          this.restoreCachedMuteForTelephonyTask(task);
+        }
+      }
 
       if (this.onTaskSelected && !isSameTask && typeof isClicked !== 'undefined') {
         this.onTaskSelected(task, isClicked);
@@ -501,11 +653,11 @@ class StoreWrapper implements IStoreWrapper {
     this.store.cc.off(event);
   };
 
-  removeTaskCallback = (event: TASK_EVENTS, callback, taskId: string) => {
+  removeTaskCallback = (event: TASK_EVENTS, callback, taskId: string, task?: ITask) => {
     if (!callback) return;
-    const task = this.store.taskList[taskId];
-    if (!task) return;
-    task.off(event, callback);
+    const taskToDetach = task ?? this.store.taskList[taskId];
+    if (!taskToDetach) return;
+    taskToDetach.off(event, callback);
   };
 
   init(options: InitParams): Promise<void> {
@@ -527,6 +679,7 @@ class StoreWrapper implements IStoreWrapper {
   handleTaskRemove = (taskToRemove: ITask) => {
     if (taskToRemove) {
       const taskId = taskToRemove.data?.interactionId;
+      this.clearTelephonyMuteCache(taskId);
       // Clean up accepted/dismissed campaign tracking now that the task is
       // fully removed (after wrapup).  This is safe because the task will
       // no longer render in any component.
@@ -538,10 +691,19 @@ class StoreWrapper implements IStoreWrapper {
         delete this.realtimeTranscriptionListeners[taskId];
       }
       taskToRemove.off(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
-      taskToRemove.off(TASK_EVENTS.TASK_END, this.handleTaskEnd);
+      if (taskId && this.taskEndListeners[taskId]) {
+        const {task: endTask, listener: endListener} = this.taskEndListeners[taskId];
+        (endTask ?? taskToRemove).off(TASK_EVENTS.TASK_END, endListener);
+        delete this.taskEndListeners[taskId];
+      }
       taskToRemove.off(TASK_EVENTS.TASK_REJECT, (reason) => this.handleTaskReject(taskToRemove, reason));
       taskToRemove.off(TASK_EVENTS.TASK_OUTDIAL_FAILED, (reason) => this.handleOutdialFailed(reason));
       taskToRemove.off(TASK_EVENTS.TASK_UI_CONTROLS_UPDATED, this.handleUIControlsUpdated);
+      if (taskId && this.wxAppMuteStateListeners[taskId]) {
+        const {task: muteTask, listener: muteListener} = this.wxAppMuteStateListeners[taskId];
+        (muteTask ?? taskToRemove).off(TASK_EVENTS.TASK_WXAPP_MUTE_STATE_UPDATED, muteListener);
+        delete this.wxAppMuteStateListeners[taskId];
+      }
       taskToRemove.off(TASK_EVENTS.TASK_WRAPPEDUP, this.refreshTaskList);
       taskToRemove.off(TASK_EVENTS.TASK_CONSULT_CREATED, this.handleConsultCreated);
       taskToRemove.off(TASK_EVENTS.TASK_OFFER_CONTACT, this.refreshTaskList);
@@ -597,6 +759,7 @@ class StoreWrapper implements IStoreWrapper {
       }
       if (taskToRemove && this.store.currentTask?.data.interactionId === taskToRemove.data.interactionId) {
         this.setCurrentTask(null);
+        this.setIsMuted(false);
       }
 
       this.setState({
@@ -607,11 +770,20 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   handleTaskMuteState = (task: ITask): void => {
-    const isBrowser = this.deviceType === DEVICE_TYPE_BROWSER;
-    const webRtcEnabled = this.featureFlags?.webRtcEnabled;
     const isTelephony = task?.data?.interaction?.mediaType === MEDIA_TYPE_TELEPHONY_LOWER;
 
-    if (isBrowser && isTelephony && webRtcEnabled) {
+    // Each new telephony offer starts unmuted on Webex App / WebRTC media.
+    // Widgets track mute locally in store.isMuted — reset so a prior call's mute
+    // state does not leak into the next interaction (WXCC-6026 wxApp thick-client).
+    // Background offers must not clobber mute for the currently engaged call.
+    if (!isTelephony) {
+      return;
+    }
+
+    const incomingId = task.data?.interactionId;
+    const currentId = this.currentTask?.data?.interactionId;
+
+    if (!currentId || currentId === incomingId) {
       this.setIsMuted(false);
     }
   };
@@ -836,8 +1008,11 @@ class StoreWrapper implements IStoreWrapper {
     this.refreshTaskList();
   };
 
-  handleTaskEnd = () => {
+  handleTaskEnd = (endedTask: ITask) => {
     this.setIsDeclineButtonEnabled(false);
+    if (this.currentTask?.data?.interactionId === endedTask?.data?.interactionId) {
+      this.setIsMuted(false);
+    }
     this.scheduleTaskListRefresh();
   };
 
@@ -969,12 +1144,29 @@ class StoreWrapper implements IStoreWrapper {
     this.refreshTaskList();
   };
 
+  handleWxAppMuteStateUpdated = (payload: {muted: boolean}, task: ITask) => {
+    if (this.currentTask?.data?.interactionId === task.data?.interactionId) {
+      this.setIsMuted(payload.muted);
+    }
+  };
+
   handleSwitchCall = () => {
     this.refreshTaskList();
   };
 
   private registerTaskEventListeners = (task: ITask): void => {
-    task.on(TASK_EVENTS.TASK_END, this.handleTaskEnd);
+    const taskId = task.data?.interactionId;
+    if (taskId) {
+      const existingEnd = this.taskEndListeners[taskId];
+      if (existingEnd?.task !== task) {
+        existingEnd?.task?.off(TASK_EVENTS.TASK_END, existingEnd.listener);
+        const endListener = () => this.handleTaskEnd(task);
+        this.taskEndListeners[taskId] = {task, listener: endListener};
+        task.on(TASK_EVENTS.TASK_END, endListener);
+      }
+    } else {
+      task.on(TASK_EVENTS.TASK_END, () => this.handleTaskEnd(task));
+    }
     task.on(TASK_EVENTS.TASK_ASSIGNED, this.handleTaskAssigned);
     task.on(TASK_EVENTS.TASK_REJECT, (reason) => this.handleTaskReject(task, reason));
     task.on(TASK_EVENTS.TASK_OUTDIAL_FAILED, (reason) => this.handleOutdialFailed(reason));
@@ -1019,7 +1211,15 @@ class StoreWrapper implements IStoreWrapper {
     task.on(TASK_EVENTS.TASK_CAMPAIGN_PREVIEW_RESERVATION, this.handleCampaignPreviewReservation);
     task.on(TASK_EVENTS.TASK_CAMPAIGN_CONTACT_UPDATED, this.refreshTaskList);
 
-    const taskId = task.data?.interactionId;
+    if (taskId) {
+      const existingMute = this.wxAppMuteStateListeners[taskId];
+      if (existingMute?.task !== task) {
+        existingMute?.task?.off(TASK_EVENTS.TASK_WXAPP_MUTE_STATE_UPDATED, existingMute.listener);
+        const wxAppMuteListener = (payload: {muted: boolean}) => this.handleWxAppMuteStateUpdated(payload, task);
+        this.wxAppMuteStateListeners[taskId] = {task, listener: wxAppMuteListener};
+        task.on(TASK_EVENTS.TASK_WXAPP_MUTE_STATE_UPDATED, wxAppMuteListener);
+      }
+    }
     if (taskId && !this.realtimeTranscriptionListeners[taskId]) {
       this.realtimeTranscriptionListeners[taskId] = (payload: RealTimeTranscriptionEventPayload) =>
         this.handleRealtimeTranscription(payload);

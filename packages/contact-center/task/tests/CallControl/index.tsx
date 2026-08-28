@@ -53,6 +53,7 @@ describe('CallControl Component', () => {
       secondsUntilAutoWrapup: 0,
       cancelAutoWrapup: jest.fn(),
       toggleMute: jest.fn(),
+      sendDtmf: jest.fn(),
       isMuted: false,
       consultConference: jest.fn(),
       exitConference: jest.fn(),
@@ -73,6 +74,8 @@ describe('CallControl Component', () => {
       consultTimerLabel: 'Consulting',
       consultTimerTimestamp: 0,
       isCampaignCall: false,
+      telephonyToast: null,
+      dismissTelephonyToast: jest.fn(),
     });
 
     render(
@@ -96,6 +99,8 @@ describe('CallControl Component', () => {
       isMuted: false,
       onToggleMute: undefined,
       agentId: store.agentId,
+      enableWxBetterTogether: false,
+      widgetName: 'CallControl',
     });
   });
 

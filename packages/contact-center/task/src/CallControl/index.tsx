@@ -5,7 +5,7 @@ import {ErrorBoundary} from 'react-error-boundary';
 import store from '@webex/cc-store';
 import {useCallControl} from '../helper';
 import {CallControlProps} from '../task.types';
-import {CallControlComponent} from '@webex/cc-components';
+import {CallControlComponent, TelephonyActionToast} from '@webex/cc-components';
 import {isUnacceptedCampaignPreview} from '../Utils/task-util';
 
 const CallControlInternal: React.FunctionComponent<CallControlProps> = observer(
@@ -20,6 +20,8 @@ const CallControlInternal: React.FunctionComponent<CallControlProps> = observer(
       isMuted,
       agentId,
       acceptedCampaignIds,
+      enableWxBetterTogether,
+      deviceType,
     } = store;
 
     // Hide call control when the current task is a campaign preview that
@@ -29,7 +31,7 @@ const CallControlInternal: React.FunctionComponent<CallControlProps> = observer(
       return <></>;
     }
 
-    const callControlProps = useCallControl({
+    const {telephonyToast, dismissTelephonyToast, ...callControlHookProps} = useCallControl({
       currentTask,
       onHoldResume,
       onEnd,
@@ -40,23 +42,34 @@ const CallControlInternal: React.FunctionComponent<CallControlProps> = observer(
       isMuted,
       conferenceEnabled,
       agentId,
+      enableWxBetterTogether,
+      widgetName: 'CallControl',
     });
 
     const result = {
-      ...callControlProps,
+      ...callControlHookProps,
       wrapupCodes,
       consultStartTimeStamp,
       callControlAudio,
       allowConsultToQueue,
       logger,
       consultTransferOptions,
+      enableWxBetterTogether,
+      agentDeviceType: deviceType,
     };
 
     if (!currentTask) {
       return <></>;
     }
 
-    return <CallControlComponent {...result} />;
+    return (
+      <>
+        <CallControlComponent {...result} />
+        {telephonyToast ? (
+          <TelephonyActionToast error={telephonyToast.error} onDismiss={dismissTelephonyToast} />
+        ) : null}
+      </>
+    );
   }
 );
 

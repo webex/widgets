@@ -94,6 +94,9 @@ function App() {
     const savedDisableWebRTCRegistration = window.localStorage.getItem('disableWebRTCRegistration');
     return savedDisableWebRTCRegistration === 'true';
   });
+  const [enableWxBetterTogether, setEnableWxBetterTogether] = useState(() => {
+    return window.localStorage.getItem('enableWxBetterTogether') === 'true';
+  });
   const [isWebRTCWidgetSelectionLocked, setIsWebRTCWidgetSelectionLocked] = useState(() => {
     const savedDisableWebRTCRegistration = window.localStorage.getItem('disableWebRTCRegistration');
     return savedDisableWebRTCRegistration === 'true';
@@ -151,6 +154,7 @@ function App() {
     cc: {
       allowMultiLogin: isMultiLoginEnabled,
       disableWebRTCRegistration,
+      enableWxBetterTogether,
     },
     ...(integrationEnv && {
       services: {
@@ -233,6 +237,12 @@ function App() {
     } else {
       setIsMultiLoginEnabled(true);
     }
+  };
+
+  const handleEnableWxBetterTogetherChange = () => {
+    const next = !enableWxBetterTogether;
+    setEnableWxBetterTogether(next);
+    window.localStorage.setItem('enableWxBetterTogether', next ? 'true' : 'false');
   };
 
   const toggleDisableWebRTCRegistration = () => {
@@ -361,6 +371,7 @@ function App() {
         },
         cc: {
           disableWebRTCRegistration,
+          enableWxBetterTogether,
         },
       },
     };
@@ -395,6 +406,10 @@ function App() {
   useEffect(() => {
     window.localStorage.setItem('disableWebRTCRegistration', JSON.stringify(disableWebRTCRegistration));
   }, [disableWebRTCRegistration]);
+
+  useEffect(() => {
+    window.localStorage.setItem('enableWxBetterTogether', enableWxBetterTogether ? 'true' : 'false');
+  }, [enableWxBetterTogether]);
 
   useEffect(() => {
     if (!disableWebRTCRegistration) {
@@ -437,6 +452,25 @@ function App() {
   }, []);
 
   useEffect(() => {
+    const handlePageHide = (event: PageTransitionEvent) => {
+      if (event.persisted) {
+        return;
+      }
+
+      if (!store.isAgentLoggedIn && !isLoggedIn) {
+        return;
+      }
+
+      void store.cc
+        ?.stationLogout({logoutReason: 'Page unload'})
+        .catch(() => undefined);
+    };
+
+    window.addEventListener('pagehide', handlePageHide);
+    return () => window.removeEventListener('pagehide', handlePageHide);
+  }, [isLoggedIn]);
+
+  useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && showOutdialFailedModal) {
         setShowOutdialFailedModal(false);
@@ -453,6 +487,12 @@ function App() {
   }, [showOutdialFailedModal]);
 
   const onError = (widgetName: string, error: Error) => {
+    const wxError = error as Error & {isWxAppTelephonyError?: boolean; trackingId?: string};
+    if (wxError.isWxAppTelephonyError) {
+      // Widgets render inline/toast errors — host only logs for debugging.
+      console.log('WxApp telephony error:', widgetName, error.message, wxError.trackingId);
+      return;
+    }
     console.log('Error in widgets:', widgetName, error);
   };
 
@@ -732,6 +772,42 @@ function App() {
                             enabled, the Incoming Task, Task List, Call Control, and Call Control with CAD widgets will
                             be unchecked and disabled because they depend on call handling. Set this option before
                             clicking the Init Widgets button - changes after SDK initialization will not take effect.
+                          </div>
+                        </Text>
+                      </PopoverNext>
+                    </label>
+                    <label style={{display: 'flex', flexDirection: 'row', alignItems: 'center', marginTop: '10px'}}>
+                      <input
+                        data-testid="samples:enable-answer-on-webex-checkbox"
+                        type="checkbox"
+                        id="enableWxBetterTogetherFlag"
+                        name="enableWxBetterTogetherFlag"
+                        onChange={handleEnableWxBetterTogetherChange}
+                        checked={enableWxBetterTogether}
+                      />{' '}
+                      &nbsp; Enable Answer on Webex
+                      <PopoverNext
+                        trigger="mouseenter"
+                        triggerComponent={<Icon name="info-badge-filled" />}
+                        placement="auto-end"
+                        closeButtonPlacement="top-left"
+                        closeButtonProps={{'aria-label': 'Close'}}
+                      >
+                        <Text>
+                          <div
+                            className="warning-note"
+                            style={{
+                              color: 'var(--mds-color-theme-text-error-normal)',
+                              marginBottom: '10px',
+                              maxWidth: '320px',
+                            }}
+                          >
+                            <strong>Note:</strong> Sets <code>webexConfig.cc.enableWxBetterTogether</code> before SDK
+                            init. Usersub and Mercury initialize automatically on Extension/Dial Number station login
+                            when ON; when OFF, SDK clears stale Webex toast suppression on login (e.g. after hard
+                            refresh). Desktop (BROWSER) login is not supported. Configure before Init Widgets — changes
+                            after init require re-init. Prefer Station Logout before refresh when testing toggle
+                            changes. Do not enable with Multi Login for production wxApp answer.
                           </div>
                         </Text>
                       </PopoverNext>

@@ -5,6 +5,7 @@ import './call-control.styles.scss';
 import {PopoverNext, TooltipNext, Text, ButtonCircle} from '@momentum-ui/react-collaboration';
 import {Icon, Button, Select, Option} from '@momentum-design/components/dist/react';
 import ConsultTransferPopoverComponent from './CallControlCustom/consult-transfer-popover';
+import CallControlDtmfKeypad from './call-control-dtmf-keypad';
 import AutoWrapupTimer from '../AutoWrapupTimer/AutoWrapupTimer';
 import type {MEDIA_CHANNEL as MediaChannelType} from '../task.types';
 import {DestinationType} from '@webex/cc-store';
@@ -24,6 +25,7 @@ import {
   filterButtonsForConsultation,
   getConsultFilterPhase,
   updateCallStateFromTask,
+  applyWxAppTelephonyControlVisibility,
 } from './call-control.utils';
 import {withMetrics} from '@webex/cc-ui-logging';
 
@@ -40,6 +42,7 @@ function CallControlComponent(props: CallControlComponentProps) {
     toggleHold,
     toggleRecording,
     toggleMute,
+    sendDtmf = () => undefined,
     isMuted,
     endCall,
     wrapupCall,
@@ -67,11 +70,18 @@ function CallControlComponent(props: CallControlComponentProps) {
     getQueuesFetcher,
     consultTransferOptions,
     conferenceEnabled = true,
+    enableWxBetterTogether = false,
+    agentDeviceType,
   } = props;
 
   useEffect(() => {
     updateCallStateFromTask(currentTask, setIsRecording, logger);
   }, [currentTask, logger]);
+
+  useEffect(() => {
+    setShowAgentMenu(false);
+    setAgentMenuType(null);
+  }, [currentTask?.data?.interactionId]);
 
   const handletoggleHold = () => {
     handleToggleHoldUtil(isHeld, toggleHold, logger);
@@ -144,8 +154,17 @@ function CallControlComponent(props: CallControlComponentProps) {
     conferenceEnabled
   );
 
+  const wxAppGatedButtons = applyWxAppTelephonyControlVisibility(
+    buttons,
+    currentTask,
+    controls,
+    isTelephony,
+    enableWxBetterTogether,
+    agentDeviceType
+  );
+
   const consultFilterPhase = getConsultFilterPhase(currentTask, controls);
-  const filteredButtons = filterButtonsForConsultation(buttons, consultFilterPhase, isTelephony, logger);
+  const filteredButtons = filterButtonsForConsultation(wxAppGatedButtons, consultFilterPhase, isTelephony, logger);
 
   if (!currentTask) return null;
 
@@ -165,21 +184,23 @@ function CallControlComponent(props: CallControlComponentProps) {
               if (button.menuType) {
                 const action = button.menuType === 'Transfer' ? 'Transfer' : 'Consult';
                 const availableDestinations =
-                  action === 'Transfer'
-                    ? controls.consultTransferDestinations.transfer
-                    : controls.consultTransferDestinations.consult;
+                  button.menuType === 'Keypad'
+                    ? []
+                    : action === 'Transfer'
+                      ? (controls.consultTransferDestinations?.transfer ?? [])
+                      : (controls.consultTransferDestinations?.consult ?? []);
 
                 return (
                   <PopoverNext
                     key={index}
                     onShow={() => {
-                      logger.info(`CC-Widgets: CallControl: showing consult-transfer popover`, {
+                      logger.info(`CC-Widgets: CallControl: showing ${button.menuType} popover`, {
                         module: 'call-control.tsx',
                         method: 'onShowPopover',
                       });
                       setShowAgentMenu(true);
                       setAgentMenuType(button.menuType as CallControlMenuType);
-                      if (availableDestinations.includes('agent')) {
+                      if (button.menuType !== 'Keypad' && availableDestinations.includes('agent')) {
                         loadBuddyAgents(action);
                       }
                     }}
@@ -226,7 +247,14 @@ function CallControlComponent(props: CallControlComponentProps) {
                       </TooltipNext>
                     }
                   >
-                    {showAgentMenu && agentMenuType === button.menuType ? (
+                    {showAgentMenu && agentMenuType === button.menuType && button.menuType === 'Keypad' ? (
+                      <CallControlDtmfKeypad
+                        key={currentTask?.data?.interactionId ?? 'no-interaction'}
+                        onDigitPress={sendDtmf}
+                        logger={logger}
+                        disabled={button.disabled}
+                      />
+                    ) : showAgentMenu && agentMenuType === button.menuType ? (
                       <ConsultTransferPopoverComponent
                         heading={button.menuType}
                         buttonIcon={button.icon}

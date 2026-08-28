@@ -187,7 +187,16 @@ export type IncomingTaskComponentProps = Pick<TaskProps, 'accept' | 'reject' | '
     declineControl?: {isVisible: boolean; isEnabled: boolean};
     isDeclineButtonEnabled?: boolean;
     isBrowser?: boolean;
+    offerActionError?: WxAppTelephonyErrorDisplay | null;
+    clearOfferActionError?: () => void;
   };
+
+export type WxAppTelephonyErrorDisplay = {
+  message: string;
+  trackingId?: string;
+  status?: number | string;
+  isWxAppTelephonyError: boolean;
+};
 
 export type TaskListComponentProps = Pick<
   TaskProps,
@@ -196,6 +205,8 @@ export type TaskListComponentProps = Pick<
   Partial<Pick<TaskProps, 'currentTask' | 'taskList' | 'hasCampaignPreviewEnabled' | 'acceptedCampaignIds'>> & {
     isDeclineButtonEnabled?: boolean;
     isBrowser?: boolean;
+    taskActionErrors?: Record<string, WxAppTelephonyErrorDisplay | null>;
+    clearTaskActionError?: (interactionId: string) => void;
   };
 
 export interface RealTimeTranscriptEntry {
@@ -294,6 +305,11 @@ export interface ControlProps {
    * Function to handle mute/unmute actions.
    */
   toggleMute: () => void;
+
+  /**
+   * Sends a DTMF tone on wxApp engaged telephony calls.
+   */
+  sendDtmf?: (digit: string) => void;
 
   /**
    * Function to handle ending the call.
@@ -546,6 +562,17 @@ export interface ControlProps {
    * Agent ID of the logged-in user
    */
   agentId: string;
+
+  /**
+   * Host init flag `enableWxBetterTogether` (`webexConfig.cc.enableWxBetterTogether`) for wxApp
+   * thick-client main-bar Mute/Keypad visibility gating and wxApp mute seed gate.
+   */
+  enableWxBetterTogether?: boolean;
+
+  /**
+   * Logged-in agent device type (BROWSER, EXTENSION, AGENT_DN) for Extension-only ghost control suppression.
+   */
+  agentDeviceType?: string;
 }
 
 export type CallControlComponentProps = Pick<
@@ -556,6 +583,7 @@ export type CallControlComponentProps = Pick<
   | 'toggleHold'
   | 'toggleRecording'
   | 'toggleMute'
+  | 'sendDtmf'
   | 'isMuted'
   | 'endCall'
   | 'wrapupCall'
@@ -616,6 +644,17 @@ export type CallControlComponentProps = Pick<
      * "Campaign call" label instead of the standard media type.
      */
     isCampaignCall?: boolean;
+
+    /**
+     * Host init flag `enableWxBetterTogether` (`webexConfig.cc.enableWxBetterTogether`) for wxApp
+     * thick-client main-bar Mute/Keypad visibility gating and wxApp mute seed gate.
+     */
+    enableWxBetterTogether?: boolean;
+
+    /**
+     * Logged-in agent device type for Extension-only ghost control suppression.
+     */
+    agentDeviceType?: string;
   };
 
 export type OutdialAniEntry = {
@@ -750,12 +789,14 @@ export interface CallControlConsultComponentsProps {
   controls: TaskUIControls;
   toggleConsultMute: () => void;
   conferenceEnabled: boolean;
+  enableWxBetterTogether?: boolean;
+  currentTask?: ITask | null;
 }
 
 /**
  * Type representing the possible menu types in call control.
  */
-export type CallControlMenuType = 'Consult' | 'Transfer' | 'ExitConference';
+export type CallControlMenuType = 'Consult' | 'Transfer' | 'ExitConference' | 'Keypad';
 
 export const MEDIA_CHANNEL = {
   EMAIL: 'email',

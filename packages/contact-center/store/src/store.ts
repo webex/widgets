@@ -15,6 +15,7 @@ import {
   WithWebex,
   RealTimeTranscriptionData,
   RealTimeAssistPayload,
+  OfferActionErrorDisplay,
 } from './store.types';
 
 import {getFeatureFlags} from './util';
@@ -52,6 +53,12 @@ class Store implements IStore {
   allowConsultToQueue: boolean = false;
   agentProfile: AgentLoginProfile = {};
   isMuted: boolean = false;
+  /**
+   * Host init flag `enableWxBetterTogether` — set at `webexConfig.cc.enableWxBetterTogether`
+   * (or `webex.config.cc.enableWxBetterTogether`) before `store.init()`. Gates wxApp Mute/Keypad
+   * visibility and wxApp mute seed; SDK routes mute/DTMF APIs.
+   */
+  enableWxBetterTogether: boolean = false;
   isDigitalChannelsInitialized: boolean = false;
   dataCenter: string = '';
   realtimeTranscriptionData: Partial<RealTimeTranscriptionData>[] = [];
@@ -59,6 +66,7 @@ class Store implements IStore {
   showE911Modal: boolean = false;
   isEmergencyModalAlreadyDisplayed: boolean = false;
   realTimeAssist: Record<string, RealTimeAssistPayload[]> = {};
+  offerActionErrors: Record<string, OfferActionErrorDisplay> = {};
 
   constructor() {
     makeAutoObservable(this, {
@@ -135,6 +143,15 @@ class Store implements IStore {
   }
 
   init(options: InitParams, setupEventListeners): Promise<void> {
+    if ('webexConfig' in options) {
+      this.enableWxBetterTogether = options.webexConfig?.cc?.enableWxBetterTogether === true;
+    } else if ('webex' in options) {
+      const webexWithConfig = options.webex as WithWebex['webex'];
+      this.enableWxBetterTogether = webexWithConfig.config?.cc?.enableWxBetterTogether === true;
+    } else {
+      this.enableWxBetterTogether = false;
+    }
+
     if ('webex' in options) {
       // If devs decide to go with webex, they will have to listen to the ready event before calling init
       // This has to be documented
