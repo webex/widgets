@@ -17,7 +17,7 @@ import {
   declineExtensionCall,
 } from '../Utils/incomingTaskUtils';
 import { submitWrapup } from '../Utils/wrapupUtils';
-import { USER_STATES, TASK_TYPES, WRAPUP_REASONS } from '../constants';
+import { USER_STATES, TASK_TYPES, WRAPUP_REASONS, AWAIT_TIMEOUT } from '../constants';
 import { waitForState, clearPendingCallAndWrapup, handleStrayTasks } from '../Utils/helperUtils';
 import { endTask, holdCallToggle, verifyHoldButtonIcon, verifyTaskControls } from '../Utils/taskControlUtils';
 import { TestManager } from '../test-manager';
@@ -121,13 +121,13 @@ export default function createDialNumberTaskControlTests() {
         clearAdvancedCapturedLogs();
         await consultOrTransfer(testManager.agent1Page, 'dialNumber', 'consult', process.env.PW_DIAL_NUMBER_NAME);
         await testManager.agent1Page.waitForTimeout(2000);
-        verifyConsultStartSuccessLogs();
+        await verifyConsultStartSuccessLogs();
         await acceptExtensionCall(testManager.dialNumberPage);
         await testManager.agent1Page.bringToFront();
         await cancelConsult(testManager.agent1Page);
         await verifyTaskControls(testManager.agent1Page, TASK_TYPES.CALL);
         await testManager.agent1Page.waitForTimeout(2000);
-        verifyConsultEndSuccessLogs();
+        await verifyConsultEndSuccessLogs();
         await verifyHoldButtonIcon(testManager.agent1Page, { expectedIsHeld: true });
         await holdCallToggle(testManager.agent1Page);
 
@@ -140,8 +140,8 @@ export default function createDialNumberTaskControlTests() {
         await testManager.agent1Page.waitForTimeout(2000);
         await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
         await testManager.dialNumberPage.waitForTimeout(2000);
-        verifyConsultStartSuccessLogs();
-        verifyConsultTransferredLogs();
+        await verifyConsultStartSuccessLogs();
+        await verifyConsultTransferredLogs();
         await endCallTask(testManager.dialNumberPage);
       });
 
@@ -205,7 +205,13 @@ export default function createDialNumberTaskControlTests() {
         await consultOrTransfer(testManager.agent1Page, 'dialNumber', 'consult', process.env.PW_DIAL_NUMBER_NAME!);
         await expect(testManager.agent1Page.getByTestId('cancel-consult-btn')).toBeVisible();
         await cancelConsult(testManager.agent1Page);
-        await expect(testManager.agent1Page.getByTestId('cancel-consult-btn')).not.toBeVisible();
+        // Ending the consult round-trips through the SDK (WXCC_SDK_TASK_CONSULT_END_SUCCESS)
+        // before the UI hides this control; the default 5s expect timeout can be too
+        // tight for that round trip on a loaded CI runner, so give it the same
+        // headroom as other SDK-driven UI transitions in this suite.
+        await expect(testManager.agent1Page.getByTestId('cancel-consult-btn')).not.toBeVisible({
+          timeout: AWAIT_TIMEOUT,
+        });
         await endCallTask(testManager.callerPage!, true);
         await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
       });
@@ -244,7 +250,7 @@ export default function createDialNumberTaskControlTests() {
 
         await consultOrTransfer(testManager.agent1Page, 'dialNumber', 'transfer', process.env.PW_DIAL_NUMBER_NAME);
         await acceptExtensionCall(testManager.dialNumberPage);
-        verifyTransferSuccessLogs();
+        await verifyTransferSuccessLogs();
         await endCallTask(testManager.callerPage!, true);
         await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.RESOLVED);
         await testManager.agent1Page.waitForTimeout(2000);
@@ -261,7 +267,7 @@ export default function createDialNumberTaskControlTests() {
 
         await consultOrTransfer(testManager.agent1Page, 'queue', 'transfer', 'queue with dn e2e');
         await acceptExtensionCall(testManager.dialNumberPage);
-        verifyTransferSuccessLogs();
+        await verifyTransferSuccessLogs();
         await endCallTask(testManager.callerPage!, true);
         await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.RESOLVED);
         await testManager.agent1Page.waitForTimeout(2000);
@@ -277,7 +283,9 @@ export default function createDialNumberTaskControlTests() {
         await consultOrTransfer(testManager.agent1Page, 'dialNumber', 'consult', process.env.PW_DIAL_NUMBER_NAME!);
         await expect(testManager.agent1Page.getByTestId('cancel-consult-btn')).toBeVisible();
         await cancelConsult(testManager.agent1Page);
-        await expect(testManager.agent1Page.getByTestId('cancel-consult-btn')).not.toBeVisible();
+        await expect(testManager.agent1Page.getByTestId('cancel-consult-btn')).not.toBeVisible({
+          timeout: AWAIT_TIMEOUT,
+        });
         await endCallTask(testManager.callerPage!, true);
         await submitWrapup(testManager.agent1Page, WRAPUP_REASONS.SALE);
       });

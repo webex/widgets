@@ -135,17 +135,22 @@ export const disableMultiLogin = async (page: Page): Promise<void> => {
  * ```
  */
 export const initialiseWidgets = async (page: Page): Promise<void> => {
-  await page.getByTestId('samples:init-widgets-button').click({timeout: AWAIT_TIMEOUT});
-
   try {
+    // The init-widgets button stays disabled until the sample app's bundle
+    // finishes loading, so a slow environment (e.g. a loaded CI runner) can
+    // cause the click itself to time out, not just the subsequent widget
+    // wait. Both steps must be covered by the same retry-with-reload
+    // fallback below, otherwise a slow button click fails the test
+    // immediately with no retry.
+    await page.getByTestId('samples:init-widgets-button').click({timeout: AWAIT_TIMEOUT});
     await page.getByTestId('station-login-widget').waitFor({state: 'visible', timeout: WIDGET_INIT_TIMEOUT});
   } catch (error) {
     // First attempt failed, try clicking init widgets button again
     await page.reload();
     await page.waitForTimeout(UI_SETTLE_TIMEOUT); // Wait for page to settle
-    await page.getByTestId('samples:init-widgets-button').click({timeout: AWAIT_TIMEOUT});
 
     try {
+      await page.getByTestId('samples:init-widgets-button').click({timeout: AWAIT_TIMEOUT});
       await page.getByTestId('station-login-widget').waitFor({state: 'visible', timeout: WIDGET_INIT_TIMEOUT});
     } catch (secondError) {
       // Second attempt also failed, throw error

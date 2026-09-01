@@ -70,57 +70,62 @@ export function clearAdvancedCapturedLogs(): void {
 }
 
 /**
+ * Polls the captured console logs for one containing `marker`, retrying for
+ * a short window before failing. The SDK's success console.log is emitted
+ * asynchronously from the event handler and can lag noticeably behind the
+ * UI's optimistic state update (which is all `consultOrTransfer`'s own
+ * completion waits for), especially on a resource-constrained CI runner. A
+ * single immediate check right after a fixed sleep was racing that log
+ * emission and failing intermittently even though the SDK call itself
+ * succeeded.
+ * @throws Error (with the captured logs for context) if the marker never appears in time
+ */
+async function waitForCapturedLog(marker: string, timeout = 8000): Promise<void> {
+  const start = Date.now();
+  while (Date.now() - start < timeout) {
+    if (capturedAdvancedLogs.some((log) => log.includes(marker))) {
+      return;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 250));
+  }
+
+  if (capturedAdvancedLogs.some((log) => log.includes(marker))) {
+    return;
+  }
+
+  throw new Error(`No '${marker}' logs found. Captured logs: ${JSON.stringify(capturedAdvancedLogs)}`);
+}
+
+/**
  * Verifies that transfer success logs are present.
  * @throws Error if verification fails with detailed error message
  */
-export function verifyTransferSuccessLogs(): void {
-  const transferLogs = capturedAdvancedLogs.filter((log) => log.includes('WXCC_SDK_TASK_TRANSFER_SUCCESS'));
-
-  if (transferLogs.length === 0) {
-    throw new Error(
-      `No 'WXCC_SDK_TASK_TRANSFER_SUCCESS' logs found. Captured logs: ${JSON.stringify(capturedAdvancedLogs)}`
-    );
-  }
+export async function verifyTransferSuccessLogs(): Promise<void> {
+  await waitForCapturedLog('WXCC_SDK_TASK_TRANSFER_SUCCESS');
 }
 
 /**
  * Verifies that consult start success logs are present.
  * @throws Error if verification fails with detailed error message
  */
-export function verifyConsultStartSuccessLogs(): void {
-  const consultStartLogs = capturedAdvancedLogs.filter((log) => log.includes('WXCC_SDK_TASK_CONSULT_START_SUCCESS'));
-
-  if (consultStartLogs.length === 0) {
-    throw new Error(
-      `No 'WXCC_SDK_TASK_CONSULT_START_SUCCESS' logs found. Captured logs: ${JSON.stringify(capturedAdvancedLogs)}`
-    );
-  }
+export async function verifyConsultStartSuccessLogs(): Promise<void> {
+  await waitForCapturedLog('WXCC_SDK_TASK_CONSULT_START_SUCCESS');
 }
 
 /**
  * Verifies that consult end success logs are present.
  * @throws Error if verification fails with detailed error message
  */
-export function verifyConsultEndSuccessLogs(): void {
-  const consultEndLogs = capturedAdvancedLogs.filter((log) => log.includes('WXCC_SDK_TASK_CONSULT_END_SUCCESS'));
-
-  if (consultEndLogs.length === 0) {
-    throw new Error(
-      `No 'WXCC_SDK_TASK_CONSULT_END_SUCCESS' logs found. Captured logs: ${JSON.stringify(capturedAdvancedLogs)}`
-    );
-  }
+export async function verifyConsultEndSuccessLogs(): Promise<void> {
+  await waitForCapturedLog('WXCC_SDK_TASK_CONSULT_END_SUCCESS');
 }
 
 /**
  * Verifies that agent consult transferred logs are present (when consult is converted to transfer).
  * @throws Error if verification fails with detailed error message
  */
-export function verifyConsultTransferredLogs(): void {
-  const consultTransferredLogs = capturedAdvancedLogs.filter((log) => log.includes('AgentConsultTransferred'));
-
-  if (consultTransferredLogs.length === 0) {
-    throw new Error(`No 'AgentConsultTransferred' logs found. Captured logs: ${JSON.stringify(capturedAdvancedLogs)}`);
-  }
+export async function verifyConsultTransferredLogs(): Promise<void> {
+  await waitForCapturedLog('AgentConsultTransferred');
 }
 
 /**
@@ -281,10 +286,15 @@ async function performAgentSelection(
     await searchBox.fill(agentFirstName);
 
     const listItem = currentPopover.locator(`[role="listitem"][aria-label="${value}"]`).first();
+    // The target agent's presence change (e.g. MEETING -> AVAILABLE) has to
+    // propagate to the backend buddy/agent list this popover queries before
+    // the list item renders. That propagation can lag noticeably on a
+    // resource-constrained CI runner, so give each attempt a more generous
+    // window before giving up and reopening the popover to retry.
     const isVisible = await expect
       .poll(() => listItem.isVisible().catch(() => false), {
-        timeout: 2500,
-        intervals: [200, 400, 800],
+        timeout: 8000,
+        intervals: [200, 400, 800, 1500],
       })
       .toBeTruthy()
       .then(() => true)

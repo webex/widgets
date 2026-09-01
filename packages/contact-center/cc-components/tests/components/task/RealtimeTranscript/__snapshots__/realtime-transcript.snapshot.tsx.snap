@@ -12,6 +12,7 @@ exports[`RealTimeTranscriptComponent snapshots matches snapshot with transcript 
     >
       <div
         class="real-time-transcript__item"
+        data-speaker-role="agent"
         data-testid="real-time-transcript:item"
       >
         <div
@@ -50,6 +51,7 @@ exports[`RealTimeTranscriptComponent snapshots matches snapshot with transcript 
       </div>
       <div
         class="real-time-transcript__item"
+        data-speaker-role="customer"
         data-testid="real-time-transcript:item"
       >
         <div

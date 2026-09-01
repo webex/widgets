@@ -19,7 +19,10 @@ export default defineConfig({
   },
   retries: 0,
   fullyParallel: true,
-  workers: Object.keys(USER_SETS).length, // Dynamic worker count based on USER_SETS
+  // Cap concurrency in CI to avoid exhausting the shared runner's CPU/memory
+  // (many parallel headed-Chrome instances + webpack dev server can overload
+  // it). Locally, keep one worker per user set for speed.
+  workers: process.env.CI ? Math.min(4, Object.keys(USER_SETS).length) : Object.keys(USER_SETS).length,
   reporter: 'html',
   use: {
     baseURL: 'http://localhost:3000',

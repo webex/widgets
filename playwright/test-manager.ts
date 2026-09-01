@@ -647,6 +647,21 @@ export class TestManager {
     await initialiseWidgets(this.multiSessionAgent1Page);
   }
 
+  /**
+   * Setup for Real-Time Assist / Real-Time Transcript scenarios: a single
+   * agent (desktop login) plus a caller, so a live voice call can be
+   * established. Both widgets render automatically off `store.currentTask`
+   * / the sample app's checkboxes - no extension or chat context needed.
+   */
+  async setupForRealTimeAssistAndTranscript(browser: Browser) {
+    await this.setup(browser, {
+      needsAgent1: true,
+      needsCaller: true,
+      agent1LoginMode: LOGIN_MODE.DESKTOP,
+      enableConsoleLogging: true,
+    });
+  }
+
   // Specific setup methods that use the universal setup
   async setupForIncomingTaskDesktop(browser: Browser) {
     await this.setup(browser, {

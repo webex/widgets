@@ -33,29 +33,58 @@ playwright/
 - ✅ Positions browser windows automatically
 - ✅ Maps test suites to user sets
 
-| Set       | Focus                              | Port | Suite File                                   |
-| --------- | ---------------------------------- | ---- | -------------------------------------------- |
-| **SET_1** | Digital incoming tasks & controls  | 9221 | `digital-incoming-task-tests.spec.ts`        |
-| **SET_2** | Task lists & multi-session         | 9222 | `task-list-multi-session-tests.spec.ts`      |
-| **SET_3** | Authentication & user management   | 9223 | `station-login-user-state-tests.spec.ts`     |
-| **SET_4** | Task controls & combinations       | 9224 | `basic-advanced-task-controls-tests.spec.ts` |
-| **SET_5** | Advanced task operations           | 9225 | `advanced-task-controls-tests.spec.ts`       |
-| **SET_6** | Dial number scenarios              | 9226 | `dial-number-tests.spec.ts`                  |
-| **SET_7** | Multiparty conference (team 25-28) | 9227 | `multiparty-conference-set-7-tests.spec.ts`  |
-| **SET_8** | Multiparty conference (team 29-32) | 9228 | `multiparty-conference-set-8-tests.spec.ts`  |
-| **SET_9** | Multiparty conference (team 33-36) | 9229 | `multiparty-conference-set-9-tests.spec.ts`  |
+| Set        | Focus                               | Port | Suite File                                   |
+| ---------- | ----------------------------------- | ---- | -------------------------------------------- |
+| **SET_1**  | Digital incoming tasks & controls   | 9221 | `digital-incoming-task-tests.spec.ts`        |
+| **SET_2**  | Task lists & multi-session          | 9222 | `task-list-multi-session-tests.spec.ts`      |
+| **SET_3**  | Authentication & user management    | 9223 | `station-login-user-state-tests.spec.ts`     |
+| **SET_4**  | Task controls & combinations        | 9224 | `basic-advanced-task-controls-tests.spec.ts` |
+| **SET_5**  | Advanced task operations            | 9225 | `advanced-task-controls-tests.spec.ts`       |
+| **SET_6**  | Dial number scenarios               | 9226 | `dial-number-tests.spec.ts`                  |
+| **SET_7**  | Multiparty conference (team 25-28)  | 9227 | `multiparty-conference-set-7-tests.spec.ts`  |
+| **SET_8**  | Multiparty conference (team 29-32)  | 9228 | `multiparty-conference-set-8-tests.spec.ts`  |
+| **SET_9**  | Multiparty conference (team 33-36)  | 9229 | `multiparty-conference-set-9-tests.spec.ts`  |
 
 ### Where to Add New Tests?
 
-| Test Type                    | Use Set   | Why                         |
-| ---------------------------- | --------- | --------------------------- |
-| Digital channels tasks       | SET_1     | Digital channels configured |
-| Task list operations         | SET_2     | Task list focus             |
-| Authentication/User states   | SET_3     | User management             |
-| Basic/Advanced task controls | SET_4     | Task control operations     |
-| Complex advanced scenarios   | SET_5     | Advanced operations         |
-| Dial number scenarios        | SET_6     | Dial number flows           |
-| Multiparty conference        | SET_7/8/9 | 4-agent conference coverage |
+| Test Type                           | Use Set   | Why                                                |
+| ----------------------------------- | --------- | --------------------------------------------------- |
+| Digital channels tasks              | SET_1     | Digital channels configured                        |
+| Task list operations                | SET_2     | Task list focus                                     |
+| Authentication/User states          | SET_3     | User management                                     |
+| Basic/Advanced task controls        | SET_4     | Task control operations; single agent + caller call |
+| Complex advanced scenarios          | SET_5     | Advanced operations                                 |
+| Dial number scenarios               | SET_6     | Dial number flows                                   |
+| Multiparty conference               | SET_7/8/9 | 4-agent conference coverage                         |
+| AI Assistant / Real-Time Transcript | SET_4     | Live call required for both; reuses SET_4's agent   |
+
+> **Note on AI Assistant / Real-Time Transcript coverage:** these tests are bundled into
+> `SET_4`'s suite, `basic-advanced-task-controls-tests.spec.ts`, and reuse its
+> already-provisioned agent (`user21`) plus caller. Both features retain a lightweight
+> live-backend smoke check. Precise UI behavior is tested deterministically by driving
+> the same sample-app store surfaces used by SDK events: Real Time Assist controls the
+> SDK request/feedback promises and injects `SUGGESTED_RESPONSE` payloads through
+> `store.handleRealTimeAssist`; Real-Time Transcript injects
+> `REAL_TIME_TRANSCRIPTION` payloads through `store.handleRealtimeTranscription`.
+> This split verifies the real integration path without making every rendering and
+> transition assertion depend on non-deterministic AI/speech timing.
+
+### Real Time Assist scenario coverage
+
+`playwright/tests/real-time-assist-test.spec.ts` runs serially because it validates one
+continuous interaction lifecycle. It covers:
+
+- launcher, open, minimize, restore, fullscreen, exit-fullscreen, close, and reopen;
+- no-interaction, feature-disabled, active/request, pending, error, retry, listening,
+  ready, and task-ended render states;
+- `getRealTimeAssistance` payloads, pending-request duplicate prevention, context
+  submission, user-message rendering, and subsequent suggestions;
+- deterministic `SUGGESTED_RESPONSE` rendering, chronological ordering, Adaptive Card
+  actions, and the plain-text fallback path;
+- feedback API payloads and the rule that like/dislike selection changes only after
+  backend success; and
+- active-session preservation across close/reopen, interaction cleanup, and one final
+  live SDK/backend suggestion smoke check.
 
 ## Multiparty Conference Consolidation
 
@@ -78,6 +107,10 @@ To reduce runtime and repeated call initialization, conference scenarios are con
   - Skipped: `CTS-SW-01` (EP_DN), `CTS-SW-08` (>4 agents)
 
 ## 🧪 Adding New Tests
+
+The OAuth setup project and all user-set projects run against the installed
+Google Chrome channel. This keeps browser selection consistent across setup and
+feature tests and avoids requiring a separate bundled Chromium revision.
 
 ### 1. Create Test File (in `tests/` folder)
 
@@ -193,6 +226,7 @@ Create `.env` file in project root:
 ```env
 PW_CHAT_URL=https://your-chat-url
 PW_SANDBOX=your-sandbox-name
+PW_SANDBOX_PASSWORD=your-test-agent-password
 PW_ENTRY_POINT1=entry-point-1
 PW_ENTRY_POINT2=entry-point-2
 # ... PW_ENTRY_POINT3 ... PW_ENTRY_POINT9

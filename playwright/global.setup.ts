@@ -160,7 +160,18 @@ setup('OAuth', async ({browser}) => {
 
   // Collect all environment updates
   const userSetUpdates = UpdateENVWithUserSets();
-  const groupedTokenUpdates = await Promise.all(oauthSetGroups.map((setGroup) => runOAuthSetGroup(browser, setGroup)));
+
+  // Run set-groups sequentially rather than via Promise.all. Each group
+  // already fans out to OAUTH_BATCH_SIZE concurrent real OAuth logins
+  // internally; running all groups concurrently on top of that stacked up
+  // to ~20 simultaneous browser contexts doing real network/page-render
+  // work, which was overloading the CI runner and causing the OAuth step
+  // itself to time out intermittently. Sequential groups keep peak
+  // concurrency bounded to a single group's batch size.
+  const groupedTokenUpdates: EnvUpdateMap[] = [];
+  for (const setGroup of oauthSetGroups) {
+    groupedTokenUpdates.push(await runOAuthSetGroup(browser, setGroup));
+  }
   const tokenUpdates = groupedTokenUpdates.reduce<EnvUpdateMap>((acc, groupTokens) => ({...acc, ...groupTokens}), {});
 
   // Fetch dial number token (if configured)

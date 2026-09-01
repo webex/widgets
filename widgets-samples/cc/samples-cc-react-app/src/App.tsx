@@ -42,6 +42,17 @@ const defaultWidgets = {
   aiAssistant: false,
 };
 
+// Exposes the store singleton on `window` so e2e tests can drive/inspect it
+// directly (e.g. injecting mock `REAL_TIME_TRANSCRIPTION`/AI Assist events via
+// `store.handleRealtimeTranscription`) without needing a live backend event.
+// Sample app only - never do this in production widget code.
+declare global {
+  interface Window {
+    store?: typeof store;
+  }
+}
+window.store = store;
+
 function App() {
   const [isSdkReady, setIsSdkReady] = useState(false);
   const [selectedWidgets, setSelectedWidgets] = useState(() => {
