@@ -500,48 +500,65 @@ describe('storeEventsWrapper', () => {
         storeWrapper.refreshTaskList();
       });
 
-      it('should set task callback', () => {
+      it('should set task callback using the supplied task object', () => {
         const mockCb = jest.fn();
         expect(storeWrapper.setTaskCallback).toBeInstanceOf(Function);
-        storeWrapper['store'].taskList = {
-          mockTaskId: mockTask,
-        };
 
-        storeWrapper.setTaskCallback(TASK_EVENTS.TASK_ASSIGNED, mockCb, 'mockTaskId');
+        storeWrapper.setTaskCallback(TASK_EVENTS.TASK_ASSIGNED, mockCb, mockTask.data.interactionId, mockTask);
         expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, mockCb);
       });
 
-      it('should return if callback is not present or task is not found', () => {
+      it('should set task callback by resolving the task from store.taskList when no task object is given (legacy string-id callers)', () => {
+        const mockCb = jest.fn();
+
+        storeWrapper.setTaskCallback(TASK_EVENTS.TASK_ASSIGNED, mockCb, mockTask.data.interactionId);
+        expect(mockTask.on).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, mockCb);
+      });
+
+      it('should return and not set callback if callback is missing, or the task cannot be resolved', () => {
         const mockCb = jest.fn();
         expect(storeWrapper.setTaskCallback).toBeInstanceOf(Function);
 
-        storeWrapper.setTaskCallback(TASK_EVENTS.TASK_ASSIGNED, undefined, 'mockTaskId');
+        storeWrapper.setTaskCallback(TASK_EVENTS.TASK_ASSIGNED, undefined, mockTask.data.interactionId, mockTask);
         expect(mockTask.on).not.toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, mockCb);
 
-        storeWrapper.setTaskCallback(TASK_EVENTS.TASK_ASSIGNED, mockCb, 'mockTaskI2');
+        storeWrapper.setTaskCallback(TASK_EVENTS.TASK_ASSIGNED, mockCb, 'unknown-interaction-id');
         expect(mockTask.on).not.toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, mockCb);
       });
 
-      it('should remove task callback', () => {
+      it('should remove task callback using the supplied task object', () => {
         const mockCb = jest.fn();
-        storeWrapper['store'].taskList = {
-          mockTaskId: mockTask,
-        };
         expect(storeWrapper.removeTaskCallback).toBeInstanceOf(Function);
 
-        storeWrapper.removeTaskCallback(TASK_EVENTS.TASK_WRAPPEDUP, mockCb, 'mockTaskId');
+        storeWrapper.removeTaskCallback(TASK_EVENTS.TASK_WRAPPEDUP, mockCb, mockTask.data.interactionId, mockTask);
         expect(mockTask.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_WRAPPEDUP, mockCb);
       });
 
-      it('should return and not remove callback if callback is not present or task is not found', () => {
+      it('should remove task callback by resolving the task from store.taskList when no task object is given (legacy string-id callers)', () => {
+        const mockCb = jest.fn();
+
+        storeWrapper.removeTaskCallback(TASK_EVENTS.TASK_WRAPPEDUP, mockCb, mockTask.data.interactionId);
+        expect(mockTask.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_WRAPPEDUP, mockCb);
+      });
+
+      it('should return and not remove callback if callback is missing, or the task cannot be resolved', () => {
         const mockCb = jest.fn();
         expect(storeWrapper.removeTaskCallback).toBeInstanceOf(Function);
 
-        storeWrapper.removeTaskCallback(TASK_EVENTS.TASK_ASSIGNED, undefined, 'mockTaskId');
-        expect(mockTask.on).not.toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, mockCb);
+        storeWrapper.removeTaskCallback(TASK_EVENTS.TASK_ASSIGNED, undefined, mockTask.data.interactionId, mockTask);
+        expect(mockTask.off).not.toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, mockCb);
 
-        storeWrapper.removeTaskCallback(TASK_EVENTS.TASK_ASSIGNED, mockCb, 'mockTaskI2');
-        expect(mockTask.on).not.toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, mockCb);
+        storeWrapper.removeTaskCallback(TASK_EVENTS.TASK_ASSIGNED, mockCb, 'unknown-interaction-id');
+        expect(mockTask.off).not.toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, mockCb);
+      });
+
+      it('should remove task callback via the supplied task object even when the task is absent from store.taskList', () => {
+        const mockCb = jest.fn();
+        // Clear taskList so the task is not found by ID lookup
+        storeWrapper['store'].taskList = {};
+
+        storeWrapper.removeTaskCallback(TASK_EVENTS.TASK_ASSIGNED, mockCb, mockTask.data.interactionId, mockTask);
+        expect(mockTask.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, mockCb);
       });
     });
   });
@@ -1124,7 +1141,7 @@ describe('storeEventsWrapper', () => {
       expect(oldTask.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_WXAPP_MUTE_STATE_UPDATED, oldListenerCalls[0][1]);
     });
 
-    it('removeTaskCallback detaches from the supplied task object when taskList has been replaced', () => {
+    it('removeTaskCallback detaches from the supplied task object even when taskList has been replaced', () => {
       const interactionId = 'interaction-callback-detach';
       const registeredTask = makeMockTask({
         data: {interactionId, interaction: {state: 'connected'}},
@@ -1139,6 +1156,19 @@ describe('storeEventsWrapper', () => {
 
       expect(registeredTask.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, callback);
       expect(replacementTask.off).not.toHaveBeenCalled();
+    });
+
+    it('removeTaskCallback falls back to the store.taskList lookup for legacy string-id-only callers', () => {
+      const interactionId = 'interaction-callback-legacy-lookup';
+      const listedTask = makeMockTask({
+        data: {interactionId, interaction: {state: 'connected'}},
+      });
+      const callback = jest.fn();
+
+      storeWrapper['store'].taskList = {[interactionId]: listedTask};
+      storeWrapper.removeTaskCallback(TASK_EVENTS.TASK_ASSIGNED, callback, interactionId);
+
+      expect(listedTask.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, callback);
     });
 
     it('should seed isMuted from syncWxAppMuteFromCallDetails on setCurrentTask', async () => {

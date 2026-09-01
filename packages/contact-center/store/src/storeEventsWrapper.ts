@@ -622,11 +622,15 @@ class StoreWrapper implements IStoreWrapper {
     this.store.cc.on(event, callback);
   };
 
-  setTaskCallback = (event: TASK_EVENTS, callback, taskId: string) => {
+  setTaskCallback = (event: TASK_EVENTS, callback, taskId: string, task?: ITask) => {
     if (!callback) return;
-    const task = this.store.taskList[taskId];
-    if (!task) return;
-    task.on(event, callback);
+    const taskToRegister = task ?? this.store.taskList[taskId];
+    if (!taskToRegister) return;
+    this.store.logger?.info(`CC-Widgets: setTaskCallback(): registering task event '${event}'`, {
+      module: 'storeEventsWrapper.ts',
+      method: 'setTaskCallback',
+    });
+    taskToRegister.on(event, callback);
   };
 
   setAgentProfile = (profile: AgentLoginProfile) => {
@@ -657,6 +661,10 @@ class StoreWrapper implements IStoreWrapper {
     if (!callback) return;
     const taskToDetach = task ?? this.store.taskList[taskId];
     if (!taskToDetach) return;
+    this.store.logger?.info(`CC-Widgets: removeTaskCallback(): removing task event '${event}'`, {
+      module: 'storeEventsWrapper.ts',
+      method: 'removeTaskCallback',
+    });
     taskToDetach.off(event, callback);
   };
 

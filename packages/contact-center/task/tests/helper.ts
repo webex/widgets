@@ -108,7 +108,7 @@ describe('useIncomingTask Hook', () => {
     });
 
     // Mock the implementation of removeTaskCallback to also call the offSpy for testing
-    removeTaskCallbackSpy.mockImplementation((event, callback, _taskId, task) => {
+    removeTaskCallbackSpy.mockImplementation((event, callback, taskId, task) => {
       // Make sure off is called on the task mock
       (task ?? taskMock).off(event, callback);
     });
@@ -122,19 +122,41 @@ describe('useIncomingTask Hook', () => {
       })
     );
 
-    expect(setTaskCallbackSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function), 'interaction1');
-    expect(setTaskCallbackSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_REJECT, expect.any(Function), 'interaction1');
-    expect(setTaskCallbackSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function), 'interaction1');
+    expect(setTaskCallbackSpy).toHaveBeenCalledWith(
+      TASK_EVENTS.TASK_ASSIGNED,
+      expect.any(Function),
+      taskMock.data.interactionId,
+      taskMock
+    );
+    expect(setTaskCallbackSpy).toHaveBeenCalledWith(
+      TASK_EVENTS.TASK_REJECT,
+      expect.any(Function),
+      taskMock.data.interactionId,
+      taskMock
+    );
+    expect(setTaskCallbackSpy).toHaveBeenCalledWith(
+      TASK_EVENTS.TASK_END,
+      expect.any(Function),
+      taskMock.data.interactionId,
+      taskMock
+    );
     expect(setTaskCallbackSpy).toHaveBeenCalledWith(
       TASK_EVENTS.TASK_CONSULT_ACCEPTED,
       expect.any(Function),
-      'interaction1'
+      taskMock.data.interactionId,
+      taskMock
     );
-    expect(setTaskCallbackSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_CONSULT_END, expect.any(Function), 'interaction1');
+    expect(setTaskCallbackSpy).toHaveBeenCalledWith(
+      TASK_EVENTS.TASK_CONSULT_END,
+      expect.any(Function),
+      taskMock.data.interactionId,
+      taskMock
+    );
     expect(setTaskCallbackSpy).toHaveBeenCalledWith(
       TASK_EVENTS.TASK_OUTDIAL_FAILED,
       expect.any(Function),
-      'interaction1'
+      taskMock.data.interactionId,
+      taskMock
     );
     expect(setTaskCallbackSpy).toHaveBeenCalledTimes(6);
 
@@ -146,37 +168,37 @@ describe('useIncomingTask Hook', () => {
     expect(removeTaskCallbackSpy).toHaveBeenCalledWith(
       TASK_EVENTS.TASK_ASSIGNED,
       expect.any(Function),
-      'interaction1',
+      taskMock.data.interactionId,
       taskMock
     );
     expect(removeTaskCallbackSpy).toHaveBeenCalledWith(
       TASK_EVENTS.TASK_REJECT,
       expect.any(Function),
-      'interaction1',
+      taskMock.data.interactionId,
       taskMock
     );
     expect(removeTaskCallbackSpy).toHaveBeenCalledWith(
       TASK_EVENTS.TASK_END,
       expect.any(Function),
-      'interaction1',
+      taskMock.data.interactionId,
       taskMock
     );
     expect(removeTaskCallbackSpy).toHaveBeenCalledWith(
       TASK_EVENTS.TASK_CONSULT_ACCEPTED,
       expect.any(Function),
-      'interaction1',
+      taskMock.data.interactionId,
       taskMock
     );
     expect(removeTaskCallbackSpy).toHaveBeenCalledWith(
       TASK_EVENTS.TASK_CONSULT_END,
       expect.any(Function),
-      'interaction1',
+      taskMock.data.interactionId,
       taskMock
     );
     expect(removeTaskCallbackSpy).toHaveBeenCalledWith(
       TASK_EVENTS.TASK_OUTDIAL_FAILED,
       expect.any(Function),
-      'interaction1',
+      taskMock.data.interactionId,
       taskMock
     );
     expect(removeTaskCallbackSpy).toHaveBeenCalledTimes(6);
@@ -188,7 +210,7 @@ describe('useIncomingTask Hook', () => {
   it('should call onAccepted if it is provided', async () => {
     // Mock store.setTaskCallback to capture the callback
     let assignedCallback;
-    jest.spyOn(store, 'setTaskCallback').mockImplementation((event, callback) => {
+    const setTaskCallbackSpy = jest.spyOn(store, 'setTaskCallback').mockImplementation((event, callback) => {
       if (event === TASK_EVENTS.TASK_ASSIGNED) {
         assignedCallback = callback;
       }
@@ -215,6 +237,7 @@ describe('useIncomingTask Hook', () => {
 
     // Ensure no errors are logged
     expect(logger.error).not.toHaveBeenCalled();
+    setTaskCallbackSpy.mockRestore();
   });
 
   it('should call onRejected if it is provided', async () => {
@@ -874,6 +897,8 @@ describe('useCallControl', () => {
     }) as ITask;
 
   beforeEach(() => {
+    // Restore any spied implementations leaked from prior describe blocks
+    jest.restoreAllMocks();
     store.refreshTaskList();
     // Mock the MediaStreamTrack and MediaStream classes for the test environment
     global.MediaStreamTrack = jest.fn().mockImplementation(() => ({
@@ -927,10 +952,10 @@ describe('useCallControl', () => {
     const onSpy = jest.spyOn(mockCurrentTask, 'on');
 
     // Mock the implementation of setTaskCallback to also call the onSpy for testing
-    setTaskCallbackSpy.mockImplementation((event, callback) => {
+    setTaskCallbackSpy.mockImplementation((event, callback, taskId, task) => {
       // Skip calling original implementation to avoid recursion
-      // Just register directly on task for test visibility
-      mockCurrentTask.on(event, callback);
+      // Just register directly on the passed-in task for test visibility
+      task.on(event, callback);
     });
 
     const {unmount} = renderHook(() =>
@@ -948,6 +973,12 @@ describe('useCallControl', () => {
 
     // 7 store callbacks + TASK_UI_CONTROLS_UPDATED + TASK_SWITCH_CALL + TASK_HOLD + TASK_RESUME on task
     expect(onSpy).toHaveBeenCalledTimes(11);
+    expect(setTaskCallbackSpy).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.any(Function),
+      mockCurrentTask.data.interactionId,
+      mockCurrentTask
+    );
 
     // Unmount the component
     act(() => {
