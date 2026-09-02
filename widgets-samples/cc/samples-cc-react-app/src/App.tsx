@@ -110,6 +110,7 @@ function App() {
   const [isAIAssistantFullScreen, setIsAIAssistantFullScreen] = useState(false);
 
   const handleSaveStart = () => {
+    console.log('Profile save started');
     setShowLoader(true);
     setToast(null);
   };
