@@ -1,8 +1,15 @@
-import React, {useState} from 'react';
+import React, {useMemo, useState} from 'react';
 import {Text, ListNext, TextInput, Button, ButtonCircle, TooltipNext} from '@momentum-ui/react-collaboration';
 import {Icon, Checkbox, Spinner} from '@momentum-design/components/dist/react';
 import ConsultTransferListComponent from './consult-transfer-list-item';
-import {ConsultTransferPopoverComponentProps} from '../../task.types';
+import {
+  CategoryType,
+  ConsultTransferPopoverComponentProps,
+  CATEGORY_AGENTS,
+  CATEGORY_DIAL_NUMBER,
+  CATEGORY_ENTRY_POINT,
+  CATEGORY_QUEUES,
+} from '../../task.types';
 import ConsultTransferEmptyState from './consult-transfer-empty-state';
 import {
   handleAgentSelection,
@@ -11,14 +18,19 @@ import {
   getAgentsForDisplay,
 } from './call-control-custom.utils';
 import {useConsultTransferPopover} from './consult-transfer-popover-hooks';
-
 import {
   SEARCH_PLACEHOLDER,
   CLEAR_SEARCH,
   SCROLL_TO_LOAD_MORE,
   NO_DATA_AVAILABLE_CONSULT_TRANSFER,
 } from '../../constants';
-import {CATEGORY_AGENTS, CATEGORY_DIAL_NUMBER, CATEGORY_ENTRY_POINT, CATEGORY_QUEUES} from '../../task.types';
+
+const DESTINATION_CATEGORY = {
+  agent: CATEGORY_AGENTS,
+  queue: CATEGORY_QUEUES,
+  dialNumber: CATEGORY_DIAL_NUMBER,
+  entryPoint: CATEGORY_ENTRY_POINT,
+} as const;
 
 const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentProps> = ({
   heading,
@@ -33,13 +45,25 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
   onQueueSelect,
   onDialNumberSelect,
   onEntryPointSelect,
-  allowConsultToQueue,
+  action,
+  availableDestinations,
   consultTransferOptions,
   isConferenceInProgress,
   logger,
 }) => {
   const {showDialNumberTab = true, showEntryPointTab = true} = consultTransferOptions || {};
-  const isEntryPointTabVisible = showEntryPointTab && heading === 'Consult';
+  const availableCategories = useMemo(
+    () =>
+      availableDestinations
+        .filter((destination) => showDialNumberTab || destination !== 'dialNumber')
+        .filter((destination) => showEntryPointTab || destination !== 'entryPoint')
+        .map((destination) => DESTINATION_CATEGORY[destination]),
+    [availableDestinations, showDialNumberTab, showEntryPointTab]
+  );
+  const isAgentsTabVisible = availableCategories.includes(CATEGORY_AGENTS);
+  const isQueueTabVisible = availableCategories.includes(CATEGORY_QUEUES);
+  const isDialNumberTabVisible = availableCategories.includes(CATEGORY_DIAL_NUMBER);
+  const isEntryPointTabVisible = availableCategories.includes(CATEGORY_ENTRY_POINT);
   const {
     selectedCategory,
     searchQuery,
@@ -54,30 +78,31 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
     hasMoreQueues,
     loadingQueues,
     handleSearchChange,
-    handleAgentsClick,
-    handleQueuesClick,
-    handleDialNumberClick,
-    handleEntryPointClick,
+    handleCategoryChange,
     handleReload,
   } = useConsultTransferPopover({
-    showDialNumberTab,
-    showEntryPointTab: isEntryPointTabVisible,
+    availableCategories,
     getAddressBookEntries,
     getEntryPoints,
     getQueues,
     logger,
   });
   const [allowParticipantsToInteract, setAllowParticipantsToInteract] = useState<boolean>(false);
-  const renderList = <T extends {id: string; name: string; number?: string}>(
+  const renderList = <T extends {id?: string; name: string; number?: string; presence?: 'active' | 'away'}>(
     items: T[],
     onButtonPress: (item: T) => void
   ) => (
     <ListNext listSize={items.length} className="agent-list">
       {items.map((item) => (
-        <div key={item.id} onMouseDown={(e) => e.stopPropagation()} className="consult-list-item-wrapper">
+        <div
+          key={`${item.id ?? item.name}-${item.number ?? ''}`}
+          onMouseDown={(e) => e.stopPropagation()}
+          className="consult-list-item-wrapper"
+        >
           <ConsultTransferListComponent
             title={item.name}
             subtitle={item.number}
+            presence={item.presence}
             buttonIcon={buttonIcon}
             onButtonPress={() => onButtonPress(item)}
             logger={logger}
@@ -92,9 +117,9 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
     </ListNext>
   );
 
-  const noQueues = !allowConsultToQueue || queuesData.length === 0;
-  const noDialNumbers = !showDialNumberTab || dialNumbers.length === 0;
-  const noEntryPoints = !isEntryPointTabVisible || entryPoints.length === 0;
+  const noQueues = queuesData.length === 0;
+  const noDialNumbers = dialNumbers.length === 0;
+  const noEntryPoints = entryPoints.length === 0;
 
   const consultTransferManualAction = shouldAddConsultTransferAction(
     selectedCategory,
@@ -133,7 +158,7 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
                 data-testid="consult-reload-button"
                 onPress={() => {
                   if (selectedCategory === CATEGORY_AGENTS && loadBuddyAgents) {
-                    loadBuddyAgents();
+                    loadBuddyAgents(action);
                   } else {
                     handleReload();
                   }
@@ -180,56 +205,28 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
       </div>
 
       <div className="consult-category-buttons">
-        <Button
-          variant={selectedCategory === CATEGORY_AGENTS ? 'primary' : 'secondary'}
-          size="small"
-          onClick={handleAgentsClick}
-          className={`consult-category-button-standard ${
-            selectedCategory === CATEGORY_AGENTS ? 'consult-category-button-active' : ''
-          }`}
-        >
-          {CATEGORY_AGENTS}
-        </Button>
-        {allowConsultToQueue && (
-          <Button
-            variant={selectedCategory === CATEGORY_QUEUES ? 'primary' : 'secondary'}
-            size="small"
-            onClick={handleQueuesClick}
-            className={`consult-category-button-standard ${
-              selectedCategory === CATEGORY_QUEUES ? 'consult-category-button-active' : ''
-            }`}
-          >
-            {CATEGORY_QUEUES}
-          </Button>
-        )}
-        {showDialNumberTab && (
-          <Button
-            variant={selectedCategory === CATEGORY_DIAL_NUMBER ? 'primary' : 'secondary'}
-            size="small"
-            onClick={handleDialNumberClick}
-            className={`consult-category-button-wide ${
-              selectedCategory === CATEGORY_DIAL_NUMBER ? 'consult-category-button-active' : ''
-            }`}
-          >
-            {CATEGORY_DIAL_NUMBER}
-          </Button>
-        )}
-        {isEntryPointTabVisible && (
-          <Button
-            variant={selectedCategory === CATEGORY_ENTRY_POINT ? 'primary' : 'secondary'}
-            size="small"
-            onClick={handleEntryPointClick}
-            className={`consult-category-button-wide ${
-              selectedCategory === CATEGORY_ENTRY_POINT ? 'consult-category-button-active' : ''
-            }`}
-          >
-            {CATEGORY_ENTRY_POINT}
-          </Button>
-        )}
+        {availableCategories.map((category: CategoryType) => {
+          const isWide = category === CATEGORY_DIAL_NUMBER || category === CATEGORY_ENTRY_POINT;
+
+          return (
+            <Button
+              key={category}
+              variant={selectedCategory === category ? 'primary' : 'secondary'}
+              size="small"
+              onClick={() => handleCategoryChange(category)}
+              className={`${isWide ? 'consult-category-button-wide' : 'consult-category-button-standard'} ${
+                selectedCategory === category ? 'consult-category-button-active' : ''
+              }`}
+            >
+              {category}
+            </Button>
+          );
+        })}
       </div>
 
       <div className="consult-list-container">
-        {selectedCategory === 'Agents' &&
+        {isAgentsTabVisible &&
+          selectedCategory === CATEGORY_AGENTS &&
           (loadingBuddyAgents ? (
             <div className="consult-loading-spinner">
               <Spinner />
@@ -241,12 +238,14 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
               getAgentsForDisplay(selectedCategory, buddyAgents, searchQuery).map((agent) => ({
                 id: agent.agentId,
                 name: agent.agentName,
+                presence: agent.state?.toLowerCase() === 'available' ? ('active' as const) : ('away' as const),
               })),
               (item) => handleAgentSelection(item.id, item.name, allowParticipantsToInteract, onAgentSelect, logger)
             )
           ))}
 
-        {selectedCategory === 'Queues' &&
+        {isQueueTabVisible &&
+          selectedCategory === CATEGORY_QUEUES &&
           (loadingQueues && queuesData.length === 0 ? (
             <div className="consult-loading-spinner">
               <Spinner />
@@ -255,9 +254,10 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
             <ConsultTransferEmptyState message={NO_DATA_AVAILABLE_CONSULT_TRANSFER} />
           ) : (
             <div>
-              {renderList(
-                queuesData.map((q) => ({id: q.id, name: q.name})),
-                (item) => handleQueueSelection(item.id, item.name, allowParticipantsToInteract, onQueueSelect, logger)
+              {renderList(queuesData, (item) =>
+                item.id
+                  ? handleQueueSelection(item.id, item.name, allowParticipantsToInteract, onQueueSelect, logger)
+                  : undefined
               )}
               {hasMoreQueues && (
                 <div ref={loadMoreRef} className="consult-load-more">
@@ -275,7 +275,7 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
             </div>
           ))}
 
-        {showDialNumberTab &&
+        {isDialNumberTabVisible &&
           selectedCategory === CATEGORY_DIAL_NUMBER &&
           (loadingDialNumbers && dialNumbers.length === 0 ? (
             <div className="consult-loading-spinner">
@@ -285,14 +285,11 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
             <ConsultTransferEmptyState message={NO_DATA_AVAILABLE_CONSULT_TRANSFER} />
           ) : (
             <div>
-              {renderList(
-                dialNumbers.map((d) => ({id: d.id, name: d.name, number: d.number})),
-                (item) => {
-                  if (item.number) {
-                    onDialNumberSelect(item.number, allowParticipantsToInteract);
-                  }
+              {renderList(dialNumbers, (item) => {
+                if (item.number) {
+                  onDialNumberSelect(item.number, allowParticipantsToInteract);
                 }
-              )}
+              })}
               {hasMoreDialNumbers && (
                 <div ref={loadMoreRef} className="consult-load-more">
                   {loadingDialNumbers ? (
@@ -319,12 +316,9 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
             <ConsultTransferEmptyState message={NO_DATA_AVAILABLE_CONSULT_TRANSFER} />
           ) : (
             <div>
-              {renderList(
-                entryPoints.map((e) => ({id: e.id, name: e.name})),
-                (item) => {
-                  onEntryPointSelect(item.id, item.name, allowParticipantsToInteract);
-                }
-              )}
+              {renderList(entryPoints, (item) => {
+                onEntryPointSelect(item.id, item.name, allowParticipantsToInteract);
+              })}
               {hasMoreEntryPoints && (
                 <div ref={loadMoreRef} className="consult-load-more">
                   {loadingEntryPoints ? (
@@ -340,6 +334,7 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
               )}
             </div>
           ))}
+        {availableCategories.length === 0 && <ConsultTransferEmptyState message={NO_DATA_AVAILABLE_CONSULT_TRANSFER} />}
       </div>
       {isConferenceInProgress && (
         <div className="consult-checkbox-container">

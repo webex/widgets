@@ -10,6 +10,8 @@ import {
   EntryPointRecord,
   FetchPaginatedList,
   Participant,
+  ConferenceParticipantDropRoster,
+  ConferenceParticipantDropTarget,
   AddressBookEntrySearchParams,
   AddressBookEntriesResponse,
   TaskUIControls,
@@ -52,6 +54,11 @@ export const TARGET_TYPE = {
 } as const;
 
 export type TargetType = (typeof TARGET_TYPE)[keyof typeof TARGET_TYPE];
+
+export type ParticipantDropAnnouncement = {
+  type: 'success' | 'error';
+  message: string;
+};
 
 /**
  * Interface representing the TaskProps of a user.
@@ -180,7 +187,16 @@ export type IncomingTaskComponentProps = Pick<TaskProps, 'accept' | 'reject' | '
     declineControl?: {isVisible: boolean; isEnabled: boolean};
     isDeclineButtonEnabled?: boolean;
     isBrowser?: boolean;
+    offerActionError?: WxAppTelephonyErrorDisplay | null;
+    clearOfferActionError?: () => void;
   };
+
+export type WxAppTelephonyErrorDisplay = {
+  message: string;
+  trackingId?: string;
+  status?: number | string;
+  isWxAppTelephonyError: boolean;
+};
 
 export type TaskListComponentProps = Pick<
   TaskProps,
@@ -189,6 +205,8 @@ export type TaskListComponentProps = Pick<
   Partial<Pick<TaskProps, 'currentTask' | 'taskList' | 'hasCampaignPreviewEnabled' | 'acceptedCampaignIds'>> & {
     isDeclineButtonEnabled?: boolean;
     isBrowser?: boolean;
+    taskActionErrors?: Record<string, WxAppTelephonyErrorDisplay | null>;
+    clearTaskActionError?: (interactionId: string) => void;
   };
 
 export interface RealTimeTranscriptEntry {
@@ -289,6 +307,11 @@ export interface ControlProps {
   toggleMute: () => void;
 
   /**
+   * Sends a DTMF tone on wxApp engaged telephony calls.
+   */
+  sendDtmf?: (digit: string) => void;
+
+  /**
    * Function to handle ending the call.
    */
   endCall: () => void;
@@ -340,7 +363,7 @@ export interface ControlProps {
   /**
    * Function to load buddy agents
    */
-  loadBuddyAgents: () => Promise<void>;
+  loadBuddyAgents: (action?: 'Consult' | 'Transfer') => Promise<void>;
 
   /**
    * Function to transfer the call to a destination.
@@ -497,13 +520,37 @@ export interface ControlProps {
    */
   conferenceParticipants: Participant[];
 
+  /** Owner-aware conference roster used by the CallControlCAD Drop menu. */
+  conferenceParticipantDropRoster: ConferenceParticipantDropRoster | null;
+
+  /** Drop target currently waiting for routing-event completion. */
+  pendingParticipantDropId: string | null;
+
+  /** Generic screen-reader and visible feedback for the most recent Drop request. */
+  participantDropAnnouncement: ParticipantDropAnnouncement | null;
+
+  /** Customer target currently awaiting explicit confirmation. */
+  participantDropConfirmationTarget: ConferenceParticipantDropTarget | null;
+
+  /** Whether the current Customer confirmation action is unavailable. */
+  participantDropConfirmationDisabled: boolean;
+
+  /** Validates a Drop target, opening confirmation for Customer or invoking Drop immediately. */
+  requestParticipantDrop: (target: ConferenceParticipantDropTarget) => Promise<void>;
+
+  /** Confirms and invokes the currently selected Customer Drop. */
+  confirmParticipantDrop: () => Promise<void>;
+
+  /** Cancels the currently selected Customer Drop. */
+  cancelParticipantDropConfirmation: () => void;
+
   /** Fetch paginated address book entries for dial numbers */
   getAddressBookEntries?: FetchPaginatedList<AddressBookEntry>;
 
   /** Fetch paginated entry points */
   getEntryPoints?: FetchPaginatedList<EntryPointRecord>;
 
-  /** Fetch paginated queues (filtered by media type in store) */
+  /** Fetch paginated consult/transfer queues from the SDK-owned policy */
   getQueuesFetcher?: FetchPaginatedList<ContactServiceQueue>;
 
   /**
@@ -515,6 +562,17 @@ export interface ControlProps {
    * Agent ID of the logged-in user
    */
   agentId: string;
+
+  /**
+   * Host init flag `enableWxBetterTogether` (`webexConfig.cc.enableWxBetterTogether`) for wxApp
+   * thick-client main-bar Mute/Keypad visibility gating and wxApp mute seed gate.
+   */
+  enableWxBetterTogether?: boolean;
+
+  /**
+   * Logged-in agent device type (BROWSER, EXTENSION, AGENT_DN) for Extension-only ghost control suppression.
+   */
+  agentDeviceType?: string;
 }
 
 export type CallControlComponentProps = Pick<
@@ -525,6 +583,7 @@ export type CallControlComponentProps = Pick<
   | 'toggleHold'
   | 'toggleRecording'
   | 'toggleMute'
+  | 'sendDtmf'
   | 'isMuted'
   | 'endCall'
   | 'wrapupCall'
@@ -565,14 +624,38 @@ export type CallControlComponentProps = Pick<
   | 'getQueuesFetcher'
   | 'consultTransferOptions'
   | 'conferenceEnabled'
-> & {
-  /**
-   * Whether the current task is an accepted campaign preview call.
-   * When `true`, the header renders the campaign icon and
-   * "Campaign call" label instead of the standard media type.
-   */
-  isCampaignCall?: boolean;
-};
+> &
+  Partial<
+    Pick<
+      ControlProps,
+      | 'conferenceParticipantDropRoster'
+      | 'pendingParticipantDropId'
+      | 'participantDropAnnouncement'
+      | 'participantDropConfirmationTarget'
+      | 'participantDropConfirmationDisabled'
+      | 'requestParticipantDrop'
+      | 'confirmParticipantDrop'
+      | 'cancelParticipantDropConfirmation'
+    >
+  > & {
+    /**
+     * Whether the current task is an accepted campaign preview call.
+     * When `true`, the header renders the campaign icon and
+     * "Campaign call" label instead of the standard media type.
+     */
+    isCampaignCall?: boolean;
+
+    /**
+     * Host init flag `enableWxBetterTogether` (`webexConfig.cc.enableWxBetterTogether`) for wxApp
+     * thick-client main-bar Mute/Keypad visibility gating and wxApp mute seed gate.
+     */
+    enableWxBetterTogether?: boolean;
+
+    /**
+     * Logged-in agent device type for Extension-only ghost control suppression.
+     */
+    agentDeviceType?: string;
+  };
 
 export type OutdialAniEntry = {
   /** Unique identifier for the ANI entry */
@@ -647,6 +730,7 @@ export type OutdialCallComponentProps = Pick<
 export interface ConsultTransferListComponentProps {
   title: string;
   subtitle?: string;
+  presence?: 'active' | 'away';
   buttonIcon: string;
   onButtonPress: () => void;
   className?: string;
@@ -673,7 +757,7 @@ export interface ConsultTransferPopoverComponentProps {
   buttonIcon: string;
   buddyAgents: BuddyDetails[];
   loadingBuddyAgents: boolean;
-  loadBuddyAgents?: () => Promise<void>;
+  loadBuddyAgents?: (action?: 'Consult' | 'Transfer') => Promise<void>;
   getAddressBookEntries?: FetchPaginatedList<AddressBookEntry>;
   getEntryPoints?: FetchPaginatedList<EntryPointRecord>;
   getQueues?: FetchPaginatedList<ContactServiceQueue>;
@@ -681,7 +765,8 @@ export interface ConsultTransferPopoverComponentProps {
   onQueueSelect: (queueId: string, queueName: string, allowParticipantsToInteract: boolean) => void;
   onEntryPointSelect: (entryPointId: string, entryPointName: string, allowParticipantsToInteract: boolean) => void;
   onDialNumberSelect: (dialNumber: string, allowParticipantsToInteract: boolean) => void;
-  allowConsultToQueue: boolean;
+  action: 'Consult' | 'Transfer';
+  availableDestinations: TaskUIControls['consultTransferDestinations']['consult'];
   /** Options governing popover visibility/behavior */
   consultTransferOptions?: ConsultTransferOptions;
   isConferenceInProgress?: boolean;
@@ -704,12 +789,14 @@ export interface CallControlConsultComponentsProps {
   controls: TaskUIControls;
   toggleConsultMute: () => void;
   conferenceEnabled: boolean;
+  enableWxBetterTogether?: boolean;
+  currentTask?: ITask | null;
 }
 
 /**
  * Type representing the possible menu types in call control.
  */
-export type CallControlMenuType = 'Consult' | 'Transfer' | 'ExitConference';
+export type CallControlMenuType = 'Consult' | 'Transfer' | 'ExitConference' | 'Keypad';
 
 export const MEDIA_CHANNEL = {
   EMAIL: 'email',
@@ -885,8 +972,7 @@ export const CATEGORY_AGENTS: CategoryType = 'Agents';
  * Parameters for `useConsultTransferPopover` hook.
  */
 export type UseConsultTransferParams = {
-  showDialNumberTab: boolean;
-  showEntryPointTab: boolean;
+  availableCategories: CategoryType[];
   getAddressBookEntries?: FetchPaginatedList<AddressBookEntry>;
   getEntryPoints?: FetchPaginatedList<EntryPointRecord>;
   getQueues?: FetchPaginatedList<ContactServiceQueue>;

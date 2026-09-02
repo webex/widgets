@@ -53,10 +53,19 @@ describe('CallControl Component', () => {
       secondsUntilAutoWrapup: 0,
       cancelAutoWrapup: jest.fn(),
       toggleMute: jest.fn(),
+      sendDtmf: jest.fn(),
       isMuted: false,
       consultConference: jest.fn(),
       exitConference: jest.fn(),
       conferenceParticipants: [],
+      conferenceParticipantDropRoster: null,
+      pendingParticipantDropId: null,
+      participantDropAnnouncement: null,
+      participantDropConfirmationTarget: null,
+      participantDropConfirmationDisabled: true,
+      requestParticipantDrop: jest.fn(),
+      confirmParticipantDrop: jest.fn(),
+      cancelParticipantDropConfirmation: jest.fn(),
       getAddressBookEntries: jest.fn().mockResolvedValue({data: [], meta: {page: 0, totalPages: 0}}),
       getEntryPoints: jest.fn().mockResolvedValue({data: [], meta: {page: 0, totalPages: 0}}),
       getQueuesFetcher: jest.fn().mockResolvedValue({data: [], meta: {page: 0, totalPages: 0}}),
@@ -65,6 +74,8 @@ describe('CallControl Component', () => {
       consultTimerLabel: 'Consulting',
       consultTimerTimestamp: 0,
       isCampaignCall: false,
+      telephonyToast: null,
+      dismissTelephonyToast: jest.fn(),
     });
 
     render(
@@ -88,6 +99,8 @@ describe('CallControl Component', () => {
       isMuted: false,
       onToggleMute: undefined,
       agentId: store.agentId,
+      enableWxBetterTogether: false,
+      widgetName: 'CallControl',
     });
   });
 

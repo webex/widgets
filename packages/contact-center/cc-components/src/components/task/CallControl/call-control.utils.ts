@@ -3,6 +3,7 @@ import type {CallControlButton, MEDIA_CHANNEL as MediaChannelType, MediaTypeInfo
 import type {TaskUIControls} from '@webex/cc-store';
 import {getMediaTypeInfo} from '../../../utils';
 import {DestinationType, ILogger, ITask} from '@webex/cc-store';
+
 import {
   RESUME_CALL,
   HOLD_CALL,
@@ -14,6 +15,12 @@ import {
   MUTE_CALL,
   UNMUTE_CALL,
 } from '../constants';
+import {isWxAppEngagedCall} from '../../../utils/wxapp-telephony.utils';
+
+/** SDK P0 keypad control — may exist on main leg before InteractionUIControls ships keypad. */
+type TaskMainControlsWithKeypad = TaskUIControls['main'] & {
+  keypad?: {isVisible: boolean; isEnabled: boolean};
+};
 
 /**
  * Handles toggle hold functionality
@@ -33,25 +40,22 @@ export const handleToggleHold = (isHeld: boolean, toggleHold: (hold: boolean) =>
 /**
  * Handles mute toggle functionality with disabled state management
  */
-export const handleMuteToggle = (
-  toggleMute: () => void,
+export const handleMuteToggle = async (
+  toggleMute: () => void | Promise<void>,
   setIsMuteButtonDisabled: (disabled: boolean) => void,
   logger: ILogger
-): void => {
+): Promise<void> => {
   setIsMuteButtonDisabled(true);
 
   try {
-    toggleMute();
+    await toggleMute();
   } catch (error) {
     logger.error(`Mute toggle failed: ${error}`, {
       module: 'call-control.tsx',
       method: 'handleMuteToggle',
     });
   } finally {
-    // Re-enable button after operation
-    setTimeout(() => {
-      setIsMuteButtonDisabled(false);
-    }, 500);
+    setIsMuteButtonDisabled(false);
   }
 };
 
@@ -167,6 +171,55 @@ export const getMediaType = (mediaType: MediaChannelType, mediaChannel: MediaCha
 };
 
 /**
+ * Thin defense layer for thick-client flag ON: suppresses visible+disabled ghost controls.
+ * SDK owns isVisible/isEnabled for wxApp engaged calls; widgets pass through when SDK is correct.
+ */
+export const applyWxAppTelephonyControlVisibility = (
+  buttons: CallControlButton[],
+  task: ITask | null | undefined,
+  controls: TaskUIControls | undefined,
+  isTelephony: boolean,
+  enableWxBetterTogether?: boolean,
+  agentDeviceType?: string
+): CallControlButton[] => {
+  if (enableWxBetterTogether !== true) {
+    return buttons;
+  }
+
+  const mainCtrl = controls?.main as TaskMainControlsWithKeypad | undefined;
+  const wxAppEngaged = isTelephony && isWxAppEngagedCall(task);
+  const isExtensionAgent = agentDeviceType != null && agentDeviceType !== 'BROWSER';
+
+  return buttons.map((button) => {
+    if (button.id !== 'mute' && button.id !== 'keypad') {
+      return button;
+    }
+
+    const ctrl = button.id === 'mute' ? mainCtrl?.mute : mainCtrl?.keypad;
+
+    if (wxAppEngaged && ctrl?.isEnabled) {
+      return {...button, isVisible: true, disabled: false};
+    }
+
+    if (!ctrl?.isVisible || ctrl.isEnabled) {
+      return button;
+    }
+
+    // Extension ghost controls when flag ON but wxApp telephony not active.
+    if (isExtensionAgent && !wxAppEngaged) {
+      return {...button, isVisible: false};
+    }
+
+    // wxApp engaged: hide stale visible+disabled if SDK payload briefly desyncs.
+    if (wxAppEngaged) {
+      return {...button, isVisible: false};
+    }
+
+    return button;
+  });
+};
+
+/**
  * Checks if the media type is telephony
  */
 export const isTelephonyMediaType = (mediaType: MediaChannelType, logger?): boolean => {
@@ -204,7 +257,7 @@ export const buildCallControlButtons = (
   conferenceEnabled = true
 ): CallControlButton[] => {
   try {
-    const mainCtrl = controls?.main;
+    const mainCtrl = controls?.main as TaskMainControlsWithKeypad | undefined;
     const isTransferConferenceVisible = mainCtrl?.transferConference?.isVisible ?? false;
     const isTransferConferenceEnabled = mainCtrl?.transferConference?.isEnabled ?? false;
     const isTransferVisible = mainCtrl?.transfer?.isVisible ?? false;
@@ -228,6 +281,16 @@ export const buildCallControlButtons = (
         disabled: isMuteButtonDisabled || !(mainCtrl?.mute?.isEnabled ?? false),
         isVisible: mainCtrl?.mute?.isVisible ?? false,
         dataTestId: 'call-control:mute-toggle',
+      },
+      {
+        id: 'keypad',
+        icon: 'dialpad-bold',
+        tooltip: 'Keypad',
+        className: 'call-control-button',
+        disabled: !(mainCtrl?.keypad?.isEnabled ?? false),
+        isVisible: mainCtrl?.keypad?.isVisible ?? false,
+        menuType: 'Keypad',
+        dataTestId: 'call-control:keypad',
       },
       {
         id: 'switchToConsult',

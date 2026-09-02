@@ -1,6 +1,8 @@
 import {MediaInfo, MEDIA_CHANNEL} from '../components/task/task.types';
 import type {MEDIA_CHANNEL as MediaChannelType} from '../components/task/task.types';
 
+export {isWxAppEngagedCall, shouldShowWxAppTelephonyControls} from './wxapp-telephony.utils';
+
 export const formatTime = (time: number): string => {
   const hours = Math.floor(time / 3600);
   const minutes = Math.floor((time % 3600) / 60);

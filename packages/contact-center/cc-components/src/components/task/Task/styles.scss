@@ -17,6 +17,44 @@
   min-height: 5rem;
   height: auto;
 
+  &.task-list-item--has-action-error {
+    &.md-list-item-base-wrapper {
+      display: grid;
+      height: auto !important;
+      min-height: 5rem;
+      align-items: start;
+      align-content: start;
+    }
+
+    grid-template-columns: auto 1fr auto;
+
+    [data-position='start'] {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    [data-position='fill'] {
+      grid-column: 2;
+      grid-row: 1;
+      min-width: 0;
+    }
+
+    [data-position='end'] {
+      display: contents;
+    }
+
+    .task-button-container {
+      grid-column: 3;
+      grid-row: 1;
+    }
+
+    .wxapp-offer-action-error {
+      grid-column: 1 / -1;
+      grid-row: 2;
+      width: 100%;
+    }
+  }
+
   mdc-avatar {
     --mdc-avatar-default-background-color: var(--mds-color-theme-avatar-glass-normal);
 

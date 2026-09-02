@@ -1,5 +1,7 @@
 import {renderHook, act, waitFor} from '@testing-library/react';
 import {useIncomingTask, useTaskList, useCallControl, useOutdialCall} from '../src/helper';
+import {resetMuteCoordinatorForTests} from '../src/mute-coordinator';
+import {resetOfferActionAttemptsForTests} from '../src/offer-action-attempts';
 import {
   TIMER_LABEL_WRAP_UP,
   TIMER_LABEL_POST_CALL,
@@ -41,6 +43,19 @@ const onTaskDeclined = jest.fn();
 const onTaskSelected = jest.fn().mockImplementation(() => {});
 
 const logger = mockCC.LoggerProxy;
+
+const resetStoreOfferActionErrors = (): void => {
+  if (typeof store.clearOfferActionError === 'function' && store.offerActionErrors) {
+    Object.keys(store.offerActionErrors).forEach((interactionId) => {
+      store.clearOfferActionError(interactionId);
+    });
+    return;
+  }
+
+  if (store.store) {
+    store.store.offerActionErrors = {};
+  }
+};
 
 // Override the wrapupCodes property before your tests run
 beforeAll(() => {
@@ -93,9 +108,9 @@ describe('useIncomingTask Hook', () => {
     });
 
     // Mock the implementation of removeTaskCallback to also call the offSpy for testing
-    removeTaskCallbackSpy.mockImplementation((event, callback) => {
+    removeTaskCallbackSpy.mockImplementation((event, callback, taskId, task) => {
       // Make sure off is called on the task mock
-      taskMock.off(event, callback);
+      (task ?? taskMock).off(event, callback);
     });
 
     const {unmount} = renderHook(() =>
@@ -107,19 +122,41 @@ describe('useIncomingTask Hook', () => {
       })
     );
 
-    expect(setTaskCallbackSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function), 'interaction1');
-    expect(setTaskCallbackSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_REJECT, expect.any(Function), 'interaction1');
-    expect(setTaskCallbackSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function), 'interaction1');
+    expect(setTaskCallbackSpy).toHaveBeenCalledWith(
+      TASK_EVENTS.TASK_ASSIGNED,
+      expect.any(Function),
+      taskMock.data.interactionId,
+      taskMock
+    );
+    expect(setTaskCallbackSpy).toHaveBeenCalledWith(
+      TASK_EVENTS.TASK_REJECT,
+      expect.any(Function),
+      taskMock.data.interactionId,
+      taskMock
+    );
+    expect(setTaskCallbackSpy).toHaveBeenCalledWith(
+      TASK_EVENTS.TASK_END,
+      expect.any(Function),
+      taskMock.data.interactionId,
+      taskMock
+    );
     expect(setTaskCallbackSpy).toHaveBeenCalledWith(
       TASK_EVENTS.TASK_CONSULT_ACCEPTED,
       expect.any(Function),
-      'interaction1'
+      taskMock.data.interactionId,
+      taskMock
     );
-    expect(setTaskCallbackSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_CONSULT_END, expect.any(Function), 'interaction1');
+    expect(setTaskCallbackSpy).toHaveBeenCalledWith(
+      TASK_EVENTS.TASK_CONSULT_END,
+      expect.any(Function),
+      taskMock.data.interactionId,
+      taskMock
+    );
     expect(setTaskCallbackSpy).toHaveBeenCalledWith(
       TASK_EVENTS.TASK_OUTDIAL_FAILED,
       expect.any(Function),
-      'interaction1'
+      taskMock.data.interactionId,
+      taskMock
     );
     expect(setTaskCallbackSpy).toHaveBeenCalledTimes(6);
 
@@ -128,23 +165,41 @@ describe('useIncomingTask Hook', () => {
       unmount();
     });
 
-    expect(removeTaskCallbackSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_ASSIGNED, expect.any(Function), 'interaction1');
-    expect(removeTaskCallbackSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_REJECT, expect.any(Function), 'interaction1');
-    expect(removeTaskCallbackSpy).toHaveBeenCalledWith(TASK_EVENTS.TASK_END, expect.any(Function), 'interaction1');
+    expect(removeTaskCallbackSpy).toHaveBeenCalledWith(
+      TASK_EVENTS.TASK_ASSIGNED,
+      expect.any(Function),
+      taskMock.data.interactionId,
+      taskMock
+    );
+    expect(removeTaskCallbackSpy).toHaveBeenCalledWith(
+      TASK_EVENTS.TASK_REJECT,
+      expect.any(Function),
+      taskMock.data.interactionId,
+      taskMock
+    );
+    expect(removeTaskCallbackSpy).toHaveBeenCalledWith(
+      TASK_EVENTS.TASK_END,
+      expect.any(Function),
+      taskMock.data.interactionId,
+      taskMock
+    );
     expect(removeTaskCallbackSpy).toHaveBeenCalledWith(
       TASK_EVENTS.TASK_CONSULT_ACCEPTED,
       expect.any(Function),
-      'interaction1'
+      taskMock.data.interactionId,
+      taskMock
     );
     expect(removeTaskCallbackSpy).toHaveBeenCalledWith(
       TASK_EVENTS.TASK_CONSULT_END,
       expect.any(Function),
-      'interaction1'
+      taskMock.data.interactionId,
+      taskMock
     );
     expect(removeTaskCallbackSpy).toHaveBeenCalledWith(
       TASK_EVENTS.TASK_OUTDIAL_FAILED,
       expect.any(Function),
-      'interaction1'
+      taskMock.data.interactionId,
+      taskMock
     );
     expect(removeTaskCallbackSpy).toHaveBeenCalledTimes(6);
 
@@ -155,7 +210,7 @@ describe('useIncomingTask Hook', () => {
   it('should call onAccepted if it is provided', async () => {
     // Mock store.setTaskCallback to capture the callback
     let assignedCallback;
-    jest.spyOn(store, 'setTaskCallback').mockImplementation((event, callback) => {
+    const setTaskCallbackSpy = jest.spyOn(store, 'setTaskCallback').mockImplementation((event, callback) => {
       if (event === TASK_EVENTS.TASK_ASSIGNED) {
         assignedCallback = callback;
       }
@@ -182,6 +237,7 @@ describe('useIncomingTask Hook', () => {
 
     // Ensure no errors are logged
     expect(logger.error).not.toHaveBeenCalled();
+    setTaskCallbackSpy.mockRestore();
   });
 
   it('should call onRejected if it is provided', async () => {
@@ -204,6 +260,28 @@ describe('useIncomingTask Hook', () => {
 
     // Ensure no errors are logged
     expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it('should reject an unaccepted consult exactly once on consult-end', async () => {
+    renderHook(() =>
+      useIncomingTask({
+        incomingTask: taskMock,
+        onAccepted: onTaskAccepted,
+        onRejected: onTaskDeclined,
+        logger,
+      })
+    );
+
+    const consultEndCallback = taskMock.on.mock.calls.find((call) => call[0] === TASK_EVENTS.TASK_CONSULT_END)?.[1];
+
+    act(() => {
+      consultEndCallback?.();
+    });
+
+    await waitFor(() => {
+      expect(onTaskDeclined).toHaveBeenCalledTimes(1);
+      expect(onTaskDeclined).toHaveBeenCalledWith({task: taskMock});
+    });
   });
 
   it('should return if there is no taskId for incoming task', async () => {
@@ -746,6 +824,7 @@ describe('useCallControl', () => {
     toggleMute: jest.fn(() => Promise.resolve()),
     switchCall: jest.fn(() => Promise.resolve()),
     transferConference: jest.fn(() => Promise.resolve()),
+    dropConferenceParticipant: jest.fn(() => Promise.resolve()),
   };
 
   const mockLogger = mockCC.LoggerProxy;
@@ -754,7 +833,72 @@ describe('useCallControl', () => {
   const mockOnEnd = jest.fn();
   const mockOnWrapUp = jest.fn();
 
+  const createParticipantDropTask = (dropRequest = jest.fn().mockResolvedValue(undefined)): ITask =>
+    ({
+      ...mockCurrentTask,
+      dropConferenceParticipant: dropRequest,
+      uiControls: createEnabledMainTaskUIControls({exitConference: {isVisible: true, isEnabled: true}}),
+      data: {
+        ...mockCurrentTask.data,
+        interactionId: 'participant-drop-task',
+        isConferenceInProgress: true,
+        interaction: {
+          ...mockCurrentTask.data.interaction,
+          interactionId: 'participant-drop-task',
+          mediaType: 'telephony',
+          mediaChannel: 'telephony',
+          state: 'conference',
+          owner: 'agent1',
+          contactDirection: {type: 'inbound'},
+          callAssociatedDetails: {ani: '+15550000001', dnis: '+15550000002'},
+          callProcessingDetails: {...mockCurrentTask.data.interaction.callProcessingDetails},
+          media: {
+            main: {
+              mediaResourceId: 'main',
+              mediaType: 'telephony',
+              mediaMgr: 'aqm',
+              participants: ['agent1', 'agent2', 'customer1'],
+              mType: 'mainCall',
+              isHold: false,
+              holdTimestamp: null,
+            },
+          },
+          participants: {
+            agent1: {
+              id: 'agent1',
+              pType: 'Agent',
+              type: 'Agent',
+              name: 'Current Agent',
+              hasJoined: true,
+              hasLeft: false,
+              isInPredial: false,
+            },
+            agent2: {
+              id: 'agent2',
+              pType: 'Agent',
+              type: 'Agent',
+              name: 'Agent Two',
+              hasJoined: true,
+              hasLeft: false,
+              isInPredial: false,
+            },
+            customer1: {
+              id: 'customer1',
+              pType: 'Customer',
+              type: 'Customer',
+              name: 'Customer',
+              hasJoined: true,
+              hasLeft: false,
+              isInPredial: false,
+            },
+          },
+        },
+      },
+    }) as ITask;
+
   beforeEach(() => {
+    // Restore any spied implementations leaked from prior describe blocks
+    jest.restoreAllMocks();
     store.refreshTaskList();
     // Mock the MediaStreamTrack and MediaStream classes for the test environment
     global.MediaStreamTrack = jest.fn().mockImplementation(() => ({
@@ -799,6 +943,7 @@ describe('useCallControl', () => {
     // Restore the original Worker class and URL.createObjectURL
     global.Worker = originalWorker;
     delete global.URL.createObjectURL;
+    store.onErrorCallback = undefined;
     jest.clearAllMocks();
   });
 
@@ -807,10 +952,10 @@ describe('useCallControl', () => {
     const onSpy = jest.spyOn(mockCurrentTask, 'on');
 
     // Mock the implementation of setTaskCallback to also call the onSpy for testing
-    setTaskCallbackSpy.mockImplementation((event, callback) => {
+    setTaskCallbackSpy.mockImplementation((event, callback, taskId, task) => {
       // Skip calling original implementation to avoid recursion
-      // Just register directly on task for test visibility
-      mockCurrentTask.on(event, callback);
+      // Just register directly on the passed-in task for test visibility
+      task.on(event, callback);
     });
 
     const {unmount} = renderHook(() =>
@@ -828,6 +973,12 @@ describe('useCallControl', () => {
 
     // 7 store callbacks + TASK_UI_CONTROLS_UPDATED + TASK_SWITCH_CALL + TASK_HOLD + TASK_RESUME on task
     expect(onSpy).toHaveBeenCalledTimes(11);
+    expect(setTaskCallbackSpy).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.any(Function),
+      mockCurrentTask.data.interactionId,
+      mockCurrentTask
+    );
 
     // Unmount the component
     act(() => {
@@ -835,6 +986,537 @@ describe('useCallControl', () => {
     });
 
     setTaskCallbackSpy.mockRestore();
+  });
+
+  describe('conference participant Drop', () => {
+    it('retains surviving Participants when Customer leaves and conference signals downgrade', () => {
+      const task = createParticipantDropTask();
+      task.data.interaction.media.main.participants = ['agent1', 'agent2', 'agent3', 'customer1'];
+      task.data.interaction.participants.agent3 = {
+        id: 'agent3',
+        pType: 'Agent',
+        type: 'Agent',
+        name: 'Agent Three',
+        hasJoined: true,
+        hasLeft: false,
+        isInPredial: false,
+      };
+      const {result, rerender} = renderHook(() =>
+        useCallControl({
+          currentTask: task,
+          logger: mockLogger,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'agent1',
+        })
+      );
+
+      expect(result.current.conferenceParticipantDropRoster?.customer).not.toBeNull();
+
+      task.data.interaction.participants.customer1.hasLeft = true;
+      task.data.interaction.state = 'connected';
+      task.data.isConferenceInProgress = false;
+      task.data.isConferencing = false;
+      task.data.interaction.callProcessingDetails.isConferencing = 'false';
+      task.uiControls.main.exitConference = {isVisible: false, isEnabled: false};
+      rerender();
+
+      expect(result.current.conferenceParticipantDropRoster?.customer).toBeNull();
+      expect(result.current.conferenceParticipantDropRoster?.participants).toEqual([
+        expect.objectContaining({participantType: 'Agent', dropTargetId: 'agent2'}),
+        expect.objectContaining({participantType: 'Agent', dropTargetId: 'agent3'}),
+      ]);
+    });
+
+    it('keeps the roster when Customer leaves only one other Agent', () => {
+      const task = createParticipantDropTask();
+      const {result, rerender} = renderHook(() =>
+        useCallControl({
+          currentTask: task,
+          logger: mockLogger,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'agent1',
+        })
+      );
+
+      expect(result.current.conferenceParticipantDropRoster).not.toBeNull();
+
+      task.data.interaction.participants.customer1.hasLeft = true;
+      task.data.interaction.state = 'post_call';
+      task.data.wrapUpRequired = true;
+      task.data.isConferenceInProgress = false;
+      task.data.isConferencing = false;
+      task.data.interaction.callProcessingDetails.isConferencing = 'false';
+      task.uiControls.main.exitConference = {isVisible: false, isEnabled: false};
+      task.uiControls.main.wrapup = {isVisible: true, isEnabled: true};
+      rerender();
+
+      expect(result.current.conferenceParticipantDropRoster).toEqual({
+        customer: null,
+        participants: [expect.objectContaining({participantType: 'Agent', dropTargetId: 'agent2'})],
+        isDropDisabled: false,
+      });
+    });
+
+    it('shows the Entry Point number while ringing, then replaces it with the answering agent', async () => {
+      const dropRequest = jest.fn().mockResolvedValue(undefined);
+      const task = createParticipantDropTask(dropRequest);
+      task.data.consultMediaResourceId = 'consult';
+      task.data.destinationType = 'entryPoint';
+      task.data.interaction.state = 'consulting';
+      task.data.interaction.media.consult = {
+        mediaResourceId: 'consult',
+        mediaType: 'telephony',
+        mediaMgr: 'aqm',
+        participants: ['agent1', 'entry-point-route'],
+        mType: 'consult',
+        isHold: true,
+        holdTimestamp: Date.now(),
+      };
+      task.data.interaction.participants['entry-point-route'] = {
+        id: '+15550000009',
+        pType: 'entry-point-id',
+        type: 'EpDn',
+        name: 'EP-DN',
+        dn: '+15550000009',
+        hasJoined: false,
+        hasLeft: false,
+        isInPredial: false,
+      };
+      task.uiControls.consult.endConsult = {isVisible: true, isEnabled: true};
+      const {result, rerender} = renderHook(() =>
+        useCallControl({
+          currentTask: task,
+          logger: mockLogger,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'agent1',
+        })
+      );
+      const pendingTarget = result.current.conferenceParticipantDropRoster?.participants.find(
+        (target) => target.dropTargetId === '+15550000009'
+      );
+
+      expect(pendingTarget).toEqual(expect.objectContaining({displayName: '+15550000009', isDropDisabled: true}));
+      if (!pendingTarget) throw new Error('Expected pending EP-DN target');
+
+      await act(async () => {
+        await result.current.requestParticipantDrop(pendingTarget);
+      });
+
+      expect(dropRequest).not.toHaveBeenCalled();
+
+      task.data.interaction.media.consult.participants.push('agent2', 'agent3');
+      task.data.interaction.participants.agent3 = {
+        id: 'agent3',
+        pType: 'Agent',
+        type: 'Agent',
+        name: 'Support Agent',
+        hasJoined: true,
+        hasLeft: false,
+        isInPredial: false,
+        isConsulted: true,
+      };
+      task.data.interaction.callProcessingDetails.consultDestinationAgentJoined = 'true';
+      task.data.interaction.callProcessingDetails.consultDestinationAgentName = 'Support Agent';
+      rerender();
+
+      expect(result.current.conferenceParticipantDropRoster?.participants).toEqual([
+        expect.objectContaining({
+          participantType: 'Agent',
+          displayName: 'Agent Two',
+          dropTargetId: 'agent2',
+          isDropDisabled: false,
+        }),
+        expect.objectContaining({
+          participantType: 'Agent',
+          displayName: 'Support Agent',
+          dropTargetId: 'agent3',
+          isDropDisabled: true,
+        }),
+      ]);
+    });
+
+    it('delegates the exact target and publishes success only after the SDK promise resolves', async () => {
+      let resolveDrop!: () => void;
+      const dropRequest = jest.fn(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveDrop = resolve;
+          })
+      );
+      const task = createParticipantDropTask(dropRequest);
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: task,
+          logger: mockLogger,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'agent1',
+        })
+      );
+      const target = result.current.conferenceParticipantDropRoster?.participants[0];
+
+      if (!target) throw new Error('Expected Agent Drop target');
+      let requestPromise!: Promise<void>;
+      act(() => {
+        requestPromise = result.current.requestParticipantDrop(target);
+      });
+
+      expect(dropRequest).toHaveBeenCalledWith({participantId: 'agent2'});
+      expect(result.current.pendingParticipantDropId).toBe('agent2');
+      expect(result.current.participantDropAnnouncement).toBeNull();
+
+      await act(async () => {
+        resolveDrop();
+        await requestPromise;
+      });
+
+      expect(result.current.pendingParticipantDropId).toBeNull();
+      expect(result.current.participantDropAnnouncement).toEqual({
+        type: 'success',
+        message: 'Participant removed from the conference.',
+      });
+    });
+
+    it('preserves the pending lock and feedback across a same-interaction task clone', async () => {
+      let resolveDrop!: () => void;
+      const dropRequest = jest.fn(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveDrop = resolve;
+          })
+      );
+      const clonedDropRequest = jest.fn().mockResolvedValue(undefined);
+      let activeTask = createParticipantDropTask(dropRequest);
+      const {result, rerender} = renderHook(() =>
+        useCallControl({
+          currentTask: activeTask,
+          logger: mockLogger,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'agent1',
+        })
+      );
+      const target = result.current.conferenceParticipantDropRoster?.participants[0];
+      if (!target) throw new Error('Expected Agent Drop target');
+      let requestPromise!: Promise<void>;
+
+      act(() => {
+        requestPromise = result.current.requestParticipantDrop(target);
+      });
+
+      activeTask = createParticipantDropTask(clonedDropRequest);
+      rerender();
+
+      expect(result.current.pendingParticipantDropId).toBe('agent2');
+      const clonedTarget = result.current.conferenceParticipantDropRoster?.participants[0];
+      if (!clonedTarget) throw new Error('Expected cloned Agent Drop target');
+
+      await act(async () => {
+        await result.current.requestParticipantDrop(clonedTarget);
+      });
+
+      expect(dropRequest).toHaveBeenCalledTimes(1);
+      expect(clonedDropRequest).not.toHaveBeenCalled();
+
+      await act(async () => {
+        resolveDrop();
+        await requestPromise;
+      });
+
+      expect(result.current.pendingParticipantDropId).toBeNull();
+      expect(result.current.participantDropAnnouncement).toEqual({
+        type: 'success',
+        message: 'Participant removed from the conference.',
+      });
+    });
+
+    it('publishes a failure from the original request after a same-interaction task clone', async () => {
+      let rejectDrop!: (error: Error) => void;
+      const dropRequest = jest.fn(
+        () =>
+          new Promise<void>((_resolve, reject) => {
+            rejectDrop = reject;
+          })
+      );
+      const clonedDropRequest = jest.fn().mockResolvedValue(undefined);
+      let activeTask = createParticipantDropTask(dropRequest);
+      const {result, rerender} = renderHook(() =>
+        useCallControl({
+          currentTask: activeTask,
+          logger: mockLogger,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'agent1',
+        })
+      );
+      const target = result.current.conferenceParticipantDropRoster?.participants[0];
+      if (!target) throw new Error('Expected Agent Drop target');
+      let requestPromise!: Promise<void>;
+
+      act(() => {
+        requestPromise = result.current.requestParticipantDrop(target);
+      });
+
+      activeTask = createParticipantDropTask(clonedDropRequest);
+      rerender();
+
+      await act(async () => {
+        rejectDrop(new Error('routing failure'));
+        await requestPromise;
+      });
+
+      expect(clonedDropRequest).not.toHaveBeenCalled();
+      expect(result.current.pendingParticipantDropId).toBeNull();
+      expect(result.current.participantDropAnnouncement).toEqual({
+        type: 'error',
+        message: 'Unable to drop participant from the call. Try again.',
+      });
+    });
+
+    it('owns Customer confirmation state and invokes Drop only after confirmation', async () => {
+      const dropRequest = jest.fn().mockResolvedValue(undefined);
+      const task = createParticipantDropTask(dropRequest);
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: task,
+          logger: mockLogger,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'agent1',
+        })
+      );
+      const customerTarget = result.current.conferenceParticipantDropRoster?.customer;
+      if (!customerTarget) throw new Error('Expected Customer Drop target');
+
+      await act(async () => {
+        await result.current.requestParticipantDrop(customerTarget);
+      });
+
+      expect(dropRequest).not.toHaveBeenCalled();
+      expect(result.current.participantDropConfirmationTarget).toEqual(customerTarget);
+      expect(result.current.participantDropConfirmationDisabled).toBe(false);
+
+      act(() => {
+        result.current.cancelParticipantDropConfirmation();
+      });
+      expect(result.current.participantDropConfirmationTarget).toBeNull();
+
+      await act(async () => {
+        await result.current.requestParticipantDrop(customerTarget);
+      });
+
+      await act(async () => {
+        await result.current.confirmParticipantDrop();
+      });
+
+      expect(dropRequest).toHaveBeenCalledWith({participantId: customerTarget.dropTargetId});
+      expect(result.current.participantDropConfirmationTarget).toBeNull();
+    });
+
+    it('globally serializes same-target and cross-target requests', async () => {
+      let resolveDrop!: () => void;
+      const dropRequest = jest.fn(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveDrop = resolve;
+          })
+      );
+      const task = createParticipantDropTask(dropRequest);
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: task,
+          logger: mockLogger,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'agent1',
+        })
+      );
+      const agentTarget = result.current.conferenceParticipantDropRoster?.participants[0];
+      const customerTarget = result.current.conferenceParticipantDropRoster?.customer;
+      if (!agentTarget || !customerTarget) throw new Error('Expected Agent and Customer Drop targets');
+      let firstRequest!: Promise<void>;
+
+      act(() => {
+        firstRequest = result.current.requestParticipantDrop(agentTarget);
+        void result.current.requestParticipantDrop(agentTarget);
+        void result.current.requestParticipantDrop(customerTarget);
+      });
+
+      expect(dropRequest).toHaveBeenCalledTimes(1);
+
+      await act(async () => {
+        resolveDrop();
+        await firstRequest;
+      });
+    });
+
+    it('reports a sanitized failure without logging participant data', async () => {
+      const sensitiveParticipantId = 'sensitive-participant-id';
+      const dropRequest = jest.fn().mockRejectedValue(new Error(`Failed URL contained ${sensitiveParticipantId}`));
+      const task = createParticipantDropTask(dropRequest);
+      task.data.interaction.media.main.participants[1] = sensitiveParticipantId;
+      task.data.interaction.participants[sensitiveParticipantId] = {
+        ...task.data.interaction.participants.agent2,
+        id: sensitiveParticipantId,
+      };
+      delete task.data.interaction.participants.agent2;
+      const hostErrorCallback = jest.fn();
+      store.onErrorCallback = hostErrorCallback;
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: task,
+          logger: mockLogger,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'agent1',
+        })
+      );
+      const target = result.current.conferenceParticipantDropRoster?.participants[0];
+      if (!target) throw new Error('Expected Agent Drop target');
+
+      await act(async () => {
+        await result.current.requestParticipantDrop(target);
+      });
+
+      expect(result.current.participantDropAnnouncement).toEqual({
+        type: 'error',
+        message: 'Unable to drop participant from the call. Try again.',
+      });
+      expect(hostErrorCallback).toHaveBeenCalledWith(
+        'CallControlCAD',
+        Error('Unable to drop participant from the call. Try again.')
+      );
+      expect(JSON.stringify(mockLogger.error.mock.calls)).not.toContain(sensitiveParticipantId);
+      expect(JSON.stringify(hostErrorCallback.mock.calls)).not.toContain(sensitiveParticipantId);
+    });
+
+    it('ignores stale completion and re-derives roster changes from the current task', async () => {
+      let resolveDrop!: () => void;
+      const dropRequest = jest.fn(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveDrop = resolve;
+          })
+      );
+      const firstTask = createParticipantDropTask(dropRequest);
+      const nextTask = createParticipantDropTask();
+      nextTask.data.interaction.owner = 'agent2';
+      let activeTask = firstTask;
+      const {result, rerender} = renderHook(() =>
+        useCallControl({
+          currentTask: activeTask,
+          logger: mockLogger,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'agent1',
+        })
+      );
+      const target = result.current.conferenceParticipantDropRoster?.participants[0];
+      if (!target) throw new Error('Expected Agent Drop target');
+      let requestPromise!: Promise<void>;
+
+      act(() => {
+        requestPromise = result.current.requestParticipantDrop(target);
+      });
+      activeTask = nextTask;
+      rerender();
+
+      expect(result.current.conferenceParticipantDropRoster?.participants[0].isReadOnly).toBe(true);
+
+      await act(async () => {
+        resolveDrop();
+        await requestPromise;
+      });
+
+      expect(result.current.participantDropAnnouncement).toBeNull();
+
+      nextTask.data.interaction.participants.agent2.hasLeft = true;
+      rerender();
+      expect(result.current.conferenceParticipantDropRoster).toBeNull();
+    });
+
+    it('clears a pending request when the interaction changes', async () => {
+      let resolveDrop!: () => void;
+      const dropRequest = jest.fn(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveDrop = resolve;
+          })
+      );
+      const firstTask = createParticipantDropTask(dropRequest);
+      const nextTask = createParticipantDropTask();
+      nextTask.data.interactionId = 'next-interaction';
+      nextTask.data.interaction.interactionId = 'next-interaction';
+      let activeTask = firstTask;
+      const {result, rerender} = renderHook(() =>
+        useCallControl({
+          currentTask: activeTask,
+          logger: mockLogger,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'agent1',
+        })
+      );
+      const target = result.current.conferenceParticipantDropRoster?.participants[0];
+      if (!target) throw new Error('Expected Agent Drop target');
+      let requestPromise!: Promise<void>;
+
+      act(() => {
+        requestPromise = result.current.requestParticipantDrop(target);
+      });
+
+      activeTask = nextTask;
+      rerender();
+      expect(result.current.pendingParticipantDropId).toBeNull();
+
+      await act(async () => {
+        resolveDrop();
+        await requestPromise;
+      });
+
+      expect(result.current.participantDropAnnouncement).toBeNull();
+    });
+
+    it('suppresses completion feedback when the current task terminates', async () => {
+      let resolveDrop!: () => void;
+      const dropRequest = jest.fn(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveDrop = resolve;
+          })
+      );
+      const task = createParticipantDropTask(dropRequest);
+      const {result, rerender} = renderHook(() =>
+        useCallControl({
+          currentTask: task,
+          logger: mockLogger,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'agent1',
+        })
+      );
+      const target = result.current.conferenceParticipantDropRoster?.participants[0];
+      if (!target) throw new Error('Expected Agent Drop target');
+      let requestPromise!: Promise<void>;
+
+      act(() => {
+        requestPromise = result.current.requestParticipantDrop(target);
+      });
+
+      task.data.interaction.isTerminated = true;
+      rerender();
+
+      await act(async () => {
+        resolveDrop();
+        await requestPromise;
+      });
+
+      expect(result.current.pendingParticipantDropId).toBeNull();
+      expect(result.current.participantDropAnnouncement).toBeNull();
+    });
   });
 
   it('should not call any call backs if callbacks are not provided', async () => {
@@ -2400,10 +3082,57 @@ describe('useCallControl', () => {
       })
     );
     await act(async () => {
-      await result.current.loadBuddyAgents();
+      await result.current.loadBuddyAgents('Transfer');
     });
     expect(result.current.buddyAgents).toEqual(mockAgents);
+    expect(getBuddyAgentsSpy).toHaveBeenCalledWith('Transfer');
     getBuddyAgentsSpy.mockRestore();
+  });
+
+  it('should ignore a stale buddy-agent response after the action changes', async () => {
+    let resolveConsult!: (agents: typeof mockAgents) => void;
+    let resolveTransfer!: (agents: typeof mockAgents) => void;
+    const consultResponse = new Promise<typeof mockAgents>((resolve) => {
+      resolveConsult = resolve;
+    });
+    const transferResponse = new Promise<typeof mockAgents>((resolve) => {
+      resolveTransfer = resolve;
+    });
+    jest
+      .spyOn(store, 'getBuddyAgents')
+      .mockImplementation((action) => (action === 'Transfer' ? transferResponse : consultResponse));
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: mockCurrentTask,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+        isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
+      })
+    );
+
+    let consultRequest!: Promise<void>;
+    let transferRequest!: Promise<void>;
+    act(() => {
+      consultRequest = result.current.loadBuddyAgents('Consult');
+      transferRequest = result.current.loadBuddyAgents('Transfer');
+    });
+
+    await act(async () => {
+      resolveTransfer([mockAgents[1]]);
+      await transferRequest;
+    });
+    expect(result.current.buddyAgents).toEqual([mockAgents[1]]);
+
+    await act(async () => {
+      resolveConsult([mockAgents[0]]);
+      await consultRequest;
+    });
+    expect(result.current.buddyAgents).toEqual([mockAgents[1]]);
+    expect(result.current.loadingBuddyAgents).toBe(false);
   });
 
   it('should call transferCall successfully', async () => {
@@ -3538,7 +4267,7 @@ describe('useCallControl', () => {
   it('should get queues via getQueuesFetcher', async () => {
     const getQueuesResponse: Awaited<ReturnType<typeof store.getQueues>> = {
       data: mockQueueDetails,
-      meta: {page: 0, pageSize: mockQueueDetails.length, total: mockQueueDetails.length, totalPages: 1},
+      meta: {page: 0, pageSize: mockQueueDetails.length, totalRecords: mockQueueDetails.length, totalPages: 1},
     };
     const getQueuesSpy = jest.spyOn(store, 'getQueues').mockResolvedValue(getQueuesResponse);
 
@@ -3598,7 +4327,7 @@ describe('useCallControl', () => {
   it('should get queues via getQueuesFetcher (paginated)', async () => {
     const mockResponse: Awaited<ReturnType<typeof store.getQueues>> = {
       data: [mockQueueDetails[0]],
-      meta: {page: 0, pageSize: 25, total: 1, totalPages: 1},
+      meta: {page: 0, pageSize: 25, totalRecords: 1, totalPages: 1},
     };
     jest.spyOn(store, 'getQueues').mockResolvedValue(mockResponse);
 
@@ -3676,11 +4405,13 @@ describe('useCallControl', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
+      resetMuteCoordinatorForTests();
 
       mockCurrentTask.toggleMute = jest.fn(() => Promise.resolve());
 
       jest.spyOn(store, 'setIsMuted').mockImplementation(() => {});
       jest.spyOn(store, 'isMuted', 'get').mockImplementation(() => false);
+      jest.spyOn(store, 'currentTask', 'get').mockReturnValue(mockCurrentTask as never);
 
       mockOnToggleMute.mockClear();
     });
@@ -3722,6 +4453,8 @@ describe('useCallControl', () => {
     });
 
     it('should successfully toggle mute from muted to unmuted', async () => {
+      jest.spyOn(store, 'isMuted', 'get').mockImplementation(() => true);
+
       const {result} = renderHook(() =>
         useCallControl({
           currentTask: mockCurrentTask,
@@ -3753,7 +4486,7 @@ describe('useCallControl', () => {
       });
     });
 
-    it('should handle multiple rapid toggleMute calls correctly', async () => {
+    it('should coalesce multiple rapid toggleMute calls to the final intended state', async () => {
       const {result} = renderHook(() =>
         useCallControl({
           currentTask: mockCurrentTask,
@@ -3769,9 +4502,414 @@ describe('useCallControl', () => {
         await Promise.all([result.current.toggleMute(), result.current.toggleMute(), result.current.toggleMute()]);
       });
 
-      expect(mockCurrentTask.toggleMute).toHaveBeenCalledTimes(3);
-      expect(store.setIsMuted).toHaveBeenCalledTimes(3);
-      expect(mockOnToggleMute).toHaveBeenCalledTimes(3);
+      expect(mockCurrentTask.toggleMute).toHaveBeenCalledTimes(1);
+      expect(mockCurrentTask.toggleMute).toHaveBeenCalledWith({muted: true});
+      expect(store.setIsMuted).toHaveBeenCalledTimes(1);
+      expect(store.setIsMuted).toHaveBeenCalledWith(true);
+      expect(mockOnToggleMute).toHaveBeenCalledTimes(1);
+    });
+
+    it('should reverse mute intent when clicked again while SDK request is pending', async () => {
+      let resolveFirstMute!: () => void;
+      mockCurrentTask.toggleMute = jest
+        .fn()
+        .mockImplementationOnce(
+          () =>
+            new Promise<void>((resolve) => {
+              resolveFirstMute = resolve;
+            })
+        )
+        .mockImplementationOnce(() => Promise.resolve());
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: mockCurrentTask,
+          onToggleMute: mockOnToggleMute,
+          logger: mockLogger,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'test-agent-id',
+        })
+      );
+
+      let firstToggle!: Promise<void>;
+      act(() => {
+        firstToggle = result.current.toggleMute();
+      });
+
+      await act(async () => {
+        await Promise.resolve();
+      });
+
+      expect(mockCurrentTask.toggleMute).toHaveBeenCalledTimes(1);
+      expect(mockCurrentTask.toggleMute).toHaveBeenCalledWith({muted: true});
+
+      await act(async () => {
+        void result.current.toggleMute();
+      });
+
+      await act(async () => {
+        resolveFirstMute();
+        await firstToggle;
+      });
+
+      await act(async () => {
+        await Promise.resolve();
+      });
+
+      expect(mockCurrentTask.toggleMute).toHaveBeenCalledTimes(2);
+      expect(mockCurrentTask.toggleMute).toHaveBeenLastCalledWith({muted: false});
+      expect(store.setIsMuted).toHaveBeenLastCalledWith(false);
+    });
+
+    it('should not apply mute state after task switch while SDK mute is pending', async () => {
+      let isMutedState = false;
+      const setIsMutedSpy = jest.spyOn(store, 'setIsMuted').mockImplementation((value: boolean) => {
+        isMutedState = value;
+      });
+      jest.spyOn(store, 'isMuted', 'get').mockImplementation(() => isMutedState);
+
+      let resolveMute!: () => void;
+      const taskA = {
+        ...mockCurrentTask,
+        data: {...mockCurrentTask.data, interactionId: 'interaction-a'},
+        toggleMute: jest.fn(
+          () =>
+            new Promise<void>((resolve) => {
+              resolveMute = resolve;
+            })
+        ),
+      };
+      const taskB = {
+        ...mockCurrentTask,
+        data: {...mockCurrentTask.data, interactionId: 'interaction-b'},
+        toggleMute: jest.fn().mockResolvedValue(undefined),
+      };
+
+      const {result, rerender} = renderHook(
+        (props: {currentTask: typeof taskA}) =>
+          useCallControl({
+            currentTask: props.currentTask,
+            logger: mockLogger,
+            isMuted: false,
+            conferenceEnabled: true,
+            agentId: 'test-agent-id',
+          }),
+        {initialProps: {currentTask: taskA}}
+      );
+
+      jest.spyOn(store, 'currentTask', 'get').mockReturnValue(taskA as never);
+
+      let mutePromise!: Promise<void>;
+      act(() => {
+        mutePromise = result.current.toggleMute();
+      });
+
+      await act(async () => {
+        await Promise.resolve();
+      });
+
+      setIsMutedSpy.mockClear();
+      jest.spyOn(store, 'currentTask', 'get').mockReturnValue(taskB as never);
+
+      rerender({currentTask: taskB});
+
+      await act(async () => {
+        resolveMute();
+        await mutePromise;
+      });
+
+      expect(setIsMutedSpy).not.toHaveBeenCalled();
+      expect(isMutedState).toBe(false);
+    });
+
+    it('should not apply mute state after current task is cleared while SDK mute is pending', async () => {
+      let isMutedState = false;
+      const setIsMutedSpy = jest.spyOn(store, 'setIsMuted').mockImplementation((value: boolean) => {
+        isMutedState = value;
+      });
+      jest.spyOn(store, 'isMuted', 'get').mockImplementation(() => isMutedState);
+
+      let resolveMute!: () => void;
+      const taskA = {
+        ...mockCurrentTask,
+        data: {...mockCurrentTask.data, interactionId: 'interaction-ended'},
+        toggleMute: jest.fn(
+          () =>
+            new Promise<void>((resolve) => {
+              resolveMute = resolve;
+            })
+        ),
+      };
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: taskA,
+          logger: mockLogger,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'test-agent-id',
+        })
+      );
+
+      jest.spyOn(store, 'currentTask', 'get').mockReturnValue(taskA as never);
+
+      let mutePromise!: Promise<void>;
+      act(() => {
+        mutePromise = result.current.toggleMute();
+      });
+
+      await act(async () => {
+        await Promise.resolve();
+      });
+
+      setIsMutedSpy.mockClear();
+      isMutedState = false;
+      jest.spyOn(store, 'currentTask', 'get').mockReturnValue(null as never);
+
+      await act(async () => {
+        resolveMute();
+        await mutePromise;
+      });
+
+      expect(setIsMutedSpy).not.toHaveBeenCalled();
+      expect(isMutedState).toBe(false);
+    });
+
+    it('should preserve mute coordinator state when a stale task chain settles after switching tasks', async () => {
+      let isMutedState = false;
+      jest.spyOn(store, 'setIsMuted').mockImplementation((value: boolean) => {
+        isMutedState = value;
+      });
+      jest.spyOn(store, 'isMuted', 'get').mockImplementation(() => isMutedState);
+
+      let resolveMuteA!: () => void;
+      let resolveMuteB!: () => void;
+      const taskA = {
+        ...mockCurrentTask,
+        data: {...mockCurrentTask.data, interactionId: 'interaction-a'},
+        toggleMute: jest.fn(
+          () =>
+            new Promise<void>((resolve) => {
+              resolveMuteA = resolve;
+            })
+        ),
+      };
+      const taskB = {
+        ...mockCurrentTask,
+        data: {...mockCurrentTask.data, interactionId: 'interaction-b'},
+        toggleMute: jest
+          .fn()
+          .mockImplementationOnce(
+            () =>
+              new Promise<void>((resolve) => {
+                resolveMuteB = resolve;
+              })
+          )
+          .mockImplementation(() => Promise.resolve()),
+      };
+
+      const {result, rerender} = renderHook(
+        (props: {currentTask: typeof taskA}) =>
+          useCallControl({
+            currentTask: props.currentTask,
+            logger: mockLogger,
+            isMuted: false,
+            conferenceEnabled: true,
+            agentId: 'test-agent-id',
+          }),
+        {initialProps: {currentTask: taskA}}
+      );
+
+      jest.spyOn(store, 'currentTask', 'get').mockReturnValue(taskA as never);
+
+      let mutePromiseA!: Promise<void>;
+      act(() => {
+        mutePromiseA = result.current.toggleMute();
+      });
+
+      await act(async () => {
+        await Promise.resolve();
+      });
+
+      jest.spyOn(store, 'currentTask', 'get').mockReturnValue(taskB as never);
+
+      await act(async () => {
+        rerender({currentTask: taskB});
+      });
+
+      let mutePromiseB!: Promise<void>;
+      await act(async () => {
+        mutePromiseB = result.current.toggleMute();
+        await Promise.resolve();
+      });
+
+      await act(async () => {
+        resolveMuteA();
+        await mutePromiseA;
+      });
+
+      await act(async () => {
+        resolveMuteB();
+        await mutePromiseB;
+      });
+
+      expect(taskB.toggleMute).toHaveBeenCalledWith({muted: true});
+      expect(isMutedState).toBe(true);
+
+      taskB.toggleMute.mockClear();
+
+      await act(async () => {
+        await result.current.toggleMute();
+      });
+
+      expect(taskB.toggleMute).toHaveBeenCalledWith({muted: false});
+      expect(isMutedState).toBe(false);
+    });
+
+    it('should unmute from a second hook instance after muting from the first', async () => {
+      let isMutedState = false;
+      jest.spyOn(store, 'setIsMuted').mockImplementation((value: boolean) => {
+        isMutedState = value;
+      });
+      jest.spyOn(store, 'isMuted', 'get').mockImplementation(() => isMutedState);
+
+      const sharedHookProps = {
+        currentTask: mockCurrentTask,
+        logger: mockLogger,
+        isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
+      };
+
+      const {result: callControlResult} = renderHook(() => useCallControl(sharedHookProps));
+      const {result: callControlCadResult} = renderHook(() =>
+        useCallControl({...sharedHookProps, widgetName: 'CallControlCAD'})
+      );
+
+      await act(async () => {
+        await callControlResult.current.toggleMute();
+      });
+
+      expect(mockCurrentTask.toggleMute).toHaveBeenCalledWith({muted: true});
+      expect(isMutedState).toBe(true);
+
+      mockCurrentTask.toggleMute.mockClear();
+
+      await act(async () => {
+        await callControlCadResult.current.toggleMute();
+      });
+
+      expect(mockCurrentTask.toggleMute).toHaveBeenCalledTimes(1);
+      expect(mockCurrentTask.toggleMute).toHaveBeenCalledWith({muted: false});
+      expect(isMutedState).toBe(false);
+    });
+
+    it('should coalesce cross-widget unmute while first mute SDK request is pending', async () => {
+      let isMutedState = false;
+      jest.spyOn(store, 'setIsMuted').mockImplementation((value: boolean) => {
+        isMutedState = value;
+      });
+      jest.spyOn(store, 'isMuted', 'get').mockImplementation(() => isMutedState);
+
+      let resolveFirstMute!: () => void;
+      mockCurrentTask.toggleMute = jest
+        .fn()
+        .mockImplementationOnce(
+          () =>
+            new Promise<void>((resolve) => {
+              resolveFirstMute = resolve;
+            })
+        )
+        .mockImplementationOnce(() => Promise.resolve());
+
+      const sharedHookProps = {
+        currentTask: mockCurrentTask,
+        logger: mockLogger,
+        isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
+      };
+
+      const {result: callControlResult} = renderHook(() => useCallControl(sharedHookProps));
+      const {result: callControlCadResult} = renderHook(() => useCallControl(sharedHookProps));
+
+      let firstToggle!: Promise<void>;
+      act(() => {
+        firstToggle = callControlResult.current.toggleMute();
+      });
+
+      await act(async () => {
+        await Promise.resolve();
+      });
+
+      expect(mockCurrentTask.toggleMute).toHaveBeenCalledTimes(1);
+      expect(mockCurrentTask.toggleMute).toHaveBeenCalledWith({muted: true});
+
+      await act(async () => {
+        void callControlCadResult.current.toggleMute();
+      });
+
+      await act(async () => {
+        resolveFirstMute();
+        await firstToggle;
+        await Promise.resolve();
+      });
+
+      expect(mockCurrentTask.toggleMute).toHaveBeenCalledTimes(2);
+      expect(mockCurrentTask.toggleMute).toHaveBeenLastCalledWith({muted: false});
+      expect(isMutedState).toBe(false);
+    });
+
+    it('should not reset mute coordinator when a second hook mounts during pending mute on same interaction', async () => {
+      let isMutedState = false;
+      const setIsMutedSpy = jest.spyOn(store, 'setIsMuted').mockImplementation((value: boolean) => {
+        isMutedState = value;
+      });
+      jest.spyOn(store, 'isMuted', 'get').mockImplementation(() => isMutedState);
+
+      let resolveFirstMute!: () => void;
+      mockCurrentTask.toggleMute = jest.fn(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveFirstMute = resolve;
+          })
+      );
+
+      const sharedHookProps = {
+        currentTask: mockCurrentTask,
+        logger: mockLogger,
+        isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
+      };
+
+      const {result: callControlResult} = renderHook(() => useCallControl(sharedHookProps));
+
+      let firstToggle!: Promise<void>;
+      act(() => {
+        firstToggle = callControlResult.current.toggleMute();
+      });
+
+      await act(async () => {
+        await Promise.resolve();
+      });
+
+      const {unmount: unmountCad} = renderHook(() =>
+        useCallControl({...sharedHookProps, widgetName: 'CallControlCAD'})
+      );
+
+      setIsMutedSpy.mockClear();
+
+      await act(async () => {
+        resolveFirstMute();
+        await firstToggle;
+      });
+
+      expect(setIsMutedSpy).toHaveBeenCalledWith(true);
+      expect(isMutedState).toBe(true);
+
+      unmountCad();
     });
 
     it('should not call onToggleMute callback if not provided', async () => {
@@ -3792,6 +4930,45 @@ describe('useCallControl', () => {
       expect(mockCurrentTask.toggleMute).toHaveBeenCalled();
       expect(store.setIsMuted).toHaveBeenCalledWith(true);
       expect(mockOnToggleMute).not.toHaveBeenCalled();
+    });
+
+    it('should keep mute queue working when onToggleMute callback throws after SDK success', async () => {
+      mockOnToggleMute
+        .mockImplementationOnce(() => {
+          throw new Error('Host callback failed');
+        })
+        .mockImplementation(() => undefined);
+
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: mockCurrentTask,
+          onToggleMute: mockOnToggleMute,
+          logger: mockLogger,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'test-agent-id',
+        })
+      );
+
+      await act(async () => {
+        await result.current.toggleMute();
+      });
+
+      expect(store.setIsMuted).toHaveBeenCalledWith(true);
+      expect(mockLogger.error).toHaveBeenCalledWith('onToggleMute callback failed: Error: Host callback failed', {
+        module: 'useCallControl',
+        method: 'toggleMuteCallback',
+      });
+      expect(result.current.telephonyToast).toBeNull();
+
+      mockCurrentTask.toggleMute.mockClear();
+      mockOnToggleMute.mockClear();
+
+      await act(async () => {
+        await result.current.toggleMute();
+      });
+
+      expect(mockCurrentTask.toggleMute).toHaveBeenCalled();
     });
 
     it('should not call onToggleMute callback on error if not provided', async () => {
@@ -3824,6 +5001,7 @@ describe('useCallControl', () => {
     it('should handle errors when toggleMute SDK call fails and call onToggleMute with current state', async () => {
       const toggleMuteError = new Error('SDK Toggle mute failed');
       mockCurrentTask.toggleMute = jest.fn().mockRejectedValue(toggleMuteError);
+      jest.spyOn(store, 'isMuted', 'get').mockImplementation(() => true);
 
       const {result} = renderHook(() =>
         useCallControl({
@@ -5696,7 +6874,7 @@ describe('useOutdialCall', () => {
     });
 
     expect(mockOutdialCallProps.startOutdial).toHaveBeenCalledWith(destination);
-    expect(logger.info).toHaveBeenCalledWith('Outdial call started', 'Success');
+    expect(logger.info).toHaveBeenCalledWith('Outdial call started');
   });
 
   it('should successfully start an outdial call with origin', async () => {
@@ -5713,7 +6891,7 @@ describe('useOutdialCall', () => {
     });
 
     expect(mockOutdialCallProps.startOutdial).toHaveBeenCalledWith(destination, origin);
-    expect(logger.info).toHaveBeenCalledWith('Outdial call started', 'Success');
+    expect(logger.info).toHaveBeenCalledWith('Outdial call started');
   });
 
   it('should show alert when destination is empty or only contains spaces', async () => {
@@ -6724,7 +7902,7 @@ describe('Task Hook Error Handling and Logging', () => {
       );
     });
 
-    it('should handle synchronous errors in toggleMute', () => {
+    it('should handle synchronous errors in toggleMute', async () => {
       const errorTask = {
         ...mockTaskWithInteraction,
         uiControls: createEnabledMainTaskUIControls(),
@@ -6743,8 +7921,10 @@ describe('Task Hook Error Handling and Logging', () => {
         })
       );
 
-      act(() => {
-        result.current.toggleMute();
+      jest.spyOn(store, 'currentTask', 'get').mockReturnValue(errorTask as never);
+
+      await act(async () => {
+        await result.current.toggleMute();
       });
 
       expect(logger.error).toHaveBeenCalledWith('toggleMute failed: Error: toggleMute synchronous error', {
@@ -7074,5 +8254,991 @@ describe('Task Hook Error Handling and Logging', () => {
         unmount();
       });
     });
+  });
+});
+
+describe('WXCC-6026 wxApp thick-client hooks', () => {
+  beforeEach(() => {
+    resetMuteCoordinatorForTests();
+    resetOfferActionAttemptsForTests();
+    resetStoreOfferActionErrors();
+    jest.spyOn(store, 'setIsMuted').mockImplementation(() => {});
+    jest.spyOn(store, 'isMuted', 'get').mockImplementation(() => false);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+    resetMuteCoordinatorForTests();
+    resetOfferActionAttemptsForTests();
+    resetStoreOfferActionErrors();
+  });
+
+  it('useIncomingTask accept calls task.accept()', async () => {
+    const accept = jest.fn().mockResolvedValue(undefined);
+    const wxAppTask = {
+      ...taskMock,
+      accept,
+      decline: jest.fn(),
+      on: jest.fn(),
+      off: jest.fn(),
+    };
+
+    const {result} = renderHook(() =>
+      useIncomingTask({
+        incomingTask: wxAppTask,
+        onAccepted: onTaskAccepted,
+        onRejected: onTaskDeclined,
+        logger,
+      })
+    );
+
+    await act(async () => {
+      await result.current.accept();
+    });
+
+    expect(accept).toHaveBeenCalled();
+  });
+
+  it('useIncomingTask reject calls task.decline()', async () => {
+    const decline = jest.fn().mockResolvedValue(undefined);
+    const wxAppTask = {
+      ...taskMock,
+      accept: jest.fn(),
+      decline,
+      on: jest.fn(),
+      off: jest.fn(),
+    };
+
+    const {result} = renderHook(() =>
+      useIncomingTask({
+        incomingTask: wxAppTask,
+        onRejected: onTaskDeclined,
+        logger,
+      })
+    );
+
+    await act(async () => {
+      await result.current.reject();
+    });
+
+    expect(decline).toHaveBeenCalled();
+  });
+
+  it('useCallControl toggleMute calls task.toggleMute with target state', async () => {
+    const toggleMute = jest.fn().mockResolvedValue(undefined);
+    const wxAppTask = {
+      ...mockTask,
+      data: {...mockTask.data, interactionId: 'wxapp-interaction'},
+      toggleMute,
+      getWebexCallingCallId: jest.fn().mockReturnValue('call-123'),
+      uiControls: createEnabledMainTaskUIControls(),
+      on: jest.fn(),
+      off: jest.fn(),
+    };
+
+    jest.spyOn(store, 'setIsMuted').mockImplementation(() => {});
+    jest.spyOn(store, 'isMuted', 'get').mockImplementation(() => false);
+
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: wxAppTask,
+        logger: mockCC.LoggerProxy,
+        isMuted: false,
+        conferenceEnabled: false,
+        agentId: 'agent1',
+      })
+    );
+
+    await act(async () => {
+      await result.current.toggleMute();
+    });
+
+    expect(toggleMute).toHaveBeenCalledWith({muted: true});
+  });
+
+  it('useCallControl sendDtmf calls task.transmitDtmf for engaged wxApp calls', async () => {
+    const transmitDtmf = jest.fn().mockResolvedValue(undefined);
+    const wxAppTask = {
+      ...mockTask,
+      data: {...mockTask.data, interactionId: 'wxapp-interaction'},
+      getWebexCallingCallId: jest.fn().mockReturnValue('call-123'),
+      transmitDtmf,
+      uiControls: {
+        ...createEnabledMainTaskUIControls(),
+        main: {
+          ...createEnabledMainTaskUIControls().main,
+          keypad: {isVisible: true, isEnabled: true},
+        },
+      },
+      on: jest.fn(),
+      off: jest.fn(),
+    };
+
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: wxAppTask,
+        logger: mockCC.LoggerProxy,
+        isMuted: false,
+        conferenceEnabled: false,
+        agentId: 'agent1',
+      })
+    );
+
+    jest.spyOn(store, 'currentTask', 'get').mockReturnValue(wxAppTask as never);
+
+    await act(async () => {
+      await result.current.sendDtmf('5');
+    });
+
+    expect(transmitDtmf).toHaveBeenCalledWith({dtmf: '5'});
+  });
+
+  it('useCallControl sendDtmf does not surface telephonyToast after task switch while transmitDtmf is pending', async () => {
+    const telephonyError = Object.assign(new Error('DTMF failed'), {
+      isWxAppTelephonyError: true,
+      trackingId: 'track-dtmf',
+    });
+    let rejectDtmf!: (error: Error) => void;
+    const transmitDtmf = jest.fn(
+      () =>
+        new Promise<void>((_, reject) => {
+          rejectDtmf = reject;
+        })
+    );
+    const taskA = {
+      ...mockTask,
+      data: {...mockTask.data, interactionId: 'dtmf-interaction-a'},
+      getWebexCallingCallId: jest.fn().mockReturnValue('call-a'),
+      transmitDtmf,
+      uiControls: {
+        ...createEnabledMainTaskUIControls(),
+        main: {
+          ...createEnabledMainTaskUIControls().main,
+          keypad: {isVisible: true, isEnabled: true},
+        },
+      },
+      on: jest.fn(),
+      off: jest.fn(),
+    };
+    const taskB = {
+      ...mockTask,
+      data: {...mockTask.data, interactionId: 'dtmf-interaction-b'},
+      getWebexCallingCallId: jest.fn().mockReturnValue('call-b'),
+      transmitDtmf: jest.fn().mockResolvedValue(undefined),
+      uiControls: taskA.uiControls,
+      on: jest.fn(),
+      off: jest.fn(),
+    };
+
+    const {result, rerender} = renderHook(
+      (props: {currentTask: typeof taskA}) =>
+        useCallControl({
+          currentTask: props.currentTask,
+          logger: mockCC.LoggerProxy,
+          isMuted: false,
+          conferenceEnabled: false,
+          agentId: 'agent1',
+          enableWxBetterTogether: true,
+        }),
+      {initialProps: {currentTask: taskA}}
+    );
+
+    jest.spyOn(store, 'currentTask', 'get').mockReturnValue(taskA as never);
+
+    let dtmfPromise!: Promise<void>;
+    await act(async () => {
+      dtmfPromise = result.current.sendDtmf('5');
+      await Promise.resolve();
+    });
+
+    jest.spyOn(store, 'currentTask', 'get').mockReturnValue(taskB as never);
+
+    await act(async () => {
+      rerender({currentTask: taskB});
+    });
+
+    expect(result.current.telephonyToast).toBeNull();
+
+    await act(async () => {
+      rejectDtmf(telephonyError);
+      await dtmfPromise.catch(() => undefined);
+    });
+
+    expect(result.current.telephonyToast).toBeNull();
+  });
+
+  it('useCallControl sendDtmf skips transmitDtmf when store current task no longer matches hook task', async () => {
+    const transmitDtmf = jest.fn().mockResolvedValue(undefined);
+    const taskA = {
+      ...mockTask,
+      data: {...mockTask.data, interactionId: 'dtmf-interaction-a'},
+      getWebexCallingCallId: jest.fn().mockReturnValue('call-a'),
+      transmitDtmf,
+      uiControls: {
+        ...createEnabledMainTaskUIControls(),
+        main: {
+          ...createEnabledMainTaskUIControls().main,
+          keypad: {isVisible: true, isEnabled: true},
+        },
+      },
+      on: jest.fn(),
+      off: jest.fn(),
+    };
+    const taskB = {
+      ...mockTask,
+      data: {...mockTask.data, interactionId: 'dtmf-interaction-b'},
+      getWebexCallingCallId: jest.fn().mockReturnValue('call-b'),
+      transmitDtmf: jest.fn().mockResolvedValue(undefined),
+      uiControls: taskA.uiControls,
+      on: jest.fn(),
+      off: jest.fn(),
+    };
+
+    jest.spyOn(store, 'currentTask', 'get').mockReturnValue(taskB as never);
+
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: taskA,
+        logger: mockCC.LoggerProxy,
+        isMuted: false,
+        conferenceEnabled: false,
+        agentId: 'agent1',
+        enableWxBetterTogether: true,
+      })
+    );
+
+    await act(async () => {
+      await result.current.sendDtmf('5');
+    });
+
+    expect(transmitDtmf).not.toHaveBeenCalled();
+  });
+
+  it('useTaskList acceptTask calls task.accept()', async () => {
+    const accept = jest.fn().mockResolvedValue(undefined);
+    const wxAppTask = {
+      ...taskMock,
+      accept,
+      decline: jest.fn(),
+    };
+    const mockTaskList = {mockId1: wxAppTask};
+
+    const {result} = renderHook(() => useTaskList({cc: mockCC, onTaskAccepted, logger, taskList: mockTaskList}));
+
+    act(() => {
+      result.current.acceptTask(wxAppTask);
+    });
+
+    await waitFor(() => {
+      expect(accept).toHaveBeenCalled();
+    });
+  });
+
+  it('useTaskList declineTask calls task.decline()', async () => {
+    const decline = jest.fn().mockResolvedValue(undefined);
+    const wxAppTask = {
+      ...taskMock,
+      accept: jest.fn(),
+      decline,
+    };
+    const mockTaskList = {mockId1: wxAppTask};
+
+    const {result} = renderHook(() => useTaskList({cc: mockCC, onTaskDeclined, logger, taskList: mockTaskList}));
+
+    act(() => {
+      result.current.declineTask(wxAppTask);
+    });
+
+    await waitFor(() => {
+      expect(decline).toHaveBeenCalled();
+    });
+  });
+
+  it('useIncomingTask accept uses task.accept for non-wxApp offers', async () => {
+    const accept = jest.fn().mockResolvedValue(undefined);
+    const legacyTask = {
+      ...taskMock,
+      accept,
+      decline: jest.fn(),
+      on: jest.fn(),
+      off: jest.fn(),
+    };
+
+    const {result} = renderHook(() =>
+      useIncomingTask({
+        incomingTask: legacyTask,
+        onAccepted: onTaskAccepted,
+        onRejected: onTaskDeclined,
+        logger,
+      })
+    );
+
+    await act(async () => {
+      await result.current.accept();
+    });
+
+    expect(accept).toHaveBeenCalled();
+  });
+
+  it('useCallControl toggleMute calls task.toggleMute for non-wxApp calls', async () => {
+    const toggleMute = jest.fn().mockResolvedValue(undefined);
+    const legacyTask = {
+      ...mockTask,
+      toggleMute,
+      getWebexCallingCallId: jest.fn().mockReturnValue(null),
+      uiControls: createEnabledMainTaskUIControls(),
+      on: jest.fn(),
+      off: jest.fn(),
+    };
+
+    jest.spyOn(store, 'setIsMuted').mockImplementation(() => {});
+    jest.spyOn(store, 'isMuted', 'get').mockImplementation(() => false);
+
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: legacyTask,
+        logger: mockCC.LoggerProxy,
+        isMuted: false,
+        conferenceEnabled: false,
+        agentId: 'agent1',
+      })
+    );
+
+    await act(async () => {
+      await result.current.toggleMute();
+    });
+
+    expect(toggleMute).toHaveBeenCalledWith({muted: true});
+  });
+
+  it('useCallControl sendDtmf calls task.transmitDtmf for engaged wxApp calls when keypad is enabled but not visible', async () => {
+    const transmitDtmf = jest.fn().mockResolvedValue(undefined);
+    const wxAppTask = {
+      ...mockTask,
+      data: {...mockTask.data, interactionId: 'wxapp-interaction'},
+      getWebexCallingCallId: jest.fn().mockReturnValue('call-123'),
+      transmitDtmf,
+      uiControls: {
+        ...createEnabledMainTaskUIControls(),
+        main: {
+          ...createEnabledMainTaskUIControls().main,
+          keypad: {isVisible: false, isEnabled: true},
+        },
+      },
+      on: jest.fn(),
+      off: jest.fn(),
+    };
+
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: wxAppTask,
+        logger: mockCC.LoggerProxy,
+        isMuted: false,
+        conferenceEnabled: false,
+        agentId: 'agent1',
+        enableWxBetterTogether: true,
+      })
+    );
+
+    jest.spyOn(store, 'currentTask', 'get').mockReturnValue(wxAppTask as never);
+
+    await act(async () => {
+      await result.current.sendDtmf('5');
+    });
+
+    expect(transmitDtmf).toHaveBeenCalledWith({dtmf: '5'});
+  });
+
+  it('useCallControl sendDtmf no-ops when keypad control is not visible', async () => {
+    const transmitDtmf = jest.fn().mockResolvedValue(undefined);
+    const wxAppTask = {
+      ...mockTask,
+      data: {...mockTask.data, interactionId: 'wxapp-interaction'},
+      getWebexCallingCallId: jest.fn().mockReturnValue('call-123'),
+      transmitDtmf,
+      uiControls: {
+        ...createEnabledMainTaskUIControls(),
+        main: {
+          ...createEnabledMainTaskUIControls().main,
+          keypad: {isVisible: false, isEnabled: false},
+        },
+      },
+      on: jest.fn(),
+      off: jest.fn(),
+    };
+
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: wxAppTask,
+        logger: mockCC.LoggerProxy,
+        isMuted: false,
+        conferenceEnabled: false,
+        agentId: 'agent1',
+        enableWxBetterTogether: true,
+      })
+    );
+
+    await act(async () => {
+      await result.current.sendDtmf('5');
+    });
+
+    expect(transmitDtmf).not.toHaveBeenCalled();
+    expect(mockCC.LoggerProxy.warn).toHaveBeenCalledWith('Keypad control not available', {
+      module: 'useCallControl',
+      method: 'sendDtmf',
+    });
+  });
+
+  it('useIncomingTask accept failure surfaces offerActionError', async () => {
+    const telephonyError = Object.assign(new Error('Answer failed'), {
+      isWxAppTelephonyError: true,
+      trackingId: 'track-accept',
+      status: 500,
+    });
+    const accept = jest.fn().mockRejectedValue(telephonyError);
+    const onErrorCallback = jest.fn();
+    store.onErrorCallback = onErrorCallback;
+    const wxAppTask = {
+      ...taskMock,
+      accept,
+      decline: jest.fn(),
+      on: jest.fn(),
+      off: jest.fn(),
+    };
+
+    const {result, rerender} = renderHook(() =>
+      useIncomingTask({
+        incomingTask: wxAppTask,
+        onAccepted: onTaskAccepted,
+        onRejected: onTaskDeclined,
+        logger,
+      })
+    );
+
+    await act(async () => {
+      await result.current.accept();
+    });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    rerender();
+
+    expect(result.current.offerActionError).toMatchObject({
+      message: 'Unable to answer the Call. Please try again',
+      trackingId: 'track-accept',
+      status: 500,
+    });
+    expect(onErrorCallback).toHaveBeenCalledWith('IncomingTask', expect.objectContaining({message: 'Answer failed'}));
+  });
+
+  it('useIncomingTask accept retry clears offerActionError before the new attempt', async () => {
+    const telephonyError = Object.assign(new Error('Answer failed'), {
+      isWxAppTelephonyError: true,
+      trackingId: 'track-accept',
+      status: 500,
+    });
+    const accept = jest.fn().mockRejectedValueOnce(telephonyError).mockResolvedValueOnce(undefined);
+    const wxAppTask = {
+      ...taskMock,
+      accept,
+      decline: jest.fn(),
+      on: jest.fn(),
+      off: jest.fn(),
+    };
+
+    const {result, rerender} = renderHook(() =>
+      useIncomingTask({
+        incomingTask: wxAppTask,
+        onAccepted: onTaskAccepted,
+        onRejected: onTaskDeclined,
+        logger,
+      })
+    );
+
+    await act(async () => {
+      result.current.accept();
+    });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    rerender();
+
+    expect(result.current.offerActionError).not.toBeNull();
+
+    await act(async () => {
+      result.current.accept();
+    });
+
+    rerender();
+
+    expect(result.current.offerActionError).toBeNull();
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+  });
+
+  it('useIncomingTask does not clear newer accept failure when an older accept attempt succeeds', async () => {
+    let resolveFirstAccept!: () => void;
+    const telephonyError = Object.assign(new Error('Answer failed'), {
+      isWxAppTelephonyError: true,
+      trackingId: 'track-accept-stale',
+      status: 500,
+    });
+    const accept = jest
+      .fn()
+      .mockImplementationOnce(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveFirstAccept = resolve;
+          })
+      )
+      .mockRejectedValueOnce(telephonyError);
+    const wxAppTask = {
+      ...taskMock,
+      data: {...taskMock.data, interactionId: 'incoming-overlap-interaction'},
+      accept,
+      decline: jest.fn(),
+      on: jest.fn(),
+      off: jest.fn(),
+    };
+
+    const {result, rerender} = renderHook(() =>
+      useIncomingTask({
+        incomingTask: wxAppTask,
+        onAccepted: onTaskAccepted,
+        onRejected: onTaskDeclined,
+        logger,
+      })
+    );
+
+    act(() => {
+      result.current.accept();
+    });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    act(() => {
+      result.current.accept();
+    });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    rerender();
+
+    expect(result.current.offerActionError).toMatchObject({
+      message: 'Unable to answer the Call. Please try again',
+      trackingId: 'track-accept-stale',
+    });
+
+    await act(async () => {
+      resolveFirstAccept();
+      await Promise.resolve();
+    });
+
+    rerender();
+
+    expect(result.current.offerActionError).toMatchObject({
+      message: 'Unable to answer the Call. Please try again',
+      trackingId: 'track-accept-stale',
+    });
+  });
+
+  it('useTaskList does not clear newer accept failure when an older accept attempt succeeds', async () => {
+    let resolveFirstAccept!: () => void;
+    const telephonyError = Object.assign(new Error('Answer failed'), {
+      isWxAppTelephonyError: true,
+      trackingId: 'track-accept-stale-tasklist',
+      status: 500,
+    });
+    const accept = jest
+      .fn()
+      .mockImplementationOnce(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveFirstAccept = resolve;
+          })
+      )
+      .mockRejectedValueOnce(telephonyError);
+    const wxAppTask = {
+      ...taskMock,
+      data: {...taskMock.data, interactionId: 'tasklist-overlap-interaction'},
+      accept,
+      decline: jest.fn(),
+      on: jest.fn(),
+      off: jest.fn(),
+    };
+
+    const {result} = renderHook(() =>
+      useTaskList({
+        taskList: {'tasklist-overlap-interaction': wxAppTask},
+        logger,
+        cc: mockCC,
+      })
+    );
+
+    act(() => {
+      result.current.acceptTask(wxAppTask);
+    });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    act(() => {
+      result.current.acceptTask(wxAppTask);
+    });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(store.offerActionErrors['tasklist-overlap-interaction']).toMatchObject({
+      message: 'Unable to answer the Call. Please try again',
+      trackingId: 'track-accept-stale-tasklist',
+    });
+
+    await act(async () => {
+      resolveFirstAccept();
+      await Promise.resolve();
+    });
+
+    expect(store.offerActionErrors['tasklist-overlap-interaction']).toMatchObject({
+      message: 'Unable to answer the Call. Please try again',
+      trackingId: 'track-accept-stale-tasklist',
+    });
+  });
+
+  it('useTaskList accept failure syncs offerActionError to store for IncomingTask', async () => {
+    const telephonyError = Object.assign(new Error('Answer failed'), {
+      isWxAppTelephonyError: true,
+      trackingId: 'track-sync',
+      status: 500,
+    });
+    const accept = jest.fn().mockRejectedValue(telephonyError);
+    const wxAppTask = {
+      ...taskMock,
+      data: {...taskMock.data, interactionId: 'sync-interaction'},
+      accept,
+      decline: jest.fn(),
+      on: jest.fn(),
+      off: jest.fn(),
+    };
+
+    const {result: taskListResult, rerender: rerenderTaskList} = renderHook(() =>
+      useTaskList({
+        taskList: {'sync-interaction': wxAppTask},
+        logger,
+        cc: mockCC,
+      })
+    );
+
+    const {result: incomingResult, rerender: rerenderIncoming} = renderHook(() =>
+      useIncomingTask({
+        incomingTask: wxAppTask,
+        onAccepted: onTaskAccepted,
+        onRejected: onTaskDeclined,
+        logger,
+      })
+    );
+
+    await act(async () => {
+      taskListResult.current.acceptTask(wxAppTask);
+    });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    const errorsAfterAccept = store.offerActionErrors;
+    expect(errorsAfterAccept['sync-interaction']).toMatchObject({
+      message: 'Unable to answer the Call. Please try again',
+      trackingId: 'track-sync',
+    });
+
+    rerenderIncoming();
+    expect(incomingResult.current.offerActionError).toMatchObject({
+      message: 'Unable to answer the Call. Please try again',
+    });
+
+    rerenderTaskList();
+    expect(taskListResult.current.taskActionErrors).toBe(errorsAfterAccept);
+    expect(taskListResult.current.taskActionErrors['sync-interaction']).toMatchObject({
+      message: 'Unable to answer the Call. Please try again',
+    });
+  });
+
+  it('useIncomingTask accept failure syncs offerActionError to TaskList via new store map reference', async () => {
+    resetStoreOfferActionErrors();
+    const telephonyError = Object.assign(new Error('Answer failed'), {
+      isWxAppTelephonyError: true,
+      trackingId: 'track-reverse-sync',
+      status: 500,
+    });
+    const accept = jest.fn().mockRejectedValue(telephonyError);
+    const wxAppTask = {
+      ...taskMock,
+      data: {...taskMock.data, interactionId: 'reverse-sync-interaction'},
+      accept,
+      decline: jest.fn(),
+      on: jest.fn(),
+      off: jest.fn(),
+    };
+
+    const {result: taskListResult, rerender: rerenderTaskList} = renderHook(() =>
+      useTaskList({
+        taskList: {'reverse-sync-interaction': wxAppTask},
+        logger,
+        cc: mockCC,
+      })
+    );
+
+    const {result: incomingResult, rerender: rerenderIncoming} = renderHook(() =>
+      useIncomingTask({
+        incomingTask: wxAppTask,
+        onAccepted: onTaskAccepted,
+        onRejected: onTaskDeclined,
+        logger,
+      })
+    );
+
+    const errorsRefBeforeAccept = store.offerActionErrors;
+
+    await act(async () => {
+      incomingResult.current.accept();
+    });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(store.offerActionErrors['reverse-sync-interaction']).toMatchObject({
+      message: 'Unable to answer the Call. Please try again',
+      trackingId: 'track-reverse-sync',
+    });
+    expect(store.offerActionErrors).not.toBe(errorsRefBeforeAccept);
+    rerenderTaskList();
+    expect(taskListResult.current.taskActionErrors).toBe(store.offerActionErrors);
+    expect(taskListResult.current.taskActionErrors['reverse-sync-interaction']).toMatchObject({
+      message: 'Unable to answer the Call. Please try again',
+    });
+    rerenderIncoming();
+    expect(incomingResult.current.offerActionError).toMatchObject({
+      message: 'Unable to answer the Call. Please try again',
+    });
+  });
+
+  it('useCallControl toggleMute failure surfaces telephonyToast', async () => {
+    const telephonyError = Object.assign(new Error('Mute failed'), {
+      isWxAppTelephonyError: true,
+      trackingId: 'track-mute',
+    });
+    const toggleMute = jest.fn().mockRejectedValue(telephonyError);
+    const wxAppTask = {
+      ...mockTask,
+      data: {...mockTask.data, interactionId: 'wxapp-interaction'},
+      toggleMute,
+      getWebexCallingCallId: jest.fn().mockReturnValue('call-123'),
+      uiControls: createEnabledMainTaskUIControls(),
+      on: jest.fn(),
+      off: jest.fn(),
+    };
+
+    jest.spyOn(store, 'setIsMuted').mockImplementation(() => {});
+    jest.spyOn(store, 'isMuted', 'get').mockImplementation(() => false);
+    jest.spyOn(store, 'currentTask', 'get').mockReturnValue(wxAppTask as never);
+
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: wxAppTask,
+        logger: mockCC.LoggerProxy,
+        isMuted: false,
+        conferenceEnabled: false,
+        agentId: 'agent1',
+      })
+    );
+
+    await act(async () => {
+      await result.current.toggleMute();
+    });
+
+    expect(result.current.telephonyToast).toMatchObject({
+      action: 'mute',
+      error: expect.objectContaining({
+        message: "Couldn't mute call. Please try again.",
+        trackingId: 'track-mute',
+      }),
+    });
+  });
+
+  it('useCallControl toggleMute failure while muted surfaces unmute telephonyToast', async () => {
+    const telephonyError = Object.assign(new Error('Unmute failed'), {
+      isWxAppTelephonyError: true,
+      trackingId: 'track-unmute',
+    });
+    const toggleMute = jest.fn().mockRejectedValue(telephonyError);
+    const wxAppTask = {
+      ...mockTask,
+      data: {...mockTask.data, interactionId: 'wxapp-interaction'},
+      toggleMute,
+      getWebexCallingCallId: jest.fn().mockReturnValue('call-123'),
+      uiControls: createEnabledMainTaskUIControls(),
+      on: jest.fn(),
+      off: jest.fn(),
+    };
+
+    jest.spyOn(store, 'setIsMuted').mockImplementation(() => {});
+    jest.spyOn(store, 'isMuted', 'get').mockImplementation(() => true);
+    jest.spyOn(store, 'currentTask', 'get').mockReturnValue(wxAppTask as never);
+
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: wxAppTask,
+        logger: mockCC.LoggerProxy,
+        isMuted: true,
+        conferenceEnabled: false,
+        agentId: 'agent1',
+      })
+    );
+
+    await act(async () => {
+      await result.current.toggleMute();
+    });
+
+    expect(result.current.telephonyToast).toMatchObject({
+      action: 'unmute',
+      error: expect.objectContaining({
+        message: "Couldn't unmute call. Please try again.",
+        trackingId: 'track-unmute',
+      }),
+    });
+  });
+
+  it('useCallControl toggleMute allows wxApp path when SDK hides mute but enableWxBetterTogether is true', async () => {
+    const toggleMute = jest.fn().mockResolvedValue(undefined);
+    const wxAppTask = {
+      ...mockTask,
+      data: {...mockTask.data, interactionId: 'wxapp-interaction'},
+      toggleMute,
+      getWebexCallingCallId: jest.fn().mockReturnValue('call-123'),
+      uiControls: {
+        ...createEnabledMainTaskUIControls(),
+        main: {
+          ...createEnabledMainTaskUIControls().main,
+          mute: {isVisible: false, isEnabled: false},
+        },
+      },
+      on: jest.fn(),
+      off: jest.fn(),
+    };
+
+    jest.spyOn(store, 'setIsMuted').mockImplementation(() => {});
+    jest.spyOn(store, 'isMuted', 'get').mockImplementation(() => false);
+
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: wxAppTask,
+        logger: mockCC.LoggerProxy,
+        isMuted: false,
+        conferenceEnabled: false,
+        agentId: 'agent1',
+        enableWxBetterTogether: true,
+      })
+    );
+
+    await act(async () => {
+      await result.current.toggleMute();
+    });
+
+    expect(toggleMute).toHaveBeenCalledWith({muted: true});
+  });
+
+  it('useCallControl toggleMute no-ops when SDK hides mute and enableWxBetterTogether is false despite wxApp call id', async () => {
+    const toggleMute = jest.fn().mockResolvedValue(undefined);
+    const wxAppTask = {
+      ...mockTask,
+      data: {...mockTask.data, interactionId: 'wxapp-interaction'},
+      toggleMute,
+      getWebexCallingCallId: jest.fn().mockReturnValue('call-123'),
+      uiControls: {
+        ...createEnabledMainTaskUIControls(),
+        main: {
+          ...createEnabledMainTaskUIControls().main,
+          mute: {isVisible: false, isEnabled: false},
+        },
+      },
+      on: jest.fn(),
+      off: jest.fn(),
+    };
+
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: wxAppTask,
+        logger: mockCC.LoggerProxy,
+        isMuted: false,
+        conferenceEnabled: false,
+        agentId: 'agent1',
+        enableWxBetterTogether: false,
+      })
+    );
+
+    await act(async () => {
+      await result.current.toggleMute();
+    });
+
+    expect(toggleMute).not.toHaveBeenCalled();
+    expect(mockCC.LoggerProxy.warn).toHaveBeenCalledWith('Mute control not available', {
+      module: 'useCallControl',
+      method: 'toggleMute',
+    });
+  });
+
+  it('useCallControl toggleMute routes via task.toggleMute when only consult.mute is visible', async () => {
+    const toggleMute = jest.fn().mockResolvedValue(undefined);
+    const consultTask = {
+      ...mockTask,
+      data: {...mockTask.data, interactionId: 'consult-interaction'},
+      toggleMute,
+      uiControls: {
+        ...createEnabledMainTaskUIControls(),
+        main: {
+          ...createEnabledMainTaskUIControls().main,
+          mute: {isVisible: false, isEnabled: false},
+        },
+        consult: {
+          ...createEnabledMainTaskUIControls().consult,
+          mute: {isVisible: true, isEnabled: true},
+        },
+      },
+      on: jest.fn(),
+      off: jest.fn(),
+    };
+
+    jest.spyOn(store, 'setIsMuted').mockImplementation(() => {});
+
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: consultTask,
+        logger: mockCC.LoggerProxy,
+        isMuted: false,
+        conferenceEnabled: false,
+        agentId: 'agent1',
+        enableWxBetterTogether: true,
+      })
+    );
+
+    await act(async () => {
+      await result.current.toggleMute();
+    });
+
+    expect(toggleMute).toHaveBeenCalled();
   });
 });

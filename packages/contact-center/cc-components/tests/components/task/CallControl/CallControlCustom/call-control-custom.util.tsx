@@ -112,6 +112,65 @@ describe('Call Control Custom Utils', () => {
       expect(muteButton?.tooltip).toBe('Unmute');
     });
 
+    it('hides consult mute when wxApp is engaged and enableWxBetterTogether is true', () => {
+      const wxAppTask = {
+        getWebexCallingCallId: () => 'call-123',
+      };
+
+      const buttons = createConsultButtons(
+        false,
+        mockControls,
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        loggerMock,
+        true,
+        true,
+        wxAppTask as never
+      );
+
+      const muteButton = buttons.find((b) => b.key === 'mute');
+      expect(muteButton?.isVisible).toBe(false);
+    });
+
+    it('uses SDK consult mute visibility when enableWxBetterTogether is true but wxApp is not engaged', () => {
+      const buttons = createConsultButtons(
+        false,
+        mockControls,
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        loggerMock,
+        true,
+        true
+      );
+
+      const muteButton = buttons.find((b) => b.key === 'mute');
+      expect(muteButton?.isVisible).toBe(true);
+    });
+
+    it('uses SDK consult mute visibility when enableWxBetterTogether is false', () => {
+      const buttons = createConsultButtons(
+        false,
+        mockControls,
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        jest.fn(),
+        loggerMock,
+        true,
+        false
+      );
+
+      const muteButton = buttons.find((b) => b.key === 'mute');
+      expect(muteButton?.isVisible).toBe(true);
+    });
+
     it('should configure mute button correctly when not muted', () => {
       const buttons = createConsultButtons(
         false, // isMuted
@@ -355,8 +414,13 @@ describe('Call Control Custom Utils', () => {
       expect(createInitials('John')).toBe('J');
     });
 
-    it('should create initials from multiple names, taking first two', () => {
-      expect(createInitials('John Michael Doe')).toBe('JM');
+    it('should create initials from the first and last words', () => {
+      expect(createInitials('John Michael Doe')).toBe('JD');
+    });
+
+    it('should use the first and last tokens for multi-token destination initials', () => {
+      expect(createInitials('Queue e2e 1')).toBe('Q1');
+      expect(createInitials('Entry point e2e set 1')).toBe('E1');
     });
 
     it('should handle empty string', () => {

@@ -15,6 +15,8 @@ import {
   useOutdialCallProps,
   TargetType,
   TARGET_TYPE,
+  ParticipantDropAnnouncement,
+  PendingParticipantDropRequest,
 } from './task.types';
 import store, {
   TASK_EVENTS,
@@ -22,11 +24,20 @@ import store, {
   DestinationType,
   PaginatedListParams,
   getConferenceParticipants,
-  Participant,
+  getConferenceParticipantDropRoster,
+  ConferenceParticipantDropTarget,
   findMediaResourceId,
   MEDIA_TYPE_TELEPHONY_LOWER,
   RealTimeTranscriptionData,
 } from '@webex/cc-store';
+import {shouldShowWxAppTelephonyControls} from '@webex/cc-components';
+import {
+  getTelephonyToastDisplay,
+  reportWxAppTelephonyFailure,
+  TelephonyToastAction,
+  withOfferActionUserMessage,
+  WxAppTelephonyErrorDisplay,
+} from './wxapp-error.utils';
 import {
   TIMER_LABEL_CONSULTING,
   TIMER_LABEL_CONSULT_REQUESTED,
@@ -39,9 +50,51 @@ import {deriveMainCadHoldState} from './Utils/main-cad-hold.util';
 import {writeConsultHoldAnchor, clearConsultHoldAnchor} from './Utils/task-util';
 import {useHoldTimer} from './Utils/useHoldTimer';
 import {OutdialAniEntriesResponse} from '@webex/contact-center/dist/types/services/config/types';
+import {enqueueMuteToggle, resetMuteCoordinatorForInteraction} from './mute-coordinator';
+import {isLatestOfferActionAttempt, nextOfferActionAttempt} from './offer-action-attempts';
 
 const ENGAGED_LABEL = 'ENGAGED';
 const ENGAGED_USERNAME = 'Engaged';
+const PARTICIPANT_DROP_SUCCESS_MESSAGE = 'Participant removed from the conference.';
+const PARTICIPANT_DROP_FAILURE_MESSAGE = 'Unable to drop participant from the call. Try again.';
+
+const getLatestEligibleParticipantDropTarget = (
+  task: ITask,
+  agentId: string,
+  target: ConferenceParticipantDropTarget
+): ConferenceParticipantDropTarget | null => {
+  const latestRoster = getConferenceParticipantDropRoster(task, agentId);
+  const latestTarget = [latestRoster?.customer, ...(latestRoster?.participants ?? [])].find(
+    (candidate) =>
+      candidate?.dropTargetId === target.dropTargetId && candidate.participantType === target.participantType
+  );
+
+  if (
+    !latestRoster ||
+    !latestTarget ||
+    latestTarget.isReadOnly ||
+    latestTarget.isDropDisabled ||
+    latestRoster.isDropDisabled
+  ) {
+    return null;
+  }
+
+  return latestTarget;
+};
+
+const isCurrentParticipantDropRequest = (
+  request: PendingParticipantDropRequest,
+  pendingRequest: PendingParticipantDropRequest | null,
+  task: ITask | undefined,
+  agentId: string | undefined
+): boolean =>
+  Boolean(
+    pendingRequest?.token === request.token &&
+      task?.data?.interactionId === request.taskId &&
+      agentId === request.agentId &&
+      task.data.interaction.owner === request.agentId &&
+      !task.data.interaction.isTerminated
+  );
 
 const getTranscriptSpeaker = (role?: string): string => {
   const normalizedRole = role?.toUpperCase();
@@ -79,6 +132,14 @@ export const useTaskList = (props: UseTaskListProps) => {
       method: `useTaskList#${method}`,
     });
   };
+
+  const setTaskActionError = useCallback(
+    (interactionId: string, error: unknown, action: string) => {
+      const parsed = reportWxAppTelephonyFailure(error, {widget: 'TaskList', action}, logger, store.onErrorCallback);
+      store.setOfferActionError(interactionId, withOfferActionUserMessage(parsed, action));
+    },
+    [logger]
+  );
 
   useEffect(() => {
     try {
@@ -138,13 +199,28 @@ export const useTaskList = (props: UseTaskListProps) => {
 
   const acceptTask = (task: ITask) => {
     try {
-      logger.info(`CC-Widgets: acceptTask called for ${task.data.interactionId}`, {
+      const interactionId = task.data.interactionId;
+      const attemptId = nextOfferActionAttempt(interactionId);
+      store.clearOfferActionError(interactionId);
+      logger.info('CC-Widgets: acceptTask called', {
         module: 'useTaskList',
         method: 'acceptTask',
       });
-      task.accept().catch((error) => {
-        logError(`CC-Widgets: Error accepting task: ${error}`, 'acceptTask');
-      });
+      task
+        .accept()
+        .then(() => {
+          if (!isLatestOfferActionAttempt(interactionId, attemptId)) {
+            return;
+          }
+          store.clearOfferActionError(interactionId);
+        })
+        .catch((error) => {
+          if (!isLatestOfferActionAttempt(interactionId, attemptId)) {
+            return;
+          }
+          setTaskActionError(interactionId, error, 'acceptTask');
+          logError(`CC-Widgets: Error accepting task: ${error}`, 'acceptTask');
+        });
     } catch (error) {
       logger?.error(`CC-Widgets: Task: Error in acceptTask - ${error.message}`, {
         module: 'useTaskList',
@@ -155,14 +231,29 @@ export const useTaskList = (props: UseTaskListProps) => {
 
   const declineTask = (task: ITask) => {
     try {
-      logger.info(`CC-Widgets: declineTask called for ${task.data.interactionId}`, {
+      const interactionId = task.data.interactionId;
+      const attemptId = nextOfferActionAttempt(interactionId);
+      store.clearOfferActionError(interactionId);
+      logger.info('CC-Widgets: declineTask called', {
         module: 'useTaskList',
         method: 'declineTask',
       });
-      task.decline().catch((error) => {
-        logError(`CC-Widgets: Error declining task: ${error}`, 'declineTask');
-      });
-      logger.log(`CC-Widgets: incoming task declined for ${task.data.interactionId}`, {
+      task
+        .decline()
+        .then(() => {
+          if (!isLatestOfferActionAttempt(interactionId, attemptId)) {
+            return;
+          }
+          store.clearOfferActionError(interactionId);
+        })
+        .catch((error) => {
+          if (!isLatestOfferActionAttempt(interactionId, attemptId)) {
+            return;
+          }
+          setTaskActionError(interactionId, error, 'declineTask');
+          logError(`CC-Widgets: Error declining task: ${error}`, 'declineTask');
+        });
+      logger.log('CC-Widgets: incoming task declined', {
         module: 'useTaskList',
         method: 'declineTask',
       });
@@ -184,7 +275,18 @@ export const useTaskList = (props: UseTaskListProps) => {
     }
   };
 
-  return {taskList, acceptTask, declineTask, onTaskSelect};
+  useEffect(() => {
+    store.pruneOfferActionErrors(new Set(Object.keys(taskList)));
+  }, [taskList]);
+
+  return {
+    taskList,
+    acceptTask,
+    declineTask,
+    onTaskSelect,
+    taskActionErrors: store.offerActionErrors,
+    clearTaskActionError: store.clearOfferActionError,
+  };
 };
 
 export const useRealTimeTranscript = (props: UseRealTimeTranscriptInternalProps) => {
@@ -208,6 +310,14 @@ export const useRealTimeTranscript = (props: UseRealTimeTranscriptInternalProps)
 
 export const useIncomingTask = (props: UseTaskProps) => {
   const {onAccepted, onRejected, incomingTask, logger} = props;
+  const interactionId = incomingTask?.data?.interactionId;
+  const offerActionError = interactionId ? (store.offerActionErrors[interactionId] ?? null) : null;
+
+  const clearOfferActionError = useCallback(() => {
+    if (interactionId) {
+      store.clearOfferActionError(interactionId);
+    }
+  }, [interactionId]);
 
   const acceptControl = incomingTask?.uiControls?.main?.accept ?? {isVisible: false, isEnabled: false};
   const sdkDeclineControl = incomingTask?.uiControls?.main?.decline ?? {isVisible: false, isEnabled: false};
@@ -216,8 +326,17 @@ export const useIncomingTask = (props: UseTaskProps) => {
     isEnabled: sdkDeclineControl.isEnabled || store.isDeclineButtonEnabled,
   };
 
+  logger?.info('CC-Widgets: IncomingTask uiControls snapshot', {
+    module: 'useIncomingTask',
+    method: 'render',
+    data: {accept: acceptControl, decline: declineControl},
+  });
+
   const taskAssignCallback = useCallback(() => {
     try {
+      if (interactionId) {
+        store.clearOfferActionError(interactionId);
+      }
       if (onAccepted) onAccepted({task: incomingTask});
     } catch (error) {
       logger?.error(`CC-Widgets: Task: Error in taskAssignCallback - ${error.message}`, {
@@ -225,10 +344,13 @@ export const useIncomingTask = (props: UseTaskProps) => {
         method: 'taskAssignCallback',
       });
     }
-  }, [onAccepted, incomingTask, logger]);
+  }, [onAccepted, incomingTask, logger, interactionId]);
 
   const taskRejectCallback = useCallback(() => {
     try {
+      if (interactionId) {
+        store.clearOfferActionError(interactionId);
+      }
       if (onRejected) onRejected({task: incomingTask});
     } catch (error) {
       logger?.error(`CC-Widgets: Task: Error in taskRejectCallback - ${error.message}`, {
@@ -236,34 +358,26 @@ export const useIncomingTask = (props: UseTaskProps) => {
         method: 'taskRejectCallback',
       });
     }
-  }, [onRejected, incomingTask, logger]);
+  }, [onRejected, incomingTask, logger, interactionId]);
 
   useEffect(() => {
     try {
       if (!incomingTask) return;
-      store.setTaskCallback(TASK_EVENTS.TASK_ASSIGNED, taskAssignCallback, incomingTask.data.interactionId);
-      store.setTaskCallback(TASK_EVENTS.TASK_CONSULT_ACCEPTED, taskAssignCallback, incomingTask?.data.interactionId);
-      store.setTaskCallback(TASK_EVENTS.TASK_END, taskRejectCallback, incomingTask?.data.interactionId);
-      store.setTaskCallback(TASK_EVENTS.TASK_REJECT, taskRejectCallback, incomingTask?.data.interactionId);
-      store.setTaskCallback(TASK_EVENTS.TASK_CONSULT_END, taskRejectCallback, incomingTask?.data.interactionId);
-      store.setTaskCallback(TASK_EVENTS.TASK_OUTDIAL_FAILED, taskRejectCallback, incomingTask?.data.interactionId);
+      store.setTaskCallback(TASK_EVENTS.TASK_ASSIGNED, taskAssignCallback, interactionId, incomingTask);
+      store.setTaskCallback(TASK_EVENTS.TASK_CONSULT_ACCEPTED, taskAssignCallback, interactionId, incomingTask);
+      store.setTaskCallback(TASK_EVENTS.TASK_END, taskRejectCallback, interactionId, incomingTask);
+      store.setTaskCallback(TASK_EVENTS.TASK_REJECT, taskRejectCallback, interactionId, incomingTask);
+      store.setTaskCallback(TASK_EVENTS.TASK_CONSULT_END, taskRejectCallback, interactionId, incomingTask);
+      store.setTaskCallback(TASK_EVENTS.TASK_OUTDIAL_FAILED, taskRejectCallback, interactionId, incomingTask);
 
       return () => {
         try {
-          store.removeTaskCallback(TASK_EVENTS.TASK_ASSIGNED, taskAssignCallback, incomingTask?.data.interactionId);
-          store.removeTaskCallback(
-            TASK_EVENTS.TASK_CONSULT_ACCEPTED,
-            taskAssignCallback,
-            incomingTask?.data.interactionId
-          );
-          store.removeTaskCallback(TASK_EVENTS.TASK_END, taskRejectCallback, incomingTask?.data.interactionId);
-          store.removeTaskCallback(TASK_EVENTS.TASK_REJECT, taskRejectCallback, incomingTask?.data.interactionId);
-          store.removeTaskCallback(TASK_EVENTS.TASK_CONSULT_END, taskRejectCallback, incomingTask?.data.interactionId);
-          store.removeTaskCallback(
-            TASK_EVENTS.TASK_OUTDIAL_FAILED,
-            taskRejectCallback,
-            incomingTask?.data.interactionId
-          );
+          store.removeTaskCallback(TASK_EVENTS.TASK_ASSIGNED, taskAssignCallback, interactionId, incomingTask);
+          store.removeTaskCallback(TASK_EVENTS.TASK_CONSULT_ACCEPTED, taskAssignCallback, interactionId, incomingTask);
+          store.removeTaskCallback(TASK_EVENTS.TASK_END, taskRejectCallback, interactionId, incomingTask);
+          store.removeTaskCallback(TASK_EVENTS.TASK_REJECT, taskRejectCallback, interactionId, incomingTask);
+          store.removeTaskCallback(TASK_EVENTS.TASK_CONSULT_END, taskRejectCallback, interactionId, incomingTask);
+          store.removeTaskCallback(TASK_EVENTS.TASK_OUTDIAL_FAILED, taskRejectCallback, interactionId, incomingTask);
         } catch (error) {
           logger?.error(`CC-Widgets: Task: Error in useIncomingTask cleanup - ${error.message}`, {
             module: 'useIncomingTask',
@@ -288,14 +402,34 @@ export const useIncomingTask = (props: UseTaskProps) => {
 
   const accept = () => {
     try {
+      clearOfferActionError();
       logger.info(`CC-Widgets: incomingTask.accept() called`, {
         module: 'useIncomingTask',
         method: 'accept',
       });
       if (!incomingTask?.data.interactionId) return;
-      incomingTask.accept().catch((error) => {
-        logError(`CC-Widgets: Error accepting incoming task: ${error}`, 'accept');
-      });
+      const attemptId = nextOfferActionAttempt(incomingTask.data.interactionId);
+      incomingTask
+        .accept()
+        .then(() => {
+          if (!isLatestOfferActionAttempt(incomingTask.data.interactionId, attemptId)) {
+            return;
+          }
+          store.clearOfferActionError(incomingTask.data.interactionId);
+        })
+        .catch((error) => {
+          if (!isLatestOfferActionAttempt(incomingTask.data.interactionId, attemptId)) {
+            return;
+          }
+          const parsed = reportWxAppTelephonyFailure(
+            error,
+            {widget: 'IncomingTask', action: 'accept'},
+            logger,
+            store.onErrorCallback
+          );
+          store.setOfferActionError(incomingTask.data.interactionId, withOfferActionUserMessage(parsed, 'accept'));
+          logError(`CC-Widgets: Error accepting incoming task: ${error}`, 'accept');
+        });
       logger.log(`CC-Widgets: incomingTask accepted`, {
         module: 'useIncomingTask',
         method: 'accept',
@@ -310,14 +444,34 @@ export const useIncomingTask = (props: UseTaskProps) => {
 
   const reject = () => {
     try {
+      clearOfferActionError();
       logger.info(`CC-Widgets: incomingTask.reject() called`, {
         module: 'useIncomingTask',
         method: 'reject',
       });
       if (!incomingTask?.data.interactionId) return;
-      incomingTask.decline().catch((error) => {
-        logError(`CC-Widgets: Error rejecting incoming task: ${error}`, 'reject');
-      });
+      const attemptId = nextOfferActionAttempt(incomingTask.data.interactionId);
+      incomingTask
+        .decline()
+        .then(() => {
+          if (!isLatestOfferActionAttempt(incomingTask.data.interactionId, attemptId)) {
+            return;
+          }
+          store.clearOfferActionError(incomingTask.data.interactionId);
+        })
+        .catch((error) => {
+          if (!isLatestOfferActionAttempt(incomingTask.data.interactionId, attemptId)) {
+            return;
+          }
+          const parsed = reportWxAppTelephonyFailure(
+            error,
+            {widget: 'IncomingTask', action: 'reject'},
+            logger,
+            store.onErrorCallback
+          );
+          store.setOfferActionError(incomingTask.data.interactionId, withOfferActionUserMessage(parsed, 'reject'));
+          logError(`CC-Widgets: Error rejecting incoming task: ${error}`, 'reject');
+        });
       logger.log(`CC-Widgets: incomingTask rejected`, {
         module: 'useIncomingTask',
         method: 'reject',
@@ -336,6 +490,8 @@ export const useIncomingTask = (props: UseTaskProps) => {
     reject,
     acceptControl,
     declineControl,
+    offerActionError,
+    clearOfferActionError,
   };
 };
 
@@ -351,6 +507,8 @@ export const useCallControl = (props: useCallControlProps) => {
     isMuted,
     agentId,
     conferenceEnabled = true,
+    enableWxBetterTogether = false,
+    widgetName = 'CallControl',
   } = props;
   const [isRecording, setIsRecording] = useState(true);
   const [controls, setControls] = useState<TaskUIControls>(currentTask?.uiControls ?? getDefaultUIControls());
@@ -360,6 +518,26 @@ export const useCallControl = (props: useCallControlProps) => {
   const [consultAgentName, setConsultAgentName] = useState<string>('Consult Agent');
   const [startTimestamp, setStartTimestamp] = useState<number>(0);
   const [secondsUntilAutoWrapup, setsecondsUntilAutoWrapup] = useState<number | null>(null);
+  const [telephonyToast, setTelephonyToast] = useState<{
+    error: WxAppTelephonyErrorDisplay;
+    action: TelephonyToastAction;
+  } | null>(null);
+
+  const showTelephonyToast = useCallback(
+    (error: unknown, action: TelephonyToastAction) => {
+      const parsed = reportWxAppTelephonyFailure(error, {widget: widgetName, action}, logger, store.onErrorCallback);
+      setTelephonyToast({error: getTelephonyToastDisplay(parsed, action), action});
+    },
+    [logger, widgetName]
+  );
+
+  const dismissTelephonyToast = useCallback(() => {
+    setTelephonyToast(null);
+  }, []);
+
+  useEffect(() => {
+    setTelephonyToast(null);
+  }, [currentTask?.data?.interactionId]);
 
   // State timer labels and timestamps
   const [stateTimerLabel, setStateTimerLabel] = useState<string | null>(null);
@@ -376,8 +554,40 @@ export const useCallControl = (props: useCallControlProps) => {
     !!(initialControls?.consult?.endConsult?.isVisible || initialControls?.main?.endConsult?.isVisible)
   );
   const [lastTargetType, setLastTargetType] = useState<TargetType>(TARGET_TYPE.AGENT);
-  const [conferenceParticipants, setConferenceParticipants] = useState<Participant[]>([]);
   const lastWrapupAuxCodeIdRef = useRef<string | null>(null);
+  const [pendingParticipantDropId, setPendingParticipantDropId] = useState<string | null>(null);
+  const [participantDropAnnouncement, setParticipantDropAnnouncement] = useState<ParticipantDropAnnouncement | null>(
+    null
+  );
+  const [participantDropConfirmationTarget, setParticipantDropConfirmationTarget] =
+    useState<ConferenceParticipantDropTarget | null>(null);
+  const pendingParticipantDropRef = useRef<PendingParticipantDropRequest | null>(null);
+  const participantDropTaskRef = useRef(currentTask);
+  const participantDropAgentIdRef = useRef(agentId);
+  participantDropTaskRef.current = currentTask;
+  participantDropAgentIdRef.current = agentId;
+
+  useEffect(() => {
+    resetMuteCoordinatorForInteraction(currentTask?.data?.interactionId);
+  }, [currentTask?.data?.interactionId]);
+
+  // Derive conference state during render so MobX tracks nested participant and owner changes.
+  const conferenceParticipants = currentTask && agentId ? getConferenceParticipants(currentTask, agentId) : [];
+  const conferenceParticipantDropRoster =
+    currentTask && agentId ? getConferenceParticipantDropRoster(currentTask, agentId) : null;
+  const participantDropTaskId = currentTask?.data?.interactionId;
+  const latestParticipantDropConfirmationTarget =
+    participantDropConfirmationTarget &&
+    conferenceParticipantDropRoster?.customer?.dropTargetId === participantDropConfirmationTarget.dropTargetId
+      ? conferenceParticipantDropRoster.customer
+      : null;
+  const participantDropConfirmationDisabled = Boolean(
+    pendingParticipantDropId ||
+      conferenceParticipantDropRoster?.isDropDisabled ||
+      !latestParticipantDropConfirmationTarget ||
+      latestParticipantDropConfirmationTarget.isReadOnly ||
+      latestParticipantDropConfirmationTarget.isDropDisabled
+  );
 
   // Subscribe to SDK-computed UI control updates
   useEffect(() => {
@@ -447,11 +657,22 @@ export const useCallControl = (props: useCallControlProps) => {
   }, [controls?.consult?.endConsult?.isVisible, controls?.main?.endConsult?.isVisible]);
 
   useEffect(() => {
-    if (currentTask && store?.cc?.agentConfig?.agentId) {
-      const participants = getConferenceParticipants(currentTask, store.cc.agentConfig.agentId);
-      setConferenceParticipants(participants);
+    const pendingRequest = pendingParticipantDropRef.current;
+
+    if (pendingRequest && (pendingRequest.taskId !== participantDropTaskId || pendingRequest.agentId !== agentId)) {
+      pendingParticipantDropRef.current = null;
     }
-  }, [currentTask, controls]);
+
+    setPendingParticipantDropId(null);
+    setParticipantDropAnnouncement(null);
+    setParticipantDropConfirmationTarget(null);
+  }, [participantDropTaskId, agentId]);
+
+  useEffect(() => {
+    if (participantDropConfirmationTarget && !latestParticipantDropConfirmationTarget) {
+      setParticipantDropConfirmationTarget(null);
+    }
+  }, [participantDropConfirmationTarget, latestParticipantDropConfirmationTarget]);
   // Function to extract consulting agent information
   const extractConsultingAgent = useCallback(() => {
     try {
@@ -575,22 +796,35 @@ export const useCallControl = (props: useCallControlProps) => {
     }
   }, [currentTask, agentId, extractConsultingAgent]);
 
-  const loadBuddyAgents = useCallback(async () => {
-    try {
-      setLoadingBuddyAgents(true);
-      const agents = await store.getBuddyAgents();
-      logger.info(`Loaded ${agents.length} buddy agents`, {module: 'helper.ts', method: 'loadBuddyAgents'});
-      setBuddyAgents(agents);
-    } catch (error) {
-      logger?.error(`CC-Widgets: Task: Error loading buddy agents - ${error.message || error}`, {
-        module: 'useCallControl',
-        method: 'loadBuddyAgents',
-      });
-      setBuddyAgents([]);
-    } finally {
-      setLoadingBuddyAgents(false);
-    }
-  }, [logger]);
+  const buddyAgentsRequestIdRef = useRef(0);
+
+  const loadBuddyAgents = useCallback(
+    async (action: 'Consult' | 'Transfer' = 'Consult') => {
+      const requestId = ++buddyAgentsRequestIdRef.current;
+
+      try {
+        setLoadingBuddyAgents(true);
+        const agents = await store.getBuddyAgents(action);
+        if (requestId !== buddyAgentsRequestIdRef.current) return;
+
+        logger.info(`Loaded ${agents.length} buddy agents`, {module: 'helper.ts', method: 'loadBuddyAgents'});
+        setBuddyAgents(agents);
+      } catch (error) {
+        logger?.error(`CC-Widgets: Task: Error loading buddy agents - ${error.message || error}`, {
+          module: 'useCallControl',
+          method: 'loadBuddyAgents',
+        });
+        if (requestId !== buddyAgentsRequestIdRef.current) return;
+
+        setBuddyAgents([]);
+      } finally {
+        if (requestId === buddyAgentsRequestIdRef.current) {
+          setLoadingBuddyAgents(false);
+        }
+      }
+    },
+    [logger]
+  );
 
   const getAddressBookEntries = useCallback(
     async ({page, pageSize, search}: PaginatedListParams) => {
@@ -625,8 +859,7 @@ export const useCallControl = (props: useCallControlProps) => {
   const getQueuesFetcher = useCallback(
     async ({page, pageSize, search}: PaginatedListParams) => {
       try {
-        const mediaType = currentTask?.data?.interaction?.mediaType;
-        return await store.getQueues(mediaType, {page, pageSize, search});
+        return await store.getQueues({page, pageSize, search});
       } catch (error) {
         logger?.error(`CC-Widgets: Task: Error fetching queues (paginated) - ${error.message || error}`, {
           module: 'useCallControl',
@@ -635,7 +868,7 @@ export const useCallControl = (props: useCallControlProps) => {
         return {data: [], meta: {page: 0, totalPages: 0}};
       }
     },
-    [logger, currentTask]
+    [logger]
   );
 
   const holdCallback = () => {
@@ -735,35 +968,41 @@ export const useCallControl = (props: useCallControlProps) => {
   };
 
   useEffect(() => {
-    if (!currentTask?.data?.interactionId) return;
-    logger.log(`useCallControl init for task ${currentTask.data.interactionId}`, {
+    const registeredTask = currentTask;
+    if (!registeredTask?.data?.interactionId) return;
+    logger.log('useCallControl init for task', {
       module: 'useCallControl',
       method: 'useEffect-init',
     });
 
-    const interactionId = currentTask.data.interactionId;
+    const interactionId = registeredTask.data.interactionId;
 
-    store.setTaskCallback(
-      // Should use holdCallback
-      TASK_EVENTS.TASK_HOLD,
-      holdCallback,
-      interactionId
-    );
-    store.setTaskCallback(TASK_EVENTS.TASK_RESUME, resumeCallback, interactionId);
-    store.setTaskCallback(TASK_EVENTS.TASK_END, endCallCallback, interactionId);
-    store.setTaskCallback(TASK_EVENTS.TASK_WRAPUP, endCallCallback, interactionId); // Also call onEnd when entering wrapup
-    store.setTaskCallback(TASK_EVENTS.TASK_WRAPPEDUP, wrapupCallCallback, interactionId);
-    store.setTaskCallback(TASK_EVENTS.TASK_RECORDING_PAUSED, pauseRecordingCallback, interactionId);
-    store.setTaskCallback(TASK_EVENTS.TASK_RECORDING_RESUMED, resumeRecordingCallback, interactionId);
+    store.setTaskCallback(TASK_EVENTS.TASK_HOLD, holdCallback, interactionId, registeredTask);
+    store.setTaskCallback(TASK_EVENTS.TASK_RESUME, resumeCallback, interactionId, registeredTask);
+    store.setTaskCallback(TASK_EVENTS.TASK_END, endCallCallback, interactionId, registeredTask);
+    store.setTaskCallback(TASK_EVENTS.TASK_WRAPUP, endCallCallback, interactionId, registeredTask); // Also call onEnd when entering wrapup
+    store.setTaskCallback(TASK_EVENTS.TASK_WRAPPEDUP, wrapupCallCallback, interactionId, registeredTask);
+    store.setTaskCallback(TASK_EVENTS.TASK_RECORDING_PAUSED, pauseRecordingCallback, interactionId, registeredTask);
+    store.setTaskCallback(TASK_EVENTS.TASK_RECORDING_RESUMED, resumeRecordingCallback, interactionId, registeredTask);
 
     return () => {
-      store.removeTaskCallback(TASK_EVENTS.TASK_HOLD, holdCallback, interactionId);
-      store.removeTaskCallback(TASK_EVENTS.TASK_RESUME, resumeCallback, interactionId);
-      store.removeTaskCallback(TASK_EVENTS.TASK_END, endCallCallback, interactionId);
-      store.removeTaskCallback(TASK_EVENTS.TASK_WRAPUP, endCallCallback, interactionId);
-      store.removeTaskCallback(TASK_EVENTS.TASK_WRAPPEDUP, wrapupCallCallback, interactionId);
-      store.removeTaskCallback(TASK_EVENTS.TASK_RECORDING_PAUSED, pauseRecordingCallback, interactionId);
-      store.removeTaskCallback(TASK_EVENTS.TASK_RECORDING_RESUMED, resumeRecordingCallback, interactionId);
+      store.removeTaskCallback(TASK_EVENTS.TASK_HOLD, holdCallback, interactionId, registeredTask);
+      store.removeTaskCallback(TASK_EVENTS.TASK_RESUME, resumeCallback, interactionId, registeredTask);
+      store.removeTaskCallback(TASK_EVENTS.TASK_END, endCallCallback, interactionId, registeredTask);
+      store.removeTaskCallback(TASK_EVENTS.TASK_WRAPUP, endCallCallback, interactionId, registeredTask);
+      store.removeTaskCallback(TASK_EVENTS.TASK_WRAPPEDUP, wrapupCallCallback, interactionId, registeredTask);
+      store.removeTaskCallback(
+        TASK_EVENTS.TASK_RECORDING_PAUSED,
+        pauseRecordingCallback,
+        interactionId,
+        registeredTask
+      );
+      store.removeTaskCallback(
+        TASK_EVENTS.TASK_RECORDING_RESUMED,
+        resumeRecordingCallback,
+        interactionId,
+        registeredTask
+      );
     };
   }, [currentTask]);
 
@@ -813,47 +1052,177 @@ export const useCallControl = (props: useCallControlProps) => {
     }
   };
 
-  const toggleMute = async () => {
-    try {
-      if (!controls?.main?.mute?.isVisible) {
-        logger.warn('Mute control not available', {module: 'useCallControl', method: 'toggleMute'});
+  const executeParticipantDrop = useCallback(
+    async (target: ConferenceParticipantDropTarget): Promise<void> => {
+      const task = participantDropTaskRef.current;
+      const currentAgentId = participantDropAgentIdRef.current;
+
+      if (!task || !currentAgentId || pendingParticipantDropRef.current) {
         return;
+      }
+
+      const latestTarget = getLatestEligibleParticipantDropTarget(task, currentAgentId, target);
+
+      if (!latestTarget) {
+        return;
+      }
+
+      const taskId = task.data.interactionId;
+      const request: PendingParticipantDropRequest = {
+        token: Symbol('participant-drop-request'),
+        taskId,
+        agentId: currentAgentId,
+        dropTargetId: latestTarget.dropTargetId,
+      };
+
+      pendingParticipantDropRef.current = request;
+      setPendingParticipantDropId(latestTarget.dropTargetId);
+      setParticipantDropAnnouncement(null);
+
+      try {
+        await task.dropConferenceParticipant({participantId: latestTarget.dropTargetId});
+
+        const latestTask = participantDropTaskRef.current;
+        if (
+          isCurrentParticipantDropRequest(
+            request,
+            pendingParticipantDropRef.current,
+            latestTask,
+            participantDropAgentIdRef.current
+          )
+        ) {
+          setParticipantDropAnnouncement({type: 'success', message: PARTICIPANT_DROP_SUCCESS_MESSAGE});
+        }
+      } catch {
+        const latestTask = participantDropTaskRef.current;
+        if (
+          isCurrentParticipantDropRequest(
+            request,
+            pendingParticipantDropRef.current,
+            latestTask,
+            participantDropAgentIdRef.current
+          )
+        ) {
+          const sanitizedError = new Error(PARTICIPANT_DROP_FAILURE_MESSAGE);
+
+          setParticipantDropAnnouncement({type: 'error', message: PARTICIPANT_DROP_FAILURE_MESSAGE});
+          logger.error('CC-Widgets: Conference participant Drop failed', {
+            module: 'useCallControl',
+            method: 'dropConferenceParticipant',
+          });
+          store.onErrorCallback?.('CallControlCAD', sanitizedError);
+        }
+      } finally {
+        if (pendingParticipantDropRef.current?.token === request.token) {
+          pendingParticipantDropRef.current = null;
+
+          if (
+            participantDropTaskRef.current?.data?.interactionId === request.taskId &&
+            participantDropAgentIdRef.current === request.agentId
+          ) {
+            setPendingParticipantDropId(null);
+          }
+        }
+      }
+    },
+    [logger]
+  );
+
+  const requestParticipantDrop = useCallback(
+    async (target: ConferenceParticipantDropTarget): Promise<void> => {
+      const task = participantDropTaskRef.current;
+      const currentAgentId = participantDropAgentIdRef.current;
+
+      if (!task || !currentAgentId || pendingParticipantDropRef.current) {
+        return;
+      }
+
+      const latestTarget = getLatestEligibleParticipantDropTarget(task, currentAgentId, target);
+      if (!latestTarget) {
+        return;
+      }
+
+      if (latestTarget.requiresConfirmation) {
+        setParticipantDropConfirmationTarget(latestTarget);
+        return;
+      }
+
+      await executeParticipantDrop(latestTarget);
+    },
+    [executeParticipantDrop]
+  );
+
+  const confirmParticipantDrop = useCallback(async (): Promise<void> => {
+    const target = latestParticipantDropConfirmationTarget;
+
+    if (!target || participantDropConfirmationDisabled) {
+      return;
+    }
+
+    setParticipantDropConfirmationTarget(null);
+    await executeParticipantDrop(target);
+  }, [executeParticipantDrop, latestParticipantDropConfirmationTarget, participantDropConfirmationDisabled]);
+
+  const cancelParticipantDropConfirmation = useCallback((): void => {
+    setParticipantDropConfirmationTarget(null);
+  }, []);
+
+  const toggleMute = (): Promise<void> => {
+    try {
+      if (
+        !controls?.main?.mute?.isVisible &&
+        !controls?.consult?.mute?.isVisible &&
+        !shouldShowWxAppTelephonyControls(enableWxBetterTogether, currentTask)
+      ) {
+        logger.warn('Mute control not available', {module: 'useCallControl', method: 'toggleMute'});
+        return Promise.resolve();
       }
 
       logger.info('toggleMute() called', {module: 'useCallControl', method: 'toggleMute'});
 
-      // Store the intended new state
-      const intendedMuteState = !isMuted;
-
-      try {
-        await currentTask.toggleMute();
-
-        // Only update state after successful SDK call
-        store.setIsMuted(intendedMuteState);
-
-        if (onToggleMute) {
-          onToggleMute({
-            isMuted: intendedMuteState,
-            task: currentTask,
-          });
-        }
-
-        logger.info(`Mute state toggled to: ${intendedMuteState}`, {module: 'useCallControl', method: 'toggleMute'});
-      } catch (error) {
-        logger.error(`toggleMute failed: ${error}`, {module: 'useCallControl', method: 'toggleMute'});
-
-        if (onToggleMute) {
-          onToggleMute({
-            isMuted: isMuted,
-            task: currentTask,
-          });
-        }
-      }
+      return enqueueMuteToggle({
+        task: currentTask,
+        callbacks: {onToggleMute, logger, showTelephonyToast},
+      });
     } catch (error) {
       logger?.error(`CC-Widgets: Task: Error in toggleMute - ${error.message}`, {
         module: 'useCallControl',
         method: 'toggleMute',
       });
+      return Promise.resolve();
+    }
+  };
+
+  const sendDtmf = async (digit: string) => {
+    const interactionId = currentTask?.data?.interactionId;
+
+    try {
+      const keypad = controls?.main?.keypad;
+      const wxAppAllowed = shouldShowWxAppTelephonyControls(enableWxBetterTogether, currentTask);
+      if (wxAppAllowed) {
+        if (!keypad?.isEnabled) {
+          logger.warn('Keypad control not available', {module: 'useCallControl', method: 'sendDtmf'});
+          return;
+        }
+      } else if (!keypad?.isVisible || !keypad?.isEnabled) {
+        logger.warn('Keypad control not available', {module: 'useCallControl', method: 'sendDtmf'});
+        return;
+      }
+
+      logger.info('sendDtmf called', {module: 'useCallControl', method: 'sendDtmf'});
+
+      if (interactionId && store.currentTask?.data?.interactionId !== interactionId) {
+        return;
+      }
+
+      await currentTask.transmitDtmf({dtmf: digit});
+    } catch (error) {
+      if (interactionId && store.currentTask?.data?.interactionId !== interactionId) {
+        return;
+      }
+
+      logger.error(`sendDtmf failed: ${error}`, {module: 'useCallControl', method: 'sendDtmf'});
+      showTelephonyToast(error, 'dtmf');
     }
   };
 
@@ -1231,6 +1600,7 @@ export const useCallControl = (props: useCallControlProps) => {
     toggleHold,
     toggleRecording,
     toggleMute,
+    sendDtmf,
     isMuted,
     wrapupCall,
     isRecording,
@@ -1261,10 +1631,20 @@ export const useCallControl = (props: useCallControlProps) => {
     secondsUntilAutoWrapup,
     cancelAutoWrapup,
     conferenceParticipants,
+    conferenceParticipantDropRoster,
+    pendingParticipantDropId,
+    participantDropAnnouncement,
+    participantDropConfirmationTarget: latestParticipantDropConfirmationTarget,
+    participantDropConfirmationDisabled,
+    requestParticipantDrop,
+    confirmParticipantDrop,
+    cancelParticipantDropConfirmation,
     getAddressBookEntries,
     getEntryPoints,
     getQueuesFetcher,
     isCampaignCall,
+    telephonyToast,
+    dismissTelephonyToast,
   };
 };
 
@@ -1304,12 +1684,17 @@ export const useOutdialCall = (props: useOutdialCallProps) => {
         return;
       }
 
-      // Only pass origin if it's defined and not empty
-      const outdialArgs = origin ? [destination, origin] : [destination];
+      const outdialClient = cc as typeof cc & {
+        startOutdial(destination: string, origin?: string): Promise<unknown>;
+      };
 
-      cc.startOutdial(...outdialArgs)
-        .then((response) => {
-          logger.info('Outdial call started', response);
+      const outdialRequest = origin
+        ? outdialClient.startOutdial(destination, origin)
+        : outdialClient.startOutdial(destination);
+
+      outdialRequest
+        .then(() => {
+          logger.info('Outdial call started');
         })
         .catch((error: Error) => {
           logger.error(`${error}`, {

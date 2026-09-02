@@ -1,6 +1,7 @@
-import {BuddyDetails, ContactServiceQueue, ILogger, TaskUIControls} from '@webex/cc-store';
+import {BuddyDetails, ContactServiceQueue, ILogger, ITask, TaskUIControls} from '@webex/cc-store';
 import {MUTE_CALL, UNMUTE_CALL} from '../../constants';
 import {ButtonConfig} from '../../task.types';
+import {shouldShowWxAppTelephonyControls} from '../../../../utils/wxapp-telephony.utils';
 
 /**
  * Interface for list item data
@@ -22,7 +23,9 @@ export const createConsultButtons = (
   consultConference: () => void,
   switchToMainCall: () => void,
   logger?,
-  conferenceEnabled = true
+  conferenceEnabled = true,
+  enableWxBetterTogether = false,
+  task: ITask | null = null
 ): ButtonConfig[] => {
   try {
     const consultCtrl = controls?.consult;
@@ -44,7 +47,9 @@ export const createConsultButtons = (
         className: `${isMuted ? 'call-control-button-muted' : 'call-control-button'}`,
         // Consult mute should only be interactive while consult leg is active.
         disabled: !isConsultLegActive || !(consultCtrl?.mute?.isEnabled ?? false),
-        isVisible: consultCtrl?.mute?.isVisible ?? false,
+        isVisible: shouldShowWxAppTelephonyControls(enableWxBetterTogether, task)
+          ? false
+          : (consultCtrl?.mute?.isVisible ?? false),
       },
       {
         key: 'switchToMainCall',
@@ -116,12 +121,14 @@ export const getVisibleButtons = (buttons: ButtonConfig[], logger?): ButtonConfi
  */
 export const createInitials = (name: string, logger?): string => {
   try {
-    return name
-      .split(' ')
-      .map((word) => word[0])
-      .join('')
-      .slice(0, 2)
-      .toUpperCase();
+    const words = name.trim().split(/\s+/).filter(Boolean);
+
+    if (words.length === 0) {
+      return '';
+    }
+
+    const lastInitial = words.length > 1 ? words[words.length - 1][0] : '';
+    return `${words[0][0]}${lastInitial}`.toUpperCase();
   } catch (error) {
     logger?.error('CC-Widgets: CallControlCustom: Error in createInitials', {
       module: 'cc-components#call-control-custom.utils.ts',
