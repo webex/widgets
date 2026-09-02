@@ -1,0 +1,848 @@
+{
+  "samples-cc-react-app": {
+    "0.0.0-next.0": {
+      "published_date": 1788276829096,
+      "commits": {
+        "4733dbcd300eafcdc394a6f77980ba47d26bae73": "fix(store): pass task object directly to setTaskCallback/removeTaskCallback to prevent duplicate event listeners (#723)"
+      },
+      "alongWith": {
+        "@webex/cc-ai-assistant": "0.0.0-next.8",
+        "@webex/cc-components": "1.28.0-next.47",
+        "@webex/cc-digital-channels": "0.0.0-next.27",
+        "@webex/cc-widgets": "1.28.0-next.57",
+        "@webex/cc-station-login": "1.28.0-next.47",
+        "@webex/cc-store": "1.28.0-next.31",
+        "@webex/cc-task": "1.28.0-next.50",
+        "@webex/test-fixtures": "0.0.0-next.0",
+        "@webex/cc-ui-logging": "1.28.0-next.32",
+        "@webex/cc-user-state": "1.28.0-next.48",
+        "samples-cc-wc-app": "0.0.0-next.0"
+      }
+    },
+    "0.0.0-rtt.0": {
+      "published_date": 1774849583922,
+      "commits": {
+        "f75a3c08dc2c8c7cf5544479c9ffafae07d568e3": "feat(ccwidgets): Real Time Transcript Widget Implementation (#653)"
+      },
+      "alongWith": {
+        "@webex/cc-components": "1.28.0-rtt.2",
+        "@webex/cc-digital-channels": "0.0.0-rtt.1",
+        "@webex/cc-widgets": "1.28.0-rtt.2",
+        "@webex/cc-station-login": "1.28.0-rtt.2",
+        "@webex/cc-store": "1.28.0-rtt.2",
+        "@webex/cc-task": "1.28.0-rtt.2",
+        "@webex/test-fixtures": "0.0.0-rtt.0",
+        "@webex/cc-ui-logging": "1.28.0-rtt.2",
+        "@webex/cc-user-state": "1.28.0-rtt.2",
+        "samples-cc-wc-app": "0.0.0-rtt.0"
+      }
+    },
+    "0.0.0-task-refactor.0": {
+      "published_date": 1780653861341,
+      "commits": {
+        "01bd548e396140979c706c6704f58cca0f3f566f": "fix(task-refactor): bug bash fixes (#692)"
+      },
+      "alongWith": {
+        "@webex/cc-components": "1.28.0-task-refactor.2",
+        "@webex/cc-digital-channels": "0.0.0-task-refactor.1",
+        "@webex/cc-widgets": "1.28.0-task-refactor.2",
+        "@webex/cc-station-login": "1.28.0-task-refactor.2",
+        "@webex/cc-store": "1.28.0-task-refactor.2",
+        "@webex/cc-task": "1.28.0-task-refactor.2",
+        "@webex/test-fixtures": "0.0.0-task-refactor.0",
+        "@webex/cc-ui-logging": "1.28.0-task-refactor.2",
+        "@webex/cc-user-state": "1.28.0-task-refactor.2",
+        "samples-cc-wc-app": "0.0.0-task-refactor.0"
+      }
+    }
+  },
+  "samples-cc-wc-app": {
+    "0.0.0-next.0": {
+      "published_date": 1788276829096,
+      "commits": {
+        "4733dbcd300eafcdc394a6f77980ba47d26bae73": "fix(store): pass task object directly to setTaskCallback/removeTaskCallback to prevent duplicate event listeners (#723)"
+      },
+      "alongWith": {
+        "@webex/cc-ai-assistant": "0.0.0-next.8",
+        "@webex/cc-components": "1.28.0-next.47",
+        "@webex/cc-digital-channels": "0.0.0-next.27",
+        "@webex/cc-widgets": "1.28.0-next.57",
+        "@webex/cc-station-login": "1.28.0-next.47",
+        "@webex/cc-store": "1.28.0-next.31",
+        "@webex/cc-task": "1.28.0-next.50",
+        "@webex/test-fixtures": "0.0.0-next.0",
+        "@webex/cc-ui-logging": "1.28.0-next.32",
+        "@webex/cc-user-state": "1.28.0-next.48",
+        "samples-cc-react-app": "0.0.0-next.0"
+      }
+    },
+    "0.0.0-rtt.0": {
+      "published_date": 1774849583934,
+      "commits": {
+        "f75a3c08dc2c8c7cf5544479c9ffafae07d568e3": "feat(ccwidgets): Real Time Transcript Widget Implementation (#653)"
+      },
+      "alongWith": {
+        "@webex/cc-components": "1.28.0-rtt.2",
+        "@webex/cc-digital-channels": "0.0.0-rtt.1",
+        "@webex/cc-widgets": "1.28.0-rtt.2",
+        "@webex/cc-station-login": "1.28.0-rtt.2",
+        "@webex/cc-store": "1.28.0-rtt.2",
+        "@webex/cc-task": "1.28.0-rtt.2",
+        "@webex/test-fixtures": "0.0.0-rtt.0",
+        "@webex/cc-ui-logging": "1.28.0-rtt.2",
+        "@webex/cc-user-state": "1.28.0-rtt.2",
+        "samples-cc-react-app": "0.0.0-rtt.0"
+      }
+    },
+    "0.0.0-task-refactor.0": {
+      "published_date": 1780653861341,
+      "commits": {
+        "01bd548e396140979c706c6704f58cca0f3f566f": "fix(task-refactor): bug bash fixes (#692)"
+      },
+      "alongWith": {
+        "@webex/cc-components": "1.28.0-task-refactor.2",
+        "@webex/cc-digital-channels": "0.0.0-task-refactor.1",
+        "@webex/cc-widgets": "1.28.0-task-refactor.2",
+        "@webex/cc-station-login": "1.28.0-task-refactor.2",
+        "@webex/cc-store": "1.28.0-task-refactor.2",
+        "@webex/cc-task": "1.28.0-task-refactor.2",
+        "@webex/test-fixtures": "0.0.0-task-refactor.0",
+        "@webex/cc-ui-logging": "1.28.0-task-refactor.2",
+        "@webex/cc-user-state": "1.28.0-task-refactor.2",
+        "samples-cc-react-app": "0.0.0-task-refactor.0"
+      }
+    }
+  },
+  "@webex/test-fixtures": {
+    "0.0.0-next.0": {
+      "published_date": 1788276829083,
+      "commits": {
+        "4733dbcd300eafcdc394a6f77980ba47d26bae73": "fix(store): pass task object directly to setTaskCallback/removeTaskCallback to prevent duplicate event listeners (#723)"
+      },
+      "alongWith": {
+        "@webex/cc-ai-assistant": "0.0.0-next.8",
+        "@webex/cc-components": "1.28.0-next.47",
+        "@webex/cc-digital-channels": "0.0.0-next.27",
+        "@webex/cc-widgets": "1.28.0-next.57",
+        "@webex/cc-station-login": "1.28.0-next.47",
+        "@webex/cc-store": "1.28.0-next.31",
+        "@webex/cc-task": "1.28.0-next.50",
+        "@webex/cc-ui-logging": "1.28.0-next.32",
+        "@webex/cc-user-state": "1.28.0-next.48",
+        "samples-cc-react-app": "0.0.0-next.0",
+        "samples-cc-wc-app": "0.0.0-next.0"
+      }
+    },
+    "0.0.0-rtt.0": {
+      "published_date": 1774849583926,
+      "commits": {
+        "f75a3c08dc2c8c7cf5544479c9ffafae07d568e3": "feat(ccwidgets): Real Time Transcript Widget Implementation (#653)"
+      },
+      "alongWith": {
+        "@webex/cc-components": "1.28.0-rtt.2",
+        "@webex/cc-digital-channels": "0.0.0-rtt.1",
+        "@webex/cc-widgets": "1.28.0-rtt.2",
+        "@webex/cc-station-login": "1.28.0-rtt.2",
+        "@webex/cc-store": "1.28.0-rtt.2",
+        "@webex/cc-task": "1.28.0-rtt.2",
+        "@webex/cc-ui-logging": "1.28.0-rtt.2",
+        "@webex/cc-user-state": "1.28.0-rtt.2",
+        "samples-cc-react-app": "0.0.0-rtt.0",
+        "samples-cc-wc-app": "0.0.0-rtt.0"
+      }
+    },
+    "0.0.0-task-refactor.0": {
+      "published_date": 1780653861329,
+      "commits": {
+        "01bd548e396140979c706c6704f58cca0f3f566f": "fix(task-refactor): bug bash fixes (#692)"
+      },
+      "alongWith": {
+        "@webex/cc-components": "1.28.0-task-refactor.2",
+        "@webex/cc-digital-channels": "0.0.0-task-refactor.1",
+        "@webex/cc-widgets": "1.28.0-task-refactor.2",
+        "@webex/cc-station-login": "1.28.0-task-refactor.2",
+        "@webex/cc-store": "1.28.0-task-refactor.2",
+        "@webex/cc-task": "1.28.0-task-refactor.2",
+        "@webex/cc-ui-logging": "1.28.0-task-refactor.2",
+        "@webex/cc-user-state": "1.28.0-task-refactor.2",
+        "samples-cc-react-app": "0.0.0-task-refactor.0",
+        "samples-cc-wc-app": "0.0.0-task-refactor.0"
+      }
+    }
+  },
+  "@webex/cc-digital-channels": {
+    "0.0.0-next.1": {
+      "published_date": 1770359435551,
+      "commits": {
+        "c16dc065d9bb99745e43371cda164205cce9ab4e": "docs(store): add AI documentation - AGENTS.md and ARCHITECTURE.md (#592)"
+      },
+      "alongWith": {
+        "@webex/cc-components": "1.28.0-next.16",
+        "@webex/cc-widgets": "1.28.0-next.21",
+        "@webex/cc-station-login": "1.28.0-next.16",
+        "@webex/cc-store": "1.28.0-next.8",
+        "@webex/cc-task": "1.28.0-next.18",
+        "@webex/test-fixtures": "0.0.0-next.0",
+        "@webex/cc-ui-logging": "1.28.0-next.9",
+        "@webex/cc-user-state": "1.28.0-next.17",
+        "samples-cc-react-app": "0.0.0-next.0",
+        "samples-cc-wc-app": "0.0.0-next.0"
+      }
+    },
+    "0.0.0-next.2": {
+      "published_date": 1770708813390,
+      "commits": {
+        "bfba443800292b32a84e0277b37a7c2788cc56b0": "feat(cc-digital-channel): add-uts-for-digital-channel (#611)"
+      },
+      "alongWith": {
+        "@webex/cc-components": "1.28.0-next.17",
+        "@webex/cc-widgets": "1.28.0-next.22",
+        "@webex/cc-station-login": "1.28.0-next.17",
+        "@webex/cc-store": "1.28.0-next.9",
+        "@webex/cc-task": "1.28.0-next.19",
+        "@webex/test-fixtures": "0.0.0-next.0",
+        "@webex/cc-ui-logging": "1.28.0-next.10",
+        "@webex/cc-user-state": "1.28.0-next.18",
+        "samples-cc-react-app": "0.0.0-next.0",
+        "samples-cc-wc-app": "0.0.0-next.0"
+      }
+    },
+    "0.0.0-next.3": {
+      "published_date": 1770877854964,
+      "commits": {
+        "4149aeda17efb8d38fca3ee49ef9dfadf3a25c7e": "docs(test-fixtures): add AI documentation - AGENTS.md and ARCHITECTURE.md (#595)"
+      },
+      "alongWith": {
+        "@webex/cc-components": "1.28.0-next.18",
+        "@webex/cc-widgets": "1.28.0-next.23",
+        "@webex/cc-station-login": "1.28.0-next.18",
+        "@webex/cc-store": "1.28.0-next.10",
+        "@webex/cc-task": "1.28.0-next.20",
+        "@webex/test-fixtures": "0.0.0-next.0",
+        "@webex/cc-ui-logging": "1.28.0-next.11",
+        "@webex/cc-user-state": "1.28.0-next.19",
+        "samples-cc-react-app": "0.0.0-next.0",
+        "samples-cc-wc-app": "0.0.0-next.0"
+      }
+    },
+    "0.0.0-next.4": {
+      "published_date": 1771321429227,
+      "commits": {
+        "fab0381365634821da476f053b9782739c346e7c": "fix(cc-store): update sdk version for all fields profile update (#620)"
+      },
+      "alongWith": {
+        "@webex/cc-components": "1.28.0-next.19",
+        "@webex/cc-widgets": "1.28.0-next.24",
+        "@webex/cc-station-login": "1.28.0-next.19",
+        "@webex/cc-store": "1.28.0-next.11",
+        "@webex/cc-task": "1.28.0-next.21",
+        "@webex/test-fixtures": "0.0.0-next.0",
+        "@webex/cc-ui-logging": "1.28.0-next.12",
+        "@webex/cc-user-state": "1.28.0-next.20",
+        "samples-cc-react-app": "0.0.0-next.0",
+        "samples-cc-wc-app": "0.0.0-next.0"
+      }
+    },
+    "0.0.0-next.5": {
+      "published_date": 1772013750602,
+      "commits": {
+        "9fc72e864e92cb77f448a28b466deff914896757": "fix(cc-widgets): upgrade-sdk-to-3.11.0-next.17-for-x-org-id-header (#631)"
+      },
+      "alongWith": {
+        "@webex/cc-components": "1.28.0-next.20",
+        "@webex/cc-widgets": "1.28.0-next.25",
+        "@webex/cc-station-login": "1.28.0-next.20",
+        "@webex/cc-store": "1.28.0-next.12",
+        "@webex/cc-task": "1.28.0-next.22",
+        "@webex/test-fixtures": "0.0.0-next.0",
+        "@webex/cc-ui-logging": "1.28.0-next.13",
+        "@webex/cc-user-state": "1.28.0-next.21",
+        "samples-cc-react-app": "0.0.0-next.0",
+        "samples-cc-wc-app": "0.0.0-next.0"
+      }
+    },
+    "0.0.0-next.6": {
+      "published_date": 1772194740059,
+      "commits": {
+        "ddcd28dc2008cb6e31967ebe9758c047d316a5ec": "fix(cc-digital-channels): upgrade cc-digital-interactions to 3.0.8 and add peer deps for React 19 (#634)"
+      },
+      "alongWith": {
+        "@webex/cc-widgets": "1.28.0-next.27",
+        "samples-cc-react-app": "0.0.0-next.0",
+        "samples-cc-wc-app": "0.0.0-next.0"
+      }
+    },
+    "0.0.0-next.7": {
+      "published_date": 1772428991383,
+      "commits": {
+        "e71af659aeb24652f80167696289c21ce4e16743": "fix(cc-digital-channels): get-theme-value-from-store (#625)"
+      },
+      "alongWith": {
+        "@webex/cc-widgets": "1.28.0-next.28",
+        "samples-cc-react-app": "0.0.0-next.0",
+        "samples-cc-wc-app": "0.0.0-next.0"
+      }
+    },
+    "0.0.0-next.8": {
+      "published_date": 1772715066597,
+      "commits": {
+        "e450aa050bea55362e8416453d406a34a3b01e0c": "fix(cc-digital-channels): upgrade cc-digital-interactions-version (#641)"
+      },
+      "alongWith": {
+        "@webex/cc-widgets": "1.28.0-next.29",
+        "samples-cc-react-app": "0.0.0-next.0",
+        "samples-cc-wc-app": "0.0.0-next.0"
+      }
+    },
+    "0.0.0-next.9": {
+      "published_date": 1773429735626,
+      "commits": {
+        "936e59c52ebe6ab90cb3b2184bca76a232219a1b": "fix(cc-widgets): widget station login issues (#638)"
+      },
+      "alongWith": {
+        "@webex/cc-components": "1.28.0-next.22",
+        "@webex/cc-widgets": "1.28.0-next.31",
+        "@webex/cc-station-login": "1.28.0-next.22",
+        "@webex/cc-store": "1.28.0-next.13",
+        "@webex/cc-task": "1.28.0-next.24",
+        "@webex/test-fixtures": "0.0.0-next.0",
+        "@webex/cc-ui-logging": "1.28.0-next.14",
+        "@webex/cc-user-state": "1.28.0-next.23",
+        "samples-cc-react-app": "0.0.0-next.0",
+        "samples-cc-wc-app": "0.0.0-next.0"
+      }
+    },
+    "0.0.0-rtt.1": {
+      "published_date": 1774849583932,
+      "commits": {
+        "f75a3c08dc2c8c7cf5544479c9ffafae07d568e3": "feat(ccwidgets): Real Time Transcript Widget Implementation (#653)"
+      },
+      "alongWith": {
+        "@webex/cc-components": "1.28.0-rtt.2",
+        "@webex/cc-widgets": "1.28.0-rtt.2",
+        "@webex/cc-station-login": "1.28.0-rtt.2",
+        "@webex/cc-store": "1.28.0-rtt.2",
+        "@webex/cc-task": "1.28.0-rtt.2",
+        "@webex/test-fixtures": "0.0.0-rtt.0",
+        "@webex/cc-ui-logging": "1.28.0-rtt.2",
+        "@webex/cc-user-state": "1.28.0-rtt.2",
+        "samples-cc-react-app": "0.0.0-rtt.0",
+        "samples-cc-wc-app": "0.0.0-rtt.0"
+      }
+    },
+    "0.0.0-next.10": {
+      "published_date": 1776255031214,
+      "commits": {
+        "f5664387725f72183e19b9a5f88a099de0718251": "feat(ccwidgets): merge rtt with next (#666)"
+      },
+      "alongWith": {
+        "@webex/cc-components": "1.28.0-next.25",
+        "@webex/cc-widgets": "1.28.0-next.35",
+        "@webex/cc-station-login": "1.28.0-next.25",
+        "@webex/cc-store": "1.28.0-next.14",
+        "@webex/cc-task": "1.28.0-next.28",
+        "@webex/test-fixtures": "0.0.0-next.0",
+        "@webex/cc-ui-logging": "1.28.0-next.15",
+        "@webex/cc-user-state": "1.28.0-next.26",
+        "samples-cc-react-app": "0.0.0-next.0",
+        "samples-cc-wc-app": "0.0.0-next.0"
+      }
+    },
+    "0.0.0-next.11": {
+      "published_date": 1776357142571,
+      "commits": {
+        "8642d320531dee0e84b2b72e3a053af3b8dd9b87": "chore(cc): bump @webex/contact-center to 3.12.0-next.14 (#672)"
+      },
+      "alongWith": {
+        "@webex/cc-components": "1.28.0-next.27",
+        "@webex/cc-widgets": "1.28.0-next.37",
+        "@webex/cc-station-login": "1.28.0-next.27",
+        "@webex/cc-store": "1.28.0-next.15",
+        "@webex/cc-task": "1.28.0-next.30",
+        "@webex/test-fixtures": "0.0.0-next.0",
+        "@webex/cc-ui-logging": "1.28.0-next.16",
+        "@webex/cc-user-state": "1.28.0-next.28",
+        "samples-cc-react-app": "0.0.0-next.0",
+        "samples-cc-wc-app": "0.0.0-next.0"
+      }
+    },
+    "0.0.0-next.12": {
+      "published_date": 1777468886863,
+      "commits": {
+        "0566ab1b44249f917c7b0748e2cde4276a6881ca": "feat(callcontrolcad): update to support global variables (#679)"
+      },
+      "alongWith": {
+        "@webex/cc-components": "1.28.0-next.28",
+        "@webex/cc-widgets": "1.28.0-next.38",
+        "@webex/cc-station-login": "1.28.0-next.28",
+        "@webex/cc-store": "1.28.0-next.16",
+        "@webex/cc-task": "1.28.0-next.31",
+        "@webex/test-fixtures": "0.0.0-next.0",
+        "@webex/cc-ui-logging": "1.28.0-next.17",
+        "@webex/cc-user-state": "1.28.0-next.29",
+        "samples-cc-react-app": "0.0.0-next.0",
+        "samples-cc-wc-app": "0.0.0-next.0"
+      }
+    },
+    "0.0.0-next.13": {
+      "published_date": 1779167011853,
+      "commits": {
+        "26a6dbe08357c1304c66336fa8cd9d8b132ba9a8": "chore(cc): bump @webex/contact-center to 3.12.0-next.42 (#686)"
+      },
+      "alongWith": {
+        "@webex/cc-components": "1.28.0-next.31",
+        "@webex/cc-widgets": "1.28.0-next.41",
+        "@webex/cc-station-login": "1.28.0-next.31",
+        "@webex/cc-store": "1.28.0-next.17",
+        "@webex/cc-task": "1.28.0-next.34",
+        "@webex/test-fixtures": "0.0.0-next.0",
+        "@webex/cc-ui-logging": "1.28.0-next.18",
+        "@webex/cc-user-state": "1.28.0-next.32",
+        "samples-cc-react-app": "0.0.0-next.0",
+        "samples-cc-wc-app": "0.0.0-next.0"
+      }
+    },
+    "0.0.0-next.14": {
+      "published_date": 1779916157362,
+      "commits": {
+        "bc41a9f0bcf859a7056cd512a578bfb500784c34": "feat(cc): add campaign preview (#684)"
+      },
+      "alongWith": {
+        "@webex/cc-components": "1.28.0-next.33",
+        "@webex/cc-widgets": "1.28.0-next.43",
+        "@webex/cc-station-login": "1.28.0-next.33",
+        "@webex/cc-store": "1.28.0-next.18",
+        "@webex/cc-task": "1.28.0-next.36",
+        "@webex/test-fixtures": "0.0.0-next.0",
+        "@webex/cc-ui-logging": "1.28.0-next.19",
+        "@webex/cc-user-state": "1.28.0-next.34",
+        "samples-cc-react-app": "0.0.0-next.0",
+        "samples-cc-wc-app": "0.0.0-next.0"
+      }
+    },
+    "0.0.0-task-refactor.1": {
+      "published_date": 1780653861338,
+      "commits": {
+        "01bd548e396140979c706c6704f58cca0f3f566f": "fix(task-refactor): bug bash fixes (#692)"
+      },
+      "alongWith": {
+        "@webex/cc-components": "1.28.0-task-refactor.2",
+        "@webex/cc-widgets": "1.28.0-task-refactor.2",
+        "@webex/cc-station-login": "1.28.0-task-refactor.2",
+        "@webex/cc-store": "1.28.0-task-refactor.2",
+        "@webex/cc-task": "1.28.0-task-refactor.2",
+        "@webex/test-fixtures": "0.0.0-task-refactor.0",
+        "@webex/cc-ui-logging": "1.28.0-task-refactor.2",
+        "@webex/cc-user-state": "1.28.0-task-refactor.2",
+        "samples-cc-react-app": "0.0.0-task-refactor.0",
+        "samples-cc-wc-app": "0.0.0-task-refactor.0"
+      }
+    },
+    "0.0.0-next.15": {
+      "published_date": 1781558077682,
+      "commits": {
+        "663db9c7455146b9355db507220b08ddf3098881": "fix(cc-widgets): Add timeout inactivity properties to cc store (#695)"
+      },
+      "alongWith": {
+        "@webex/cc-components": "1.28.0-next.34",
+        "@webex/cc-widgets": "1.28.0-next.44",
+        "@webex/cc-station-login": "1.28.0-next.34",
+        "@webex/cc-store": "1.28.0-next.19",
+        "@webex/cc-task": "1.28.0-next.37",
+        "@webex/test-fixtures": "0.0.0-next.0",
+        "@webex/cc-ui-logging": "1.28.0-next.20",
+        "@webex/cc-user-state": "1.28.0-next.35",
+        "samples-cc-react-app": "0.0.0-next.0",
+        "samples-cc-wc-app": "0.0.0-next.0"
+      }
+    },
+    "0.0.0-next.16": {
+      "published_date": 1783404613831,
+      "commits": {
+        "a449373e4132b8e6c44ca03f7b5d7659a4405118": "fix(cc): merge task-refactor into next (#716)"
+      },
+      "alongWith": {
+        "@webex/cc-components": "1.28.0-next.35",
+        "@webex/cc-widgets": "1.28.0-next.45",
+        "@webex/cc-station-login": "1.28.0-next.35",
+        "@webex/cc-store": "1.28.0-next.20",
+        "@webex/cc-task": "1.28.0-next.38",
+        "@webex/test-fixtures": "0.0.0-next.0",
+        "@webex/cc-ui-logging": "1.28.0-next.21",
+        "@webex/cc-user-state": "1.28.0-next.36",
+        "samples-cc-react-app": "0.0.0-next.0",
+        "samples-cc-wc-app": "0.0.0-next.0"
+      }
+    },
+    "0.0.0-next.17": {
+      "published_date": 1783488812183,
+      "commits": {
+        "0a1d20a862d393c7db2cd281c7be67058f23ea7e": "docs(ai-docs): migrate to SDLC-Templates component-repo standard (#707)"
+      },
+      "alongWith": {
+        "@webex/widgets": "1.28.2-next.8",
+        "@webex/cc-components": "1.28.0-next.36",
+        "@webex/cc-widgets": "1.28.0-next.46",
+        "@webex/cc-station-login": "1.28.0-next.36",
+        "@webex/cc-store": "1.28.0-next.21",
+        "@webex/cc-task": "1.28.0-next.39",
+        "@webex/test-fixtures": "0.0.0-next.0",
+        "@webex/cc-ui-logging": "1.28.0-next.22",
+        "@webex/cc-user-state": "1.28.0-next.37",
+        "samples-cc-react-app": "0.0.0-next.0",
+        "samples-cc-wc-app": "0.0.0-next.0",
+        "samples-meeting-app": "0.0.0-next.0"
+      }
+    },
+    "0.0.0-next.18": {
+      "published_date": 1783686977758,
+      "commits": {
+        "6ffc3f123a2cccb9f65a5a0f70e811fd990b9268": "fix(campaign-task): Ensure Skipped/Removed Task are removed from task list (#718)"
+      },
+      "alongWith": {
+        "@webex/cc-components": "1.28.0-next.37",
+        "@webex/cc-widgets": "1.28.0-next.47",
+        "@webex/cc-station-login": "1.28.0-next.37",
+        "@webex/cc-store": "1.28.0-next.22",
+        "@webex/cc-task": "1.28.0-next.40",
+        "@webex/test-fixtures": "0.0.0-next.0",
+        "@webex/cc-ui-logging": "1.28.0-next.23",
+        "@webex/cc-user-state": "1.28.0-next.38",
+        "samples-cc-react-app": "0.0.0-next.0",
+        "samples-cc-wc-app": "0.0.0-next.0"
+      }
+    },
+    "0.0.0-next.19": {
+      "published_date": 1784721212952,
+      "commits": {
+        "d29c8ecbaf859bbb93177d21d037085ee0b488fc": "fix(tooling): pin NODE_ENV=test on jest invocations (#724)"
+      },
+      "alongWith": {
+        "@webex/widgets": "1.28.2-next.9",
+        "@webex/cc-components": "1.28.0-next.38",
+        "@webex/cc-widgets": "1.28.0-next.48",
+        "@webex/cc-station-login": "1.28.0-next.38",
+        "@webex/cc-store": "1.28.0-next.23",
+        "@webex/cc-task": "1.28.0-next.41",
+        "@webex/test-fixtures": "0.0.0-next.0",
+        "@webex/cc-ui-logging": "1.28.0-next.24",
+        "@webex/cc-user-state": "1.28.0-next.39",
+        "samples-cc-react-app": "0.0.0-next.0",
+        "samples-cc-wc-app": "0.0.0-next.0",
+        "samples-meeting-app": "0.0.0-next.0"
+      }
+    },
+    "0.0.0-next.20": {
+      "published_date": 1784729665024,
+      "commits": {
+        "8baa06f1fc30fea600c5c89893aff670b5e33fd3": "chore(cc): bump @webex/contact-center to 3.12.0-next.82 (#721)"
+      },
+      "alongWith": {
+        "@webex/cc-components": "1.28.0-next.39",
+        "@webex/cc-widgets": "1.28.0-next.49",
+        "@webex/cc-station-login": "1.28.0-next.39",
+        "@webex/cc-store": "1.28.0-next.24",
+        "@webex/cc-task": "1.28.0-next.42",
+        "@webex/test-fixtures": "0.0.0-next.0",
+        "@webex/cc-ui-logging": "1.28.0-next.25",
+        "@webex/cc-user-state": "1.28.0-next.40",
+        "samples-cc-react-app": "0.0.0-next.0",
+        "samples-cc-wc-app": "0.0.0-next.0"
+      }
+    },
+    "0.0.0-next.21": {
+      "published_date": 1785416242235,
+      "commits": {
+        "adbc70d6eed6397dd3f77d12c4a203d86fb34eb3": "feat(ccwidgets): Implementing Real Time Assistance feature within cc widgets (#722)"
+      },
+      "alongWith": {
+        "@webex/cc-ai-assistant": "0.0.0-next.1",
+        "@webex/cc-components": "1.28.0-next.40",
+        "@webex/cc-widgets": "1.28.0-next.50",
+        "@webex/cc-station-login": "1.28.0-next.40",
+        "@webex/cc-store": "1.28.0-next.25",
+        "@webex/cc-task": "1.28.0-next.43",
+        "@webex/test-fixtures": "0.0.0-next.0",
+        "@webex/cc-ui-logging": "1.28.0-next.26",
+        "@webex/cc-user-state": "1.28.0-next.41",
+        "samples-cc-react-app": "0.0.0-next.0",
+        "samples-cc-wc-app": "0.0.0-next.0"
+      }
+    },
+    "0.0.0-next.22": {
+      "published_date": 1786345183368,
+      "commits": {
+        "f59df906dbe630a3b20bf92bad22f2089a040ba1": "fix(cc-widgets): bump SDK for EP-DN blind transfer fix (CAI-8329) (#732)"
+      },
+      "alongWith": {
+        "@webex/cc-ai-assistant": "0.0.0-next.3",
+        "@webex/cc-components": "1.28.0-next.42",
+        "@webex/cc-widgets": "1.28.0-next.52",
+        "@webex/cc-station-login": "1.28.0-next.42",
+        "@webex/cc-store": "1.28.0-next.26",
+        "@webex/cc-task": "1.28.0-next.45",
+        "@webex/test-fixtures": "0.0.0-next.0",
+        "@webex/cc-ui-logging": "1.28.0-next.27",
+        "@webex/cc-user-state": "1.28.0-next.43",
+        "samples-cc-react-app": "0.0.0-next.0",
+        "samples-cc-wc-app": "0.0.0-next.0"
+      }
+    },
+    "0.0.0-next.23": {
+      "published_date": 1786462971918,
+      "commits": {
+        "7efcf9ede6eb8702276f1d3c9cc985909030e715": "feat(station-login): e911 Modal on Desktop Station Login (#719)"
+      },
+      "alongWith": {
+        "@webex/cc-ai-assistant": "0.0.0-next.4",
+        "@webex/cc-components": "1.28.0-next.43",
+        "@webex/cc-widgets": "1.28.0-next.53",
+        "@webex/cc-station-login": "1.28.0-next.43",
+        "@webex/cc-store": "1.28.0-next.27",
+        "@webex/cc-task": "1.28.0-next.46",
+        "@webex/test-fixtures": "0.0.0-next.0",
+        "@webex/cc-ui-logging": "1.28.0-next.28",
+        "@webex/cc-user-state": "1.28.0-next.44",
+        "samples-cc-react-app": "0.0.0-next.0",
+        "samples-cc-wc-app": "0.0.0-next.0"
+      }
+    },
+    "0.0.0-next.24": {
+      "published_date": 1787555732107,
+      "commits": {
+        "7ff24335a618fdc4155b6b8e40e5ef6f4ea2f1f3": "fix(cc-task): delegate consult transfer list policy to SDK (CAI-8354) (#736)"
+      },
+      "alongWith": {
+        "@webex/cc-ai-assistant": "0.0.0-next.5",
+        "@webex/cc-components": "1.28.0-next.44",
+        "@webex/cc-widgets": "1.28.0-next.54",
+        "@webex/cc-station-login": "1.28.0-next.44",
+        "@webex/cc-store": "1.28.0-next.28",
+        "@webex/cc-task": "1.28.0-next.47",
+        "@webex/test-fixtures": "0.0.0-next.0",
+        "@webex/cc-ui-logging": "1.28.0-next.29",
+        "@webex/cc-user-state": "1.28.0-next.45",
+        "samples-cc-react-app": "0.0.0-next.0",
+        "samples-cc-wc-app": "0.0.0-next.0"
+      }
+    },
+    "0.0.0-next.25": {
+      "published_date": 1787658121556,
+      "commits": {
+        "df90bdda489d15e78fc0b08a2d6463a9d210d952": "fix(contact-center): Drop Button Implementation in widgets (#735)"
+      },
+      "alongWith": {
+        "@webex/cc-ai-assistant": "0.0.0-next.6",
+        "@webex/cc-components": "1.28.0-next.45",
+        "@webex/cc-widgets": "1.28.0-next.55",
+        "@webex/cc-station-login": "1.28.0-next.45",
+        "@webex/cc-store": "1.28.0-next.29",
+        "@webex/cc-task": "1.28.0-next.48",
+        "@webex/test-fixtures": "0.0.0-next.0",
+        "@webex/cc-ui-logging": "1.28.0-next.30",
+        "@webex/cc-user-state": "1.28.0-next.46",
+        "samples-cc-react-app": "0.0.0-next.0",
+        "samples-cc-wc-app": "0.0.0-next.0"
+      }
+    },
+    "0.0.0-next.26": {
+      "published_date": 1787899446873,
+      "commits": {
+        "d329e1e20244bf0216617dd810be3cd883121748": "feat(contact-center): wxcc-6026 wxapp answer, mute sync, dtmf keypad (#734)"
+      },
+      "alongWith": {
+        "@webex/cc-ai-assistant": "0.0.0-next.7",
+        "@webex/cc-components": "1.28.0-next.46",
+        "@webex/cc-widgets": "1.28.0-next.56",
+        "@webex/cc-station-login": "1.28.0-next.46",
+        "@webex/cc-store": "1.28.0-next.30",
+        "@webex/cc-task": "1.28.0-next.49",
+        "@webex/test-fixtures": "0.0.0-next.0",
+        "@webex/cc-ui-logging": "1.28.0-next.31",
+        "@webex/cc-user-state": "1.28.0-next.47",
+        "samples-cc-react-app": "0.0.0-next.0",
+        "samples-cc-wc-app": "0.0.0-next.0"
+      }
+    },
+    "0.0.0-next.27": {
+      "published_date": 1788276829092,
+      "commits": {
+        "4733dbcd300eafcdc394a6f77980ba47d26bae73": "fix(store): pass task object directly to setTaskCallback/removeTaskCallback to prevent duplicate event listeners (#723)"
+      },
+      "alongWith": {
+        "@webex/cc-ai-assistant": "0.0.0-next.8",
+        "@webex/cc-components": "1.28.0-next.47",
+        "@webex/cc-widgets": "1.28.0-next.57",
+        "@webex/cc-station-login": "1.28.0-next.47",
+        "@webex/cc-store": "1.28.0-next.31",
+        "@webex/cc-task": "1.28.0-next.50",
+        "@webex/test-fixtures": "0.0.0-next.0",
+        "@webex/cc-ui-logging": "1.28.0-next.32",
+        "@webex/cc-user-state": "1.28.0-next.48",
+        "samples-cc-react-app": "0.0.0-next.0",
+        "samples-cc-wc-app": "0.0.0-next.0"
+      }
+    }
+  },
+  "samples-meeting-app": {
+    "0.0.0-next.0": {
+      "published_date": 1785920163188,
+      "commits": {
+        "2d8094c3402f5d5be0f84f9455e816309f698159": "fix(widgets): bump sdk-component-adapter to 1.113.3 and components to 1.277.1 (#730)"
+      },
+      "alongWith": {
+        "@webex/widgets": "1.28.2-next.10"
+      }
+    }
+  },
+  "@webex/cc-ai-assistant": {
+    "0.0.0-next.1": {
+      "published_date": 1785416242238,
+      "commits": {
+        "adbc70d6eed6397dd3f77d12c4a203d86fb34eb3": "feat(ccwidgets): Implementing Real Time Assistance feature within cc widgets (#722)"
+      },
+      "alongWith": {
+        "@webex/cc-components": "1.28.0-next.40",
+        "@webex/cc-digital-channels": "0.0.0-next.21",
+        "@webex/cc-widgets": "1.28.0-next.50",
+        "@webex/cc-station-login": "1.28.0-next.40",
+        "@webex/cc-store": "1.28.0-next.25",
+        "@webex/cc-task": "1.28.0-next.43",
+        "@webex/test-fixtures": "0.0.0-next.0",
+        "@webex/cc-ui-logging": "1.28.0-next.26",
+        "@webex/cc-user-state": "1.28.0-next.41",
+        "samples-cc-react-app": "0.0.0-next.0",
+        "samples-cc-wc-app": "0.0.0-next.0"
+      }
+    },
+    "0.0.0-next.2": {
+      "published_date": 1785945215102,
+      "commits": {
+        "cb081d1df77079a0af3b057c65f36fca59545ead": "fix(cc): call recording pause resume fix (#727)"
+      },
+      "alongWith": {
+        "@webex/cc-components": "1.28.0-next.41",
+        "@webex/cc-widgets": "1.28.0-next.51",
+        "@webex/cc-station-login": "1.28.0-next.41",
+        "@webex/cc-task": "1.28.0-next.44",
+        "@webex/cc-user-state": "1.28.0-next.42",
+        "samples-cc-react-app": "0.0.0-next.0",
+        "samples-cc-wc-app": "0.0.0-next.0"
+      }
+    },
+    "0.0.0-next.3": {
+      "published_date": 1786345183370,
+      "commits": {
+        "f59df906dbe630a3b20bf92bad22f2089a040ba1": "fix(cc-widgets): bump SDK for EP-DN blind transfer fix (CAI-8329) (#732)"
+      },
+      "alongWith": {
+        "@webex/cc-components": "1.28.0-next.42",
+        "@webex/cc-digital-channels": "0.0.0-next.22",
+        "@webex/cc-widgets": "1.28.0-next.52",
+        "@webex/cc-station-login": "1.28.0-next.42",
+        "@webex/cc-store": "1.28.0-next.26",
+        "@webex/cc-task": "1.28.0-next.45",
+        "@webex/test-fixtures": "0.0.0-next.0",
+        "@webex/cc-ui-logging": "1.28.0-next.27",
+        "@webex/cc-user-state": "1.28.0-next.43",
+        "samples-cc-react-app": "0.0.0-next.0",
+        "samples-cc-wc-app": "0.0.0-next.0"
+      }
+    },
+    "0.0.0-next.4": {
+      "published_date": 1786462971920,
+      "commits": {
+        "7efcf9ede6eb8702276f1d3c9cc985909030e715": "feat(station-login): e911 Modal on Desktop Station Login (#719)"
+      },
+      "alongWith": {
+        "@webex/cc-components": "1.28.0-next.43",
+        "@webex/cc-digital-channels": "0.0.0-next.23",
+        "@webex/cc-widgets": "1.28.0-next.53",
+        "@webex/cc-station-login": "1.28.0-next.43",
+        "@webex/cc-store": "1.28.0-next.27",
+        "@webex/cc-task": "1.28.0-next.46",
+        "@webex/test-fixtures": "0.0.0-next.0",
+        "@webex/cc-ui-logging": "1.28.0-next.28",
+        "@webex/cc-user-state": "1.28.0-next.44",
+        "samples-cc-react-app": "0.0.0-next.0",
+        "samples-cc-wc-app": "0.0.0-next.0"
+      }
+    },
+    "0.0.0-next.5": {
+      "published_date": 1787555732110,
+      "commits": {
+        "7ff24335a618fdc4155b6b8e40e5ef6f4ea2f1f3": "fix(cc-task): delegate consult transfer list policy to SDK (CAI-8354) (#736)"
+      },
+      "alongWith": {
+        "@webex/cc-components": "1.28.0-next.44",
+        "@webex/cc-digital-channels": "0.0.0-next.24",
+        "@webex/cc-widgets": "1.28.0-next.54",
+        "@webex/cc-station-login": "1.28.0-next.44",
+        "@webex/cc-store": "1.28.0-next.28",
+        "@webex/cc-task": "1.28.0-next.47",
+        "@webex/test-fixtures": "0.0.0-next.0",
+        "@webex/cc-ui-logging": "1.28.0-next.29",
+        "@webex/cc-user-state": "1.28.0-next.45",
+        "samples-cc-react-app": "0.0.0-next.0",
+        "samples-cc-wc-app": "0.0.0-next.0"
+      }
+    },
+    "0.0.0-next.6": {
+      "published_date": 1787658121558,
+      "commits": {
+        "df90bdda489d15e78fc0b08a2d6463a9d210d952": "fix(contact-center): Drop Button Implementation in widgets (#735)"
+      },
+      "alongWith": {
+        "@webex/cc-components": "1.28.0-next.45",
+        "@webex/cc-digital-channels": "0.0.0-next.25",
+        "@webex/cc-widgets": "1.28.0-next.55",
+        "@webex/cc-station-login": "1.28.0-next.45",
+        "@webex/cc-store": "1.28.0-next.29",
+        "@webex/cc-task": "1.28.0-next.48",
+        "@webex/test-fixtures": "0.0.0-next.0",
+        "@webex/cc-ui-logging": "1.28.0-next.30",
+        "@webex/cc-user-state": "1.28.0-next.46",
+        "samples-cc-react-app": "0.0.0-next.0",
+        "samples-cc-wc-app": "0.0.0-next.0"
+      }
+    },
+    "0.0.0-next.7": {
+      "published_date": 1787899446875,
+      "commits": {
+        "d329e1e20244bf0216617dd810be3cd883121748": "feat(contact-center): wxcc-6026 wxapp answer, mute sync, dtmf keypad (#734)"
+      },
+      "alongWith": {
+        "@webex/cc-components": "1.28.0-next.46",
+        "@webex/cc-digital-channels": "0.0.0-next.26",
+        "@webex/cc-widgets": "1.28.0-next.56",
+        "@webex/cc-station-login": "1.28.0-next.46",
+        "@webex/cc-store": "1.28.0-next.30",
+        "@webex/cc-task": "1.28.0-next.49",
+        "@webex/test-fixtures": "0.0.0-next.0",
+        "@webex/cc-ui-logging": "1.28.0-next.31",
+        "@webex/cc-user-state": "1.28.0-next.47",
+        "samples-cc-react-app": "0.0.0-next.0",
+        "samples-cc-wc-app": "0.0.0-next.0"
+      }
+    },
+    "0.0.0-next.8": {
+      "published_date": 1788276829095,
+      "commits": {
+        "4733dbcd300eafcdc394a6f77980ba47d26bae73": "fix(store): pass task object directly to setTaskCallback/removeTaskCallback to prevent duplicate event listeners (#723)"
+      },
+      "alongWith": {
+        "@webex/cc-components": "1.28.0-next.47",
+        "@webex/cc-digital-channels": "0.0.0-next.27",
+        "@webex/cc-widgets": "1.28.0-next.57",
+        "@webex/cc-station-login": "1.28.0-next.47",
+        "@webex/cc-store": "1.28.0-next.31",
+        "@webex/cc-task": "1.28.0-next.50",
+        "@webex/test-fixtures": "0.0.0-next.0",
+        "@webex/cc-ui-logging": "1.28.0-next.32",
+        "@webex/cc-user-state": "1.28.0-next.48",
+        "samples-cc-react-app": "0.0.0-next.0",
+        "samples-cc-wc-app": "0.0.0-next.0"
+      }
+    }
+  }
+}

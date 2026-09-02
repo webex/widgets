@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CC Widgets as web-component</title>
+    <style>
+      .disabled {
+        display: none;
+      }
+      #task-rejected-popup {
+        position: fixed;
+        top: 20%;
+        left: 50%;
+        transform: translate(-50%, 0);
+        background: white;
+        padding: 20px;
+        border: 1px solid #ccc;
+        z-index: 1000;
+      }
+
+      .webexTheme {
+        padding: 1rem;
+        height: 100%;
+        color: var(--mds-color-theme-button-primary-normal);
+        background-color: var(--mds-color-theme-inverted-text-primary-normal);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="mdc-typography">
+      <mdc-themeprovider id="theme-provider-elem" themeclass="mds-theme-stable-lightWebex">
+        <div class="webexTheme">
+          <h1>Contact Center widgets as web-component</h1>
+          <select id="loginType" onchange="changeLoginType()">
+            <option value="token">Access Token</option>
+            <option value="oauth">Login with Webex</option>
+          </select>
+          <br/>
+          <div id="oauth_login_btn" style="display: none;">
+            <button onclick="doOAuthLogin()" class="md-button md-button--primary">Login with Webex</button>
+          </div>
+          <br/>
+          <div>
+            <input
+              type="text"
+              placeholder="Enter your access token"
+              id="access_token_elem"
+              autocomplete="off"
+              spellcheck="false"
+              autocapitalize="off"
+            />
+          </div>
+          <br/>
+          <input type="checkbox" id="theme" name="theme" /> Dark Theme
+          <br />
+          <input type="checkbox" id="integrationEnv" name="integrationEnv" onchange="toggleintegrationEnv()" /> Enable Integration Env
+          <br />
+          </div>
+          <div class="warning-note" style="color: var(--mds-color-theme-text-error-normal); margin-bottom: 10px">
+            <strong>Note:</strong> When a number is dialed, the agent gets an incoming task to accept via an Extension, Dial Number, or Browser. It's recommended to have the incoming task/task list widget and call controls widget according to your needs.
+          </div>
+          <div id="widget-selection">
+            <label> <input type="checkbox" name="stationLogin" id="stationLoginCheckbox" /> Station Login </label>
+            <label> <input type="checkbox" name="userState" id="userStateCheckbox" /> User State </label>
+            <label> <input type="checkbox" name="incomingTask" id="incomingTaskCheckbox" /> Incoming Task </label>
+            <label> <input type="checkbox" name="taskList" id="taskListCheckbox" /> Task List </label>
+            <label> <input type="checkbox" name="callControl" id="callControlCheckbox" /> Call Control </label>
+            <label> <input type="checkbox" name="callControlCAD" id="callControlCADCheckbox" /> Call Control CAD</label>
+            <label> <input type="checkbox" name="outdialCall" id="outdialCallCheckbox" /> Outdial Call </label>
+          </div>
+          <br />
+          <div class="warning-note" style="color: var(--mds-color-theme-text-error-normal); margin-bottom: 10px">
+            <strong>Note:</strong> The "Enable Multi Login" option must be set before initializing the SDK. Changes to
+            this setting after SDK initialization will not take effect. Please ensure you configure this option before
+            clicking the "Init Widgets" button.
+          </div>
+          <br />
+          <input
+            type="checkbox"
+            id="multiLoginFlag"
+            name="multiLoginFlag"
+            onchange="enableMultiLogin()"
+            aria-label="Enable agent multi-login"
+            role="checkbox"
+          />
+          Enable Multi Login
+          <br />
+          <button onclick="initWidgets()" id="init-widgets" disabled>Init Widgets</button>
+          <div id="widgets-container"></div>
+          <div id="popup-container" style="display: none">
+            <div id="task-rejected-popup">
+              <h2>Task Rejected</h2>
+              <p id="task-rejected-reason"></p>
+              <select id="state-select">
+                <option value="">Select a state</option>
+                <option value="Available">Available</option>
+                <option value="Idle">Idle</option>
+              </select>
+              <button id="task-rejected-submit-button">Confirm State Change</button>
+            </div>
+          </div>
+        </div>
+      </mdc-themeprovider>
+    </div>
+    <script src="dist/bundle.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/webex@3.8.0-next.120/umd/contact-center.min.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
