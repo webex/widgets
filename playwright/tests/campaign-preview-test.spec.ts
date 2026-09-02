@@ -663,13 +663,16 @@ export default function createCampaignPreviewTests() {
       });
       await waitForCampaignTaskVisible(testManager.agent1Page);
 
-      // The countdown element should be visible in the popover's list item
-      // The popover uses testIdPrefix="campaign-popover" and shows the countdown
-      // in the main list item the countdown is only shown when timerDisplayMode=auto (popover)
-      // The inline card uses timerDisplayMode=handle-time, so countdown only appears in popover.
-      // Check the campaign-countdown element directly
+      // The countdown is rendered inside the popover (timerDisplayMode=auto),
+      // which opens on mouseenter. Hover the campaign task to trigger it.
+      await testManager.agent1Page.getByTestId(CAMPAIGN_TEST_IDS.TASK).first().hover();
+      const popover = testManager.agent1Page.getByTestId(CAMPAIGN_TEST_IDS.POPOVER).first();
+      await expect(popover).toBeVisible({timeout: 5000});
+
+      // Assert the countdown is visible and displays a plausible remaining value
       const countdown = testManager.agent1Page.getByTestId(CAMPAIGN_TEST_IDS.COUNTDOWN).first();
-      await expect(countdown).toBeAttached({timeout: 5000});
+      await expect(countdown).toBeVisible({timeout: 5000});
+      await expect(countdown).toContainText('Time left:');
     });
   });
 
