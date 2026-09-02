@@ -108,4 +108,15 @@ export const USER_SETS = {
     ENTRY_POINT: env.PW_ENTRY_POINT9,
     TEST_SUITE: 'multiparty-conference-set-9-tests.spec.ts',
   },
+  SET_10: {
+    AGENTS: {
+      AGENT1: {username: 'user1', extension: '1001', agentName: 'User1 Agent1'},
+      AGENT2: {username: 'user1', extension: '1001', agentName: 'User1 Agent1'},
+    },
+    QUEUE_NAME: 'Queue e2e 10',
+    CHAT_URL: `${env.PW_CHAT_URL}-e2e-10.html`,
+    EMAIL_ENTRY_POINT: `${env.PW_SANDBOX}.e2e10@gmail.com`,
+    ENTRY_POINT: env.PW_ENTRY_POINT10,
+    TEST_SUITE: 'campaign-preview-tests.spec.ts',
+  },
 };

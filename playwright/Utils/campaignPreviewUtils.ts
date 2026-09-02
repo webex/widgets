@@ -98,10 +98,13 @@ export async function injectCampaignPreviewTask(
       interactionState,
       globalVariables,
     }) => {
-      const store = (window as unknown as Record<string, unknown>)['store'] as Record<string, unknown>;
-      if (!store) {
+      const storeWrapper = (window as unknown as Record<string, unknown>)['store'] as Record<string, unknown>;
+      if (!storeWrapper) {
         throw new Error('Store not found on window object');
       }
+      // Access the inner MobX store — the wrapper's taskList is a getter-only
+      // property, so assignments to it silently fail without triggering observers.
+      const store = storeWrapper.store as Record<string, unknown>;
 
       // Build callAssociatedData from globalVariables
       const callAssociatedData: Record<
@@ -134,7 +137,7 @@ export async function injectCampaignPreviewTask(
         };
       }
 
-      const agentId = store.agentId as string;
+      const agentId = (storeWrapper.agentId ?? store.agentId) as string;
 
       // Build a minimal mock task matching the ITask shape.
       // The EventEmitter methods are stubs since E2E doesn't fire real SDK events.
@@ -239,14 +242,14 @@ export async function injectCampaignPreviewTask(
         toggleMute: noOp,
       };
 
-      // Inject the task into the store's task list.
-      // Use MobX runInAction-like direct assignment — the store is already
-      // wrapped with makeAutoObservable so direct mutations are tracked.
-      const taskList = store.taskList as Record<string, unknown>;
-      taskList[interactionId] = mockTask;
-
-      // Trigger MobX reactivity by reassigning taskList
-      store.taskList = {...taskList};
+      // Inject the task into the inner store's taskList.
+      // Assigning a new object to the MobX-observable property triggers
+      // observer notifications and React re-renders.
+      const existingTaskList = store.taskList as Record<string, unknown> | undefined;
+      store.taskList = {
+        ...(existingTaskList ?? {}),
+        [interactionId]: mockTask,
+      };
     },
     {
       interactionId,
@@ -278,11 +281,14 @@ export async function removeCampaignPreviewTask(
 ): Promise<void> {
   await page.evaluate(
     ({interactionId}) => {
-      const store = (window as unknown as Record<string, unknown>)['store'] as Record<string, unknown>;
-      if (!store) return;
+      const storeWrapper = (window as unknown as Record<string, unknown>)['store'] as Record<string, unknown>;
+      if (!storeWrapper) return;
+      const store = storeWrapper.store as Record<string, unknown>;
+
       const taskList = store.taskList as Record<string, unknown>;
-      delete taskList[interactionId];
-      store.taskList = {...taskList};
+      const updated = {...taskList};
+      delete updated[interactionId];
+      store.taskList = updated;
 
       // Also clean up acceptedCampaignIds
       const acceptedIds = store.acceptedCampaignIds as Set<string>;
@@ -297,21 +303,66 @@ export async function removeCampaignPreviewTask(
 }
 
 /**
+ * Stubs the StoreWrapper's refreshTaskList method to prevent real SDK events
+ * (heartbeats, AGENT_CONTACT, etc.) from overwriting mock-injected tasks.
+ *
+ * In the E2E environment, the agent is logged into a real sandbox.
+ * Any SDK event that fires will call refreshTaskList(), which replaces
+ * store.taskList with cc.taskManager.getAllTasks() — an empty map since
+ * our tasks are mock-injected and not known to the real SDK task manager.
+ *
+ * Call this BEFORE injecting mock tasks to ensure they persist.
+ *
+ * @param page - Playwright Page object
+ */
+export async function stubRefreshTaskList(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    const storeWrapper = (window as unknown as Record<string, unknown>)['store'] as Record<string, unknown>;
+    if (!storeWrapper) return;
+    // Save the original before overwriting so restoreRefreshTaskList can put it back
+    (window as unknown as Record<string, unknown>)['__originalRefreshTaskList'] = storeWrapper.refreshTaskList;
+    // Replace refreshTaskList with a no-op to prevent SDK events from clearing mock tasks
+    (storeWrapper as Record<string, () => void>).refreshTaskList = () => {};
+  });
+}
+
+/**
+ * Restores the StoreWrapper's original refreshTaskList method.
+ * Call this during test cleanup to avoid affecting other tests.
+ *
+ * @param page - Playwright Page object
+ */
+export async function restoreRefreshTaskList(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    const storeWrapper = (window as unknown as Record<string, unknown>)['store'] as Record<string, unknown>;
+    if (!storeWrapper) return;
+    // Restore the original saved by stubRefreshTaskList
+    const saved = (window as unknown as Record<string, unknown>)['__originalRefreshTaskList'];
+    if (typeof saved === 'function') {
+      (storeWrapper as Record<string, unknown>).refreshTaskList = saved;
+      delete (window as unknown as Record<string, unknown>)['__originalRefreshTaskList'];
+    }
+  });
+}
+
+/**
  * Stubs the SDK's campaign preview action methods (acceptPreviewContact, skipPreviewContact,
- * removePreviewContact) on window['store'].cc so that test assertions can check whether
- * the action was invoked and control whether it resolves or rejects.
+ * removePreviewContact) on window['store'].cc and the task's end() method (used by cancel)
+ * so that test assertions can check whether the action was invoked and control whether it
+ * resolves or rejects.
  *
  * @param page - Playwright Page object
  * @param failAction - If set, that action will reject with an error (for error dialog tests)
  */
 export async function stubCampaignPreviewActions(
   page: Page,
-  failAction?: 'accept' | 'skip' | 'remove'
+  failAction?: 'accept' | 'skip' | 'remove' | 'cancel'
 ): Promise<void> {
   await page.evaluate(
-    ({failAction}) => {
-      const store = (window as unknown as Record<string, unknown>)['store'] as Record<string, unknown>;
-      if (!store) return;
+    ({failAction, campaignInteractionId}) => {
+      const storeWrapper = (window as unknown as Record<string, unknown>)['store'] as Record<string, unknown>;
+      if (!storeWrapper) return;
+      const store = storeWrapper.store as Record<string, unknown>;
       const cc = store.cc as Record<string, (...args: unknown[]) => unknown>;
       if (!cc) return;
 
@@ -320,6 +371,7 @@ export async function stubCampaignPreviewActions(
         accept: 0,
         skip: 0,
         remove: 0,
+        cancel: 0,
       });
 
       cc.acceptPreviewContact = () => {
@@ -345,8 +397,20 @@ export async function stubCampaignPreviewActions(
         }
         return Promise.resolve({});
       };
+
+      // Stub the task's end() method (used by cancelPreviewContact) if cancel failure is needed
+      if (failAction === 'cancel') {
+        const innerTaskList = store.taskList as Record<string, Record<string, unknown>>;
+        const task = innerTaskList[campaignInteractionId];
+        if (task) {
+          task.end = () => {
+            tracker.cancel++;
+            return Promise.reject(new Error('Cancel failed (stubbed)'));
+          };
+        }
+      }
     },
-    {failAction: failAction ?? null}
+    {failAction: failAction ?? null, campaignInteractionId: CAMPAIGN_INTERACTION_ID}
   );
 }
 
@@ -354,16 +418,16 @@ export async function stubCampaignPreviewActions(
  * Returns the number of times each campaign action was called.
  *
  * @param page - Playwright Page object
- * @returns Call counts for accept, skip, and remove
+ * @returns Call counts for accept, skip, remove, and cancel
  */
 export async function getCampaignActionCounts(
   page: Page
-): Promise<{accept: number; skip: number; remove: number}> {
+): Promise<{accept: number; skip: number; remove: number; cancel: number}> {
   return page.evaluate(() => {
     const tracker = (window as unknown as Record<string, unknown>)['__campaignPreviewCalls'] as
-      | {accept: number; skip: number; remove: number}
+      | {accept: number; skip: number; remove: number; cancel: number}
       | undefined;
-    return tracker ?? {accept: 0, skip: 0, remove: 0};
+    return tracker ?? {accept: 0, skip: 0, remove: 0, cancel: 0};
   });
 }
 
@@ -468,8 +532,9 @@ export async function expireCampaignTimeout(
 ): Promise<void> {
   await page.evaluate(
     ({interactionId}) => {
-      const store = (window as unknown as Record<string, unknown>)['store'] as Record<string, unknown>;
-      if (!store) return;
+      const storeWrapper = (window as unknown as Record<string, unknown>)['store'] as Record<string, unknown>;
+      if (!storeWrapper) return;
+      const store = storeWrapper.store as Record<string, unknown>;
       const taskList = store.taskList as Record<string, Record<string, unknown>>;
       const task = taskList[interactionId] as Record<string, unknown> | undefined;
       if (!task) return;
@@ -481,7 +546,7 @@ export async function expireCampaignTimeout(
       // Set timeout to 1 second from now so countdown expires quickly
       cpd.campaignPreviewOfferTimeout = String(Date.now() + 1000);
 
-      // Trigger MobX reactivity
+      // Trigger MobX reactivity by reassigning taskList on inner store
       store.taskList = {...taskList};
     },
     {interactionId}
