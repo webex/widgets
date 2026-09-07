@@ -1,4 +1,4 @@
-import {makeAutoObservable, observable} from 'mobx';
+import {makeAutoObservable, observable, runInAction} from 'mobx';
 import Webex, {ITask} from '@webex/contact-center';
 import {
   IContactCenter,
@@ -16,6 +16,9 @@ import {
   RealTimeTranscriptionData,
   RealTimeAssistPayload,
   OfferActionErrorDisplay,
+  WellnessBreakState,
+  AIAssistantRTDStatusEvent,
+  AgentChannelStateDetail,
 } from './store.types';
 
 import {getFeatureFlags} from './util';
@@ -67,6 +70,18 @@ class Store implements IStore {
   isEmergencyModalAlreadyDisplayed: boolean = false;
   realTimeAssist: Record<string, RealTimeAssistPayload[]> = {};
   offerActionErrors: Record<string, OfferActionErrorDisplay> = {};
+  isWellnessBreakEnabled = false;
+  wellnessAgentSessionId = '';
+  wellbeingBreakIdleCode?: IdleCode;
+  wellnessBreakState: WellnessBreakState = {phase: 'idle'};
+  wellnessEventSequence = 0;
+  aiAssistantRtdStatus: AIAssistantRTDStatusEvent = {state: 'disconnected', generation: 0};
+  isAgentStateControlEnabled = false;
+  agentChannelTypes: string[] = [];
+  agentChannelStateDetails: Record<string, AgentChannelStateDetail> = {};
+  agentChannelReloginSequence = 0;
+  legacyAgentState = '';
+  legacyAuxCodeId = '';
 
   constructor() {
     makeAutoObservable(this, {
@@ -108,6 +123,11 @@ class Store implements IStore {
         });
         // wire up logger into feature‐flag extraction
         this.featureFlags = getFeatureFlags(response);
+        const isWellnessBreakEnabled =
+          (response as Profile & {isWellnessBreakEnabled?: boolean}).isWellnessBreakEnabled === true;
+        runInAction(() => {
+          this.isWellnessBreakEnabled = isWellnessBreakEnabled;
+        });
         //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         this.teams = response.teams;
         this.loginOptions = response.webRtcEnabled
@@ -132,6 +152,24 @@ class Store implements IStore {
         this.agentProfile.isTimeoutDesktopInactivityEnabled = response.isTimeoutDesktopInactivityEnabled;
         this.agentProfile.timeoutDesktopInactivityMins = response.timeoutDesktopInactivityMins;
         this.dataCenter = (response as {environment?: string}).environment || '';
+        if (!this.isWellnessBreakEnabled) {
+          const hasStateOwnedWellnessLifecycle = [
+            'changing-to-break',
+            'waiting-for-safe-state',
+            'starting',
+            'playing',
+            'ending',
+            'restoring',
+          ].includes(this.wellnessBreakState.phase);
+          if (!hasStateOwnedWellnessLifecycle) {
+            runInAction(() => {
+              this.wellbeingBreakIdleCode = undefined;
+              this.wellnessBreakState = {phase: 'idle'};
+            });
+          }
+        } else if (response.isAgentLoggedIn) {
+          void this.loadWellbeingBreakIdleCode();
+        }
       })
       .catch((error) => {
         this.logger.error(`CC-Widgets: Contact-center registerCC(): failed - ${error}`, {
@@ -140,6 +178,51 @@ class Store implements IStore {
         });
         return Promise.reject(error);
       });
+  }
+
+  async loadWellbeingBreakIdleCode(): Promise<void> {
+    if (!this.isWellnessBreakEnabled || !this.isAgentLoggedIn) {
+      runInAction(() => {
+        this.wellbeingBreakIdleCode = undefined;
+      });
+      return;
+    }
+
+    if (!this.cc?.getWellbeingBreakIdleCode) {
+      runInAction(() => {
+        this.wellbeingBreakIdleCode = undefined;
+        this.wellnessBreakState = {phase: 'error', errorCode: 'SYSTEM_CODE_UNAVAILABLE'};
+      });
+      this.logger?.error('CC-Widgets: WellbeingBreak system code API is unavailable', {
+        module: 'cc-store#store.ts',
+        method: 'loadWellbeingBreakIdleCode',
+      });
+      return;
+    }
+
+    try {
+      const idleCode = await this.cc.getWellbeingBreakIdleCode();
+      runInAction(() => {
+        if (this.isWellnessBreakEnabled && this.isAgentLoggedIn) {
+          this.wellbeingBreakIdleCode = idleCode;
+          if (this.wellnessBreakState.errorCode === 'SYSTEM_CODE_UNAVAILABLE') {
+            this.wellnessBreakState = {phase: 'idle'};
+          }
+        }
+      });
+    } catch {
+      runInAction(() => {
+        this.wellbeingBreakIdleCode = undefined;
+        this.wellnessBreakState = {
+          phase: 'error',
+          errorCode: 'SYSTEM_CODE_UNAVAILABLE',
+        };
+      });
+      this.logger?.error('CC-Widgets: WellbeingBreak system code is unavailable', {
+        module: 'cc-store#store.ts',
+        method: 'loadWellbeingBreakIdleCode',
+      });
+    }
   }
 
   init(options: InitParams, setupEventListeners): Promise<void> {

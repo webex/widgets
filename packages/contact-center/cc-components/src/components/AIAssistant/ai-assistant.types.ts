@@ -1,10 +1,42 @@
-import type {ILogger, RealTimeAssistPayload} from '@webex/cc-store';
+import type {
+  ILogger,
+  RealTimeAssistPayload,
+  WellnessBreakError,
+  WellnessBreakEvent,
+  WellnessBreakPhase,
+} from '@webex/cc-store';
 
 /** Visual state of the AI Assistant panel chrome. */
 export type AIAssistantChromeState = 'closed' | 'open' | 'minimized';
 
 /** Lifecycle state of a real-time assist request. */
 export type AIAssistantRequestStatus = 'idle' | 'listening' | 'ready' | 'error';
+
+export type WellnessBreakNotice = 'declined' | 'not-allowed' | 'no-response' | 'completed';
+export type WellnessBreakResponseSource = 'card' | 'notification';
+/** Where the active wellness-break overlay is rendered. */
+export type WellnessBreakOverlayTarget = 'viewport' | 'assistant' | HTMLElement;
+
+/** Presentational contract supplied by the AI Assistant wellness orchestrator. */
+export interface WellnessBreakViewModel {
+  enabled: boolean;
+  phase: WellnessBreakPhase;
+  event?: WellnessBreakEvent;
+  error?: WellnessBreakError;
+  notice?: WellnessBreakNotice;
+  requestAvailable: boolean;
+  /** Whether an active task is currently delaying an accepted break. */
+  hasBlockingTasks: boolean;
+  countdown?: number;
+  elapsedSeconds: number;
+  animationData?: unknown;
+  reducedMotion: boolean;
+  onRequest: () => void;
+  onAccept: (source?: WellnessBreakResponseSource) => void;
+  onLater: (source?: WellnessBreakResponseSource) => void;
+  onDismissNotification?: () => void;
+  onMediaError: () => void;
+}
 
 /**
  * A single entry rendered in the chat transcript.  User entries are agent
@@ -66,6 +98,44 @@ export interface AIAssistantComponentProps {
   logger?: ILogger;
   /** Extra class applied to the widget root. */
   className?: string;
+  /** Viewport by default; may be scoped to the assistant or portalled into a host element. */
+  wellnessBreakOverlayTarget?: WellnessBreakOverlayTarget;
+  /** Independent Agent Wellness Break cards and overlay. */
+  wellness?: WellnessBreakViewModel;
+}
+
+export interface WellnessBreakRequestCardProps {
+  phase: WellnessBreakPhase;
+  notice?: WellnessBreakNotice;
+  disabled: boolean;
+  actionText?: string;
+  onRequest: () => void;
+}
+
+export interface WellnessBreakOfferCardProps {
+  event?: WellnessBreakEvent;
+  disabled: boolean;
+  onAccept: () => void;
+  onLater: () => void;
+}
+
+export interface WellnessBreakOfferToastProps extends WellnessBreakOfferCardProps {
+  visible: boolean;
+  onDismiss?: () => void;
+}
+
+export interface WellnessBreakModalProps {
+  phase: Extract<WellnessBreakPhase, 'starting' | 'playing' | 'ending'>;
+  countdown?: number;
+  elapsedSeconds: number;
+  animationData?: unknown;
+  reducedMotion: boolean;
+  onMediaError: () => void;
+  overlayTarget?: WellnessBreakOverlayTarget;
+}
+
+export interface WellnessBreakErrorProps {
+  error?: WellnessBreakError;
 }
 
 export interface RealTimeAssistProps {

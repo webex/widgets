@@ -4,9 +4,18 @@ import {withMetrics} from '@webex/cc-ui-logging';
 import RealTimeAssist from './RealTimeAssist/real-time-assist';
 import AIAssistantLanding from './ai-assistant-landing';
 import CiscoAIAssistantColorIcon from './CiscoAIAssistantColorIcon';
-import {AIAssistantComponentProps} from './ai-assistant.types';
+import WellnessBreakError from './WellnessBreak/wellness-break-error';
+import WellnessBreakModal from './WellnessBreak/wellness-break-modal';
+import WellnessBreakOfferCard from './WellnessBreak/wellness-break-offer-card';
+import WellnessBreakOfferToast from './WellnessBreak/wellness-break-offer-toast';
+import WellnessBreakRequestCard from './WellnessBreak/wellness-break-request-card';
+import {AIAssistantComponentProps, WellnessBreakModalProps, WellnessBreakViewModel} from './ai-assistant.types';
 import {AI_ASSISTANT_TITLE, DISCLAIMER_TEXT} from './constants';
 import './ai-assistant.styles.scss';
+import './WellnessBreak/wellness-break.styles.scss';
+
+const isWellnessOverlayPhase = (phase: WellnessBreakViewModel['phase']): phase is WellnessBreakModalProps['phase'] =>
+  phase === 'starting' || phase === 'playing' || phase === 'ending';
 
 const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
   chrome,
@@ -31,6 +40,8 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
   onRealTimeAssistAction,
   logger,
   className,
+  wellnessBreakOverlayTarget,
+  wellness,
 }) => {
   // Fullscreen is consumer-owned: we emit onFullScreenToggle; the host owns layout.
   const rootClass = ['ai-assistant', className || ''].filter(Boolean).join(' ');
@@ -38,6 +49,33 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
     .filter(Boolean)
     .join(' ');
   const showLanding = !hasActiveInteraction || !isFeatureEnabled;
+  // Desktop treats the suggested CTA as an empty-state action. It is only
+  // eligible when normal assistant content is not active; once eligible, the
+  // wellness experience owns the body instead of stacking above the landing.
+  const showWellnessSuggestion = Boolean(
+    wellness?.enabled && showLanding && wellness.phase === 'idle' && wellness.requestAvailable && !wellness.notice
+  );
+  const showWellnessRequestState = Boolean(
+    wellness?.enabled && (wellness.phase === 'request-pending' || wellness.notice)
+  );
+  const showWellnessOffer = Boolean(wellness?.enabled && wellness.phase === 'offer-pending');
+  const showWellnessStatus = Boolean(
+    wellness?.enabled && ['changing-to-break', 'waiting-for-safe-state', 'restoring'].includes(wellness.phase)
+  );
+  const showWellnessError = Boolean(wellness?.enabled && wellness.phase === 'error');
+  const wellnessOverlayPhase = wellness && isWellnessOverlayPhase(wellness.phase) ? wellness.phase : undefined;
+  const showWellnessOverlay = Boolean(wellnessOverlayPhase);
+  const showWellnessContent = Boolean(
+    showWellnessSuggestion ||
+      showWellnessRequestState ||
+      showWellnessOffer ||
+      showWellnessStatus ||
+      showWellnessError ||
+      showWellnessOverlay
+  );
+  const showFooter = showWellnessContent
+    ? Boolean(!showWellnessSuggestion && !showWellnessOverlay && isFeatureEnabled)
+    : !showLanding;
 
   return (
     <div className={rootClass} data-testid="ai-assistant:root">
@@ -118,28 +156,63 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
             </div>
           </header>
           <div
-            className={`ai-assistant__body${showLanding ? ' ai-assistant__body--landing' : ''}`}
+            className={`ai-assistant__body${
+              (showLanding && !showWellnessContent) || showWellnessSuggestion ? ' ai-assistant__body--landing' : ''
+            }`}
             data-testid="ai-assistant:body"
           >
-            {showLanding ? (
-              <AIAssistantLanding agentName={agentName} showRealTimeAssist={isFeatureEnabled} />
-            ) : (
-              <RealTimeAssist
-                status={requestStatus}
-                errorMessage={errorMessage}
-                chatEntries={chatEntries}
-                contextDraft={contextDraft}
-                isRequesting={isRequesting}
-                onRequestRealTimeAssist={requestRealTimeAssist}
-                onContextDraftChange={setContextDraft}
-                onSubmitContext={submitContext}
-                hasInitialRequestSucceeded={hasInitialRequestSucceeded}
-                onRealTimeAssistAction={onRealTimeAssistAction}
-                logger={logger}
+            {(showWellnessSuggestion || showWellnessRequestState) && wellness ? (
+              <WellnessBreakRequestCard
+                phase={wellness.phase}
+                notice={wellness.notice}
+                disabled={wellness.phase === 'request-pending' || !wellness.requestAvailable}
+                actionText={wellness.event?.actionText}
+                onRequest={wellness.onRequest}
               />
-            )}
+            ) : null}
+            {showWellnessOffer && wellness ? (
+              <WellnessBreakOfferCard
+                event={wellness.event}
+                disabled={false}
+                onAccept={() => wellness.onAccept('card')}
+                onLater={() => wellness.onLater('card')}
+              />
+            ) : null}
+            {showWellnessStatus && wellness ? (
+              <section className="wellness-break-card" data-testid="wellness-break:status" aria-live="polite">
+                <Text tagname="p" type="body-small-regular" className="wellness-break-card__message">
+                  {wellness.phase === 'restoring'
+                    ? 'Restoring your status…'
+                    : wellness.phase === 'waiting-for-safe-state'
+                      ? wellness.hasBlockingTasks
+                        ? 'Great. Your well-being break starts right after your current work.'
+                        : 'Great. Your well-being break will begin shortly.'
+                      : 'Great. Your well-being break will begin shortly.'}
+                </Text>
+              </section>
+            ) : null}
+            {showWellnessError && wellness ? <WellnessBreakError error={wellness.error} /> : null}
+            {!showWellnessContent ? (
+              showLanding ? (
+                <AIAssistantLanding agentName={agentName} showRealTimeAssist={isFeatureEnabled} />
+              ) : (
+                <RealTimeAssist
+                  status={requestStatus}
+                  errorMessage={errorMessage}
+                  chatEntries={chatEntries}
+                  contextDraft={contextDraft}
+                  isRequesting={isRequesting}
+                  onRequestRealTimeAssist={requestRealTimeAssist}
+                  onContextDraftChange={setContextDraft}
+                  onSubmitContext={submitContext}
+                  hasInitialRequestSucceeded={hasInitialRequestSucceeded}
+                  onRealTimeAssistAction={onRealTimeAssistAction}
+                  logger={logger}
+                />
+              )
+            ) : null}
           </div>
-          {showLanding ? null : (
+          {showFooter ? (
             <footer className="ai-assistant__footer" data-testid="ai-assistant:footer">
               <Text
                 tagname="p"
@@ -150,9 +223,30 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
                 {DISCLAIMER_TEXT}
               </Text>
             </footer>
-          )}
+          ) : null}
         </div>
       )}
+      {wellnessOverlayPhase && wellness ? (
+        <WellnessBreakModal
+          phase={wellnessOverlayPhase}
+          countdown={wellness.countdown}
+          elapsedSeconds={wellness.elapsedSeconds}
+          animationData={wellness.animationData}
+          reducedMotion={wellness.reducedMotion}
+          onMediaError={wellness.onMediaError}
+          overlayTarget={wellnessBreakOverlayTarget}
+        />
+      ) : null}
+      {showWellnessOffer && wellness ? (
+        <WellnessBreakOfferToast
+          visible={chrome !== 'open'}
+          event={wellness.event}
+          disabled={false}
+          onAccept={() => wellness.onAccept('notification')}
+          onLater={() => wellness.onLater('notification')}
+          onDismiss={wellness.onDismissNotification}
+        />
+      ) : null}
     </div>
   );
 };

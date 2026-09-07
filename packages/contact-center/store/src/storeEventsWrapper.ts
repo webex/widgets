@@ -28,6 +28,12 @@ import {
   DesktopPreference,
   RealTimeAssistPayload,
   OfferActionErrorDisplay,
+  WellnessBreakEvent,
+  WellnessBreakState,
+  WidgetsBehavioralMetric,
+  AIAssistantRTDStatusEvent,
+  AgentChannelReloginSuccessEvent,
+  AgentChannelStateChangedEvent,
 } from './store.types';
 import Store from './store';
 import {
@@ -47,6 +53,12 @@ const CONSULT_TRANSFER_CHANNELS = {
   social: 'SOCIAL_CHANNEL',
   email: 'EMAIL',
 } as const;
+
+const WELLNESS_NOTIFICATION_ACTIONS = new Set([
+  'PROVIDE_WELLNESS_BREAK',
+  'SUGGEST_WELLNESS_BREAK',
+  'WELLNESS_BREAK_NOT_ALLOWED',
+]);
 
 const getSupportedMediaType = (mediaType?: string): keyof typeof CONSULT_TRANSFER_CHANNELS | undefined => {
   const normalizedMediaType = typeof mediaType === 'string' ? mediaType.toLowerCase() : '';
@@ -209,6 +221,54 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.realTimeAssist;
   }
 
+  get isWellnessBreakEnabled() {
+    return this.store.isWellnessBreakEnabled;
+  }
+
+  get wellnessAgentSessionId() {
+    return this.store.wellnessAgentSessionId;
+  }
+
+  get wellbeingBreakIdleCode() {
+    return this.store.wellbeingBreakIdleCode;
+  }
+
+  get wellnessBreakState() {
+    return this.store.wellnessBreakState;
+  }
+
+  get wellnessEventSequence() {
+    return this.store.wellnessEventSequence;
+  }
+
+  get aiAssistantRtdStatus() {
+    return this.store.aiAssistantRtdStatus;
+  }
+
+  get isAgentStateControlEnabled() {
+    return this.store.isAgentStateControlEnabled;
+  }
+
+  get agentChannelTypes() {
+    return this.store.agentChannelTypes;
+  }
+
+  get agentChannelStateDetails() {
+    return this.store.agentChannelStateDetails;
+  }
+
+  get agentChannelReloginSequence() {
+    return this.store.agentChannelReloginSequence;
+  }
+
+  get legacyAgentState() {
+    return this.store.legacyAgentState;
+  }
+
+  get legacyAuxCodeId() {
+    return this.store.legacyAuxCodeId;
+  }
+
   setDataCenter = (value: string): void => {
     this.store.dataCenter = value;
   };
@@ -329,6 +389,169 @@ class StoreWrapper implements IStoreWrapper {
       this.store.offerActionErrors = Object.fromEntries(
         currentEntries.filter(([interactionId]) => activeInteractionIds.has(interactionId))
       );
+    });
+  };
+
+  loadWellbeingBreakIdleCode = (): Promise<void> => this.store.loadWellbeingBreakIdleCode();
+
+  setWellnessBreakState = (state: WellnessBreakState): void => {
+    runInAction(() => {
+      this.store.wellnessBreakState = state;
+    });
+  };
+
+  submitBehavioralMetric = ({name, agent, target, verb, properties}: WidgetsBehavioralMetric): void => {
+    const metrics = this.store.cc?.webex?.internal?.newMetrics;
+    if (!metrics) {
+      this.store.logger?.warn('CC-Widgets: behavioral metrics transport unavailable', {
+        module: 'storeEventsWrapper.ts',
+        method: 'submitBehavioralMetric',
+      });
+      return;
+    }
+
+    try {
+      metrics.submitBehavioralEvent({
+        product: 'wxcc-widgets',
+        agent,
+        target,
+        verb,
+        payload: {name, ...properties},
+      });
+    } catch {
+      this.store.logger?.warn('CC-Widgets: behavioral metric submission failed', {
+        module: 'storeEventsWrapper.ts',
+        method: 'submitBehavioralMetric',
+      });
+    }
+  };
+
+  resetWellnessSession = (): void => {
+    runInAction(() => {
+      this.store.wellnessAgentSessionId = '';
+      this.store.wellbeingBreakIdleCode = undefined;
+      this.store.wellnessBreakState = {phase: 'idle'};
+      this.store.wellnessEventSequence = (this.store.wellnessEventSequence ?? 0) + 1;
+      this.store.isAgentStateControlEnabled = false;
+      this.store.agentChannelTypes = [];
+      this.store.agentChannelStateDetails = {};
+      this.store.agentChannelReloginSequence = 0;
+      this.store.legacyAgentState = '';
+      this.store.legacyAuxCodeId = '';
+    });
+  };
+
+  private captureWellnessSession = (payload: AgentLoginProfile): void => {
+    const nextSessionId = payload?.agentSessionId;
+    if (!nextSessionId) return;
+
+    runInAction(() => {
+      const sessionRotated =
+        Boolean(this.store.wellnessAgentSessionId) && this.store.wellnessAgentSessionId !== nextSessionId;
+      if (sessionRotated) {
+        this.store.wellnessBreakState = {phase: 'idle'};
+        this.store.wellnessEventSequence = (this.store.wellnessEventSequence ?? 0) + 1;
+        this.store.agentChannelStateDetails = {};
+        this.store.agentChannelTypes = [];
+        this.store.isAgentStateControlEnabled = false;
+      }
+
+      this.store.wellnessAgentSessionId = nextSessionId;
+      this.store.legacyAgentState = payload.subStatus || this.store.legacyAgentState;
+      this.store.legacyAuxCodeId = payload.auxCodeId?.trim() || this.store.legacyAuxCodeId || '0';
+
+      if (payload.agentChannelStateDetailMap) {
+        this.store.isAgentStateControlEnabled = true;
+        this.store.agentChannelStateDetails = {...payload.agentChannelStateDetailMap};
+        this.store.agentChannelReloginSequence = (this.store.agentChannelReloginSequence ?? 0) + 1;
+      }
+      if (payload.channelsMap) {
+        this.store.agentChannelTypes = Object.entries(payload.channelsMap)
+          .filter(([, channelIds]) => Array.isArray(channelIds) && channelIds.length > 0)
+          .map(([channelType]) => channelType);
+      } else if (payload.agentChannelStateDetailMap) {
+        // StationLoginSuccess exposes the ASC snapshot while normalizing
+        // channelsMap into mmProfile. Snapshot keys preserve the configured
+        // channel types needed for exact pre-break restoration.
+        this.store.agentChannelTypes = Object.keys(payload.agentChannelStateDetailMap);
+      }
+    });
+
+    void this.loadWellbeingBreakIdleCode();
+  };
+
+  handleAgentChannelRelogin = (payload: AgentChannelReloginSuccessEvent): void => {
+    if (!payload || payload.agentId !== this.store.agentId) {
+      this.store.logger?.warn('CC-Widgets: ignored Agent State Control relogin for another agent', {
+        module: 'storeEventsWrapper.ts',
+        method: 'handleAgentChannelRelogin',
+      });
+      return;
+    }
+    this.captureWellnessSession(payload);
+  };
+
+  handleAgentChannelStateChanged = (payload: AgentChannelStateChangedEvent): void => {
+    if (
+      !payload?.agentSessionId ||
+      payload.agentSessionId !== this.store.wellnessAgentSessionId ||
+      payload.agentId !== this.store.agentId
+    ) {
+      this.store.logger?.warn('CC-Widgets: ignored stale Agent State Control update', {
+        module: 'storeEventsWrapper.ts',
+        method: 'handleAgentChannelStateChanged',
+      });
+      return;
+    }
+
+    runInAction(() => {
+      this.store.isAgentStateControlEnabled = true;
+      this.store.agentChannelStateDetails = {
+        ...this.store.agentChannelStateDetails,
+        [payload.channelType]: {...payload.agentChannelStateDetail},
+      };
+      if (!this.store.agentChannelTypes.includes(payload.channelType)) {
+        this.store.agentChannelTypes = [...this.store.agentChannelTypes, payload.channelType];
+      }
+    });
+  };
+
+  handleWellnessBreak = (payload: WellnessBreakEvent): void => {
+    if (
+      !this.store.isWellnessBreakEnabled ||
+      !payload?.agentSessionId ||
+      payload.agentSessionId !== this.store.wellnessAgentSessionId ||
+      payload.agentId !== this.store.agentId ||
+      !WELLNESS_NOTIFICATION_ACTIONS.has(payload.actionEvent)
+    ) {
+      this.store.logger?.warn('CC-Widgets: ignored invalid or stale wellness notification', {
+        module: 'storeEventsWrapper.ts',
+        method: 'handleWellnessBreak',
+      });
+      return;
+    }
+
+    runInAction(() => {
+      this.store.wellnessBreakState = {
+        ...(this.store.wellnessBreakState ?? {phase: 'idle'}),
+        event: payload,
+      };
+      this.store.wellnessEventSequence = (this.store.wellnessEventSequence ?? 0) + 1;
+    });
+  };
+
+  handleAIAssistantRtdStatus = (payload: AIAssistantRTDStatusEvent): void => {
+    const currentStatus = this.store.aiAssistantRtdStatus ?? {state: 'disconnected', generation: 0};
+    if (!payload || payload.generation < currentStatus.generation) return;
+
+    runInAction(() => {
+      this.store.aiAssistantRtdStatus = payload;
+      if (
+        payload.state === 'disconnected' &&
+        ['offer-pending', 'request-pending'].includes(this.store.wellnessBreakState?.phase)
+      ) {
+        this.store.wellnessBreakState = {phase: 'idle'};
+      }
     });
   };
 
@@ -479,7 +702,6 @@ class StoreWrapper implements IStoreWrapper {
 
   setOnError = (callback: (widgetName: string, error: Error) => void) => {
     this.onErrorCallback = (widgetName: string, error: Error) => {
-      // @ts-expect-error - test error boundary
       this.store.cc.webex.internal.newMetrics.submitBehavioralEvent({
         product: 'wxcc-widgets',
         agent: 'browser',
@@ -1310,11 +1532,26 @@ class StoreWrapper implements IStoreWrapper {
       method: 'handleStateChange',
     });
     if (data && typeof data === 'object' && data.type === 'AgentStateChangeSuccess') {
+      if (
+        data.agentSessionId &&
+        this.store.wellnessAgentSessionId &&
+        data.agentSessionId !== this.store.wellnessAgentSessionId
+      ) {
+        this.store.logger.warn('CC-Widgets: ignored stale legacy agent state update', {
+          module: 'storeEventsWrapper.ts',
+          method: 'handleStateChange',
+        });
+        return;
+      }
       const DEFAULT_CODE = '0'; // Default code when no aux code is present
       this.setCurrentState(data.auxCodeId?.trim() !== '' ? data.auxCodeId : DEFAULT_CODE);
 
       this.setLastStateChangeTimestamp(data.lastStateChangeTimestamp);
       this.setLastIdleCodeChangeTimestamp(data.lastIdleCodeChangeTimestamp);
+      runInAction(() => {
+        this.store.legacyAgentState = data.subStatus || '';
+        this.store.legacyAuxCodeId = data.auxCodeId?.trim() || DEFAULT_CODE;
+      });
     }
   };
 
@@ -1324,6 +1561,9 @@ class StoreWrapper implements IStoreWrapper {
       method: 'handleMultiLoginCloseSession',
     });
     if (data && typeof data === 'object' && data.type === 'AgentMultiLoginCloseSession') {
+      if (data.agentSessionId && data.agentSessionId === this.store.wellnessAgentSessionId) {
+        this.resetWellnessSession();
+      }
       // Don't show the multi-login modal if there's an active task
       // The modal blocks UI interactions and should not interfere with task handling
       if (this.currentTask) {
@@ -1604,6 +1844,7 @@ class StoreWrapper implements IStoreWrapper {
       this.setIsEmergencyModalAlreadyDisplayed(false);
       this.store.realTimeAssist = {};
       this.realTimeAssistListeners = {};
+      this.resetWellnessSession();
     });
   };
 
@@ -1649,6 +1890,10 @@ class StoreWrapper implements IStoreWrapper {
       ccSDK.off(TASK_EVENTS.TASK_MERGED, this.handleTaskMerged);
       ccSDK.off(CC_EVENTS.AGENT_MULTI_LOGIN, this.handleMultiLoginCloseSession);
       ccSDK.off(CC_EVENTS.AGENT_LOGOUT_SUCCESS, handleLogOut);
+      ccSDK.off(CC_EVENTS.WELLNESS_BREAK, this.handleWellnessBreak);
+      ccSDK.off(CC_EVENTS.AI_ASSISTANT_RTD_STATUS_CHANGED, this.handleAIAssistantRtdStatus);
+      ccSDK.off(CC_EVENTS.AGENT_CHANNEL_RELOGIN_SUCCESS, this.handleAgentChannelRelogin);
+      ccSDK.off(CC_EVENTS.AGENT_CHANNEL_STATE_CHANGED, this.handleAgentChannelStateChanged);
     };
 
     // TODO: https://jira-eng-gpk2.cisco.com/jira/browse/SPARK-626777 Implement the de-register method and close the listener there
@@ -1670,6 +1915,7 @@ class StoreWrapper implements IStoreWrapper {
         // @ts-expect-error To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         this.setTeamId(payload.teamId);
       });
+      this.captureWellnessSession(payload as AgentLoginProfile);
     };
 
     ccSDK.on(CC_EVENTS.AGENT_STATION_LOGIN_SUCCESS, handleLogin);
@@ -1684,6 +1930,7 @@ class StoreWrapper implements IStoreWrapper {
           if (event === CC_EVENTS.AGENT_RELOGIN_SUCCESS) {
             this.setAgentProfile(payload);
             this.setTeamId(payload.teamId);
+            this.captureWellnessSession(payload);
           }
         });
         if (!listenersAdded) {
@@ -1692,6 +1939,19 @@ class StoreWrapper implements IStoreWrapper {
         }
       });
     });
+
+    // Registration-level listeners are deliberately independent of task listeners.
+    // Keep these after the established registration order for backwards-compatible
+    // listener sequencing in host integrations, and replace exact callbacks so
+    // repeated init/register flows remain idempotent.
+    ccSDK.off(CC_EVENTS.WELLNESS_BREAK, this.handleWellnessBreak);
+    ccSDK.off(CC_EVENTS.AI_ASSISTANT_RTD_STATUS_CHANGED, this.handleAIAssistantRtdStatus);
+    ccSDK.off(CC_EVENTS.AGENT_CHANNEL_RELOGIN_SUCCESS, this.handleAgentChannelRelogin);
+    ccSDK.off(CC_EVENTS.AGENT_CHANNEL_STATE_CHANGED, this.handleAgentChannelStateChanged);
+    ccSDK.on(CC_EVENTS.WELLNESS_BREAK, this.handleWellnessBreak);
+    ccSDK.on(CC_EVENTS.AI_ASSISTANT_RTD_STATUS_CHANGED, this.handleAIAssistantRtdStatus);
+    ccSDK.on(CC_EVENTS.AGENT_CHANNEL_RELOGIN_SUCCESS, this.handleAgentChannelRelogin);
+    ccSDK.on(CC_EVENTS.AGENT_CHANNEL_STATE_CHANGED, this.handleAgentChannelStateChanged);
   };
 }
 

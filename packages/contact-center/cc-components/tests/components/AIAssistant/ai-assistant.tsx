@@ -256,4 +256,484 @@ describe('AIAssistantComponent', () => {
     expect(screen.getByTestId('ai-assistant:panel')).toHaveClass('ai-assistant__panel--full-screen');
     expect(screen.getByTestId('ai-assistant:header-fullscreen')).toHaveAttribute('aria-label', 'Exit full screen');
   });
+
+  it('renders wellness offer and eligible suggestion without stacking normal assistant content', () => {
+    const onRequest = jest.fn();
+    const onAccept = jest.fn();
+    const onLater = jest.fn();
+    const wellness = {
+      enabled: true,
+      phase: 'offer-pending' as const,
+      event: {
+        agentId: 'agent-1',
+        orgId: 'org-1',
+        agentSessionId: 'session-1',
+        actionEvent: 'PROVIDE_WELLNESS_BREAK' as const,
+      },
+      requestAvailable: false,
+      hasBlockingTasks: false,
+      elapsedSeconds: 0,
+      reducedMotion: false,
+      onRequest,
+      onAccept,
+      onLater,
+      onMediaError: jest.fn(),
+    };
+    const {rerender} = render(<AIAssistantComponent {...createProps({isFeatureEnabled: false, wellness})} />);
+
+    expect(screen.queryByTestId('ai-assistant:landing')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('wellness-break:accept'));
+    fireEvent.click(screen.getByTestId('wellness-break:later'));
+    expect(onAccept).toHaveBeenCalledTimes(1);
+    expect(onLater).toHaveBeenCalledTimes(1);
+
+    rerender(
+      <AIAssistantComponent
+        {...createProps({
+          isFeatureEnabled: false,
+          wellness: {
+            ...wellness,
+            phase: 'idle',
+            event: {
+              ...wellness.event,
+              actionEvent: 'SUGGEST_WELLNESS_BREAK',
+              actionText: 'This is your approved break.',
+            },
+            requestAvailable: true,
+          },
+        })}
+      />
+    );
+    expect(
+      screen.getByText("Looks like it's a busy day. Here's how I can help you stay focussed and on top of your game")
+    ).toBeInTheDocument();
+    expect(screen.getByText('This is your approved break.')).toBeInTheDocument();
+    expect(screen.queryByTestId('ai-assistant:landing')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('wellness-break:request'));
+    expect(onRequest).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps a suggestion hidden while interaction content has priority', () => {
+    render(
+      <AIAssistantComponent
+        {...createProps({
+          wellness: {
+            enabled: true,
+            phase: 'idle',
+            event: {
+              agentId: 'agent-1',
+              orgId: 'org-1',
+              agentSessionId: 'session-1',
+              actionEvent: 'SUGGEST_WELLNESS_BREAK',
+            },
+            requestAvailable: true,
+            hasBlockingTasks: false,
+            elapsedSeconds: 0,
+            reducedMotion: false,
+            onRequest: jest.fn(),
+            onAccept: jest.fn(),
+            onLater: jest.fn(),
+            onMediaError: jest.fn(),
+          },
+        })}
+      />
+    );
+
+    expect(screen.queryByTestId('wellness-break:request')).not.toBeInTheDocument();
+    expect(screen.getByTestId('ai-assistant:empty')).toBeInTheDocument();
+  });
+
+  it('shows request results exclusively and does not restore the manual CTA for completion', () => {
+    const wellness = {
+      enabled: true,
+      phase: 'request-pending' as const,
+      requestAvailable: false,
+      hasBlockingTasks: false,
+      elapsedSeconds: 0,
+      reducedMotion: false,
+      onRequest: jest.fn(),
+      onAccept: jest.fn(),
+      onLater: jest.fn(),
+      onMediaError: jest.fn(),
+    };
+    const {rerender} = render(<AIAssistantComponent {...createProps({isFeatureEnabled: false, wellness})} />);
+
+    expect(screen.getByText('Take a break')).toBeInTheDocument();
+    expect(screen.queryByText('Request pending')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('wellness-break:request')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('ai-assistant:landing')).not.toBeInTheDocument();
+
+    const completedWellness = {
+      ...wellness,
+      phase: 'idle' as const,
+      notice: 'completed' as const,
+      requestAvailable: true,
+    };
+    rerender(<AIAssistantComponent {...createProps({isFeatureEnabled: false, wellness: completedWellness})} />);
+
+    expect(screen.getByText('Well-being break completed')).toBeInTheDocument();
+    expect(screen.queryByTestId('wellness-break:request')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('ai-assistant:landing')).not.toBeInTheDocument();
+
+    rerender(
+      <AIAssistantComponent
+        {...createProps({chrome: 'closed', isFeatureEnabled: false, wellness: completedWellness})}
+      />
+    );
+    expect(screen.queryByText('Well-being break completed')).not.toBeInTheDocument();
+
+    rerender(<AIAssistantComponent {...createProps({isFeatureEnabled: false, wellness: completedWellness})} />);
+    expect(screen.getByText('Well-being break completed')).toBeInTheDocument();
+  });
+
+  it('shows backend denial action text and falls back to the approved copy when it is blank', () => {
+    const wellness = {
+      enabled: true,
+      phase: 'idle' as const,
+      event: {
+        agentId: 'agent-1',
+        orgId: 'org-1',
+        agentSessionId: 'session-1',
+        actionEvent: 'WELLNESS_BREAK_NOT_ALLOWED' as const,
+        actionText: 'Sorry, you have already reached your limit for today.',
+      },
+      notice: 'not-allowed' as const,
+      requestAvailable: false,
+      hasBlockingTasks: false,
+      elapsedSeconds: 0,
+      reducedMotion: false,
+      onRequest: jest.fn(),
+      onAccept: jest.fn(),
+      onLater: jest.fn(),
+      onMediaError: jest.fn(),
+    };
+    const {rerender} = render(<AIAssistantComponent {...createProps({isFeatureEnabled: false, wellness})} />);
+
+    expect(screen.getByText('Sorry, you have already reached your limit for today.')).toBeInTheDocument();
+    expect(screen.queryByTestId('ai-assistant:landing')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('wellness-break:request')).not.toBeInTheDocument();
+
+    rerender(
+      <AIAssistantComponent
+        {...createProps({
+          isFeatureEnabled: false,
+          wellness: {...wellness, event: {...wellness.event, actionText: '   '}},
+        })}
+      />
+    );
+
+    expect(
+      screen.getByText(
+        "I'm sorry, you've reached your well-being break limit today. Continue with your tasks, but remember to take care of yourself."
+      )
+    ).toBeInTheDocument();
+  });
+
+  it('keeps the accessible wellness overlay mounted while assistant chrome is closed', () => {
+    render(
+      <AIAssistantComponent
+        {...createProps({
+          chrome: 'closed',
+          wellness: {
+            enabled: true,
+            phase: 'starting',
+            countdown: 5,
+            requestAvailable: false,
+            hasBlockingTasks: false,
+            elapsedSeconds: 0,
+            reducedMotion: true,
+            onRequest: jest.fn(),
+            onAccept: jest.fn(),
+            onLater: jest.fn(),
+            onMediaError: jest.fn(),
+          },
+        })}
+      />
+    );
+
+    expect(screen.getByTestId('wellness-break:overlay')).toBeInTheDocument();
+    expect(screen.getByRole('dialog', {name: 'Relax'})).toHaveAttribute('aria-modal', 'true');
+    expect(screen.getByLabelText('5 seconds')).toBeInTheDocument();
+    expect(screen.getByTestId('wellness-break:surface')).toContainElement(
+      screen.getByTestId('wellness-break:animation')
+    );
+    expect(screen.getByTestId('wellness-break:countdown')).toHaveTextContent('54321');
+    expect(screen.getByText('5')).toHaveClass('wellness-break-modal__countdown-digit--active');
+  });
+
+  it('locks and restores document scrolling for the default viewport overlay', () => {
+    document.documentElement.style.overflow = 'auto';
+    document.body.style.overflow = 'scroll';
+
+    const {unmount} = render(
+      <AIAssistantComponent
+        {...createProps({
+          chrome: 'closed',
+          wellness: {
+            enabled: true,
+            phase: 'playing',
+            requestAvailable: false,
+            hasBlockingTasks: false,
+            elapsedSeconds: 10,
+            reducedMotion: true,
+            onRequest: jest.fn(),
+            onAccept: jest.fn(),
+            onLater: jest.fn(),
+            onMediaError: jest.fn(),
+          },
+        })}
+      />
+    );
+
+    expect(screen.getByTestId('wellness-break:overlay')).toHaveClass('wellness-break-overlay--viewport');
+    expect(document.documentElement.style.overflow).toBe('hidden');
+    expect(document.body.style.overflow).toBe('hidden');
+
+    unmount();
+    expect(document.documentElement.style.overflow).toBe('auto');
+    expect(document.body.style.overflow).toBe('scroll');
+    document.documentElement.style.removeProperty('overflow');
+    document.body.style.removeProperty('overflow');
+  });
+
+  it('can scope the wellness overlay to the assistant container', () => {
+    render(
+      <AIAssistantComponent
+        {...createProps({
+          wellnessBreakOverlayTarget: 'assistant',
+          wellness: {
+            enabled: true,
+            phase: 'playing',
+            requestAvailable: false,
+            hasBlockingTasks: false,
+            elapsedSeconds: 10,
+            reducedMotion: true,
+            onRequest: jest.fn(),
+            onAccept: jest.fn(),
+            onLater: jest.fn(),
+            onMediaError: jest.fn(),
+          },
+        })}
+      />
+    );
+
+    const overlay = screen.getByTestId('wellness-break:overlay');
+    expect(overlay).toHaveClass('wellness-break-overlay--assistant');
+    expect(overlay.parentElement).toBe(screen.getByTestId('ai-assistant:root'));
+  });
+
+  it('can portal the wellness overlay into a custom container and restores its styles', () => {
+    const customTarget = document.createElement('section');
+    customTarget.style.overflow = 'auto';
+    document.body.append(customTarget);
+
+    const {unmount} = render(
+      <AIAssistantComponent
+        {...createProps({
+          wellnessBreakOverlayTarget: customTarget,
+          wellness: {
+            enabled: true,
+            phase: 'playing',
+            requestAvailable: false,
+            hasBlockingTasks: false,
+            elapsedSeconds: 10,
+            reducedMotion: true,
+            onRequest: jest.fn(),
+            onAccept: jest.fn(),
+            onLater: jest.fn(),
+            onMediaError: jest.fn(),
+          },
+        })}
+      />
+    );
+
+    const overlay = screen.getByTestId('wellness-break:overlay');
+    expect(overlay).toHaveClass('wellness-break-overlay--custom');
+    expect(overlay.parentElement).toBe(customTarget);
+    expect(customTarget.style.position).toBe('relative');
+    expect(customTarget.style.overflow).toBe('hidden');
+
+    unmount();
+    expect(customTarget.style.position).toBe('');
+    expect(customTarget.style.overflow).toBe('auto');
+    customTarget.remove();
+  });
+
+  it('renders the ongoing Desktop-style message and progress over the full break surface', () => {
+    render(
+      <AIAssistantComponent
+        {...createProps({
+          chrome: 'closed',
+          wellness: {
+            enabled: true,
+            phase: 'playing',
+            requestAvailable: false,
+            hasBlockingTasks: false,
+            elapsedSeconds: 24,
+            reducedMotion: true,
+            onRequest: jest.fn(),
+            onAccept: jest.fn(),
+            onLater: jest.fn(),
+            onMediaError: jest.fn(),
+          },
+        })}
+      />
+    );
+
+    const surface = screen.getByTestId('wellness-break:surface');
+    expect(surface).toContainElement(screen.getByText('This moment is yours.'));
+    expect(surface).toContainElement(screen.getByRole('progressbar', {name: 'Well-being break progress'}));
+  });
+
+  it('uses only the inline countdown message while the break is ending', () => {
+    render(
+      <AIAssistantComponent
+        {...createProps({
+          chrome: 'closed',
+          wellness: {
+            enabled: true,
+            phase: 'ending',
+            countdown: 3,
+            requestAvailable: false,
+            hasBlockingTasks: false,
+            elapsedSeconds: 60,
+            reducedMotion: true,
+            onRequest: jest.fn(),
+            onAccept: jest.fn(),
+            onLater: jest.fn(),
+            onMediaError: jest.fn(),
+          },
+        })}
+      />
+    );
+
+    expect(screen.getByText('Transitioning back to work mode in')).toBeInTheDocument();
+    expect(screen.queryByRole('heading', {name: 'Transitioning back to work mode'})).not.toBeInTheDocument();
+    expect(screen.getByTestId('wellness-break:countdown')).toHaveTextContent('54321');
+    expect(screen.getByText('3')).toHaveClass('wellness-break-modal__countdown-digit--active');
+  });
+
+  it('shows an actionable offer toast while the panel is closed', () => {
+    const onAccept = jest.fn();
+    const onDismissNotification = jest.fn();
+    const {rerender} = render(
+      <AIAssistantComponent
+        {...createProps({
+          chrome: 'closed',
+          wellness: {
+            enabled: true,
+            phase: 'offer-pending',
+            event: {
+              agentId: 'agent-1',
+              orgId: 'org-1',
+              agentSessionId: 'session-1',
+              actionEvent: 'PROVIDE_WELLNESS_BREAK',
+              actionText: 'Your approved break is ready.',
+            },
+            requestAvailable: false,
+            hasBlockingTasks: false,
+            elapsedSeconds: 0,
+            reducedMotion: false,
+            onRequest: jest.fn(),
+            onAccept,
+            onLater: jest.fn(),
+            onDismissNotification,
+            onMediaError: jest.fn(),
+          },
+        })}
+      />
+    );
+
+    expect(screen.getByTestId('wellness-break:offer-toast')).toHaveTextContent('Your approved break is ready.');
+    fireEvent.click(screen.getByTestId('wellness-break:toast-accept'));
+    expect(onAccept).toHaveBeenCalledTimes(1);
+    expect(onAccept).toHaveBeenCalledWith('notification');
+    expect(screen.queryByTestId('wellness-break:offer-toast')).not.toBeInTheDocument();
+
+    // A newly delivered offer remounts the actionable notification state.
+    rerender(
+      <AIAssistantComponent
+        {...createProps({
+          chrome: 'closed',
+          wellness: {
+            enabled: true,
+            phase: 'offer-pending',
+            event: {
+              agentId: 'agent-1',
+              orgId: 'org-1',
+              agentSessionId: 'session-1',
+              actionEvent: 'PROVIDE_WELLNESS_BREAK',
+              actionText: 'Another approved break is ready.',
+            },
+            requestAvailable: false,
+            hasBlockingTasks: false,
+            elapsedSeconds: 0,
+            reducedMotion: false,
+            onRequest: jest.fn(),
+            onAccept: jest.fn(),
+            onLater: jest.fn(),
+            onDismissNotification,
+            onMediaError: jest.fn(),
+          },
+        })}
+      />
+    );
+    expect(screen.getByTestId('wellness-break:offer-toast')).toHaveTextContent('Another approved break is ready.');
+    const toast = screen.getByTestId('wellness-break:offer-toast').querySelector('mdc-toast');
+    expect(toast).toBeTruthy();
+    fireEvent(toast as Element, new CustomEvent('close'));
+    expect(onDismissNotification).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps the offer in the panel without duplicating the toast when open', () => {
+    render(
+      <AIAssistantComponent
+        {...createProps({
+          wellness: {
+            enabled: true,
+            phase: 'offer-pending',
+            event: {
+              agentId: 'agent-1',
+              orgId: 'org-1',
+              agentSessionId: 'session-1',
+              actionEvent: 'PROVIDE_WELLNESS_BREAK',
+            },
+            requestAvailable: false,
+            hasBlockingTasks: false,
+            elapsedSeconds: 0,
+            reducedMotion: false,
+            onRequest: jest.fn(),
+            onAccept: jest.fn(),
+            onLater: jest.fn(),
+            onMediaError: jest.fn(),
+          },
+        })}
+      />
+    );
+
+    expect(screen.getByTestId('wellness-break:offer-card')).toBeInTheDocument();
+    expect(screen.queryByTestId('wellness-break:offer-toast')).not.toBeInTheDocument();
+  });
+
+  it('only mentions current work when a task is actually blocking the break', () => {
+    const wellness = {
+      enabled: true,
+      phase: 'waiting-for-safe-state' as const,
+      requestAvailable: false,
+      hasBlockingTasks: false,
+      elapsedSeconds: 0,
+      reducedMotion: false,
+      onRequest: jest.fn(),
+      onAccept: jest.fn(),
+      onLater: jest.fn(),
+      onMediaError: jest.fn(),
+    };
+    const {rerender} = render(<AIAssistantComponent {...createProps({wellness})} />);
+
+    expect(screen.getByTestId('wellness-break:status')).toHaveTextContent('will begin shortly');
+    expect(screen.queryByText(/current work/)).not.toBeInTheDocument();
+
+    rerender(<AIAssistantComponent {...createProps({wellness: {...wellness, hasBlockingTasks: true}})} />);
+    expect(screen.getByTestId('wellness-break:status')).toHaveTextContent('right after your current work');
+  });
 });

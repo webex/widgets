@@ -69,6 +69,10 @@ interface IContactCenter {
     outdialANIId: string;
   };
   setAgentState(data: StateChange): Promise<SetStateResponse>;
+  /** Returns the system-owned `WellbeingBreak` idle code for the active registration. */
+  getWellbeingBreakIdleCode(): Promise<IdleCode>;
+  /** Changes one or more Agent State Control channels and resolves from the matching SDK event. */
+  setAgentChannelState(data: SetAgentChannelStateParams): Promise<AgentChannelStateChangedEvent>;
   getOutdialAniEntries(params: OutdialAniParams): Promise<OutdialAniEntriesResponse>;
   getAccessToken(): Promise<string>;
   startOutdial(destination: string, origin?: string): Promise<TaskResponse>;
@@ -79,7 +83,50 @@ interface IContactCenter {
   apiAIAssistant?: {
     getRealTimeAssistance(params: RealTimeAssistRequestParams & {actionTimeStamp?: number}): Promise<unknown>;
     sendRealTimeAssistanceUserAction(params: RealTimeAssistUserActionParams): Promise<unknown>;
+    requestWellnessBreak(params: RequestWellnessBreakParams): Promise<void>;
+    respondToWellnessBreak(params: RespondToWellnessBreakParams): Promise<void>;
   };
+  /** SDK-owned transport for widgets behavioral metrics. */
+  webex?: {
+    internal?: {
+      newMetrics?: {
+        submitBehavioralEvent: (event: {
+          product: 'wxcc-widgets';
+          agent: WidgetsBehavioralMetricAgent;
+          target: string;
+          verb: WidgetsBehavioralMetricVerb;
+          payload?: Record<string, string | number | boolean>;
+        }) => void;
+      };
+    };
+  };
+}
+
+type WidgetsBehavioralMetricVerb =
+  | 'accept'
+  | 'display'
+  | 'dismiss'
+  | 'end'
+  | 'error'
+  | 'expire'
+  | 'fail'
+  | 'fire'
+  | 'ignore'
+  | 'load'
+  | 'receive'
+  | 'reject'
+  | 'request'
+  | 'retry'
+  | 'start';
+
+type WidgetsBehavioralMetricAgent = 'browser' | 'service' | 'system' | 'user';
+
+interface WidgetsBehavioralMetric {
+  name: string;
+  agent: WidgetsBehavioralMetricAgent;
+  target: string;
+  verb: WidgetsBehavioralMetricVerb;
+  properties?: Record<string, string | number | boolean>;
 }
 
 type RealTimeAssistRequestParams = RealTimeAssistanceParams;
@@ -112,6 +159,131 @@ type RealTimeAssistPayload = {
   notifType?: string;
   orgId?: string;
 };
+
+/** Agent Wellness Break notifications normalized by the Contact Center SDK. */
+type WellnessBreakNotificationAction =
+  | 'PROVIDE_WELLNESS_BREAK'
+  | 'SUGGEST_WELLNESS_BREAK'
+  | 'WELLNESS_BREAK_NOT_ALLOWED';
+
+/** Agent actions supported by the dedicated SDK wellness endpoint. */
+type WellnessBreakUserAction = 'REQUESTED' | 'ACCEPTED' | 'REJECTED' | 'NO_RESPONSE';
+
+/** Validated agent-scoped notification emitted by the SDK. */
+interface WellnessBreakEvent {
+  agentId: string;
+  orgId: string;
+  agentSessionId: string;
+  actionEvent: WellnessBreakNotificationAction;
+  actionText?: string;
+  interactionId?: string;
+  trackingId?: string;
+}
+
+type AIAssistantRTDConnectionState = 'connected' | 'disconnected';
+
+/** SDK-owned AI Assistant RTD connection state. */
+interface AIAssistantRTDStatusEvent {
+  state: AIAssistantRTDConnectionState;
+  generation: number;
+}
+
+interface RequestWellnessBreakParams {
+  agentId: string;
+  agentSessionId: string;
+}
+
+interface RespondToWellnessBreakParams extends RequestWellnessBreakParams {
+  action: Exclude<WellnessBreakUserAction, 'REQUESTED'>;
+}
+
+/** Current state for one Agent State Control channel. */
+interface AgentChannelStateDetail {
+  agentState: string;
+  pendingIdle: boolean;
+  auxCodeId?: string | null;
+  stateChangeTimestamp: number;
+  stateChangeReason: string;
+}
+
+/** Agent State Control relogin snapshot projected by the store. */
+interface AgentChannelReloginSuccessEvent {
+  agentId: string;
+  orgId: string;
+  agentSessionId: string;
+  trackingId: string;
+  channelsMap: Record<string, string[]>;
+  agentChannelStateDetailMap: Record<string, AgentChannelStateDetail>;
+}
+
+/** One Agent State Control channel update projected by the store. */
+interface AgentChannelStateChangedEvent {
+  agentId: string;
+  orgId: string;
+  agentSessionId: string;
+  channelType: string;
+  agentChannelStateDetail: AgentChannelStateDetail;
+  connectedChannels: string[];
+  trackingId: string;
+}
+
+interface SetAgentChannelStateParams {
+  channelTypes: string[];
+  state: 'Available' | 'Idle';
+  auxCodeId?: string;
+  reason?: string;
+  agentId?: string;
+}
+
+/** Public Agent Wellness Break lifecycle exposed by the widget package. */
+type WellnessBreakPhase =
+  | 'idle'
+  | 'offer-pending'
+  | 'request-pending'
+  | 'changing-to-break'
+  | 'waiting-for-safe-state'
+  | 'starting'
+  | 'playing'
+  | 'ending'
+  | 'restoring'
+  | 'error';
+
+/** Stable, non-PII failure categories emitted to widget hosts. */
+type WellnessBreakErrorCode =
+  | 'FEATURE_DISABLED'
+  | 'SESSION_UNAVAILABLE'
+  | 'SYSTEM_CODE_UNAVAILABLE'
+  | 'ACTION_REQUEST_FAILED'
+  | 'STATE_CHANGE_FAILED'
+  | 'RESTORE_FAILED'
+  | 'INVALID_EVENT'
+  | 'MEDIA_UNAVAILABLE';
+
+interface WellnessBreakError {
+  code: WellnessBreakErrorCode;
+  phase: WellnessBreakPhase;
+  recoverable: boolean;
+}
+
+interface WellnessBreakState {
+  phase: WellnessBreakPhase;
+  event?: WellnessBreakEvent;
+  responseDeadline?: number;
+  errorCode?: WellnessBreakErrorCode;
+}
+
+type WellnessStateModel = 'legacy' | 'agent-state-control';
+
+type WellnessCapturedChannelState = Pick<AgentChannelStateDetail, 'agentState' | 'auxCodeId'>;
+
+/** Short-lived, session-scoped recovery ownership stored by the widget host. */
+interface WellnessBreakRecoveryMarkerV1 {
+  version: 1;
+  agentSessionId: string;
+  stateModel: WellnessStateModel;
+  channelTypes?: string[];
+  preBreakChannelStates?: Record<string, WellnessCapturedChannelState>;
+}
 //  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
 type IWebex = {
   cc: IContactCenter;
@@ -222,8 +394,21 @@ interface IStore {
   isEmergencyModalAlreadyDisplayed: boolean;
   realTimeAssist: Record<string, RealTimeAssistPayload[]>;
   offerActionErrors: Record<string, OfferActionErrorDisplay>;
+  isWellnessBreakEnabled: boolean;
+  wellnessAgentSessionId: string;
+  wellbeingBreakIdleCode?: IdleCode;
+  wellnessBreakState: WellnessBreakState;
+  wellnessEventSequence: number;
+  aiAssistantRtdStatus: AIAssistantRTDStatusEvent;
+  isAgentStateControlEnabled: boolean;
+  agentChannelTypes: string[];
+  agentChannelStateDetails: Record<string, AgentChannelStateDetail>;
+  agentChannelReloginSequence: number;
+  legacyAgentState: string;
+  legacyAuxCodeId: string;
   init(params: InitParams, callback: (ccSDK: IContactCenter) => void): Promise<void>;
   registerCC(webex?: WithWebex['webex']): Promise<void>;
+  loadWellbeingBreakIdleCode(): Promise<void>;
 }
 
 interface IStoreWrapper extends IStore {
@@ -269,6 +454,10 @@ interface IStoreWrapper extends IStore {
   setOfferActionError(interactionId: string, error: OfferActionErrorDisplay | null): void;
   clearOfferActionError(interactionId: string): void;
   pruneOfferActionErrors(activeInteractionIds: Set<string>): void;
+  loadWellbeingBreakIdleCode(): Promise<void>;
+  setWellnessBreakState(state: WellnessBreakState): void;
+  submitBehavioralMetric(metric: WidgetsBehavioralMetric): void;
+  resetWellnessSession(): void;
 }
 
 interface IWrapupCode {
@@ -289,6 +478,10 @@ enum CC_EVENTS {
   AGENT_RELOGIN_SUCCESS = 'agent:reloginSuccess',
   AGENT_OFFER_CONSULT = 'AgentOfferConsult',
   REAL_TIME_TRANSCRIPTION = 'REAL_TIME_TRANSCRIPTION',
+  WELLNESS_BREAK = 'WellnessBreak',
+  AI_ASSISTANT_RTD_STATUS_CHANGED = 'AIAssistantRTDStatusChanged',
+  AGENT_CHANNEL_RELOGIN_SUCCESS = 'AgentChannelReloginSuccess',
+  AGENT_CHANNEL_STATE_CHANGED = 'AgentChannelStateChanged',
 }
 
 interface ICustomStateSet {
@@ -322,6 +515,11 @@ type AgentLoginProfile = {
   agentProfileID?: string;
   isTimeoutDesktopInactivityEnabled?: boolean;
   timeoutDesktopInactivityMins?: number;
+  agentSessionId?: string;
+  auxCodeId?: string;
+  subStatus?: string;
+  channelsMap?: Record<string, string[]>;
+  agentChannelStateDetailMap?: Record<string, AgentChannelStateDetail>;
 };
 
 // Generic pagination params for list-fetching APIs
@@ -407,6 +605,27 @@ export type {
   RealTimeAssistUserActionId,
   RealTimeAssistUserActionParams,
   OfferActionErrorDisplay,
+  WellnessBreakNotificationAction,
+  WellnessBreakUserAction,
+  WellnessBreakEvent,
+  AIAssistantRTDConnectionState,
+  AIAssistantRTDStatusEvent,
+  RequestWellnessBreakParams,
+  RespondToWellnessBreakParams,
+  AgentChannelStateDetail,
+  AgentChannelReloginSuccessEvent,
+  AgentChannelStateChangedEvent,
+  SetAgentChannelStateParams,
+  WellnessBreakPhase,
+  WellnessBreakErrorCode,
+  WellnessBreakError,
+  WellnessBreakState,
+  WellnessStateModel,
+  WellnessCapturedChannelState,
+  WellnessBreakRecoveryMarkerV1,
+  WidgetsBehavioralMetric,
+  WidgetsBehavioralMetricAgent,
+  WidgetsBehavioralMetricVerb,
 };
 
 export {

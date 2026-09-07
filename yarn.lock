@@ -9664,6 +9664,7 @@ __metadata:
     globals: "npm:^16.0.0"
     jest: "npm:29.7.0"
     jest-environment-jsdom: "npm:29.7.0"
+    lottie-web: "npm:5.13.0"
     prettier: "npm:^3.5.1"
     react-error-boundary: "npm:^6.0.0"
     swiper: "npm:^12.1.2"
@@ -24986,7 +24987,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lottie-web@npm:^5.12.2":
+"lottie-web@npm:5.13.0, lottie-web@npm:^5.12.2":
   version: 5.13.0
   resolution: "lottie-web@npm:5.13.0"
   checksum: 10c0/b463ad462169df3f7e04b7f3716274e269842554f1d72b8303ca7245628f2512982a59ae31698b3d57fbcda886228ae160fcb2aa518c6cecd8a95974db2458ee

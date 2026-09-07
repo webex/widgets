@@ -225,3 +225,31 @@ iframe {
   min-height: 12rem;
   width: 100%;
 }
+
+.wellness-overlay-config {
+  align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0.75rem 0.5rem 1rem;
+  max-width: 24rem;
+}
+
+.wellness-overlay-config__description {
+  color: var(--mds-color-theme-text-secondary-normal, #545454);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  margin: 0;
+}
+
+.wellness-overlay-demo-target {
+  box-sizing: border-box;
+  position: relative;
+}
+
+.wellness-overlay-demo-target--active {
+  border: 0.125rem dashed var(--mds-color-theme-outline-secondary-normal, #929292);
+  border-radius: 0.5rem;
+  min-height: 36rem;
+  padding: 0.5rem;
+}

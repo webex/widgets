@@ -3,6 +3,13 @@ const path = require('path');
 
 const baseConfig = require('../../../webpack.config');
 
+// Preserve dynamic imports so the wellness renderer stays out of the initial bundle.
+baseConfig.module.rules = baseConfig.module.rules.map((rule) =>
+  String(rule.test) === String(/\.(ts|tsx)$/)
+    ? {...rule, use: {loader: 'ts-loader', options: {compilerOptions: {module: 'esnext'}}}}
+    : rule
+);
+
 // Helper function to resolve paths relative to the monorepo root
 const resolveMonorepoRoot = (...segments) => path.resolve(__dirname, '../../../', ...segments);
 
@@ -23,7 +30,8 @@ module.exports = mergeWithCustomize({
     path: path.resolve(__dirname, 'dist'),
     filename: '[name].js',
     libraryTarget: 'commonjs2',
-    publicPath: '',
+    publicPath: 'auto',
+    chunkFilename: 'assets/wellness/[name].[contenthash:8].js',
   },
   externals: {
     react: 'react',

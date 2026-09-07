@@ -621,6 +621,13 @@ const mockCC: IContactCenter = {
   getEntryPoints: jest.fn().mockResolvedValue(mockEntryPointsResponse),
   addressBook: mockAddressBook,
   setAgentState: jest.fn().mockResolvedValue({}),
+  getWellbeingBreakIdleCode: jest.fn().mockResolvedValue({
+    id: 'wellbeing-break',
+    name: 'WellbeingBreak',
+    isSystem: true,
+    isDefault: false,
+  }),
+  setAgentChannelState: jest.fn().mockResolvedValue({}),
   getOutdialAniEntries: jest.fn().mockResolvedValue({entries: []}),
   getAccessToken: jest.fn().mockResolvedValue('mock-access-token'),
   startOutdial: jest.fn().mockResolvedValue({}),
@@ -630,6 +637,8 @@ const mockCC: IContactCenter = {
   apiAIAssistant: {
     getRealTimeAssistance: jest.fn().mockResolvedValue({}),
     sendRealTimeAssistanceUserAction: jest.fn().mockResolvedValue({}),
+    requestWellnessBreak: jest.fn().mockResolvedValue(undefined),
+    respondToWellnessBreak: jest.fn().mockResolvedValue(undefined),
   },
 };
 

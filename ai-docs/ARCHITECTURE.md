@@ -25,6 +25,7 @@ SDK at runtime — so there is no datastore, schema, or migration discipline to 
 | `store/` | MobX singleton: global CC state, SDK event wiring, SDK access surface | `packages/contact-center/store/ai-docs/store-spec.md` |
 | `cc-components/` | Pure presentational React primitives (props-only) | `packages/contact-center/cc-components/ai-docs/cc-components-spec.md` |
 | `cc-widgets/` | r2wc Web Component wrappers; aggregates and exports all widgets | `packages/contact-center/cc-widgets/ai-docs/cc-widgets-spec.md` |
+| `ai-assistant/` | AI Assistant observer/orchestrator for Real-time Assist and Agent Wellness Break | `packages/contact-center/ai-assistant/ai-docs/ai-assistant-spec.md` |
 | `station-login/` | Agent login widget (team + device selection) | `packages/contact-center/station-login/ai-docs/station-login-spec.md` |
 | `user-state/` | Agent state widget (state, idle codes, timer) | `packages/contact-center/user-state/ai-docs/user-state-spec.md` |
 | `task/` | Task widgets: CallControl, CallControlCAD, IncomingTask, OutdialCall, TaskList | `packages/contact-center/task/ai-docs/task-spec.md` |
@@ -36,7 +37,7 @@ SDK at runtime — so there is no datastore, schema, or migration discipline to 
 ```mermaid
 graph TD
   Host[Host app / Web Component] --> Widget
-  subgraph WidgetPackages[Widget packages: station-login, user-state, task]
+  subgraph WidgetPackages[Widget packages: station-login, user-state, task, ai-assistant]
     Widget[Widget = observer HOC] --> Hook[Custom hook helper.ts]
   end
   Hook --> Comp[Presentational component cc-components]
@@ -112,7 +113,7 @@ For Consult/Transfer, `Task.uiControls.consultTransferDestinations` is the visib
   `widgets-samples/**/**`.
 - **Inter-package dependency graph** (from each package's `package.json`):
 ```
-cc-widgets ── wraps ──> station-login, user-state, task (+ cc-digital-channels)
+cc-widgets ── wraps ──> station-login, user-state, task, ai-assistant (+ cc-digital-channels)
 station-login ─┐
 user-state    ─┼──> cc-components, cc-store
 task          ─┘

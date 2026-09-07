@@ -15,6 +15,7 @@ const ccTaskList = document.createElement('widget-cc-task-list');
 const ccCallControl = document.createElement('widget-cc-call-control');
 const ccCallControlCAD = document.createElement('widget-cc-call-control-cad');
 const ccOutdial = document.createElement('widget-cc-outdial-call');
+const ccAiAssistant = document.createElement('widget-cc-ai-assistant');
 const initWidgetsButton = document.getElementById('init-widgets');
 
 const themeProviderElem = document.getElementById('theme-provider-elem');
@@ -26,6 +27,7 @@ const taskListCheckbox = document.getElementById('taskListCheckbox');
 const callControlCheckbox = document.getElementById('callControlCheckbox');
 const callControlCADCheckbox = document.getElementById('callControlCADCheckbox');
 const outdialCallCheckbox = document.getElementById('outdialCallCheckbox');
+const aiAssistantCheckbox = document.getElementById('aiAssistantCheckbox');
 let isMultiLoginEnabled = false;
 let hasCampaignPreviewEnabled = true;
 let integrationEnv = false;
@@ -205,6 +207,14 @@ function initWidgets() {
       ccCallControlCAD.onHoldResume = onHoldResume;
       ccCallControlCAD.onEnd = onEnd;
       ccCallControlCAD.onWrapUp = onWrapUp;
+      ccAiAssistant.onWellnessBreakOffered = () => console.log('AIAssistant wellness offered');
+      ccAiAssistant.onWellnessBreakAccepted = () => console.log('AIAssistant wellness accepted');
+      ccAiAssistant.onWellnessBreakStarted = () => console.log('AIAssistant wellness started');
+      ccAiAssistant.onWellnessBreakEnded = () => console.log('AIAssistant wellness ended');
+      ccAiAssistant.onWellnessBreakError = (error) => console.error('AIAssistant wellness error', error.code);
+      ccAiAssistant.onFullScreenToggle = (isFullScreen) => {
+        ccAiAssistant.classList.toggle('ai-assistant-fullscreen-host', isFullScreen);
+      };
 
       if (stationLoginCheckbox.checked) {
         ccStationLogin.classList.remove('disabled');
@@ -294,6 +304,20 @@ function loginSuccess() {
     callControlCADContainer.querySelector('fieldset').appendChild(ccCallControlCAD);
     widgetsContainer.appendChild(callControlCADContainer);
   }
+  if (aiAssistantCheckbox.checked && !ccAiAssistant.isConnected) {
+    ccAiAssistant.classList.remove('disabled');
+    const aiAssistantContainer = document.createElement('div');
+    aiAssistantContainer.className = 'box';
+    aiAssistantContainer.innerHTML = `
+      <section class="section-box">
+        <fieldset class="fieldset">
+          <legend class="legend-box">AI Assistant</legend>
+        </fieldset>
+      </section>
+    `;
+    aiAssistantContainer.querySelector('fieldset').appendChild(ccAiAssistant);
+    widgetsContainer.appendChild(aiAssistantContainer);
+  }
 }
 
 function logoutSuccess() {
@@ -304,6 +328,7 @@ function logoutSuccess() {
   ccCallControl.classList.add('disabled');
   ccCallControlCAD.classList.add('disabled');
   ccOutdial.classList.add('disabled');
+  ccAiAssistant.classList.add('disabled');
 }
 
 function onStateChange(status) {

@@ -1,0 +1,320 @@
+.wellness-break-card {
+  align-self: center;
+  background: var(--mds-color-theme-background-secondary-normal, rgba(0, 0, 0, 0.04));
+  border: 0.0625rem solid var(--mds-color-theme-outline-secondary-normal, rgba(0, 0, 0, 0.18));
+  border-radius: 0.75rem;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: 40rem;
+  padding: 1rem;
+  width: 100%;
+}
+
+.wellness-break-card__title,
+.wellness-break-card__message,
+.wellness-break-error p {
+  margin: 0;
+}
+
+.wellness-break-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.wellness-break-suggestion {
+  align-items: center;
+  box-sizing: border-box;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100%;
+  padding: 2.5rem 2rem;
+  text-align: center;
+}
+
+.wellness-break-suggestion__logo {
+  display: flex;
+  margin-bottom: 1.25rem;
+}
+
+.wellness-break-suggestion__message {
+  color: var(--mds-color-theme-text-secondary-normal);
+  margin: 0 0 1rem;
+  max-width: 20rem;
+}
+
+.wellness-break-suggestion > mdc-button {
+  width: min(100%, 20rem);
+}
+
+.wellness-break-conversation {
+  align-self: center;
+  box-sizing: border-box;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 1rem;
+  justify-content: flex-end;
+  max-width: 40rem;
+  min-height: 0;
+  width: 100%;
+}
+
+.wellness-break-conversation__request {
+  align-self: flex-end;
+  background: var(--mds-color-theme-button-primary-normal, #000);
+  border-radius: 0.75rem 0.75rem 0 0.75rem;
+  color: var(--mds-color-theme-inverted-text-primary-normal, #fff);
+  margin: 0;
+  padding: 0.625rem 0.875rem;
+}
+
+.wellness-break-conversation__response {
+  align-items: flex-start;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.wellness-break-conversation__response p {
+  margin: 0;
+}
+
+.wellness-break-conversation__response-icon {
+  display: flex;
+  flex: 0 0 1.25rem;
+  margin-top: 0.125rem;
+}
+
+.wellness-break-toast-anchor {
+  max-width: calc(100vw - 2rem);
+  position: fixed;
+  right: 1rem;
+  top: 1rem;
+  z-index: 1100;
+}
+
+.wellness-break-toast-anchor > mdc-toast {
+  --mdc-toast-width: min(24rem, calc(100vw - 2rem));
+}
+
+.wellness-break-toast__icon {
+  display: flex;
+}
+
+.wellness-break-error {
+  color: var(--mds-color-theme-text-error-normal, #b50000);
+  padding: 0.75rem;
+}
+
+.wellness-break-overlay {
+  background: var(--mds-color-theme-common-overlays-secondary-normal, rgba(0, 0, 0, 0.4));
+  box-sizing: border-box;
+  display: flex;
+  inset: 0;
+  padding-block-start: 4rem;
+  padding-inline-start: 3.5rem;
+  position: fixed;
+  z-index: 10000;
+}
+
+.wellness-break-overlay--assistant,
+.wellness-break-overlay--custom {
+  padding: 0;
+  position: absolute;
+}
+
+.wellness-break-modal {
+  align-items: center;
+  background: var(--mds-color-theme-background-primary-normal, #fff);
+  border-radius: 0.5rem;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  text-align: center;
+  width: 100%;
+
+  &:focus {
+    outline: none;
+  }
+
+  &::after {
+    background: linear-gradient(
+      color-mix(in srgb, var(--mds-color-theme-background-primary-normal, #fff) 20%, transparent),
+      color-mix(in srgb, var(--mds-color-theme-background-primary-normal, #fff) 60%, transparent)
+    );
+    content: '';
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+    position: absolute;
+    transition: opacity 0.5s;
+    z-index: 1;
+  }
+}
+
+.wellness-break-modal--starting::after,
+.wellness-break-modal--ending::after {
+  opacity: 1;
+}
+
+.wellness-break-modal__animation {
+  height: 100%;
+  inset: 0;
+  position: absolute;
+  width: 100%;
+
+  svg {
+    height: 100% !important;
+    width: 100% !important;
+  }
+}
+
+.wellness-break-modal__animation--static {
+  background:
+    radial-gradient(
+      ellipse at 50% 110%,
+      color-mix(in srgb, var(--mds-color-theme-background-primary-normal, #fff) 52%, transparent) 0 30%,
+      transparent 31%
+    ),
+    linear-gradient(
+      110deg,
+      var(--mds-color-theme-background-accent-normal, #c9c4ef),
+      var(--mds-color-theme-background-accent-light, #bfeaf4)
+    );
+}
+
+.wellness-break-modal__content {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  z-index: 2;
+}
+
+.wellness-break-modal__title {
+  color: var(--mds-color-theme-text-primary-normal, #121212);
+  font-size: 2.5rem;
+  font-weight: 500;
+  line-height: 3.25rem;
+  margin: 0;
+}
+
+.wellness-break-modal__countdown-row {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-block-start: 1rem;
+}
+
+.wellness-break-modal__countdown-message,
+.wellness-break-modal__playing-message {
+  color: var(--mds-color-theme-text-primary-normal, #121212);
+  font-weight: 400;
+  margin: 0;
+}
+
+.wellness-break-modal__countdown-message {
+  font-size: 1.5rem;
+  line-height: 2rem;
+}
+
+.wellness-break-modal__playing-message {
+  font-size: 2rem;
+  line-height: 2.5rem;
+}
+
+.wellness-break-modal__countdown {
+  display: flex;
+}
+
+.wellness-break-modal__countdown-digit {
+  color: var(--mds-color-theme-text-primary-disabled, rgba(18, 18, 18, 0.35));
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 2rem;
+  margin-inline-start: 1rem;
+}
+
+.wellness-break-modal__countdown-digit--active {
+  color: var(--mds-color-theme-text-primary-normal, #121212);
+}
+
+.wellness-break-modal__progress {
+  background: var(--mds-color-theme-background-secondary-normal, #ddd);
+  border-radius: 0.1875rem;
+  bottom: 5%;
+  height: 0.375rem;
+  min-width: 7rem;
+  overflow: hidden;
+  position: absolute;
+  width: 11%;
+  z-index: 2;
+}
+
+.wellness-break-modal__progress span {
+  background: var(--mds-color-theme-text-accent-normal, #0051af);
+  display: block;
+  height: 100%;
+  transition: width 1s linear;
+}
+
+.sr-only {
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wellness-break-modal::after,
+  .wellness-break-modal__progress span {
+    transition: none;
+  }
+}
+
+@media (max-width: 48rem) {
+  .wellness-break-overlay {
+    padding: 1rem;
+  }
+
+  .wellness-break-modal__content {
+    padding: 1.5rem;
+  }
+
+  .wellness-break-modal__title {
+    font-size: 2rem;
+    line-height: 2.5rem;
+  }
+
+  .wellness-break-modal__countdown-message,
+  .wellness-break-modal__countdown-digit {
+    font-size: 1.125rem;
+    line-height: 1.5rem;
+  }
+
+  .wellness-break-modal__countdown-digit {
+    margin-inline-start: 0.625rem;
+  }
+
+  .wellness-break-modal__playing-message {
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+
+  .wellness-break-modal__progress {
+    width: 35%;
+  }
+}

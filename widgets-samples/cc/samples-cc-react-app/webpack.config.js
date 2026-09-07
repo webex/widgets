@@ -8,6 +8,7 @@ const resolveMonorepoRoot = (...segments) => path.resolve(__dirname, '../../../'
 const PKG_SRC = [
   'packages/contact-center/store/src',
   'packages/contact-center/cc-widgets/src',
+  'packages/contact-center/ai-assistant/src',
   'packages/contact-center/station-login/src',
   'packages/contact-center/user-state/src',
   'packages/contact-center/task/src',
@@ -15,6 +16,10 @@ const PKG_SRC = [
   'packages/contact-center/ui-logging/src',
   'packages/contact-center/cc-digital-channels/src',
 ].map((p) => resolveMonorepoRoot(p));
+const WELLNESS_LAZY_SRC = [
+  resolveMonorepoRoot('packages/contact-center/ai-assistant/src/wellness'),
+  resolveMonorepoRoot('packages/contact-center/cc-components/src/components/AIAssistant/WellnessBreak'),
+];
 
 module.exports = {
   mode: process.env.NODE_ENV || 'development',
@@ -44,6 +49,7 @@ module.exports = {
     alias: {
       '@webex/cc-store': path.resolve(__dirname, '../../../packages/contact-center/store/src'),
       '@webex/cc-widgets': path.resolve(__dirname, '../../../packages/contact-center/cc-widgets/src'),
+      '@webex/cc-ai-assistant': path.resolve(__dirname, '../../../packages/contact-center/ai-assistant/src'),
       '@webex/cc-station-login': path.resolve(__dirname, '../../../packages/contact-center/station-login/src'),
       '@webex/cc-user-state': path.resolve(__dirname, '../../../packages/contact-center/user-state/src'),
       '@webex/cc-task': path.resolve(__dirname, '../../../packages/contact-center/task/src'),
@@ -67,9 +73,27 @@ module.exports = {
       {
         test: /\.[jt]sx?$/,
         include: [path.resolve(__dirname, 'src'), ...PKG_SRC, resolveMonorepoRoot('node_modules/xxh3-ts')],
+        exclude: WELLNESS_LAZY_SRC,
         loader: 'ts-loader',
         options: {
           transpileOnly: true, // ✅ disables type-checking
+        },
+      },
+      {
+        test: /\.[jt]sx?$/,
+        include: WELLNESS_LAZY_SRC,
+        loader: 'ts-loader',
+        options: {
+          transpileOnly: true,
+          // Preserve only the wellness imports that intentionally split media.
+          compilerOptions: {module: 'esnext', moduleResolution: 'bundler'},
+        },
+      },
+      {
+        test: /WellnessBreakSound\.mp3$/,
+        type: 'asset/resource',
+        generator: {
+          filename: 'assets/wellness/[name][ext]',
         },
       },
       {
@@ -127,6 +151,8 @@ module.exports = {
     path: path.resolve(__dirname, '../../../docs/samples-cc-react-app'), // Output directory
     filename: 'bundle.js', // Output bundle file name
     clean: true, // Clean dist folder before each build
+    publicPath: 'auto',
+    chunkFilename: 'assets/wellness/[name].[contenthash:8].js',
   },
   plugins: [
     new HtmlWebpackPlugin({

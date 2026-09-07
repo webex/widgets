@@ -12,7 +12,7 @@
 | Doc kind                                | Module spec                                                                   |
 | Coverage score                          | Pending coverage assessment                                                   |
 | Generated from                          | `module-spec` @ SDLC template library `0.1.0-draft`                           |
-| generated_by / approved_by / updated_at | generated_by: migration agent / approved_by: pending / updated_at: 2026-06-29 |
+| generated_by / approved_by / updated_at | generated_by: migration agent / approved_by: pending / updated_at: 2026-09-04 |
 | Validation status                       | not-run                                                                       |
 
 Coverage score: `Pending coverage assessment` before the first report; after assessment, replace with
@@ -400,3 +400,17 @@ Unit tests are split by source file. `tests/store.ts` covers the singleton defau
 
 - Repo architecture: [`ARCHITECTURE.md`](../../../../ai-docs/ARCHITECTURE.md) · Registry: [`SPEC_INDEX.md`](../../../../ai-docs/SPEC_INDEX.md) · Contracts: [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md)
 - Coverage state & contracts baseline: `.sdd/manifest.json`
+
+## Agent Wellness Break addendum (WXCC-12423)
+
+| ID | Requirement | Source evidence | Test evidence |
+|---|---|---|---|
+| `STORE-R-032` | Project only the SDK's effective `Profile.isWellnessBreakEnabled`; never rebuild licensing or rollout rules from raw AI configuration. | `src/store.ts`, `src/util.ts` | `tests/wellness.ts` |
+| `STORE-R-033` | Own the station/channel `agentSessionId`, `WellbeingBreak` system-code lookup, exact wellness/RTD/channel event listeners, and reject stale-session notifications/state updates without payload logging. | `src/store.ts`, `src/storeEventsWrapper.ts`, `src/store.types.ts` | `tests/wellness.ts`, `tests/storeEventsWrapper.ts` |
+| `STORE-R-034` | RTD disconnect clears only offer/request state; logout, session rotation, and current-session multi-login close reset all session-owned wellness state. Active lifecycle/restoration remains state-owned across RTD loss and feature revocation. | `src/storeEventsWrapper.ts`, `src/store.ts` | `tests/wellness.ts`, `tests/storeEventsWrapper.ts` |
+| `STORE-R-035` | Project ASC login/relogin snapshots and channel changes plus legacy state without changing session ownership from a state event. When station login normalizes away `channelsMap`, derive configured ASC channel types from the state-snapshot keys so pre-break capture and restoration remain exact. All event/promise mutations use MobX actions. | `src/storeEventsWrapper.ts` | `tests/wellness.ts` |
+| `STORE-R-036` | Submit widgets behavioral events through `webex.internal.newMetrics` using explicit agent/target/verb taxonomy and flat bounded properties; missing or failed metrics transport is logged and never interrupts the wellness lifecycle. | `src/storeEventsWrapper.ts`, `src/store.types.ts` | `tests/wellness.ts` |
+
+The SDK symbols are represented structurally until the WXCC-12423 Contact Center package is published;
+release must replace them with its package-root exports. See
+[`agent-wellness-break-intake.md`](../../../../ai-docs/features/agent-wellness-break-intake.md).

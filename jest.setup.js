@@ -2,6 +2,13 @@
 // This is a workaround for the fact that JSDOM does not support canvas methods like getContext.
 import 'jest-canvas-mock';
 
+// Webpack's browser-relative lazy chunks derive their base URL from the
+// currently loaded script. JSDOM does not create one, so provide the same
+// minimal browser invariant for tests that import built workspace packages.
+const webpackEntryScript = document.createElement('script');
+webpackEntryScript.src = 'http://localhost/index.js';
+document.head.appendChild(webpackEntryScript);
+
 const createEnumProxy = () =>
   new Proxy(
     {},

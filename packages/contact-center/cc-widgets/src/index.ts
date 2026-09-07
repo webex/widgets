@@ -6,6 +6,14 @@ import {AIAssistant} from '@webex/cc-ai-assistant';
 import store from '@webex/cc-store';
 import '@momentum-ui/core/css/momentum-ui.min.css';
 
+export type {
+  IAIAssistantProps,
+  WellnessBreakError,
+  WellnessBreakErrorCode,
+  WellnessBreakOverlayTarget,
+  WellnessBreakPhase,
+} from '@webex/cc-ai-assistant';
+
 export {
   StationLogin,
   UserState,
