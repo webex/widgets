@@ -382,6 +382,48 @@ describe('AIAssistantComponent', () => {
     expect(onRequest).toHaveBeenCalledTimes(1);
   });
 
+  it('lets an eligible suggestion fill the assistant body while retaining prior wellness history', () => {
+    const history = [
+      {
+        type: 'notice' as const,
+        id: 'completed-1',
+        createdAt: 1,
+        notice: 'completed' as const,
+      },
+    ];
+    const wellness = {
+      enabled: true,
+      phase: 'idle' as const,
+      event: {
+        agentId: 'agent-1',
+        orgId: 'org-1',
+        agentSessionId: 'notification-session',
+        actionEvent: 'SUGGEST_WELLNESS_BREAK' as const,
+      },
+      requestAvailable: true,
+      hasBlockingTasks: false,
+      elapsedSeconds: 0,
+      reducedMotion: false,
+      history,
+      contentCleared: false,
+      onRequest: jest.fn(),
+      onAccept: jest.fn(),
+      onLater: jest.fn(),
+      onClearHistory: jest.fn(),
+      onMediaError: jest.fn(),
+    };
+    const props = createProps({isFeatureEnabled: false, wellness});
+    const {rerender} = render(<AIAssistantComponent {...props} />);
+
+    expect(screen.getByTestId('ai-assistant:body')).toHaveClass('ai-assistant__body--landing');
+    expect(screen.getByTestId('wellness-break:request-card')).toBeInTheDocument();
+    expect(screen.queryByText('Well-being break completed')).not.toBeInTheDocument();
+
+    rerender(<AIAssistantComponent {...props} wellness={{...wellness, requestAvailable: false}} />);
+
+    expect(screen.getByText('Well-being break completed')).toBeInTheDocument();
+  });
+
   it('keeps a suggestion hidden while interaction content has priority', () => {
     render(
       <AIAssistantComponent

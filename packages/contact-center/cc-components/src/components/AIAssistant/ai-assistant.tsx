@@ -59,7 +59,7 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
     .join(' ');
   const showLanding = !hasActiveInteraction || !isFeatureEnabled;
   const wellnessHistory = wellness?.history ?? [];
-  const showWellnessHistory = Boolean(wellness?.enabled && !wellness.contentCleared && wellnessHistory.length > 0);
+  const hasWellnessHistory = Boolean(wellness?.enabled && !wellness.contentCleared && wellnessHistory.length > 0);
   // Desktop treats the suggested CTA as an empty-state action. It is only
   // eligible when normal assistant content is not active; once eligible, the
   // wellness experience owns the body instead of stacking above the landing.
@@ -71,6 +71,9 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
       wellness.requestAvailable &&
       !wellness.notice
   );
+  // Keep prior messages in the view model, but let a newly eligible Desktop-style
+  // suggestion temporarily own the complete assistant body.
+  const showWellnessHistory = hasWellnessHistory && !showWellnessSuggestion;
   const showWellnessRequestState = Boolean(
     wellness?.enabled && !wellness.contentCleared && (wellness.phase === 'request-pending' || wellness.notice)
   );
@@ -217,9 +220,7 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
           </header>
           <div
             className={`ai-assistant__body${
-              (showLanding && !showWellnessContent) || (showWellnessSuggestion && !showWellnessHistory)
-                ? ' ai-assistant__body--landing'
-                : ''
+              (showLanding && !showWellnessContent) || showWellnessSuggestion ? ' ai-assistant__body--landing' : ''
             }`}
             data-testid="ai-assistant:body"
           >
