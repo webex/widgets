@@ -316,6 +316,51 @@ describe('useUserState Hook', () => {
     });
   });
 
+  it('does not echo externally managed wellness state transitions back to the SDK', async () => {
+    const wellnessIdleCodes = [
+      ...idleCodes,
+      {id: 'wellness', name: 'WellbeingBreak', isSystem: true, isDefault: false},
+    ];
+    const {rerender} = renderHook(
+      ({currentState, isCurrentStateExternallyManaged, lastStateChangeTimestamp}) =>
+        useUserState({
+          idleCodes: wellnessIdleCodes,
+          agentId,
+          cc: mockCC,
+          currentState,
+          customState: null,
+          lastStateChangeTimestamp,
+          lastIdleCodeChangeTimestamp: lastStateChangeTimestamp,
+          isCurrentStateExternallyManaged,
+          logger,
+          onStateChange,
+        }),
+      {
+        initialProps: {
+          currentState: '1',
+          isCurrentStateExternallyManaged: false,
+          lastStateChangeTimestamp: 1_000,
+        },
+      }
+    );
+
+    rerender({
+      currentState: 'wellness',
+      isCurrentStateExternallyManaged: true,
+      lastStateChangeTimestamp: 2_000,
+    });
+    rerender({
+      currentState: '1',
+      isCurrentStateExternallyManaged: false,
+      lastStateChangeTimestamp: 3_000,
+    });
+
+    await waitFor(() => expect(onStateChange).toHaveBeenCalledWith(expect.objectContaining({name: 'WellbeingBreak'})));
+    expect(mockCC.setAgentState).not.toHaveBeenCalled();
+    expect(workerMock.postMessage).toHaveBeenCalledWith({type: 'reset', startTime: 2_000});
+    expect(workerMock.postMessage).toHaveBeenCalledWith({type: 'reset', startTime: 3_000});
+  });
+
   it('should handle errors from setAgentState and revert state', async () => {
     ccSetAgentStateSpy.mockRejectedValueOnce(new Error('Error setting agent status'));
     const {rerender} = renderHook(

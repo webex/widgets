@@ -2,20 +2,12 @@ import React, {useState} from 'react';
 import {Button, Text, Tooltip} from '@momentum-design/components/dist/react';
 import CiscoAIAssistantColorIcon from '../CiscoAIAssistantColorIcon';
 import type {WellnessBreakRequestCardProps} from '../ai-assistant.types';
-
-const SUGGESTION_COPY = "Looks like it's a busy day. Here's how I can help you stay focussed and on top of your game";
-const SUGGESTION_TOOLTIP_FALLBACK =
-  'This break is pre-approved by your organization for your well-being. You deserve it.';
+import {
+  WELLNESS_NOTICE_COPY,
+  WELLNESS_SUGGESTION_COPY,
+  WELLNESS_SUGGESTION_TOOLTIP_FALLBACK,
+} from './wellness-break-copy';
 let requestButtonSequence = 0;
-
-const NOTICE_COPY = {
-  declined:
-    "It's great to see your dedication. But remember, taking breaks can boost your productivity and your health.",
-  'not-allowed':
-    "I'm sorry, you've reached your well-being break limit today. Continue with your tasks, but remember to take care of yourself.",
-  'no-response': "Looks like you're busy. I didn't get a response, so I'll check back with you shortly.",
-  completed: "I hope you're feeling recharged after that well-being break. See you in your next break!",
-} as const;
 
 const WellnessBreakRequestCard: React.FC<WellnessBreakRequestCardProps> = ({
   phase,
@@ -29,9 +21,9 @@ const WellnessBreakRequestCard: React.FC<WellnessBreakRequestCardProps> = ({
     return `wellness-break-request-${requestButtonSequence}`;
   });
   const notificationText = actionText?.trim();
-  const tooltip = notificationText || SUGGESTION_TOOLTIP_FALLBACK;
+  const tooltip = notificationText || WELLNESS_SUGGESTION_TOOLTIP_FALLBACK;
   const noticeText =
-    notice === 'not-allowed' && notificationText ? notificationText : notice ? NOTICE_COPY[notice] : '';
+    notice === 'not-allowed' && notificationText ? notificationText : notice ? WELLNESS_NOTICE_COPY[notice] : '';
   const showRequestConversation = phase === 'request-pending' || notice === 'not-allowed';
 
   if (!notice && phase === 'idle') {
@@ -45,7 +37,7 @@ const WellnessBreakRequestCard: React.FC<WellnessBreakRequestCardProps> = ({
           <CiscoAIAssistantColorIcon size={48} />
         </div>
         <Text tagname="p" type="body-large-regular" className="wellness-break-suggestion__message">
-          {SUGGESTION_COPY}
+          {WELLNESS_SUGGESTION_COPY}
         </Text>
         <Button
           id={requestButtonId}

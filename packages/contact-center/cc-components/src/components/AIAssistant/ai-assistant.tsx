@@ -1,10 +1,11 @@
-import React from 'react';
-import {Button, Text} from '@momentum-design/components/dist/react';
+import React, {useState} from 'react';
+import {Button, Text, Tooltip} from '@momentum-design/components/dist/react';
 import {withMetrics} from '@webex/cc-ui-logging';
 import RealTimeAssist from './RealTimeAssist/real-time-assist';
 import AIAssistantLanding from './ai-assistant-landing';
 import CiscoAIAssistantColorIcon from './CiscoAIAssistantColorIcon';
 import WellnessBreakError from './WellnessBreak/wellness-break-error';
+import WellnessBreakHistory from './WellnessBreak/wellness-break-history';
 import WellnessBreakModal from './WellnessBreak/wellness-break-modal';
 import WellnessBreakOfferCard from './WellnessBreak/wellness-break-offer-card';
 import WellnessBreakOfferToast from './WellnessBreak/wellness-break-offer-toast';
@@ -16,6 +17,8 @@ import './WellnessBreak/wellness-break.styles.scss';
 
 const isWellnessOverlayPhase = (phase: WellnessBreakViewModel['phase']): phase is WellnessBreakModalProps['phase'] =>
   phase === 'starting' || phase === 'playing' || phase === 'ending';
+
+let assistantHeaderSequence = 0;
 
 const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
   chrome,
@@ -34,6 +37,8 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
   minimize,
   restore,
   toggleFullScreen,
+  clearContent = () => undefined,
+  hasClearableContent = false,
   requestRealTimeAssist,
   setContextDraft,
   submitContext,
@@ -43,30 +48,46 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
   wellnessBreakOverlayTarget,
   wellness,
 }) => {
+  const [headerActionId] = useState(() => {
+    assistantHeaderSequence += 1;
+    return `ai-assistant-header-${assistantHeaderSequence}`;
+  });
   // Fullscreen is consumer-owned: we emit onFullScreenToggle; the host owns layout.
   const rootClass = ['ai-assistant', className || ''].filter(Boolean).join(' ');
   const panelClass = ['ai-assistant__panel', isFullScreen ? 'ai-assistant__panel--full-screen' : '']
     .filter(Boolean)
     .join(' ');
   const showLanding = !hasActiveInteraction || !isFeatureEnabled;
+  const wellnessHistory = wellness?.history ?? [];
+  const showWellnessHistory = Boolean(wellness?.enabled && !wellness.contentCleared && wellnessHistory.length > 0);
   // Desktop treats the suggested CTA as an empty-state action. It is only
   // eligible when normal assistant content is not active; once eligible, the
   // wellness experience owns the body instead of stacking above the landing.
   const showWellnessSuggestion = Boolean(
-    wellness?.enabled && showLanding && wellness.phase === 'idle' && wellness.requestAvailable && !wellness.notice
+    wellness?.enabled &&
+      !wellness.contentCleared &&
+      showLanding &&
+      wellness.phase === 'idle' &&
+      wellness.requestAvailable &&
+      !wellness.notice
   );
   const showWellnessRequestState = Boolean(
-    wellness?.enabled && (wellness.phase === 'request-pending' || wellness.notice)
+    wellness?.enabled && !wellness.contentCleared && (wellness.phase === 'request-pending' || wellness.notice)
   );
-  const showWellnessOffer = Boolean(wellness?.enabled && wellness.phase === 'offer-pending');
+  const showWellnessOffer = Boolean(
+    wellness?.enabled && !wellness.contentCleared && wellness.phase === 'offer-pending'
+  );
   const showWellnessStatus = Boolean(
-    wellness?.enabled && ['changing-to-break', 'waiting-for-safe-state', 'restoring'].includes(wellness.phase)
+    wellness?.enabled &&
+      !wellness.contentCleared &&
+      ['changing-to-break', 'waiting-for-safe-state', 'restoring'].includes(wellness.phase)
   );
-  const showWellnessError = Boolean(wellness?.enabled && wellness.phase === 'error');
+  const showWellnessError = Boolean(wellness?.enabled && !wellness.contentCleared && wellness.phase === 'error');
   const wellnessOverlayPhase = wellness && isWellnessOverlayPhase(wellness.phase) ? wellness.phase : undefined;
   const showWellnessOverlay = Boolean(wellnessOverlayPhase);
   const showWellnessContent = Boolean(
     showWellnessSuggestion ||
+      showWellnessHistory ||
       showWellnessRequestState ||
       showWellnessOffer ||
       showWellnessStatus ||
@@ -99,6 +120,7 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
             </Text>
             <div className="ai-assistant__header-actions">
               <Button
+                id={`${headerActionId}-restore`}
                 type="button"
                 variant="tertiary"
                 size={28}
@@ -107,7 +129,11 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
                 data-testid="ai-assistant:minimized-restore"
                 onClick={restore}
               />
+              <Tooltip triggerID={`${headerActionId}-restore`} placement="bottom" tooltipType="label">
+                Restore
+              </Tooltip>
               <Button
+                id={`${headerActionId}-minimized-close`}
                 type="button"
                 variant="tertiary"
                 size={28}
@@ -116,6 +142,9 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
                 data-testid="ai-assistant:minimized-close"
                 onClick={close}
               />
+              <Tooltip triggerID={`${headerActionId}-minimized-close`} placement="bottom" tooltipType="label">
+                Close
+              </Tooltip>
             </div>
           </div>
         </div>
@@ -125,8 +154,28 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
             <Text tagname="h2" type="body-large-bold" className="ai-assistant__title">
               {AI_ASSISTANT_TITLE}
             </Text>
-            <div className="ai-assistant__header-actions">
+            <div className="ai-assistant__header-actions" data-testid="ai-assistant:header-actions">
               <Button
+                id={`${headerActionId}-clear`}
+                type="button"
+                variant="tertiary"
+                size={28}
+                prefix-icon="clean-up-bold"
+                aria-label="Clear"
+                data-testid="ai-assistant:header-clear"
+                disabled={!hasClearableContent}
+                onClick={clearContent}
+              />
+              <Tooltip
+                triggerID={`${headerActionId}-clear`}
+                placement="bottom"
+                tooltipType="label"
+                data-testid="ai-assistant:header-clear-tooltip"
+              >
+                Clear
+              </Tooltip>
+              <Button
+                id={`${headerActionId}-minimize`}
                 type="button"
                 variant="tertiary"
                 size={28}
@@ -135,7 +184,11 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
                 data-testid="ai-assistant:header-minimize"
                 onClick={minimize}
               />
+              <Tooltip triggerID={`${headerActionId}-minimize`} placement="bottom" tooltipType="label">
+                Minimize
+              </Tooltip>
               <Button
+                id={`${headerActionId}-fullscreen`}
                 type="button"
                 variant="tertiary"
                 size={28}
@@ -144,7 +197,11 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
                 data-testid="ai-assistant:header-fullscreen"
                 onClick={toggleFullScreen}
               />
+              <Tooltip triggerID={`${headerActionId}-fullscreen`} placement="bottom" tooltipType="label">
+                {isFullScreen ? 'Exit full screen' : 'Full screen'}
+              </Tooltip>
               <Button
+                id={`${headerActionId}-close`}
                 type="button"
                 variant="tertiary"
                 size={28}
@@ -153,15 +210,27 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
                 data-testid="ai-assistant:header-close"
                 onClick={close}
               />
+              <Tooltip triggerID={`${headerActionId}-close`} placement="bottom" tooltipType="label">
+                Close
+              </Tooltip>
             </div>
           </header>
           <div
             className={`ai-assistant__body${
-              (showLanding && !showWellnessContent) || showWellnessSuggestion ? ' ai-assistant__body--landing' : ''
+              (showLanding && !showWellnessContent) || (showWellnessSuggestion && !showWellnessHistory)
+                ? ' ai-assistant__body--landing'
+                : ''
             }`}
             data-testid="ai-assistant:body"
           >
-            {(showWellnessSuggestion || showWellnessRequestState) && wellness ? (
+            {showWellnessHistory && wellness ? (
+              <WellnessBreakHistory
+                entries={wellnessHistory}
+                onAccept={() => wellness.onAccept('card')}
+                onLater={() => wellness.onLater('card')}
+              />
+            ) : null}
+            {(showWellnessSuggestion || (showWellnessRequestState && !showWellnessHistory)) && wellness ? (
               <WellnessBreakRequestCard
                 phase={wellness.phase}
                 notice={wellness.notice}
@@ -170,7 +239,7 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
                 onRequest={wellness.onRequest}
               />
             ) : null}
-            {showWellnessOffer && wellness ? (
+            {showWellnessOffer && !showWellnessHistory && wellness ? (
               <WellnessBreakOfferCard
                 event={wellness.event}
                 disabled={false}
@@ -178,7 +247,7 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
                 onLater={() => wellness.onLater('card')}
               />
             ) : null}
-            {showWellnessStatus && wellness ? (
+            {showWellnessStatus && !showWellnessHistory && wellness ? (
               <section className="wellness-break-card" data-testid="wellness-break:status" aria-live="polite">
                 <Text tagname="p" type="body-small-regular" className="wellness-break-card__message">
                   {wellness.phase === 'restoring'

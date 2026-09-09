@@ -25,6 +25,11 @@ describe('Agent Wellness Break store projection', () => {
     store.store.agentChannelTypes = [];
     store.store.agentChannelStateDetails = {};
     store.store.wellbeingBreakIdleCode = undefined;
+    store.store.currentState = '0';
+    store.store.lastStateChangeTimestamp = undefined;
+    store.store.lastIdleCodeChangeTimestamp = undefined;
+    store.store.legacyAgentState = '';
+    store.store.legacyAuxCodeId = '';
     mockCC.webex = undefined;
     mockCC.getWellbeingBreakIdleCode.mockResolvedValue({
       id: 'wellbeing-break',
@@ -57,14 +62,16 @@ describe('Agent Wellness Break store projection', () => {
     expect(store.idleCodes.map(({id}) => id)).toEqual(['ordinary']);
   });
 
-  it('accepts a current-session notification and rejects stale notifications', () => {
+  it('accepts current-agent notifications regardless of their agent session id', () => {
     store.handleWellnessBreak(wellnessEvent);
 
     expect(store.wellnessBreakState.event).toEqual(wellnessEvent);
     expect(store.wellnessEventSequence).toBe(1);
 
-    store.handleWellnessBreak({...wellnessEvent, agentSessionId: 'stale-session'});
-    expect(store.wellnessEventSequence).toBe(1);
+    const mismatchedSessionEvent = {...wellnessEvent, agentSessionId: 'another-session'};
+    store.handleWellnessBreak(mismatchedSessionEvent);
+    expect(store.wellnessBreakState.event).toEqual(mismatchedSessionEvent);
+    expect(store.wellnessEventSequence).toBe(2);
   });
 
   it('clears only pre-accept state when RTD disconnects', () => {
@@ -107,6 +114,24 @@ describe('Agent Wellness Break store projection', () => {
 
     store.handleAgentChannelStateChanged({...update, agentSessionId: 'stale-session', channelType: 'chat'});
     expect(store.agentChannelStateDetails.chat).toBeUndefined();
+  });
+
+  it('projects the WellbeingBreak legacy state and timestamps used by the status timer', () => {
+    store.handleStateChange({
+      type: 'AgentStateChangeSuccess',
+      agentSessionId: 'session-1',
+      subStatus: 'Idle',
+      auxCodeId: 'wellbeing-break',
+      lastStateChangeTimestamp: 2_000,
+      lastIdleCodeChangeTimestamp: 2_000,
+      lastStateChangeReason: 'WellbeingBreak',
+    });
+
+    expect(store.currentState).toBe('wellbeing-break');
+    expect(store.legacyAgentState).toBe('Idle');
+    expect(store.legacyAuxCodeId).toBe('wellbeing-break');
+    expect(store.lastStateChangeTimestamp).toBe(2_000);
+    expect(store.lastIdleCodeChangeTimestamp).toBe(2_000);
   });
 
   it('derives configured ASC channels from the station-login snapshot when channelsMap is not exposed', () => {

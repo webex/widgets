@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useCallback} from 'react';
 import store from '@webex/cc-store';
 import {observer} from 'mobx-react-lite';
 import {ErrorBoundary} from 'react-error-boundary';
@@ -63,6 +63,21 @@ const AIAssistantInternal: React.FunctionComponent<IAIAssistantProps> = observer
     idleCodes: idleCodes || [],
     theme: currentTheme || 'light',
   });
+  const clearContent = useCallback(() => {
+    hookProps.clearTranscript();
+    wellness.onClearHistory?.();
+  }, [hookProps.clearTranscript, wellness.onClearHistory]);
+  const hasClearableContent = Boolean(
+    hookProps.chatEntries.length ||
+      wellness.history?.length ||
+      (!wellness.contentCleared &&
+        (wellness.requestAvailable ||
+          wellness.notice ||
+          wellness.error ||
+          ['offer-pending', 'request-pending', 'changing-to-break', 'waiting-for-safe-state', 'restoring'].includes(
+            wellness.phase
+          )))
+  );
 
   return (
     <AIAssistantComponent
@@ -74,6 +89,8 @@ const AIAssistantInternal: React.FunctionComponent<IAIAssistantProps> = observer
       className={props.className}
       wellnessBreakOverlayTarget={props.wellnessBreakOverlayTarget}
       wellness={wellness}
+      clearContent={clearContent}
+      hasClearableContent={hasClearableContent}
     />
   );
 });

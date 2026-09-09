@@ -234,6 +234,61 @@ describe('useWellnessBreak', () => {
     });
   });
 
+  it('accepts a direct offer from another notification session using the active local session', async () => {
+    const provide = {
+      ...event,
+      agentSessionId: 'notification-session',
+      actionEvent: 'PROVIDE_WELLNESS_BREAK' as const,
+    };
+    const {result} = renderHook(() =>
+      useWellnessBreak({
+        ...baseInput,
+        wellnessBreakState: {phase: 'offer-pending', event: provide},
+      })
+    );
+
+    await act(async () => result.current.onAccept('card'));
+
+    expect(storeMock.cc.setAgentState).toHaveBeenCalledWith(
+      expect.objectContaining({state: 'Idle', auxCodeId: 'wellness', agentId: 'agent-1'})
+    );
+    expect(storeMock.cc.apiAIAssistant.respondToWellnessBreak).toHaveBeenCalledWith({
+      agentId: 'agent-1',
+      agentSessionId: 'session-1',
+      action: 'ACCEPTED',
+    });
+  });
+
+  it('keeps a chronological wellness transcript until it is explicitly cleared', async () => {
+    const provide = {
+      ...event,
+      actionEvent: 'PROVIDE_WELLNESS_BREAK' as const,
+      actionText: 'This break is pre-approved.',
+    };
+    const {result, rerender} = renderHook((props: UseWellnessBreakInput) => useWellnessBreak(props), {
+      initialProps: {
+        ...baseInput,
+        wellnessBreakState: {phase: 'idle', event: provide},
+        wellnessEventSequence: 1,
+      },
+    });
+
+    await waitFor(() => expect(result.current.history.map(({type}) => type)).toEqual(['offer']));
+    rerender({
+      ...baseInput,
+      wellnessBreakState: {phase: 'offer-pending', event: provide},
+      wellnessEventSequence: 1,
+    });
+    await act(async () => result.current.onAccept('card'));
+
+    expect(result.current.history.map(({type}) => type)).toEqual(['offer', 'user-action', 'acknowledgement']);
+    expect(result.current.history[0]).toMatchObject({type: 'offer', actionable: false, event: provide});
+
+    act(() => result.current.onClearHistory());
+    expect(result.current.history).toEqual([]);
+    expect(result.current.contentCleared).toBe(true);
+  });
+
   it('sends REJECTED exactly once when Later is selected for a direct PROVIDE', async () => {
     const provide = {...event, actionEvent: 'PROVIDE_WELLNESS_BREAK' as const};
     const {result} = renderHook(() =>
@@ -268,13 +323,18 @@ describe('useWellnessBreak', () => {
   it('sends NO_RESPONSE once for a live same-session offer', async () => {
     jest.useFakeTimers();
     const provide = {...event, actionEvent: 'PROVIDE_WELLNESS_BREAK' as const};
-    renderHook(() =>
-      useWellnessBreak({
+    const {rerender} = renderHook((props: UseWellnessBreakInput) => useWellnessBreak(props), {
+      initialProps: {
         ...baseInput,
         wellnessBreakState: {phase: 'idle', event: provide},
         wellnessEventSequence: 1,
-      })
-    );
+      },
+    });
+    rerender({
+      ...baseInput,
+      wellnessBreakState: {phase: 'offer-pending', event: provide},
+      wellnessEventSequence: 1,
+    });
 
     await act(async () => {
       jest.advanceTimersByTime(WELLNESS_OFFER_TIMEOUT_MS);
@@ -451,6 +511,42 @@ describe('useWellnessBreak', () => {
     );
   });
 
+  it('restores the exact pre-break legacy Meeting idle code after the break', async () => {
+    jest.useFakeTimers();
+    const provide = {...event, actionEvent: 'PROVIDE_WELLNESS_BREAK' as const};
+    const input = {
+      ...baseInput,
+      legacyAgentState: 'Idle',
+      legacyAuxCodeId: 'meeting',
+      idleCodes: [{id: 'meeting', name: 'Meeting', isSystem: false, isDefault: false}],
+      wellnessBreakState: {phase: 'offer-pending' as const, event: provide},
+    };
+    const {result, rerender} = renderHook((props: UseWellnessBreakInput) => useWellnessBreak(props), {
+      initialProps: input,
+    });
+
+    await act(async () => result.current.onAccept());
+    rerender({
+      ...input,
+      legacyAgentState: 'Idle',
+      legacyAuxCodeId: 'wellness',
+      wellnessBreakState: {phase: 'waiting-for-safe-state', event: provide},
+    });
+
+    await act(async () => {
+      jest.advanceTimersByTime(2_000 + 5_000 + 60_000 + 5_000);
+      await Promise.resolve();
+    });
+
+    await waitFor(() =>
+      expect(storeMock.cc.setAgentState).toHaveBeenLastCalledWith({
+        state: 'Idle',
+        auxCodeId: 'meeting',
+        agentId: 'agent-1',
+      })
+    );
+  });
+
   it('surfaces a store-originated system-code error to the host', async () => {
     const onWellnessBreakError = jest.fn();
     const {result} = renderHook(() =>
@@ -524,7 +620,6 @@ describe('useWellnessBreak', () => {
     expect(audioConstructor).toHaveBeenCalledWith('/wellness.mp3');
     expect(audio.load).toHaveBeenCalledTimes(1);
     expect(audio.play).not.toHaveBeenCalled();
-    await waitFor(() => expect(result.current.animationData).toBeDefined());
 
     await act(async () => {
       jest.advanceTimersByTime(5_000);

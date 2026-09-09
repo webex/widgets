@@ -8,7 +8,12 @@ import type {
   WellnessBreakRecoveryMarkerV1,
   WellnessStateModel,
 } from '@webex/cc-store';
-import type {WellnessBreakNotice, WellnessBreakResponseSource, WellnessBreakViewModel} from '@webex/cc-components';
+import type {
+  WellnessBreakHistoryEntry,
+  WellnessBreakNotice,
+  WellnessBreakResponseSource,
+  WellnessBreakViewModel,
+} from '@webex/cc-components';
 import type {UseWellnessBreakInput} from '../ai-assistant.types';
 import {
   areAllTasksSafeForWellness,
@@ -54,6 +59,20 @@ type CapturedBreakState = {
   preBreakLegacyAuxCodeId?: string;
 };
 
+const getLegacyRestoreState = (
+  captured?: Pick<CapturedBreakState, 'preBreakLegacyState' | 'preBreakLegacyAuxCodeId'>
+): {state: 'Available' | 'Idle'; auxCodeId: string} => {
+  if (
+    normalizeWellnessState(captured?.preBreakLegacyState) === 'idle' &&
+    captured?.preBreakLegacyAuxCodeId &&
+    captured.preBreakLegacyAuxCodeId !== '0'
+  ) {
+    return {state: 'Idle', auxCodeId: captured.preBreakLegacyAuxCodeId};
+  }
+
+  return {state: 'Available', auxCodeId: '0'};
+};
+
 const wait = (milliseconds: number): Promise<void> =>
   new Promise((resolve) => {
     window.setTimeout(resolve, milliseconds);
@@ -67,6 +86,8 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [animationData, setAnimationData] = useState<unknown>();
   const [reducedMotion, setReducedMotion] = useState(false);
+  const [history, setHistory] = useState<WellnessBreakHistoryEntry[]>([]);
+  const [contentCleared, setContentCleared] = useState(false);
 
   const latestRef = useRef(input);
   const phaseRef = useRef<WellnessBreakPhase>(input.wellnessBreakState.phase);
@@ -90,6 +111,8 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
   const ascReconnectAttemptedRef = useRef(false);
   const priorRtdGenerationRef = useRef(input.rtdStatus.generation);
   const reportedErrorCodeRef = useRef<WellnessBreakErrorCode>();
+  const historySequenceRef = useRef(0);
+  const activeOfferHistoryIdRef = useRef<string>();
 
   latestRef.current = input;
   callbackRef.current = input;
@@ -113,6 +136,64 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
     },
     []
   );
+
+  const createHistoryMetadata = useCallback((type: WellnessBreakHistoryEntry['type']) => {
+    historySequenceRef.current += 1;
+    return {id: `${type}-${Date.now()}-${historySequenceRef.current}`, createdAt: Date.now()};
+  }, []);
+
+  const appendHistory = useCallback((entry: WellnessBreakHistoryEntry) => {
+    setHistory((current) => [...current, entry]);
+    setContentCleared(false);
+  }, []);
+
+  const appendUserAction = useCallback(
+    (action: Extract<WellnessBreakHistoryEntry, {type: 'user-action'}>['action']) => {
+      appendHistory({type: 'user-action', action, ...createHistoryMetadata('user-action')});
+    },
+    [appendHistory, createHistoryMetadata]
+  );
+
+  const appendAcknowledgement = useCallback(
+    (hasBlockingTasks: boolean) => {
+      appendHistory({type: 'acknowledgement', hasBlockingTasks, ...createHistoryMetadata('acknowledgement')});
+    },
+    [appendHistory, createHistoryMetadata]
+  );
+
+  const appendNotice = useCallback(
+    (nextNotice: WellnessBreakNotice, actionText?: string) => {
+      appendHistory({type: 'notice', notice: nextNotice, actionText, ...createHistoryMetadata('notice')});
+    },
+    [appendHistory, createHistoryMetadata]
+  );
+
+  const appendOffer = useCallback(
+    (event: WellnessBreakEvent) => {
+      const metadata = createHistoryMetadata('offer');
+      activeOfferHistoryIdRef.current = metadata.id;
+      appendHistory({type: 'offer', event, actionable: true, ...metadata});
+    },
+    [appendHistory, createHistoryMetadata]
+  );
+
+  const resolveActiveOffer = useCallback(() => {
+    const offerId = activeOfferHistoryIdRef.current;
+    if (!offerId) return;
+    setHistory((current) =>
+      current.map((entry) => (entry.type === 'offer' && entry.id === offerId ? {...entry, actionable: false} : entry))
+    );
+    activeOfferHistoryIdRef.current = undefined;
+  }, []);
+
+  const clearHistory = useCallback(() => {
+    setHistory([]);
+    setContentCleared(true);
+    setRequestAvailable(false);
+    setNotice(undefined);
+    setError(undefined);
+    activeOfferHistoryIdRef.current = undefined;
+  }, []);
 
   const setPhase = useCallback(
     (
@@ -253,7 +334,7 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
             normalizeWellnessState(latest.legacyAgentState) === 'wellbeingbreak' ||
             (restoreSourcePhase === 'changing-to-break' && stateRequestResolvedRef.current)
           ) {
-            await store.cc.setAgentState({state: 'Available', auxCodeId: '0', agentId: latest.agentId});
+            await store.cc.setAgentState({...getLegacyRestoreState(captured), agentId: latest.agentId});
           }
 
           if (attempt > 1) {
@@ -268,6 +349,7 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
           setNotice(completedTimeline ? 'completed' : undefined);
           setPhase('idle');
           if (completedTimeline) {
+            appendNotice('completed');
             logWellnessMetric(WELLNESS_METRIC.BREAK_ENDED);
             invokeHost(callbackRef.current.onWellnessBreakEnded, 'onWellnessBreakEnded');
           }
@@ -287,7 +369,7 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
       if (lastFailure) reportError('RESTORE_FAILED', 'restoring', true);
       return false;
     },
-    [clearOfferTimer, clearRecoveryMarker, clearTimeline, invokeHost, reportError, setPhase, stopMedia]
+    [appendNotice, clearOfferTimer, clearRecoveryMarker, clearTimeline, invokeHost, reportError, setPhase, stopMedia]
   );
 
   const prepareAudio = useCallback((): Promise<HTMLAudioElement | undefined> => {
@@ -407,6 +489,7 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
     setNotice(undefined);
     setError(undefined);
     setRequestAvailable(false);
+    appendUserAction('take-break');
     setPhase('request-pending');
     logWellnessMetric(WELLNESS_METRIC.CTA_USER_REQUEST);
     try {
@@ -415,7 +498,7 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
       setPhase('idle');
       reportError('ACTION_REQUEST_FAILED', 'request-pending', true);
     }
-  }, [reportError, setPhase]);
+  }, [appendUserAction, reportError, setPhase]);
 
   const enterBreak = useCallback(
     async (event: WellnessBreakEvent, sendAccepted: boolean, responseSource: WellnessBreakResponseSource = 'card') => {
@@ -428,7 +511,7 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
       stateRequestResolvedRef.current = false;
       acceptedEventRef.current = event;
 
-      if (!latest.agentSessionId || event.agentSessionId !== latest.agentSessionId) {
+      if (!latest.agentSessionId) {
         reportError('INVALID_EVENT', 'offer-pending', false);
         return;
       }
@@ -446,6 +529,10 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
       const channelTypes = [...new Set(latest.agentChannelTypes)];
       const preBreakChannelStates = cloneWellnessChannelStates(channelTypes, latest.agentChannelStateDetails);
       const scheduledAfterWork = !areAllTasksSafeForWellness(latest.taskList);
+      if (sendAccepted) {
+        resolveActiveOffer();
+        appendUserAction('take-break');
+      }
       capturedRef.current = {
         stateModel,
         theme: latest.theme,
@@ -506,6 +593,7 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
       }
 
       invokeHostWithEvent(callbackRef.current.onWellnessBreakAccepted, event, 'onWellnessBreakAccepted');
+      appendAcknowledgement(scheduledAfterWork);
       logWellnessMetric(
         sendAccepted
           ? responseSource === 'notification'
@@ -537,11 +625,14 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
     },
     [
       beginStartingCountdown,
+      appendAcknowledgement,
+      appendUserAction,
       clearOfferTimer,
       clearRecoveryMarker,
       invokeHostWithEvent,
       performRestore,
       reportError,
+      resolveActiveOffer,
       saveRecoveryMarker,
       setPhase,
     ]
@@ -564,6 +655,9 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
       setRequestAvailable(false);
       setPhase('idle');
       setNotice('declined');
+      resolveActiveOffer();
+      appendUserAction('later');
+      appendNotice('declined');
       logWellnessMetric(
         responseSource === 'notification' ? WELLNESS_METRIC.NOTIFICATION_REJECTED : WELLNESS_METRIC.CARD_BREAK_REJECTED
       );
@@ -579,7 +673,7 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
         reportError('ACTION_REQUEST_FAILED', 'offer-pending', true, false);
       }
     },
-    [clearOfferTimer, reportError, setPhase]
+    [appendNotice, appendUserAction, clearOfferTimer, reportError, resolveActiveOffer, setPhase]
   );
 
   const dismissNotification = useCallback(() => {
@@ -615,6 +709,7 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
 
     clearOfferTimer();
     setNotice(undefined);
+    setContentCleared(false);
     if (event.actionEvent === 'SUGGEST_WELLNESS_BREAK') {
       setRequestAvailable(true);
       if (!ACTIVE_PHASES.has(phaseRef.current)) setPhase('idle', {event});
@@ -623,6 +718,7 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
       setRequestAvailable(false);
       if (phaseRef.current === 'request-pending') {
         setNotice('not-allowed');
+        appendNotice('not-allowed', event.actionText);
         setPhase('idle', {event});
         logWellnessMetric(WELLNESS_METRIC.CTA_REJECTED);
       }
@@ -632,22 +728,21 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
         logWellnessMetric(WELLNESS_METRIC.PROVIDE_BREAK_EVENT_RECEIVED);
         void enterBreak(event, false);
       } else if (!ACTIVE_PHASES.has(phaseRef.current)) {
+        appendOffer(event);
         setPhase('offer-pending', {event, responseDeadline: Date.now() + WELLNESS_OFFER_TIMEOUT_MS});
         invokeHostWithEvent(callbackRef.current.onWellnessBreakOffered, event, 'onWellnessBreakOffered');
         logWellnessMetric(WELLNESS_METRIC.PROVIDE_BREAK_EVENT_RECEIVED);
         logWellnessMetric(WELLNESS_METRIC.NOTIFICATION_FIRED);
         offerTimerRef.current = window.setTimeout(() => {
           const latest = latestRef.current;
-          if (
-            phaseRef.current !== 'offer-pending' ||
-            event.agentSessionId !== latest.agentSessionId ||
-            !latest.agentSessionId
-          ) {
+          if (phaseRef.current !== 'offer-pending' || !latest.agentSessionId) {
             return;
           }
           setRequestAvailable(false);
           setPhase('idle');
           setNotice('no-response');
+          resolveActiveOffer();
+          appendNotice('no-response');
           logWellnessMetric(WELLNESS_METRIC.NO_RESPONSE);
           logWellnessMetric(WELLNESS_METRIC.NOTIFICATION_TIMEOUT);
           const api = store.cc.apiAIAssistant;
@@ -666,12 +761,15 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
       }
     }
   }, [
+    appendNotice,
+    appendOffer,
     clearOfferTimer,
     enterBreak,
     input.wellnessBreakState,
     input.wellnessEventSequence,
     invokeHostWithEvent,
     reportError,
+    resolveActiveOffer,
     setPhase,
   ]);
 
@@ -818,6 +916,9 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
 
   // Refresh recovery never replays notification actions or media.
   useEffect(() => {
+    // A marker created by this mounted lifecycle is not a refresh-recovery
+    // candidate. Wait for its confirmed state/restoration path to own it.
+    if (capturedRef.current) return;
     if (!input.isLoggedIn || !input.agentSessionId || !input.wellbeingBreakIdleCode) return;
     let serialized: string | null = null;
     try {
@@ -906,7 +1007,7 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
       }
       if (captured && latest.agentSessionId && ACTIVE_PHASES.has(phaseRef.current)) {
         if (captured.stateModel === 'legacy') {
-          void store.cc.setAgentState({state: 'Available', auxCodeId: '0', agentId: latest.agentId}).catch(() => {});
+          void store.cc.setAgentState({...getLegacyRestoreState(captured), agentId: latest.agentId}).catch(() => {});
         } else {
           const groups = buildWellnessRestoreGroups({
             channelTypes: captured.channelTypes,
@@ -952,6 +1053,8 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
       error,
       notice,
       requestAvailable: uiEnabled && requestAvailable,
+      history,
+      contentCleared,
       hasBlockingTasks: !areAllTasksSafeForWellness(input.taskList),
       countdown,
       elapsedSeconds,
@@ -960,6 +1063,7 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
       onRequest: requestBreak,
       onAccept: acceptOffer,
       onLater: later,
+      onClearHistory: clearHistory,
       onDismissNotification: dismissNotification,
       onMediaError: handleMediaError,
     }),
@@ -967,6 +1071,8 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
       acceptOffer,
       animationData,
       countdown,
+      clearHistory,
+      contentCleared,
       dismissNotification,
       elapsedSeconds,
       error,
@@ -975,6 +1081,7 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
       input.wellnessBreakState.event,
       input.wellnessBreakState.phase,
       input.taskList,
+      history,
       later,
       notice,
       reducedMotion,

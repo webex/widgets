@@ -520,11 +520,10 @@ class StoreWrapper implements IStoreWrapper {
     if (
       !this.store.isWellnessBreakEnabled ||
       !payload?.agentSessionId ||
-      payload.agentSessionId !== this.store.wellnessAgentSessionId ||
       payload.agentId !== this.store.agentId ||
       !WELLNESS_NOTIFICATION_ACTIONS.has(payload.actionEvent)
     ) {
-      this.store.logger?.warn('CC-Widgets: ignored invalid or stale wellness notification', {
+      this.store.logger?.warn('CC-Widgets: ignored invalid wellness notification', {
         module: 'storeEventsWrapper.ts',
         method: 'handleWellnessBreak',
       });

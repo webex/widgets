@@ -53,6 +53,8 @@ const createProps = (overrides: Partial<AIAssistantComponentProps> = {}): AIAssi
   requestRealTimeAssist: jest.fn(),
   setContextDraft: jest.fn(),
   submitContext: jest.fn(),
+  clearContent: jest.fn(),
+  hasClearableContent: false,
   ...overrides,
 });
 
@@ -77,6 +79,65 @@ describe('AIAssistantComponent', () => {
     expect(props.minimize).toHaveBeenCalledTimes(1);
     expect(props.toggleFullScreen).toHaveBeenCalledTimes(1);
     expect(props.close).toHaveBeenCalledTimes(2);
+  });
+
+  it('renders Clear as the first header action and only enables it for assistant content', () => {
+    const props = createProps({hasClearableContent: true});
+    render(<AIAssistantComponent {...props} />);
+
+    const actions = screen.getByTestId('ai-assistant:header-actions');
+    expect(actions.firstElementChild).toBe(screen.getByTestId('ai-assistant:header-clear'));
+    expect(screen.getByText('Clear')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('ai-assistant:header-clear'));
+    expect(props.clearContent).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders persistent wellness history across close and reopen until Clear is pressed', () => {
+    const history = [
+      {
+        type: 'offer' as const,
+        id: 'offer-1',
+        createdAt: 1,
+        actionable: false,
+        event: {
+          agentId: 'agent-1',
+          orgId: 'org-1',
+          agentSessionId: 'notification-session',
+          actionEvent: 'PROVIDE_WELLNESS_BREAK' as const,
+          actionText: 'This break is pre-approved by your organization.',
+        },
+      },
+      {type: 'user-action' as const, id: 'action-1', createdAt: 2, action: 'take-break' as const},
+      {type: 'acknowledgement' as const, id: 'ack-1', createdAt: 3, hasBlockingTasks: false},
+      {type: 'notice' as const, id: 'done-1', createdAt: 4, notice: 'completed' as const},
+    ];
+    const wellness = {
+      enabled: true,
+      phase: 'idle' as const,
+      requestAvailable: false,
+      hasBlockingTasks: false,
+      elapsedSeconds: 0,
+      reducedMotion: false,
+      history,
+      contentCleared: false,
+      onRequest: jest.fn(),
+      onAccept: jest.fn(),
+      onLater: jest.fn(),
+      onClearHistory: jest.fn(),
+      onMediaError: jest.fn(),
+    };
+    const props = createProps({wellness, hasClearableContent: true});
+    const {rerender} = render(<AIAssistantComponent {...props} />);
+
+    expect(screen.getByText('Well-being break scheduled')).toBeInTheDocument();
+    expect(screen.getByText('Take a break')).toBeInTheDocument();
+    expect(screen.getByText('Great. Your well-being break will begin shortly.')).toBeInTheDocument();
+    expect(screen.getByText('Well-being break completed')).toBeInTheDocument();
+
+    rerender(<AIAssistantComponent {...props} chrome="closed" />);
+    expect(screen.queryByText('Well-being break completed')).not.toBeInTheDocument();
+    rerender(<AIAssistantComponent {...props} chrome="open" />);
+    expect(screen.getByText('Well-being break completed')).toBeInTheDocument();
   });
 
   it('renders the empty state and requests a suggestion', () => {
@@ -104,8 +165,16 @@ describe('AIAssistantComponent', () => {
   it('shows Real-time Assist on the landing page before an interaction starts', () => {
     render(<AIAssistantComponent {...createProps({hasActiveInteraction: false})} />);
 
-    expect(screen.getByTestId('ai-assistant:landing')).toBeInTheDocument();
-    expect(screen.getByText('Real-time Assist')).toBeInTheDocument();
+    const landing = screen.getByTestId('ai-assistant:landing');
+    expect(landing).toBeInTheDocument();
+    expect(landing).toHaveTextContent('✨Real-time Assist');
+    expect(landing).toHaveTextContent('Real-time guidance to help you to respond to the customer');
+    expect(landing).toHaveTextContent('🪷Wellness breaks');
+    expect(landing).toHaveTextContent('Ensuring you get those well needed breaks');
+    expect(landing).toHaveTextContent('✍🏻Smart summaries');
+    expect(landing).toHaveTextContent(
+      'Focus on the conversation while we capture the context - covering AI handoffs, transfers & consults, dropped conversations, and wrap-up.'
+    );
     expect(screen.queryByTestId('ai-assistant:empty')).not.toBeInTheDocument();
   });
 

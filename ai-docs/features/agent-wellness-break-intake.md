@@ -28,6 +28,9 @@ surface through `widget-cc-ai-assistant` and distributes lazy media chunks.
   rotation invalidates it without a response action. When the assistant panel is closed or minimized,
   a Desktop-style actionable toast exposes the same Take a break and Later actions; opening the panel
   shows the offer in the assistant body without duplicating the toast.
+- Wellness notification eligibility is scoped to the current agent and organization, not to equality
+  with the notification-provided `agentSessionId`. Requests and responses always use the active local
+  station/channel session rather than echoing notification session metadata.
 - Agent acceptance changes state before sending `ACCEPTED`. A pending manual request approved by
   `PROVIDE` changes state without a duplicate action. Repeated clicks are guarded so a direct offer
   sends at most one acceptance request.
@@ -39,11 +42,15 @@ surface through `widget-cc-ai-assistant` and distributes lazy media chunks.
 - Start requires exact `Idle / WellbeingBreak` confirmation, all configured ASC channels when enabled,
   all `store.taskList` entries safe, and a two-second event settle window. Waiting copy mentions current
   work only while `store.taskList` contains an actual blocking task.
+- The User State widget renders the system-owned `WellbeingBreak` code as the current, timed state while
+  it is active, without adding it to the manually selectable idle-code list or echoing SDK-driven entry
+  and restoration transitions back through `setAgentState`.
 - Playback is 5 seconds starting, 60 seconds playing (copy changes at 40 seconds), and 5 seconds ending.
   Audio and animation are independently lazy-loaded during the starting countdown. The full-bleed
   animation holds its first frame behind the inline `5 4 3 2 1` start sequence, plays with the 60-second
   timeline, then holds its final frame behind the ending sequence; audio is rewound and starts with playback.
-- Restoration is sequential per ASC target group, leaves RONA/external system idle states unchanged,
+- Restoration returns legacy agents to their captured Available or idle-code state (for example,
+  `Meeting`), is sequential per ASC target group, leaves RONA/external system idle states unchanged,
   tries three times with ten-second spacing, and has one ASC relogin attempt or five bounded legacy
   recovery attempts. Before playback, an incompatible external/RONA transition cancels and restores;
   during playback/ending it does not interrupt the timeline.
@@ -72,9 +79,14 @@ Its custom mode passes the bordered demo container's `HTMLElement`, making cover
 without changing sample source.
 
 During an active break, the selected scroll surface is locked and its prior inline styles are restored
-on cleanup. This prevents the document scrollbar gutter from showing beside a viewport overlay. The
-Desktop-style completion notice remains until a fresh wellness event or session/reset invalidates it;
-closing and reopening assistant chrome does not clear wellness history.
+on cleanup. This prevents the document scrollbar gutter from showing beside a viewport overlay. Wellness
+offers, user actions, acknowledgements, denials/timeouts, and completion messages append to a chronological
+assistant transcript. Closing, minimizing, reopening, receiving another wellness event, or rotating the
+station session does not clear that transcript. Only the first header action, **Clear**, clears displayed
+Real-time Assist and wellness history; it does not cancel an active offer/break or fabricate a backend action.
+
+The landing feature list matches Desktop copy and icons exactly: `✨ Real-time Assist`, `🪷 Wellness breaks`,
+and `✍🏻 Smart summaries`, with their approved Desktop descriptions.
 
 ## Media provenance
 

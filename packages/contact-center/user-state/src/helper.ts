@@ -12,6 +12,7 @@ export const useUserState = ({
   logger,
   onStateChange,
   lastIdleCodeChangeTimestamp,
+  isCurrentStateExternallyManaged = false,
 }: UseUserStateProps) => {
   const [isSettingAgentStatus, setIsSettingAgentStatus] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -19,6 +20,7 @@ export const useUserState = ({
   const workerRef = useRef<Worker | null>(null);
 
   const prevStateRef = useRef(currentState);
+  const externallyManagedStateRef = useRef(isCurrentStateExternallyManaged);
 
   const callOnStateChange = () => {
     try {
@@ -162,6 +164,16 @@ export const useUserState = ({
           method: 'useEffect - currentState',
         });
 
+        // Wellness state is changed by the AI Assistant lifecycle. Reflect its
+        // SDK event (and the following restore event) without echoing either
+        // transition back through setAgentState.
+        if (isCurrentStateExternallyManaged || externallyManagedStateRef.current) {
+          prevStateRef.current = currentState;
+          externallyManagedStateRef.current = isCurrentStateExternallyManaged;
+          callOnStateChange();
+          return;
+        }
+
         // Call setAgentStatus and update prevStateRef after promise resolves
         updateAgentState(currentState)
           .then(() => {
@@ -170,6 +182,7 @@ export const useUserState = ({
               method: 'useEffect - currentState',
             });
             prevStateRef.current = currentState;
+            externallyManagedStateRef.current = false;
             callOnStateChange();
           })
           .catch((error) => {
@@ -185,7 +198,7 @@ export const useUserState = ({
         method: 'useEffect - currentState',
       });
     }
-  }, [currentState]);
+  }, [currentState, isCurrentStateExternallyManaged]);
 
   useEffect(() => {
     try {

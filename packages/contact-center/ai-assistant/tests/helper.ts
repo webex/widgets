@@ -9,12 +9,14 @@ jest.mock('@webex/cc-store', () => {
     __esModule: true,
     default: {
       cc: mockCC,
+      clearRealTimeAssist: jest.fn(),
     },
   };
 });
 
 type StoreMock = {
   cc: typeof mockCC;
+  clearRealTimeAssist: jest.Mock;
 };
 const storeMock = store as unknown as StoreMock;
 
@@ -190,6 +192,18 @@ describe('useAiAssistant', () => {
     expect(types).toContain('user');
     expect(types).toContain('assistant-greeting');
     expect(types.filter((t) => t === 'assistant')).toHaveLength(2);
+  });
+
+  it('clears the real-time transcript only when Clear is invoked', async () => {
+    const suggestion = {data: {adaptiveCard: {type: 'AdaptiveCard'}, title: 'first'}};
+    const {result} = renderHook(() => useAiAssistant({...baseProps, realTimeAssist: [suggestion]}));
+
+    await waitFor(() => expect(result.current.chatEntries).toHaveLength(1));
+    act(() => result.current.clearTranscript());
+
+    expect(storeMock.clearRealTimeAssist).toHaveBeenCalledWith('interaction-1');
+    expect(result.current.chatEntries).toEqual([]);
+    expect(result.current.requestStatus).toBe('idle');
   });
 
   it('stays idle when the feature flag is off', async () => {

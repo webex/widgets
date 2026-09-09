@@ -13,4 +13,7 @@ export type UseUserStateProps = Pick<
   | 'logger'
   | 'onStateChange'
   | 'lastIdleCodeChangeTimestamp'
->;
+> & {
+  /** True when an SDK-owned lifecycle, rather than the dropdown, changed the current state. */
+  isCurrentStateExternallyManaged?: boolean;
+};

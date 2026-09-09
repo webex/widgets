@@ -69,6 +69,7 @@ const mockProfile: Profile = {
   lostConnectionRecoveryTimeout: 30000,
   maskSensitiveData: false,
   isAgentLoggedIn: true,
+  isWellnessBreakEnabled: false,
   lastStateAuxCodeId: 'auxCodeId',
   lastStateChangeTimestamp: 123456789,
   lastIdleCodeChangeTimestamp: 123456789,

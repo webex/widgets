@@ -1,5 +1,5 @@
 import React from 'react';
-import {render} from '@testing-library/react';
+import {render, screen} from '@testing-library/react';
 import {UserState} from '../../src';
 import * as helper from '../../src/helper';
 import store from '@webex/cc-store';
@@ -24,9 +24,15 @@ jest.mock('@webex/cc-store', () => {
     lastIdleCodeChangeTimestamp: undefined,
     customState: null,
     currentState: '0',
+    wellbeingBreakIdleCode: undefined,
     onErrorCallback: jest.fn(),
   };
 });
+
+const mutableStore = store as unknown as {
+  currentState: string;
+  wellbeingBreakIdleCode?: {id: string; name: string; isSystem: boolean; isDefault: boolean};
+};
 
 describe('UserState Component', () => {
   let workerMock;
@@ -34,6 +40,8 @@ describe('UserState Component', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mutableStore.currentState = '0';
+    mutableStore.wellbeingBreakIdleCode = undefined;
     // Suppress console.error for error boundary tests
     jest.spyOn(console, 'error').mockImplementation(() => {});
 
@@ -71,6 +79,7 @@ describe('UserState Component', () => {
       customState: null,
       lastStateChangeTimestamp: expect.any(Number),
       lastIdleCodeChangeTimestamp: undefined,
+      isCurrentStateExternallyManaged: false,
       logger: {
         log: expect.any(Function),
         info: expect.any(Function),
@@ -79,6 +88,28 @@ describe('UserState Component', () => {
       },
       onStateChange: expect.any(Function),
     });
+  });
+
+  it('projects WellbeingBreak as an externally managed state', () => {
+    const useUserStateSpy = jest.spyOn(helper, 'useUserState');
+    mutableStore.currentState = 'wellness';
+    mutableStore.wellbeingBreakIdleCode = {
+      id: 'wellness',
+      name: 'WellbeingBreak',
+      isSystem: true,
+      isDefault: false,
+    };
+
+    render(<UserState onStateChange={onStateChange} />);
+
+    expect(useUserStateSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        currentState: 'wellness',
+        idleCodes: [expect.objectContaining({id: 'wellness', name: 'WellbeingBreak'})],
+        isCurrentStateExternallyManaged: true,
+      })
+    );
+    expect(screen.getByTestId('elapsed-time')).toBeInTheDocument();
   });
 
   describe('ErrorBoundary Tests', () => {
