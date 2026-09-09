@@ -221,7 +221,7 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
           <div
             className={`ai-assistant__body${
               (showLanding && !showWellnessContent) || showWellnessSuggestion ? ' ai-assistant__body--landing' : ''
-            }`}
+            }${showWellnessSuggestion ? ' ai-assistant__body--wellness-suggestion' : ''}`}
             data-testid="ai-assistant:body"
           >
             {showWellnessHistory && wellness ? (

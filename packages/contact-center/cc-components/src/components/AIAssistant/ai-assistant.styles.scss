@@ -111,6 +111,12 @@
   padding: 0;
 }
 
+.ai-assistant__body--wellness-suggestion {
+  isolation: isolate;
+  overflow: hidden;
+  position: relative;
+}
+
 .ai-assistant__landing {
   align-items: center;
   box-sizing: border-box;

@@ -26,14 +26,19 @@
 
 .wellness-break-suggestion {
   align-items: center;
+  background: var(--mds-color-theme-background-primary-normal, #fff);
   box-sizing: border-box;
   display: flex;
   flex: 1;
   flex-direction: column;
+  inset: 0;
   justify-content: center;
   min-height: 100%;
+  overflow-y: auto;
   padding: 2.5rem 2rem;
+  position: absolute;
   text-align: center;
+  z-index: 1;
 }
 
 .wellness-break-suggestion__logo {

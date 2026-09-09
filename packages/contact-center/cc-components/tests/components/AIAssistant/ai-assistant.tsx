@@ -415,12 +415,18 @@ describe('AIAssistantComponent', () => {
     const props = createProps({isFeatureEnabled: false, wellness});
     const {rerender} = render(<AIAssistantComponent {...props} />);
 
-    expect(screen.getByTestId('ai-assistant:body')).toHaveClass('ai-assistant__body--landing');
+    expect(screen.getByTestId('ai-assistant:body')).toHaveClass(
+      'ai-assistant__body--landing',
+      'ai-assistant__body--wellness-suggestion'
+    );
     expect(screen.getByTestId('wellness-break:request-card')).toBeInTheDocument();
+    expect(screen.queryByTestId('wellness-break:history')).not.toBeInTheDocument();
     expect(screen.queryByText('Well-being break completed')).not.toBeInTheDocument();
 
     rerender(<AIAssistantComponent {...props} wellness={{...wellness, requestAvailable: false}} />);
 
+    expect(screen.getByTestId('ai-assistant:body')).not.toHaveClass('ai-assistant__body--wellness-suggestion');
+    expect(screen.getByTestId('wellness-break:history')).toBeInTheDocument();
     expect(screen.getByText('Well-being break completed')).toBeInTheDocument();
   });
 
