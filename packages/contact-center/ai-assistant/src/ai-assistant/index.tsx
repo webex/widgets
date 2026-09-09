@@ -6,6 +6,7 @@ import {ErrorBoundary} from 'react-error-boundary';
 import {AIAssistantComponent} from '@webex/cc-components';
 import {useAiAssistant, REAL_TIME_ASSIST_FLAG} from '../helper';
 import {useWellnessBreak} from '../wellness/useWellnessBreak';
+import type {WellnessStoreBridge} from '../wellness/wellness-internal.types';
 import {IAIAssistantProps} from '../ai-assistant.types';
 
 const AIAssistantInternal: React.FunctionComponent<IAIAssistantProps> = observer((props) => {
@@ -31,7 +32,7 @@ const AIAssistantInternal: React.FunctionComponent<IAIAssistantProps> = observer
     taskList,
     idleCodes,
     currentTheme,
-  } = store;
+  } = store as typeof store & WellnessStoreBridge;
   const interactionId = currentTask?.data?.interactionId;
   const isFeatureEnabled = Boolean(featureFlags?.[REAL_TIME_ASSIST_FLAG]);
   const activeRealTimeAssist = interactionId ? realTimeAssist?.[interactionId] || [] : [];

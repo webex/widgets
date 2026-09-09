@@ -1,13 +1,6 @@
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import store from '@webex/cc-store';
-import type {
-  WellnessBreakError,
-  WellnessBreakErrorCode,
-  WellnessBreakEvent,
-  WellnessBreakPhase,
-  WellnessBreakRecoveryMarkerV1,
-  WellnessStateModel,
-} from '@webex/cc-store';
+import type {WellnessBreakError, WellnessBreakErrorCode, WellnessBreakEvent, WellnessBreakPhase} from '@webex/cc-store';
 import type {
   WellnessBreakHistoryEntry,
   WellnessBreakNotice,
@@ -15,6 +8,7 @@ import type {
   WellnessBreakViewModel,
 } from '@webex/cc-components';
 import type {UseWellnessBreakInput} from '../ai-assistant.types';
+import type {WellnessBreakRecoveryMarkerV1, WellnessStateModel, WellnessStoreBridge} from './wellness-internal.types';
 import {
   areAllTasksSafeForWellness,
   areWellnessChannelsConfirmed,
@@ -34,6 +28,8 @@ export const WELLNESS_PLAYING_MS = 60 * 1000;
 export const WELLNESS_ENDING_MS = 5 * 1000;
 export const WELLNESS_RESTORE_RETRY_MS = 10 * 1000;
 export const WELLNESS_RECOVERY_KEY = 'webex-cc-agent-wellness-break:v1';
+
+const wellnessStore = store as typeof store & WellnessStoreBridge;
 
 const RESTORE_ATTEMPTS = 3;
 const LEGACY_RECOVERY_ATTEMPTS = 5;
@@ -78,6 +74,7 @@ const wait = (milliseconds: number): Promise<void> =>
     window.setTimeout(resolve, milliseconds);
   });
 
+/** @internal */
 export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakViewModel => {
   const [requestAvailable, setRequestAvailable] = useState(false);
   const [notice, setNotice] = useState<WellnessBreakNotice | undefined>();
@@ -317,7 +314,7 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
             let groupFailure = false;
             for (const group of groups) {
               try {
-                await store.cc.setAgentChannelState({
+                await wellnessStore.cc.setAgentChannelState({
                   channelTypes: group.channelTypes,
                   state: group.state,
                   ...(group.auxCodeId ? {auxCodeId: group.auxCodeId} : {}),
@@ -553,7 +550,7 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
 
       try {
         if (stateModel === 'agent-state-control') {
-          await store.cc.setAgentChannelState({
+          await wellnessStore.cc.setAgentChannelState({
             channelTypes,
             state: 'Idle',
             auxCodeId: latest.wellbeingBreakIdleCode.id,
@@ -1020,7 +1017,7 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
           void groups.reduce(
             (sequence, group) =>
               sequence.then(() =>
-                store.cc
+                wellnessStore.cc
                   .setAgentChannelState({
                     channelTypes: group.channelTypes,
                     state: group.state,

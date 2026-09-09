@@ -6,7 +6,9 @@ final live-flow verification is pending with a wellness-enabled test agent.
 ## Scope and ownership
 
 `@webex/cc-store` projects the SDK's effective enablement, current station/channel session, system-owned
-`WellbeingBreak` code, wellness/RTD events, legacy state, and Agent State Control snapshots.
+`WellbeingBreak` code, wellness/RTD events, and legacy state. It also retains Agent State Control V2
+snapshots through an internal first-party bridge; those methods, event constants, fields, and types are
+not part of the public store, AI Assistant, aggregate widget, or custom-element contract.
 `@webex/cc-ai-assistant` owns request/offer actions, safe-state orchestration, timers, media, recovery,
 and host callbacks. `@webex/cc-components` remains props-only. `@webex/cc-widgets` mirrors the public
 surface through `widget-cc-ai-assistant` and distributes lazy media chunks.
@@ -39,7 +41,8 @@ surface through `widget-cc-ai-assistant` and distributes lazy media chunks.
 - Backend copy is event-specific and plain text: suggestion `actionText` is the CTA tooltip, direct
   `PROVIDE` `actionText` is the offer body, and `WELLNESS_BREAK_NOT_ALLOWED` `actionText` is the denial
   body. Blank text uses the approved local fallback for that state.
-- Start requires exact `Idle / WellbeingBreak` confirmation, all configured ASC channels when enabled,
+- Start requires exact `Idle / WellbeingBreak` confirmation, including all configured State Control V2
+  channels when the internal first-party mode is enabled,
   all `store.taskList` entries safe, and a two-second event settle window. Waiting copy mentions current
   work only while `store.taskList` contains an actual blocking task.
 - The User State widget renders the system-owned `WellbeingBreak` code as the current, timed state while
@@ -50,8 +53,8 @@ surface through `widget-cc-ai-assistant` and distributes lazy media chunks.
   animation holds its first frame behind the inline `5 4 3 2 1` start sequence, plays with the 60-second
   timeline, then holds its final frame behind the ending sequence; audio is rewound and starts with playback.
 - Restoration returns legacy agents to their captured Available or idle-code state (for example,
-  `Meeting`), is sequential per ASC target group, leaves RONA/external system idle states unchanged,
-  tries three times with ten-second spacing, and has one ASC relogin attempt or five bounded legacy
+  `Meeting`), is sequential per internal State Control V2 target group, leaves RONA/external system idle states unchanged,
+  tries three times with ten-second spacing, and has one internal V2 relogin attempt or five bounded legacy
   recovery attempts. Before playback, an incompatible external/RONA transition cancels and restores;
   during playback/ending it does not interrupt the timeline.
 - A host-scoped `sessionStorage` marker contains only version, station session, state model, configured
@@ -73,6 +76,9 @@ widget root, while React hosts may pass an `HTMLElement` to portal into a custom
 The serializable Web Component modes are `viewport` and `assistant`.
 `WellnessBreakPhase`, `WellnessBreakErrorCode`, and `WellnessBreakError` are exported by both
 `@webex/cc-ai-assistant` and the aggregate React entry.
+
+State Control V2 remains implementation-only. No ASC/V2 method, event constant, store field, hook input,
+or restoration type is exported for host use.
 
 The React sample exposes all three modes in an **AI Assistant → Wellness break overlay target** selector.
 Its custom mode passes the bordered demo container's `HTMLElement`, making coverage behavior verifiable
@@ -123,6 +129,6 @@ or initial bundle alone.
 ## Samples and verification
 
 The React and Web Component samples use real store/SDK events, expose the lifecycle callbacks, log only
-lifecycle/error categories, and do not include a fake wellness event generator. Verify legacy and ASC
+lifecycle/error categories, and do not include a fake wellness event generator. Verify legacy and internal State Control V2
 flows, active voice/digital work, RONA phase boundaries, refresh recovery, RTD disconnect, media failure,
 reduced motion, focus restoration, and aggregate asset loading after the SDK release gate is resolved.

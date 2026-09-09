@@ -45,7 +45,7 @@ import {
 } from './store.types';
 import {runInAction} from 'mobx';
 import {isIncomingTask} from './task-utils';
-import {SUGGESTED_RESPONSE_EVENT, TASK_MULTI_LOGIN_HYDRATE} from './constants';
+import {INTERNAL_AGENT_STATE_CONTROL_EVENTS, SUGGESTED_RESPONSE_EVENT, TASK_MULTI_LOGIN_HYDRATE} from './constants';
 
 const CONSULT_TRANSFER_CHANNELS = {
   telephony: 'TELEPHONY',
@@ -245,18 +245,22 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.aiAssistantRtdStatus;
   }
 
+  /** @internal */
   get isAgentStateControlEnabled() {
     return this.store.isAgentStateControlEnabled;
   }
 
+  /** @internal */
   get agentChannelTypes() {
     return this.store.agentChannelTypes;
   }
 
+  /** @internal */
   get agentChannelStateDetails() {
     return this.store.agentChannelStateDetails;
   }
 
+  /** @internal */
   get agentChannelReloginSequence() {
     return this.store.agentChannelReloginSequence;
   }
@@ -480,6 +484,7 @@ class StoreWrapper implements IStoreWrapper {
     void this.loadWellbeingBreakIdleCode();
   };
 
+  /** @internal */
   handleAgentChannelRelogin = (payload: AgentChannelReloginSuccessEvent): void => {
     if (!payload || payload.agentId !== this.store.agentId) {
       this.store.logger?.warn('CC-Widgets: ignored Agent State Control relogin for another agent', {
@@ -491,6 +496,7 @@ class StoreWrapper implements IStoreWrapper {
     this.captureWellnessSession(payload);
   };
 
+  /** @internal */
   handleAgentChannelStateChanged = (payload: AgentChannelStateChangedEvent): void => {
     if (
       !payload?.agentSessionId ||
@@ -1891,8 +1897,8 @@ class StoreWrapper implements IStoreWrapper {
       ccSDK.off(CC_EVENTS.AGENT_LOGOUT_SUCCESS, handleLogOut);
       ccSDK.off(CC_EVENTS.WELLNESS_BREAK, this.handleWellnessBreak);
       ccSDK.off(CC_EVENTS.AI_ASSISTANT_RTD_STATUS_CHANGED, this.handleAIAssistantRtdStatus);
-      ccSDK.off(CC_EVENTS.AGENT_CHANNEL_RELOGIN_SUCCESS, this.handleAgentChannelRelogin);
-      ccSDK.off(CC_EVENTS.AGENT_CHANNEL_STATE_CHANGED, this.handleAgentChannelStateChanged);
+      ccSDK.off(INTERNAL_AGENT_STATE_CONTROL_EVENTS.AGENT_CHANNEL_RELOGIN_SUCCESS, this.handleAgentChannelRelogin);
+      ccSDK.off(INTERNAL_AGENT_STATE_CONTROL_EVENTS.AGENT_CHANNEL_STATE_CHANGED, this.handleAgentChannelStateChanged);
     };
 
     // TODO: https://jira-eng-gpk2.cisco.com/jira/browse/SPARK-626777 Implement the de-register method and close the listener there
@@ -1945,12 +1951,12 @@ class StoreWrapper implements IStoreWrapper {
     // repeated init/register flows remain idempotent.
     ccSDK.off(CC_EVENTS.WELLNESS_BREAK, this.handleWellnessBreak);
     ccSDK.off(CC_EVENTS.AI_ASSISTANT_RTD_STATUS_CHANGED, this.handleAIAssistantRtdStatus);
-    ccSDK.off(CC_EVENTS.AGENT_CHANNEL_RELOGIN_SUCCESS, this.handleAgentChannelRelogin);
-    ccSDK.off(CC_EVENTS.AGENT_CHANNEL_STATE_CHANGED, this.handleAgentChannelStateChanged);
+    ccSDK.off(INTERNAL_AGENT_STATE_CONTROL_EVENTS.AGENT_CHANNEL_RELOGIN_SUCCESS, this.handleAgentChannelRelogin);
+    ccSDK.off(INTERNAL_AGENT_STATE_CONTROL_EVENTS.AGENT_CHANNEL_STATE_CHANGED, this.handleAgentChannelStateChanged);
     ccSDK.on(CC_EVENTS.WELLNESS_BREAK, this.handleWellnessBreak);
     ccSDK.on(CC_EVENTS.AI_ASSISTANT_RTD_STATUS_CHANGED, this.handleAIAssistantRtdStatus);
-    ccSDK.on(CC_EVENTS.AGENT_CHANNEL_RELOGIN_SUCCESS, this.handleAgentChannelRelogin);
-    ccSDK.on(CC_EVENTS.AGENT_CHANNEL_STATE_CHANGED, this.handleAgentChannelStateChanged);
+    ccSDK.on(INTERNAL_AGENT_STATE_CONTROL_EVENTS.AGENT_CHANNEL_RELOGIN_SUCCESS, this.handleAgentChannelRelogin);
+    ccSDK.on(INTERNAL_AGENT_STATE_CONTROL_EVENTS.AGENT_CHANNEL_STATE_CHANGED, this.handleAgentChannelStateChanged);
   };
 }
 

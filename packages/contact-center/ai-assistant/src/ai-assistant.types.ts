@@ -1,6 +1,5 @@
 import type {
   AIAssistantRTDStatusEvent,
-  AgentChannelStateDetail,
   IdleCode,
   ITask,
   RealTimeAssistPayload,
@@ -9,6 +8,7 @@ import type {
   WellnessBreakState,
 } from '@webex/cc-store';
 import type {WellnessBreakOverlayTarget} from '@webex/cc-components';
+import type {AgentChannelStateDetail} from './wellness/wellness-internal.types';
 
 export type {WellnessBreakError, WellnessBreakErrorCode, WellnessBreakPhase} from '@webex/cc-store';
 export type {WellnessBreakOverlayTarget} from '@webex/cc-components';
@@ -67,6 +67,7 @@ export type UseRealTimeAssistInput = Pick<
 
 export type UserMessage = {id: string; text: string; sentAt: number};
 
+/** @internal */
 export interface UseWellnessBreakInput
   extends Pick<
     IAIAssistantProps,

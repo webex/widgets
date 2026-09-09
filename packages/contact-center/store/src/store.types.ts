@@ -71,7 +71,10 @@ interface IContactCenter {
   setAgentState(data: StateChange): Promise<SetStateResponse>;
   /** Returns the system-owned `WellbeingBreak` idle code for the active registration. */
   getWellbeingBreakIdleCode(): Promise<IdleCode>;
-  /** Changes one or more Agent State Control channels and resolves from the matching SDK event. */
+  /**
+   * Changes one or more State Control V2 channels for first-party wellness compatibility.
+   * @internal
+   */
   setAgentChannelState(data: SetAgentChannelStateParams): Promise<AgentChannelStateChangedEvent>;
   getOutdialAniEntries(params: OutdialAniParams): Promise<OutdialAniEntriesResponse>;
   getAccessToken(): Promise<string>;
@@ -197,8 +200,8 @@ interface RespondToWellnessBreakParams extends RequestWellnessBreakParams {
   action: Exclude<WellnessBreakUserAction, 'REQUESTED'>;
 }
 
-/** Current state for one Agent State Control channel. */
-interface AgentChannelStateDetail {
+/** Current state for one State Control V2 channel. @internal */
+export interface AgentChannelStateDetail {
   agentState: string;
   pendingIdle: boolean;
   auxCodeId?: string | null;
@@ -206,8 +209,8 @@ interface AgentChannelStateDetail {
   stateChangeReason: string;
 }
 
-/** Agent State Control relogin snapshot projected by the store. */
-interface AgentChannelReloginSuccessEvent {
+/** State Control V2 relogin snapshot projected internally by the store. @internal */
+export interface AgentChannelReloginSuccessEvent {
   agentId: string;
   orgId: string;
   agentSessionId: string;
@@ -216,8 +219,8 @@ interface AgentChannelReloginSuccessEvent {
   agentChannelStateDetailMap: Record<string, AgentChannelStateDetail>;
 }
 
-/** One Agent State Control channel update projected by the store. */
-interface AgentChannelStateChangedEvent {
+/** One State Control V2 channel update projected internally by the store. @internal */
+export interface AgentChannelStateChangedEvent {
   agentId: string;
   orgId: string;
   agentSessionId: string;
@@ -227,7 +230,8 @@ interface AgentChannelStateChangedEvent {
   trackingId: string;
 }
 
-interface SetAgentChannelStateParams {
+/** @internal */
+export interface SetAgentChannelStateParams {
   channelTypes: string[];
   state: 'Available' | 'Idle';
   auxCodeId?: string;
@@ -272,12 +276,14 @@ interface WellnessBreakState {
   errorCode?: WellnessBreakErrorCode;
 }
 
-type WellnessStateModel = 'legacy' | 'agent-state-control';
+/** @internal */
+export type WellnessStateModel = 'legacy' | 'agent-state-control';
 
-type WellnessCapturedChannelState = Pick<AgentChannelStateDetail, 'agentState' | 'auxCodeId'>;
+/** @internal */
+export type WellnessCapturedChannelState = Pick<AgentChannelStateDetail, 'agentState' | 'auxCodeId'>;
 
-/** Short-lived, session-scoped recovery ownership stored by the widget host. */
-interface WellnessBreakRecoveryMarkerV1 {
+/** Short-lived, session-scoped recovery ownership stored by the widget host. @internal */
+export interface WellnessBreakRecoveryMarkerV1 {
   version: 1;
   agentSessionId: string;
   stateModel: WellnessStateModel;
@@ -400,9 +406,13 @@ interface IStore {
   wellnessBreakState: WellnessBreakState;
   wellnessEventSequence: number;
   aiAssistantRtdStatus: AIAssistantRTDStatusEvent;
+  /** @internal */
   isAgentStateControlEnabled: boolean;
+  /** @internal */
   agentChannelTypes: string[];
+  /** @internal */
   agentChannelStateDetails: Record<string, AgentChannelStateDetail>;
+  /** @internal */
   agentChannelReloginSequence: number;
   legacyAgentState: string;
   legacyAuxCodeId: string;
@@ -480,8 +490,6 @@ enum CC_EVENTS {
   REAL_TIME_TRANSCRIPTION = 'REAL_TIME_TRANSCRIPTION',
   WELLNESS_BREAK = 'WellnessBreak',
   AI_ASSISTANT_RTD_STATUS_CHANGED = 'AIAssistantRTDStatusChanged',
-  AGENT_CHANNEL_RELOGIN_SUCCESS = 'AgentChannelReloginSuccess',
-  AGENT_CHANNEL_STATE_CHANGED = 'AgentChannelStateChanged',
 }
 
 interface ICustomStateSet {
@@ -519,6 +527,7 @@ type AgentLoginProfile = {
   auxCodeId?: string;
   subStatus?: string;
   channelsMap?: Record<string, string[]>;
+  /** @internal */
   agentChannelStateDetailMap?: Record<string, AgentChannelStateDetail>;
 };
 
@@ -612,17 +621,10 @@ export type {
   AIAssistantRTDStatusEvent,
   RequestWellnessBreakParams,
   RespondToWellnessBreakParams,
-  AgentChannelStateDetail,
-  AgentChannelReloginSuccessEvent,
-  AgentChannelStateChangedEvent,
-  SetAgentChannelStateParams,
   WellnessBreakPhase,
   WellnessBreakErrorCode,
   WellnessBreakError,
   WellnessBreakState,
-  WellnessStateModel,
-  WellnessCapturedChannelState,
-  WellnessBreakRecoveryMarkerV1,
   WidgetsBehavioralMetric,
   WidgetsBehavioralMetricAgent,
   WidgetsBehavioralMetricVerb,

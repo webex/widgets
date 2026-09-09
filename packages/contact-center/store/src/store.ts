@@ -76,9 +76,13 @@ class Store implements IStore {
   wellnessBreakState: WellnessBreakState = {phase: 'idle'};
   wellnessEventSequence = 0;
   aiAssistantRtdStatus: AIAssistantRTDStatusEvent = {state: 'disconnected', generation: 0};
+  /** @internal */
   isAgentStateControlEnabled = false;
+  /** @internal */
   agentChannelTypes: string[] = [];
+  /** @internal */
   agentChannelStateDetails: Record<string, AgentChannelStateDetail> = {};
+  /** @internal */
   agentChannelReloginSequence = 0;
   legacyAgentState = '';
   legacyAuxCodeId = '';

@@ -599,7 +599,11 @@ const mockQueuesResponse: ContactServiceQueuesResponse = {
   meta: {page: 0, pageSize: 25, totalPages: 1},
 };
 
-const mockCC: IContactCenter = {
+type InternalStateControlTestDouble = {
+  setAgentChannelState: jest.Mock<Promise<unknown>, [Record<string, unknown>]>;
+};
+
+const mockCC: IContactCenter & InternalStateControlTestDouble = {
   on: jest.fn(),
   off: jest.fn(),
   updateAgentProfile: jest.fn(),

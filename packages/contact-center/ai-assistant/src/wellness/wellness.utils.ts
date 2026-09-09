@@ -1,26 +1,29 @@
+import type {ITask, WellnessBreakPhase} from '@webex/cc-store';
 import type {
   AgentChannelStateDetail,
-  ITask,
-  WellnessBreakPhase,
   WellnessBreakRecoveryMarkerV1,
   WellnessCapturedChannelState,
-} from '@webex/cc-store';
+} from './wellness-internal.types';
 
 const TERMINAL_TASK_STATES = new Set(['completed', 'disconnected', 'ended', 'terminated', 'wrappedup']);
 const BUSY_CHANNEL_STATES = new Set(['engaged', 'engagedother', 'reserved', 'wrapup', 'wrappingup']);
 const PRE_PLAY_PHASES = new Set<WellnessBreakPhase>(['changing-to-break', 'waiting-for-safe-state', 'starting']);
 
+/** @internal */
 export interface IWellnessRestoreGroup {
   state: 'Available' | 'Idle';
   auxCodeId?: string;
   channelTypes: string[];
 }
 
+/** @internal */
 export type WellnessRecoveryDecision = 'discard' | 'wait' | 'clear' | 'restore';
 
+/** @internal */
 export const normalizeWellnessState = (value?: string): string =>
   typeof value === 'string' ? value.replace(/[\s_-]/g, '').toLowerCase() : '';
 
+/** @internal */
 export const isTaskBlockingWellness = (task?: ITask | null): boolean => {
   if (!task) return false;
   if (!task.data) return true;
@@ -30,9 +33,11 @@ export const isTaskBlockingWellness = (task?: ITask | null): boolean => {
   return !state || !TERMINAL_TASK_STATES.has(state);
 };
 
+/** @internal */
 export const areAllTasksSafeForWellness = (taskList: Record<string, ITask>): boolean =>
   Object.values(taskList || {}).every((task) => !isTaskBlockingWellness(task));
 
+/** @internal */
 export const cloneWellnessChannelStates = (
   channelTypes: string[],
   channelStateDetails: Record<string, AgentChannelStateDetail>
@@ -48,6 +53,7 @@ export const cloneWellnessChannelStates = (
     return snapshot;
   }, {});
 
+/** @internal */
 export const isWellnessChannelState = (
   detail: AgentChannelStateDetail | undefined,
   wellnessAuxCodeId?: string
@@ -59,6 +65,7 @@ export const isWellnessChannelState = (
       detail?.auxCodeId === wellnessAuxCodeId
   );
 
+/** @internal */
 export const shouldCancelWellnessBeforePlayback = (
   phase: WellnessBreakPhase,
   detail: AgentChannelStateDetail | undefined,
@@ -68,6 +75,7 @@ export const shouldCancelWellnessBeforePlayback = (
   return !isWellnessChannelState(detail, wellnessAuxCodeId) && detail.pendingIdle !== true;
 };
 
+/** @internal */
 export const areWellnessChannelsConfirmed = (
   channelTypes: string[],
   channelStateDetails: Record<string, AgentChannelStateDetail>,
@@ -76,6 +84,7 @@ export const areWellnessChannelsConfirmed = (
   channelTypes.length > 0 &&
   channelTypes.every((channelType) => isWellnessChannelState(channelStateDetails[channelType], wellnessAuxCodeId));
 
+/** @internal */
 export const buildWellnessRestoreGroups = ({
   channelTypes,
   currentChannelStates,
@@ -142,6 +151,7 @@ export const buildWellnessRestoreGroups = ({
   return [...groups.values()];
 };
 
+/** @internal */
 export const createWellnessRecoveryMarker = ({
   agentSessionId,
   stateModel,
@@ -165,6 +175,7 @@ export const createWellnessRecoveryMarker = ({
     : {}),
 });
 
+/** @internal */
 export const parseWellnessRecoveryMarker = (serialized: string | null): WellnessBreakRecoveryMarkerV1 | undefined => {
   if (!serialized) return undefined;
   try {
@@ -195,6 +206,7 @@ export const parseWellnessRecoveryMarker = (serialized: string | null): Wellness
   }
 };
 
+/** @internal */
 export const getWellnessRecoveryDecision = ({
   marker,
   agentSessionId,

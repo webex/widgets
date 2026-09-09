@@ -1,4 +1,5 @@
-import type {AgentChannelStateDetail, ITask, WellnessBreakRecoveryMarkerV1} from '@webex/cc-store';
+import type {ITask} from '@webex/cc-store';
+import type {AgentChannelStateDetail, WellnessBreakRecoveryMarkerV1} from '../src/wellness/wellness-internal.types';
 import {
   areAllTasksSafeForWellness,
   areWellnessChannelsConfirmed,
