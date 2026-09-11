@@ -490,7 +490,7 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
     setPhase('request-pending');
     logWellnessMetric(WELLNESS_METRIC.CTA_USER_REQUEST);
     try {
-      await api.requestWellnessBreak({agentId: latest.agentId, agentSessionId: latest.agentSessionId});
+      await api.requestWellnessBreak();
     } catch {
       setPhase('idle');
       reportError('ACTION_REQUEST_FAILED', 'request-pending', true);
@@ -578,8 +578,6 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
           const api = store.cc.apiAIAssistant;
           if (!api?.respondToWellnessBreak) throw new Error('Wellness response API unavailable');
           await api.respondToWellnessBreak({
-            agentId: latest.agentId,
-            agentSessionId: latest.agentSessionId,
             action: 'ACCEPTED',
           });
         } catch {
@@ -662,8 +660,6 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
         const api = store.cc.apiAIAssistant;
         if (!api?.respondToWellnessBreak) throw new Error('Wellness response API unavailable');
         await api.respondToWellnessBreak({
-          agentId: latest.agentId,
-          agentSessionId: latest.agentSessionId,
           action: 'REJECTED',
         });
       } catch {
@@ -749,8 +745,6 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
           }
           void api
             .respondToWellnessBreak({
-              agentId: latest.agentId,
-              agentSessionId: latest.agentSessionId,
               action: 'NO_RESPONSE',
             })
             .catch(() => reportError('ACTION_REQUEST_FAILED', 'offer-pending', true, false));

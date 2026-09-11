@@ -86,7 +86,7 @@ interface IContactCenter {
   apiAIAssistant?: {
     getRealTimeAssistance(params: RealTimeAssistRequestParams & {actionTimeStamp?: number}): Promise<unknown>;
     sendRealTimeAssistanceUserAction(params: RealTimeAssistUserActionParams): Promise<unknown>;
-    requestWellnessBreak(params: RequestWellnessBreakParams): Promise<void>;
+    requestWellnessBreak(): Promise<void>;
     respondToWellnessBreak(params: RespondToWellnessBreakParams): Promise<void>;
   };
   /** SDK-owned transport for widgets behavioral metrics. */
@@ -191,12 +191,7 @@ interface AIAssistantRTDStatusEvent {
   generation: number;
 }
 
-interface RequestWellnessBreakParams {
-  agentId: string;
-  agentSessionId: string;
-}
-
-interface RespondToWellnessBreakParams extends RequestWellnessBreakParams {
+interface RespondToWellnessBreakParams {
   action: Exclude<WellnessBreakUserAction, 'REQUESTED'>;
 }
 
@@ -619,7 +614,6 @@ export type {
   WellnessBreakEvent,
   AIAssistantRTDConnectionState,
   AIAssistantRTDStatusEvent,
-  RequestWellnessBreakParams,
   RespondToWellnessBreakParams,
   WellnessBreakPhase,
   WellnessBreakErrorCode,

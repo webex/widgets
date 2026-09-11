@@ -31,8 +31,9 @@ surface through `widget-cc-ai-assistant` and distributes lazy media chunks.
   a Desktop-style actionable toast exposes the same Take a break and Later actions; opening the panel
   shows the offer in the assistant body without duplicating the toast.
 - Wellness notification eligibility is scoped to the current agent and organization, not to equality
-  with the notification-provided `agentSessionId`. Requests and responses always use the active local
-  station/channel session rather than echoing notification session metadata.
+  with the notification-provided `agentSessionId`. The widget calls `requestWellnessBreak()` without
+  arguments and calls `respondToWellnessBreak({action})` without identity fields. The SDK supplies its
+  active registration and login/relogin context rather than accepting notification identity metadata.
 - Agent acceptance changes state before sending `ACCEPTED`. A pending manual request approved by
   `PROVIDE` changes state without a duplicate action. Repeated clicks are guarded so a direct offer
   sends at most one acceptance request.

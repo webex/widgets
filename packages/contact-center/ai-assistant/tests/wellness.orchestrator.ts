@@ -94,10 +94,7 @@ describe('useWellnessBreak', () => {
     await waitFor(() => expect(result.current.requestAvailable).toBe(true));
     await act(async () => result.current.onRequest());
 
-    expect(storeMock.cc.apiAIAssistant.requestWellnessBreak).toHaveBeenCalledWith({
-      agentId: 'agent-1',
-      agentSessionId: 'session-1',
-    });
+    expect(storeMock.cc.apiAIAssistant.requestWellnessBreak).toHaveBeenCalledWith();
     expect(result.current.requestAvailable).toBe(false);
     expect(storeMock.setWellnessBreakState).toHaveBeenCalledWith({phase: 'idle', event});
     expect(storeMock.setWellnessBreakState).toHaveBeenCalledWith({phase: 'request-pending'});
@@ -219,8 +216,6 @@ describe('useWellnessBreak', () => {
     expect(storeMock.cc.setAgentState).toHaveBeenCalledTimes(1);
     expect(storeMock.cc.apiAIAssistant.respondToWellnessBreak).toHaveBeenCalledTimes(1);
     expect(storeMock.cc.apiAIAssistant.respondToWellnessBreak).toHaveBeenCalledWith({
-      agentId: 'agent-1',
-      agentSessionId: 'session-1',
       action: 'ACCEPTED',
     });
     expect(storeMock.cc.setAgentState.mock.invocationCallOrder[0]).toBeLessThan(
@@ -234,7 +229,7 @@ describe('useWellnessBreak', () => {
     });
   });
 
-  it('accepts a direct offer from another notification session using the active local session', async () => {
+  it('accepts a direct offer from another notification session through the SDK-owned active context', async () => {
     const provide = {
       ...event,
       agentSessionId: 'notification-session',
@@ -253,8 +248,6 @@ describe('useWellnessBreak', () => {
       expect.objectContaining({state: 'Idle', auxCodeId: 'wellness', agentId: 'agent-1'})
     );
     expect(storeMock.cc.apiAIAssistant.respondToWellnessBreak).toHaveBeenCalledWith({
-      agentId: 'agent-1',
-      agentSessionId: 'session-1',
       action: 'ACCEPTED',
     });
   });
@@ -307,8 +300,6 @@ describe('useWellnessBreak', () => {
     expect(storeMock.cc.setAgentState).not.toHaveBeenCalled();
     expect(storeMock.cc.apiAIAssistant.respondToWellnessBreak).toHaveBeenCalledTimes(1);
     expect(storeMock.cc.apiAIAssistant.respondToWellnessBreak).toHaveBeenCalledWith({
-      agentId: 'agent-1',
-      agentSessionId: 'session-1',
       action: 'REJECTED',
     });
     expect(result.current.notice).toBe('declined');
@@ -342,8 +333,6 @@ describe('useWellnessBreak', () => {
     });
     expect(storeMock.cc.apiAIAssistant.respondToWellnessBreak).toHaveBeenCalledTimes(1);
     expect(storeMock.cc.apiAIAssistant.respondToWellnessBreak).toHaveBeenCalledWith({
-      agentId: 'agent-1',
-      agentSessionId: 'session-1',
       action: 'NO_RESPONSE',
     });
     expect(storeMock.submitBehavioralMetric).toHaveBeenCalledWith({
@@ -452,8 +441,6 @@ describe('useWellnessBreak', () => {
       agentId: 'agent-1',
     });
     expect(storeMock.cc.apiAIAssistant.respondToWellnessBreak).toHaveBeenCalledWith({
-      agentId: 'agent-1',
-      agentSessionId: 'session-1',
       action: 'ACCEPTED',
     });
     expect(JSON.parse(window.sessionStorage.getItem(WELLNESS_RECOVERY_KEY) || '{}')).toEqual({
