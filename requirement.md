@@ -29,7 +29,7 @@ Figma MCP must not be used for this run. The local Figma scene-graph JSON, text 
 - Receiving-agent eligibility begins only when the receiving-agent content event arrives. There is no separate pre-content eligibility event.
 - The same `interactionId` is retained across consult-to-transfer promotion, additional transfers, and conference changes.
 - Summary request cancellation is not supported. The widget must use an interaction/agent/owner generation token to ignore settlements that are no longer current.
-- The SDK request timeout is 20 seconds for consult/transfer behavior. While the request is pending, further consult/transfer initiation is disabled. The widget does not propagate or render a response delivered after the SDK timeout.
+- The SDK request timeout is 15 seconds for consult/transfer behavior. While the request is pending, further consult/transfer initiation is disabled. The widget does not propagate or render a response delivered after the SDK timeout.
 - There is no automatic client retry for unauthorized, offline, unavailable, empty, disabled, timeout, or generic request failure. A user-visible Retry action, where supplied by the approved post-call UX, starts a fresh SDK request.
 - Repeated transport requests are tolerated by the backend. Each explicit user request still calls the SDK, and the UI uses the response with the greatest monotonic UTC `actionTimestamp`; equal timestamps use last arrival. A stale lower timestamp cannot replace newer visible state.
 
@@ -77,7 +77,7 @@ Figma MCP must not be used for this run. The local Figma scene-graph JSON, text 
 
 - On A to B to C transfer, Agent C receives a new summary covering the complete A+B history. Agent B's prior summary is discarded when C's summary becomes valid. The common interaction ID is retained and Agent C starts new counters.
 - The new summary is available during transfer preparation. Consult-then-transfer and direct transfer use the same summary rules.
-- The SDK's 20-second request timeout disables a further consult attempt while pending. Independently, an ownership-generation check must prevent an old agent's settlement from replacing the current agent's state.
+- The SDK's 15-second request timeout disables a further consult attempt while pending. Independently, an ownership-generation check must prevent an old agent's settlement from replacing the current agent's state.
 - Adding a conference participant requests a new, per-agent summary covering the call from its beginning. The existing summary remains visible only until that agent's new summary arrives, then is discarded.
 - The participant receiving the current consult is the receiving agent before conference establishment. After establishment there is no single receiving agent; each agent sees only that agent's generated summary.
 - Summary generation continues when participants join or leave. If two participants remain, the session becomes a call. The oldest remaining initiating agent is the host.
@@ -243,7 +243,7 @@ Screenshot and variant identifiers are stable local evidence keys. The variant i
 
 - Actor: voice agent initiating or receiving a consult, transfer, or conference participant addition
 - Preconditions: an active voice interaction, matching interaction-scoped capability, and current-agent summary eligibility
-- Steps: initiate or receive consult/transfer; wait up to 20 seconds; open View summary; inspect role-specific content; optionally edit when initiating; copy or select feedback; continue consult/transfer
+- Steps: initiate or receive consult/transfer; wait up to 15 seconds; open View summary; inspect role-specific content; optionally edit when initiating; copy or select feedback; continue consult/transfer
 - Required states: mid-call-summary
 - Keyboard/focus behavior: all controls are reachable in document order; disappearing focused controls move focus to the next focusable control; content changes do not otherwise move focus
 - Screen-reader behavior: controls have the exact accessible names in REQ-009; no feature-owned announcement or live-region behavior is added

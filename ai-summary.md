@@ -51,7 +51,7 @@
  * @returns {Promise<PostCallSummaryEventPayload>} Resolves with the inbound
  *   summary payload (after double-envelope unwrap) once the matching
  *   `POST_CALL_SUMMARY` arrives. Rejects on HTTP failure, disabled flag, or
- *   if no payload arrives within `AI_SUMMARY_REQUEST_TIMEOUT_MS` (default 30s).
+ *   if no payload arrives within `AI_SUMMARY_REQUEST_TIMEOUT_MS` (default 15s).
  * @throws {Error} If `aiFeature.generatedSummaries.wrapUpSummariesEnabled` is
  *   false (`POST_CALL_SUMMARY_DISABLED`), or the api-ai-assistant base URL
  *   cannot be resolved, or the GET request fails, or the WS payload never
@@ -83,7 +83,7 @@ public async requestPostCallSummary(): Promise<PostCallSummaryEventPayload>;
 - Validation: `aiFeature.generatedSummaries.wrapUpSummariesEnabled === true`. If false, throw `Error('POST_CALL_SUMMARY_DISABLED')` augmented via `getErrorDetails`.
 - Response channel: HTTP 202 acks the GET; the Promise then awaits the matching `POST_CALL_SUMMARY` WS payload and resolves with it.
 - **Multi-session rule:** the `task:postCallSummary` event MUST fire on every received payload regardless of whether a Promise is currently awaiting. The Promise is fulfilled by subscribing internally with `once` so external listeners are unaffected.
-- **Timeout:** if no WS payload arrives within `AI_SUMMARY_REQUEST_TIMEOUT_MS` (default 30,000 ms), the Promise rejects with `POST_CALL_SUMMARY_TIMEOUT` and the internal `once` listener is removed; subsequent late arrivals still fire the event for other listeners.
+- **Timeout:** if no WS payload arrives within `AI_SUMMARY_REQUEST_TIMEOUT_MS` (default 15,000 ms), the Promise rejects with `POST_CALL_SUMMARY_TIMEOUT` and the internal `once` listener is removed; subsequent late arrivals still fire the event for other listeners.
 - Idempotency: backend-controlled; the SDK sends the request as-is. Repeated calls are allowed — each call gets its own pending Promise tied to the next inbound payload. Agent-desktop fires a fresh `GET_MID_CALL_CONSULT_SUMMARY` every time the consult dialog re-opens on the same `conversationId`, and counter state (`numberOfTimesViewed`) is reset per-dialog-open (not cumulative across the call).
 
 #### 3.1.2 `task.sendPostCallSummaryResponse(payload: PostCallSummaryResponsePayload): Promise<void>`
@@ -157,7 +157,7 @@ public async requestMidCallSummary(
   - `'TRANSFER'` → `AIAssistantEventName.GET_MID_CALL_TRANSFER_SUMMARY`
   - `'CONSULT'` → `AIAssistantEventName.GET_MID_CALL_CONSULT_SUMMARY`
 - **Multi-session rule:** the `task:midCallSummary` event MUST fire on every received payload regardless of whether a Promise is currently awaiting. The Promise is fulfilled by an internal `once` listener so external listeners are unaffected.
-- **Timeout:** if no WS payload arrives within `AI_SUMMARY_REQUEST_TIMEOUT_MS` (default 30,000 ms), the Promise rejects with `MID_CALL_SUMMARY_TIMEOUT` and the internal `once` listener is detached; late arrivals still fire the public event for other listeners.
+- **Timeout:** if no WS payload arrives within `AI_SUMMARY_REQUEST_TIMEOUT_MS` (default 15,000 ms), the Promise rejects with `MID_CALL_SUMMARY_TIMEOUT` and the internal `once` listener is detached; late arrivals still fire the public event for other listeners.
 
 #### 3.1.4 `task.sendMidCallSummaryResponse(payload: MidCallSummaryResponsePayload, actionType: SummaryActionType): Promise<void>`
 
@@ -490,7 +490,7 @@ flowchart TD
   WidgetGet["Widget awaits<br/>task.requestPostCallSummary()"]
   Validate{"wrapUpSummariesEnabled?"}
   Disabled["Throw POST_CALL_SUMMARY_DISABLED"]
-  Prepare["Start GET metrics; log request;<br/>attach internal once listener + 30s timeout"]
+  Prepare["Start GET metrics; log request;<br/>attach internal once listener + 15s timeout"]
   SendGet["ApiAIAssistant.sendSummaryGetEvent<br/>GET_POST_CALL_SUMMARY"]
   Http{"POST /event result"}
   HttpFail["Track FAILED; getErrorDetails;<br/>detach listener; throw"]
@@ -532,7 +532,7 @@ flowchart TD
   Request["Await task.requestMidCallSummary<br/>(CONSULT or TRANSFER)"]
   Validate{"consultTransferSummariesEnabled?"}
   Disabled["Throw MID_CALL_SUMMARY_DISABLED"]
-  Prepare["Start GET metrics;<br/>attach internal once listener + 30s timeout"]
+  Prepare["Start GET metrics;<br/>attach internal once listener + 15s timeout"]
   Select{"actionType"}
   Consult["GET_MID_CALL_CONSULT_SUMMARY"]
   Transfer["GET_MID_CALL_TRANSFER_SUMMARY"]
@@ -616,7 +616,7 @@ flowchart TD
  * Default timeout for awaiting an inbound summary payload over WebSocket
  * after a GET has been accepted. Lives in `src/constants.ts`.
  */
-export const AI_SUMMARY_REQUEST_TIMEOUT_MS = 30_000;
+export const AI_SUMMARY_REQUEST_TIMEOUT_MS = 15_000;
 
 /**
  * Race a one-shot listener on the given event against a timeout. Resolves
