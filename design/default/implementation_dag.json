@@ -2,192 +2,361 @@
   "tasks": [
     {
       "id": "D0-sdk-package-contract",
-      "title": "Build and lock the exact cc-summaries SDK package",
-      "description": "REQ-001 and AC-01: add a deterministic verifier bound through WEBEX_JS_SDK_DIR to /Users/pkesari/Desktop/WorkProjects/webex-js-sdk (widgets-relative fallback ../../webex-js-sdk), accepting only the clean cc-summaries checkout at commit 50602eea08dfc72df57d038529049e46f064f6c5; record its immutable identity, Node 22.14 and pinned Yarn build facts, pack @webex/contact-center, pin the widgets repository to the hashed local tarball, verify declarations and runtime event/method/payload contracts including AI_SUMMARY_REQUEST_TIMEOUT_MS === 20_000 ms while receiver-buffer and orphan-retention durations remain 30_000 ms, recheck source identity after build and pack, and fail closed without editing SDK source when the identity or contract differs.",
-      "priority": "critical",
+      "title": "Admit and seal the conforming cc-summaries SDK package",
+      "description": "REQ-015, REQ-016, REQ-001, and AC-01 / Component: SDK Supply Lock and Contract Admission - add the CommonJS build/verify command ai-summary-sdk-lock.js with exported buildSdkPackage, verifySdkPackage, and runCli seams plus its fail-closed Jest suite; add the narrow .gitignore exception and generate sdk_package_lock.json plus vendor/contact-center-cc-summaries.tgz; replace @webex/cc-store's @webex/contact-center range with the sealed file artifact and regenerate yarn.lock. The command records a clean cc-summaries path/commit/version, Node 22.14, Yarn 3.4.1, exact install/build/test/pack argv, tarball SHA-256, and public declaration hashes; it compiles and probes Task.requestPostCallSummary, Task.sendPostCallSummaryResponse, Task.requestMidCallSummary, Task.sendMidCallSummaryResponse, cc:featureEnablement, role events/payloads including optional resolution, structured-or-string received response unions and exact unavailable branches, stable interaction identity, receiver action correlation, send success/non-success settlement, and the 15-second mid-call timeout. It rejects the currently inspected nonconforming package identity and never falls back to 3.12.0-next.123. This is the root task because every TypeScript consumer and fixture must use the admitted declarations.",
       "files": [
-        "tooling/build-cc-summaries-sdk.mjs",
-        "tooling/tests/cc-summaries-sdk-contract.test.js",
+        ".gitignore",
+        "tooling/src/ai-summary-sdk-lock.js",
+        "tooling/tests/ai-summary-sdk-lock.test.js",
         "design/default/sdk_package_lock.json",
         "vendor/contact-center-cc-summaries.tgz",
-        "package.json",
+        "packages/contact-center/store/package.json",
         "yarn.lock"
       ],
       "dependencies": [],
-      "acceptance": "node tooling/build-cc-summaries-sdk.mjs --verify && yarn test:tooling --runInBand --runTestsByPath tooling/tests/cc-summaries-sdk-contract.test.js"
+      "acceptance": "node tooling/src/ai-summary-sdk-lock.js build && yarn test:tooling --runInBand --runTestsByPath tooling/tests/ai-summary-sdk-lock.test.js && node tooling/src/ai-summary-sdk-lock.js verify",
+      "prerequisites": [
+        {
+          "kind": "tool",
+          "name": "Node.js 22.14",
+          "command": "node",
+          "check_command": ["node", "--version"],
+          "version_regex": "^v22\\.14\\.",
+          "required": true,
+          "fix_hint": "Activate Node.js 22.14 before building either repository."
+        },
+        {
+          "kind": "tool",
+          "name": "Corepack",
+          "command": "corepack",
+          "check_command": ["corepack", "--version"],
+          "required": true,
+          "fix_hint": "Enable Corepack for the SDK repository's pinned Yarn 3.4.1 release."
+        },
+        {
+          "kind": "tool",
+          "name": "Git",
+          "command": "git",
+          "check_command": ["git", "--version"],
+          "required": true,
+          "fix_hint": "Install Git so source identity and cleanliness can be verified."
+        },
+        {
+          "kind": "service",
+          "name": "Local webex-js-sdk cc-summaries checkout",
+          "service": "filesystem-git-checkout",
+          "check_command": [
+            "git",
+            "-C",
+            "/Users/fsiyavud/Documents/Projects/WebexDevPlatform/webex-js-sdk",
+            "rev-parse",
+            "--verify",
+            "HEAD"
+          ],
+          "working_directory": "/Users/fsiyavud/Documents/Projects/WebexDevPlatform/widgets/.worktrees/design",
+          "timeout_seconds": 10,
+          "required": true,
+          "fix_hint": "Provide the clean sibling webex-js-sdk checkout on cc-summaries; the admission command validates its exact commit and public contract."
+        },
+        {
+          "kind": "service",
+          "name": "npm registry for pinned SDK and widget installs",
+          "service": "https://registry.npmjs.org",
+          "check_command": [
+            "node",
+            "-e",
+            "require('https').get('https://registry.npmjs.org/-/ping',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"
+          ],
+          "working_directory": "/Users/fsiyavud/Documents/Projects/WebexDevPlatform/widgets/.worktrees/design",
+          "timeout_seconds": 20,
+          "required": true,
+          "fix_hint": "Allow the SDK's pinned Yarn install to reach its declared npm registry or provide a complete local cache."
+        }
+      ]
     },
     {
       "id": "D1-summary-contract-fixtures",
-      "title": "Add immutable AI-summary contract and race fixtures",
-      "description": "REQ-001, REQ-002, REQ-003, REQ-004, REQ-005, REQ-006, REQ-008, REQ-010, REQ-012 and AC-01, AC-02, AC-03, AC-04, AC-05, AC-06, AC-07, AC-08, AC-10, AC-11, AC-13, AC-14, AC-16: add raw SDK fixtures for capabilities, initiator typed/plain payloads, receiver cards, post-call variants, malformed and unsupported content, normalized failures, timestamps, transfers, conferences, counters, feedback, stale settlements, wrap-up ordering, and cleanup without logging summary bodies.",
-      "priority": "critical",
+      "title": "Add typed raw SDK summary fixtures and contract probes",
+      "description": "REQ-001, REQ-002, REQ-003, REQ-004, REQ-005, REQ-006, REQ-008, REQ-010, REQ-012, AC-01, AC-02, AC-03, AC-04, AC-05, AC-06, AC-07, AC-08, AC-10, AC-11, AC-13, AC-14, and AC-16 / Component: Interaction Summary Store and SDK Adapter and Test Strategy - add the single readonly aiSummaryFixtures export and re-export it from test-fixtures/src/index.ts for strict feature enablement, initiating typed/plain payloads, receiver cards, structured/plain post-call payloads including top-level resolution/Outcome, malformed/unsupported/empty input, normalized failures, timestamps, transfers, conferences, feedback, counters, timeout, wrap-up, response failure, stale settlements, and AgentWrappedUp. Add ai-summary-contract.ts to compile conforming fixture members against and runtime-probe only the D0 tarball, and update the fixture module specification. D0 is required first because fixture field names and event values must come from sealed public declarations rather than casts or guesses.",
       "files": [
-        "packages/contact-center/test-fixtures/src/ai-summary.ts",
+        "packages/contact-center/test-fixtures/src/aiSummaryFixtures.ts",
         "packages/contact-center/test-fixtures/src/index.ts",
+        "packages/contact-center/test-fixtures/ai-docs/test-fixtures-spec.md",
         "packages/contact-center/store/tests/ai-summary-contract.ts"
       ],
-      "dependencies": [
-        "D0-sdk-package-contract"
-      ],
-      "acceptance": "yarn workspace @webex/cc-store test:unit --runInBand --runTestsByPath tests/ai-summary-contract.ts"
+      "dependencies": ["D0-sdk-package-contract"],
+      "acceptance": "yarn workspace @webex/test-fixtures build && yarn workspace @webex/cc-store test:unit --runInBand --runTestsByPath tests/ai-summary-contract.ts"
     },
     {
       "id": "D2-interaction-summary-store",
-      "title": "Implement interaction and ownership scoped summary state",
-      "description": "REQ-002, REQ-006, REQ-008, REQ-010 and AC-02, AC-06, AC-07, AC-08, AC-10, AC-11, AC-13, AC-14: keep @webex/cc-store as the SDK boundary; validate and normalize role-specific events, capabilities and errors; call every explicit request; enforce timestamp and owner-generation freshness; retain and clear state at approved boundaries; count successful view/edit/copy actions; sequence final responses; and guarantee listener cleanup with no automatic retry, persistence, sensitive callback detail, or unhandled rejection.",
-      "priority": "critical",
+      "title": "Implement validated interaction and ownership scoped summary state",
+      "description": "REQ-014, REQ-001, REQ-002, REQ-006, REQ-008, REQ-010, AC-02, AC-06, AC-07, AC-08, AC-10, AC-13, and AC-14 / Component: Interaction Summary Store and SDK Adapter - add pure ai-summary.ts validators, getCanonicalAISummaryInteractionId reusing findMediaResourceId(task, 'mainCall'), discriminated valid/invalid capability normalization that retains only a recognizable interactionId for fail-closed clearing, payload normalization, timestamp ordering, owner-key guards, response composers, and sanitized error mapping; add stateful StoreWrapper.getOrCreateAISummaryOwnerKey plus pending-request sequence bookkeeping in storeEventsWrapper.ts; add AISummaryOwnerKey, AISummaryOwnerState, AISummaryViewModel including requestPending, AISummarySectionKey, AISummaryDisplaySectionKey, AISummaryEditableField, AISummaryCounters, AISummaryFeedback, PostCallDraftCapture, AISummaryStatusTransition, agentWrappedUpObserved, currentAISummaryOwnerByInteraction, nextAISummaryOwnershipGeneration, and store action signatures to store.types.ts. Normalize admitted post-call resolution as the read-only Outcome display row only when typed sections exist, keep it out of editable/response keys, and retain the exact string bytes for display/copy. Add handleAISummaryFeatureEnablement and pair its exact callback in setupIncomingTaskHandler.addEventListeners/removeEventListeners; store exact task-bound receiving/wrapped-up callbacks so registerTaskEventListeners rebinds safely and handleTaskRemove/cleanUpStore detach exact functions; leave the existing TASK_PARTICIPANT_JOINED, TASK_CONFERENCE_STARTED, TASK_PARTICIPANT_LEFT, and TASK_CONFERENCE_ENDED handlers unchanged and prove they neither fan out an SDK request nor cancel pending summary work; replace only the direct wrapped-up refresh listener with a wrapper that transitions summary state before preserving refreshTaskList. Extend Store and setCurrentTask to make @webex/cc-store the sole caller/listener for the four Task methods and summary events, compute the canonical main-interaction/agent key without using interaction.owner as receiving-agent identity, require the existing registered session plus non-empty authenticated agentId for authorization, preserve same-agent generation across consult-to-transfer and conference content replacement, advance it after terminal clear or agent change, enforce voice/capability/authorization gates, retain accepted same-agent content/counters while a conference-participant preparation request is pending or fails, accept per-agent conference replacements only from the initiating Promise or D0-declared receiving content event, capture post-call draft bytes before wrap-up without freezing lifecycle, freeze/send them once after success even if visibility changes, retain a monotonic content-free status transition through keyed-content cleanup, retain and clear summary memory at required boundaries, order AgentWrappedUp against an in-flight frozen response, ignore stale-owner results while allowing every same-owner response to compete by SDK timestamp, and reject all automatic retry/cancellation/persistence/logging. Modify existing store tests/mocks and module spec and add ai-summary.ts tests for canonical identity, owner-generation triggers, prior-agent non-projection, resolution display/response separation, conference replacement retention, no conference-event request fan-out, leave-without-cancel, event routing, listener rebind/removal, concurrency, feedback, counters, exact freeze, status deduplication, event-before-rejection callback visibility, and zero unhandled rejections. D0/D1 provide the only accepted contracts and deterministic raw inputs required before reducer/event work.",
       "files": [
-        "packages/contact-center/store/src/ai-summary.types.ts",
         "packages/contact-center/store/src/ai-summary.ts",
         "packages/contact-center/store/src/store.ts",
         "packages/contact-center/store/src/store.types.ts",
         "packages/contact-center/store/src/storeEventsWrapper.ts",
-        "packages/contact-center/store/src/index.ts",
-        "packages/contact-center/store/tests/ai-summary-store.ts",
-        "packages/contact-center/store/tests/storeEventsWrapper.ts"
+        "packages/contact-center/store/tests/ai-summary.ts",
+        "packages/contact-center/store/tests/store.ts",
+        "packages/contact-center/store/tests/storeEventsWrapper.ts",
+        "packages/contact-center/store/tests/setupContactCenterMock.js",
+        "packages/contact-center/store/ai-docs/store-spec.md"
       ],
-      "dependencies": [
-        "D0-sdk-package-contract",
-        "D1-summary-contract-fixtures"
-      ],
-      "acceptance": "yarn workspace @webex/cc-store test:unit --runInBand --runTestsByPath tests/ai-summary-store.ts tests/storeEventsWrapper.ts"
+      "dependencies": ["D0-sdk-package-contract", "D1-summary-contract-fixtures"],
+      "acceptance": "yarn workspace @webex/cc-store test:unit --runInBand --runTestsByPath tests/ai-summary.ts tests/store.ts tests/storeEventsWrapper.ts"
     },
     {
       "id": "D3-shared-summary-presentation",
-      "title": "Build SDK-free shared AI-summary presentation",
-      "description": "REQ-003, REQ-004, REQ-008, REQ-009, REQ-010, REQ-011, REQ-012 and AC-03, AC-04, AC-05, AC-10, AC-11, AC-12, AC-13, AC-14, AC-15, AC-16: add reusable typed/plain summary, action, loading, generation-error and unsupported components with exact copy, text-only rendering, dir auto, vertical containment, inherited theme and forced-colors behavior, focus recovery, no feature live region, and hooks suitable for the existing restricted adaptive-card renderer.",
-      "priority": "high",
+      "title": "Add SDK-free shared summary presentation and controls",
+      "description": "REQ-003, REQ-004, REQ-005, REQ-008, REQ-009, REQ-010, AC-03, AC-04, AC-05, AC-11, AC-12, AC-13, and AC-14 / Component: Shared Summary Presentation - add the single exported AISummary component with closed AISummaryProps/AISummaryCopyVisualState in ai-summary.types.ts, exact en-US message IDs and ordered section/display definitions in ai-summary.constants.ts (including literal percent-delimited screenshot states), semantic-token styles, package exports, and focused component tests. Render typed/plain values as text with dir=auto; map admitted post-call resolution to a read-only Outcome row in display/copy order while keeping it out of editable response keys; implement direct-gesture promise-confirmed copy plus hover/confirmed/idle state and timer cleanup, controlled mutual feedback, post pending/failure descriptions, focus successor/fallback behavior, vertical overflow, forced-colors semantics, and no live region. Extend only the existing AdaptiveCardRenderer and extractCardText security seam to expose approved text for direct-gesture copy while preserving restricted actions and default behavior. D1 provides deterministic role-compatible content and D2 provides the normalized AISummarySection/AISummaryEditableField contract consumed by these SDK-free components.",
       "files": [
         "packages/contact-center/cc-components/src/components/AISummary/ai-summary.tsx",
         "packages/contact-center/cc-components/src/components/AISummary/ai-summary.types.ts",
+        "packages/contact-center/cc-components/src/components/AISummary/ai-summary.constants.ts",
         "packages/contact-center/cc-components/src/components/AISummary/ai-summary.styles.scss",
         "packages/contact-center/cc-components/src/components/AISummary/index.ts",
         "packages/contact-center/cc-components/src/index.ts",
-        "packages/contact-center/cc-components/tests/components/AISummary/ai-summary.tsx"
+        "packages/contact-center/cc-components/src/components/AIAssistant/ai-assistant.types.ts",
+        "packages/contact-center/cc-components/src/components/AIAssistant/AdaptiveCardRenderer/adaptive-card-renderer.tsx",
+        "packages/contact-center/cc-components/src/components/AIAssistant/AdaptiveCardRenderer/adaptive-card-renderer.utils.ts",
+        "packages/contact-center/cc-components/tests/components/AISummary/ai-summary.tsx",
+        "packages/contact-center/cc-components/tests/components/AIAssistant/adaptive-card-renderer.test.tsx",
+        "packages/contact-center/cc-components/tests/components/AIAssistant/adaptive-card-renderer.utils.test.ts",
+        "packages/contact-center/cc-components/ai-docs/cc-components-spec.md"
       ],
-      "dependencies": [
-        "D1-summary-contract-fixtures"
-      ],
-      "acceptance": "yarn workspace @webex/cc-components test:unit --runInBand --runTestsByPath tests/components/AISummary/ai-summary.tsx"
+      "dependencies": ["D1-summary-contract-fixtures", "D2-interaction-summary-store"],
+      "acceptance": "yarn workspace @webex/cc-components test:unit --runInBand --runTestsByPath tests/components/AISummary/ai-summary.tsx tests/components/AIAssistant/adaptive-card-renderer.test.tsx tests/components/AIAssistant/adaptive-card-renderer.utils.test.ts"
     },
     {
       "id": "D4-receiving-ai-assistant",
-      "title": "Integrate receiving-agent summaries into AI Assistant",
-      "description": "REQ-004, REQ-006, REQ-008, REQ-009, REQ-010 and AC-04, AC-06, AC-10, AC-11, AC-12, AC-13, AC-14: expose View summary, copy and feedback for the current receiving agent, render only the validated adaptive card through the existing restricted renderer, ignore typed/plain fields, isolate real-time-assist state, and discard stale ownership-generation events.",
-      "priority": "high",
+      "title": "Integrate receiver summaries in the existing AI Assistant panel",
+      "description": "REQ-004, REQ-006, REQ-008, REQ-009, REQ-010, JNY-001, AC-04, AC-06, AC-10, AC-11, AC-12, AC-13, and AC-14 / Component: Receiving-Agent AI Assistant Integration - extend useAiAssistant and the observer container with openReceiverSummary, copyReceiverSummary, and setReceiverSummaryFeedback store actions; extend AIAssistantComponent with a content-free View summary notification and a receiver branch that sends only validated adaptiveCard through AdaptiveCardRenderer. Ignore typed/plain fields, increment viewed only on successful reveal, paint feedback only after SDK success, isolate existing real-time-assist behavior, handle unavailable cards, and clean component subscriptions without cancelling SDK work. Modify the existing helper/container/component/styles tests and both affected module specifications. D2 and D3 are required because the container consumes the normalized store view and shared actions; completing this task before D5 serializes their shared cc-components specification edit.",
       "files": [
         "packages/contact-center/ai-assistant/src/ai-assistant.types.ts",
         "packages/contact-center/ai-assistant/src/ai-assistant/index.tsx",
         "packages/contact-center/ai-assistant/src/helper.ts",
-        "packages/contact-center/ai-assistant/tests/ai-assistant/summary.tsx",
+        "packages/contact-center/ai-assistant/tests/ai-assistant/index.tsx",
+        "packages/contact-center/ai-assistant/tests/helper.ts",
+        "packages/contact-center/ai-assistant/ai-docs/ai-assistant-spec.md",
         "packages/contact-center/cc-components/src/components/AIAssistant/ai-assistant.tsx",
         "packages/contact-center/cc-components/src/components/AIAssistant/ai-assistant.types.ts",
-        "packages/contact-center/cc-components/tests/components/AIAssistant/ai-assistant.tsx"
+        "packages/contact-center/cc-components/src/components/AIAssistant/ai-assistant.styles.scss",
+        "packages/contact-center/cc-components/tests/components/AIAssistant/ai-assistant.tsx",
+        "packages/contact-center/cc-components/ai-docs/cc-components-spec.md"
       ],
-      "dependencies": [
-        "D2-interaction-summary-store",
-        "D3-shared-summary-presentation"
-      ],
-      "acceptance": "yarn workspace @webex/cc-ai-assistant test:unit --runInBand --runTestsByPath tests/ai-assistant/summary.tsx && yarn workspace @webex/cc-components test:unit --runInBand --runTestsByPath tests/components/AIAssistant/ai-assistant.tsx"
+      "dependencies": ["D2-interaction-summary-store", "D3-shared-summary-presentation"],
+      "acceptance": "yarn workspace @webex/cc-ai-assistant test:unit --runInBand --runTestsByPath tests/ai-assistant/index.tsx tests/helper.ts && yarn workspace @webex/cc-components test:unit --runInBand --runTestsByPath tests/components/AIAssistant/ai-assistant.tsx"
     },
     {
       "id": "D5-mid-call-call-control",
-      "title": "Integrate initiating-agent summaries with consult and transfer",
-      "description": "REQ-003, REQ-006, REQ-008, REQ-009, REQ-010 and AC-03, AC-06, AC-07, AC-10, AC-11, AC-12, AC-13, AC-14: place View summary and the bottom summary box after consult/transfer results, prefer typed sections then summaryText while ignoring cards, disable another action during the 20-second request, support edit/copy/feedback, send the mid-call response before the unchanged consult/transfer API, and apply transfer/conference owner-generation rules.",
-      "priority": "critical",
+      "title": "Integrate initiating summaries with consult, transfer, and conference preparation",
+      "description": "REQ-003, REQ-006, REQ-008, REQ-009, REQ-010, UX-001, JNY-001, AC-03, AC-06, AC-07, AC-10, AC-11, AC-12, AC-13, and AC-14 / Component: Initiating-Agent Call Control Integration - extend useCallControl, CallControl, CallControlComponentProps, and ConsultTransferPopoverComponent with requestInitiatingSummary, edit/copy/feedback actions, pending disable state, and submit-before-action orchestration. In the eligible branch, reuse destination data/actions but render radio categories, the literal percent-delimited search copy, results, divider, exact consult/transfer heading, and bottom editor in sealed UX-001 order; preserve the current search-first pill layout when ineligible. Render ordered typed labels or summaryText and discard cards; retain unchanged consultCall, transferCall, consultTransfer, and consultConference SDK argument shapes; continue the telephony action after a sanitized response-send failure; and apply stable interaction/ownership guards for direct transfer, consult-to-transfer, additional transfer, and conference addition. Modify existing task and cc-components tests/specs; no new hook is added. D2/D3 provide state/presentation and D4 serializes the shared specification file.",
       "files": [
         "packages/contact-center/task/src/helper.ts",
         "packages/contact-center/task/src/task.types.ts",
         "packages/contact-center/task/src/CallControl/index.tsx",
-        "packages/contact-center/task/tests/CallControl/ai-summary.tsx",
-        "packages/contact-center/cc-components/src/components/task/task.types.ts",
-        "packages/contact-center/cc-components/src/components/task/CallControl/CallControlCustom/consult-transfer-popover.tsx",
-        "packages/contact-center/cc-components/src/components/task/CallControl/CallControlCustom/consult-transfer-popover-hooks.ts",
-        "packages/contact-center/cc-components/src/components/task/CallControl/call-control.styles.scss",
-        "packages/contact-center/cc-components/tests/components/task/CallControl/CallControlCustom/ai-summary.tsx"
-      ],
-      "dependencies": [
-        "D2-interaction-summary-store",
-        "D3-shared-summary-presentation"
-      ],
-      "acceptance": "yarn workspace @webex/cc-task test:unit --runInBand --runTestsByPath tests/CallControl/ai-summary.tsx && yarn workspace @webex/cc-components test:unit --runInBand --runTestsByPath tests/components/task/CallControl/CallControlCustom/ai-summary.tsx"
-    },
-    {
-      "id": "D6-post-call-wrap-up",
-      "title": "Integrate post-call summary generation and frozen response submission",
-      "description": "REQ-005, REQ-006, REQ-008, REQ-009, REQ-010 and AC-05, AC-06, AC-07, AC-08, AC-10, AC-11, AC-12, AC-13, AC-14: place the post-call summary after reason selection and before Complete Wrap-Up, request fresh content for every user action, prefer typed sections then plain text while ignoring cards, preserve edit and feedback state, run wrap-up first, submit one frozen response, retain response failure without retry until the backend wrapped-up event, and expose the approved generic error and fresh-request Retry behavior.",
-      "priority": "critical",
-      "files": [
-        "packages/contact-center/task/src/helper.ts",
-        "packages/contact-center/task/src/task.types.ts",
-        "packages/contact-center/task/src/CallControl/index.tsx",
-        "packages/contact-center/task/tests/CallControl/ai-summary-wrapup.tsx",
+        "packages/contact-center/task/tests/helper.ts",
+        "packages/contact-center/task/tests/CallControl/index.tsx",
+        "packages/contact-center/task/ai-docs/task-spec.md",
         "packages/contact-center/cc-components/src/components/task/task.types.ts",
         "packages/contact-center/cc-components/src/components/task/CallControl/call-control.tsx",
         "packages/contact-center/cc-components/src/components/task/CallControl/call-control.styles.scss",
-        "packages/contact-center/cc-components/tests/components/task/CallControl/ai-summary-wrapup.tsx"
+        "packages/contact-center/cc-components/src/components/task/CallControl/CallControlCustom/consult-transfer-popover.tsx",
+        "packages/contact-center/cc-components/tests/components/task/CallControl/call-control.tsx",
+        "packages/contact-center/cc-components/tests/components/task/CallControl/CallControlCustom/consult-transfer-popover.tsx",
+        "packages/contact-center/cc-components/ai-docs/cc-components-spec.md"
       ],
-      "dependencies": [
-        "D2-interaction-summary-store",
-        "D3-shared-summary-presentation",
-        "D5-mid-call-call-control"
+      "dependencies": ["D2-interaction-summary-store", "D3-shared-summary-presentation", "D4-receiving-ai-assistant"],
+      "acceptance": "yarn workspace @webex/cc-task test:unit --runInBand --runTestsByPath tests/helper.ts tests/CallControl/index.tsx && yarn workspace @webex/cc-components test:unit --runInBand --runTestsByPath tests/components/task/CallControl/call-control.tsx tests/components/task/CallControl/CallControlCustom/consult-transfer-popover.tsx"
+    },
+    {
+      "id": "D6-post-call-wrap-up",
+      "title": "Integrate post-call generation and frozen final response submission",
+      "description": "REQ-005, REQ-006, REQ-008, REQ-009, REQ-010, JNY-002, AC-05, AC-06, AC-07, AC-08, AC-10, AC-11, AC-12, AC-13, and AC-14 / Component: Post-Call Wrap-Up Integration - change useCallControl.wrapupCall to async (wrapUpReason: string, auxCodeId: string) => Promise<void>, thread request/edit/copy/local-feedback actions and the normalized view through CallControl, and extend call-control.tsx/call-control.utils.ts to place the summary after reason selection and before Complete Wrap-Up. In the eligible branch, reuse wrapupCodes/handleWrapupChange with installed Momentum Input/RadioGroup/Radio, en-US substring filtering, selected reason state, screenshot header/help/divider hierarchy, expanded generating/plain/error list, collapsed structured trigger, read-only Outcome resolution, and exact Search/Complete strings including copy hover/confirmed percent-delimited variants; retain the existing Select and Submit & Wrap up path unchanged when the feature is ineligible. Every explicit reason request/Retry generates anew; typed response fields or plain text are editable, resolution is display-only, and cards are ignored. Capture exact draft/counters/feedback plus wrapUpReason before locking controls without changing lifecycle; await existing task.wrapup with auxCodeId first; discard the capture and expose the unchanged draft if it rejects; otherwise freeze that capture and call sendPostCallSummaryResponse once on the captured Task even if current visibility changed. Retain response-failed until AgentWrappedUp with no response retry, including the event-before-rejection race. Modify existing tests and module specs. D5 precedes this task because both change the same CallControl orchestration, types, styles, tests, and specs.",
+      "files": [
+        "packages/contact-center/task/src/helper.ts",
+        "packages/contact-center/task/src/task.types.ts",
+        "packages/contact-center/task/src/CallControl/index.tsx",
+        "packages/contact-center/task/tests/helper.ts",
+        "packages/contact-center/task/tests/CallControl/index.tsx",
+        "packages/contact-center/task/ai-docs/task-spec.md",
+        "packages/contact-center/cc-components/src/components/task/task.types.ts",
+        "packages/contact-center/cc-components/src/components/task/CallControl/call-control.tsx",
+        "packages/contact-center/cc-components/src/components/task/CallControl/call-control.utils.ts",
+        "packages/contact-center/cc-components/src/components/task/CallControl/call-control.styles.scss",
+        "packages/contact-center/cc-components/tests/components/task/CallControl/call-control.tsx",
+        "packages/contact-center/cc-components/tests/components/task/CallControl/call-control.utils.tsx",
+        "packages/contact-center/cc-components/ai-docs/cc-components-spec.md"
       ],
-      "acceptance": "yarn workspace @webex/cc-task test:unit --runInBand --runTestsByPath tests/CallControl/ai-summary-wrapup.tsx && yarn workspace @webex/cc-components test:unit --runInBand --runTestsByPath tests/components/task/CallControl/ai-summary-wrapup.tsx"
+      "dependencies": ["D2-interaction-summary-store", "D3-shared-summary-presentation", "D5-mid-call-call-control"],
+      "acceptance": "yarn workspace @webex/cc-task test:unit --runInBand --runTestsByPath tests/helper.ts tests/CallControl/index.tsx && yarn workspace @webex/cc-components test:unit --runInBand --runTestsByPath tests/components/task/CallControl/call-control.tsx tests/components/task/CallControl/call-control.utils.tsx"
     },
     {
       "id": "D7-host-status-callback",
-      "title": "Add the optional content-free host status callback",
-      "description": "REQ-007, REQ-010 and AC-09, AC-14: add only the optional onAISummaryStatusChange function property to the existing widget-cc-call-control surface, preserve all existing props and the existing tag, emit only the approved kind/state union, and test absent-callback behavior plus rejection of content, identifiers, counters and raw errors.",
-      "priority": "high",
+      "title": "Expose the optional content-free AI summary status callback",
+      "description": "REQ-007, REQ-010, AC-09, and AC-14 / Change: Host Status Callback and Existing Web Component - add AISummaryStatusDetail and onAISummaryStatusChange?: (detail: AISummaryStatusDetail) => void to task.types.ts, type-re-export AISummaryStatusDetail and CallControlProps from task/src/index.ts, observe getAISummaryStatusTransition in CallControl/index.tsx, deduplicate its monotonic sequence without replay on same-agent remount, invoke only its allowlisted detail literal, and register onAISummaryStatusChange: 'function' only on the existing WebCallControl r2wc definition. Preserve response-failed notification even after event-first keyed payload cleanup. Add task runtime/type assertions and a discoverable cc-widgets Jest test for all four state forms, omission, throw containment, remount deduplication, event-before-rejection delivery, and forbidden-key absence; update task and cc-widgets module specs. D4/D6 precede this public surface because receiver, initiator, and post-call lifecycle transitions must be final before callback mapping.",
       "files": [
         "packages/contact-center/task/src/task.types.ts",
+        "packages/contact-center/task/src/index.ts",
         "packages/contact-center/task/src/CallControl/index.tsx",
-        "packages/contact-center/task/tests/CallControl/ai-summary-status.tsx",
+        "packages/contact-center/task/tests/CallControl/index.tsx",
+        "packages/contact-center/task/ai-docs/task-spec.md",
         "packages/contact-center/cc-widgets/src/wc.ts",
-        "packages/contact-center/cc-widgets/tests/wc.ai-summary.ts"
+        "packages/contact-center/cc-widgets/tests/wc.ai-summary.ts",
+        "packages/contact-center/cc-widgets/ai-docs/cc-widgets-spec.md"
       ],
-      "dependencies": [
-        "D4-receiving-ai-assistant",
-        "D6-post-call-wrap-up"
-      ],
-      "acceptance": "yarn workspace @webex/cc-task test:unit --runInBand --runTestsByPath tests/CallControl/ai-summary-status.tsx && yarn workspace @webex/cc-widgets test:unit --runInBand --runTestsByPath tests/wc.ai-summary.ts"
+      "dependencies": ["D4-receiving-ai-assistant", "D6-post-call-wrap-up"],
+      "acceptance": "yarn workspace @webex/cc-task test:unit --runInBand --runTestsByPath tests/CallControl/index.tsx && yarn workspace @webex/cc-widgets test:unit --runInBand --runTestsByPath tests/wc.ai-summary.ts"
     },
     {
       "id": "D8-browser-ux-validation",
-      "title": "Add browser, accessibility, concurrency, and visual evidence",
-      "description": "REQ-009, REQ-011, REQ-012 and AC-11, AC-12, AC-13, AC-15, AC-16: extend the existing Playwright harness with deterministic SDK mocks for both journeys, keyboard and focus recovery, automated accessibility, copy and feedback, responsive vertical containment, inherited forced-colors behavior, ownership races, transfer/conference scenarios, wrap-up and response failures, and render/compare evidence for all ten sealed Figma JSON screenshot states without Figma MCP.",
-      "priority": "high",
+      "title": "Validate both journeys, accessibility, concurrency, and sealed visual states",
+      "description": "REQ-011, REQ-012, REQ-017, REQ-018, UX-001, UX-002, UX-003, UX-004, UX-005, UX-006, UX-007, UX-008, UX-009, UX-010, JNY-001, JNY-002, AC-11, AC-12, AC-13, AC-15, and AC-16 / Change: Deterministic UX and Release Validation, UX Evidence and Productionization, and Figma JSON Reconstruction Assessment - add aiSummaryUtils exports installAISummarySDKMock, driveAISummaryState, auditAISummaryAccessibility, and recordAISummaryVisual, a manager suite, and a direct Playwright suite; add the AI Summary Deterministic project to playwright.config.ts so it uses the existing local sample-app webServer without OAuth or an external backend; declare the already-locked axe-core 4.10.2 as an exact root dev dependency and inject its local audit runtime. Exercise initiator/receiver/post-call UI, keyboard/focus, direct clipboard success/failure, feedback, WCAG 2 A/AA subtree audits plus semantic/contrast checks, 320px overflow, forced colors, timestamp/interaction/owner races, timeout, remount, transfer/conference, wrap-up/response failures, and uncaught-rejection capture. Prepare/read the official implementation visual plan, write generated evidence only beneath its gitignored .matrix render directory, render S01-S10 against every exact sealed JSON/text/PNG input, invoke export-ux-screenshot and compare-ux-images for at most five iterations and <=0.5% pixel difference, finish with validate-ux-visual-comparison, write structural-only receipts for unscreenshoted states, and never call Figma MCP. Generated evidence is not implementation source. D4-D7 are required because browser evidence targets the complete public integration.",
       "files": [
-        "playwright/ai-summary-fixtures.ts",
+        "package.json",
+        "yarn.lock",
+        "packages/contact-center/cc-components/src/components/AISummary/ai-summary.tsx",
+        "packages/contact-center/cc-components/src/components/AISummary/ai-summary.types.ts",
+        "packages/contact-center/cc-components/src/components/AISummary/ai-summary.constants.ts",
+        "packages/contact-center/cc-components/src/components/AISummary/ai-summary.styles.scss",
+        "packages/contact-center/cc-components/src/components/AIAssistant/ai-assistant.tsx",
+        "packages/contact-center/cc-components/src/components/AIAssistant/ai-assistant.styles.scss",
+        "packages/contact-center/cc-components/src/components/AIAssistant/AdaptiveCardRenderer/adaptive-card-renderer.tsx",
+        "packages/contact-center/cc-components/src/components/task/CallControl/call-control.tsx",
+        "packages/contact-center/cc-components/src/components/task/CallControl/call-control.styles.scss",
+        "packages/contact-center/cc-components/src/components/task/CallControl/CallControlCustom/consult-transfer-popover.tsx",
+        "packages/contact-center/cc-components/tests/components/AISummary/ai-summary.tsx",
+        "packages/contact-center/cc-components/tests/components/AIAssistant/adaptive-card-renderer.test.tsx",
+        "packages/contact-center/cc-components/tests/components/AIAssistant/ai-assistant.tsx",
+        "packages/contact-center/cc-components/tests/components/task/CallControl/call-control.tsx",
+        "packages/contact-center/cc-components/tests/components/task/CallControl/CallControlCustom/consult-transfer-popover.tsx",
+        "packages/contact-center/cc-components/ai-docs/cc-components-spec.md",
         "playwright/Utils/aiSummaryUtils.ts",
         "playwright/suites/ai-summary-tests.spec.ts",
         "playwright/tests/ai-summary-test.spec.ts",
-        "playwright.config.ts",
-        "package.json",
-        "yarn.lock"
+        "playwright.config.ts"
       ],
-      "dependencies": [
-        "D4-receiving-ai-assistant",
-        "D5-mid-call-call-control",
-        "D6-post-call-wrap-up",
-        "D7-host-status-callback"
-      ],
-      "acceptance": "yarn playwright test playwright/tests/ai-summary-test.spec.ts"
+      "dependencies": ["D4-receiving-ai-assistant", "D5-mid-call-call-control", "D6-post-call-wrap-up", "D7-host-status-callback"],
+      "acceptance": "yarn workspace @webex/cc-components test:unit --runInBand --runTestsByPath tests/components/AISummary/ai-summary.tsx tests/components/AIAssistant/adaptive-card-renderer.test.tsx tests/components/AIAssistant/ai-assistant.tsx tests/components/task/CallControl/call-control.tsx tests/components/task/CallControl/CallControlCustom/consult-transfer-popover.tsx && cd '/Users/fsiyavud/Documents/Projects/WebexDevPlatform/widgets' && '/Users/fsiyavud/Documents/Projects/Machine Learning/MatrixBuilder-Prog-Mini-BW-GO/.venv/bin/mb-flow' prog-mini-js prepare-ux-visual-comparison && cd '/Users/fsiyavud/Documents/Projects/WebexDevPlatform/widgets/.worktrees/design' && yarn playwright test --workers=1 --project='AI Summary Deterministic' playwright/suites/ai-summary-tests.spec.ts && cd '/Users/fsiyavud/Documents/Projects/WebexDevPlatform/widgets' && '/Users/fsiyavud/Documents/Projects/Machine Learning/MatrixBuilder-Prog-Mini-BW-GO/.venv/bin/mb-flow' prog-mini-js validate-ux-visual-comparison",
+      "prerequisites": [
+        {
+          "kind": "tool",
+          "name": "MatrixBuilder mb-flow prog-mini-js UX query and comparison runtime",
+          "command": "/Users/fsiyavud/Documents/Projects/Machine Learning/MatrixBuilder-Prog-Mini-BW-GO/.venv/bin/mb-flow",
+          "check_command": [
+            "/Users/fsiyavud/Documents/Projects/Machine Learning/MatrixBuilder-Prog-Mini-BW-GO/.venv/bin/mb-flow",
+            "prog-mini-js",
+            "figma-json-node",
+            "--source",
+            "UX-001",
+            "--node",
+            "8061:880455",
+            "--depth",
+            "0"
+          ],
+          "working_directory": "/Users/fsiyavud/Documents/Projects/WebexDevPlatform/widgets",
+          "timeout_seconds": 60,
+          "required": true,
+          "fix_hint": "Use the installed MatrixBuilder environment that owns the sealed prog-mini-js UX manifest; Figma MCP is forbidden."
+        },
+        {
+          "kind": "tool",
+          "name": "Playwright Chromium browser binary",
+          "command": "yarn",
+          "check_command": [
+            "yarn",
+            "node",
+            "-e",
+            "const fs=require('fs');const {chromium}=require('@playwright/test');fs.accessSync(chromium.executablePath())"
+          ],
+          "working_directory": "/Users/fsiyavud/Documents/Projects/WebexDevPlatform/widgets/.worktrees/design",
+          "timeout_seconds": 20,
+          "required": true,
+          "fix_hint": "Install the repository-pinned Playwright Chromium binary before running browser or visual acceptance."
+        },
+        {
+          "kind": "service",
+          "name": "Playwright-managed samples-cc-react-app web server",
+          "service": "http://localhost:3000",
+          "check_command": ["yarn", "workspace", "samples-cc-react-app", "webpack", "--version"],
+          "working_directory": "/Users/fsiyavud/Documents/Projects/WebexDevPlatform/widgets/.worktrees/design",
+          "timeout_seconds": 20,
+          "required": true,
+          "fix_hint": "Install workspace dependencies; Playwright starts the declared sample-app server through playwright.config.ts."
+        }
+      ]
     },
     {
       "id": "D9-release-validation",
-      "title": "Run complete AI-summary release and provenance validation",
-      "description": "REQ-001, REQ-002, REQ-003, REQ-004, REQ-005, REQ-006, REQ-007, REQ-008, REQ-009, REQ-010, REQ-011, REQ-012 and AC-01, AC-02, AC-03, AC-04, AC-05, AC-06, AC-07, AC-08, AC-09, AC-10, AC-11, AC-12, AC-13, AC-14, AC-15, AC-16: add a deterministic edit-free verifier for requirement/design/DAG/SDK/UX hashes, dependency and package provenance, role contracts, privacy, build and type results, focused and full unit tests, browser/accessibility/visual receipts, acceptance commands, and zero skipped mandatory checks or unhandled rejections.",
-      "priority": "critical",
+      "title": "Run complete AI summary release and provenance validation",
+      "description": "REQ-013, REQ-014, REQ-015, REQ-016, REQ-017, REQ-018, REQ-001, REQ-002, REQ-003, REQ-004, REQ-005, REQ-006, REQ-007, REQ-008, REQ-009, REQ-010, REQ-011, REQ-012, UX-001, UX-002, UX-003, UX-004, UX-005, UX-006, UX-007, UX-008, UX-009, UX-010, JNY-001, JNY-002, AC-01, AC-02, AC-03, AC-04, AC-05, AC-06, AC-07, AC-08, AC-09, AC-10, AC-11, AC-12, AC-13, AC-14, AC-15, and AC-16 / Change: Deterministic UX and Release Validation and Test Strategy - add read-only verify-ai-summary-release.js and fail-closed Jest tests. The verifier exposes verifySDKReceipt, verifyUXEvidence, verifyPrivacyAllowlist, verifyDAGTraceability, and verifyGateReceipts; it records/verifies ai-assistant-summary as the requirement's promotion target while allowing the flow's transient worktree branch, rehashes requirement/design/DAG/SDK declarations/tarball/UX sources, confirms the configured node-modules install and yarn.lock resolve only the sealed file artifact, validates dependency direction and spec currency, scans persistence/log/telemetry/callback paths, and rejects skipped suites, visual/structural gaps, or unhandled rejections. Acceptance runs explicit TypeScript builds for all six touched workspaces before the existing all-package development build, full CC unit/style gates, deterministic browser/accessibility/visual gates, both tooling suites, and the provenance verifier. It runs after D8 and does not edit product or evidence files.",
       "files": [
-        "tooling/verify-ai-summary-release.mjs",
-        "tooling/tests/verify-ai-summary-release.test.js",
-        "package.json"
+        "tooling/src/verify-ai-summary-release.js",
+        "tooling/tests/verify-ai-summary-release.test.js"
       ],
-      "dependencies": [
-        "D8-browser-ux-validation"
-      ],
-      "acceptance": "node tooling/verify-ai-summary-release.mjs && yarn test:tooling --runInBand --runTestsByPath tooling/tests/verify-ai-summary-release.test.js && yarn build:prod && yarn test:cc-widgets && yarn playwright test playwright/tests/ai-summary-test.spec.ts"
+      "dependencies": ["D8-browser-ux-validation"],
+      "acceptance": "yarn install --immutable && node tooling/src/ai-summary-sdk-lock.js verify && yarn workspace @webex/test-fixtures build && yarn workspace @webex/cc-store build && yarn workspace @webex/cc-components build && yarn workspace @webex/cc-task build && yarn workspace @webex/cc-ai-assistant build && yarn workspace @webex/cc-widgets build && yarn build:dev && yarn test:cc-widgets && yarn test:styles && cd '/Users/fsiyavud/Documents/Projects/WebexDevPlatform/widgets' && '/Users/fsiyavud/Documents/Projects/Machine Learning/MatrixBuilder-Prog-Mini-BW-GO/.venv/bin/mb-flow' prog-mini-js prepare-ux-visual-comparison && cd '/Users/fsiyavud/Documents/Projects/WebexDevPlatform/widgets/.worktrees/design' && yarn playwright test --workers=1 --project='AI Summary Deterministic' playwright/suites/ai-summary-tests.spec.ts && cd '/Users/fsiyavud/Documents/Projects/WebexDevPlatform/widgets' && '/Users/fsiyavud/Documents/Projects/Machine Learning/MatrixBuilder-Prog-Mini-BW-GO/.venv/bin/mb-flow' prog-mini-js validate-ux-visual-comparison && cd '/Users/fsiyavud/Documents/Projects/WebexDevPlatform/widgets/.worktrees/design' && yarn test:tooling --runInBand --runTestsByPath tooling/tests/ai-summary-sdk-lock.test.js tooling/tests/verify-ai-summary-release.test.js && node tooling/src/verify-ai-summary-release.js",
+      "prerequisites": [
+        {
+          "kind": "service",
+          "name": "npm registry for immutable workspace install",
+          "service": "https://registry.npmjs.org",
+          "check_command": [
+            "node",
+            "-e",
+            "require('https').get('https://registry.npmjs.org/-/ping',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"
+          ],
+          "working_directory": "/Users/fsiyavud/Documents/Projects/WebexDevPlatform/widgets/.worktrees/design",
+          "timeout_seconds": 20,
+          "required": true,
+          "fix_hint": "Allow the immutable Yarn install to reach the configured registry or provide a complete local cache."
+        },
+        {
+          "kind": "tool",
+          "name": "MatrixBuilder mb-flow prog-mini-js UX query and comparison runtime",
+          "command": "/Users/fsiyavud/Documents/Projects/Machine Learning/MatrixBuilder-Prog-Mini-BW-GO/.venv/bin/mb-flow",
+          "check_command": [
+            "/Users/fsiyavud/Documents/Projects/Machine Learning/MatrixBuilder-Prog-Mini-BW-GO/.venv/bin/mb-flow",
+            "prog-mini-js",
+            "figma-json-node",
+            "--source",
+            "UX-001",
+            "--node",
+            "8061:880455",
+            "--depth",
+            "0"
+          ],
+          "working_directory": "/Users/fsiyavud/Documents/Projects/WebexDevPlatform/widgets",
+          "timeout_seconds": 60,
+          "required": true,
+          "fix_hint": "Use the installed MatrixBuilder environment and sealed local sources; Figma MCP is forbidden."
+        },
+        {
+          "kind": "tool",
+          "name": "Playwright Chromium browser binary",
+          "command": "yarn",
+          "check_command": [
+            "yarn",
+            "node",
+            "-e",
+            "const fs=require('fs');const {chromium}=require('@playwright/test');fs.accessSync(chromium.executablePath())"
+          ],
+          "working_directory": "/Users/fsiyavud/Documents/Projects/WebexDevPlatform/widgets/.worktrees/design",
+          "timeout_seconds": 20,
+          "required": true,
+          "fix_hint": "Install the repository-pinned Playwright Chromium binary before release validation."
+        },
+        {
+          "kind": "service",
+          "name": "Playwright-managed samples-cc-react-app web server",
+          "service": "http://localhost:3000",
+          "check_command": ["yarn", "workspace", "samples-cc-react-app", "webpack", "--version"],
+          "working_directory": "/Users/fsiyavud/Documents/Projects/WebexDevPlatform/widgets/.worktrees/design",
+          "timeout_seconds": 20,
+          "required": true,
+          "fix_hint": "Install workspace dependencies; Playwright starts the declared local sample-app server."
+        }
+      ]
     }
   ]
 }

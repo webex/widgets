@@ -2,256 +2,663 @@
 
 ## Overview
 
-This design adds voice-only AI summaries to the existing Contact Center widgets without changing the SDK or Artificer. `@webex/cc-store` remains the only SDK boundary. The existing call-control and AI Assistant containers consume observable, interaction-scoped view models; presentation components remain SDK-free. The existing `<widget-cc-call-control>` tag is retained and receives one optional content-free function property. The existing AI Assistant adaptive-card renderer is reused for receiving-agent content.
+This design adds voice-only, in-memory AI summaries to the existing Contact Center call-control and AI Assistant surfaces. `@webex/cc-store` remains the only SDK boundary: it validates capabilities and role-specific payloads, owns interaction/agent/ownership state, invokes the four summary methods, and routes the receiving-agent event. `@webex/cc-task` and `@webex/cc-ai-assistant` orchestrate the existing containers. `@webex/cc-components` remains SDK-free and renders normalized props. The existing `<widget-cc-call-control>` element and every existing property remain compatible; the only host addition is the optional content-free `onAISummaryStatusChange` function property.
 
-The product decisions in `requirement.md` are closed for this run. Earlier human-approval gates are removed. SDK readiness is instead a deterministic D0 package-identity and contract probe. On the target machine, the intended SDK checkout is `/Users/pkesari/Desktop/WorkProjects/webex-js-sdk` (widgets-relative `../../webex-js-sdk`). It was verified clean on branch `cc-summaries` at commit `50602eea08dfc72df57d038529049e46f064f6c5`. That exact path, branch, and commit are the SDK source identity for this run. Under Node 22.14 and the repository-pinned Yarn 3.4.1, the Contact Center production build compiled all 58 source files, declaration emission succeeded, all 33 Contact Center unit suites passed with 1,040 tests, and source style validation reported zero errors. A package probe confirmed that the packed workspace contains both runtime output and declarations while keeping `agentName` internal to the mid-call transport contract. D0 must still rebuild, pack, hash, and seal its exact artifact and must fail closed if the identity changes or any deterministic build or contract probe is nonzero; it must never substitute another checkout or the currently installed package.
+The implementation target branch is `ai-assistant-summary`. Target behavior comes from `requirement.md` (SHA-256 `31061b7752dfc3e786905ee3a370527144aed1dc68641d641646dff0c1cf4c46`); `ai-summary.md` (SHA-256 `773538c733849f5f917dc75fe64a796a4c00498e88dd20dada9509f02b02c887`) and a conforming packed SDK define only the concrete API translation. Requirement decisions override either API source for widget behavior. Existing module specifications are DRAFT and were cross-checked against live source.
 
-The UX authority is requirement version v005, SHA-256 `171ebf24011ff7d28089ddbbd622e4a1ab30557a28c90b9921c9f27c529e81eb`, and the sealed local UX manifest SHA-256 `56bc18d0aec9ce2c89e60deb4610765ab7e75400c73eaec438fb977741c74907`. Figma MCP was not used.
+The inspected sibling SDK checkout is `/Users/fsiyavud/Documents/Projects/WebexDevPlatform/webex-js-sdk`, clean on `cc-summaries` at commit `59ba210e5c9d5e63d244d3739a204c8fac5aa5fb`, with pinned Yarn `3.4.1`. It is evidence, not yet an admissible dependency. Its Contact Center manifest has no `version`, and its live source exposes `task:featureEnablement` plus raw `FEATURE_ENABLEMENT`, not the required public `cc:featureEnablement`. It does implement the four Task methods and a 15,000 ms request timeout. Task D0 therefore fails closed until the exact `cc-summaries` source is conforming, versioned, rebuilt under Node 22.14, packed, hashed, and recorded. No cast, local SDK edit, semver fallback, or currently installed `@webex/contact-center` package may bypass D0.
+
+The UX authority is the ten local scene-graph/text JSON pairs and ten PNGs in `requirement.md`, bound by UX manifest SHA-256 `58d925e6d12c377589120f39fc170f1d80692d1901522fce0959b70e17f8c1b4`, source-manifest SHA-256 `a266410383fc773812cd0a3352313d8db5e3e3828d5e584aaeee1df42709f162`, and source identity SHA-256 `50073d2c12591ac4c682e8599c1ecae9f2797cae9ed85542bfebf068b5ebfecb`. The inputs currently resolve in the parent checkout rather than this worktree; visual admission must re-resolve and rehash the declared repository paths before use. Figma MCP was not used and is forbidden for this work.
+
+Externally visible outcomes are: initiating agents can review/edit/copy/rate a consult or transfer summary below destination results; receiving agents open an adaptive-card summary from `View summary` in the existing AI Assistant panel; agents generate/edit/copy/rate a post-call summary between wrap-up reason selection and Complete Wrap-Up; and hosts may observe content-free availability/submission states. Non-voice channels, Agent Desktop-native slots, SDK/backend changes, automatic retries, cancellation, new telemetry, persistence, new custom elements, localization infrastructure, RTL layout, and feature-owned live regions remain outside this widget design.
 
 ## Feature Disposition Matrix
 
 | Fix # | Disposition | Reference |
 | --- | --- | --- |
-| REQ-001 | Addressed | requirement.md:L17-L35; [Component: SDK Package Lock and Contract Probe](#component-sdk-package-lock-and-contract-probe) |
-| REQ-002 | Addressed | requirement.md:L36-L45; [Component: Interaction Summary Store](#component-interaction-summary-store) |
-| REQ-003 | Addressed | requirement.md:L46-L55; [Component: Mid-Call Call Control Integration](#component-mid-call-call-control-integration) |
-| REQ-004 | Addressed | requirement.md:L56-L63; [Component: Receiving-Agent AI Assistant Integration](#component-receiving-agent-ai-assistant-integration) |
-| REQ-005 | Addressed | requirement.md:L64-L75; [Component: Post-Call Wrap-Up and Host Callback](#component-post-call-wrap-up-and-host-callback) |
-| REQ-006 | Addressed | requirement.md:L76-L85; [Component: Interaction Summary Store](#component-interaction-summary-store) and [Component: Mid-Call Call Control Integration](#component-mid-call-call-control-integration) |
-| REQ-007 | Addressed | requirement.md:L86-L101; [Component: Post-Call Wrap-Up and Host Callback](#component-post-call-wrap-up-and-host-callback) |
-| REQ-008 | Addressed | requirement.md:L102-L112; [Component: Interaction Summary Store](#component-interaction-summary-store) and [Component: Shared Summary Presentation](#component-shared-summary-presentation) |
-| REQ-009 | Addressed | requirement.md:L113-L123; [Component: Shared Summary Presentation](#component-shared-summary-presentation) |
-| REQ-010 | Addressed | requirement.md:L124-L131; [Component: Interaction Summary Store](#component-interaction-summary-store) and [Component: Shared Summary Presentation](#component-shared-summary-presentation) |
-| REQ-011 | Addressed | requirement.md:L132-L138; [Component: UX Evidence and Release Validation](#component-ux-evidence-and-release-validation) |
-| REQ-012 | Addressed | requirement.md:L139-L146; [Component: UX Evidence and Release Validation](#component-ux-evidence-and-release-validation) |
-| AC-01 | Addressed | requirement.md:L276; [Component: SDK Package Lock and Contract Probe](#component-sdk-package-lock-and-contract-probe) |
-| AC-02 | Addressed | requirement.md:L277; [Component: Interaction Summary Store](#component-interaction-summary-store) |
-| AC-03 | Addressed | requirement.md:L278; [Component: Mid-Call Call Control Integration](#component-mid-call-call-control-integration) |
-| AC-04 | Addressed | requirement.md:L279; [Component: Receiving-Agent AI Assistant Integration](#component-receiving-agent-ai-assistant-integration) |
-| AC-05 | Addressed | requirement.md:L280; [Component: Post-Call Wrap-Up and Host Callback](#component-post-call-wrap-up-and-host-callback) |
-| AC-06 | Addressed | requirement.md:L281; [Component: Mid-Call Call Control Integration](#component-mid-call-call-control-integration) |
-| AC-07 | Addressed | requirement.md:L282; [Component: Interaction Summary Store](#component-interaction-summary-store) |
-| AC-08 | Addressed | requirement.md:L283; [Component: Post-Call Wrap-Up and Host Callback](#component-post-call-wrap-up-and-host-callback) |
-| AC-09 | Addressed | requirement.md:L284; [Component: Post-Call Wrap-Up and Host Callback](#component-post-call-wrap-up-and-host-callback) |
-| AC-10 | Addressed | requirement.md:L285; [Component: Interaction Summary Store](#component-interaction-summary-store) |
-| AC-11 | Addressed | requirement.md:L286; [Component: Shared Summary Presentation](#component-shared-summary-presentation) |
-| AC-12 | Addressed | requirement.md:L287; [Component: Shared Summary Presentation](#component-shared-summary-presentation) |
-| AC-13 | Addressed | requirement.md:L288; [Component: Shared Summary Presentation](#component-shared-summary-presentation) |
-| AC-14 | Addressed | requirement.md:L289; [Component: Interaction Summary Store](#component-interaction-summary-store) |
-| AC-15 | Addressed | requirement.md:L290; [Component: UX Evidence and Release Validation](#component-ux-evidence-and-release-validation) |
-| AC-16 | Addressed | requirement.md:L291; [Component: UX Evidence and Release Validation](#component-ux-evidence-and-release-validation) |
+| REQ-013 | Addressed | requirement.md:L3-L5 -> Change: Deterministic UX and Release Validation |
+| REQ-014 | Addressed | requirement.md:L7-L9 -> Component: Interaction Summary Store and SDK Adapter |
+| REQ-015 | Addressed | requirement.md:L11-L11 -> Component: SDK Supply Lock and Contract Admission |
+| REQ-016 | Addressed | requirement.md:L13-L13 -> Component: SDK Supply Lock and Contract Admission |
+| REQ-017 | Addressed | requirement.md:L15-L15 -> Change: Deterministic UX and Release Validation |
+| REQ-001 | Addressed | requirement.md:L17-L35 -> Component: SDK Supply Lock and Contract Admission and Component: Interaction Summary Store and SDK Adapter |
+| REQ-002 | Addressed | requirement.md:L36-L45 -> Component: Interaction Summary Store and SDK Adapter |
+| REQ-003 | Addressed | requirement.md:L46-L55 -> Component: Initiating-Agent Call Control Integration |
+| REQ-004 | Addressed | requirement.md:L56-L63 -> Component: Receiving-Agent AI Assistant Integration |
+| REQ-005 | Addressed | requirement.md:L64-L75 -> Component: Post-Call Wrap-Up Integration |
+| REQ-006 | Addressed | requirement.md:L76-L85 -> Component: Interaction Summary Store and SDK Adapter and Component: Initiating-Agent Call Control Integration |
+| REQ-007 | Addressed | requirement.md:L86-L101 -> Change: Host Status Callback and Existing Web Component |
+| REQ-008 | Addressed | requirement.md:L102-L112 -> Component: Interaction Summary Store and SDK Adapter and Component: Shared Summary Presentation |
+| REQ-009 | Addressed | requirement.md:L113-L123 -> Component: Shared Summary Presentation |
+| REQ-010 | Addressed | requirement.md:L124-L131 -> Component: Shared Summary Presentation |
+| REQ-011 | Addressed | requirement.md:L132-L138 -> Change: Deterministic UX and Release Validation |
+| REQ-012 | Addressed | requirement.md:L139-L146 -> Change: Deterministic UX and Release Validation |
+| REQ-018 | Addressed | requirement.md:L148-L150 -> Change: Deterministic UX and Release Validation |
+| UX-001 | Addressed | requirement.md:L152-L160 -> Change: Deterministic UX and Release Validation |
+| UX-002 | Addressed | requirement.md:L161-L169 -> Change: Deterministic UX and Release Validation |
+| UX-003 | Addressed | requirement.md:L170-L178 -> Change: Deterministic UX and Release Validation |
+| UX-004 | Addressed | requirement.md:L179-L187 -> Change: Deterministic UX and Release Validation |
+| UX-005 | Addressed | requirement.md:L188-L196 -> Change: Deterministic UX and Release Validation |
+| UX-006 | Addressed | requirement.md:L197-L205 -> Change: Deterministic UX and Release Validation |
+| UX-007 | Addressed | requirement.md:L206-L214 -> Change: Deterministic UX and Release Validation |
+| UX-008 | Addressed | requirement.md:L215-L223 -> Change: Deterministic UX and Release Validation |
+| UX-009 | Addressed | requirement.md:L224-L232 -> Change: Deterministic UX and Release Validation |
+| UX-010 | Addressed | requirement.md:L233-L241 -> Change: Deterministic UX and Release Validation |
+| JNY-001 | Addressed | requirement.md:L242-L251 -> Change: Deterministic UX and Release Validation |
+| JNY-002 | Addressed | requirement.md:L252-L261 -> Change: Deterministic UX and Release Validation |
+| REQ-019 | Out-of-Scope | requirement.md:L264-L264 -> Out-of-Scope: eligibility rejects every non-voice task; no non-voice summary state or UI is introduced. |
+| REQ-020 | Out-of-Scope | requirement.md:L265-L265 -> Out-of-Scope: this repository owns existing embedded widgets, not Agent Desktop-native slot placement. |
+| REQ-021 | Out-of-Scope | requirement.md:L266-L266 -> Out-of-Scope: D0 consumes and verifies the SDK artifact but does not modify SDK or backend source. |
+| REQ-022 | Out-of-Scope | requirement.md:L267-L267 -> Out-of-Scope: generation is user initiated, requests are not cancelled, and no automatic retry path exists. |
+| REQ-023 | Out-of-Scope | requirement.md:L268-L268 -> Out-of-Scope: a frozen post-call response failure is never resent; Retry creates a new pre-wrap-up generation request only. |
+| REQ-024 | Out-of-Scope | requirement.md:L269-L269 -> Out-of-Scope: existing wrappers remain, but this feature adds no telemetry event, identifier, duration, dimension, or failure vocabulary. |
+| REQ-025 | Out-of-Scope | requirement.md:L270-L270 -> Out-of-Scope: en-US message IDs are retained, while translation infrastructure, feature RTL layout, and feature live regions are intentionally absent. |
+| REQ-026 | Out-of-Scope | requirement.md:L271-L271 -> Out-of-Scope: `widget-cc-call-control` is extended additively; no tag is added and no existing contract is broken. |
+| REQ-027 | Out-of-Scope | requirement.md:L272-L272 -> Out-of-Scope: summaries stay in memory and clipboard lifetime is controlled by the operating system after an approved user gesture. |
+| AC-01 | Addressed | requirement.md:L276-L276 -> Component: SDK Supply Lock and Contract Admission |
+| AC-02 | Addressed | requirement.md:L277-L277 -> Component: Interaction Summary Store and SDK Adapter |
+| AC-03 | Addressed | requirement.md:L278-L278 -> Component: Initiating-Agent Call Control Integration |
+| AC-04 | Addressed | requirement.md:L279-L279 -> Component: Receiving-Agent AI Assistant Integration |
+| AC-05 | Addressed | requirement.md:L280-L280 -> Component: Post-Call Wrap-Up Integration |
+| AC-06 | Addressed | requirement.md:L281-L281 -> Component: Interaction Summary Store and SDK Adapter and Component: Initiating-Agent Call Control Integration |
+| AC-07 | Addressed | requirement.md:L282-L282 -> Component: Interaction Summary Store and SDK Adapter and Component: Post-Call Wrap-Up Integration |
+| AC-08 | Addressed | requirement.md:L283-L283 -> Component: Post-Call Wrap-Up Integration |
+| AC-09 | Addressed | requirement.md:L284-L284 -> Change: Host Status Callback and Existing Web Component |
+| AC-10 | Addressed | requirement.md:L285-L285 -> Component: Interaction Summary Store and SDK Adapter |
+| AC-11 | Addressed | requirement.md:L286-L286 -> Component: Shared Summary Presentation |
+| AC-12 | Addressed | requirement.md:L287-L287 -> Component: Shared Summary Presentation |
+| AC-13 | Addressed | requirement.md:L288-L288 -> Component: Interaction Summary Store and SDK Adapter and Component: Shared Summary Presentation |
+| AC-14 | Addressed | requirement.md:L289-L289 -> Cross-Cutting Concerns and Change: Host Status Callback and Existing Web Component |
+| AC-15 | Addressed | requirement.md:L290-L290 -> Change: Deterministic UX and Release Validation |
+| AC-16 | Addressed | requirement.md:L291-L291 -> Change: Deterministic UX and Release Validation |
 
 ## Current State and Reuse Analysis
 
-The repository already has the correct dependency direction and most of the required integration seams:
+Live code already supplies the package direction and insertion points; it does not yet contain summary state or views.
 
-- `packages/contact-center/store/src/store.ts` and `storeEventsWrapper.ts` own the SDK object, task listener registration, MobX state, task replacement, hold/resume, conference, task-end, and wrapped-up routing. This is the only acceptable place to call or subscribe to the summary SDK contract.
-- `packages/contact-center/task/src/CallControl/index.tsx` adapts observable store data into `CallControlComponent`; `helper.ts` already coordinates consult, transfer, wrap-up, conference, and task listener lifetimes.
-- `packages/contact-center/cc-components/src/components/task/CallControl/CallControlCustom/consult-transfer-popover.tsx` renders consult/transfer results, while `call-control.tsx` renders reason selection and the Complete Wrap-Up control. These are the insertion points required by the approved placement rules.
-- `packages/contact-center/ai-assistant/src/ai-assistant/index.tsx` is an observer container backed by the same store. `packages/contact-center/cc-components/src/components/AIAssistant/AdaptiveCardRenderer` already supplies the restricted adaptive-card and error-boundary path required for receiving agents.
-- `packages/contact-center/cc-widgets/src/wc.ts` registers `widget-cc-call-control` through r2wc and already declares function-valued host properties. Adding `onAISummaryStatusChange` there is additive and does not create an HTML attribute contract or another custom-element tag.
-- Jest workspace tests and the root Playwright harness already exist. New AI-summary suites extend these mechanisms; they do not create a second test stack.
+| Behavior or surface | Classification | Live evidence and decision |
+| --- | --- | --- |
+| SDK ownership | preserve | `packages/contact-center/store/src/store.ts`, `storeEventsWrapper.ts`, and `store.types.ts` own `cc`, Task listeners, MobX state, task replacement, sign-out cleanup, and SDK calls. New summary API access stays here. |
+| Contact Center package direction | preserve | `cc-widgets -> task/ai-assistant -> cc-components -> store -> SDK`; presentation must not import `@webex/contact-center` or a container. |
+| Store task/media lifecycle | extend | `StoreWrapper.registerTaskEventListeners`, `handleTaskRemove`, `setCurrentTask`, `refreshTaskList`, and `cleanUpStore` are the current binding and cleanup seams. The existing private `isTelephonyTask` and `MEDIA_TYPE_TELEPHONY_LOWER` prevent a duplicate media-policy helper. |
+| Call-control orchestration | extend | `packages/contact-center/task/src/helper.ts#useCallControl` owns `consultCall`, `transferCall`, `consultTransfer`, `consultConference`, and `wrapupCall`; `CallControl/index.tsx` is already `observer` plus `ErrorBoundary`. Summary sequencing is composed around these functions without changing SDK consult/transfer signatures. |
+| Consult/transfer UI | replace only in the eligible branch | `cc-components/.../CallControl/call-control.tsx` opens the popover and `CallControlCustom/consult-transfer-popover.tsx` owns categories/search/results. With current mid-call eligibility, the same handlers/data render in screenshot order as radio categories, exact search field, results, divider, and summary; without eligibility the current search-first pill-button layout remains. No second popover is added. |
+| Wrap-up UI | replace only in the eligible branch | `call-control.tsx` currently renders a Momentum `Select` immediately before `SUBMIT_WRAP_UP`. When post-call summary eligibility is true, the screenshot-authoritative searchable radio hierarchy, summary region, and Complete Wrap-Up labels replace that markup while reusing `wrapupCodes`/selection handlers; absent/false eligibility preserves the existing `Select` path. `call-control.utils.ts#handleWrapupCall` must await the new internal Promise before clearing the selected reason. |
+| AI Assistant panel | extend | `ai-assistant/src/ai-assistant/index.tsx` observes the singleton store and `cc-components/.../AIAssistant/ai-assistant.tsx` owns the established dialog/panel. Receiver content gets a distinct summary branch so real-time-assist chat entries remain isolated. |
+| Adaptive Card security boundary | preserve and narrowly extend | `AdaptiveCardRenderer`, `prepareCardForRender`, `extractCardText`, local image fallbacks, and `ErrorBoundary` already restrict cards. Optional summary-mode labels/selection/copy hooks are added; default real-time-assist behavior is preserved, and unknown card actions remain inert for summary mode. |
+| Existing card feedback/copy semantics | replace only in summary mode | Generic cards label controls “Like/Dislike/Copy suggestion”, toggle a selected reaction off, and use a legacy clipboard fallback. Summary mode requires exact labels, sticky mutually exclusive feedback, re-send on re-selection, and `navigator.clipboard.writeText` fulfillment before success. |
+| Web component | extend | `packages/contact-center/cc-widgets/src/wc.ts` already declares r2wc function props for `widget-cc-call-control`; one optional function prop is added to the same registration. |
+| Installed SDK dependency | replace | `packages/contact-center/store/package.json` currently pins `@webex/contact-center` `3.12.0-next.123`; D0 replaces that resolution with the sealed local tarball and updates `yarn.lock`. Runtime fallback is prohibited. |
+| Tests | extend | Store, task, AI Assistant, cc-components, cc-widgets Jest configurations and the root Playwright harness are reused. Tests are behavioral; snapshots alone are not acceptance. |
+| Existing source removal | remove none | No existing component, tag, method, callback, or real-time-assist path is obsolete. Only contradictory summary-mode behavior is bypassed through explicit optional props. |
 
-The currently installed `@webex/contact-center` declarations do not establish the clarified contract. The required source checkout is available and deterministically buildable at the verified `cc-summaries` identity above. Generated widget code must not use casts, stale installed output, or guessed symbols to bypass that contract. D0 supplies the repository-owned immutable package and receipt first; every consumer builds against it.
+New files are limited to responsibilities with no existing home. `store/src/ai-summary.ts` holds pure validation, normalization, timestamp comparison, and response composition so those rules are not duplicated between `store.ts` and `storeEventsWrapper.ts`; it is not a service/factory layer. `cc-components/src/components/AISummary/*` is necessary because typed/plain summary editing and shared actions are used by two independent containers and do not belong in either CallControl or AdaptiveCardRenderer. `test-fixtures/src/aiSummaryFixtures.ts` centralizes raw SDK shapes. Two tooling scripts own immutable SDK admission and final provenance, responsibilities absent from `tooling/src/publish.js`. No package is added.
 
 ## Target Architecture and Package Layout
 
-The target data flow is:
-
 ```text
-cc:featureEnablement and Task summary events
-  -> @webex/cc-store SDK adapter, validator, owner-generation reducer
-     -> initiating-agent call-control view model
-     -> receiving-agent AI Assistant view model
-     -> post-call wrap-up view model
-        -> SDK-free @webex/cc-components presentation
-           -> optional content-free widget-cc-call-control callback
+conforming @webex/contact-center Task methods + cc/task events
+  -> @webex/cc-store validation, canonical interaction key, owner generation, reducer
+     -> @webex/cc-task initiating/post-call observable view models
+     -> @webex/cc-ai-assistant receiving observable view model
+        -> SDK-free @webex/cc-components AISummary / restricted AdaptiveCardRenderer
+           -> existing widget-cc-call-control plus optional content-free callback
 ```
 
-Planned package ownership:
+The canonical state key is `(canonicalInteractionId, agentId, ownershipGeneration)`. The adapter computes `canonicalInteractionId` as the first non-empty value of `task.data.interaction.mainInteractionId`, the existing `findMediaResourceId(task, 'mainCall')`, `task.data.interaction.interactionId`, and `task.data.interactionId`; this mirrors the inspected SDK's stable-main-call correlation without duplicating media traversal. D0 admits the package only when transfer/conference fixtures prove that value equals capability `interactionId` and summary `conversationId` throughout the call. `agentId` is the non-empty authenticated `store.agentId`, not a participant name. `ownershipGeneration` is a store-issued monotonic summary-ownership epoch, not `task.data.interaction.owner`: the latter names the primary call owner and cannot identify the receiving agent during consult or every agent after conference establishment. A same-agent remount, hold/resume, consult-to-transfer promotion, task clone/end, or same-agent conference content replacement retains the epoch. A different local agent or re-entry after a terminal clear receives a fresh generation. Content revision and arrival sequence are separate and do not reset counters.
 
-```text
-design/default/sdk_package_lock.json         immutable SDK package receipt
-vendor/contact-center-cc-summaries.tgz       exact locally packed SDK artifact
-tooling/                                     SDK and final release verifiers
-packages/contact-center/test-fixtures/       raw valid, malformed, race, and failure payloads
-packages/contact-center/store/               validation, SDK calls/events, state, retention
-packages/contact-center/cc-components/       text/card presentation and controls
-packages/contact-center/task/                consult/transfer and wrap-up orchestration
-packages/contact-center/ai-assistant/         receiving-agent container integration
-packages/contact-center/cc-widgets/           optional host callback registration
-playwright/                                  browser, accessibility, and visual evidence
+Planned file actions are deliberately package-local:
+
+| Area | Retained/modified/added files and responsibility |
+| --- | --- |
+| SDK admission | Add `tooling/src/ai-summary-sdk-lock.js`, `tooling/tests/ai-summary-sdk-lock.test.js`, generated `design/default/sdk_package_lock.json`, and generated `vendor/contact-center-cc-summaries.tgz`; modify `.gitignore`, `packages/contact-center/store/package.json`, and `yarn.lock`. |
+| Fixtures | Add `packages/contact-center/test-fixtures/src/aiSummaryFixtures.ts`; modify its `src/index.ts` and `ai-docs/test-fixtures-spec.md`. |
+| Store | Add `packages/contact-center/store/src/ai-summary.ts` and `tests/ai-summary.ts`; modify `src/store.ts`, `src/store.types.ts`, `src/storeEventsWrapper.ts`, `tests/store.ts`, `tests/storeEventsWrapper.ts`, and `ai-docs/store-spec.md`. Existing `src/index.ts` already re-exports `store.types.ts`; it is unchanged. |
+| Shared presentation | Add `cc-components/src/components/AISummary/{ai-summary.tsx,ai-summary.types.ts,ai-summary.constants.ts,ai-summary.styles.scss,index.ts}` and `tests/components/AISummary/ai-summary.tsx`; modify `src/index.ts`, `AIAssistant/ai-assistant.types.ts`, `AdaptiveCardRenderer/{adaptive-card-renderer.tsx,adaptive-card-renderer.utils.ts}`, their existing tests, and `ai-docs/cc-components-spec.md`. |
+| Task integration | Modify `task/src/{helper.ts,task.types.ts,CallControl/index.tsx}`, its existing tests/spec, and cc-components `task.types.ts`, `CallControl/{call-control.tsx,call-control.utils.ts,call-control.styles.scss}`, `CallControlCustom/consult-transfer-popover.tsx`, and their existing tests. |
+| Receiver integration | Modify `ai-assistant/src/{ai-assistant.types.ts,ai-assistant/index.tsx,helper.ts}` and its tests/spec; modify cc-components `AIAssistant/{ai-assistant.tsx,ai-assistant.types.ts,ai-assistant.styles.scss}` and tests. |
+| Host compatibility | Modify `task/src/{task.types.ts,index.ts,CallControl/index.tsx}`, their tests/spec, `cc-widgets/src/wc.ts`, `cc-widgets/tests/wc.ai-summary.ts`, and `cc-widgets/ai-docs/cc-widgets-spec.md`. The existing package-level Jest configuration already discovers the new test. |
+| UX/release | Add `playwright/Utils/aiSummaryUtils.ts`, `playwright/suites/ai-summary-tests.spec.ts`, `playwright/tests/ai-summary-test.spec.ts`, `tooling/src/verify-ai-summary-release.js`, and `tooling/tests/verify-ai-summary-release.test.js`; modify `playwright.config.ts` to add a deterministic, local, no-auth project that still uses the existing sample-app web server; add root dev dependency `axe-core` pinned to the already locked `4.10.2` in `package.json`/`yarn.lock` for a supported browser audit import. Declared `.ccwidgets/**` files are immutable inputs, not modified outputs. |
+
+No TypeScript target, module format, webpack/Babel configuration, package boundary, server/client boundary, or persistence schema changes. The only new direct third-party declaration is the test-only `axe-core@4.10.2`; it is already resolved transitively at that version in the inspected lockfile and is not bundled into production. All implementation tasks update the affected module specification in the same change.
+
+## Component: SDK Supply Lock and Contract Admission
+
+**Coverage and outcome.** This component covers REQ-015, REQ-016, REQ-001, AC-01, and the SDK-dependent parts of AC-03 through AC-08. DAG task: `D0-sdk-package-contract`. It makes the SDK a reproducible input before any widget code compiles. The current inspected commit is not accepted because its package version and public feature event fail the requirement; that is an admission failure, not a widget workaround.
+
+**Files, responsibilities, and dependency direction.** `tooling/src/ai-summary-sdk-lock.js` is a CommonJS command (`build` and `verify` subcommands) consistent with existing tooling. It resolves the SDK sibling from the widgets common Git directory, allows an explicit `WEBEX_JS_SDK_DIR` only when its canonical path is recorded, and never searches arbitrary checkouts. It reads but does not edit SDK source. It creates the tarball/receipt, changes the store dependency to `file:../../../vendor/contact-center-cc-summaries.tgz`, and regenerates `yarn.lock`. Because the existing `*.json` rule would otherwise hide the receipt, `.gitignore` adds the narrow negation `!design/default/sdk_package_lock.json`; no broader JSON exception is introduced. `tooling/tests/ai-summary-sdk-lock.test.js` stubs process execution/filesystem facts and tests every fail-closed branch. No SDK file is in this DAG because backend/SDK implementation is out of scope.
+
+**Tool API.** The CommonJS module exports only the concrete test/CLI seam `buildSdkPackage(options): Promise<SDKPackageLockReceipt>`, `verifySdkPackage(options): Promise<void>`, and `runCli(argv: readonly string[]): Promise<void>`, where `options` is `{widgetsRoot: string; sdkRoot?: string; env?: NodeJS.ProcessEnv}`. `sdkRoot` defaults only from `WEBEX_JS_SDK_DIR` or the documented sibling; `env` exists for unit-test injection and is never persisted wholesale. `runCli` accepts exactly `build` or `verify`, rejects any other/missing argument, catches once at the process boundary, prints a content-free category, and sets a nonzero `process.exitCode`. `SDKPackageLockReceipt` is the JSON model below; the build function returns the exact object it atomically wrote, and verification resolves with no value or rejects. No daemon, worker, socket, cancellation signal, or long-lived child process is created; every spawned Yarn/Git process is awaited and its exit code checked.
+
+**Receipt model and validation.** `design/default/sdk_package_lock.json` has the following required JSON fields and no secrets: `schemaVersion: 1`; `source.repositoryPath: string` (canonical absolute audit path), `source.branch: "cc-summaries"`, `source.commit: string` (40 lowercase hex), `source.clean: true`; `toolchain.node: string` matching `22.14.x`, `toolchain.yarn: "3.4.1"`; `package.name: "@webex/contact-center"`, `package.version: string` (non-empty valid semver); `commands.install/build/test/pack: string[]` (exact argv); `artifact.repositoryPath: "vendor/contact-center-cc-summaries.tgz"`, `artifact.sha256: string` (64 lowercase hex); and `declarations: Array<{path: string; sha256: string}>` for every public declaration reached from packed `dist/types/index.d.ts`, including Task methods, event constants, and payload types. Missing, extra-unresolved, null, zero-length, dirty-source, moving-HEAD, hash, version, or toolchain values fail verification. There is no trusted `passed` boolean.
+
+**Concrete contract probes.** Under Node 22.14 and the SDK-pinned Yarn, the command runs `yarn install --immutable`, exact package build `yarn workspace @webex/contact-center run build:src`, exact combined style/unit gate `yarn workspace @webex/contact-center run test`, and `yarn workspace @webex/contact-center pack --out <temporary-path>`. It checks source path/branch/commit/cleanliness both before and after build/pack, hashes the packed bytes, extracts declarations to a temporary directory, and runs TypeScript plus runtime probes against the tarball. The probes require these exact public signatures:
+
+```typescript
+task.requestPostCallSummary(): Promise<PostCallSummaryEventPayload>;
+task.sendPostCallSummaryResponse(payload: PostCallSummaryResponsePayload): Promise<void>;
+task.requestMidCallSummary(actionType: 'CONSULT' | 'TRANSFER'): Promise<MidCallSummaryEventPayload>;
+task.sendMidCallSummaryResponse(
+  payload: MidCallSummaryResponsePayload,
+  actionType: 'CONSULT' | 'TRANSFER'
+): Promise<void>;
 ```
 
-The store key is `(interactionId, agentId, ownershipGeneration)`. A generation increments whenever ownership moves to a different agent or a transfer/conference request establishes a new current owner. `actionTimestamp` is compared only inside the same key; greater values win and equal values use last arrival. Promise settlements and events capture the key plus a request generation and are discarded if it no longer matches. No SDK cancellation is invented.
+They also require a declared public `cc:featureEnablement` event whose payload names `interactionId`, `midCallEnabled`, `postCallEnabled`, and UTC `actionTimestamp`, with boolean/number types when supplied; optionality is tolerated because the widget must fail closed on omitted fields. They require the declared initiating, receiving, and post-call event names/payloads from `ai-summary.md`, including optional string `resolution`; received-response `summary` unions that accept the declared structured section object or `string` for the requirement's plain-text fallback, with the unavailable branch restricted to `summary: ''` and zero counters; the stable interaction identifier across consult/transfer/conference fixtures; a receiver action correlation that resolves only to `CONSULT` or `TRANSFER`; no pre-content receiver eligibility event; no cancellation API; and 15,000 ms mid-call request rejection with listener cleanup. Runtime probes prove response payloads receive SDK-owned envelope fields (conversation/interaction identity and `agentName`) rather than asking UI code to invent them, and prove each send Promise fulfills after a successful transport result while a non-success result rejects. The adapter accepts only the packed declarations actually probed.
 
-## Component: SDK Package Lock and Contract Probe
+**Control flow and installation.** Build happens in a temporary output directory. Only after all probes pass does the script copy the exact tarball, atomically replace the receipt, update the store dependency, run the widgets lock update, then run `yarn install --immutable`. The live `.yarnrc.yml` uses Yarn 4.5.1 with `nodeLinker: node-modules`; verification therefore runs `yarn workspace @webex/cc-store node` to resolve and read `@webex/contact-center/package.json`, checks the installed package bytes/declarations against the tarball receipt, and checks `yarn.lock` has only the sealed `file:` resolution for the store descriptor. It does not assume Plug'n'Play. Failure before the atomic replacement leaves the previous admissible artifact untouched. Verification never downloads or selects `3.12.0-next.123` as a fallback.
 
-This component addresses REQ-001 and AC-01. DAG owners are D0-sdk-package-contract and D9-release-validation.
+**Failure, recovery, and lifecycle.** Any mismatch exits nonzero with a content-free diagnostic naming only the failed contract/path/hash category. The user or SDK owner must supply a conforming clean `cc-summaries` commit; the widget task does not patch it. Re-running `build` is the only recovery and always rebuilds/re-hashes from source. The D0 DAG declares the npm registry needed by the SDK's pinned install; if the registry or an equivalent complete local cache is unavailable, admission stops rather than skipping the install. Temporary directories are removed on success/failure. Not applicable - no runtime storage or migration is introduced by this build-time gate.
 
-D0 accepts the SDK checkout only when its canonical path is `/Users/pkesari/Desktop/WorkProjects/webex-js-sdk`, `git rev-parse --abbrev-ref HEAD` is exactly `cc-summaries`, `git rev-parse HEAD` is exactly `50602eea08dfc72df57d038529049e46f064f6c5`, and the worktree is clean. The primary source locator is `WEBEX_JS_SDK_DIR`; for this target machine it must be set to that absolute path. If the variable is absent, the verifier may inspect only the documented widgets-relative candidate `../../webex-js-sdk`, resolving it canonically before comparison. It runs the SDK's pinned Yarn through Corepack under Node 22.14, performs the documented build, packs the `@webex/contact-center` workspace, copies the tarball into `vendor/`, pins the widgets dependency to the file artifact, and refreshes `yarn.lock` in immutable mode. It rechecks path, branch, commit, and cleanliness immediately after build and pack so a moving or locally modified source cannot be sealed.
+**Tests.** `sdk-lock rejects missing package version`, `sdk-lock rejects task event in place of cc:featureEnablement`, `declaration signatures compile`, `runtime methods resolve/reject with concrete shapes`, `mid-call timeout is 15 seconds and late payload is not returned`, `send fulfills on success and rejects non-success`, `receiver has an unambiguous action type`, `source moves during pack`, `tarball/declaration tamper`, `node-modules install resolves only sealed file artifact`, and `no installed-package fallback` run in D0 acceptance.
 
-`design/default/sdk_package_lock.json` records schema version, absolute source path for local audit, branch, commit, package name/version, Node and Yarn versions, exact build and pack commands, tarball repository path and SHA-256, and every declaration file/hash used by the probe. The receipt is regenerated from facts; no pass boolean is trusted.
+## Component: Interaction Summary Store and SDK Adapter
 
-The contract test imports both declarations and built runtime exports and proves the four Task methods, `AGENT_EVENTS.FEATURE_ENABLEMENT === 'cc:featureEnablement'`, the three Task event values, all payload fields, numeric counters/timestamps, typed section keys, receiving-agent adaptive-card fields, and absence of invented cancellation or pre-content eligibility APIs. It runs a fake-clock probe that proves `AI_SUMMARY_REQUEST_TIMEOUT_MS === 20_000` while receiver-buffer and orphan-retention durations remain `30_000`. If the source still implements the older 30-second request default described in `ai-summary.md`, D0 stops and reports the contract discrepancy instead of changing SDK source or weakening the widget requirement.
+**Coverage and outcome.** This component covers REQ-014, REQ-001, REQ-002, REQ-006, REQ-008, REQ-010, AC-02, AC-06, AC-07, AC-08, AC-10, AC-13, and AC-14. DAG tasks: `D1-summary-contract-fixtures` and `D2-interaction-summary-store`. It is the sole owner of raw SDK values, capability gating, state isolation, stale-work rejection, counters, response composition, and retention. Containers receive immutable normalized view models and invoke store actions; components never see an SDK Task method.
 
-## Component: Interaction Summary Store
+**Files, responsibilities, collaborators, and direction.** Raw deterministic fixtures live in new `test-fixtures/src/aiSummaryFixtures.ts` and are re-exported by its existing `index.ts`. New `store/src/ai-summary.ts` exports pure validators/composers to `store.ts` and `storeEventsWrapper.ts`; it imports only store types and the D0-sealed SDK types. `store.ts` adds observable maps/counters and initializes them through the existing `makeAutoObservable` path. `storeEventsWrapper.ts` owns event binding, SDK Promise calls, `runInAction` commits, current Task capture, and cleanup. It adds `handleAISummaryFeatureEnablement(value: unknown): void`, registers/removes that exact callback inside the existing `setupIncomingTaskHandler` `addEventListeners`/`removeEventListeners` closures, and extends `registerTaskEventListeners`, `handleTaskRemove`, `setCurrentTask`, and `cleanUpStore`. It stores exact receiving-agent and wrapped-up callback references for symmetric task listener removal. Existing `TASK_PARTICIPANT_JOINED`, `TASK_CONFERENCE_STARTED`, `TASK_PARTICIPANT_LEFT`, and `TASK_CONFERENCE_ENDED` handlers remain unchanged; no summary listener is added to those events and they neither fan out an SDK request nor cancel pending summary work. No manager/factory/package hop is added.
 
-This component addresses REQ-002, REQ-006, REQ-008, REQ-010, AC-02, AC-06, AC-07, AC-08, AC-10, AC-11, AC-13, and AC-14. DAG owners are D1-summary-contract-fixtures, D2-interaction-summary-store, and D9-release-validation.
+The fixture module has one data export, `aiSummaryFixtures`, re-exported from `test-fixtures/src/index.ts`. Its readonly groups are `featureEnablement`, `initiatingMidCall`, `receivingMidCall`, `postCall`, `malformed`, `errors`, `ordering`, `transfers`, `conferences`, `feedback`, `counters`, and `wrapUp`; conforming members use `satisfies` against the D0 public payload types, while deliberately malformed members are `unknown` values consumed only by validation tests. All identities and bodies are synthetic constants. Tests that need mutation spread/clone the selected member locally; the fixture package adds no mutable singleton, factory, SDK client, or runtime export outside test consumers.
 
-The store adds closed, discriminated state rather than retaining raw payloads in components:
+**Field-level models.** The following exported types are added to `store.types.ts`; all string unions are closed, all counters start at `0`, optional presentation is `undefined` rather than `null`, and none is serialized:
 
-- Capability records hold `interactionId`, `midCallEnabled`, `postCallEnabled`, and monotonic UTC `actionTimestamp`. Missing, malformed, cross-interaction, non-voice, unauthorized, or initialization-failure input is unavailable.
-- Request state is `idle`, `loading`, `ready`, `generation-error`, or `unsupported`. Role is `initiator`, `receiver`, or `post-call`. Content is either normalized typed sections, normalized plain text, or a validated adaptive-card object; role-incompatible fields are discarded immediately.
-- Mid-call response state holds numeric viewed/edited/copied counters, feedback, edited typed sections, and action type. Post-call response state additionally holds wrap-up code and a lifecycle of editable, frozen-after-wrap-up, submitted, or response-failed.
-- Raw summary content never enters logger arguments, callback details, URL state, persistence APIs, analytics, or metrics. The store exposes only content-free status and sanitized category codes.
+```typescript
+export type AISummaryKind = 'mid-call' | 'post-call';
+export type AISummaryRole = 'initiator' | 'receiver' | 'post-call';
+export type AISummaryActionType = 'CONSULT' | 'TRANSFER';
+export type AISummaryFeedback = 'none' | 'thumbs_up' | 'thumbs_down';
+export type AISummaryErrorCategory =
+  | 'unauthorized'
+  | 'initialization'
+  | 'offline'
+  | 'unavailable'
+  | 'empty'
+  | 'disabled'
+  | 'timeout'
+  | 'generic'
+  | 'unsupported';
+export type AISummaryLifecycle =
+  | 'idle'
+  | 'requesting'
+  | 'ready'
+  | 'generation-error'
+  | 'unsupported'
+  | 'frozen'
+  | 'submitted'
+  | 'response-failed';
 
-The store subscribes to `cc:featureEnablement`, `task:midCallSummary`, `task:midCallSummaryForReceivingAgent`, `task:postCallSummary`, and the existing wrapped-up lifecycle event. Listener ownership follows task hydration and replacement exactly as current real-time-assist listeners do. Receiving-agent eligibility starts only with its content event. Hold/resume and task end preserve mid-call state; wrap-up completion, interaction change, sign-out, or SDK-session end clears it. Successful post-call state clears on interaction change. Frozen response-failure state clears only on the backend wrapped-up event.
+export type AISummaryCounters = {
+  viewed: number;
+  edited: number;
+  copied: number;
+};
+export type AISummarySectionKey =
+  | 'reasonForTransferOrConsult'
+  | 'initialContactReason'
+  | 'additionalContactReasons'
+  | 'additionalContext'
+  | 'keyActionsTaken'
+  | 'nextSteps';
+export type AISummaryEditableField = AISummarySectionKey | 'summaryText';
+export type AISummaryDisplaySectionKey = AISummarySectionKey | 'resolution';
+export type AISummarySection =
+  | {key: AISummarySectionKey; value: string; editable: true}
+  | {key: 'resolution'; value: string; editable: false};
+export type AISummaryContent =
+  | {type: 'sections'; sections: AISummarySection[]}
+  | {type: 'text'; text: string}
+  | {type: 'adaptive-card'; card: Record<string, unknown>};
+export type AISummaryCapability = {
+  interactionId: string;
+  midCallEnabled: boolean;
+  postCallEnabled: boolean;
+  actionTimestamp: number;
+  arrivalSequence: number;
+};
+export type AISummaryOwnerKey = {
+  interactionId: string;
+  agentId: string;
+  ownershipGeneration: number;
+};
+export type PostCallDraftCapture = {
+  owner: AISummaryOwnerKey;
+  contentRevision: number;
+  content: Extract<AISummaryContent, {type: 'sections' | 'text'}>;
+  counters: AISummaryCounters;
+  feedback: AISummaryFeedback;
+  wrapUpCode: string;
+};
+export type AISummaryStatusTransition = {
+  sequence: number;
+  detail:
+    | {kind: 'mid-call' | 'post-call'; state: 'available' | 'unavailable'}
+    | {kind: 'post-call'; state: 'submitted' | 'response-failed'};
+};
+export type AISummaryOwnerState = AISummaryOwnerKey & {
+  role: AISummaryRole;
+  lifecycle: AISummaryLifecycle;
+  actionType?: AISummaryActionType;
+  content?: AISummaryContent;
+  sourceTimestamp?: number;
+  arrivalSequence: number;
+  contentRevision: number;
+  counters: AISummaryCounters;
+  feedback: AISummaryFeedback;
+  feedbackPending: boolean;
+  errorCategory?: AISummaryErrorCategory;
+  frozenResponse?: PostCallSummaryResponsePayload;
+  responseAttempted: boolean;
+  agentWrappedUpObserved: boolean;
+};
+export type AISummaryViewModel = Pick<
+  AISummaryOwnerState,
+  | 'role'
+  | 'lifecycle'
+  | 'content'
+  | 'contentRevision'
+  | 'counters'
+  | 'feedback'
+  | 'feedbackPending'
+> & {eligible: boolean; requestPending: boolean; controlsDisabled: boolean};
+export type PostCallSubmissionResult = 'submitted' | 'response-failed';
+export type NormalizedAISummaryResult =
+  | {
+      kind: 'ready';
+      interactionId: string;
+      timestamp: number;
+      content: AISummaryContent;
+    }
+  | {kind: 'unsupported'; interactionId: string; timestamp: number}
+  | {kind: 'error'; category: AISummaryErrorCategory};
+```
 
-Every explicit user request calls the SDK. The client performs no automatic retry. A user Retry after generation failure creates a new request and replaces content only when the response is current by timestamp and generation. A 20-second pending mid-call guard disables further consult/transfer initiation. A late or stale settlement cannot mutate current state even if the underlying SDK event still fires.
+At runtime, `aiSummaryCapabilities: Map<string, AISummaryCapability>` is keyed by canonical interaction ID and `aiSummaryOwners: Map<string, AISummaryOwnerState>` uses an internal non-logged key encoding all three `AISummaryOwnerKey` fields. `currentAISummaryOwnerByInteraction: Map<string, AISummaryOwnerKey>` points only to an accepted owner generation, while a request may create a non-visible pending owner key; projection additionally requires that key's `agentId === store.agentId`, so a prior agent's content is never exposed while a successor waits. `nextAISummaryOwnershipGeneration` starts at `0` and is incremented before every new owner epoch; it is never derived from, reset by, or serialized with the backend's `interaction.owner`. `postCallResponseFailures` retains frozen failed records separately when they are no longer the visible interaction. `nextAISummaryArrivalSequence` is a monotonically increasing in-memory integer used only to break equal timestamps. `nextAISummaryRequestSequence`, `pendingAISummaryRequests: Map<number, AISummaryOwnerKey>`, and `latestAISummaryRequestByOwner: Map<string, number>` associate each Promise with its pending indicator and cleanup. A request sequence never determines successful content freshness or invalidates another same-owner success; because failures have no source timestamp, only rejection of the latest-started request for that owner may paint `generation-error`, while an older rejection is consumed. `aiSummaryTaskListeners: Record<string, {task: ITask; receiving: (value: unknown) => void; wrappedUp: () => void}>` stores exact task-bound callbacks so hydration/replacement can detach the old object and `handleTaskRemove` can remove every listener. `nextAISummaryStatusSequence` starts at `0`; `latestAISummaryStatusTransition?: AISummaryStatusTransition` is replaced only when a current accepted request/event produces `available`, `unavailable`, `submitted`, or `response-failed`, never for stale/lower-timestamp settlements, edits, counters, feedback, hold/remount, or render churn. The transition itself contains only its local sequence and the exact callback-safe detail, with no interaction/agent ID, counters, feedback, error, or content. It is retained after keyed content cleanup so an event-before-response-rejection race can still notify the host, then cleared on sign-out/session cleanup. These values reset on store cleanup. No object is JSON-stringified, persisted, placed in a URL, or passed to analytics.
 
-For A-to-B-to-C transfer, the common interaction ID remains, ownership generation advances for C, C starts counters at zero, and B's summary remains only until C's valid summary is committed. A conference addition follows the same per-agent generation rule and requests history from call start. Participant removal does not clear another current participant's state. Consult-then-transfer and direct transfer share the same reducer transitions.
+The pure module's exact named exports are:
 
-Viewed increments after a successful reveal action, edited after an accepted content-changing edit, and copied only after `navigator.clipboard.writeText` fulfills. Failed, blocked, stale, and no-op actions do not increment. Counters persist for the same key across hold/resume and remount and reset for a different agent generation.
+```typescript
+normalizeFeatureEnablement(
+  value: unknown,
+  arrivalSequence: number
+): {kind: 'valid'; capability: AISummaryCapability} | {kind: 'invalid'; interactionId?: string};
+normalizeAISummaryPayload(role: AISummaryRole, value: unknown): NormalizedAISummaryResult;
+getCanonicalAISummaryInteractionId(task: ITask): string | undefined;
+shouldAcceptAISummaryCandidate(
+  current: Pick<AISummaryOwnerState, 'sourceTimestamp' | 'arrivalSequence'> | undefined,
+  timestamp: number,
+  arrivalSequence: number
+): boolean;
+composeMidCallResponse(state: AISummaryOwnerState): MidCallSummaryResponsePayload;
+composePostCallResponse(capture: PostCallDraftCapture): PostCallSummaryResponsePayload;
+normalizeAISummaryError(error: unknown): AISummaryErrorCategory;
+```
+
+`normalizeFeatureEnablement` requires a non-empty string interaction ID and a finite non-negative integer UTC Unix-epoch-millisecond timestamp. The numeric value is stored unchanged and is never parsed through a local timezone. A missing interaction ID returns invalid without an ID because it cannot be associated with any interaction and never enables one. If a non-empty interaction ID is recognizable but its timestamp/envelope is malformed, the invalid result retains only that ID and `handleAISummaryFeatureEnablement` removes that interaction's enabling record so an older `true` cannot remain effective; raw malformed values never escape the validator. Within an otherwise valid record, each capability is enabled only by the literal boolean `true`; a missing, non-boolean, or false individual field normalizes to `false`. Greater `actionTimestamp` wins; equal timestamps use later `arrivalSequence`.
+
+`normalizeAISummaryPayload(role, value): NormalizedAISummaryResult` requires the D0-proven canonical conversation ID and finite non-negative integer concrete SDK `timestamp`; the adapter stores it as `sourceTimestamp`, which implements the requirement's monotonic action-timestamp ordering rule. Initiator accepts SDK-defined mid-call section strings whose `.trim().length > 0` in declaration order, otherwise a `summaryText` string passing the same non-empty test, and drops cards. Post-call applies the same test to its declared section set/plain fallback and drops cards. When post-call sections exist, a non-empty declared top-level `resolution` is normalized as the non-editable display section `resolution` between `keyActionsTaken` and `nextSteps`, matching the screenshot's `Outcome` row; it is omitted when absent and never inserted into the SDK response `summary` object. `resolution` alone does not suppress the required plain-`summaryText` fallback. The original accepted string bytes, including leading/trailing whitespace and embedded newlines, are retained; trimming is validation only, so display/edit/copy/response composition do not silently rewrite SDK content. Receiver requires an object adaptive card and discards `sections`/`summaryText` as render sources. Unknown section keys never enter normalized state. A valid envelope with no role-compatible render content returns `unsupported`; transport/malformed/empty input returns its sanitized error category. Text is retained as text, not HTML.
+
+**Store API signatures.** `IStoreWrapper` gains only concrete actions consumed by current containers:
+
+```typescript
+getAISummaryView(kind: AISummaryKind, role: AISummaryRole): AISummaryViewModel | undefined;
+getAISummaryStatusTransition(): AISummaryStatusTransition | undefined;
+requestMidCallSummary(actionType: AISummaryActionType): Promise<void>;
+requestPostCallSummary(): Promise<void>;
+sendMidCallSummaryBeforeAction(actionType: AISummaryActionType): Promise<void>;
+setMidCallSummaryFeedback(
+  role: 'initiator' | 'receiver',
+  feedback: Exclude<AISummaryFeedback, 'none'>
+): Promise<void>;
+setPostCallSummaryFeedback(feedback: Exclude<AISummaryFeedback, 'none'>): void;
+editAISummary(
+  kind: AISummaryKind,
+  field: AISummaryEditableField,
+  value: string,
+  expectedRevision: number
+): boolean;
+recordAISummaryViewed(kind: AISummaryKind, expectedRevision: number): boolean;
+recordAISummaryCopied(kind: AISummaryKind, expectedRevision: number): boolean;
+capturePostCallDraft(wrapUpCode: string, expectedRevision: number): PostCallDraftCapture | undefined;
+freezeAndSendPostCallSummary(
+  task: ITask,
+  capture: PostCallDraftCapture
+): Promise<PostCallSubmissionResult>;
+```
+
+`editAISummary` accepts only `AISummaryEditableField`, requires the current owner/revision, compares the exact string, commits one text change, and increments both `edited` and `contentRevision` once. It also requires the field to belong to the current role and content variant: only declared mid-call keys are accepted for initiating sections, only declared post-call section keys for post-call sections, and `summaryText` only for plain content. Every normalized typed section value and plain text is editable; the presentation-only `resolution`/`Outcome` row and receiver cards are not. Runtime callers are still checked because custom-element and event input is untrusted. Empty text is allowed as an edit but cannot turn an otherwise empty response into a renderable success. Cross-role, unknown, read-only-resolution, unchanged, stale-revision, frozen, or ineligible edits return `false`. View/copy recorders likewise return `false` on stale/ineligible/hidden actions and increment exactly once per successful caller action. Copy content itself remains in the component and never crosses a logging boundary.
+
+**Capability, request, and ordering control flow.**
+
+1. `setupIncomingTaskHandler.addEventListeners` binds the exact D0-verified `cc:featureEnablement` listener through the existing `ccSDK.on` boundary, and its paired `removeEventListeners` removes the same callback on logout/session teardown. `registerTaskEventListeners` uses `aiSummaryTaskListeners` to bind the D0-verified receiving-agent event and a wrapped-up callback; `handleTaskRemove`/replacement removes those exact function references. Existing conference participant handlers continue without an added summary request or cancellation. The wrapped-up callback performs the summary transition and then calls `refreshTaskList`, replacing the current direct `TASK_WRAPPEDUP -> refreshTaskList` registration without changing its legacy refresh effect. Initiating and post-call content are consumed from request Promises, preventing a late public event after timeout from being rendered.
+2. `setCurrentTask` calls `getCanonicalAISummaryInteractionId(task: ITask): string | undefined`, which applies the exact `mainInteractionId -> findMediaResourceId(task, 'mainCall') -> interaction.interactionId -> task interactionId` rule above, then pairs it with non-empty `store.agentId`. Current-agent authorization requires the existing registered SDK session (`store.isAgentLoggedIn === true`) and that non-empty authenticated agent ID; SDK unauthorized/initialization failures revoke the applicable projection. Empty identity, a non-telephony task, mismatched feature record, false flag, absent authorization, unauthorized/init failure, or missing lifecycle makes `eligible: false`; no role-name, leaf-ID, participant-name, or owner-field guess is enabled.
+3. `StoreWrapper.getOrCreateAISummaryOwnerKey(interactionId: string, agentId: string): AISummaryOwnerKey` reuses the current key only when both strings match and that epoch has not crossed a terminal clear. Otherwise it increments `nextAISummaryOwnershipGeneration` and returns a new key. This stateful method lives in `storeEventsWrapper.ts`; the new `ai-summary.ts` remains pure. A receiver content event establishes the receiving agent's epoch; later consult-to-transfer promotion for that same agent reuses it. Hold/resume, task clone/end, and same-agent conference content replacement also reuse it. A different agent or same-agent re-entry after wrap-up/interaction/sign-out/session cleanup gets a new generation. Every async operation captures the full key; a settlement whose key is not the current or matching pending key for that exact agent is consumed and ignored without a counter, error, callback, or unhandled rejection.
+4. Each explicit user request calls the matching SDK method and receives a unique pending sequence used to pair settlement/cleanup with that request and to suppress an older request's timestamp-less rejection after a newer request began. Mid-call permits one in-flight request for the owner and exposes `requestPending: true` until the SDK Promise settles or rejects at 15 seconds; containers use that flag to disable further consult/transfer initiation, while `controlsDisabled` remains reserved for stale/frozen summary actions. If accepted mid-call content already exists during a conference-participant preparation request, its ready lifecycle, actions, and counters remain projected while the request is pending. No widget timeout, `AbortSignal`, cancellation, or retry timer is added. All same-owner successful post-call settlements remain eligible to compete by source timestamp even if a later request was started first; request sequence never overrides the timestamp/arrival rule for content.
+5. A normalized candidate replaces visible content only when its `timestamp` is greater than the current source timestamp; equal timestamps use the later local arrival sequence. Lower timestamps cannot replace content. A missing/malformed timestamp cannot win. Every accepted replacement increments `contentRevision` but preserves same-owner counters and feedback.
+6. A Promise rejection maps to one internal category. Unauthorized/initialization hides the section. For an initial mid-call request or any post-call request, disabled/offline/unavailable/empty/timeout/generic becomes `generation-error`; a valid but role-incompatible result becomes `unsupported`. A failed conference-participant preparation request with already accepted content clears only its pending record and keeps that content/counters ready, because REQ-006 retains the old summary until a valid replacement arrives; no unavailable transition or visible error replaces a still-available summary. Raw errors and payloads are discarded after categorization.
+7. A lower-timestamp settlement, SDK-timeout late event, stale owner settlement, failed action, and caught unmount settlement are terminally consumed; none is rethrown into the event loop.
+
+**Transfers, conferences, and retention.** For A-to-B-to-C, all state uses the common canonical interaction ID. C creates a new owner generation with zero counters; B is never visible under C's key and is deleted when C's valid summary commits. Direct transfer and consult-to-transfer use the same transition. Adding a conference participant uses the existing initiating-agent `requestMidCallSummary('CONSULT')` during consult preparation; it does not introduce a conference-only SDK call. That Promise result is the initiator's per-agent summary. Before `consultConference()`, the initiating agent sends the edited response through the existing mid-call response method; the SDK/backend then delivers the D0-declared receiving-agent content event independently to each other participating agent. Each local client keys that event to its own authenticated `store.agentId`; after establishment there is no shared receiving-agent slot. The prior same-agent summary remains visible until a valid newer Promise result or receiving-agent event wins the timestamp comparison, then only that agent's content is replaced while same-agent counters remain. A newly receiving agent starts a new owner generation and counters at zero. Existing `TASK_PARTICIPANT_JOINED`, `TASK_CONFERENCE_STARTED`, `TASK_PARTICIPANT_LEFT`, and `TASK_CONFERENCE_ENDED` handling does not fan out `requestMidCallSummary`, clear summary state, or cancel pending generation; duplicate task hydration therefore cannot duplicate a request. The SDK/backend remains authority for whole-call history, continued generation as participants join/leave, conference-to-two-party conversion, and oldest-remaining-host selection. Concurrent Promise results and content events correlate on canonical ID, local agent ID, owner generation, then timestamp/arrival sequence.
+
+Mid-call content/counters survive hold, resume, same-agent remount, and task end; `TASK_WRAPPEDUP`, interaction terminal cleanup, sign-out, or SDK session cleanup removes them. When the visible current interaction changes to a different canonical ID, the old interaction's mid-call and successful post-call state is cleared immediately and can never project into the new view. A failed frozen post-call tombstone remains non-visible only until its matching backend wrapped-up event so the mandated cleanup event can be honored. A submitted post-call response remains visible until interaction change. `agentWrappedUpObserved` starts `false`. If `TASK_WRAPPEDUP` arrives while the one post-call response Promise is pending, the listener sets it `true` but retains the frozen snapshot until settlement. On response failure, the store emits the content-free failure transition and retains the snapshot only when that event has not yet arrived; if it was already observed, it discards immediately after the failure transition. If failure settled first, the later event removes it. A successful submitted response ignores that cleanup flag and remains until interaction change. Sign-out/session termination remains the global privacy boundary and clears all memory.
+
+**Response composition and failures.** `composeMidCallResponse` emits the sealed SDK union: ready content uses `summaryReceived: true`, normalized editable sections or plain string, numeric counters, feedback, and valid state; unavailable generation uses `summaryReceived: false`, `summary: ''`, zero counters, `feedback: 'none'`, and `state: 'NOT_RECEIVED'`. `composePostCallResponse` similarly emits either the exact editable `PostCallSummarySections` keys or the plain string; the presentation-only `resolution` row is never serialized into `summary`. Closing a popover invalidates its view token but sends no cancellation response and never uses `MID_CALL_CANCELLED`. Receiver action type is derived only from the D0-verified Task relationship/action correlation; unknown values block the feedback request and do not paint selection.
+
+`capturePostCallDraft` succeeds only for the current eligible ready owner/revision and non-empty selected wrap-up reason. It deep-copies normalized content, counters, local feedback, and that reason as the SDK `wrapUpCode` into an internal capture without changing the lifecycle to `frozen`; the existing `auxCodeId` remains solely the argument to `task.wrapup`. `composePostCallResponse` later emits captured sections or string, exact numeric counters/feedback, `state: 'DEFAULT'`, and captured `wrapUpCode`. After wrap-up succeeds, `freezeAndSendPostCallSummary` deep-copies that capture into `frozenResponse` and calls the captured pre-wrap-up Task once. It does not re-read or reject the capture merely because another interaction became visible after the user committed wrap-up. A rejection sets `response-failed`, retains that copy, and resolves with the sanitized result so no response-only retry or unhandled rejection occurs. Not applicable - the widget adds no response cancellation, backoff, persistence migration, or telemetry.
+
+**Tests.** D1 supplies raw feature, typed/plain/card, malformed, unsupported, every normalized failure, transfer, conference, feedback, counter, timestamp, and race fixtures. D2 names and covers `canonical main interaction matches capability and conversation`, `non-voice never eligible`, `missing capability false`, `capability interaction mismatch`, `same owner hold/remount retention`, `receiver consult-to-transfer retains generation`, `terminal clear then same-agent re-entry advances generation`, `task end retention then wrapped-up cleanup`, `interaction switch clears visible state`, `sign-out/session cleanup`, `A-B-C generation isolation`, `prior agent is never projected while successor waits`, `conference replacement retains old until valid per-agent content`, `conference preparation failure preserves ready content and counters`, `conference task events do not fan out SDK requests`, `participant leave does not cancel generation`, `greatest timestamp and equal-last-arrival`, `repeated explicit requests each call SDK`, `older rejection cannot replace newer success`, `older success still competes by timestamp`, `15-second rejection ignores late event`, `unmount and owner switch consume settlement`, `view/edit/copy success-only counters`, `mid feedback waits for 200`, `post feedback remains local`, `frozen response exactness`, `response attempted once`, and `zero unhandled rejection`.
 
 ## Component: Shared Summary Presentation
 
-This component addresses REQ-008, REQ-009, REQ-010, AC-11, AC-12, and AC-13. DAG owners are D3-shared-summary-presentation and D9-release-validation.
+**Coverage and outcome.** This component covers REQ-003, REQ-004, REQ-008, REQ-009, REQ-010, AC-03, AC-04, AC-05, AC-11, AC-12, AC-13, and AC-14. DAG task: `D3-shared-summary-presentation`. It gives both host containers one SDK-free visual/action contract while keeping receiving adaptive cards inside their established security boundary.
 
-SDK-free `AISummaryContent`, `AISummaryActions`, and `AISummaryError` components accept normalized props and callbacks. Typed initiating-agent fields render in SDK-defined order as labeled key-value text; post-call typed fields render as individually labeled editable sections. Plain initiating-agent mid-call text fills the bottom-most popover text box; plain post-call text is an unlabeled paragraph in the summary area. All typed and plain values use React text nodes and `dir="auto"`.
+**Files and responsibilities.** New `AISummary/ai-summary.types.ts` declares props; `ai-summary.constants.ts` holds stable en-US message IDs and exact strings; `ai-summary.tsx` renders loading, ready, error, and unsupported states; `ai-summary.styles.scss` uses existing semantic tokens; `index.ts` and the package `src/index.ts` export the component/types. These files cannot live in CallControl because AI Assistant also consumes them, and cannot live in AdaptiveCardRenderer because typed/plain editing is not an adaptive-card concern. Existing `AdaptiveCardRenderer` and its utility gain optional summary behavior without changing defaults.
 
-Receiving-agent content delegates only to the existing restricted `AdaptiveCardRenderer`. It does not execute scripts, expand adaptive-card actions, or fall back to typed/plain fields. A successful-looking but role-unrenderable payload shows `The summary is not available`. Unauthorized and initialization-failure states omit the summary surface. All other generation categories show `Having trouble generating summary`.
+**Presentation contracts and signatures.** The public package types are normalized and contain no SDK Task or raw error:
 
-Actions expose the exact accessible label and identical tooltip: `View summary`, `This is helpful`, `This isn't helpful`, `Copy Summary`, and post-call `Retry`. Like/dislike are mutually exclusive. Mid-call selection waits for a successful SDK update before painting; re-selection sends another update and remains selected; opposite selection sends another update and replaces it. Post-call selection is local pending state included only in the final response. It shows `Pending submission`, changes to `Submission not confirmed` after response failure, and removes the description after confirmed success.
+```typescript
+export function AISummary(props: AISummaryProps): React.ReactElement | null;
 
-No feature-owned live region or announcement is added. When a focused control is actually removed, focus moves to the next focusable control in document order or the existing panel focus target. Loading, ready updates, expand/collapse, and text refresh do not otherwise move focus. Existing semantic theme tokens, visible focus, and forced-colors behavior are inherited. Content wraps with no horizontal scrollbar and receives a bounded vertical scroll region using the same container behavior as call control.
+export type AISummaryPresentationState = 'loading' | 'ready' | 'generation-error' | 'unsupported';
+export type AISummaryAction = 'view' | 'copy' | 'like' | 'dislike' | 'retry';
+export type AISummaryCopyVisualState = 'idle' | 'hover' | 'confirmed';
+export interface AISummaryProps {
+  kind: 'mid-call' | 'post-call';
+  role: 'initiator' | 'post-call';
+  state: AISummaryPresentationState;
+  content?: {type: 'sections'; sections: AISummarySection[]} | {type: 'text'; text: string};
+  feedback: 'none' | 'thumbs_up' | 'thumbs_down';
+  feedbackDescription?: 'Pending submission' | 'Submission not confirmed';
+  controlsDisabled: boolean;
+  onView: () => void;
+  onEdit: (field: AISummaryEditableField, value: string) => boolean;
+  onCopy: (text: string) => Promise<boolean>;
+  onCopyVisualStateChange?: (state: AISummaryCopyVisualState) => void;
+  onFeedback: (feedback: 'thumbs_up' | 'thumbs_down') => void | Promise<void>;
+  onRetry?: () => void | Promise<void>;
+  containingPanelFocusTarget: React.RefObject<HTMLElement>;
+}
+```
+
+`AISummary` is the single exported typed/plain summary component. Loading/error/content/action rows remain private render functions in `ai-summary.tsx`; they are not additional public abstractions. Receiver cards continue through `AdaptiveCardRenderer`, while both paths reuse the same constants and action semantics.
+
+For `AdaptiveCardRendererProps`, optional `controlLabels?: {[K in AIAssistantActionKind]?: string}`, `selectionMode?: 'toggle' | 'sticky-exclusive'`, `selectedAction?: 'like' | 'dislike'`, `onCopyText?: (text: string) => Promise<boolean>`, and `allowUnknownActions?: boolean` are added. Defaults preserve the existing real-time-assist path (`toggle`, current labels/`copySuggestion`, existing `onAction`). Receiver summary supplies exact labels, `sticky-exclusive`, controlled selection, promise copy, and `allowUnknownActions={false}`. In that mode, a copy action extracts visible text and awaits `onCopyText`; only `true` paints the check state, and neither the legacy clipboard helper nor a duplicate `onUserAction` fires. Like/dislike await the existing `onUserAction` Promise, then rely on `selectedAction` from the store instead of `toggleActionControls`; re-selection therefore remains selected. Unknown actions are inert. The renderer continues to parse through `prepareCardForRender`, local image fallbacks, and `ErrorBoundary`; it returns extracted visible text to the direct-gesture copy callback but does not expose HTML.
+
+**Rendering and edit mapping.** `ai-summary.constants.ts` exports closed `MID_CALL_SECTION_DEFINITIONS` and `POST_CALL_SECTION_DEFINITIONS` tuples so order, keys, message IDs, and en-US labels cannot drift between display and response composition. Mid-call order is `reasonForTransferOrConsult` (`aiSummary.midCall.section.reasonForTransferOrConsult`, `Reason for transfer or consult`), `additionalContext` (`aiSummary.midCall.section.additionalContext`, `Additional context`), then `keyActionsTaken` (`aiSummary.midCall.section.keyActionsTaken`, `Key actions taken`). Post-call display order is `initialContactReason` (`aiSummary.postCall.section.initialContactReason`, `Initial contact reason`), `additionalContactReasons` (`aiSummary.postCall.section.additionalContactReasons`, `Additional contact reason(s)`), `additionalContext` (`aiSummary.postCall.section.additionalContext`, `Additional context`), `keyActionsTaken` (`aiSummary.postCall.section.keyActionsTaken`, `Key Actions Taken`), optional top-level `resolution` (`aiSummary.postCall.section.resolution`, `Outcome`), then `nextSteps` (`aiSummary.postCall.section.nextSteps`, `Next Steps`). Post-call capitalization, the parenthesized plural, and `Outcome` follow the screenshot/text evidence; mid-call labels are the direct humanized SDK keys because UX-001 supplies only a plain-text state. Role-qualified IDs permit those intentional visible-label differences without adding translation infrastructure. The five editable post-call keys and three editable mid-call keys are the complete declaration keys admitted by D0; `resolution` is a declared payload field but not a response-section key and is therefore display/copy-only. Missing/`undefined`/empty-string values are omitted without reordering the remaining fields, and unknown keys are rejected at the store boundary rather than serialized.
+
+Initiator sections render as labeled text rows inside the bottom-most bordered editor; post-call sections render every present declared label/value in that order. Labels are resolved in `@webex/cc-components` from the closed key tuples rather than stored in the SDK-facing store. Every typed section value is a controlled editable field and maps back by its exact key; the `Outcome` row is rendered as text and cannot emit `onEdit`. Plain content is a single controlled unlabeled text area for post-call and the same bottom editor for initiator. For clipboard export, structured content becomes `Label: value` blocks separated by exactly two newline characters in displayed order, including `Outcome` when present; plain content is copied byte-for-byte from the current edited string; receiver content uses `extractCardText` newline order. Empty output blocks the copy. Values are React text/textarea values, never `dangerouslySetInnerHTML`, and the dynamic content root uses `dir="auto"`. `undefined` content is legal only in non-ready states; ready without compatible content renders unsupported copy.
+
+Loading uses message ID `aiSummary.generating` (`Generating summary...`) plus `aiSummary.generatingDescription` (`Just a sec_the details are coming together.`). All visible generation errors use `aiSummary.generationError` (`Having trouble generating summary`); the screenshot subcopy is retained for post-call. Unsupported uses `aiSummary.unavailable` (`The summary is not available`). Exact action labels and identical tooltip strings are `View summary`, `This is helpful`, `This isn't helpful`, `Copy Summary`, and post-call `Retry`. The same constants file retains `aiSummary.midCall.consultHeading` (`Here’s a consult summary—they’ll get a copy`), `aiSummary.midCall.transferHeading` (`Here’s a transfer summary—they’ll get a copy`), and `aiSummary.midCall.searchPlaceholder` (`%Search by name, queue, entry point or phone number%`) for D5, plus the screenshot-authoritative wrap-up strings `Search topic`, `%Search topic%`, `Complete wrap-up`, and `%Complete wrap-up%` under distinct stable IDs for D6. Percent delimiters are literal visible characters in their mapped states, not stripped localization syntax.
+
+**Action and focus control flow.** Copy is invoked only from a button click/key activation. The handler synchronously derives the current text and calls `navigator.clipboard.writeText(text)` before its first `await`, preserving transient user activation, then reports success only after fulfillment; there is no `execCommand` or automatic copy fallback in summary mode. A rejected/empty/stale copy keeps the control unchanged and returns `false`. In post-call mode, pointer entry/exit reports `hover`/`idle` through optional `onCopyVisualStateChange`; fulfilled copy reports `confirmed` for the existing `COPIED_FEEDBACK_MS` 1,500 ms and then `idle`. Content change/unmount clears the timer and reports `idle`. Fulfillment paints the screenshot check treatment, but the button's accessible name and tooltip both remain exactly `Copy Summary`; the check icon supplies a non-color visual state without a feature announcement. Feedback buttons are native buttons with `aria-pressed`; selected state includes icon/label semantics as well as color. Mid-call selection is controlled and changes only after the SDK Promise resolves. Post-call changes immediately to local pending selection, remains mutually exclusive, re-selection calls the action again, and shows the required description as ordinary visible text referenced from the feedback group with `aria-describedby`; that description is not a live region.
+
+The component records the DOM successor before removing a focused control. In `useLayoutEffect`, removal focuses the next still-connected focusable element in document order; if absent, it focuses the passed established panel target. Loading-to-content, text replacement, feedback paint, and expand/collapse do not move focus. No `aria-live`, `role=status`, alert announcement, or custom screen reader message is introduced. Tooltip and button remain keyboard reachable in DOM order.
+
+**Layout/theme/lifecycle.** The summary uses existing CallControl/AI Assistant width and theme inheritance; it does not hard-code screenshot bitmap dimensions or add theme maps. `min-inline-size: 0`, overflow wrapping, and word breaking prevent horizontal scroll. The content body uses bounded `overflow-y: auto` and `overflow-x: hidden`; controls remain outside the scrolling text region. Existing focus and forced-colors rules are extended with semantic tokens. A copied visual reset timer, if retained from the existing renderer, is cleared on card change/unmount. Reduced motion inherits existing Spinner/button behavior; no feature animation is added. Not applicable - there is no configuration, persistence, schema, network call, or telemetry in this component.
+
+**Tests.** `sections preserve SDK order and response keys`, `resolution renders as read-only Outcome in visual order`, `plain paragraph has no synthetic label`, `typed/plain text cannot inject HTML`, `dir auto`, `exact labels equal tooltips`, `copy increments only after Clipboard Promise`, `copy reject/no-op`, `copy hover/confirmed/idle callback and timer cleanup`, `sticky feedback reselect`, `opposite feedback selection`, `pending/not-confirmed descriptions`, `unsupported versus hidden responsibility`, `no live region`, `focus moves forward only when removed`, `focus falls back to panel`, `updates retain focus`, `vertical not horizontal overflow`, `forced colors and non-color selection`, and `adaptive-card summary blocks unknown actions while RTA defaults remain unchanged` run in D3.
+
+## Component: Initiating-Agent Call Control Integration
+
+**Coverage and outcome.** This component covers REQ-003, REQ-006, JNY-001, AC-03, AC-06, AC-07, AC-10, AC-11, AC-12, AC-13, and AC-14. DAG task: `D5-mid-call-call-control`. Consult, direct transfer, consult-to-transfer, and conference-participant preparation use the same normalized summary flow while retaining existing telephony method names and arguments.
+
+**Files and integration points.** `task/src/helper.ts#useCallControl` composes store operations around its existing `consultCall`, `transferCall`, `consultTransfer`, and `consultConference`. `task/src/CallControl/index.tsx` passes the observable summary view/actions to `CallControlComponent`. Internal additions to `cc-components/src/components/task/task.types.ts` are threaded through `CallControl/call-control.tsx` into `CallControlCustom/consult-transfer-popover.tsx`; presentation still imports only `@webex/cc-store` data types already exposed by cc-components and never calls the SDK. `consult-transfer-popover.tsx` reuses `availableCategories`, `handleCategoryChange`, `searchQuery`, existing fetch/search hooks, and destination list renderers. In the eligible branch only it renders the installed Momentum `RadioGroup`/`Radio` categories before the existing `TextInput`, uses the exact summary-mode placeholder from `ai-summary.constants.ts`, and then renders the unchanged results and summary; the current search-first pill-button branch remains for an absent/hidden summary. `call-control.styles.scss` extends the existing popover container. No new hook is introduced because `useCallControl` and the popover already own the lifecycles.
+
+**Internal signatures and compatibility.** `ControlProps`/`CallControlComponentProps` gain the following required internal fields; existing host `CallControlProps` consult/transfer properties do not change:
+
+```typescript
+midCallSummary?: AISummaryViewModel;
+requestMidCallSummary: (actionType: AISummaryActionType) => Promise<void>;
+editMidCallSummary: (field: AISummaryEditableField, value: string, revision: number) => boolean;
+copyMidCallSummary: (text: string, revision: number) => Promise<boolean>;
+setMidCallSummaryFeedback: (feedback: 'thumbs_up' | 'thumbs_down') => Promise<void>;
+sendMidCallSummaryBeforeAction: (actionType: AISummaryActionType) => Promise<void>;
+```
+
+Existing internal action callback types widen from `void` to `void | Promise<void>` where an actual async function is already supplied. `handleTargetSelect(...)` becomes `async (...): Promise<void>` and is invoked with an explicit rejection handler, eliminating the current fire-and-forget rejection risk. The SDK calls remain exactly `task.consult(payload)`, `task.transfer(payload)`, `task.transferConference()`, and `task.consultConference()` with their existing signatures and payloads.
+
+**Popover and request control flow.**
+
+1. Opening a Consult or Transfer popover retains current destination loading, filtering, pagination, selection, and quick-action callbacks and starts `requestMidCallSummary('CONSULT' | 'TRANSFER')` exactly once for that opening when voice capability is true. The eligible DOM order is heading, radio categories, search field with literal `%Search by name, queue, entry point or phone number%`, destination results, divider, action-specific summary heading, editor, and actions. The heading is `Here’s a consult summary—they’ll get a copy` or `Here’s a transfer summary—they’ll get a copy`; initiating content is shown directly and is not labeled as a receiver notification. Dynamic `%Agent name%`, `%User type%`, `%Queue%`, and `%Number%` screenshot values come from D8 fixture data through existing list props, not hard-coded product strings. With no eligible/visible summary the current destination markup/order/copy is unchanged.
+2. While the SDK Promise is pending (up to its 15-second timeout), destination-selection/quick-action controls and another consult/transfer initiation are disabled from `requestPending`. Search and scrolling may remain operable. A conference-participant preparation request keeps an existing ready summary and its edit/copy/feedback actions usable until valid replacement content arrives; an initial request without content shows loading. Closing removes the surface and invalidates its UI reveal token but does not cancel the request or send `MID_CALL_CANCELLED`; a current result may remain in same-owner store state for reopening, while a stale generation cannot commit.
+3. On a current valid result, sections are collapsed in SDK order into labeled rows in the bottom-most editor. If sections are absent, non-empty `summaryText` fills one text editor. `adaptiveCard` and edit-card JSON are dropped. The first successful transition that makes content visible for that popover opening records one view; every later explicit close/reopen that successfully reveals it records another.
+4. Each accepted text change calls `editMidCallSummary` with the rendered revision. Copy uses the direct button gesture and increments only after `navigator.clipboard.writeText` resolves. Like/dislike awaits `setMidCallSummaryFeedback`; every selection or re-selection composes the current counters/content and calls `task.sendMidCallSummaryResponse(payload, actionType)`, and the controlled highlight changes only on fulfilled Promise. Re-selecting sends again; opposite selection replaces after success. This feedback update is independent of the later required response call immediately before the telephony action.
+5. Selecting a destination captures the current Task/owner/action. It awaits `sendMidCallSummaryBeforeAction(actionType)` first, using edited sections/string or the SDK `NOT_RECEIVED` variant after generation failure, then invokes the unchanged existing consult/transfer callback exactly once. If response submission rejects, the failure is normalized without raw logging and the telephony action still proceeds after that failed attempt; there is no automatic response retry and summary failure cannot strand call control.
+
+**Consult-to-transfer, additional transfer, and conference flow.** A later consult-to-transfer enters transfer preparation and requests `TRANSFER`; direct transfer uses the same path. Before an additional transfer to C, the new owner generation is captured so B's result cannot settle into C's view. Participant addition uses exactly one existing `CONSULT` preparation request from the initiating agent; the consulted participant is the receiving agent until `consultConference()` establishes the conference. Before establishment, the current edited response is sent. The initiator consumes its Promise result, and every other participating client waits for its own SDK receiving-agent content event; the widget does not synthesize requests from conference lifecycle events. Afterwards there is no global receiving agent and each client accepts only content keyed to that local authenticated agent. Same-agent old content remains until a valid newer per-agent summary commits, while a newly receiving agent starts counters at zero. Participant join/leave and conference-to-call transitions do not clear or cancel remaining state/in-flight generation; the Task/SDK remains authority for whole-call summary generation, oldest-remaining host selection, and participants. The final post-call request uses the unchanged canonical interaction, so its SDK-generated content includes the conference segment rather than a widget-truncated local transcript.
+
+**Failure, security, configuration, and lifecycle.** Unauthorized/initialization states omit the block. Other request failures use the generic error text with no automatic Retry control for mid-call. A role-incompatible success uses `The summary is not available`. All action callbacks capture owner/revision and become no-ops after interaction/agent change. No raw payload/error or text is logged or sent to the host callback. Not applicable - no new feature flag, persistence, migration, telemetry, process, worker, stream, or AbortSignal is added; the server capability and SDK timeout are authoritative.
+
+**Tests.** D5 covers `eligible category-search-results-summary DOM order`, `exact percent search and consult/transfer heading copy`, `ineligible destination UI unchanged`, `consult request and placement after results`, `transfer action type`, `typed order and plain fallback`, `card ignored`, `15-second pending disables initiation`, `timeout re-enables without late render`, `close does not cancel`, `edited payload sent before consult`, `unavailable response before transfer`, `response failure still precedes one telephony attempt`, `copy and feedback success gates`, `consult-to-transfer requests TRANSFER`, `A-B-C stale settlement`, `conference addition issues one initiating CONSULT request`, `other conference agents wait for receiving content events`, `conference lifecycle events issue no extra request`, `conference old content until per-agent replacement`, `leave does not cancel generation`, `same interaction ID`, and `existing consult/transfer arguments and callbacks unchanged`.
 
 ## Component: Receiving-Agent AI Assistant Integration
 
-This component addresses REQ-004 and AC-04. DAG owners are D4-receiving-ai-assistant and D9-release-validation.
+**Coverage and outcome.** This component covers REQ-004, REQ-006, JNY-001, AC-04, AC-06, AC-10, AC-11, AC-12, AC-13, and AC-14. DAG task: `D4-receiving-ai-assistant`. A current receiver content event creates a content-free `View summary` notification; only that user action opens the existing AI Assistant panel and reveals the SDK card.
 
-The AI Assistant observer reads the current receiver view model from the store. A current receiving-agent event creates a content-free `View summary` notification; opening it increments viewed and reveals the validated adaptive card in the existing AI Assistant panel. Copy serializes the renderer's approved text representation only on direct user gesture. Like/dislike call the mid-call SDK response/update path, and a successful HTTP response is sufficient confirmation.
+**Files and ownership.** `ai-assistant/src/ai-assistant/index.tsx` observes the receiver view from the store alongside existing real-time-assist state. `helper.ts#useAiAssistant` composes summary open/copy/feedback actions but does not call a summary SDK method; it calls the store. `ai-assistant.types.ts` adds internal view props without changing public AI Assistant callbacks. In cc-components, `AIAssistantComponent` and its types/styles add a summary notification/panel branch; `AdaptiveCardRenderer` remains the only card renderer. Existing real-time-assist chat, public callbacks, feature flag, and launcher behavior are preserved.
 
-The container ignores `sections` and `summaryText` for this role. It keeps the existing real-time-assist behavior isolated so an AI-summary event cannot overwrite unrelated assistant cards. Task replacement rebinds listeners through the store; unmount removes component subscriptions without cancelling the SDK request. A stale agent-generation event is discarded.
-
-## Component: Mid-Call Call Control Integration
-
-This component addresses REQ-003, REQ-006, AC-03, and AC-06. DAG owners are D5-mid-call-call-control and D9-release-validation.
-
-Opening consult or transfer creates an initiating-agent request for the exact action type and disables another consult/transfer action while the 20-second request is pending. Destination results remain first; the `View summary` trigger and summary region render after results. Structured fields are collapsed in SDK order into labeled key-value lines in the bottom-most text box. If structured fields are absent, non-empty `summaryText` is used. Adaptive-card JSON is ignored.
-
-The initiator may edit text, copy, like, or dislike. Before the existing consult/transfer API runs, orchestration freezes the current edited sections and counters and calls `sendMidCallSummaryResponse` once with the correct action type and agent name. The existing consult/transfer method signatures are unchanged. Cancel sends the SDK's approved cancelled state and does not invoke the downstream action. Direct transfer, consult-to-transfer, additional transfer, and conference addition all use the same owner-generation safeguards and current interaction ID.
-
-## Component: Post-Call Wrap-Up and Host Callback
-
-This component addresses REQ-005, REQ-007, AC-05, AC-07, AC-08, and AC-09. DAG owners are D6-post-call-wrap-up, D7-host-status-callback, and D9-release-validation.
-
-After a wrap-up reason is selected, the summary region appears before Complete Wrap-Up. Each explicit request calls `requestPostCallSummary`; adaptive cards are ignored. Typed sections render in declared order and permitted fields are editable. If typed sections are absent, non-empty `summaryText` renders as one unlabeled paragraph. Retry after generation failure is a fresh request, not a response retry.
-
-Submitting first invokes the existing wrap-up path. If it fails, the editable draft remains and the full action can be retried. When wrap-up succeeds, the store freezes the exact edited typed response, counters, feedback, and wrap-up code, then calls `sendPostCallSummaryResponse` once. On response success it records submitted. On response failure it retains that exact frozen payload, emits content-free `response-failed`, offers no response-only retry, and waits for the backend wrapped-up event before discarding it.
-
-The optional callback is exactly:
+**Internal contracts.** `AIAssistantComponentProps` gains:
 
 ```typescript
-onAISummaryStatusChange?: (
-  detail:
-    | {kind: 'mid-call' | 'post-call'; state: 'available' | 'unavailable'}
-    | {kind: 'post-call'; state: 'submitted' | 'response-failed'}
-) => void;
+receivingSummary?: AISummaryViewModel;
+showReceivingSummary: boolean;
+viewReceivingSummary: () => void;
+copyReceivingSummary: (text: string, revision: number) => Promise<boolean>;
+setReceivingSummaryFeedback: (feedback: 'thumbs_up' | 'thumbs_down') => Promise<void>;
 ```
 
-It is threaded through `CallControlProps`, invoked from content-free store transitions, and declared as a function prop in the existing r2wc registration. No summary content, interaction or customer identifier, counter, feedback, or raw error is exposed. Omitting the callback preserves current behavior and the existing tag.
+No summary body or identifier is added to `IAIAssistantProps`. The notification contains only the exact `View summary` button/tooltip and availability styling. Receiver content is eligible only after the D0-verified content event is received for the current canonical interaction/agent/generation; feature enablement alone cannot create the notification.
 
-## Component: UX Evidence and Release Validation
+**Control flow.**
 
-This component addresses REQ-011, REQ-012, AC-15, and AC-16. DAG owners are D8-browser-ux-validation and D9-release-validation.
+1. `storeEventsWrapper` validates the receiving event and commits an adaptive-card view. Typed sections and `summaryText` are discarded as render candidates. A stale owner/timestamp event is ignored. For C, the valid new event starts zero counters and deletes B's retained state; no B content is displayed while C waits.
+2. The observer renders `View summary` without automatically opening or moving focus. Activation calls `recordAISummaryViewed` for the current revision, opens/restores the established panel, and switches its body to the summary card. Each later successful notification/panel reveal action increments again.
+3. `AdaptiveCardRenderer` receives the normalized card, exact summary labels, sticky controlled feedback, no arbitrary `onAction`, and fallback text `The summary is not available`. A parse/render/error-boundary failure shows only that fallback; it never falls back to receiver `sections` or `summaryText`.
+4. Copy extracts visible text from the restricted rendered card, invokes the Clipboard Promise on the direct gesture, and records copied only after fulfillment. It never copies HTML or the ignored `summaryText` fallback line.
+5. Like/dislike resolves the D0-verified receiver `CONSULT`/`TRANSFER` correlation from declared Task state, composes the current response with rendered-card text and counters, and invokes `setMidCallSummaryFeedback`. Promise fulfillment (the SDK's successful HTTP result, including 200) is sufficient to paint; rejection leaves the previous selection. Unknown action correlation blocks the update and selection rather than guessing.
 
-The local Figma JSON pairs and PNG screenshots are immutable test inputs. Browser fixtures drive both journeys through deterministic SDK mocks and export render evidence at the sealed source dimensions. The visual loop compares each rendered PNG with its sealed source, records the runtime comparison receipt, fixes production CSS/components, and repeats within the runtime's five-iteration policy. States without screenshots receive a structural-only receipt tied to their journey and behavior tests.
+**Failures, isolation, and lifecycle.** Unauthorized/init hides the notification and panel branch. Malformed transport input maps to generic generation behavior; an otherwise valid unrenderable card shows unavailable. Closing/minimizing the panel preserves same-owner state and does not cancel SDK work. Task replacement/unmount removes React subscriptions; store listener cleanup remains at the task/session boundary. The real-time-assist transcript and its existing card callbacks are not overwritten or relabeled. Not applicable - receiver UI adds no persistence, config, telemetry, remote asset/script, new card action, retry, timer, worker, or process.
 
-Release validation rehashes the SDK package lock, requirement, design, DAG, UX manifest, sources, screenshots, and test outputs; builds all affected workspaces; runs type, unit, browser, accessibility, visual, privacy, and provenance checks; and verifies zero unhandled promise rejection. It does not alter source or mark review that did not occur.
+**Tests.** D4 covers `content event is first eligibility`, `View summary opens existing panel and counts`, `card only ignores typed/plain`, `restricted renderer and unknown action block`, `render failure unavailable`, `copy uses extracted card text after fulfillment`, `feedback waits for SDK success`, `reselect sends`, `opposite replaces`, `unknown action type does not send`, `Agent C zero counters`, `conference per-agent isolation`, `RTA entries unchanged`, and `unmount/interaction switch ignores stale event`.
 
-## Figma JSON Reconstruction Assessment
+## Component: Post-Call Wrap-Up Integration
 
-Figma MCP was not used. The acquisition mode is `json`, the UX source identity SHA-256 is `50073d2c12591ac4c682e8599c1ecae9f2797cae9ed85542bfebf068b5ebfecb`, and the UX source-manifest SHA-256 is `a266410383fc773812cd0a3352313d8db5e3e3828d5e584aaeee1df42709f162`.
+**Coverage and outcome.** This component covers REQ-005, REQ-006, REQ-008, REQ-009, REQ-010, JNY-002, AC-05, AC-07, AC-08, AC-10, AC-11, AC-12, AC-13, and AC-14. DAG task: `D6-post-call-wrap-up`. Eligible voice wrap-up shows generation/edit/actions after reason selection and before Complete Wrap-Up, performs wrap-up first, then sends exactly one frozen response.
 
-### State and Node Mapping
+**Files and signatures.** `task/src/helper.ts#wrapupCall` is changed from fire-and-forget to `async (wrapUpReason: string, auxCodeId: string): Promise<void>` while the internal cc-components prop accepts `void | Promise<void>` for source compatibility. It captures the Task before invoking `task.wrapup`. `CallControl/index.tsx` supplies the observable post-call view and store callbacks. `call-control.tsx`, `call-control.utils.ts`, `task.types.ts`, and styles add the region/awaited submit behavior. In the eligible AI-summary branch only, `call-control.tsx` reuses `wrapupCodes`, `handleWrapupChange`, and existing selected reason/id state but renders the screenshot hierarchy with the installed Momentum `Input`, `RadioGroup`, and `Radio` components instead of the legacy `Select`; the false/absent-capability branch retains the existing `Select` and `SUBMIT_WRAP_UP` markup byte-for-byte. No new reason-list component/file is introduced because this layout has one consumer. Existing `onWrapUp` still fires from the backend wrapped-up callback with the same `{task, wrapUpReason}` payload.
 
-| Source | Root node | Journey state | Scene raw SHA-256 | Text raw SHA-256 | Screenshot and SHA-256 | Size |
-| --- | --- | --- | --- | --- | --- | --- |
-| UX-001 | 8061:880455 | JNY-001:mid-call-summary | 7183f1b874339e30a7c820179d63fabc500a1721f2206194a3fe9c4317880603 | 804b66441dcd6a1ae3c43d3907bd255c3db2a1457539b3f7e3888d593320d666 | S01 / 5fee49d4111bb9b5a950e441821abc001aa99a39fdd6607b7169e2754654db0f | 964x1164 |
-| UX-002 | 5669:263180 | JNY-002:generating | 2c1ade086aaf3bea8f9719f37b6e3a06ca1d7e93737cea58b368bd49efbffd4a | 42921d9839a89fa948acd22563579a62472b14a8cc6121b2d0c7883d5b71f3ce | S02 / 0de0aeb692ae83a922898009577b11d9d027b21c8653b05c947ba03e64bc8a21 | 884x1242 |
-| UX-003 | 5669:263754 | JNY-002:editing | 9e9378e384df92e816a3c05e7faff8c800da2e1f6334e149a9522e24c837aa66 | 58457c269bf1c9efff9f43e63a92f33a7b08f8f18ad43653403084b5cb46fc50 | S03 / 92b2ef6fe8473c96f422ebcfece7699d5e3360503921ff40e36b281e355ba6f1 | 886x1242 |
-| UX-004 | 5669:264384 | JNY-002:like-hover | e084f1942b911286d4eb58e7db3082130e808e12c5197fba565d069860966e13 | c4e6025190ce7f9f6b0b81fabb3eb80c4686f69f5fb4b2ac3769896d203000b1 | S04 / 3f9013a7a0772aeef98b55bf8e301957c74dca912d500e87dfeaf12f55fc50ca | 806x1248 |
-| UX-005 | 5669:264503 | JNY-002:like-selected | 4330bf697349d52df2493b1675343d5d27c60075eddc0a6a96258b29f0fa79fb | 6a08810d6325a5cb7290712373047c61ed1044e7ca6f708d3ab202f80ad4ba00 | S05 / 3628b688d6d84ee61ed1c22e1b77ee6aabb7026656ff8d9d15739b549bdeeeca | 804x1244 |
-| UX-006 | 5669:264622 | JNY-002:dislike-hover | 41f147d96db6b2133f0f6994561cc577b0ae121ad9cf966cfdcc300f8b6d9f8e | f22fa4cce01a2cc8cb9d7ce334c261176fce196116ea190ef06d5f9c26242268 | S06 / 098c803e608ce2cc2f8c79ec12208a41ce5ba8ee2ffc66f2071801e2b4872641 | 866x1242 |
-| UX-007 | 5669:264860 | JNY-002:dislike-selected | d78d2465ad40c21102a167d5cce976f1541e9a26e415f45069f91297c2ca6550 | 5dfe180ec35e38af7df336bbe1acba5b6a5e58c7c476a5fa7d60aacf96e1cc6d | S07-UX / 7510c740d754cd9e612fc0cfb8ec080682f66a927e941c705cfe13d167920203 | 806x1244 |
-| UX-008 | 4920:216835 | JNY-002:copy-hover | 40d15e6e6e951c6ff05d451add94cde1e2a6ed1517489ba3c7153d104631eb61 | 15756650eb613cc81bfdc0d5aaa8f75f7e2009c66a79c28dd108ad39aab0caf7 | S08 / 3b1e78288b4316b4c1575f38112d924c319431f8f07bdcd88a11343a9fee6e21 | 882x1264 |
-| UX-009 | 4920:216954 | JNY-002:copy-selected | 7b8b3f8148adb46ae59cf36ffdb63e9f81f0035f7d14a433840183df46926a7a | 059a61503ef5c9eb452b7c03478bb94387143f9d2d84bc0bb433e18b8e003e33 | S09 / 71e19e3be8da9045fce78e674006cd8963bd95f15642ff6a3884686db5c5e4b1 | 806x1248 |
-| UX-010 | 5669:264979 | JNY-002:error | 3ab596f96b5a49eb56822816be31f9d4f739bf79f4a50ad09521ccfc491b8de7 | 90de99f4579e9eacadf068fa6fb48eff70eadad76e97d342094363b22fe0dbaa | S10 / 6d54cafe81f3693a16017e19adff9aaaf4a1adbae67b779a3f49d6c1fda15ff5 | 886x1242 |
+The new internal props are:
 
-All source pairs also retain their pair and projection hashes in `.matrix/results/prog-mini-js/ux_input_manifest.json`; the table above records the gate-required raw subjects and their one-to-one state/screenshot bindings.
+```typescript
+postCallSummary?: AISummaryViewModel;
+requestPostCallSummary: () => Promise<void>;
+editPostCallSummary: (field: AISummaryEditableField, value: string, revision: number) => boolean;
+copyPostCallSummary: (text: string, revision: number) => Promise<boolean>;
+setPostCallSummaryFeedback: (feedback: 'thumbs_up' | 'thumbs_down') => void;
+completeWrapupWithSummary: (wrapUpReason: string, auxCodeId: string) => Promise<void>;
+```
 
-### Component Mapping
+**Generation and render flow.**
 
-UX-001 maps the mid-call popover hierarchy to the consult/transfer summary region in D5. UX-002, UX-003, and UX-010 map generating, editing, and generation-error states to the wrap-up region in D6. UX-004 through UX-009 map hover and selected action styling to the shared action controls in D3. Receiving-agent adaptive-card layout reuses the established AI Assistant panel and renderer in D4; the written role contract governs because no separate receiving-panel screenshot was supplied.
+1. The eligible branch adds local `wrapupReasonQuery: string` (initial `''`) and `copyVisualState: AISummaryCopyVisualState` (initial `'idle'`). It renders screenshot copy `Wrap up interaction`, `Choose a code, and click the summary to edit it if needed.`, and `Choose a reason to wrap up`. The search input filters `wrapupCodes` by case-insensitive en-US substring without reordering; an empty result renders no radio rows and no invented message/live region. Radio selection calls the existing `handleWrapupChange(code.name, code.id, logger)`, then invokes a fresh `requestPostCallSummary()` and replaces the summary region with generating. Search input alone does not request. Every later explicit Retry calls the SDK again; it is never a response retry. Programmatic duplicate/race requests are all sent, and the store's timestamp rule decides visibility.
+2. Structured response sections render every admitted typed label in order and all SDK response-section fields are editable; optional `resolution` renders as the read-only `Outcome` row between Key Actions Taken and Next Steps. With no non-empty sections, non-empty `summaryText` renders as one editable unlabeled paragraph. Adaptive cards are discarded. A role-compatible response enables Complete Wrap-Up and records one viewed action when that accepted response is revealed by the agent's reason-selection request or Retry; stale, hidden, or unsupported results do not increment. A stale lower timestamp restores/retains the newer accepted content rather than replacing it.
+3. Loading and generation-error states match S02/S10 and keep Complete Wrap-Up disabled. Error Retry has exact name/tooltip. Unsupported success shows unavailable in the summary location. Unauthorized, initialization failure, false capability, or non-voice omits the entire summary region and preserves the original reason-to-submit behavior.
+4. Each edit/copy/feedback operation follows shared semantics. Post feedback is local only: selecting or re-selecting sets `feedbackPending`, paints mutual exclusion immediately, and displays `Pending submission`; no SDK feedback method is called before wrap-up.
 
-### Layout Interpretation
+**Screenshot-state layout/copy mapping.** For generating, plain editing, and generation error (UX-002/003/010), the reason search/list remains expanded above the divider with literal `Search topic`; the selected radio remains selected and the primary label is `Complete wrap-up`. For structured ready/feedback states (UX-004 through UX-007), the list is collapsed to the search trigger, whose literal visible placeholder is `%Search topic%`, and the primary label remains `Complete wrap-up`. For copy hover or confirmed states (UX-008/009), `onCopyVisualStateChange` keeps `%Search topic%` and changes the literal primary label to `%Complete wrap-up%`; returning to idle restores `Complete wrap-up`. These source strings have stable IDs in `ai-summary.constants.ts` and are not normalized. Collapse/removal of a focused search/radio uses the shared next-focus rule; otherwise list/content/copy-state updates do not move focus. The query, selected reason/id, and copy visual state reset on popover close or interaction change; the selected reason remains through a wrap-up failure as required.
 
-The root nodes describe 400-480 CSS-pixel popovers while the screenshots are approximately two device pixels per CSS pixel. Implementation uses existing popover widths, logical block/inline spacing, and responsive containment rather than hard-coding screenshot bitmap dimensions. Summary content follows reason selection and precedes Complete Wrap-Up. Mid-call content follows destination results and uses the bottom-most text box. Text wraps, controls remain visible, and long content scrolls vertically inside the existing panel boundary without horizontal scrolling.
+**Complete-wrap-up sequencing.** On click, the component calls `capturePostCallDraft(wrapUpReason, revision)` and locks controls; the capture copies the current draft/counters/feedback but does not yet change its lifecycle to frozen. `completeWrapupWithSummary` calls the captured Task's existing `wrapup({wrapUpReason, auxCodeId})` first. If it rejects, the capture is discarded, the unchanged store draft becomes editable again when the captured owner is still current, the reason remains selected, and only a sanitized existing wrap-up failure is reported. If another interaction became current during that rejection, the old draft remains non-visible and is cleared by the interaction boundary rather than restored into the new interaction. No summary response is submitted.
 
-### Source Conflicts and Ambiguities
+After wrap-up fulfills, the store deep-freezes the exact capture into the SDK response and calls `capturedTask.sendPostCallSummaryResponse(frozenPayload)` once before the helper's existing task/state switch. It never re-reads mutable UI state and never suppresses this required call merely because the visible interaction changed after the click. This retained Task reference is the sole immediate post-wrap-up call; no later retry assumes the Task is callable. Success sets `submitted` only on the captured owner record (and therefore never paints into another interaction), removes the pending description when still visible, and then performs the existing task/state switch. Rejection preserves the same frozen object/counters/feedback in its keyed tombstone, sets `Submission not confirmed` only when that owner remains visible, produces callback `response-failed`, and performs no resend. It is retained until matching `AgentWrappedUp`/`TASK_WRAPPEDUP`; if that backend event raced ahead of response rejection, the observed-event flag causes immediate post-callback discard rather than retaining past an event that already occurred. The visible Retry control never appears for response failure.
 
-Screenshot-visible geometry and copy win over JSON, and JSON wins over prose. The single mid-call source does not depict every feedback/copy state, so D3 applies the corresponding post-call control treatment while preserving the mid-call container. `ai-summary.md` documents an older 30-second SDK default, while requirement.md fixes this run at 20 seconds; the D0 contract probe treats 20 seconds as blocking. Figma content examples do not choose role payload precedence; requirement.md does: initiator and post-call ignore cards, receiver ignores typed/plain content. Figma offers no authority for Agent Desktop-native placement, localization, feature-owned live regions, telemetry, or extra themes, all of which remain outside scope.
+**Failures, storage, observability, and lifecycle.** Generation failures remain editable only when prior accepted content is restored by a stale request; otherwise they show the generic state. Response errors are not exposed, logged, or mapped to a new telemetry vocabulary. Frozen data remains memory-only. A successful submitted state is retained until interaction change; failure retention follows the backend event, subject to global sign-out/session privacy cleanup. Not applicable - no schema migration, persistence, cancellation, response backoff, background worker, or new feature configuration is required.
 
-### Typography and Exact Text
+**Tests.** D6 covers `reason search filters without reordering or requesting`, `radio reason selection requests`, `eligible screenshot hierarchy and legacy Select unchanged`, `every Retry is new GET`, `loading/error placement and disabled Complete`, `typed order/edit mapping`, `resolution Outcome is read-only and omitted from response`, `plain unlabeled fallback`, `card ignored`, `structured percent Search topic literal`, `copy hover/confirmed percent Complete literal and idle restore`, `timestamp winner`, `post feedback local pending`, `wrapup rejection keeps exact draft/reason`, `wrapup happens before one response`, `captured Task used before switch`, `success submitted then interaction cleanup`, `response failure exact freeze and no resend`, `AgentWrappedUp after failure cleanup`, `AgentWrappedUp before rejection immediate cleanup`, `unauthorized/init omission preserves legacy wrapup`, `callback outcome handoff`, and `zero unhandled rejection`.
 
-The sealed text JSON and screenshots establish `Generating summary...`, `Summary of your conversation`, `Choose a reason to wrap up`, `Complete wrap-up`, `AI-generated`, `Retry`, and `Having trouble generating summary`. Requirement.md supplies exact tooltips and accessible labels when the source does not expose them. Existing Momentum typography and semantic tokens are reused; no copied font metrics or feature-only token map is introduced. Dynamic user content is plain text with `dir="auto"`.
+## Change: Host Status Callback and Existing Web Component
 
-### Interaction and Accessibility
+**Coverage and outcome.** This change covers REQ-007, REQ-010, AC-09, and AC-14. DAG task: `D7-host-status-callback`. It adds one optional JavaScript function property to the existing tag and no event/attribute/custom-element alternative.
 
-The two journeys cover request, loading, ready, edit, hover, selected, copy, generation error, wrap-up response result, and ownership change. Keyboard order follows DOM order. Removed focused controls advance focus; ordinary state changes do not. Screen reader names match visible tooltips, but the feature deliberately adds no announcement or live-region behavior. Selected feedback has a non-color indication. Clipboard writes require a direct gesture and report success only through local control state and counters.
+**Type and files.** `packages/contact-center/task/src/task.types.ts` adds and exports exactly:
 
-### Render Compare Refine Plan
+```typescript
+export type AISummaryStatusDetail =
+  | {kind: 'mid-call' | 'post-call'; state: 'available' | 'unavailable'}
+  | {kind: 'post-call'; state: 'submitted' | 'response-failed'};
 
-D8 renders every screenshot-backed state at the exact sealed pixel dimensions and one-device-scale comparison configuration required by the runtime plan, exports the sealed target, produces rendered and diff PNGs plus JSON records, and binds them to the source identity. Geometry, hierarchy, content, interactions, focus, and accessibility are blocking under interaction-weighted fidelity; justified inherited-theme color variance is documented. Production code is corrected and rerendered until the runtime threshold is met or a concrete platform constraint is recorded, within five iterations. Structural-only states still require browser behavior and accessibility evidence.
+export type CallControlProps = {
+  [K in
+    | 'onHoldResume'
+    | 'onEnd'
+    | 'onWrapUp'
+    | 'onRecordingToggle'
+    | 'callControlClassName'
+    | 'callControlConsultClassName'
+    | 'onToggleMute'
+    | 'conferenceEnabled'
+    | 'consultTransferOptions']?: ControlProps[K];
+} & {
+  onAISummaryStatusChange?: (detail: AISummaryStatusDetail) => void;
+};
+```
+
+The mapped optional-key form above expands the existing utility-type declaration for design clarity; implementation retains that existing declaration and adds only the new intersection member, avoiding an unrelated type rewrite.
+
+`task/src/CallControl/index.tsx` reads `getAISummaryStatusTransition()` and calls the prop from an effect that deduplicates the monotonic transition `sequence`; the effect passes only `detail`. Its ref initializes to the current sequence on mount, preventing a same-agent remount from replaying an old transition. A newly accepted SDK request/event advances the sequence, while stale settlements, edit/copy/feedback, and ordinary re-render do not. Because the transition is content-free and independent of retained summary bodies, `response-failed` remains observable even when an earlier `AgentWrappedUp` event causes the frozen payload to be discarded immediately after that transition is recorded. `task/src/index.ts` adds `export type {AISummaryStatusDetail, CallControlProps} from './task.types';` so the new public type is available without adding a runtime export. `cc-widgets/src/wc.ts` adds `onAISummaryStatusChange: 'function'` only to `WebCallControl`. No new tag or bundle entry is needed.
+
+**Transition mapping and failure behavior.** A renderable current summary records `available`; generation failure, disabled/malformed current request, or unsupported current result records `unavailable`; post response fulfillment records `submitted`; its one failed attempt records `response-failed`. Ordinary re-render, counter/edit/copy/feedback changes, hold/resume, same view revision, and stale settlement do not create a transition. Interaction/owner changes may produce the next interaction's transition but never expose identifiers. Unauthorized/init may record only `unavailable` while the surface remains hidden. A throwing host callback is caught and discarded at the container boundary without a new log, metric, error payload, or vocabulary; it cannot roll back store state or reject an SDK Promise.
+
+The detail object is built as an allowlisted literal. Summary text/card, customer data, interaction/agent ID, counters, feedback, timestamps, generations, and raw errors are structurally absent. Omitting the prop performs no effect call and preserves all existing behavior/properties. Not applicable - no persistence, serialization to an HTML attribute, telemetry, configuration, migration, listener registration, or cleanup is added by a function prop.
+
+**Tests.** D7 adds compile-time exact-union assertions and runtime tests for each approved transition, deduplication, callback omission, callback throw containment, r2wc function registration on the existing tag, and a recursive allowlist assertion proving no content/identifier/counter/error keys.
+
+## Change: Deterministic UX and Release Validation
+
+**Coverage and outcome.** This change covers REQ-013, REQ-011, REQ-012, REQ-017, REQ-018, UX-001, UX-002, UX-003, UX-004, UX-005, UX-006, UX-007, UX-008, UX-009, UX-010, JNY-001, JNY-002, AC-15, and AC-16. DAG tasks: `D8-browser-ux-validation` and `D9-release-validation`. It produces browser, accessibility, privacy, concurrency, visual, SDK-provenance, DAG, and release evidence without changing product behavior or weakening existing gates. D9 records and verifies `ai-assistant-summary` as the promotion/release target from the requirement; a transient MatrixBuilder worktree branch name is execution metadata and is not mistaken for the final target branch.
+
+**Files and tools.** `playwright/Utils/aiSummaryUtils.ts` supplies deterministic browser actions/SDK event fixtures; the direct factory `playwright/tests/ai-summary-test.spec.ts` is imported by manager suite `playwright/suites/ai-summary-tests.spec.ts`, following the existing split convention. `playwright.config.ts` adds an `AI Summary Deterministic` project with `testMatch: /suites\/ai-summary-tests\.spec\.ts/`, `fullyParallel: false`, no project dependency/global setup, bundled Desktop Chromium, `locale: 'en-US'`, `colorScheme: 'light'`, `reducedMotion: 'reduce'`, and the existing local sample-app `webServer`; acceptance also fixes `--workers=1`. Before application code runs, the suite installs its SDK/task mock and rejects every non-local HTTP(S) request, so it has no OAuth, Webex, calling-sample, or external backend dependency. Root `package.json` adds exact dev dependency `axe-core: "4.10.2"` and `yarn.lock` records the direct descriptor without changing the resolved package version; the browser helper injects its local `axe.min.js` and fails any WCAG 2 A/AA violation within the summary/panel subtree. No screenshot is copied into product assets. The utility resolves each exact `.ccwidgets/...` path first beneath the current worktree and, if absent, beneath the repository root derived from `git rev-parse --git-common-dir`; it accepts neither an arbitrary search result nor an unverified override, and hashes every resolved file against the sealed manifest before inspection/comparison. D8 may refine only the already-owned `AISummary`, CallControl/popover, AI Assistant, and restricted-renderer TSX/SCSS/constants/type files listed in its DAG task when a comparison exposes a target mismatch; behavioral changes still return to D2-D7 and their focused tests. `tooling/src/verify-ai-summary-release.js` is a CommonJS, read-only verifier; its Jest test proves fail-closed behavior. The installed `mb-flow prog-mini-js` Figma JSON query/visual commands and Playwright Chromium are explicit DAG prerequisites, not silently assumed daemons.
+
+The browser helper exports `installAISummarySDKMock(page: Page, scenario: AISummaryBrowserScenario): Promise<void>`, `driveAISummaryState(page: Page, stateId: AISummaryBrowserStateId): Promise<Locator>`, `auditAISummaryAccessibility(page: Page, root: Locator): Promise<void>`, and `recordAISummaryVisual(page: Page, sourceId: UXSourceId, screenshotId: string): Promise<void>`. `AISummaryBrowserStateId` is the closed union of the ten declared journey state IDs plus named structural-only states; `UXSourceId` is `UX-001` through `UX-010`. The mock is installed with `page.addInitScript` before navigation, exposes only synthetic D1 payloads, supports deterministic Promise/event ordering and fake-clock settlement, and provides no network fallback. The direct test factory exports no production symbol; the manager suite is the sole Playwright-discovered entry to prevent duplicate runs.
+
+**Browser and visual control flow.** Tests install deterministic SDK mocks before widget initialization, drive both roles/journeys in a real browser, and collect uncaught errors/unhandled rejections. D8 first runs `mb-flow prog-mini-js prepare-ux-visual-comparison` from the sealed-manifest repository root and reads `mb-flow prog-mini-js ux-visual-plan --phase implementation`; it never invents a target or comparison policy. The current plan owns `.matrix/results/prog-mini-js/ux-visual/implementation` as its render directory. For every source/screenshot tuple, Playwright writes `rendered.png`, `diff.png`, `comparison.json`, `dom.json`, and `accessibility.json` beneath `<render-directory>/<source-id>/<screenshot-id>/`, exports the sealed target with `export-ux-screenshot --source <source-id> --screenshot <screenshot-id> --phase implementation --output <source-id>/<screenshot-id>/target.png`, and invokes the plan's exact `compare-ux-images --source <source-id> --screenshot <screenshot-id> --phase implementation --rendered <path> --diff <path> --report <path>` command. The latter three paths are absolute or repository-root-relative paths contained by the plan's render directory; the export output alone is relative to that directory. The suite then runs `validate-ux-visual-comparison`. These generated, gitignored `.matrix` acceptance artifacts are not implementation source files and therefore are not DAG `files` entries. Each iteration rehashes the source JSON/text/PNG, renders at the sealed CSS viewport/device scale, fixes production CSS/components, and repeats up to five iterations. Pixel difference must be at most `0.5%`; hierarchy, interaction, focus, exact copy, and overflow remain blocking even if the numeric threshold passes. Implemented states with no screenshot (receiver card, unsupported, unauthorized omission, response-failed, transfers/conferences) receive a structural-only receipt naming the applicable journey and tests.
+
+**Release verifier.** D9 validates the required promotion target `ai-assistant-summary`, requirement, design, DAG, SDK receipt/artifact/declarations, UX manifest/source/screenshots, installed `node-modules` package plus lockfile resolution, package dependency direction, exact changed-file allowlist, module-spec currency, privacy scans, task acceptance receipts, browser/a11y/visual records, and zero skipped mandatory checks. `verify-ai-summary-release.js` exports synchronous, read-only `verifySDKReceipt(context): void`, `verifyUXEvidence(context): void`, `verifyPrivacyAllowlist(context): void`, `verifyDAGTraceability(context): void`, `verifyGateReceipts(context): void`, and `runReleaseVerification(context): void`; `context` contains explicit repository root, requirement/design/DAG/UX-manifest paths, and result directory. Every function throws a content-free category error on failure, never shells out or writes, and the CLI catches once to set its exit code. It runs after build/type/unit/style/E2E gates and never edits source or fabricates manual evidence. Failures name only file/gate/hash categories. Not applicable - it adds no production configuration, runtime storage, network API, telemetry, migration, worker, or service.
+
+**Tests.** D8 scenarios are enumerated in Test Strategy. D9 unit tests cover a missing/tampered receipt, stale declaration, wrong tarball resolution, missing UX source, visual threshold failure, missing structural receipt, privacy token match, omitted DAG acceptance, skipped suite, and clean all-gates pass.
 
 ## UX Evidence and Productionization
 
-The production UX contract covers responsive widths, keyboard operation, screen reader labels, loading, ready, error, empty/unsupported, browser execution, long-content overflow, and current-theme behavior. Ten sealed PNGs are visual ground truth and ten scene/text pairs are structural and copy authority. The implementation must not derive production assets from screenshots or embed those screenshots in the widget.
+Figma MCP was not used. Acquisition mode is sealed local `json`; the only JSON inspection commands used were `mb-flow prog-mini-js figma-json-node`, `figma-json-children`, `figma-json-search`, and `figma-json-text`. Each source was queried at its declared root, text was searched for summary/action/error copy, and every PNG was inspected at original resolution. The following exact repository paths are immutable inputs:
 
-Browser evidence includes initiating and receiving mid-call roles, post-call generating/editing/action/error states, consult and transfer, additional transfer, conference addition/removal, hold/resume, rapid interaction switch, stale settlement, retry-as-new-request, wrap-up failure, response failure, and wrapped-up cleanup. Automated accessibility checks cover names, tooltips, tab order, focus recovery, contrast, forced colors inherited from the host, text wrapping, and `dir="auto"`; no manual screen-reader or feature-live-region receipt is claimed.
+| Source/state | Scene graph, text JSON, screenshot | Observed and retained | Productionization |
+| --- | --- | --- | --- |
+| UX-001 / JNY-001:mid-call-summary | `.ccwidgets/midcall/figma_target_8061_880455_compact.json`; `.ccwidgets/midcall/figma_target_8061_880455_text.json`; `.ccwidgets/midcall/midcall.png` | 480x580 consult popover; header, radio categories, literal `%Search by name, queue, entry point or phone number%`, and results above a divider; `Here’s a consult summary—they’ll get a copy`; 448x183 bottom editor; copy left and AI-generated/feedback right. | Reuse the existing destination data/actions, replace only the eligible branch's category/search ordering and controls, append the shared editor after results, substitute the action noun for Transfer, and leave the ineligible legacy branch unchanged. |
+| UX-002 / JNY-002:generating | `.ccwidgets/postcall_generating/figma_target_5669_263180_compact.json`; `.ccwidgets/postcall_generating/figma_target_5669_263180_text.json`; `.ccwidgets/postcall_generating/postcall_generating.png` | 440x620 wrap-up popover; reason selected; divider; centered 32x32 progress indicator; generating title/subcopy; Complete disabled. | Render after reason selection, preserve header/reason layout, use existing Spinner/tokens, and disable completion until compatible content. |
+| UX-003 / JNY-002:editing | `.ccwidgets/postcall_summary_edit/figma_target_5669_263754_compact.json`; `.ccwidgets/postcall_summary_edit/figma_target_5669_263754_text.json`; `.ccwidgets/postcall_summary_edit/postcall_summary_edit.png` | 442x620 popover; sparkle/info summary title; bordered scrollable plain editor; action bar; enabled Complete. | Map to controlled plain/structured editor with vertical overflow and unchanged wrap-up controls. |
+| UX-004 / JNY-002:like-hover | `.ccwidgets/postcall_summary_hover_thumbsup/figma_target_5669_264384_compact.json`; `.ccwidgets/postcall_summary_hover_thumbsup/figma_target_5669_264384_text.json`; `.ccwidgets/postcall_summary_hover_thumbsup/postcall_summary_hover_thumbsup.png` | 400x620 compact popover; collapsed `%Search topic%` trigger; 368x380 structured summary with `Outcome`; `This is helpful` tooltip; normal `Complete wrap-up`. | Render typed fields plus read-only SDK resolution, retain literal percent search copy, and use exact feedback label/tooltip with inherited hover token. |
+| UX-005 / JNY-002:like-selected | `.ccwidgets/postcall_summary_selected_thumbsup/figma_target_5669_264503_compact.json`; `.ccwidgets/postcall_summary_selected_thumbsup/figma_target_5669_264503_text.json`; `.ccwidgets/postcall_summary_selected_thumbsup/postcall_summary_selected_thumbsup.png` | Same geometry/copy; helpful icon has persistent selected treatment. | Controlled `aria-pressed=true`, filled icon and non-color selected semantics after the applicable success rule. |
+| UX-006 / JNY-002:dislike-hover | `.ccwidgets/postcall_summary_hover_thumbsdown/figma_target_5669_264622_compact.json`; `.ccwidgets/postcall_summary_hover_thumbsdown/figma_target_5669_264622_text.json`; `.ccwidgets/postcall_summary_hover_thumbsdown/postcall_summary_hover_thumbsdown.png` | Same structured/collapsed hierarchy and literal `%Search topic%`; `This isn't helpful` tooltip; normal `Complete wrap-up`. | Exact label/tooltip with the same shared action component and source-authoritative wrap-up copy. |
+| UX-007 / JNY-002:dislike-selected | `.ccwidgets/postcall_summary_selected_thumbsdown/figma_target_5669_264860_compact.json`; `.ccwidgets/postcall_summary_selected_thumbsdown/figma_target_5669_264860_text.json`; `.ccwidgets/postcall_summary_selected_thumbsdown/postcall_summary_selected_thumbsdown.png` | Same geometry/copy; dislike selected and like unselected. | Mutually exclusive controlled state with non-color selected semantics. |
+| UX-008 / JNY-002:copy-hover | `.ccwidgets/postcall_summary_hover_copy/figma_target_4920_216835_compact.json`; `.ccwidgets/postcall_summary_hover_copy/figma_target_4920_216835_text.json`; `.ccwidgets/postcall_summary_hover_copy/postcall_summary_hover_copy.png` | Copy hover tooltip `Copy Summary`; literal `%Search topic%` and `%Complete wrap-up%`; otherwise same structured hierarchy. | Exact button label/tooltip and literal source copy; direct Clipboard Promise; no automatic export. |
+| UX-009 / JNY-002:copy-selected | `.ccwidgets/postcall_summary_selected_copy/figma_target_4920_216954_compact.json`; `.ccwidgets/postcall_summary_selected_copy/figma_target_4920_216954_text.json`; `.ccwidgets/postcall_summary_selected_copy/postcall_summary_selected_copy.png` | Copy changes to success/check treatment while `%Search topic%` and `%Complete wrap-up%` remain visible. | Paint success only after clipboard fulfillment, retain exact state copy, clear its timer on content change/unmount, and do not treat paint as an announcement. |
+| UX-010 / JNY-002:error | `.ccwidgets/postcall_summary_error/figma_target_5669_264979_compact.json`; `.ccwidgets/postcall_summary_error/figma_target_5669_264979_text.json`; `.ccwidgets/postcall_summary_error/postcall_summary_error.png` | 440x620 popover; centered error icon/title/subcopy; outlined Retry; Complete disabled. | One generic generation-error presentation for all non-hidden categories; Retry starts a fresh generation request. |
+
+All screenshot-backed states receive exact render comparison. Receiver adaptive-card ready/unrenderable, mid-call loading/error, unauthorized/init omission, post submitted/response-failed, interaction switch, hold/resume, transfers, and conference ownership are implemented from requirement and current product conventions and are classified `structural-only` because no screenshot was supplied.
+
+Production semantics are native buttons, radio groups, labels, textareas/paragraphs, and existing dialog/popover containers. Eligible mid-call DOM order is header, radio categories, search, destinations, divider, summary content, and summary actions; post-call DOM order is header, reason selection, summary content/actions, then Complete Wrap-Up. Hover is additive and does not hide keyboard focus; selected state uses `aria-pressed`. There are no custom shortcuts. Dynamic content uses `dir="auto"`; the overall layout remains LTR. No feature live region or announcement is added. Long content wraps and scrolls vertically within the summary body at desktop and narrower host widths, with action/footer controls kept visible.
+
+## Figma JSON Reconstruction Assessment
+
+Figma MCP was not used. All scene/text pairs were inspected through the bounded MatrixBuilder query surface and matched to their exact PNG. Raw hashes below are the sealed subjects used for implementation admission.
+
+### State and Node Mapping
+
+| Source | Root node and CSS size | Scene raw SHA-256 | Text raw SHA-256 | Screenshot ID, pixels, SHA-256 |
+| --- | --- | --- | --- | --- |
+| UX-001 | `8061:880455`, 480x580 | `7183f1b874339e30a7c820179d63fabc500a1721f2206194a3fe9c4317880603` | `804b66441dcd6a1ae3c43d3907bd255c3db2a1457539b3f7e3888d593320d666` | S01, 964x1164, `5fee49d4111bb9b5a950e441821abc001aa99a39fdd6607b7169e2754654db0f` |
+| UX-002 | `5669:263180`, 440x620 | `2c1ade086aaf3bea8f9719f37b6e3a06ca1d7e93737cea58b368bd49efbffd4a` | `42921d9839a89fa948acd22563579a62472b14a8cc6121b2d0c7883d5b71f3ce` | S02, 884x1242, `0de0aeb692ae83a922898009577b11d9d027b21c8653b05c947ba03e64bc8a21` |
+| UX-003 | `5669:263754`, 442x620 | `9e9378e384df92e816a3c05e7faff8c800da2e1f6334e149a9522e24c837aa66` | `58457c269bf1c9efff9f43e63a92f33a7b08f8f18ad43653403084b5cb46fc50` | S03, 886x1242, `92b2ef6fe8473c96f422ebcfece7699d5e3360503921ff40e36b281e355ba6f1` |
+| UX-004 | `5669:264384`, 400x620 | `e084f1942b911286d4eb58e7db3082130e808e12c5197fba565d069860966e13` | `c4e6025190ce7f9f6b0b81fabb3eb80c4686f69f5fb4b2ac3769896d203000b1` | S04, 806x1248, `3f9013a7a0772aeef98b55bf8e301957c74dca912d500e87dfeaf12f55fc50ca` |
+| UX-005 | `5669:264503`, 400x620 | `4330bf697349d52df2493b1675343d5d27c60075eddc0a6a96258b29f0fa79fb` | `6a08810d6325a5cb7290712373047c61ed1044e7ca6f708d3ab202f80ad4ba00` | S05, 804x1244, `3628b688d6d84ee61ed1c22e1b77ee6aabb7026656ff8d9d15739b549bdeeeca` |
+| UX-006 | `5669:264622`, 400x620 | `41f147d96db6b2133f0f6994561cc577b0ae121ad9cf966cfdcc300f8b6d9f8e` | `f22fa4cce01a2cc8cb9d7ce334c261176fce196116ea190ef06d5f9c26242268` | S06, 866x1242, `098c803e608ce2cc2f8c79ec12208a41ce5ba8ee2ffc66f2071801e2b4872641` |
+| UX-007 | `5669:264860`, 400x620 | `d78d2465ad40c21102a167d5cce976f1541e9a26e415f45069f91297c2ca6550` | `5dfe180ec35e38af7df336bbe1acba5b6a5e58c7c476a5fa7d60aacf96e1cc6d` | S07-UX, 806x1244, `7510c740d754cd9e612fc0cfb8ec080682f66a927e941c705cfe13d167920203` |
+| UX-008 | `4920:216835`, 400x620 | `40d15e6e6e951c6ff05d451add94cde1e2a6ed1517489ba3c7153d104631eb61` | `15756650eb613cc81bfdc0d5aaa8f75f7e2009c66a79c28dd108ad39aab0caf7` | S08, 882x1264, `3b1e78288b4316b4c1575f38112d924c319431f8f07bdcd88a11343a9fee6e21` |
+| UX-009 | `4920:216954`, 400x620 | `7b8b3f8148adb46ae59cf36ffdb63e9f81f0035f7d14a433840183df46926a7a` | `059a61503ef5c9eb452b7c03478bb94387143f9d2d84bc0bb433e18b8e003e33` | S09, 806x1248, `71e19e3be8da9045fce78e674006cd8963bd95f15642ff6a3884686db5c5e4b1` |
+| UX-010 | `5669:264979`, 440x620 | `3ab596f96b5a49eb56822816be31f9d4f739bf79f4a50ad09521ccfc491b8de7` | `90de99f4579e9eacadf068fa6fb48eff70eadad76e97d342094363b22fe0dbaa` | S10, 886x1242, `6d54cafe81f3693a16017e19adff9aaaf4a1adbae67b779a3f49d6c1fda15ff5` |
+
+Root-node `node --depth 2` and `children` queries establish one primary popover/frame per state. UX-001 contains a 448-pixel content column and 448x183 summary editor. UX-002/003/010 use approximately 408-pixel inner columns within 440/442 roots. UX-004 through UX-009 consistently expose a 368x456 body, 368x380 text area, and 352-pixel inner content layout. The roughly 2x PNG dimensions reflect capture scale/canvas crop, not CSS dimensions to hard-code.
+
+### Component Mapping
+
+UX-001 maps to existing `CallControlComponent -> ConsultTransferPopoverComponent -> AISummary`. UX-002, UX-003, and UX-010 map to `CallControlComponent` wrap-up content and shared loading/editor/error states. UX-004 through UX-009 map to `AISummary` action controls, with the same optional control policy applied inside receiver `AdaptiveCardRenderer`. Existing Momentum Button/Text/Spinner/Tooltip components and current CallControl theme tokens are reused. There is no screenshot for the receiving panel, so its established `AIAssistantComponent`/restricted renderer hierarchy is retained and behavior is structural-only.
+
+### Layout Interpretation
+
+The visual hierarchy is a fixed popover header, scrollable/selectable main content, a divider, summary state/content, action row, then the existing primary completion action. In the eligible mid-call branch, UX-001 places radio categories before search and results above its divider; the legacy branch keeps its current search-first pill layout. Post-call preserves reason selection above its divider. The structured examples show compact label/value groups inside one bordered region; production uses field rows in the same region rather than independent cards. The desktop-light targets use a white/neutral surface, neutral gray borders/dividers/scroll tracks and secondary text, black high-emphasis text and enabled primary pill, blue selected-radio/sparkle accents, gray disabled primary treatment, and a dark-red error icon. Production maps those roles to existing semantic Momentum tokens instead of literal screenshot colors, retaining forced-colors behavior and tested contrast. Text bodies, not the popover page, own vertical overflow. Scene measurements retain the visible 16px popover/body insets and 12px structured-editor inset where those existing tokenized spacings match; at narrow widths, controls wrap without horizontal scrolling, and CSS uses the existing container's inline size rather than fixed 400/440/480 widths.
+
+### Source Conflicts and Ambiguities
+
+The requirement resolves role payload precedence: initiator/post-call ignore adaptive cards, receiver ignores typed/plain fields. `ai-summary.md` describes cancel submission and object-only edited bodies, while the requirement forbids cancellation and the inspected concrete SDK union permits section objects or strings; requirement plus admitted declarations govern.
+
+The structured Figma sample includes an `Outcome` label that is not a `PostCallSummarySections` response key, but the admitted event payload has optional top-level string `resolution`. Production maps that concrete field to a non-editable/non-serialized `Outcome` display row at the screenshot position; no synthetic SDK response key is invented. Sample values remain deterministic fixture content, not hard-coded UI. The transfer variant has no separate mid-call screenshot; it retains UX-001 layout and changes only the action-specific copy/message ID.
+
+UX-001 visibly places categories before search, unlike the current legacy search-first pill-button layout. The screenshot precedence therefore replaces ordering/control form only when the summary branch is eligible; the existing destination data, callbacks, and ineligible layout remain intact. Its `%Agent name%`, `%User type%`, `%Queue%`, and `%Number%` rows are deterministic result fixture values, while `%Search by name, queue, entry point or phone number%` and the consult-summary heading are source-authoritative UI copy. The Transfer form uses the same hierarchy and the requirement-directed action-name substitution.
+
+UX-004 through UX-009 visibly and textually use `%Search topic%`; UX-008/009 additionally use `%Complete wrap-up%`. Other states use the un-delimited strings. The declared precedence makes the matched screenshots and text JSON authoritative even though the percent marks resemble unresolved design variables, so production preserves these literal state-specific strings and visual tests compare them without a mask. This intentional copy transition does not alter the requirement-controlled summary action accessible names.
+
+The generating subcopy in the inspected screenshot/text source is `Just a sec_the details are coming together.` including the underscore. That exact source copy is retained under message ID `aiSummary.generatingDescription`; it is not silently grammar-corrected. Screenshot geometry wins any rounded measurement disagreement between instance/root JSON; scene JSON remains the authority for internal spacing when the screenshot is not legible.
+
+### Typography and Exact Text
+
+Scene/text queries show 16px/24px large headings and 14px/20px body text aligned with existing Momentum tokens; production references those tokens rather than copied font declarations. Exact source strings retained are `%Search by name, queue, entry point or phone number%`, `Here’s a consult summary—they’ll get a copy`, `Wrap up interaction`, `Choose a code, and click the summary to edit it if needed.`, `Choose a reason to wrap up`, `Search topic`, `%Search topic%`, `Summary of your conversation`, `AI-generated`, `Outcome`, `Generating summary...`, `Just a sec_the details are coming together.`, `Having trouble generating summary`, `It could be a lost connection or something else. Could you check your connection or try again later?`, `Complete wrap-up`, and `%Complete wrap-up%`, each in the mapped source state. The structurally extrapolated transfer heading is `Here’s a transfer summary—they’ll get a copy`. Requirement-supplied exact strings override missing control metadata: `View summary`, `This is helpful`, `This isn't helpful`, `Copy Summary`, `Retry`, and `The summary is not available`.
+
+### Interaction and Accessibility
+
+The source states demonstrate default/editing, loading, error, helpful/dislike hover and selected, and copy hover/success. Requirement supplies keyboard/focus, pending feedback, permission, timeout/offline, receiver, and ownership states. Controls are native and tab in document order. Tooltip text equals the stable accessible name. Reaction buttons use `aria-pressed`; copy success adds only the visible check treatment and retains `Copy Summary` as both name and tooltip, without a feature live region. Removed-focus recovery is deterministic; other state changes retain focus. Dynamic text is `dir="auto"`; source locale is en-US. Existing focus, forced-colors, contrast, and reduced-motion behavior is inherited and verified rather than replaced.
+
+### Render Compare Refine Plan
+
+D8 prepares the implementation comparison contract and reads its visual plan before sealing every input hash, then renders S01-S10 at the declared state/variant dimensions with deterministic fonts/data/clock. Each iteration uses the official export/comparison commands above to record target, actual, diff, pixel percentage, DOM hierarchy, computed overflow, focus order, and automated accessibility result. Production components/CSS are refined and rerendered, never the targets. A state passes only when pixel difference is at most 0.5%, required structure/copy/actions match, no horizontal overflow exists, and behavior/a11y assertions pass. `validate-ux-visual-comparison` is the final visual gate. The loop stops after at most five iterations; an unresolved source/platform discrepancy fails release with a concrete classification. Structural-only states have no fabricated pixel score and must pass named browser/DOM/a11y scenarios.
 
 ## Cross-Cutting Concerns
 
-- Security and privacy: validate every SDK payload at the boundary; render text as text; route cards through the restricted renderer; never log or persist content; keep callback details content-free; allow OS clipboard egress only after direct gesture.
-- Concurrency: bind all work to interaction, agent, owner generation, request generation, and timestamp. Remove listeners on task replacement and unmount. Ignore stale settlements and guarantee zero unhandled rejection.
-- Error policy: hide unauthorized and initialization failure; show generic generation copy for other request failures; show unavailable copy for unrenderable success; never auto-retry; never retry a frozen response failure.
-- Retention: preserve mid-call across hold/resume and task end through wrap-up, successful post-call until interaction change, and frozen response failure until backend wrapped-up. Clear on sign-out and SDK-session end.
-- Compatibility: no SDK/workflow source edits, no new custom-element tag, no breaking props, no Agent Desktop integration, no new telemetry vocabulary, no translation stack, no RTL layout.
-- Performance: keep normalized in-memory state bounded to active interactions, reuse memoized view models, avoid storing duplicate card/text bodies, and clean inactive generations deterministically.
+- **Configuration and rollout:** There is no widget-side feature flag or staged fallback. Eligibility requires voice media, the current authorized agent, a matching strict interaction capability, and the applicable lifecycle/content. Deployment is gated by the sealed SDK artifact. The existing behavior remains when the capability is absent/false or the optional callback is unset. Current D0 is expected to fail until a versioned SDK with public `cc:featureEnablement` and receiver action correlation is supplied.
+- **Persistence and migration:** Summary bodies, cards, counters, feedback, timestamps, errors, and keys exist only in MobX memory. No localStorage, sessionStorage, IndexedDB, cookie, URL, cache API, service worker, file, screenshot outside fixtures/evidence, or schema is used. There is no data migration or rollback transform. Reverting the widget removes the in-memory feature; the dependency lock/tarball is reverted as a normal source change.
+- **Concurrency:** Every Promise/event captures canonical interaction ID, agent ID, ownership generation, and a pending request sequence. The sequence pairs Promise cleanup and suppresses an older timestamp-less rejection after a newer request starts; it never establishes successful response freshness. Every same-owner success competes by SDK timestamp, so a later request does not authorize an older timestamp to overwrite newer content and equal timestamps use last arrival. There is at most one mid-call preparation request per owner/action, and its pending state disables another initiation. Post-call explicit requests are individually issued. No `AbortController` is passed because the SDK contract has no cancellation; invalidated-owner settlements are caught and ignored. No Promise is left unobserved.
+- **Security and privacy:** Boundary validation allowlists fields and section keys. Typed/plain values render as text; cards use the restricted renderer and local image policy. Clipboard export requires a direct gesture and copies text only; after `navigator.clipboard.writeText` fulfills, clipboard lifetime is exclusively the operating system's and the widget schedules no clearing write. Host callbacks, logs, error boundaries, telemetry, URLs, test names, and visual fixtures contain no live summary/customer/interaction/agent content. Browser and visual captures use only deterministic synthetic D1/D8 fixtures; production/customer summary data is never written to a screenshot. Agent identity is an in-memory key and never rendered/logged by this feature.
+- **Errors and recovery:** Unauthorized/init hides; valid-but-unrenderable shows unavailable; all other generation failures show the one generic message. Raw SDK errors are normalized and discarded. There is no automatic generation retry, cancellation, or response resend. Post-call Retry is a new request. Wrap-up failure retries the entire user action; post response failure is frozen until backend cleanup.
+- **Observability:** Existing `withMetrics` wrappers and existing logger remain unchanged. Summary paths add no runtime log call, event, metric, identifier, dimension, duration, or failure vocabulary; SDK rejections are normalized only into the closed in-memory UI categories. Release evidence is build/test provenance, not runtime telemetry.
+- **Compatibility:** Existing custom-element tags, r2wc props, Task consult/transfer calls, host callbacks, real-time-assist behavior, theme tokens, package exports, ESM/CommonJS transpilation, React 18/MobX ownership, Yarn 4.5.1, and the configured `node-modules` linker remain. The new callback is optional. Internal Promise return widening is source-compatible with callbacks returning void. No `any` type is added; D0 removes the need for SDK contract casts.
+- **Accessibility/localization/theme:** Message IDs are stable en-US constants but no translation stack is added. Dynamic content uses `dir="auto"`; surrounding RTL layout is not implemented. No feature live region exists. Focus recovery, tooltips/names, non-color selection, forced colors, contrast, keyboard order, reduced motion, and responsive vertical overflow are automated gates. Existing default/dark/customer theme behavior is inherited; no feature theme map is created.
+- **Resource lifecycle:** Global capability listener is removed on deregistration/session cleanup. Task receiving/wrapped-up listeners are removed on task replacement/removal. Copy-success timers and DOM card content are cleared on content change/unmount. Store maps clear on their specified boundaries. Temporary SDK build/extraction and visual output directories are cleaned or retained only as sealed test evidence outside production assets. No worker, stream, socket, or daemon is added by the widget.
+- **Performance:** State is bounded to active/current owners plus a failed post-response tombstone awaiting wrapped-up. Pure normalization runs once per candidate; components consume observable view models rather than duplicate bodies. Long content uses browser layout/scrolling. No polling, client retry loop, or conference-event request fan-out is added; participant addition reuses one explicit consult-preparation request and SDK-delivered per-agent content.
 
 ## Test Strategy
 
-1. SDK package tests prove the exact branch/commit/tarball/declaration/runtime contract and 20-second behavior before widget compilation.
-2. Fixture and store tests cover valid and malformed capabilities, typed/plain/card role precedence, all normalized errors, timestamp and equal-arrival ordering, repeated requests, ownership changes, transfer/conference history rules, hold/remount retention, counters, feedback, wrap-up ordering, frozen response failure, and cleanup.
-3. Component tests cover exact text, edit mapping, card restriction, unsupported fallback, copy fulfillment/rejection, feedback selection, focus recovery, wrapping, and callback detail allowlists.
-4. Integration tests cover CallControl placement and sequencing, AI Assistant receiving flow, listener rebinding, r2wc function-property compatibility, and absent-callback behavior.
-5. Playwright tests cover both journeys, keyboard, automated accessibility, responsive overflow, forced colors, direct clipboard gesture, rapid races, and every screenshot state. The Artificer render/compare/refine receipts bind the visual evidence.
-6. Release tests run affected workspace type checks and unit tests, root build, browser suite, privacy scan, deterministic UX validation, DAG acceptance, and provenance/hash verification.
+1. **SDK declaration/runtime contract (`tooling/tests/ai-summary-sdk-lock.test.js`, D0):** compile exact four signatures and payload/event imports against the packed declarations; fake-clock the 15-second request timeout and late delivery; prove public `cc:featureEnablement`, initiating/receiver/post events, optional resolution, structured-or-string received responses and exact unavailable branches, receiver action correlation, SDK-injected response envelope, stable interaction ID, package version, declaration/tarball hashes, installed-package/lockfile resolution, and fail-closed no-fallback behavior.
+2. **Raw fixture build (`test-fixtures/src/aiSummaryFixtures.ts`, D1):** typed/plain initiating, adaptive receiver, structured/plain post with resolution/Outcome, strict feature flags, every sanitized error, malformed/unsupported/empty values, lower/equal/higher timestamps, A-B-C, consult-to-transfer, conference join/leave/two-party host, feedback, counters, timeout, wrap-up, response failure, and AgentWrappedUp are typed and synthetic. The fixture workspace build proves discoverability/export correctness.
+3. **Store unit/event routing (`store/tests/ai-summary.ts`, `store.ts`, `storeEventsWrapper.ts`, D2):** test voice/capability/authorization conjunction, main interaction correlation, role field precedence, malformed matching capability disables prior enablement, owner generations, same-agent remount/hold retention, event listener bind/unbind, all retention boundaries, every explicit SDK call, no conference-event request fan-out, timestamp/equal-arrival ordering, no auto retry/cancel, timeout/late/unmount races, counter guards, feedback sequencing, read-only resolution/response separation, exact response unions, frozen response once-only behavior, and no unhandled rejection.
+4. **Shared component unit (`cc-components/tests/components/AISummary/ai-summary.tsx` and AdaptiveCardRenderer tests, D3):** test exact copy/tooltip names, source message IDs including literal percent variants, section order/edit mapping, read-only Outcome display/copy, plain rendering, HTML injection resistance, `dir=auto`, Clipboard Promise success/reject and visual-state timer cleanup, sticky mutual feedback, post descriptions, unsupported/error states, focus successor/fallback/no-spurious-move, no live region, overflow, forced colors, and unchanged default real-time-assist renderer behavior.
+5. **Receiving integration (`ai-assistant/tests/ai-assistant/index.tsx`, `helper.ts`, and cc-components AI Assistant tests, D4):** test content-event-only eligibility, notification/open/view counter, restricted card-only rendering, copy extraction, 200-confirmed feedback, unknown action correlation, RTA isolation, agent transfer/conference isolation, unmount cleanup, and unavailable fallback.
+6. **Initiating integration (`task/tests/CallControl/index.tsx`, `helper.ts`, and cc-components CallControl tests, D5):** test the eligible radio-category/search/results/summary order, exact percent-delimited search and consult/transfer headings, unchanged ineligible markup, placement after results, consult/transfer request types, pending disabled controls, edit/copy/feedback, response-before-action ordering, response failure continuation, no cancel, direct/consult-to-transfer/additional transfer/conference flows, stable ID/owner guards, and unchanged telephony payloads/signatures.
+7. **Post-call integration (`task` and `cc-components` CallControl tests, D6):** test eligible search/radio hierarchy and untouched legacy Select, search filtering without SDK request, reason-triggered generation, fresh Retry, every response form, expanded/collapsed state mapping, exact percent-delimited copy states, placement before Complete, loading/error disabled behavior, read-only Outcome omission from response, local feedback, wrap-up rejection restoration, captured-task ordering, exact freeze, one response, submitted retention, response-failed no-resend/description/callback, backend cleanup, and authorization omission.
+8. **Public type/runtime compatibility (`task` and `cc-widgets` tests, D7):** compile the exact callback union, assert all legacy props/tags, register the optional r2wc function prop, cover absent and throwing callbacks, status dedupe, and recursively reject forbidden callback keys/values.
+9. **Browser journeys (`playwright/tests/ai-summary-test.spec.ts`, D8):** real-browser JNY-001 initiator and receiver plus JNY-002 generating/editing/hover/selected/copy/error/submission states, literal source copy, reason-list expansion/collapse, and Outcome; keyboard traversal and disappearing-focus recovery; direct clipboard permission/success/failure; feedback; 320px-to-desktop responsive wrap/vertical overflow; inherited forced colors; automated accessibility; rapid interaction switch; lower/equal timestamp races; same-agent remount; 15-second fake-time timeout; transfer/conference ownership; wrap-up/response failures; and global unhandled-rejection capture.
+10. **Visual fidelity (`playwright/suites/ai-summary-tests.spec.ts` plus MatrixBuilder visual receipts, D8):** compare S01-S10 to their exact sealed sources under the five-iteration/0.5% policy. Structural-only receipts cover every implemented no-screenshot state. Snapshot-only assertions cannot satisfy this gate.
+11. **Privacy/provenance/release (`tooling/tests/verify-ai-summary-release.test.js`, D9):** scan production/log/callback/persistence surfaces; verify no summary telemetry; validate DAG/source/spec currency and exact hashes; run build/type/style/focused/full unit/browser/a11y/visual gates; and require zero skipped mandatory suites and zero unhandled rejections.
 
 ## Implementation DAG Summary
 
-| Task | Purpose | Depends on |
-| --- | --- | --- |
-| D0-sdk-package-contract | Build, pack, pin, and probe exact `cc-summaries` SDK | none |
-| D1-summary-contract-fixtures | Add immutable valid, failure, and race fixtures | D0 |
-| D2-interaction-summary-store | Implement validation, reducer, SDK routing, retention, and counters | D0, D1 |
-| D3-shared-summary-presentation | Implement SDK-free typed/plain/card-adjacent UI and actions | D1 |
-| D4-receiving-ai-assistant | Integrate receiver events with existing AI Assistant renderer | D2, D3 |
-| D5-mid-call-call-control | Integrate initiating consult/transfer summaries and sequencing | D2, D3 |
-| D6-post-call-wrap-up | Integrate post-call request/edit/freeze/submit behavior | D2, D3, D5 |
-| D7-host-status-callback | Add the optional content-free existing-tag callback | D4, D6 |
-| D8-browser-ux-validation | Add browser, accessibility, concurrency, and visual evidence | D4, D5, D6, D7 |
-| D9-release-validation | Verify all requirements, acceptance criteria, hashes, tests, and provenance | D8 |
+| Task | Requirement/acceptance trace | Depends on | Rationale |
+| --- | --- | --- | --- |
+| `D0-sdk-package-contract` | REQ-015, REQ-016, REQ-001, AC-01 | none | No TypeScript may compile against an unsealed or nonconforming SDK. The currently inspected checkout does not pass. |
+| `D1-summary-contract-fixtures` | REQ-001, REQ-002, REQ-003, REQ-004, REQ-005, REQ-006, REQ-008, REQ-010, REQ-012 and payload-related ACs | D0 | Fixtures must use the admitted public declarations and concrete runtime shapes. |
+| `D2-interaction-summary-store` | REQ-014, REQ-002, REQ-006, REQ-008, REQ-010, AC-02, AC-06, AC-07, AC-08, AC-10, AC-13, AC-14 | D0, D1 | Store validation/state must exist before either container can consume it. |
+| `D3-shared-summary-presentation` | REQ-003, REQ-004, REQ-008, REQ-009, REQ-010, AC-03, AC-04, AC-05, AC-11, AC-12, AC-13, AC-14 | D1, D2 | The SDK-free components consume the normalized store-owned section/view types, so their contract follows the reducer even though they never call the SDK. |
+| `D4-receiving-ai-assistant` | REQ-004, REQ-006, JNY-001, AC-04, AC-06, AC-10-AC-14 | D2, D3 | Receiver integration needs both state/actions and restricted shared presentation. |
+| `D5-mid-call-call-control` | REQ-003, REQ-006, JNY-001, AC-03, AC-06, AC-07, AC-10-AC-14 | D2, D3, D4 | Initiator orchestration needs the store and shared editor/actions; it follows D4 because both integrations update the shared cc-components module specification. |
+| `D6-post-call-wrap-up` | REQ-005, REQ-006, REQ-008-REQ-010, JNY-002, AC-05, AC-07, AC-08, AC-10-AC-14 | D2, D3, D5 | It shares CallControl orchestration/files with D5 and must follow it to avoid parallel edits. |
+| `D7-host-status-callback` | REQ-007, REQ-010, AC-09, AC-14 | D4, D6 | Final statuses from both containers must exist before the public callback is threaded. |
+| `D8-browser-ux-validation` | REQ-011, REQ-012, REQ-017, REQ-018, UX-001-UX-010, JNY-001, JNY-002, AC-15, AC-16 | D4, D5, D6, D7 | Browser and visual evidence exercises the complete integrated product. |
+| `D9-release-validation` | all Addressed requirements and AC-01-AC-16, including target branch metadata REQ-013 | D8 | The last task is read-only validation of the promotion target and all package, privacy, UX, test, and provenance gates. |
 
-Parallel work is limited to tasks with disjoint files. D4 and D5 may proceed together after D2/D3. D6 follows D5 because both touch call-control orchestration. D7 follows D6 because it threads the final status surface. D9 is edit-free except for its dedicated verifier and test files.
+Tasks with overlapping source, tests, or module specifications are sequential; the DAG does not permit concurrent edits to a shared file. D9 cannot declare completion until D0's SDK admission and every downstream acceptance command pass; a blocked SDK prerequisite is never converted into a Deferred requirement or a weaker widget implementation.
