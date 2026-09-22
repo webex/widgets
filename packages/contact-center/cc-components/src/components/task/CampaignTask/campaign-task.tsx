@@ -1,11 +1,11 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { Button } from '@momentum-design/components/dist/react';
-import { withMetrics } from '@webex/cc-ui-logging';
+import React, {useState, useCallback, useRef, useEffect} from 'react';
+import {Button} from '@momentum-design/components/dist/react';
+import {withMetrics} from '@webex/cc-ui-logging';
 import CampaignErrorDialog from '../CampaignErrorDialog/campaign-error-dialog';
 import GlobalVariablesPanel from '../GlobalVariablesPanel/global-variables-panel';
 import CampaignTaskPopover from './CampaignTaskPopover/campaign-task-popover';
 import CampaignTaskListItem from './CampaignTaskListItem/campaign-task-list-item';
-import { CampaignErrorType } from '../CampaignErrorDialog/campaign-error-dialog.types';
+import {CampaignErrorType} from '../CampaignErrorDialog/campaign-error-dialog.types';
 import {
   CampaignTaskProps,
   CampaignAutoAction,
@@ -15,9 +15,9 @@ import {
   CallAssociatedDataMap,
   getCallerIdentifier,
 } from '../task.types';
-import { getAgentViewableGlobalVariables } from '../Task/task.utils';
-import { CANCEL, CAMPAIGN_TASK_REGION_LABEL } from '../constants';
-import { getAgentJoinTimestamp, getCampaignCpd } from '../TaskList/task-list.utils';
+import {getAgentViewableGlobalVariables} from '../Task/task.utils';
+import {CANCEL, CAMPAIGN_TASK_REGION_LABEL} from '../constants';
+import {getAgentJoinTimestamp, getCampaignCpd} from '../TaskList/task-list.utils';
 import './campaign-task.style.scss';
 
 const LOG_MODULE = 'cc-components#campaign-task';
@@ -47,7 +47,7 @@ const CampaignTask: React.FC<CampaignTaskProps> = ({
   const title = customerName || getCallerIdentifier(ani, dn, outboundType);
   const phoneNumber = getCallerIdentifier(ani, dn, outboundType);
 
-  const callAssociatedData = (task.data.interaction as unknown as { callAssociatedData?: CallAssociatedDataMap })
+  const callAssociatedData = (task.data.interaction as unknown as {callAssociatedData?: CallAssociatedDataMap})
     .callAssociatedData;
   const latestGlobalVariables = getAgentViewableGlobalVariables(callAssociatedData);
 

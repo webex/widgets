@@ -1,6 +1,6 @@
-import React, { useEffect, useRef } from 'react';
+import React, {useEffect, useRef} from 'react';
 import CallControlComponent from '../CallControl/call-control';
-import { Text } from '@momentum-ui/react-collaboration';
+import {Text} from '@momentum-ui/react-collaboration';
 import {
   Avatar,
   Brandvisual,
@@ -17,13 +17,13 @@ import {
 import './call-control-cad.styles.scss';
 import TaskTimer from '../TaskTimer/index';
 import CallControlConsultComponent from '../CallControl/CallControlCustom/call-control-consult';
-import { MEDIA_CHANNEL as MediaChannelType, CallControlComponentProps, CallAssociatedDataMap } from '../task.types';
-import { ConferenceParticipantDropTarget } from '@webex/cc-store';
-import { getAgentViewableGlobalVariables } from '../Task/task.utils';
+import {MEDIA_CHANNEL as MediaChannelType, CallControlComponentProps, CallAssociatedDataMap} from '../task.types';
+import {ConferenceParticipantDropTarget} from '@webex/cc-store';
+import {getAgentViewableGlobalVariables} from '../Task/task.utils';
 import GlobalVariablesPanel from '../GlobalVariablesPanel/global-variables-panel';
-import { ParticipantRosterSectionProps } from './call-control-cad.types';
+import {ParticipantRosterSectionProps} from './call-control-cad.types';
 
-import { getMediaTypeInfo } from '../../../utils';
+import {getMediaTypeInfo} from '../../../utils';
 import {
   NO_CUSTOMER_NAME,
   NO_CALLER_ID,
@@ -35,7 +35,7 @@ import {
   CUSTOMER_NAME,
   CAMPAIGN_CALL,
 } from '../constants';
-import { withMetrics } from '@webex/cc-ui-logging';
+import {withMetrics} from '@webex/cc-ui-logging';
 
 const ParticipantRosterSection: React.FC<ParticipantRosterSectionProps> = ({
   heading,

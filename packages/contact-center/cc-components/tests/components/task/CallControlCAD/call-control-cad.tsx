@@ -1,14 +1,19 @@
 import React from 'react';
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import {fireEvent, render, waitFor} from '@testing-library/react';
 import CallControlCADComponent from '../../../../src/components/task/CallControlCAD/call-control-cad';
-import { CallControlComponentProps, CallAssociatedDataMap, TARGET_TYPE, OUTBOUND_TYPE } from '../../../../src/components/task/task.types';
+import {
+  CallControlComponentProps,
+  CallAssociatedDataMap,
+  TARGET_TYPE,
+  OUTBOUND_TYPE,
+} from '../../../../src/components/task/task.types';
 import {
   mockTask,
   createEnabledMainTaskUIControls,
   createMockTaskUIControls,
   enabledControl,
 } from '@webex/test-fixtures';
-import { BuddyDetails, ConferenceParticipantDropRoster } from '@webex/cc-store';
+import {BuddyDetails, ConferenceParticipantDropRoster} from '@webex/cc-store';
 import '@testing-library/jest-dom';
 
 type MomentumElement = HTMLElement & {
@@ -96,13 +101,13 @@ describe('CallControlCADComponent', () => {
     },
     status: 'connected',
     isHeld: false,
-    recording: { isRecording: false },
+    recording: {isRecording: false},
     wrapUpReason: null,
   };
 
   const mockWrapupCodes = [
-    { id: 'wrap1', name: 'Customer Issue', isSystem: false },
-    { id: 'wrap2', name: 'Technical Support', isSystem: false },
+    {id: 'wrap1', name: 'Customer Issue', isSystem: false},
+    {id: 'wrap2', name: 'Technical Support', isSystem: false},
   ];
 
   const mockBuddyAgents: BuddyDetails[] = [
@@ -264,7 +269,7 @@ describe('CallControlCADComponent', () => {
       ...defaultProps,
       consultAgentName: 'Consult Agent',
       controls: createMockTaskUIControls({
-        main: { endConsult: enabledControl },
+        main: {endConsult: enabledControl},
         consult: {
           mute: enabledControl,
           switch: enabledControl,
@@ -339,7 +344,7 @@ describe('CallControlCADComponent', () => {
     // Test wrapup mode hides elements
     const wrapupProps = {
       ...defaultProps,
-      controls: createEnabledMainTaskUIControls({ wrapup: enabledControl }),
+      controls: createEnabledMainTaskUIControls({wrapup: enabledControl}),
       isHeld: true,
       isRecording: true,
     };
@@ -376,7 +381,7 @@ describe('CallControlCADComponent', () => {
     // Test wrapup mode hiding recording indicator
     const noRecordingProps = {
       ...defaultProps,
-      controls: createEnabledMainTaskUIControls({ wrapup: enabledControl }),
+      controls: createEnabledMainTaskUIControls({wrapup: enabledControl}),
     };
     const noRecordingScreen = render(<CallControlCADComponent {...noRecordingProps} />);
     const hiddenRecordingIndicator = noRecordingScreen.container.querySelector('.recording-indicator');
@@ -389,7 +394,7 @@ describe('CallControlCADComponent', () => {
       callControlClassName: 'custom-call-control',
       callControlConsultClassName: 'custom-consult-control',
       controls: createMockTaskUIControls({
-        main: { endConsult: enabledControl },
+        main: {endConsult: enabledControl},
         consult: {
           mute: enabledControl,
           switch: enabledControl,
@@ -410,12 +415,12 @@ describe('CallControlCADComponent', () => {
   describe('on hold banner visibility', () => {
     const baseControls = {
       main: {
-        wrapup: { isVisible: false, isEnabled: false },
-        endConsult: { isVisible: false, isEnabled: false },
-        exitConference: { isVisible: false, isEnabled: false },
+        wrapup: {isVisible: false, isEnabled: false},
+        endConsult: {isVisible: false, isEnabled: false},
+        exitConference: {isVisible: false, isEnabled: false},
       },
       consult: {
-        endConsult: { isVisible: false, isEnabled: false },
+        endConsult: {isVisible: false, isEnabled: false},
       },
       activeLeg: 'main',
     };
@@ -451,7 +456,7 @@ describe('CallControlCADComponent', () => {
         ...baseControls,
         main: {
           ...baseControls.main,
-          wrapup: { isVisible: true, isEnabled: true },
+          wrapup: {isVisible: true, isEnabled: true},
         },
       };
 
@@ -474,8 +479,8 @@ describe('CallControlCADComponent', () => {
       const cancelParticipantDropConfirmation = jest.fn();
       const renderProps = (nextOverrides: Partial<CallControlComponentProps> = {}) => ({
         ...defaultProps,
-        controls: createEnabledMainTaskUIControls({ exitConference: { isVisible: true, isEnabled: true } }),
-        conferenceParticipants: [{ id: 'agent-2', name: 'Agent Two', pType: 'Agent' }],
+        controls: createEnabledMainTaskUIControls({exitConference: {isVisible: true, isEnabled: true}}),
+        conferenceParticipants: [{id: 'agent-2', name: 'Agent Two', pType: 'Agent'}],
         conferenceParticipantDropRoster: ownerDropRoster,
         pendingParticipantDropId: null,
         participantDropAnnouncement: null,
@@ -500,7 +505,7 @@ describe('CallControlCADComponent', () => {
     };
 
     it('renders Customer and Participants sections and immediately drops an Agent target', () => {
-      const { screen, requestParticipantDrop } = renderRoster();
+      const {screen, requestParticipantDrop} = renderRoster();
       const participantsTrigger = screen.getByTestId('call-control:participants-trigger') as MomentumElement;
       const participantsPopover = screen.getByTestId('call-control:participants-popover') as MomentumElement;
       const customerHeading = screen.getByText('Customer') as MomentumElement;
@@ -544,7 +549,7 @@ describe('CallControlCADComponent', () => {
     });
 
     it('keeps the Participants section when the Customer row is removed', () => {
-      const { screen } = renderRoster({
+      const {screen} = renderRoster({
         conferenceParticipantDropRoster: {
           ...ownerDropRoster,
           customer: null,
@@ -571,8 +576,8 @@ describe('CallControlCADComponent', () => {
     });
 
     it('keeps a valid multiparty roster visible when wrap-up controls appear', () => {
-      const { screen } = renderRoster({
-        controls: createEnabledMainTaskUIControls({ wrapup: { isVisible: true, isEnabled: true } }),
+      const {screen} = renderRoster({
+        controls: createEnabledMainTaskUIControls({wrapup: {isVisible: true, isEnabled: true}}),
       });
 
       expect(screen.getByTestId('call-control:participants-trigger')).toBeInTheDocument();
@@ -581,7 +586,7 @@ describe('CallControlCADComponent', () => {
     });
 
     it('requires confirmation for Customer Drop and connects Momentum focus restoration through triggerID', async () => {
-      const { screen, requestParticipantDrop, cancelParticipantDropConfirmation, rerenderRoster } = renderRoster();
+      const {screen, requestParticipantDrop, cancelParticipantDropConfirmation, rerenderRoster} = renderRoster();
       const customerDropButton = screen.getByLabelText('Drop customer +15551234567');
       const participantsTrigger = screen.getByTestId('call-control:participants-trigger');
       const participantsPopover = screen.getByTestId('call-control:participants-popover') as MomentumPopoverElement;
@@ -590,7 +595,7 @@ describe('CallControlCADComponent', () => {
       fireEvent.click(customerDropButton);
       expect(requestParticipantDrop).toHaveBeenCalledWith(ownerDropRoster.customer);
       expect(hideParticipantsPopover).toHaveBeenCalledTimes(1);
-      rerenderRoster({ participantDropConfirmationTarget: ownerDropRoster.customer });
+      rerenderRoster({participantDropConfirmationTarget: ownerDropRoster.customer});
 
       const dialog = screen.getByTestId('call-control:customer-drop-dialog') as MomentumElement;
       const cancelButton = screen.getByTestId('call-control:customer-drop-cancel') as MomentumElement;
@@ -613,20 +618,20 @@ describe('CallControlCADComponent', () => {
       fireEvent.click(cancelButton);
 
       expect(cancelParticipantDropConfirmation).toHaveBeenCalledTimes(1);
-      rerenderRoster({ participantDropConfirmationTarget: null });
+      rerenderRoster({participantDropConfirmationTarget: null});
       expect((screen.getByTestId('call-control:customer-drop-dialog') as MomentumElement).visible).toBe(false);
       await waitFor(() => expect(participantsTrigger).toHaveFocus());
     });
 
     it('restores focus to the roster trigger when the confirmed Customer row disappears', async () => {
-      const { screen, rerenderRoster } = renderRoster();
+      const {screen, rerenderRoster} = renderRoster();
 
       fireEvent.click(screen.getByLabelText('Drop customer +15551234567'));
-      rerenderRoster({ participantDropConfirmationTarget: ownerDropRoster.customer });
+      rerenderRoster({participantDropConfirmationTarget: ownerDropRoster.customer});
       expect((screen.getByTestId('call-control:customer-drop-dialog') as MomentumElement).visible).toBe(true);
 
       rerenderRoster({
-        conferenceParticipantDropRoster: { ...ownerDropRoster, customer: null },
+        conferenceParticipantDropRoster: {...ownerDropRoster, customer: null},
         participantDropConfirmationTarget: null,
       });
 
@@ -634,36 +639,36 @@ describe('CallControlCADComponent', () => {
     });
 
     it('restores focus to a stable call control when the roster disappears after confirmation', async () => {
-      const { screen, rerenderRoster } = renderRoster();
+      const {screen, rerenderRoster} = renderRoster();
 
       fireEvent.click(screen.getByLabelText('Drop customer +15551234567'));
-      rerenderRoster({ participantDropConfirmationTarget: ownerDropRoster.customer });
+      rerenderRoster({participantDropConfirmationTarget: ownerDropRoster.customer});
       expect((screen.getByTestId('call-control:customer-drop-dialog') as MomentumElement).visible).toBe(true);
 
-      rerenderRoster({ conferenceParticipantDropRoster: null, participantDropConfirmationTarget: null });
+      rerenderRoster({conferenceParticipantDropRoster: null, participantDropConfirmationTarget: null});
 
       await waitFor(() => expect(screen.getByTestId('call-control:end-call')).toHaveFocus());
     });
 
     it('confirms Customer Drop and routes Momentum close or Escape through cancellation', () => {
-      const { screen, confirmParticipantDrop, cancelParticipantDropConfirmation, rerenderRoster } = renderRoster();
+      const {screen, confirmParticipantDrop, cancelParticipantDropConfirmation, rerenderRoster} = renderRoster();
       const customerDropButton = screen.getByLabelText('Drop customer +15551234567');
 
       fireEvent.click(customerDropButton);
-      rerenderRoster({ participantDropConfirmationTarget: ownerDropRoster.customer });
+      rerenderRoster({participantDropConfirmationTarget: ownerDropRoster.customer});
       fireEvent.click(screen.getByTestId('call-control:customer-drop-confirm'));
       expect(confirmParticipantDrop).toHaveBeenCalledTimes(1);
 
-      rerenderRoster({ participantDropConfirmationTarget: null });
+      rerenderRoster({participantDropConfirmationTarget: null});
       fireEvent.click(customerDropButton);
-      rerenderRoster({ participantDropConfirmationTarget: ownerDropRoster.customer });
+      rerenderRoster({participantDropConfirmationTarget: ownerDropRoster.customer});
       const dialog = screen.getByTestId('call-control:customer-drop-dialog');
       fireEvent(dialog, new CustomEvent('close'));
       expect(cancelParticipantDropConfirmation).toHaveBeenCalledTimes(1);
     });
 
     it('globally disables Drop controls and shows loading only on the selected row', async () => {
-      const { screen } = renderRoster({ pendingParticipantDropId: 'agent-2' });
+      const {screen} = renderRoster({pendingParticipantDropId: 'agent-2'});
 
       expect(screen.getByLabelText('Drop agent Agent Two')).toHaveTextContent('Dropping…');
       await waitFor(() => {
@@ -673,8 +678,8 @@ describe('CallControlCADComponent', () => {
     });
 
     it('disables all owner Drop controls during an active non-held consult', async () => {
-      const { screen } = renderRoster({
-        conferenceParticipantDropRoster: { ...ownerDropRoster, isDropDisabled: true },
+      const {screen} = renderRoster({
+        conferenceParticipantDropRoster: {...ownerDropRoster, isDropDisabled: true},
       });
 
       await waitFor(() => {
@@ -685,9 +690,9 @@ describe('CallControlCADComponent', () => {
 
     it('renders non-owner and Supervisor rows without Drop actions or read-only labels', () => {
       const readOnlyRoster: ConferenceParticipantDropRoster = {
-        customer: ownerDropRoster.customer ? { ...ownerDropRoster.customer, isReadOnly: true } : null,
+        customer: ownerDropRoster.customer ? {...ownerDropRoster.customer, isReadOnly: true} : null,
         participants: [
-          { ...ownerDropRoster.participants[0], isPrimary: true, isReadOnly: true },
+          {...ownerDropRoster.participants[0], isPrimary: true, isReadOnly: true},
           {
             participantType: 'Supervisor',
             displayName: 'Supervisor One',
@@ -700,7 +705,7 @@ describe('CallControlCADComponent', () => {
         ],
         isDropDisabled: false,
       };
-      const { screen } = renderRoster({ conferenceParticipantDropRoster: readOnlyRoster });
+      const {screen} = renderRoster({conferenceParticipantDropRoster: readOnlyRoster});
       const participantIcons = Array.from(screen.container.querySelectorAll('.participant-menu-icon'));
 
       expect(screen.getByText('Agent Two (Primary)')).toBeInTheDocument();
@@ -736,7 +741,7 @@ describe('CallControlCADComponent', () => {
         isDropDisabled: false,
         requiresConfirmation: false,
       };
-      const { screen, requestParticipantDrop } = renderRoster({
+      const {screen, requestParticipantDrop} = renderRoster({
         conferenceParticipantDropRoster: {
           ...ownerDropRoster,
           participants: [...ownerDropRoster.participants, pendingEpDn, supervisor],
@@ -760,7 +765,7 @@ describe('CallControlCADComponent', () => {
         isDropDisabled: true,
         requiresConfirmation: false,
       };
-      const { screen, requestParticipantDrop } = renderRoster({
+      const {screen, requestParticipantDrop} = renderRoster({
         conferenceParticipantDropRoster: {
           customer: null,
           participants: [answeredEntryPointAgent],
@@ -781,7 +786,7 @@ describe('CallControlCADComponent', () => {
         <CallControlCADComponent
           {...defaultProps}
           conferenceParticipantDropRoster={null}
-          participantDropAnnouncement={{ type: 'success', message: 'Participant removed from the conference.' }}
+          participantDropAnnouncement={{type: 'success', message: 'Participant removed from the conference.'}}
         />
       );
 
@@ -792,7 +797,7 @@ describe('CallControlCADComponent', () => {
         <CallControlCADComponent
           {...defaultProps}
           conferenceParticipantDropRoster={null}
-          participantDropAnnouncement={{ type: 'error', message: 'Unable to drop participant from the call. Try again.' }}
+          participantDropAnnouncement={{type: 'error', message: 'Unable to drop participant from the call. Try again.'}}
         />
       );
 
@@ -806,8 +811,8 @@ describe('CallControlCADComponent', () => {
       const screen = render(
         <CallControlCADComponent
           {...defaultProps}
-          controls={createEnabledMainTaskUIControls({ exitConference: { isVisible: true, isEnabled: true } })}
-          conferenceParticipants={[{ id: 'agent-2', name: 'Agent Two', pType: 'Agent' }]}
+          controls={createEnabledMainTaskUIControls({exitConference: {isVisible: true, isEnabled: true}})}
+          conferenceParticipants={[{id: 'agent-2', name: 'Agent Two', pType: 'Agent'}]}
           conferenceParticipantDropRoster={ownerDropRoster}
         />
       );
@@ -819,10 +824,10 @@ describe('CallControlCADComponent', () => {
       const screen = render(
         <CallControlCADComponent
           {...defaultProps}
-          controls={createEnabledMainTaskUIControls({ exitConference: { isVisible: false, isEnabled: false } })}
+          controls={createEnabledMainTaskUIControls({exitConference: {isVisible: false, isEnabled: false}})}
           conferenceParticipants={[
-            { id: 'agent-2', name: 'Agent Two', pType: 'Agent' },
-            { id: 'agent-3', name: 'Agent Three', pType: 'Agent' },
+            {id: 'agent-2', name: 'Agent Two', pType: 'Agent'},
+            {id: 'agent-3', name: 'Agent Three', pType: 'Agent'},
           ]}
           conferenceParticipantDropRoster={null}
         />
@@ -848,8 +853,8 @@ describe('CallControlCADComponent', () => {
         <CallControlCADComponent
           {...defaultProps}
           currentTask={conferenceTask}
-          controls={createEnabledMainTaskUIControls({ exitConference: { isVisible: false, isEnabled: false } })}
-          conferenceParticipants={[{ id: 'agent-2', name: 'Agent Two', pType: 'Agent' }]}
+          controls={createEnabledMainTaskUIControls({exitConference: {isVisible: false, isEnabled: false}})}
+          conferenceParticipants={[{id: 'agent-2', name: 'Agent Two', pType: 'Agent'}]}
           conferenceParticipantDropRoster={ownerDropRoster}
         />
       );
@@ -879,10 +884,10 @@ describe('CallControlCADComponent', () => {
         <CallControlCADComponent
           {...defaultProps}
           currentTask={consultTask}
-          controls={createEnabledMainTaskUIControls({ exitConference: { isVisible: true, isEnabled: true } })}
+          controls={createEnabledMainTaskUIControls({exitConference: {isVisible: true, isEnabled: true}})}
           conferenceParticipants={[
-            { id: 'agent-2', name: 'Agent Two', pType: 'Agent' },
-            { id: 'agent-3', name: 'Agent Three', pType: 'Agent' },
+            {id: 'agent-2', name: 'Agent Two', pType: 'Agent'},
+            {id: 'agent-3', name: 'Agent Three', pType: 'Agent'},
           ]}
         />
       );
@@ -894,7 +899,7 @@ describe('CallControlCADComponent', () => {
       const screen = render(
         <CallControlCADComponent
           {...defaultProps}
-          controls={createEnabledMainTaskUIControls({ exitConference: { isVisible: true, isEnabled: true } })}
+          controls={createEnabledMainTaskUIControls({exitConference: {isVisible: true, isEnabled: true}})}
           conferenceParticipants={[]}
         />
       );
@@ -913,7 +918,7 @@ describe('CallControlCADComponent', () => {
           interaction: {
             ...defaultProps.currentTask.data.interaction,
             callAssociatedData: cad,
-          } as typeof defaultProps.currentTask.data.interaction & { callAssociatedData: CallAssociatedDataMap },
+          } as typeof defaultProps.currentTask.data.interaction & {callAssociatedData: CallAssociatedDataMap},
         },
       },
     });
