@@ -31,9 +31,7 @@ import {
   WellnessBreakEvent,
   WellnessBreakState,
   WidgetsBehavioralMetric,
-  AIAssistantRTDStatusEvent,
-  AgentChannelReloginSuccessEvent,
-  AgentChannelStateChangedEvent,
+  WELLNESS_BREAK_NOTIFICATION_ACTIONS,
 } from './store.types';
 import Store from './store';
 import {
@@ -45,7 +43,7 @@ import {
 } from './store.types';
 import {runInAction} from 'mobx';
 import {isIncomingTask} from './task-utils';
-import {INTERNAL_AGENT_STATE_CONTROL_EVENTS, SUGGESTED_RESPONSE_EVENT, TASK_MULTI_LOGIN_HYDRATE} from './constants';
+import {SUGGESTED_RESPONSE_EVENT, TASK_MULTI_LOGIN_HYDRATE} from './constants';
 
 const CONSULT_TRANSFER_CHANNELS = {
   telephony: 'TELEPHONY',
@@ -54,11 +52,7 @@ const CONSULT_TRANSFER_CHANNELS = {
   email: 'EMAIL',
 } as const;
 
-const WELLNESS_NOTIFICATION_ACTIONS = new Set([
-  'PROVIDE_WELLNESS_BREAK',
-  'SUGGEST_WELLNESS_BREAK',
-  'WELLNESS_BREAK_NOT_ALLOWED',
-]);
+const WELLNESS_NOTIFICATION_ACTIONS = new Set(Object.values(WELLNESS_BREAK_NOTIFICATION_ACTIONS));
 
 const getSupportedMediaType = (mediaType?: string): keyof typeof CONSULT_TRANSFER_CHANNELS | undefined => {
   const normalizedMediaType = typeof mediaType === 'string' ? mediaType.toLowerCase() : '';
@@ -241,30 +235,6 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.wellnessEventSequence;
   }
 
-  get aiAssistantRtdStatus() {
-    return this.store.aiAssistantRtdStatus;
-  }
-
-  /** @internal */
-  get isAgentStateControlEnabled() {
-    return this.store.isAgentStateControlEnabled;
-  }
-
-  /** @internal */
-  get agentChannelTypes() {
-    return this.store.agentChannelTypes;
-  }
-
-  /** @internal */
-  get agentChannelStateDetails() {
-    return this.store.agentChannelStateDetails;
-  }
-
-  /** @internal */
-  get agentChannelReloginSequence() {
-    return this.store.agentChannelReloginSequence;
-  }
-
   get legacyAgentState() {
     return this.store.legacyAgentState;
   }
@@ -436,10 +406,6 @@ class StoreWrapper implements IStoreWrapper {
       this.store.wellbeingBreakIdleCode = undefined;
       this.store.wellnessBreakState = {phase: 'idle'};
       this.store.wellnessEventSequence = (this.store.wellnessEventSequence ?? 0) + 1;
-      this.store.isAgentStateControlEnabled = false;
-      this.store.agentChannelTypes = [];
-      this.store.agentChannelStateDetails = {};
-      this.store.agentChannelReloginSequence = 0;
       this.store.legacyAgentState = '';
       this.store.legacyAuxCodeId = '';
     });
@@ -455,76 +421,20 @@ class StoreWrapper implements IStoreWrapper {
       if (sessionRotated) {
         this.store.wellnessBreakState = {phase: 'idle'};
         this.store.wellnessEventSequence = (this.store.wellnessEventSequence ?? 0) + 1;
-        this.store.agentChannelStateDetails = {};
-        this.store.agentChannelTypes = [];
-        this.store.isAgentStateControlEnabled = false;
       }
 
       this.store.wellnessAgentSessionId = nextSessionId;
       this.store.legacyAgentState = payload.subStatus || this.store.legacyAgentState;
       this.store.legacyAuxCodeId = payload.auxCodeId?.trim() || this.store.legacyAuxCodeId || '0';
-
-      if (payload.agentChannelStateDetailMap) {
-        this.store.isAgentStateControlEnabled = true;
-        this.store.agentChannelStateDetails = {...payload.agentChannelStateDetailMap};
-        this.store.agentChannelReloginSequence = (this.store.agentChannelReloginSequence ?? 0) + 1;
-      }
-      if (payload.channelsMap) {
-        this.store.agentChannelTypes = Object.entries(payload.channelsMap)
-          .filter(([, channelIds]) => Array.isArray(channelIds) && channelIds.length > 0)
-          .map(([channelType]) => channelType);
-      } else if (payload.agentChannelStateDetailMap) {
-        // StationLoginSuccess exposes the ASC snapshot while normalizing
-        // channelsMap into mmProfile. Snapshot keys preserve the configured
-        // channel types needed for exact pre-break restoration.
-        this.store.agentChannelTypes = Object.keys(payload.agentChannelStateDetailMap);
-      }
     });
 
     void this.loadWellbeingBreakIdleCode();
   };
 
-  /** @internal */
-  handleAgentChannelRelogin = (payload: AgentChannelReloginSuccessEvent): void => {
-    if (!payload || payload.agentId !== this.store.agentId) {
-      this.store.logger?.warn('CC-Widgets: ignored Agent State Control relogin for another agent', {
-        module: 'storeEventsWrapper.ts',
-        method: 'handleAgentChannelRelogin',
-      });
-      return;
-    }
-    this.captureWellnessSession(payload);
-  };
-
-  /** @internal */
-  handleAgentChannelStateChanged = (payload: AgentChannelStateChangedEvent): void => {
-    if (
-      !payload?.agentSessionId ||
-      payload.agentSessionId !== this.store.wellnessAgentSessionId ||
-      payload.agentId !== this.store.agentId
-    ) {
-      this.store.logger?.warn('CC-Widgets: ignored stale Agent State Control update', {
-        module: 'storeEventsWrapper.ts',
-        method: 'handleAgentChannelStateChanged',
-      });
-      return;
-    }
-
-    runInAction(() => {
-      this.store.isAgentStateControlEnabled = true;
-      this.store.agentChannelStateDetails = {
-        ...this.store.agentChannelStateDetails,
-        [payload.channelType]: {...payload.agentChannelStateDetail},
-      };
-      if (!this.store.agentChannelTypes.includes(payload.channelType)) {
-        this.store.agentChannelTypes = [...this.store.agentChannelTypes, payload.channelType];
-      }
-    });
-  };
-
   handleWellnessBreak = (payload: WellnessBreakEvent): void => {
     if (
       !this.store.isWellnessBreakEnabled ||
+      !this.store.isAgentLoggedIn ||
       !payload?.agentSessionId ||
       payload.agentId !== this.store.agentId ||
       !WELLNESS_NOTIFICATION_ACTIONS.has(payload.actionEvent)
@@ -542,21 +452,6 @@ class StoreWrapper implements IStoreWrapper {
         event: payload,
       };
       this.store.wellnessEventSequence = (this.store.wellnessEventSequence ?? 0) + 1;
-    });
-  };
-
-  handleAIAssistantRtdStatus = (payload: AIAssistantRTDStatusEvent): void => {
-    const currentStatus = this.store.aiAssistantRtdStatus ?? {state: 'disconnected', generation: 0};
-    if (!payload || payload.generation < currentStatus.generation) return;
-
-    runInAction(() => {
-      this.store.aiAssistantRtdStatus = payload;
-      if (
-        payload.state === 'disconnected' &&
-        ['offer-pending', 'request-pending'].includes(this.store.wellnessBreakState?.phase)
-      ) {
-        this.store.wellnessBreakState = {phase: 'idle'};
-      }
     });
   };
 
@@ -1895,10 +1790,6 @@ class StoreWrapper implements IStoreWrapper {
       ccSDK.off(TASK_EVENTS.TASK_MERGED, this.handleTaskMerged);
       ccSDK.off(CC_EVENTS.AGENT_MULTI_LOGIN, this.handleMultiLoginCloseSession);
       ccSDK.off(CC_EVENTS.AGENT_LOGOUT_SUCCESS, handleLogOut);
-      ccSDK.off(CC_EVENTS.WELLNESS_BREAK, this.handleWellnessBreak);
-      ccSDK.off(CC_EVENTS.AI_ASSISTANT_RTD_STATUS_CHANGED, this.handleAIAssistantRtdStatus);
-      ccSDK.off(INTERNAL_AGENT_STATE_CONTROL_EVENTS.AGENT_CHANNEL_RELOGIN_SUCCESS, this.handleAgentChannelRelogin);
-      ccSDK.off(INTERNAL_AGENT_STATE_CONTROL_EVENTS.AGENT_CHANNEL_STATE_CHANGED, this.handleAgentChannelStateChanged);
     };
 
     // TODO: https://jira-eng-gpk2.cisco.com/jira/browse/SPARK-626777 Implement the de-register method and close the listener there
@@ -1950,13 +1841,7 @@ class StoreWrapper implements IStoreWrapper {
     // listener sequencing in host integrations, and replace exact callbacks so
     // repeated init/register flows remain idempotent.
     ccSDK.off(CC_EVENTS.WELLNESS_BREAK, this.handleWellnessBreak);
-    ccSDK.off(CC_EVENTS.AI_ASSISTANT_RTD_STATUS_CHANGED, this.handleAIAssistantRtdStatus);
-    ccSDK.off(INTERNAL_AGENT_STATE_CONTROL_EVENTS.AGENT_CHANNEL_RELOGIN_SUCCESS, this.handleAgentChannelRelogin);
-    ccSDK.off(INTERNAL_AGENT_STATE_CONTROL_EVENTS.AGENT_CHANNEL_STATE_CHANGED, this.handleAgentChannelStateChanged);
     ccSDK.on(CC_EVENTS.WELLNESS_BREAK, this.handleWellnessBreak);
-    ccSDK.on(CC_EVENTS.AI_ASSISTANT_RTD_STATUS_CHANGED, this.handleAIAssistantRtdStatus);
-    ccSDK.on(INTERNAL_AGENT_STATE_CONTROL_EVENTS.AGENT_CHANNEL_RELOGIN_SUCCESS, this.handleAgentChannelRelogin);
-    ccSDK.on(INTERNAL_AGENT_STATE_CONTROL_EVENTS.AGENT_CHANNEL_STATE_CHANGED, this.handleAgentChannelStateChanged);
   };
 }
 

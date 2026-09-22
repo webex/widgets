@@ -6,7 +6,6 @@ import {ErrorBoundary} from 'react-error-boundary';
 import {AIAssistantComponent} from '@webex/cc-components';
 import {useAiAssistant, REAL_TIME_ASSIST_FLAG} from '../helper';
 import {useWellnessBreak} from '../wellness/useWellnessBreak';
-import type {WellnessStoreBridge} from '../wellness/wellness-internal.types';
 import {IAIAssistantProps} from '../ai-assistant.types';
 
 const AIAssistantInternal: React.FunctionComponent<IAIAssistantProps> = observer((props) => {
@@ -22,17 +21,11 @@ const AIAssistantInternal: React.FunctionComponent<IAIAssistantProps> = observer
     wellbeingBreakIdleCode,
     wellnessBreakState,
     wellnessEventSequence,
-    aiAssistantRtdStatus,
-    isAgentStateControlEnabled,
-    agentChannelTypes,
-    agentChannelStateDetails,
-    agentChannelReloginSequence,
     legacyAgentState,
     legacyAuxCodeId,
     taskList,
-    idleCodes,
     currentTheme,
-  } = store as typeof store & WellnessStoreBridge;
+  } = store;
   const interactionId = currentTask?.data?.interactionId;
   const isFeatureEnabled = Boolean(featureFlags?.[REAL_TIME_ASSIST_FLAG]);
   const activeRealTimeAssist = interactionId ? realTimeAssist?.[interactionId] || [] : [];
@@ -53,15 +46,9 @@ const AIAssistantInternal: React.FunctionComponent<IAIAssistantProps> = observer
     wellbeingBreakIdleCode,
     wellnessBreakState: wellnessBreakState || {phase: 'idle'},
     wellnessEventSequence: wellnessEventSequence || 0,
-    rtdStatus: aiAssistantRtdStatus || {state: 'disconnected', generation: 0},
-    isAgentStateControlEnabled: Boolean(isAgentStateControlEnabled),
-    agentChannelTypes: agentChannelTypes || [],
-    agentChannelStateDetails: agentChannelStateDetails || {},
-    agentChannelReloginSequence: agentChannelReloginSequence || 0,
     legacyAgentState: legacyAgentState || '',
     legacyAuxCodeId: legacyAuxCodeId || '',
     taskList: taskList || {},
-    idleCodes: idleCodes || [],
     theme: currentTheme || 'light',
   });
   const clearContent = useCallback(() => {

@@ -1,5 +1,4 @@
 import type {
-  AIAssistantRTDStatusEvent,
   IdleCode,
   ITask,
   RealTimeAssistPayload,
@@ -8,7 +7,6 @@ import type {
   WellnessBreakState,
 } from '@webex/cc-store';
 import type {WellnessBreakOverlayTarget} from '@webex/cc-components';
-import type {AgentChannelStateDetail} from './wellness/wellness-internal.types';
 
 export type {WellnessBreakError, WellnessBreakErrorCode, WellnessBreakPhase} from '@webex/cc-store';
 export type {WellnessBreakOverlayTarget} from '@webex/cc-components';
@@ -85,14 +83,8 @@ export interface UseWellnessBreakInput
   wellbeingBreakIdleCode?: IdleCode;
   wellnessBreakState: WellnessBreakState;
   wellnessEventSequence: number;
-  rtdStatus: AIAssistantRTDStatusEvent;
-  isAgentStateControlEnabled: boolean;
-  agentChannelTypes: string[];
-  agentChannelStateDetails: Record<string, AgentChannelStateDetail>;
-  agentChannelReloginSequence: number;
   legacyAgentState: string;
   legacyAuxCodeId: string;
   taskList: Record<string, ITask>;
-  idleCodes: IdleCode[];
   theme: string;
 }

@@ -1,14 +1,13 @@
 # Agent Wellness Break — widgets implementation contract (WXCC-12423)
 
-Status: implemented for Widgets and aligned with the engineering-reviewed v0.4 intake on 2026-09-07;
+Status: implemented for Widgets and aligned with `@webex/contact-center` 3.12.0-next.126 on 2026-09-22;
 final live-flow verification is pending with a wellness-enabled test agent.
 
 ## Scope and ownership
 
-`@webex/cc-store` projects the SDK's effective enablement, current station/channel session, system-owned
-`WellbeingBreak` code, wellness/RTD events, and legacy state. It also retains Agent State Control V2
-snapshots through an internal first-party bridge; those methods, event constants, fields, and types are
-not part of the public store, AI Assistant, aggregate widget, or custom-element contract.
+`@webex/cc-store` projects the SDK's effective enablement, current station session, system-owned
+`WellbeingBreak` code, `WellnessBreak` event, and legacy state. It uses only the wellness API that the
+SDK publishes from its package root.
 `@webex/cc-ai-assistant` owns request/offer actions, safe-state orchestration, timers, media, recovery,
 and host callbacks. `@webex/cc-components` remains props-only. `@webex/cc-widgets` mirrors the public
 surface through `widget-cc-ai-assistant` and distributes lazy media chunks.
@@ -21,13 +20,13 @@ surface through `widget-cc-ai-assistant` and distributes lazy media chunks.
   precedence; otherwise the centered wellness suggestion replaces the normal landing content. Its
   hover/focus tooltip uses the trimmed event `actionText`, falling back to the pre-approved-break copy.
 - Manual request availability is one-shot. Requesting a break, receiving `PROVIDE`/`NOT_ALLOWED`,
-  declining or timing out an offer, disconnecting while pending, and completing/restoring a break all
+  declining or timing out an offer, rotating the session, and completing/restoring a break all
   consume it. Only a later `SUGGEST_WELLNESS_BREAK` enables it again.
 - Eligible suggestions, offer/request states, acknowledgements, completion notices, status, and errors
   own the assistant body while visible; the normal landing or Real-time Assist surface is not stacked
   beneath them.
-- A provided offer expires after five minutes and emits `NO_RESPONSE` once. RTD disconnect/session
-  rotation invalidates it without a response action. When the assistant panel is closed or minimized,
+- A provided offer expires after five minutes and emits `NO_RESPONSE` once. Session rotation invalidates
+  it without a response action. When the assistant panel is closed or minimized,
   a Desktop-style actionable toast exposes the same Take a break and Later actions; opening the panel
   shows the offer in the assistant body without duplicating the toast.
 - Wellness notification eligibility is scoped to the current agent and organization, not to equality
@@ -42,9 +41,8 @@ surface through `widget-cc-ai-assistant` and distributes lazy media chunks.
 - Backend copy is event-specific and plain text: suggestion `actionText` is the CTA tooltip, direct
   `PROVIDE` `actionText` is the offer body, and `WELLNESS_BREAK_NOT_ALLOWED` `actionText` is the denial
   body. Blank text uses the approved local fallback for that state.
-- Start requires exact `Idle / WellbeingBreak` confirmation, including all configured State Control V2
-  channels when the internal first-party mode is enabled,
-  all `store.taskList` entries safe, and a two-second event settle window. Waiting copy mentions current
+- Start requires exact legacy `Idle / WellbeingBreak` confirmation, all `store.taskList` entries safe,
+  and a two-second event settle window. Waiting copy mentions current
   work only while `store.taskList` contains an actual blocking task.
 - The User State widget renders the system-owned `WellbeingBreak` code as the current, timed state while
   it is active, without adding it to the manually selectable idle-code list or echoing SDK-driven entry
@@ -53,13 +51,12 @@ surface through `widget-cc-ai-assistant` and distributes lazy media chunks.
   Audio and animation are independently lazy-loaded during the starting countdown. The full-bleed
   animation holds its first frame behind the inline `5 4 3 2 1` start sequence, plays with the 60-second
   timeline, then holds its final frame behind the ending sequence; audio is rewound and starts with playback.
-- Restoration returns legacy agents to their captured Available or idle-code state (for example,
-  `Meeting`), is sequential per internal State Control V2 target group, leaves RONA/external system idle states unchanged,
-  tries three times with ten-second spacing, and has one internal V2 relogin attempt or five bounded legacy
-  recovery attempts. Before playback, an incompatible external/RONA transition cancels and restores;
+- Restoration returns agents to their captured Available or legacy idle-code state (for example,
+  `Meeting`), tries three times with ten-second spacing, and has five bounded background recovery attempts.
+  Before playback, an incompatible external/RONA transition cancels and restores;
   during playback/ending it does not interrupt the timeline.
-- A host-scoped `sessionStorage` marker contains only version, station session, state model, configured
-  channel names, and minimal pre-break channel states. Refresh never replays an offer, action, or media.
+- A host-scoped `sessionStorage` marker contains only its version, station session, and captured legacy
+  state and idle code. Refresh never replays an offer, action, or media.
 - The full-screen dialog is independent of assistant chrome, traps focus, ignores Escape, restores focus,
   exposes live announcements, and honors reduced motion without changing timing. Its rounded canvas,
   full-bleed animation crop, overlaid phase copy, and bottom progress treatment follow Desktop.
@@ -78,8 +75,8 @@ The serializable Web Component modes are `viewport` and `assistant`.
 `WellnessBreakPhase`, `WellnessBreakErrorCode`, and `WellnessBreakError` are exported by both
 `@webex/cc-ai-assistant` and the aggregate React entry.
 
-State Control V2 remains implementation-only. No ASC/V2 method, event constant, store field, hook input,
-or restoration type is exported for host use.
+The widget does not consume or expose State Control V2 or an AI Assistant RTD status event. These
+surfaces are not part of the published SDK wellness contract.
 
 The React sample exposes all three modes in an **AI Assistant → Wellness break overlay target** selector.
 Its custom mode passes the bordered demo container's `HTMLElement`, making coverage behavior verifiable
@@ -120,16 +117,16 @@ or initial bundle alone.
 
 ## Release gates
 
-- Replace the current Contact Center SDK dependency only after the WXCC-12423 build is published; its
-  exact package-root types must replace the temporary structural declarations. No local path, tarball,
-  or guessed version may be released.
+- Keep the store pinned to the published `@webex/contact-center` 3.12.0-next.126 build. Consume its
+  wellness constants and types from the package root. Do not add local paths, tarballs, or structural
+  copies of the SDK wellness contract.
 - Retain the media redistribution approval and checksum record.
-- Verify multi-client action idempotency and live-only RTD reconnect behavior with the backend.
+- Verify multi-client action idempotency with the backend.
 - Approve the US English copy before GA.
 
 ## Samples and verification
 
 The React and Web Component samples use real store/SDK events, expose the lifecycle callbacks, log only
-lifecycle/error categories, and do not include a fake wellness event generator. Verify legacy and internal State Control V2
-flows, active voice/digital work, RONA phase boundaries, refresh recovery, RTD disconnect, media failure,
-reduced motion, focus restoration, and aggregate asset loading after the SDK release gate is resolved.
+lifecycle/error categories, and do not include a fake wellness event generator. Verify the legacy state
+flow, active voice/digital work, RONA phase boundaries, refresh recovery, media failure, reduced motion,
+focus restoration, and aggregate asset loading with a wellness-enabled test agent.

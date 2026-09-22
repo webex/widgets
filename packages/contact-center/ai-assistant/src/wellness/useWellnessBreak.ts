@@ -1,5 +1,5 @@
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import store from '@webex/cc-store';
+import store, {WELLNESS_BREAK_NOTIFICATION_ACTIONS, WELLNESS_BREAK_USER_ACTIONS} from '@webex/cc-store';
 import type {WellnessBreakError, WellnessBreakErrorCode, WellnessBreakEvent, WellnessBreakPhase} from '@webex/cc-store';
 import type {
   WellnessBreakHistoryEntry,
@@ -8,12 +8,9 @@ import type {
   WellnessBreakViewModel,
 } from '@webex/cc-components';
 import type {UseWellnessBreakInput} from '../ai-assistant.types';
-import type {WellnessBreakRecoveryMarkerV1, WellnessStateModel, WellnessStoreBridge} from './wellness-internal.types';
+import type {WellnessBreakRecoveryMarkerV1} from './wellness-internal.types';
 import {
   areAllTasksSafeForWellness,
-  areWellnessChannelsConfirmed,
-  buildWellnessRestoreGroups,
-  cloneWellnessChannelStates,
   createWellnessRecoveryMarker,
   getWellnessRecoveryDecision,
   normalizeWellnessState,
@@ -29,12 +26,9 @@ export const WELLNESS_ENDING_MS = 5 * 1000;
 export const WELLNESS_RESTORE_RETRY_MS = 10 * 1000;
 export const WELLNESS_RECOVERY_KEY = 'webex-cc-agent-wellness-break:v1';
 
-const wellnessStore = store as typeof store & WellnessStoreBridge;
-
 const RESTORE_ATTEMPTS = 3;
 const LEGACY_RECOVERY_ATTEMPTS = 5;
 const LEGACY_RECOVERY_INTERVAL_MS = 20 * 1000;
-const REFERENCE_CHANNELS = ['telephony', 'chat', 'email', 'social'];
 const ACTIVE_PHASES = new Set<WellnessBreakPhase>([
   'changing-to-break',
   'waiting-for-safe-state',
@@ -47,13 +41,8 @@ const PRE_PLAY_PHASES = new Set<WellnessBreakPhase>(['changing-to-break', 'waiti
 const MODULE = 'wellness/useWellnessBreak.ts';
 
 type CapturedBreakState = {
-  stateModel: WellnessStateModel;
   theme: string;
-  channelTypes: string[];
-  preBreakChannelStates: WellnessBreakRecoveryMarkerV1['preBreakChannelStates'];
-  preBreakLegacyState?: string;
-  preBreakLegacyAuxCodeId?: string;
-};
+} & Pick<WellnessBreakRecoveryMarkerV1, 'preBreakLegacyState' | 'preBreakLegacyAuxCodeId'>;
 
 const getLegacyRestoreState = (
   captured?: Pick<CapturedBreakState, 'preBreakLegacyState' | 'preBreakLegacyAuxCodeId'>
@@ -105,8 +94,6 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
   const acceptedEventRef = useRef<WellnessBreakEvent>();
   const completionRef = useRef(false);
   const legacyRecoveryCountRef = useRef(0);
-  const ascReconnectAttemptedRef = useRef(false);
-  const priorRtdGenerationRef = useRef(input.rtdStatus.generation);
   const reportedErrorCodeRef = useRef<WellnessBreakErrorCode>();
   const historySequenceRef = useRef(0);
   const activeOfferHistoryIdRef = useRef<string>();
@@ -299,39 +286,16 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
         }
         try {
           const captured = capturedRef.current;
-          if (captured?.stateModel === 'agent-state-control') {
-            const validIdleCodeIds = latest.idleCodes.filter((code) => !code.isSystem).map((code) => code.id);
-            const defaultIdleCodeId = latest.idleCodes.find((code) => code.isDefault && !code.isSystem)?.id;
-            const groups = buildWellnessRestoreGroups({
-              channelTypes: captured.channelTypes.length ? captured.channelTypes : REFERENCE_CHANNELS,
-              currentChannelStates: latest.agentChannelStateDetails,
-              preBreakChannelStates: captured.preBreakChannelStates || {},
-              wellnessAuxCodeId: latest.wellbeingBreakIdleCode?.id,
-              validIdleCodeIds,
-              defaultIdleCodeId,
-              includeUnconfirmedChannels: restoreSourcePhase === 'changing-to-break',
-            });
-            let groupFailure = false;
-            for (const group of groups) {
-              try {
-                await wellnessStore.cc.setAgentChannelState({
-                  channelTypes: group.channelTypes,
-                  state: group.state,
-                  ...(group.auxCodeId ? {auxCodeId: group.auxCodeId} : {}),
-                  agentId: latest.agentId,
-                  reason: 'Agent Wellness Break restoration',
-                });
-              } catch {
-                groupFailure = true;
-              }
-            }
-            if (groupFailure) throw new Error('One or more channel restore groups failed');
-          } else if (
+          if (
             latest.legacyAuxCodeId === latest.wellbeingBreakIdleCode?.id ||
             normalizeWellnessState(latest.legacyAgentState) === 'wellbeingbreak' ||
             (restoreSourcePhase === 'changing-to-break' && stateRequestResolvedRef.current)
           ) {
-            await store.cc.setAgentState({...getLegacyRestoreState(captured), agentId: latest.agentId});
+            await store.cc.setAgentState({
+              ...getLegacyRestoreState(captured),
+              agentId: latest.agentId,
+              lastStateChangeReason: 'wellness-break-complete',
+            });
           }
 
           if (attempt > 1) {
@@ -489,9 +453,12 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
     appendUserAction('take-break');
     setPhase('request-pending');
     logWellnessMetric(WELLNESS_METRIC.CTA_USER_REQUEST);
+    const operation = ++operationRef.current;
+    const sessionId = latest.agentSessionId;
     try {
       await api.requestWellnessBreak();
     } catch {
+      if (operation !== operationRef.current || latestRef.current.agentSessionId !== sessionId) return;
       setPhase('idle');
       reportError('ACTION_REQUEST_FAILED', 'request-pending', true);
     }
@@ -517,56 +484,38 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
         return;
       }
 
-      const stateModel: WellnessStateModel = latest.isAgentStateControlEnabled ? 'agent-state-control' : 'legacy';
-      if (stateModel === 'agent-state-control' && latest.agentChannelTypes.length === 0) {
-        reportError('STATE_CHANGE_FAILED', 'changing-to-break', true);
-        return;
-      }
-
-      const channelTypes = [...new Set(latest.agentChannelTypes)];
-      const preBreakChannelStates = cloneWellnessChannelStates(channelTypes, latest.agentChannelStateDetails);
+      const operation = ++operationRef.current;
+      const sessionId = latest.agentSessionId;
       const scheduledAfterWork = !areAllTasksSafeForWellness(latest.taskList);
       if (sendAccepted) {
         resolveActiveOffer();
         appendUserAction('take-break');
       }
       capturedRef.current = {
-        stateModel,
         theme: latest.theme,
-        channelTypes,
-        preBreakChannelStates,
         preBreakLegacyState: latest.legacyAgentState,
         preBreakLegacyAuxCodeId: latest.legacyAuxCodeId,
       };
       saveRecoveryMarker(
         createWellnessRecoveryMarker({
-          agentSessionId: latest.agentSessionId,
-          stateModel,
-          channelTypes,
-          preBreakChannelStates,
+          agentSessionId: sessionId,
+          preBreakLegacyState: latest.legacyAgentState,
+          preBreakLegacyAuxCodeId: latest.legacyAuxCodeId,
         })
       );
       setPhase('changing-to-break', {event});
 
       try {
-        if (stateModel === 'agent-state-control') {
-          await wellnessStore.cc.setAgentChannelState({
-            channelTypes,
-            state: 'Idle',
-            auxCodeId: latest.wellbeingBreakIdleCode.id,
-            reason: 'Agent Wellness Break',
-            agentId: latest.agentId,
-          });
-        } else {
-          await store.cc.setAgentState({
-            state: 'Idle',
-            auxCodeId: latest.wellbeingBreakIdleCode.id,
-            agentId: latest.agentId,
-            lastStateChangeReason: 'WellbeingBreak',
-          });
-        }
+        await store.cc.setAgentState({
+          state: 'Idle',
+          auxCodeId: latest.wellbeingBreakIdleCode.id,
+          agentId: latest.agentId,
+          lastStateChangeReason: 'wellness-break',
+        });
+        if (operation !== operationRef.current || latestRef.current.agentSessionId !== sessionId) return;
         stateRequestResolvedRef.current = true;
       } catch {
+        if (operation !== operationRef.current || latestRef.current.agentSessionId !== sessionId) return;
         clearRecoveryMarker();
         capturedRef.current = undefined;
         reportError('STATE_CHANGE_FAILED', 'changing-to-break', true);
@@ -578,9 +527,11 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
           const api = store.cc.apiAIAssistant;
           if (!api?.respondToWellnessBreak) throw new Error('Wellness response API unavailable');
           await api.respondToWellnessBreak({
-            action: 'ACCEPTED',
+            action: WELLNESS_BREAK_USER_ACTIONS.ACCEPTED,
           });
+          if (operation !== operationRef.current || latestRef.current.agentSessionId !== sessionId) return;
         } catch {
+          if (operation !== operationRef.current || latestRef.current.agentSessionId !== sessionId) return;
           reportError('ACTION_REQUEST_FAILED', 'changing-to-break', true, false);
           void performRestore(false);
           return;
@@ -601,14 +552,9 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
       settleTimerRef.current = window.setTimeout(() => {
         settleTimerRef.current = undefined;
         const current = latestRef.current;
-        const stateConfirmed = current.isAgentStateControlEnabled
-          ? areWellnessChannelsConfirmed(
-              current.agentChannelTypes,
-              current.agentChannelStateDetails,
-              current.wellbeingBreakIdleCode?.id
-            )
-          : current.legacyAuxCodeId === current.wellbeingBreakIdleCode?.id &&
-            normalizeWellnessState(current.legacyAgentState) === 'idle';
+        const stateConfirmed =
+          current.legacyAuxCodeId === current.wellbeingBreakIdleCode?.id &&
+          normalizeWellnessState(current.legacyAgentState) === 'idle';
         if (
           phaseRef.current === 'waiting-for-safe-state' &&
           stateConfirmed &&
@@ -646,6 +592,8 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
       const latest = latestRef.current;
       const event = latest.wellnessBreakState.event;
       if (!event || phaseRef.current !== 'offer-pending') return;
+      const operation = ++operationRef.current;
+      const sessionId = latest.agentSessionId;
       clearOfferTimer();
       setRequestAvailable(false);
       setPhase('idle');
@@ -660,9 +608,10 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
         const api = store.cc.apiAIAssistant;
         if (!api?.respondToWellnessBreak) throw new Error('Wellness response API unavailable');
         await api.respondToWellnessBreak({
-          action: 'REJECTED',
+          action: WELLNESS_BREAK_USER_ACTIONS.REJECTED,
         });
       } catch {
+        if (operation !== operationRef.current || latestRef.current.agentSessionId !== sessionId) return;
         reportError('ACTION_REQUEST_FAILED', 'offer-pending', true, false);
       }
     },
@@ -703,11 +652,11 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
     clearOfferTimer();
     setNotice(undefined);
     setContentCleared(false);
-    if (event.actionEvent === 'SUGGEST_WELLNESS_BREAK') {
+    if (event.actionEvent === WELLNESS_BREAK_NOTIFICATION_ACTIONS.SUGGEST_WELLNESS_BREAK) {
       setRequestAvailable(true);
       if (!ACTIVE_PHASES.has(phaseRef.current)) setPhase('idle', {event});
       logWellnessMetric(WELLNESS_METRIC.DISPLAY_CTA);
-    } else if (event.actionEvent === 'WELLNESS_BREAK_NOT_ALLOWED') {
+    } else if (event.actionEvent === WELLNESS_BREAK_NOTIFICATION_ACTIONS.WELLNESS_BREAK_NOT_ALLOWED) {
       setRequestAvailable(false);
       if (phaseRef.current === 'request-pending') {
         setNotice('not-allowed');
@@ -715,7 +664,7 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
         setPhase('idle', {event});
         logWellnessMetric(WELLNESS_METRIC.CTA_REJECTED);
       }
-    } else if (event.actionEvent === 'PROVIDE_WELLNESS_BREAK') {
+    } else if (event.actionEvent === WELLNESS_BREAK_NOTIFICATION_ACTIONS.PROVIDE_WELLNESS_BREAK) {
       setRequestAvailable(false);
       if (phaseRef.current === 'request-pending') {
         logWellnessMetric(WELLNESS_METRIC.PROVIDE_BREAK_EVENT_RECEIVED);
@@ -743,11 +692,16 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
             reportError('ACTION_REQUEST_FAILED', 'offer-pending', true, false);
             return;
           }
+          const operation = ++operationRef.current;
+          const sessionId = latest.agentSessionId;
           void api
             .respondToWellnessBreak({
-              action: 'NO_RESPONSE',
+              action: WELLNESS_BREAK_USER_ACTIONS.NO_RESPONSE,
             })
-            .catch(() => reportError('ACTION_REQUEST_FAILED', 'offer-pending', true, false));
+            .catch(() => {
+              if (operation !== operationRef.current || latestRef.current.agentSessionId !== sessionId) return;
+              reportError('ACTION_REQUEST_FAILED', 'offer-pending', true, false);
+            });
         }, WELLNESS_OFFER_TIMEOUT_MS);
       }
     }
@@ -769,14 +723,9 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
   useEffect(() => {
     const phase = input.wellnessBreakState.phase;
     if (phase !== 'waiting-for-safe-state' && phase !== 'starting') return;
-    const stateConfirmed = input.isAgentStateControlEnabled
-      ? areWellnessChannelsConfirmed(
-          input.agentChannelTypes,
-          input.agentChannelStateDetails,
-          input.wellbeingBreakIdleCode?.id
-        )
-      : input.legacyAuxCodeId === input.wellbeingBreakIdleCode?.id &&
-        normalizeWellnessState(input.legacyAgentState) === 'idle';
+    const stateConfirmed =
+      input.legacyAuxCodeId === input.wellbeingBreakIdleCode?.id &&
+      normalizeWellnessState(input.legacyAgentState) === 'idle';
     const safe = stateConfirmed && areAllTasksSafeForWellness(input.taskList);
     if (!safe && phase === 'starting') {
       clearTimeline();
@@ -792,9 +741,6 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
   }, [
     beginStartingCountdown,
     clearTimeline,
-    input.agentChannelStateDetails,
-    input.agentChannelTypes,
-    input.isAgentStateControlEnabled,
     input.legacyAgentState,
     input.legacyAuxCodeId,
     input.taskList,
@@ -809,77 +755,23 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
     const phase = input.wellnessBreakState.phase;
     const captured = capturedRef.current;
     if (!captured || !PRE_PLAY_PHASES.has(phase) || !stateRequestResolvedRef.current) return;
-    let incompatible = false;
-    if (captured.stateModel === 'agent-state-control') {
-      incompatible = captured.channelTypes.some((channelType) => {
-        const current = input.agentChannelStateDetails[channelType];
-        const previous = captured.preBreakChannelStates?.[channelType];
-        return Boolean(
-          current &&
-            current.pendingIdle !== true &&
-            current.auxCodeId !== input.wellbeingBreakIdleCode?.id &&
-            (current.auxCodeId !== previous?.auxCodeId || current.agentState !== previous?.agentState)
-        );
-      });
-    } else {
-      incompatible =
-        input.legacyAuxCodeId !== input.wellbeingBreakIdleCode?.id &&
-        (input.legacyAuxCodeId !== captured.preBreakLegacyAuxCodeId ||
-          input.legacyAgentState !== captured.preBreakLegacyState);
-    }
+    const incompatible =
+      input.legacyAuxCodeId !== input.wellbeingBreakIdleCode?.id &&
+      (input.legacyAuxCodeId !== captured.preBreakLegacyAuxCodeId ||
+        input.legacyAgentState !== captured.preBreakLegacyState);
     if (incompatible) void performRestore(false);
   }, [
-    input.agentChannelStateDetails,
+    input.legacyAgentState,
     input.legacyAuxCodeId,
     input.wellbeingBreakIdleCode?.id,
     input.wellnessBreakState.phase,
     performRestore,
   ]);
 
-  // RTD disconnect invalidates notification-owned state only. The store also
-  // applies this rule, while this effect owns the response timer.
-  useEffect(() => {
-    if (input.rtdStatus.state === 'disconnected') {
-      clearOfferTimer();
-      if (phaseRef.current === 'offer-pending' || phaseRef.current === 'request-pending') {
-        setRequestAvailable(false);
-        setPhase('idle');
-      }
-    }
-    if (input.rtdStatus.generation > priorRtdGenerationRef.current) {
-      priorRtdGenerationRef.current = input.rtdStatus.generation;
-      if (
-        phaseRef.current === 'error' &&
-        error?.code === 'RESTORE_FAILED' &&
-        capturedRef.current?.stateModel === 'agent-state-control' &&
-        !ascReconnectAttemptedRef.current
-      ) {
-        ascReconnectAttemptedRef.current = true;
-        void performRestore(completionRef.current, 1).then((success) =>
-          logWellnessMetric(WELLNESS_METRIC.RESTORE_STATE_RECONNECT_ATTEMPT, {success})
-        );
-      }
-    }
-  }, [clearOfferTimer, error?.code, input.rtdStatus, performRestore, setPhase]);
-
-  useEffect(() => {
-    if (
-      input.agentChannelReloginSequence > 0 &&
-      input.wellnessBreakState.phase === 'error' &&
-      error?.code === 'RESTORE_FAILED' &&
-      capturedRef.current?.stateModel === 'agent-state-control' &&
-      !ascReconnectAttemptedRef.current
-    ) {
-      ascReconnectAttemptedRef.current = true;
-      void performRestore(completionRef.current, 1).then((success) =>
-        logWellnessMetric(WELLNESS_METRIC.RESTORE_STATE_RECONNECT_ATTEMPT, {success})
-      );
-    }
-  }, [error?.code, input.agentChannelReloginSequence, input.wellnessBreakState.phase, performRestore]);
-
   // Session ownership is never derived from the wellness event.
   useEffect(() => {
     if (input.agentSessionId === previousSessionRef.current) return;
+    const previousSessionId = previousSessionRef.current;
     previousSessionRef.current = input.agentSessionId;
     operationRef.current += 1;
     restoringRef.current = false;
@@ -890,7 +782,7 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
     setNotice(undefined);
     setError(undefined);
     capturedRef.current = undefined;
-    clearRecoveryMarker();
+    if (previousSessionId) clearRecoveryMarker();
   }, [clearOfferTimer, clearRecoveryMarker, clearTimeline, input.agentSessionId, stopMedia]);
 
   // Feature revocation hides new controls only after state-owned work restores.
@@ -924,23 +816,19 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
       wellnessAuxCodeId: input.wellbeingBreakIdleCode.id,
       legacyStateKnown: Boolean(input.legacyAgentState || input.legacyAuxCodeId),
       legacyAuxCodeId: input.legacyAuxCodeId,
-      ascSnapshotKnown: Object.keys(input.agentChannelStateDetails).length > 0,
-      currentChannelStates: input.agentChannelStateDetails,
     });
     if (decision === 'discard' || decision === 'clear') {
       clearRecoveryMarker();
     } else if (decision === 'restore' && marker && !capturedRef.current) {
       capturedRef.current = {
-        stateModel: marker.stateModel,
         theme: input.theme,
-        channelTypes: marker.channelTypes || [],
-        preBreakChannelStates: marker.preBreakChannelStates || {},
+        preBreakLegacyState: marker.preBreakLegacyState,
+        preBreakLegacyAuxCodeId: marker.preBreakLegacyAuxCodeId,
       };
       void performRestore(false);
     }
   }, [
     clearRecoveryMarker,
-    input.agentChannelStateDetails,
     input.agentSessionId,
     input.isLoggedIn,
     input.legacyAgentState,
@@ -952,11 +840,7 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
   // Legacy exhaustion recovery continues in the background while this host
   // still owns the wellness state, bounded to five additional attempts.
   useEffect(() => {
-    if (
-      input.wellnessBreakState.phase !== 'error' ||
-      error?.code !== 'RESTORE_FAILED' ||
-      capturedRef.current?.stateModel !== 'legacy'
-    ) {
+    if (input.wellnessBreakState.phase !== 'error' || error?.code !== 'RESTORE_FAILED' || !capturedRef.current) {
       return undefined;
     }
     const timer = window.setInterval(() => {
@@ -997,33 +881,13 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
         store.setWellnessBreakState({phase: 'idle'});
       }
       if (captured && latest.agentSessionId && ACTIVE_PHASES.has(phaseRef.current)) {
-        if (captured.stateModel === 'legacy') {
-          void store.cc.setAgentState({...getLegacyRestoreState(captured), agentId: latest.agentId}).catch(() => {});
-        } else {
-          const groups = buildWellnessRestoreGroups({
-            channelTypes: captured.channelTypes,
-            currentChannelStates: latest.agentChannelStateDetails,
-            preBreakChannelStates: captured.preBreakChannelStates || {},
-            wellnessAuxCodeId: latest.wellbeingBreakIdleCode?.id,
-            validIdleCodeIds: latest.idleCodes.filter((code) => !code.isSystem).map((code) => code.id),
-            defaultIdleCodeId: latest.idleCodes.find((code) => code.isDefault && !code.isSystem)?.id,
-          });
-          void groups.reduce(
-            (sequence, group) =>
-              sequence.then(() =>
-                wellnessStore.cc
-                  .setAgentChannelState({
-                    channelTypes: group.channelTypes,
-                    state: group.state,
-                    ...(group.auxCodeId ? {auxCodeId: group.auxCodeId} : {}),
-                    agentId: latest.agentId,
-                    reason: 'Agent Wellness Break unmount restoration',
-                  })
-                  .then(() => undefined)
-              ),
-            Promise.resolve()
-          );
-        }
+        void store.cc
+          .setAgentState({
+            ...getLegacyRestoreState(captured),
+            agentId: latest.agentId,
+            lastStateChangeReason: 'wellness-break-complete',
+          })
+          .catch(() => {});
       }
     },
     [clearOfferTimer, clearTimeline, stopMedia]

@@ -5,10 +5,20 @@ import store from '@webex/cc-store';
 
 jest.mock('@webex/cc-store', () => ({
   __esModule: true,
+  WELLNESS_BREAK_NOTIFICATION_ACTIONS: {
+    PROVIDE_WELLNESS_BREAK: 'PROVIDE_WELLNESS_BREAK',
+    SUGGEST_WELLNESS_BREAK: 'SUGGEST_WELLNESS_BREAK',
+    WELLNESS_BREAK_NOT_ALLOWED: 'WELLNESS_BREAK_NOT_ALLOWED',
+  },
+  WELLNESS_BREAK_USER_ACTIONS: {
+    REQUESTED: 'REQUESTED',
+    ACCEPTED: 'ACCEPTED',
+    REJECTED: 'REJECTED',
+    NO_RESPONSE: 'NO_RESPONSE',
+  },
   default: {
     cc: {
       setAgentState: jest.fn(),
-      setAgentChannelState: jest.fn(),
       apiAIAssistant: {
         requestWellnessBreak: jest.fn(),
         respondToWellnessBreak: jest.fn(),
@@ -28,7 +38,6 @@ jest.mock('@webex/cc-store', () => ({
 type StoreMock = {
   cc: {
     setAgentState: jest.Mock;
-    setAgentChannelState: jest.Mock;
     apiAIAssistant: {
       requestWellnessBreak: jest.Mock;
       respondToWellnessBreak: jest.Mock;
@@ -55,15 +64,9 @@ const baseInput: UseWellnessBreakInput = {
   wellbeingBreakIdleCode: {id: 'wellness', name: 'WellbeingBreak', isSystem: true, isDefault: false},
   wellnessBreakState: {phase: 'idle'},
   wellnessEventSequence: 0,
-  rtdStatus: {state: 'connected', generation: 1},
-  isAgentStateControlEnabled: false,
-  agentChannelTypes: [],
-  agentChannelStateDetails: {},
-  agentChannelReloginSequence: 0,
   legacyAgentState: 'Available',
   legacyAuxCodeId: '0',
   taskList: {},
-  idleCodes: [{id: '0', name: 'Available', isSystem: true, isDefault: true}],
   theme: 'LIGHT',
 };
 
@@ -72,7 +75,6 @@ describe('useWellnessBreak', () => {
     jest.clearAllMocks();
     window.sessionStorage.clear();
     storeMock.cc.setAgentState.mockResolvedValue(undefined);
-    storeMock.cc.setAgentChannelState.mockResolvedValue(undefined);
     storeMock.cc.apiAIAssistant.requestWellnessBreak.mockResolvedValue(undefined);
     storeMock.cc.apiAIAssistant.respondToWellnessBreak.mockResolvedValue(undefined);
   });
@@ -105,6 +107,44 @@ describe('useWellnessBreak', () => {
       target: 'wellness_break_cta',
       verb: 'request',
     });
+  });
+
+  it('ignores a request failure after the agent session changes', async () => {
+    let rejectRequest: ((reason?: unknown) => void) | undefined;
+    storeMock.cc.apiAIAssistant.requestWellnessBreak.mockImplementationOnce(
+      () =>
+        new Promise<void>((_resolve, reject) => {
+          rejectRequest = reject;
+        })
+    );
+    const onWellnessBreakError = jest.fn();
+    const {result, rerender} = renderHook((props: UseWellnessBreakInput) => useWellnessBreak(props), {
+      initialProps: {
+        ...baseInput,
+        wellnessBreakState: {phase: 'idle', event},
+        wellnessEventSequence: 1,
+        onWellnessBreakError,
+      },
+    });
+
+    await waitFor(() => expect(result.current.requestAvailable).toBe(true));
+    act(() => {
+      result.current.onRequest();
+    });
+    rerender({
+      ...baseInput,
+      agentSessionId: 'session-2',
+      onWellnessBreakError,
+    });
+    await act(async () => {
+      rejectRequest?.(new Error('stale request'));
+      await Promise.resolve();
+    });
+
+    expect(onWellnessBreakError).not.toHaveBeenCalled();
+    expect(storeMock.setWellnessBreakState).not.toHaveBeenCalledWith(
+      expect.objectContaining({phase: 'error', errorCode: 'ACTION_REQUEST_FAILED'})
+    );
   });
 
   it('keeps a consumed manual CTA unavailable until a fresh SUGGEST arrives', async () => {
@@ -194,7 +234,8 @@ describe('useWellnessBreak', () => {
     expect(JSON.parse(window.sessionStorage.getItem(WELLNESS_RECOVERY_KEY) || '{}')).toEqual({
       version: 1,
       agentSessionId: 'session-1',
-      stateModel: 'legacy',
+      preBreakLegacyState: 'Available',
+      preBreakLegacyAuxCodeId: '0',
     });
   });
 
@@ -386,118 +427,6 @@ describe('useWellnessBreak', () => {
     });
   });
 
-  it('rejects ASC acceptance when the configured channel list is missing', async () => {
-    const onWellnessBreakError = jest.fn();
-    const provide = {...event, actionEvent: 'PROVIDE_WELLNESS_BREAK' as const};
-    const {result} = renderHook(() =>
-      useWellnessBreak({
-        ...baseInput,
-        isAgentStateControlEnabled: true,
-        wellnessBreakState: {phase: 'offer-pending', event: provide},
-        onWellnessBreakError,
-      })
-    );
-
-    await act(async () => result.current.onAccept());
-
-    expect(storeMock.cc.setAgentChannelState).not.toHaveBeenCalled();
-    expect(storeMock.cc.setAgentState).not.toHaveBeenCalled();
-    expect(storeMock.cc.apiAIAssistant.respondToWellnessBreak).not.toHaveBeenCalled();
-    expect(onWellnessBreakError).toHaveBeenCalledWith({
-      code: 'STATE_CHANGE_FAILED',
-      phase: 'changing-to-break',
-      recoverable: true,
-    });
-  });
-
-  it('uses the ASC state API before sending ACCEPTED and captures channel restore data', async () => {
-    const provide = {...event, actionEvent: 'PROVIDE_WELLNESS_BREAK' as const};
-    const {result} = renderHook(() =>
-      useWellnessBreak({
-        ...baseInput,
-        isAgentStateControlEnabled: true,
-        agentChannelTypes: ['telephony'],
-        agentChannelStateDetails: {
-          telephony: {
-            agentState: 'Idle',
-            pendingIdle: false,
-            auxCodeId: 'lunch',
-            stateChangeTimestamp: 1,
-            stateChangeReason: '',
-          },
-        },
-        idleCodes: [{id: 'lunch', name: 'Lunch', isSystem: false, isDefault: true}],
-        wellnessBreakState: {phase: 'offer-pending', event: provide},
-      })
-    );
-
-    await act(async () => result.current.onAccept());
-
-    expect(storeMock.cc.setAgentChannelState).toHaveBeenCalledWith({
-      channelTypes: ['telephony'],
-      state: 'Idle',
-      auxCodeId: 'wellness',
-      reason: 'Agent Wellness Break',
-      agentId: 'agent-1',
-    });
-    expect(storeMock.cc.apiAIAssistant.respondToWellnessBreak).toHaveBeenCalledWith({
-      action: 'ACCEPTED',
-    });
-    expect(JSON.parse(window.sessionStorage.getItem(WELLNESS_RECOVERY_KEY) || '{}')).toEqual({
-      version: 1,
-      agentSessionId: 'session-1',
-      stateModel: 'agent-state-control',
-      channelTypes: ['telephony'],
-      preBreakChannelStates: {telephony: {agentState: 'Idle', auxCodeId: 'lunch'}},
-    });
-  });
-
-  it('restores an ASC channel to its exact pre-break Meeting idle code after the break', async () => {
-    jest.useFakeTimers();
-    const provide = {...event, actionEvent: 'PROVIDE_WELLNESS_BREAK' as const};
-    const meetingState = {
-      agentState: 'Idle',
-      pendingIdle: false,
-      auxCodeId: 'meeting',
-      stateChangeTimestamp: 1,
-      stateChangeReason: '',
-    };
-    const wellnessState = {...meetingState, auxCodeId: 'wellness'};
-    const input = {
-      ...baseInput,
-      isAgentStateControlEnabled: true,
-      agentChannelTypes: ['telephony'],
-      agentChannelStateDetails: {telephony: meetingState},
-      idleCodes: [{id: 'meeting', name: 'Meeting', isSystem: false, isDefault: false}],
-      wellnessBreakState: {phase: 'offer-pending' as const, event: provide},
-    };
-    const {result, rerender} = renderHook((props: UseWellnessBreakInput) => useWellnessBreak(props), {
-      initialProps: input,
-    });
-
-    await act(async () => result.current.onAccept());
-    rerender({
-      ...input,
-      agentChannelStateDetails: {telephony: wellnessState},
-      wellnessBreakState: {phase: 'waiting-for-safe-state', event: provide},
-    });
-
-    await act(async () => {
-      jest.advanceTimersByTime(2_000 + 5_000 + 60_000 + 5_000);
-      await Promise.resolve();
-    });
-
-    await waitFor(() =>
-      expect(storeMock.cc.setAgentChannelState).toHaveBeenLastCalledWith({
-        channelTypes: ['telephony'],
-        state: 'Idle',
-        auxCodeId: 'meeting',
-        agentId: 'agent-1',
-        reason: 'Agent Wellness Break restoration',
-      })
-    );
-  });
-
   it('restores the exact pre-break legacy Meeting idle code after the break', async () => {
     jest.useFakeTimers();
     const provide = {...event, actionEvent: 'PROVIDE_WELLNESS_BREAK' as const};
@@ -505,7 +434,6 @@ describe('useWellnessBreak', () => {
       ...baseInput,
       legacyAgentState: 'Idle',
       legacyAuxCodeId: 'meeting',
-      idleCodes: [{id: 'meeting', name: 'Meeting', isSystem: false, isDefault: false}],
       wellnessBreakState: {phase: 'offer-pending' as const, event: provide},
     };
     const {result, rerender} = renderHook((props: UseWellnessBreakInput) => useWellnessBreak(props), {
@@ -530,8 +458,46 @@ describe('useWellnessBreak', () => {
         state: 'Idle',
         auxCodeId: 'meeting',
         agentId: 'agent-1',
+        lastStateChangeReason: 'wellness-break-complete',
       })
     );
+  });
+
+  it('restores a refresh marker after the first session hydration', async () => {
+    window.sessionStorage.setItem(
+      WELLNESS_RECOVERY_KEY,
+      JSON.stringify({
+        version: 1,
+        agentSessionId: 'session-1',
+        preBreakLegacyState: 'Idle',
+        preBreakLegacyAuxCodeId: 'meeting',
+      })
+    );
+    const {rerender} = renderHook((props: UseWellnessBreakInput) => useWellnessBreak(props), {
+      initialProps: {
+        ...baseInput,
+        isLoggedIn: false,
+        agentSessionId: '',
+        legacyAgentState: '',
+        legacyAuxCodeId: '',
+      },
+    });
+
+    rerender({
+      ...baseInput,
+      legacyAgentState: 'Idle',
+      legacyAuxCodeId: 'wellness',
+    });
+
+    await waitFor(() =>
+      expect(storeMock.cc.setAgentState).toHaveBeenCalledWith({
+        state: 'Idle',
+        auxCodeId: 'meeting',
+        agentId: 'agent-1',
+        lastStateChangeReason: 'wellness-break-complete',
+      })
+    );
+    expect(window.sessionStorage.getItem(WELLNESS_RECOVERY_KEY)).toBeNull();
   });
 
   it('surfaces a store-originated system-code error to the host', async () => {

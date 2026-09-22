@@ -599,11 +599,7 @@ const mockQueuesResponse: ContactServiceQueuesResponse = {
   meta: {page: 0, pageSize: 25, totalPages: 1},
 };
 
-type InternalStateControlTestDouble = {
-  setAgentChannelState: jest.Mock<Promise<unknown>, [Record<string, unknown>]>;
-};
-
-const mockCC: IContactCenter & InternalStateControlTestDouble = {
+const mockCC: IContactCenter = {
   on: jest.fn(),
   off: jest.fn(),
   updateAgentProfile: jest.fn(),
@@ -632,7 +628,6 @@ const mockCC: IContactCenter & InternalStateControlTestDouble = {
     isSystem: true,
     isDefault: false,
   }),
-  setAgentChannelState: jest.fn().mockResolvedValue({}),
   getOutdialAniEntries: jest.fn().mockResolvedValue({entries: []}),
   getAccessToken: jest.fn().mockResolvedValue('mock-access-token'),
   startOutdial: jest.fn().mockResolvedValue({}),

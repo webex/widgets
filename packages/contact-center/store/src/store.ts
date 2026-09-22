@@ -17,8 +17,6 @@ import {
   RealTimeAssistPayload,
   OfferActionErrorDisplay,
   WellnessBreakState,
-  AIAssistantRTDStatusEvent,
-  AgentChannelStateDetail,
 } from './store.types';
 
 import {getFeatureFlags} from './util';
@@ -75,17 +73,9 @@ class Store implements IStore {
   wellbeingBreakIdleCode?: IdleCode;
   wellnessBreakState: WellnessBreakState = {phase: 'idle'};
   wellnessEventSequence = 0;
-  aiAssistantRtdStatus: AIAssistantRTDStatusEvent = {state: 'disconnected', generation: 0};
-  /** @internal */
-  isAgentStateControlEnabled = false;
-  /** @internal */
-  agentChannelTypes: string[] = [];
-  /** @internal */
-  agentChannelStateDetails: Record<string, AgentChannelStateDetail> = {};
-  /** @internal */
-  agentChannelReloginSequence = 0;
   legacyAgentState = '';
   legacyAuxCodeId = '';
+  private wellnessIdleCodeRequestGeneration = 0;
 
   constructor() {
     makeAutoObservable(this, {
@@ -127,8 +117,7 @@ class Store implements IStore {
         });
         // wire up logger into feature‐flag extraction
         this.featureFlags = getFeatureFlags(response);
-        const isWellnessBreakEnabled =
-          (response as Profile & {isWellnessBreakEnabled?: boolean}).isWellnessBreakEnabled === true;
+        const isWellnessBreakEnabled = response.isWellnessBreakEnabled === true;
         runInAction(() => {
           this.isWellnessBreakEnabled = isWellnessBreakEnabled;
         });
@@ -185,6 +174,8 @@ class Store implements IStore {
   }
 
   async loadWellbeingBreakIdleCode(): Promise<void> {
+    const requestGeneration = ++this.wellnessIdleCodeRequestGeneration;
+
     if (!this.isWellnessBreakEnabled || !this.isAgentLoggedIn) {
       runInAction(() => {
         this.wellbeingBreakIdleCode = undefined;
@@ -206,6 +197,8 @@ class Store implements IStore {
 
     try {
       const idleCode = await this.cc.getWellbeingBreakIdleCode();
+      if (requestGeneration !== this.wellnessIdleCodeRequestGeneration) return;
+
       runInAction(() => {
         if (this.isWellnessBreakEnabled && this.isAgentLoggedIn) {
           this.wellbeingBreakIdleCode = idleCode;
@@ -215,6 +208,14 @@ class Store implements IStore {
         }
       });
     } catch {
+      if (
+        requestGeneration !== this.wellnessIdleCodeRequestGeneration ||
+        !this.isWellnessBreakEnabled ||
+        !this.isAgentLoggedIn
+      ) {
+        return;
+      }
+
       runInAction(() => {
         this.wellbeingBreakIdleCode = undefined;
         this.wellnessBreakState = {

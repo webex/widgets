@@ -1,4 +1,4 @@
-import store, {AIAssistantRTDStatusEvent, AgentChannelStateChangedEvent, CC_EVENTS, WellnessBreakEvent} from '../src';
+import store, {CC_EVENTS, WellnessBreakEvent} from '../src';
 import {getFeatureFlags} from '../src/util';
 import {mockCC} from '@webex/test-fixtures';
 
@@ -20,10 +20,6 @@ describe('Agent Wellness Break store projection', () => {
     store.store.wellnessAgentSessionId = 'session-1';
     store.store.wellnessBreakState = {phase: 'idle'};
     store.store.wellnessEventSequence = 0;
-    store.store.aiAssistantRtdStatus = {state: 'disconnected', generation: 0};
-    store.store.isAgentStateControlEnabled = false;
-    store.store.agentChannelTypes = [];
-    store.store.agentChannelStateDetails = {};
     store.store.wellbeingBreakIdleCode = undefined;
     store.store.currentState = '0';
     store.store.lastStateChangeTimestamp = undefined;
@@ -62,6 +58,29 @@ describe('Agent Wellness Break store projection', () => {
     expect(store.idleCodes.map(({id}) => id)).toEqual(['ordinary']);
   });
 
+  it('ignores a stale system-code response after logout', async () => {
+    let resolveIdleCode: ((value: Awaited<ReturnType<typeof mockCC.getWellbeingBreakIdleCode>>) => void) | undefined;
+    mockCC.getWellbeingBreakIdleCode.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveIdleCode = resolve;
+        })
+    );
+
+    const pendingLoad = store.loadWellbeingBreakIdleCode();
+    store.store.isAgentLoggedIn = false;
+    resolveIdleCode?.({
+      id: 'wellbeing-break',
+      name: 'WellbeingBreak',
+      isSystem: true,
+      isDefault: false,
+    });
+    await pendingLoad;
+
+    expect(store.wellbeingBreakIdleCode).toBeUndefined();
+    expect(store.wellnessBreakState).toEqual({phase: 'idle'});
+  });
+
   it('accepts current-agent notifications regardless of their agent session id', () => {
     store.handleWellnessBreak(wellnessEvent);
 
@@ -74,46 +93,13 @@ describe('Agent Wellness Break store projection', () => {
     expect(store.wellnessEventSequence).toBe(2);
   });
 
-  it('clears only pre-accept state when RTD disconnects', () => {
-    store.setWellnessBreakState({phase: 'offer-pending', event: wellnessEvent});
-    store.handleAIAssistantRtdStatus({state: 'disconnected', generation: 2});
+  it('ignores wellness notifications while the agent is logged out', () => {
+    store.store.isAgentLoggedIn = false;
+
+    store.handleWellnessBreak(wellnessEvent);
+
     expect(store.wellnessBreakState).toEqual({phase: 'idle'});
-
-    store.setWellnessBreakState({phase: 'playing', event: wellnessEvent});
-    store.handleAIAssistantRtdStatus({state: 'disconnected', generation: 3});
-    expect(store.wellnessBreakState.phase).toBe('playing');
-  });
-
-  it('ignores an older RTD connection generation', () => {
-    const current: AIAssistantRTDStatusEvent = {state: 'connected', generation: 4};
-    store.store.aiAssistantRtdStatus = current;
-    store.handleAIAssistantRtdStatus({state: 'disconnected', generation: 3});
-    expect(store.aiAssistantRtdStatus).toEqual(current);
-  });
-
-  it('updates Agent State Control snapshots only for the current session', () => {
-    const update: AgentChannelStateChangedEvent = {
-      agentId: 'agent-1',
-      orgId: 'org-1',
-      agentSessionId: 'session-1',
-      channelType: 'telephony',
-      agentChannelStateDetail: {
-        agentState: 'Idle',
-        pendingIdle: false,
-        auxCodeId: 'wellbeing-break',
-        stateChangeTimestamp: 1,
-        stateChangeReason: 'wellness-break',
-      },
-      connectedChannels: ['telephony'],
-      trackingId: 'tracking-1',
-    };
-
-    store.handleAgentChannelStateChanged(update);
-    expect(store.isAgentStateControlEnabled).toBe(true);
-    expect(store.agentChannelStateDetails.telephony?.auxCodeId).toBe('wellbeing-break');
-
-    store.handleAgentChannelStateChanged({...update, agentSessionId: 'stale-session', channelType: 'chat'});
-    expect(store.agentChannelStateDetails.chat).toBeUndefined();
+    expect(store.wellnessEventSequence).toBe(0);
   });
 
   it('projects the WellbeingBreak legacy state and timestamps used by the status timer', () => {
@@ -134,41 +120,11 @@ describe('Agent Wellness Break store projection', () => {
     expect(store.lastIdleCodeChangeTimestamp).toBe(2_000);
   });
 
-  it('derives configured ASC channels from the station-login snapshot when channelsMap is not exposed', () => {
-    store.setupIncomingTaskHandler(mockCC);
-    const loginHandler = mockCC.on.mock.calls.find(
-      ([eventName]) => eventName === CC_EVENTS.AGENT_STATION_LOGIN_SUCCESS
-    )?.[1];
-
-    loginHandler?.({
-      agentId: 'agent-1',
-      agentSessionId: 'session-1',
-      subStatus: 'Idle',
-      auxCodeId: 'meeting',
-      agentChannelStateDetailMap: {
-        telephony: {
-          agentState: 'Idle',
-          pendingIdle: false,
-          auxCodeId: 'meeting',
-          stateChangeTimestamp: 1,
-          stateChangeReason: 'Meeting',
-        },
-      },
-    });
-
-    expect(store.isAgentStateControlEnabled).toBe(true);
-    expect(store.agentChannelTypes).toEqual(['telephony']);
-    expect(store.agentChannelStateDetails.telephony?.auxCodeId).toBe('meeting');
-  });
-
-  it('registers one stable listener for each SDK wellness event', () => {
+  it('registers one stable SDK wellness listener', () => {
     store.setupIncomingTaskHandler(mockCC);
 
     expect(mockCC.off).toHaveBeenCalledWith('WellnessBreak', store.handleWellnessBreak);
     expect(mockCC.on).toHaveBeenCalledWith('WellnessBreak', store.handleWellnessBreak);
-    expect(mockCC.on).toHaveBeenCalledWith('AIAssistantRTDStatusChanged', store.handleAIAssistantRtdStatus);
-    expect(mockCC.on).toHaveBeenCalledWith('AgentChannelReloginSuccess', store.handleAgentChannelRelogin);
-    expect(mockCC.on).toHaveBeenCalledWith('AgentChannelStateChanged', store.handleAgentChannelStateChanged);
   });
 
   it('submits a flat, non-identifying behavioral metric through the SDK metrics boundary', () => {
@@ -191,7 +147,7 @@ describe('Agent Wellness Break store projection', () => {
     });
   });
 
-  it('removes registration-level wellness listeners on logout', () => {
+  it('keeps the registration-level wellness listener across logout and relogin', () => {
     store.setupIncomingTaskHandler(mockCC);
     const relogin = mockCC.on.mock.calls.find(([eventName]) => eventName === CC_EVENTS.AGENT_RELOGIN_SUCCESS)?.[1] as
       | ((payload: {agentSessionId: string}) => void)
@@ -202,11 +158,9 @@ describe('Agent Wellness Break store projection', () => {
       | undefined;
 
     expect(logout).toBeDefined();
+    const wellnessOffCount = mockCC.off.mock.calls.filter(([eventName]) => eventName === 'WellnessBreak').length;
     logout?.();
 
-    expect(mockCC.off).toHaveBeenCalledWith('WellnessBreak', store.handleWellnessBreak);
-    expect(mockCC.off).toHaveBeenCalledWith('AIAssistantRTDStatusChanged', store.handleAIAssistantRtdStatus);
-    expect(mockCC.off).toHaveBeenCalledWith('AgentChannelReloginSuccess', store.handleAgentChannelRelogin);
-    expect(mockCC.off).toHaveBeenCalledWith('AgentChannelStateChanged', store.handleAgentChannelStateChanged);
+    expect(mockCC.off.mock.calls.filter(([eventName]) => eventName === 'WellnessBreak')).toHaveLength(wellnessOffCount);
   });
 });

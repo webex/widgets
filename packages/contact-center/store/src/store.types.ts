@@ -24,6 +24,12 @@ import {
   TaskUILeg,
   getDefaultUIControls,
   TaskResponse,
+  WELLNESS_BREAK_NOTIFICATION_ACTIONS,
+  WELLNESS_BREAK_USER_ACTIONS,
+  WellnessBreakNotificationAction,
+  WellnessBreakUserAction,
+  WellnessBreakEvent,
+  RespondToWellnessBreakParams,
 } from '@webex/contact-center';
 import type {RealTimeAssistanceParams} from 'node_modules/@webex/contact-center/dist/types/types';
 import {
@@ -71,11 +77,6 @@ interface IContactCenter {
   setAgentState(data: StateChange): Promise<SetStateResponse>;
   /** Returns the system-owned `WellbeingBreak` idle code for the active registration. */
   getWellbeingBreakIdleCode(): Promise<IdleCode>;
-  /**
-   * Changes one or more State Control V2 channels for first-party wellness compatibility.
-   * @internal
-   */
-  setAgentChannelState(data: SetAgentChannelStateParams): Promise<AgentChannelStateChangedEvent>;
   getOutdialAniEntries(params: OutdialAniParams): Promise<OutdialAniEntriesResponse>;
   getAccessToken(): Promise<string>;
   startOutdial(destination: string, origin?: string): Promise<TaskResponse>;
@@ -163,77 +164,6 @@ type RealTimeAssistPayload = {
   orgId?: string;
 };
 
-/** Agent Wellness Break notifications normalized by the Contact Center SDK. */
-type WellnessBreakNotificationAction =
-  | 'PROVIDE_WELLNESS_BREAK'
-  | 'SUGGEST_WELLNESS_BREAK'
-  | 'WELLNESS_BREAK_NOT_ALLOWED';
-
-/** Agent actions supported by the dedicated SDK wellness endpoint. */
-type WellnessBreakUserAction = 'REQUESTED' | 'ACCEPTED' | 'REJECTED' | 'NO_RESPONSE';
-
-/** Validated agent-scoped notification emitted by the SDK. */
-interface WellnessBreakEvent {
-  agentId: string;
-  orgId: string;
-  agentSessionId: string;
-  actionEvent: WellnessBreakNotificationAction;
-  actionText?: string;
-  interactionId?: string;
-  trackingId?: string;
-}
-
-type AIAssistantRTDConnectionState = 'connected' | 'disconnected';
-
-/** SDK-owned AI Assistant RTD connection state. */
-interface AIAssistantRTDStatusEvent {
-  state: AIAssistantRTDConnectionState;
-  generation: number;
-}
-
-interface RespondToWellnessBreakParams {
-  action: Exclude<WellnessBreakUserAction, 'REQUESTED'>;
-}
-
-/** Current state for one State Control V2 channel. @internal */
-export interface AgentChannelStateDetail {
-  agentState: string;
-  pendingIdle: boolean;
-  auxCodeId?: string | null;
-  stateChangeTimestamp: number;
-  stateChangeReason: string;
-}
-
-/** State Control V2 relogin snapshot projected internally by the store. @internal */
-export interface AgentChannelReloginSuccessEvent {
-  agentId: string;
-  orgId: string;
-  agentSessionId: string;
-  trackingId: string;
-  channelsMap: Record<string, string[]>;
-  agentChannelStateDetailMap: Record<string, AgentChannelStateDetail>;
-}
-
-/** One State Control V2 channel update projected internally by the store. @internal */
-export interface AgentChannelStateChangedEvent {
-  agentId: string;
-  orgId: string;
-  agentSessionId: string;
-  channelType: string;
-  agentChannelStateDetail: AgentChannelStateDetail;
-  connectedChannels: string[];
-  trackingId: string;
-}
-
-/** @internal */
-export interface SetAgentChannelStateParams {
-  channelTypes: string[];
-  state: 'Available' | 'Idle';
-  auxCodeId?: string;
-  reason?: string;
-  agentId?: string;
-}
-
 /** Public Agent Wellness Break lifecycle exposed by the widget package. */
 type WellnessBreakPhase =
   | 'idle'
@@ -271,20 +201,6 @@ interface WellnessBreakState {
   errorCode?: WellnessBreakErrorCode;
 }
 
-/** @internal */
-export type WellnessStateModel = 'legacy' | 'agent-state-control';
-
-/** @internal */
-export type WellnessCapturedChannelState = Pick<AgentChannelStateDetail, 'agentState' | 'auxCodeId'>;
-
-/** Short-lived, session-scoped recovery ownership stored by the widget host. @internal */
-export interface WellnessBreakRecoveryMarkerV1 {
-  version: 1;
-  agentSessionId: string;
-  stateModel: WellnessStateModel;
-  channelTypes?: string[];
-  preBreakChannelStates?: Record<string, WellnessCapturedChannelState>;
-}
 //  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
 type IWebex = {
   cc: IContactCenter;
@@ -400,15 +316,6 @@ interface IStore {
   wellbeingBreakIdleCode?: IdleCode;
   wellnessBreakState: WellnessBreakState;
   wellnessEventSequence: number;
-  aiAssistantRtdStatus: AIAssistantRTDStatusEvent;
-  /** @internal */
-  isAgentStateControlEnabled: boolean;
-  /** @internal */
-  agentChannelTypes: string[];
-  /** @internal */
-  agentChannelStateDetails: Record<string, AgentChannelStateDetail>;
-  /** @internal */
-  agentChannelReloginSequence: number;
   legacyAgentState: string;
   legacyAuxCodeId: string;
   init(params: InitParams, callback: (ccSDK: IContactCenter) => void): Promise<void>;
@@ -484,7 +391,6 @@ enum CC_EVENTS {
   AGENT_OFFER_CONSULT = 'AgentOfferConsult',
   REAL_TIME_TRANSCRIPTION = 'REAL_TIME_TRANSCRIPTION',
   WELLNESS_BREAK = 'WellnessBreak',
-  AI_ASSISTANT_RTD_STATUS_CHANGED = 'AIAssistantRTDStatusChanged',
 }
 
 interface ICustomStateSet {
@@ -521,9 +427,6 @@ type AgentLoginProfile = {
   agentSessionId?: string;
   auxCodeId?: string;
   subStatus?: string;
-  channelsMap?: Record<string, string[]>;
-  /** @internal */
-  agentChannelStateDetailMap?: Record<string, AgentChannelStateDetail>;
 };
 
 // Generic pagination params for list-fetching APIs
@@ -612,8 +515,6 @@ export type {
   WellnessBreakNotificationAction,
   WellnessBreakUserAction,
   WellnessBreakEvent,
-  AIAssistantRTDConnectionState,
-  AIAssistantRTDStatusEvent,
   RespondToWellnessBreakParams,
   WellnessBreakPhase,
   WellnessBreakErrorCode,
@@ -641,6 +542,8 @@ export {
   LoginOptions,
   ERROR_TRIGGERING_IDLE_CODES,
   getDefaultUIControls,
+  WELLNESS_BREAK_NOTIFICATION_ACTIONS,
+  WELLNESS_BREAK_USER_ACTIONS,
 };
 
 // ConsultStatus enum removed — use task.data.consultStatus from SDK instead

@@ -14,6 +14,7 @@ describe('getFeatureFlags', () => {
       isOutboundEnabledForAgent: false,
       isOutboundEnabledForTenant: false,
       isTimeoutDesktopInactivityEnabled: false,
+      isWellnessBreakEnabled: false,
     };
 
     const result = getFeatureFlags(mockProfile);
