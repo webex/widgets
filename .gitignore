@@ -54,3 +54,12 @@ node_modules/
 # Playwright reports
 **/test-results/
 **/playwright-report
+
+# Artificer runtime and local requirement/UX inputs
+.matrix/
+.prog/
+requirementVersion/
+.ccwidgets/
+
+# The implementation DAG is an Artificer design deliverable, not runtime state.
+!design/default/implementation_dag.json

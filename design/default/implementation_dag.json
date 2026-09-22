@@ -1,0 +1,193 @@
+{
+  "tasks": [
+    {
+      "id": "D0-sdk-package-contract",
+      "title": "Build and lock the exact cc-summaries SDK package",
+      "description": "REQ-001 and AC-01: add a deterministic verifier bound through WEBEX_JS_SDK_DIR to /Users/pkesari/Desktop/WorkProjects/webex-js-sdk (widgets-relative fallback ../../webex-js-sdk), accepting only the clean cc-summaries checkout at commit 50602eea08dfc72df57d038529049e46f064f6c5; record its immutable identity, Node 22.14 and pinned Yarn build facts, pack @webex/contact-center, pin the widgets repository to the hashed local tarball, verify declarations and runtime event/method/payload contracts including AI_SUMMARY_REQUEST_TIMEOUT_MS === 20_000 ms while receiver-buffer and orphan-retention durations remain 30_000 ms, recheck source identity after build and pack, and fail closed without editing SDK source when the identity or contract differs.",
+      "priority": "critical",
+      "files": [
+        "tooling/build-cc-summaries-sdk.mjs",
+        "tooling/tests/cc-summaries-sdk-contract.test.js",
+        "design/default/sdk_package_lock.json",
+        "vendor/contact-center-cc-summaries.tgz",
+        "package.json",
+        "yarn.lock"
+      ],
+      "dependencies": [],
+      "acceptance": "node tooling/build-cc-summaries-sdk.mjs --verify && yarn test:tooling --runInBand --runTestsByPath tooling/tests/cc-summaries-sdk-contract.test.js"
+    },
+    {
+      "id": "D1-summary-contract-fixtures",
+      "title": "Add immutable AI-summary contract and race fixtures",
+      "description": "REQ-001, REQ-002, REQ-003, REQ-004, REQ-005, REQ-006, REQ-008, REQ-010, REQ-012 and AC-01, AC-02, AC-03, AC-04, AC-05, AC-06, AC-07, AC-08, AC-10, AC-11, AC-13, AC-14, AC-16: add raw SDK fixtures for capabilities, initiator typed/plain payloads, receiver cards, post-call variants, malformed and unsupported content, normalized failures, timestamps, transfers, conferences, counters, feedback, stale settlements, wrap-up ordering, and cleanup without logging summary bodies.",
+      "priority": "critical",
+      "files": [
+        "packages/contact-center/test-fixtures/src/ai-summary.ts",
+        "packages/contact-center/test-fixtures/src/index.ts",
+        "packages/contact-center/store/tests/ai-summary-contract.ts"
+      ],
+      "dependencies": [
+        "D0-sdk-package-contract"
+      ],
+      "acceptance": "yarn workspace @webex/cc-store test:unit --runInBand --runTestsByPath tests/ai-summary-contract.ts"
+    },
+    {
+      "id": "D2-interaction-summary-store",
+      "title": "Implement interaction and ownership scoped summary state",
+      "description": "REQ-002, REQ-006, REQ-008, REQ-010 and AC-02, AC-06, AC-07, AC-08, AC-10, AC-11, AC-13, AC-14: keep @webex/cc-store as the SDK boundary; validate and normalize role-specific events, capabilities and errors; call every explicit request; enforce timestamp and owner-generation freshness; retain and clear state at approved boundaries; count successful view/edit/copy actions; sequence final responses; and guarantee listener cleanup with no automatic retry, persistence, sensitive callback detail, or unhandled rejection.",
+      "priority": "critical",
+      "files": [
+        "packages/contact-center/store/src/ai-summary.types.ts",
+        "packages/contact-center/store/src/ai-summary.ts",
+        "packages/contact-center/store/src/store.ts",
+        "packages/contact-center/store/src/store.types.ts",
+        "packages/contact-center/store/src/storeEventsWrapper.ts",
+        "packages/contact-center/store/src/index.ts",
+        "packages/contact-center/store/tests/ai-summary-store.ts",
+        "packages/contact-center/store/tests/storeEventsWrapper.ts"
+      ],
+      "dependencies": [
+        "D0-sdk-package-contract",
+        "D1-summary-contract-fixtures"
+      ],
+      "acceptance": "yarn workspace @webex/cc-store test:unit --runInBand --runTestsByPath tests/ai-summary-store.ts tests/storeEventsWrapper.ts"
+    },
+    {
+      "id": "D3-shared-summary-presentation",
+      "title": "Build SDK-free shared AI-summary presentation",
+      "description": "REQ-003, REQ-004, REQ-008, REQ-009, REQ-010, REQ-011, REQ-012 and AC-03, AC-04, AC-05, AC-10, AC-11, AC-12, AC-13, AC-14, AC-15, AC-16: add reusable typed/plain summary, action, loading, generation-error and unsupported components with exact copy, text-only rendering, dir auto, vertical containment, inherited theme and forced-colors behavior, focus recovery, no feature live region, and hooks suitable for the existing restricted adaptive-card renderer.",
+      "priority": "high",
+      "files": [
+        "packages/contact-center/cc-components/src/components/AISummary/ai-summary.tsx",
+        "packages/contact-center/cc-components/src/components/AISummary/ai-summary.types.ts",
+        "packages/contact-center/cc-components/src/components/AISummary/ai-summary.styles.scss",
+        "packages/contact-center/cc-components/src/components/AISummary/index.ts",
+        "packages/contact-center/cc-components/src/index.ts",
+        "packages/contact-center/cc-components/tests/components/AISummary/ai-summary.tsx"
+      ],
+      "dependencies": [
+        "D1-summary-contract-fixtures"
+      ],
+      "acceptance": "yarn workspace @webex/cc-components test:unit --runInBand --runTestsByPath tests/components/AISummary/ai-summary.tsx"
+    },
+    {
+      "id": "D4-receiving-ai-assistant",
+      "title": "Integrate receiving-agent summaries into AI Assistant",
+      "description": "REQ-004, REQ-006, REQ-008, REQ-009, REQ-010 and AC-04, AC-06, AC-10, AC-11, AC-12, AC-13, AC-14: expose View summary, copy and feedback for the current receiving agent, render only the validated adaptive card through the existing restricted renderer, ignore typed/plain fields, isolate real-time-assist state, and discard stale ownership-generation events.",
+      "priority": "high",
+      "files": [
+        "packages/contact-center/ai-assistant/src/ai-assistant.types.ts",
+        "packages/contact-center/ai-assistant/src/ai-assistant/index.tsx",
+        "packages/contact-center/ai-assistant/src/helper.ts",
+        "packages/contact-center/ai-assistant/tests/ai-assistant/summary.tsx",
+        "packages/contact-center/cc-components/src/components/AIAssistant/ai-assistant.tsx",
+        "packages/contact-center/cc-components/src/components/AIAssistant/ai-assistant.types.ts",
+        "packages/contact-center/cc-components/tests/components/AIAssistant/ai-assistant.tsx"
+      ],
+      "dependencies": [
+        "D2-interaction-summary-store",
+        "D3-shared-summary-presentation"
+      ],
+      "acceptance": "yarn workspace @webex/cc-ai-assistant test:unit --runInBand --runTestsByPath tests/ai-assistant/summary.tsx && yarn workspace @webex/cc-components test:unit --runInBand --runTestsByPath tests/components/AIAssistant/ai-assistant.tsx"
+    },
+    {
+      "id": "D5-mid-call-call-control",
+      "title": "Integrate initiating-agent summaries with consult and transfer",
+      "description": "REQ-003, REQ-006, REQ-008, REQ-009, REQ-010 and AC-03, AC-06, AC-07, AC-10, AC-11, AC-12, AC-13, AC-14: place View summary and the bottom summary box after consult/transfer results, prefer typed sections then summaryText while ignoring cards, disable another action during the 20-second request, support edit/copy/feedback, send the mid-call response before the unchanged consult/transfer API, and apply transfer/conference owner-generation rules.",
+      "priority": "critical",
+      "files": [
+        "packages/contact-center/task/src/helper.ts",
+        "packages/contact-center/task/src/task.types.ts",
+        "packages/contact-center/task/src/CallControl/index.tsx",
+        "packages/contact-center/task/tests/CallControl/ai-summary.tsx",
+        "packages/contact-center/cc-components/src/components/task/task.types.ts",
+        "packages/contact-center/cc-components/src/components/task/CallControl/CallControlCustom/consult-transfer-popover.tsx",
+        "packages/contact-center/cc-components/src/components/task/CallControl/CallControlCustom/consult-transfer-popover-hooks.ts",
+        "packages/contact-center/cc-components/src/components/task/CallControl/call-control.styles.scss",
+        "packages/contact-center/cc-components/tests/components/task/CallControl/CallControlCustom/ai-summary.tsx"
+      ],
+      "dependencies": [
+        "D2-interaction-summary-store",
+        "D3-shared-summary-presentation"
+      ],
+      "acceptance": "yarn workspace @webex/cc-task test:unit --runInBand --runTestsByPath tests/CallControl/ai-summary.tsx && yarn workspace @webex/cc-components test:unit --runInBand --runTestsByPath tests/components/task/CallControl/CallControlCustom/ai-summary.tsx"
+    },
+    {
+      "id": "D6-post-call-wrap-up",
+      "title": "Integrate post-call summary generation and frozen response submission",
+      "description": "REQ-005, REQ-006, REQ-008, REQ-009, REQ-010 and AC-05, AC-06, AC-07, AC-08, AC-10, AC-11, AC-12, AC-13, AC-14: place the post-call summary after reason selection and before Complete Wrap-Up, request fresh content for every user action, prefer typed sections then plain text while ignoring cards, preserve edit and feedback state, run wrap-up first, submit one frozen response, retain response failure without retry until the backend wrapped-up event, and expose the approved generic error and fresh-request Retry behavior.",
+      "priority": "critical",
+      "files": [
+        "packages/contact-center/task/src/helper.ts",
+        "packages/contact-center/task/src/task.types.ts",
+        "packages/contact-center/task/src/CallControl/index.tsx",
+        "packages/contact-center/task/tests/CallControl/ai-summary-wrapup.tsx",
+        "packages/contact-center/cc-components/src/components/task/task.types.ts",
+        "packages/contact-center/cc-components/src/components/task/CallControl/call-control.tsx",
+        "packages/contact-center/cc-components/src/components/task/CallControl/call-control.styles.scss",
+        "packages/contact-center/cc-components/tests/components/task/CallControl/ai-summary-wrapup.tsx"
+      ],
+      "dependencies": [
+        "D2-interaction-summary-store",
+        "D3-shared-summary-presentation",
+        "D5-mid-call-call-control"
+      ],
+      "acceptance": "yarn workspace @webex/cc-task test:unit --runInBand --runTestsByPath tests/CallControl/ai-summary-wrapup.tsx && yarn workspace @webex/cc-components test:unit --runInBand --runTestsByPath tests/components/task/CallControl/ai-summary-wrapup.tsx"
+    },
+    {
+      "id": "D7-host-status-callback",
+      "title": "Add the optional content-free host status callback",
+      "description": "REQ-007, REQ-010 and AC-09, AC-14: add only the optional onAISummaryStatusChange function property to the existing widget-cc-call-control surface, preserve all existing props and the existing tag, emit only the approved kind/state union, and test absent-callback behavior plus rejection of content, identifiers, counters and raw errors.",
+      "priority": "high",
+      "files": [
+        "packages/contact-center/task/src/task.types.ts",
+        "packages/contact-center/task/src/CallControl/index.tsx",
+        "packages/contact-center/task/tests/CallControl/ai-summary-status.tsx",
+        "packages/contact-center/cc-widgets/src/wc.ts",
+        "packages/contact-center/cc-widgets/tests/wc.ai-summary.ts"
+      ],
+      "dependencies": [
+        "D4-receiving-ai-assistant",
+        "D6-post-call-wrap-up"
+      ],
+      "acceptance": "yarn workspace @webex/cc-task test:unit --runInBand --runTestsByPath tests/CallControl/ai-summary-status.tsx && yarn workspace @webex/cc-widgets test:unit --runInBand --runTestsByPath tests/wc.ai-summary.ts"
+    },
+    {
+      "id": "D8-browser-ux-validation",
+      "title": "Add browser, accessibility, concurrency, and visual evidence",
+      "description": "REQ-009, REQ-011, REQ-012 and AC-11, AC-12, AC-13, AC-15, AC-16: extend the existing Playwright harness with deterministic SDK mocks for both journeys, keyboard and focus recovery, automated accessibility, copy and feedback, responsive vertical containment, inherited forced-colors behavior, ownership races, transfer/conference scenarios, wrap-up and response failures, and render/compare evidence for all ten sealed Figma JSON screenshot states without Figma MCP.",
+      "priority": "high",
+      "files": [
+        "playwright/ai-summary-fixtures.ts",
+        "playwright/Utils/aiSummaryUtils.ts",
+        "playwright/suites/ai-summary-tests.spec.ts",
+        "playwright/tests/ai-summary-test.spec.ts",
+        "playwright.config.ts",
+        "package.json",
+        "yarn.lock"
+      ],
+      "dependencies": [
+        "D4-receiving-ai-assistant",
+        "D5-mid-call-call-control",
+        "D6-post-call-wrap-up",
+        "D7-host-status-callback"
+      ],
+      "acceptance": "yarn playwright test playwright/tests/ai-summary-test.spec.ts"
+    },
+    {
+      "id": "D9-release-validation",
+      "title": "Run complete AI-summary release and provenance validation",
+      "description": "REQ-001, REQ-002, REQ-003, REQ-004, REQ-005, REQ-006, REQ-007, REQ-008, REQ-009, REQ-010, REQ-011, REQ-012 and AC-01, AC-02, AC-03, AC-04, AC-05, AC-06, AC-07, AC-08, AC-09, AC-10, AC-11, AC-12, AC-13, AC-14, AC-15, AC-16: add a deterministic edit-free verifier for requirement/design/DAG/SDK/UX hashes, dependency and package provenance, role contracts, privacy, build and type results, focused and full unit tests, browser/accessibility/visual receipts, acceptance commands, and zero skipped mandatory checks or unhandled rejections.",
+      "priority": "critical",
+      "files": [
+        "tooling/verify-ai-summary-release.mjs",
+        "tooling/tests/verify-ai-summary-release.test.js",
+        "package.json"
+      ],
+      "dependencies": [
+        "D8-browser-ux-validation"
+      ],
+      "acceptance": "node tooling/verify-ai-summary-release.mjs && yarn test:tooling --runInBand --runTestsByPath tooling/tests/verify-ai-summary-release.test.js && yarn build:prod && yarn test:cc-widgets && yarn playwright test playwright/tests/ai-summary-test.spec.ts"
+    }
+  ]
+}
