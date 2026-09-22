@@ -1,6 +1,6 @@
-import React, {useEffect, useRef} from 'react';
+import React, { useEffect, useRef } from 'react';
 import CallControlComponent from '../CallControl/call-control';
-import {Text} from '@momentum-ui/react-collaboration';
+import { Text } from '@momentum-ui/react-collaboration';
 import {
   Avatar,
   Brandvisual,
@@ -17,13 +17,13 @@ import {
 import './call-control-cad.styles.scss';
 import TaskTimer from '../TaskTimer/index';
 import CallControlConsultComponent from '../CallControl/CallControlCustom/call-control-consult';
-import {MEDIA_CHANNEL as MediaChannelType, CallControlComponentProps, CallAssociatedDataMap} from '../task.types';
-import {ConferenceParticipantDropTarget} from '@webex/cc-store';
-import {getAgentViewableGlobalVariables} from '../Task/task.utils';
+import { MEDIA_CHANNEL as MediaChannelType, CallControlComponentProps, CallAssociatedDataMap } from '../task.types';
+import { ConferenceParticipantDropTarget } from '@webex/cc-store';
+import { getAgentViewableGlobalVariables } from '../Task/task.utils';
 import GlobalVariablesPanel from '../GlobalVariablesPanel/global-variables-panel';
-import {ParticipantRosterSectionProps} from './call-control-cad.types';
+import { ParticipantRosterSectionProps } from './call-control-cad.types';
 
-import {getMediaTypeInfo} from '../../../utils';
+import { getMediaTypeInfo } from '../../../utils';
 import {
   NO_CUSTOMER_NAME,
   NO_CALLER_ID,
@@ -35,7 +35,7 @@ import {
   CUSTOMER_NAME,
   CAMPAIGN_CALL,
 } from '../constants';
-import {withMetrics} from '@webex/cc-ui-logging';
+import { withMetrics } from '@webex/cc-ui-logging';
 
 const ParticipantRosterSection: React.FC<ParticipantRosterSectionProps> = ({
   heading,
@@ -169,21 +169,25 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
   const callAssociatedData = currentTask?.data?.interaction?.callAssociatedData as CallAssociatedDataMap | undefined;
   const latestGlobalVariables = getAgentViewableGlobalVariables(callAssociatedData);
 
-  // Persist global variables across task updates — some store refreshes
-  // replace currentTask with a snapshot that omits callAssociatedData,
-  // which causes getAgentViewableGlobalVariables to return [].
-  // We intentionally keep the previous values when length === 0 because
-  // an empty array indicates missing data, not a legitimate clearing of
-  // variables.  Variables are never cleared mid-call by the backend.
-  // Reset when the interaction changes so stale CAD from a previous task
-  // is never shown on a new call.
+  // Persist and accumulate global variables across task updates.
+  // Each websocket event may only carry a subset of the full
+  // callAssociatedData, so we merge new variables into the ref by name
+  // instead of replacing the whole array.  This ensures all global
+  // variables seen during the interaction are displayed — matching the
+  // regular desktop behaviour.
+  // When length === 0 we keep previous values (missing data, not a
+  // legitimate clearing — variables are never cleared mid-call).
+  // Reset when the interaction changes so stale CAD from a previous
+  // task is never shown on a new call.
   const globalVariablesRef = useRef(latestGlobalVariables);
   const prevInteractionIdRef = useRef(interactionId);
   if (prevInteractionIdRef.current !== interactionId) {
     prevInteractionIdRef.current = interactionId;
     globalVariablesRef.current = latestGlobalVariables;
   } else if (latestGlobalVariables.length > 0) {
-    globalVariablesRef.current = latestGlobalVariables;
+    const existingMap = new Map(globalVariablesRef.current.map((v) => [v.name, v]));
+    latestGlobalVariables.forEach((v) => existingMap.set(v.name, v));
+    globalVariablesRef.current = Array.from(existingMap.values());
   }
   const globalVariables = globalVariablesRef.current;
 

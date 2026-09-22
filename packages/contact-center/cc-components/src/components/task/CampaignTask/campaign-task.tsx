@@ -1,11 +1,11 @@
-import React, {useState, useCallback, useRef, useEffect} from 'react';
-import {Button} from '@momentum-design/components/dist/react';
-import {withMetrics} from '@webex/cc-ui-logging';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
+import { Button } from '@momentum-design/components/dist/react';
+import { withMetrics } from '@webex/cc-ui-logging';
 import CampaignErrorDialog from '../CampaignErrorDialog/campaign-error-dialog';
 import GlobalVariablesPanel from '../GlobalVariablesPanel/global-variables-panel';
 import CampaignTaskPopover from './CampaignTaskPopover/campaign-task-popover';
 import CampaignTaskListItem from './CampaignTaskListItem/campaign-task-list-item';
-import {CampaignErrorType} from '../CampaignErrorDialog/campaign-error-dialog.types';
+import { CampaignErrorType } from '../CampaignErrorDialog/campaign-error-dialog.types';
 import {
   CampaignTaskProps,
   CampaignAutoAction,
@@ -15,9 +15,9 @@ import {
   CallAssociatedDataMap,
   getCallerIdentifier,
 } from '../task.types';
-import {getAgentViewableGlobalVariables} from '../Task/task.utils';
-import {CANCEL, CAMPAIGN_TASK_REGION_LABEL} from '../constants';
-import {getAgentJoinTimestamp, getCampaignCpd} from '../TaskList/task-list.utils';
+import { getAgentViewableGlobalVariables } from '../Task/task.utils';
+import { CANCEL, CAMPAIGN_TASK_REGION_LABEL } from '../constants';
+import { getAgentJoinTimestamp, getCampaignCpd } from '../TaskList/task-list.utils';
 import './campaign-task.style.scss';
 
 const LOG_MODULE = 'cc-components#campaign-task';
@@ -47,21 +47,29 @@ const CampaignTask: React.FC<CampaignTaskProps> = ({
   const title = customerName || getCallerIdentifier(ani, dn, outboundType);
   const phoneNumber = getCallerIdentifier(ani, dn, outboundType);
 
-  const callAssociatedData = (task.data.interaction as unknown as {callAssociatedData?: CallAssociatedDataMap})
+  const callAssociatedData = (task.data.interaction as unknown as { callAssociatedData?: CallAssociatedDataMap })
     .callAssociatedData;
   const latestGlobalVariables = getAgentViewableGlobalVariables(callAssociatedData);
 
-  // Persist global variables across task updates — some store refreshes
-  // replace the task with a snapshot that omits callAssociatedData.
-  // Reset when the interaction changes so stale CAD from a previous task
-  // is never shown on a new call.
+  // Persist and accumulate global variables across task updates.
+  // Each websocket event may only carry a subset of the full
+  // callAssociatedData, so we merge new variables into the ref by name
+  // instead of replacing the whole array.  This ensures all global
+  // variables seen during the interaction are displayed — matching the
+  // regular desktop behaviour.
+  // When length === 0 we keep previous values (missing data, not a
+  // legitimate clearing — variables are never cleared mid-call).
+  // Reset when the interaction changes so stale CAD from a previous
+  // task is never shown on a new call.
   const globalVariablesRef = useRef(latestGlobalVariables);
   const prevInteractionIdRef = useRef(interactionId);
   if (prevInteractionIdRef.current !== interactionId) {
     prevInteractionIdRef.current = interactionId;
     globalVariablesRef.current = latestGlobalVariables;
   } else if (latestGlobalVariables.length > 0) {
-    globalVariablesRef.current = latestGlobalVariables;
+    const existingMap = new Map(globalVariablesRef.current.map((v) => [v.name, v]));
+    latestGlobalVariables.forEach((v) => existingMap.set(v.name, v));
+    globalVariablesRef.current = Array.from(existingMap.values());
   }
   const globalVariables = globalVariablesRef.current;
 

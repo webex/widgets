@@ -1,10 +1,10 @@
-import React, {useRef} from 'react';
-import {Popover} from '@momentum-design/components/dist/react';
+import React, { useRef } from 'react';
+import { Popover } from '@momentum-design/components/dist/react';
 import CampaignTaskListItem from '../CampaignTaskListItem/campaign-task-list-item';
 import GlobalVariablesPanel from '../../GlobalVariablesPanel/global-variables-panel';
-import {CampaignTaskPopoverProps, CallAssociatedDataMap, getCallerIdentifier} from '../../task.types';
-import {getAgentViewableGlobalVariables} from '../../Task/task.utils';
-import {getCampaignCpd} from '../../TaskList/task-list.utils';
+import { CampaignTaskPopoverProps, CallAssociatedDataMap, getCallerIdentifier } from '../../task.types';
+import { getAgentViewableGlobalVariables } from '../../Task/task.utils';
+import { getCampaignCpd } from '../../TaskList/task-list.utils';
 import './campaign-task-popover.style.scss';
 
 const POPOVER_WIDTH = '440px';
@@ -38,13 +38,14 @@ const CampaignTaskPopover: React.FC<CampaignTaskPopoverProps> = ({
   const title = customerName || getCallerIdentifier(ani, dn, outboundType);
   const phoneNumber = getCallerIdentifier(ani, dn, outboundType);
 
-  const callAssociatedData = (task.data.interaction as unknown as {callAssociatedData?: CallAssociatedDataMap})
+  const callAssociatedData = (task.data.interaction as unknown as { callAssociatedData?: CallAssociatedDataMap })
     .callAssociatedData;
   const latestGlobalVariables = getAgentViewableGlobalVariables(callAssociatedData);
 
-  // Persist global variables across task updates — some store refreshes
-  // replace the task with a snapshot that omits callAssociatedData,
-  // which causes getAgentViewableGlobalVariables to return [].
+  // Persist and accumulate global variables across task updates.
+  // Each websocket event may only carry a subset of the full
+  // callAssociatedData, so we merge new variables into the ref by name
+  // instead of replacing the whole array.
   // Reset when the interaction changes so stale CAD from a previous
   // contact is never shown on the next preview.
   const interactionId = task.data.interactionId;
@@ -54,7 +55,9 @@ const CampaignTaskPopover: React.FC<CampaignTaskPopoverProps> = ({
     prevInteractionIdRef.current = interactionId;
     globalVariablesRef.current = latestGlobalVariables;
   } else if (latestGlobalVariables.length > 0) {
-    globalVariablesRef.current = latestGlobalVariables;
+    const existingMap = new Map(globalVariablesRef.current.map((v) => [v.name, v]));
+    latestGlobalVariables.forEach((v) => existingMap.set(v.name, v));
+    globalVariablesRef.current = Array.from(existingMap.values());
   }
   const globalVariables = globalVariablesRef.current;
 
@@ -66,7 +69,7 @@ const CampaignTaskPopover: React.FC<CampaignTaskPopoverProps> = ({
       interactive
       delay={POPOVER_DELAY}
       className="campaign-task-popover"
-      style={{['--mdc-popover-width' as string]: POPOVER_WIDTH}}
+      style={{ ['--mdc-popover-width' as string]: POPOVER_WIDTH }}
       data-testid="campaign-task-popover"
     >
       <div className="campaign-task-popover__content">
