@@ -77,6 +77,9 @@
           "working_directory": ".",
           "timeout_seconds": 10,
           "required": true,
+          "required_env": [
+            "WEBEX_JS_SDK_DIR"
+          ],
           "fix_hint": "For build-sdk only, set WEBEX_JS_SDK_DIR to the Deferred clean, versioned, publicly conforming cc-summaries handoff. Verification never needs this checkout or variable."
         },
         {
@@ -541,6 +544,9 @@
           "working_directory": ".",
           "timeout_seconds": 60,
           "required": true,
+          "required_env": [
+            "MB_FLOW_BIN"
+          ],
           "fix_hint": "Set MB_FLOW_BIN to an absolute executable MatrixBuilder mb-flow path in the developer or CI environment; do not commit a machine-specific fallback. Use it only after D0a seals and D8 verify-ux rechecks the exact target-worktree sources."
         },
         {
@@ -609,7 +615,7 @@
             "-e",
             "require('https').get('https://registry.npmjs.org/-/ping',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"
           ],
-          "working_directory": "/Users/fsiyavud/Documents/Projects/WebexDevPlatform/widgets/.worktrees/design",
+          "working_directory": ".",
           "timeout_seconds": 20,
           "required": true,
           "fix_hint": "The SDK owner must publish the exact D0-admitted @webex/contact-center version and tarball; do not retain the local file descriptor or select another version."
@@ -702,6 +708,9 @@
           "working_directory": ".",
           "timeout_seconds": 60,
           "required": true,
+          "required_env": [
+            "MB_FLOW_BIN"
+          ],
           "fix_hint": "Set MB_FLOW_BIN to an absolute executable MatrixBuilder mb-flow path in the developer or CI environment; do not commit a machine-specific fallback. Use it only after the combined receipt verifies target-worktree UX sources."
         },
         {
