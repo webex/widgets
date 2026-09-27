@@ -30,7 +30,7 @@
     "build": "yarn run -T tsc",
     "build:src": "yarn run clean:dist && webpack",
     "build:watch": "webpack --watch",
-    "test:unit": "NODE_ENV=test jest --coverage",
+    "test:unit": "tsc --project tsconfig.test.json --noEmit && NODE_ENV=test jest --coverage",
     "test:styles": "eslint",
     "deploy:npm": "yarn npm publish"
   },
@@ -98,6 +98,14 @@
       "**/tests/**/*.ts",
       "**/tests/**/*.tsx"
     ],
+    "transform": {
+      "^.+\\.[jt]sx?$": [
+        "babel-jest",
+        {
+          "configFile": "../../../babel.config.js"
+        }
+      ]
+    },
     "moduleNameMapper": {
       "^.+\\.(css|less|scss)$": "babel-jest"
     }

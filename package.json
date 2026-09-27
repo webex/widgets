@@ -22,6 +22,7 @@
     "@types/babel__plugin-transform-runtime": "^7.9.5",
     "@webex/cli-tools": "0.0.0-next.2",
     "@webex/package-tools": "0.0.0-next.6",
+    "axe-core": "4.10.2",
     "babel-jest": "^29.7.0",
     "crypto-browserify": "^3.12.1",
     "css-loader": "^7.1.2",
@@ -38,6 +39,7 @@
     "sass": "^1.83.1",
     "sass-loader": "^16.0.4",
     "semantic-release": "^24.2.0",
+    "semver": "^7.7.3",
     "stream-browserify": "^3.0.0",
     "style-loader": "^4.0.0",
     "typescript": "^5.6.3",
@@ -48,7 +50,8 @@
   },
   "resolutions": {
     "@momentum-design/components": "0.133.23",
-    "@momentum-design/icons": "0.17.0"
+    "@momentum-design/icons": "0.17.0",
+    "@webex/contact-center": "file:./vendor/contact-center-cc-summaries.tgz"
   },
   "scripts": {
     "clean": "yarn workspaces foreach --all --topological --parallel run clean && rm -rf node_modules",
@@ -57,7 +60,7 @@
     "test:e2e": "yarn playwright test",
     "test:styles": "yarn workspaces foreach --all --exclude webex-widgets run test:styles",
     "test:tooling": "NODE_ENV=test jest --coverage",
-    "test:cc-widgets": "yarn workspaces foreach --all --exclude webex-widgets --exclude samples-cc-wc-app --exclude samples-cc-react-app run test:unit",
+    "test:cc-widgets": "yarn workspaces foreach --all --exclude webex-widgets --exclude @webex/test-fixtures --exclude samples-meeting-app --exclude samples-cc-wc-app --exclude samples-cc-react-app run test:unit",
     "test:meetings-widget": "yarn workspaces foreach --all --verbose --include @webex/widgets run test:unit",
     "build:dev": "NODE_ENV=development yarn build",
     "build:prod": "NODE_ENV=production  yarn build:serial",

@@ -1,0 +1,2422 @@
+{
+  "schemaVersion": 1,
+  "sdk": {
+    "status": "sealed",
+    "sealedAt": "2026-09-24T13:07:52.326Z",
+    "packageName": "@webex/contact-center",
+    "registryDescriptor": "3.12.0-next.123",
+    "version": "3.12.0-cc-summaries.15f3da706d84",
+    "source": {
+      "branch": "cc-summaries",
+      "commit": "15f3da706d84c10bc632abe252cea202a70ae212",
+      "treeSha256": "8690f822c3421bf7a9f855fa74612b4e2df09fc7c6572f334f217437727b8791"
+    },
+    "tarball": {
+      "path": "vendor/contact-center-cc-summaries.tgz",
+      "sha256": "62150e40c9a6c729a3dc60d936a05c132ade8311c52c5c69239617326ab01ef5",
+      "sizeBytes": 3081607
+    },
+    "yarn": {
+      "nodeLinker": "node-modules",
+      "resolution": "@webex/contact-center: file:./vendor/contact-center-cc-summaries.tgz",
+      "checksum": "10c0/6f679f8e84f10396c39b5a8a30d457d764d27a2ca9702823d9ba2e2317d73c87d67f057ab26439787c58413d88f748a8e3aca3889d2574e174645db39582e35b"
+    },
+    "package": {
+      "files": [
+        {
+          "path": ".sdd/manifest.json",
+          "sha256": "558c539515615df00e93714f2dce063b249e027cd01b64d76bd9cd7014e6648c",
+          "sizeBytes": 37976
+        },
+        {
+          "path": "AGENTS.md",
+          "sha256": "ae85c7cccb2c32a6b23b15199d1551e1f1fd7330735b5f3ef8e10211440d2a6e",
+          "sizeBytes": 4694
+        },
+        {
+          "path": "README.md",
+          "sha256": "fa0d788dc8dafbf6bf5700ae169b3825908bdbdb321f3988c1b751912f7a14da",
+          "sizeBytes": 1486
+        },
+        {
+          "path": "__mocks__/workerMock.js",
+          "sha256": "abc2eef0aef52c4bf36d9d44835c192d666f4ae06caefc17fe361c8fa40d08a5",
+          "sizeBytes": 279
+        },
+        {
+          "path": "ai-docs/ARCHITECTURE.md",
+          "sha256": "f80295440ab56e74f1ba05ca1ee8edc71f7899f3a4b32361f3e74371bca0b55a",
+          "sizeBytes": 9808
+        },
+        {
+          "path": "ai-docs/CONTRACTS.md",
+          "sha256": "510e9e5584afaadc57e2957f46de164b98012c5ffb212904df7f53603d03769c",
+          "sizeBytes": 12192
+        },
+        {
+          "path": "ai-docs/GETTING_STARTED.md",
+          "sha256": "a6d13b3ae963c1da466f60fc63301de4b8d7aeeec252061eed2faf700fd0df31",
+          "sizeBytes": 6542
+        },
+        {
+          "path": "ai-docs/GLOSSARY.md",
+          "sha256": "030fa484d5bbf10a1f9a0ac11006a12a3355fb2cbf6322a7e04e8ea21ede29f3",
+          "sizeBytes": 2321
+        },
+        {
+          "path": "ai-docs/README.md",
+          "sha256": "ecf5cbce906ddc459eb6d2178b9a1505ea06273f4c224e728e7be7fe953b72d6",
+          "sizeBytes": 5601
+        },
+        {
+          "path": "ai-docs/REVIEW_CHECKLIST.md",
+          "sha256": "13018ece188852c694e3ba519dbc583622bd7c34075aad1b361c24644e5f27b8",
+          "sizeBytes": 2110
+        },
+        {
+          "path": "ai-docs/RULES.md",
+          "sha256": "2c77e77c312c59dbdab924b877946aff5d5bde3b52a290046bbfc9c6a5f70906",
+          "sizeBytes": 13335
+        },
+        {
+          "path": "ai-docs/SECURITY.md",
+          "sha256": "115d68f3dfb9f8cc4688908774e630338ffaa72b138a5f87b6bfda4cf85177a4",
+          "sizeBytes": 3372
+        },
+        {
+          "path": "ai-docs/SERVICE_STATE.md",
+          "sha256": "7ad6d2ac7cbceb3c1a3df5a6e619d789073b0dbcd958bf086b4c60bd283a7367",
+          "sizeBytes": 3233
+        },
+        {
+          "path": "ai-docs/SPEC_INDEX.md",
+          "sha256": "aa2290bde4465c1b79ee1f55c569b0540d325f5514f7d1364dff3261d601696d",
+          "sizeBytes": 4021
+        },
+        {
+          "path": "ai-docs/adr/0001-spec-source-policy.md",
+          "sha256": "f7221fa2656626a829dfc57f5608f60b51d38648c1db508b99864cee19c248ac",
+          "sizeBytes": 3645
+        },
+        {
+          "path": "ai-docs/adr/README.md",
+          "sha256": "8580f7b9723be83ff257e4e4c618607eccf617db9c46460ac3d0bf44e97af508",
+          "sizeBytes": 394
+        },
+        {
+          "path": "ai-docs/adr/_adr-template.md",
+          "sha256": "633f61b0fe7159758d47dc29816fe839b68f21b47341db0cf36f527c1774069a",
+          "sizeBytes": 500
+        },
+        {
+          "path": "ai-docs/contact-center-spec.md",
+          "sha256": "9e5319eb6651c0caacdf69dd3ba1529ee7b5580ce61b7ffa2f4db704c273136b",
+          "sizeBytes": 37025
+        },
+        {
+          "path": "ai-docs/features/consult-transfer-list-policy/spec/feature-spec.md",
+          "sha256": "f7b474c0265c166c70f100c070fab35950217e588c02faa077c6d6f33332d192",
+          "sizeBytes": 51435
+        },
+        {
+          "path": "ai-docs/features/generated-spec-conformance-fidelity-remediation/spec/feature-spec.md",
+          "sha256": "64b417ba9602bdbe4828f8e42bc49400ba210aa8d67b98ef272bce658306089c",
+          "sizeBytes": 7933
+        },
+        {
+          "path": "ai-docs/features/residual-warning-coverage-completion/spec/feature-spec.md",
+          "sha256": "4adebaf5540abd57c41f04c3cee0499e630ec9d385edddf591fb38ad69630c5d",
+          "sizeBytes": 12593
+        },
+        {
+          "path": "ai-docs/features/validator-code-fidelity-drift-fix/spec/feature-spec.md",
+          "sha256": "085b8ee05682ef1faa7ff1c3f88d1ce7625a52d53f3fa9a171b032c8374a9d64",
+          "sizeBytes": 25871
+        },
+        {
+          "path": "ai-docs/patterns/event-driven-patterns.md",
+          "sha256": "29363a368decbfff036928a16af248cc7cafa8b41cae874f73dfa5f58e52251d",
+          "sizeBytes": 13986
+        },
+        {
+          "path": "ai-docs/patterns/testing-patterns.md",
+          "sha256": "2f631458fcd0e63ee330998ad830895577419660b9155c9fe3bd1583ff40afa5",
+          "sizeBytes": 10792
+        },
+        {
+          "path": "ai-docs/patterns/typescript-patterns.md",
+          "sha256": "ff56817395ca04ef88e8cec9582c7afe82a1cf3abf7a52f11b2fc40417ea8a81",
+          "sizeBytes": 7872
+        },
+        {
+          "path": "ai-docs/templates/README.md",
+          "sha256": "0e2a575412d04593ff8ea384ee4cd405b3f942c967a5c654a59d725162af8209",
+          "sizeBytes": 3960
+        },
+        {
+          "path": "ai-docs/templates/documentation/create-agents-md.md",
+          "sha256": "1393086838f04092647cd90ea4897ed770a54df769a5d04ee309d1a4a390235d",
+          "sizeBytes": 4477
+        },
+        {
+          "path": "ai-docs/templates/documentation/create-architecture-md.md",
+          "sha256": "63dd922f6594e4037486b65dbb4264622c90c844ca21ea4e811dcbf20e684b72",
+          "sizeBytes": 5890
+        },
+        {
+          "path": "ai-docs/templates/existing-service/bug-fix.md",
+          "sha256": "f77c63fe485044550b180a9efe7823da94459f4dda9849bb70aa18ebb7f13d8a",
+          "sizeBytes": 6646
+        },
+        {
+          "path": "ai-docs/templates/existing-service/feature-enhancement.md",
+          "sha256": "f0197bba04d6848ca8cd472d3b5d82e8152a02cc458fab7c700992810d231abc",
+          "sizeBytes": 12516
+        },
+        {
+          "path": "ai-docs/templates/new-method/00-master.md",
+          "sha256": "0fed9b3fa907a25c542641886e8965e0b44a0a128220c6fc9672a36f60648436",
+          "sizeBytes": 1970
+        },
+        {
+          "path": "ai-docs/templates/new-method/01-requirements.md",
+          "sha256": "22f842def4d5c59812071b4c45cbea13c21c1ec6ef0f0507ede4945c6db257a3",
+          "sizeBytes": 8192
+        },
+        {
+          "path": "ai-docs/templates/new-method/02-implementation.md",
+          "sha256": "01878b450e8f30ffd5ae40d7fab4b521d838933b67f6f37f99a2ad81b7b3acf4",
+          "sizeBytes": 8677
+        },
+        {
+          "path": "ai-docs/templates/new-method/03-tests.md",
+          "sha256": "d6ffea407d35a56c88988a8a1c80bcb4b4fa2bde1894f79a159b93a98d728184",
+          "sizeBytes": 5495
+        },
+        {
+          "path": "ai-docs/templates/new-method/04-validation.md",
+          "sha256": "52142425ce7764904856f18624b309cf7228e69c715cdaf90148ecc262a908a6",
+          "sizeBytes": 4051
+        },
+        {
+          "path": "ai-docs/templates/new-service/00-master.md",
+          "sha256": "205d11d886b237624072c85ac6287c2ed1148785c9a4437c80986651bc39ee07",
+          "sizeBytes": 3526
+        },
+        {
+          "path": "ai-docs/templates/new-service/01-pre-questions.md",
+          "sha256": "b42931fc693a2583a8c57b18fafbdd733adee25532fc69336dead1a654d313b5",
+          "sizeBytes": 6103
+        },
+        {
+          "path": "ai-docs/templates/new-service/02-code-generation.md",
+          "sha256": "e71f42553d2afdb076567f3a285a7aa54a88085abc8f7566dab2ee2f839ebb93",
+          "sizeBytes": 11652
+        },
+        {
+          "path": "ai-docs/templates/new-service/03-integration.md",
+          "sha256": "8fd2f8c46f29466640998ebefbc47b9aa008ec2f345511617fe84a79e34e07a9",
+          "sizeBytes": 4631
+        },
+        {
+          "path": "ai-docs/templates/new-service/04-test-generation.md",
+          "sha256": "4853517879af9fa529e4a1ef6dd3f127b83c5bbd71d43c31ccb62837d4114120",
+          "sizeBytes": 4751
+        },
+        {
+          "path": "ai-docs/templates/new-service/05-validation.md",
+          "sha256": "3f8fd572d242938d73c796ba8d6eebb3a9cded8e5d533e1fbe082ea83cecb5ad",
+          "sizeBytes": 4526
+        },
+        {
+          "path": "babel.config.js",
+          "sha256": "ec4f1a4152be7c8d443c3a70f5ad008d9953dd10ce40d4dd75477560868af1a9",
+          "sizeBytes": 272
+        },
+        {
+          "path": "dist/cc.js",
+          "sha256": "49a78b7075faf985cf754a18e5501d7f542262e51176211f4f1daa8035983b50",
+          "sizeBytes": 102954
+        },
+        {
+          "path": "dist/cc.js.map",
+          "sha256": "f56e03109778bb6bcc71d998a2385b7ec8a67c39b57064208019995fa0eaade6",
+          "sizeBytes": 176032
+        },
+        {
+          "path": "dist/config.js",
+          "sha256": "8ccee18bda872ea1f3ab98718eb23448514639d7c8b3726789338091e167bf70",
+          "sizeBytes": 1950
+        },
+        {
+          "path": "dist/config.js.map",
+          "sha256": "6159a55cad8b2a6230f4ace2807691fff81e89379b0a8b06c29cf95fe1bb992c",
+          "sizeBytes": 2781
+        },
+        {
+          "path": "dist/constants.js",
+          "sha256": "439b3b8e56ce9f9469e9d91d4ab551c736ad6a0f166ab55c9446e9c5b8179265",
+          "sizeBytes": 5331
+        },
+        {
+          "path": "dist/constants.js.map",
+          "sha256": "870162cf545ca3a532b467bd54510dfc1369fc554a5d7ea16f2557b6410676aa",
+          "sizeBytes": 8801
+        },
+        {
+          "path": "dist/index.js",
+          "sha256": "3491492df74a26537ebb86e192b232eb74b75f13ffca056a958d4d5a88f45595",
+          "sizeBytes": 4966
+        },
+        {
+          "path": "dist/index.js.map",
+          "sha256": "54f4c6019b802fdbaaf9e5f44105c59a72af56d8baa0c1c576ddecad536d3a6b",
+          "sizeBytes": 9112
+        },
+        {
+          "path": "dist/logger-proxy.js",
+          "sha256": "75358af16942f26064e92d0094d6567ea91519d6339ae5d8cbf31754cfe07211",
+          "sizeBytes": 4387
+        },
+        {
+          "path": "dist/logger-proxy.js.map",
+          "sha256": "1d44a5dc36ce87743d5d813852bde309f9ae8416d81907b4346bca65e11de767",
+          "sizeBytes": 7839
+        },
+        {
+          "path": "dist/metrics/MetricsManager.js",
+          "sha256": "778a377f788bfd3f4714cd1356ba12c76d7ef52219648b5a84b5da610a9c157b",
+          "sizeBytes": 14781
+        },
+        {
+          "path": "dist/metrics/MetricsManager.js.map",
+          "sha256": "fbffec1483c0dda68d328433aa8b6c69693251177b7a77e9fade0b3b00d5beca",
+          "sizeBytes": 27301
+        },
+        {
+          "path": "dist/metrics/behavioral-events.js",
+          "sha256": "c8c41416eeafb5c656f38920a1dc88fbd321cef44cde9b8a07e9086c2b266340",
+          "sizeBytes": 17210
+        },
+        {
+          "path": "dist/metrics/behavioral-events.js.map",
+          "sha256": "5de8f503674acff96256bc138c0b346895ea4446057de91609786e66a75263f3",
+          "sizeBytes": 32130
+        },
+        {
+          "path": "dist/metrics/constants.js",
+          "sha256": "35bd57dec8d3ba9b70e7eacd2902e2778b0e4bdc9154a5df1387257ad7a5cdc0",
+          "sizeBytes": 13972
+        },
+        {
+          "path": "dist/metrics/constants.js.map",
+          "sha256": "b6e624462f878227226c3163731a5aaad1dfa77e67fe3a3801aaee8d9602eadf",
+          "sizeBytes": 21624
+        },
+        {
+          "path": "dist/services/AddressBook.js",
+          "sha256": "4c8489a37a4df31cf658c99a44ada8f234622822d2260851e49137e814a1bae9",
+          "sizeBytes": 9849
+        },
+        {
+          "path": "dist/services/AddressBook.js.map",
+          "sha256": "068c16cffa731f43cf6d02812460a2ed584fd7eb73894f41ee3e5934c3d95a09",
+          "sizeBytes": 17449
+        },
+        {
+          "path": "dist/services/AnswerCallOnWebexService.js",
+          "sha256": "3d6c010b7c7429ff969f018c111f05f38939eedf4b08464aa6110165503e9faf",
+          "sizeBytes": 6078
+        },
+        {
+          "path": "dist/services/AnswerCallOnWebexService.js.map",
+          "sha256": "0ded9f64af2770a5ba4101da9d0791b89b94a6e9b9bd9109713461801418be5c",
+          "sizeBytes": 13426
+        },
+        {
+          "path": "dist/services/ApiAiAssistant.js",
+          "sha256": "37a81ce8f1f5f7df4464a35a0b72e6157e98c7b8ef52d3afdaa245b2961f0078",
+          "sizeBytes": 19576
+        },
+        {
+          "path": "dist/services/ApiAiAssistant.js.map",
+          "sha256": "3cfa3fb9aed7c87355ff184c2c5884389de54f24fe2d4b4f2da2df717d523924",
+          "sizeBytes": 38922
+        },
+        {
+          "path": "dist/services/EntryPoint.js",
+          "sha256": "0668e90d00490ce4d0c6af395fae480ed9f8ed2f306d659bc6b382c10c4e5fba",
+          "sizeBytes": 7338
+        },
+        {
+          "path": "dist/services/EntryPoint.js.map",
+          "sha256": "42e4a2aec987a4cd9e65a1c729ff1f1525fac0e8926bb542f87fda7958661d1b",
+          "sizeBytes": 13822
+        },
+        {
+          "path": "dist/services/Queue.js",
+          "sha256": "4a0389607acc94f44e5b0c3f5d5a93a5b9b117cea406e6182efcea68d2ebe3fc",
+          "sizeBytes": 9805
+        },
+        {
+          "path": "dist/services/Queue.js.map",
+          "sha256": "40d918fc3d08a973819d8217e9ce7584ba58d47019fcd43bce4ebfe897bf41b6",
+          "sizeBytes": 17663
+        },
+        {
+          "path": "dist/services/UserPreference.js",
+          "sha256": "9c125eb20e5304a4a8c918624ff2081a9bea9457d8a7269b8fbfe2f1d866801c",
+          "sizeBytes": 14990
+        },
+        {
+          "path": "dist/services/UserPreference.js.map",
+          "sha256": "1a1411f1c59223a18bd1d8cb2ecf578dbb3836b9e46bb5f1ed74b10e38e9dd32",
+          "sizeBytes": 25696
+        },
+        {
+          "path": "dist/services/WebCallingService.js",
+          "sha256": "759210f9743fc572579efcbf9b9f73a0c736c5e56116575242baf9b6f67d3b8e",
+          "sizeBytes": 9888
+        },
+        {
+          "path": "dist/services/WebCallingService.js.map",
+          "sha256": "93fa21ae8b6e5bfb434c36f1602bb118446c51d289b1715d48ad7ca3469964e5",
+          "sizeBytes": 17933
+        },
+        {
+          "path": "dist/services/WebexCrossClientService.js",
+          "sha256": "bcff9d3d890ec25b63413da97a7f1d3aa11370926d1f4ce8e693574311239437",
+          "sizeBytes": 8088
+        },
+        {
+          "path": "dist/services/WebexCrossClientService.js.map",
+          "sha256": "ed20f8ce3212f79bb2bba1f48e769996324d53a9871e6457adeef855e9c67397",
+          "sizeBytes": 16772
+        },
+        {
+          "path": "dist/services/WxAppTelephonyMercurySync.js",
+          "sha256": "716a4649870907ef9eb247617baee402ae25c26926cd224f50e70850ea771077",
+          "sizeBytes": 4109
+        },
+        {
+          "path": "dist/services/WxAppTelephonyMercurySync.js.map",
+          "sha256": "7ebf1d77fd6a53383a0367c6d1d3ba7b5f4acbf4e5e1941fb8ec7a883e574e87",
+          "sizeBytes": 8439
+        },
+        {
+          "path": "dist/services/agent/index.js",
+          "sha256": "9e0c59fceff0b4b52581a88d76e0406a8acc08f7caff92991e95fccdca029940",
+          "sizeBytes": 5277
+        },
+        {
+          "path": "dist/services/agent/index.js.map",
+          "sha256": "169129dd6b5acba84bf15d53826a7f0eac47d30621674f11f647cb0a94f61ee9",
+          "sizeBytes": 9483
+        },
+        {
+          "path": "dist/services/agent/types.js",
+          "sha256": "8e239cc217fded077303a2ee7ceea413a70fa12b0b2f3cd4809219fe6f64cf40",
+          "sizeBytes": 5603
+        },
+        {
+          "path": "dist/services/agent/types.js.map",
+          "sha256": "fd207943c84df7b7208a0b3bc80227569aba145bb66c9096172d5a4a564d121f",
+          "sizeBytes": 16079
+        },
+        {
+          "path": "dist/services/config/Util.js",
+          "sha256": "2fc5c7e75735e487af57354d26ee4f91ad981b7e8785cd43e1da3e4ecff652c6",
+          "sizeBytes": 8001
+        },
+        {
+          "path": "dist/services/config/Util.js.map",
+          "sha256": "672759985c5c391ad360d156a15f0f70019ddaa2261815b2b1f32d7d8354b65a",
+          "sizeBytes": 17866
+        },
+        {
+          "path": "dist/services/config/constants.js",
+          "sha256": "a93f752241f7735e44ff82f966f40e08d7290cb10c5d0bddf8ec02bf0a62c612",
+          "sizeBytes": 11052
+        },
+        {
+          "path": "dist/services/config/constants.js.map",
+          "sha256": "0b12e1f44c7c2935600444545d90c54405417d0a1748ade4d2baea6370290b75",
+          "sizeBytes": 16656
+        },
+        {
+          "path": "dist/services/config/index.js",
+          "sha256": "84bb14f71ae031b8d9b5490accafe3aa4bbe3adcac31e4a04bbdbd207d7235f7",
+          "sizeBytes": 29322
+        },
+        {
+          "path": "dist/services/config/index.js.map",
+          "sha256": "1c51306ef962e68f25aa8bf8b8668722902af5717a4ef2b6a30e3c30242c4c4a",
+          "sizeBytes": 50394
+        },
+        {
+          "path": "dist/services/config/types.js",
+          "sha256": "8f0c5d5d66d34ef8b50fdcf600fcd1dcb443da4c13336d2a69f05a4bc53848d0",
+          "sizeBytes": 14108
+        },
+        {
+          "path": "dist/services/config/types.js.map",
+          "sha256": "b0f671cfc5131ce71cd405e9339fdd4304800811444ab27a0aa9119072c19fbc",
+          "sizeBytes": 47211
+        },
+        {
+          "path": "dist/services/constants.js",
+          "sha256": "c28f317e03b064f003f55120314e0dca4428ef7f104f1156fe112918ccb7e22a",
+          "sizeBytes": 4148
+        },
+        {
+          "path": "dist/services/constants.js.map",
+          "sha256": "cd448a982a44d5bd07de976d8bbd57cf299c152ba16f53701c7f1abd7ef71eb5",
+          "sizeBytes": 6041
+        },
+        {
+          "path": "dist/services/core/Err.js",
+          "sha256": "15ac1a9d9380e286cfbea776227dcae6cdb6bfbbd82838787c51812b0bb71858",
+          "sizeBytes": 963
+        },
+        {
+          "path": "dist/services/core/Err.js.map",
+          "sha256": "f7a29358f5f2789f2c3acbadfeca4844ec7ad976899497529fbfdd8f47bbbaf2",
+          "sizeBytes": 5247
+        },
+        {
+          "path": "dist/services/core/GlobalTypes.js",
+          "sha256": "2908774aac53b6c31ed73de05f42867b7e73567986eeb4492dab667fa28c74fa",
+          "sizeBytes": 120
+        },
+        {
+          "path": "dist/services/core/GlobalTypes.js.map",
+          "sha256": "209bf3c98ad74e0ad3f70d1d5eec1bd3a8c1c480a4723cecba13996a8aad4f65",
+          "sizeBytes": 1800
+        },
+        {
+          "path": "dist/services/core/Utils.js",
+          "sha256": "d92c978f3f1774e538fd99f14f6151c99fc314d3d9156fbd16be8c703c107672",
+          "sizeBytes": 16752
+        },
+        {
+          "path": "dist/services/core/Utils.js.map",
+          "sha256": "a045885a536a54d293d43a754b0329bb06f1261850873cab4804d26e539d8ad2",
+          "sizeBytes": 28633
+        },
+        {
+          "path": "dist/services/core/WebexRequest.js",
+          "sha256": "7eef678d467f65e91fd7cd1a9f3f96d2bc532ea23f3c00066090eaf52c0df837",
+          "sizeBytes": 2917
+        },
+        {
+          "path": "dist/services/core/WebexRequest.js.map",
+          "sha256": "31da1055987014232ae82d1bc1d9ba32d423feba01323bc80a551db17231d671",
+          "sizeBytes": 6078
+        },
+        {
+          "path": "dist/services/core/aqm-reqs.js",
+          "sha256": "08f509f2d070e9ec30143677e7efc9711aba5d658ab1ca3f7af000445e29acc1",
+          "sizeBytes": 11866
+        },
+        {
+          "path": "dist/services/core/aqm-reqs.js.map",
+          "sha256": "393895fc3ac7abba171c22cd31de97173b4e4a73613647296fcd19eabcd75336",
+          "sizeBytes": 23557
+        },
+        {
+          "path": "dist/services/core/constants.js",
+          "sha256": "1dd360b26b9ef4684f1f8ba0f82109ba99658789c54b34a8dec55914d34654c3",
+          "sizeBytes": 4000
+        },
+        {
+          "path": "dist/services/core/constants.js.map",
+          "sha256": "9ff134b006a06732c955b6ced71ccc227ea34c51635ad0627b98ea19bb048f37",
+          "sizeBytes": 5986
+        },
+        {
+          "path": "dist/services/core/types.js",
+          "sha256": "a09c56ed3cf5baf8b487c370fa4c6af691b08c10c2c1d40e5000dcf276d7da66",
+          "sizeBytes": 114
+        },
+        {
+          "path": "dist/services/core/types.js.map",
+          "sha256": "2b96cb5412624dada8de1f3f07161c10ec0511a6f4cf5d78088aa66e34775d24",
+          "sizeBytes": 2470
+        },
+        {
+          "path": "dist/services/core/websocket/WebSocketManager.js",
+          "sha256": "7a0f0a8cc842072febc82e2c236418e94a285bca2e58b77c0d4b908179f8d91d",
+          "sizeBytes": 8005
+        },
+        {
+          "path": "dist/services/core/websocket/WebSocketManager.js.map",
+          "sha256": "885f5c16ecea45b5b1791c98986bb04ce4e480926edb51a67c97f6da59f6108e",
+          "sizeBytes": 15536
+        },
+        {
+          "path": "dist/services/core/websocket/connection-service.js",
+          "sha256": "eddcbe001815a3a9973e0692b1df5d0dcf5a5fb59acc5003a3aa4a687a144c00",
+          "sizeBytes": 4221
+        },
+        {
+          "path": "dist/services/core/websocket/connection-service.js.map",
+          "sha256": "40489974faa34616fb9271554133fcea5b7c99f247f5f19bfa893725689ee17e",
+          "sizeBytes": 9772
+        },
+        {
+          "path": "dist/services/core/websocket/keepalive.worker.js",
+          "sha256": "dea73aa1cd5c34292cb98e425f3684e5c77672d0d788cc20ef7c67c4c7fc5ada",
+          "sizeBytes": 2598
+        },
+        {
+          "path": "dist/services/core/websocket/keepalive.worker.js.map",
+          "sha256": "11c0d0d3513743c0b4b60a6e299338d6bcf42104c7910447e90ee560bab76c00",
+          "sizeBytes": 3197
+        },
+        {
+          "path": "dist/services/core/websocket/types.js",
+          "sha256": "a09c56ed3cf5baf8b487c370fa4c6af691b08c10c2c1d40e5000dcf276d7da66",
+          "sizeBytes": 114
+        },
+        {
+          "path": "dist/services/core/websocket/types.js.map",
+          "sha256": "92c8ae008eea1e9a6032aa1f050e13dd9f67e433216455fcea3821e459a13fee",
+          "sizeBytes": 1546
+        },
+        {
+          "path": "dist/services/index.js",
+          "sha256": "895fc0fc1145470ff6abf0e2491c15da4f4bb90b925a144c6fa520ef37330dfd",
+          "sizeBytes": 2899
+        },
+        {
+          "path": "dist/services/index.js.map",
+          "sha256": "f185733a7553408e4920c925877a0b48ef7e56dceabece07b8a1de5f4b3ae58f",
+          "sizeBytes": 5044
+        },
+        {
+          "path": "dist/services/task/AutoWrapup.js",
+          "sha256": "7f023829e2b99dcebc7e64fb5fb256bc1146ed3e90343707a9c50c493b31f55a",
+          "sizeBytes": 2273
+        },
+        {
+          "path": "dist/services/task/AutoWrapup.js.map",
+          "sha256": "333298afb86d7c29aa80d94e269f486e8d3f31d0c0493bbeabf1d1332c60a10b",
+          "sizeBytes": 4249
+        },
+        {
+          "path": "dist/services/task/Task.js",
+          "sha256": "d2df2858b681832a12397c49beb9889e7a7afb908242d0e90ac2ff19563ca7cf",
+          "sizeBytes": 34577
+        },
+        {
+          "path": "dist/services/task/Task.js.map",
+          "sha256": "e449c0e073fe1b96455cbb8f0e1cb4f1f356ca8b22a392509fd98c770cddf3ab",
+          "sizeBytes": 72628
+        },
+        {
+          "path": "dist/services/task/TaskFactory.js",
+          "sha256": "7db225be5fe7a8c519f8f7b54ae659c33bb8d20fb53bbacb884c5b8be533d2d2",
+          "sizeBytes": 2028
+        },
+        {
+          "path": "dist/services/task/TaskFactory.js.map",
+          "sha256": "db19efc7d8b4c090502eec9991c38964bf97377205c5c993e62135ddb5976a2b",
+          "sizeBytes": 4375
+        },
+        {
+          "path": "dist/services/task/TaskManager.js",
+          "sha256": "ce2f6fe1cb11439b699ae650480bf24f919c40f55446b4fea76719713c04f9c4",
+          "sizeBytes": 61954
+        },
+        {
+          "path": "dist/services/task/TaskManager.js.map",
+          "sha256": "b363d3da56530ca96b37f15b5b08c86432c7bd388a072fa7b9087f919e4b4ed5",
+          "sizeBytes": 119943
+        },
+        {
+          "path": "dist/services/task/TaskUtils.js",
+          "sha256": "a0c65b265e8c35e9664b6a142ceaa0fb9c2086f8f022005d26c539886810212b",
+          "sizeBytes": 19005
+        },
+        {
+          "path": "dist/services/task/TaskUtils.js.map",
+          "sha256": "a8559289b5869e6175afabaa9703113edc888aa30b096574de4ee586b16e58c9",
+          "sizeBytes": 33628
+        },
+        {
+          "path": "dist/services/task/WebexCallingUtils.js",
+          "sha256": "14e6c34141ed3d828a797be9777543f6650cfb5581fd7262996f6bb9b38e7178",
+          "sizeBytes": 3187
+        },
+        {
+          "path": "dist/services/task/WebexCallingUtils.js.map",
+          "sha256": "9348cfc334d41d12e28ffe8894943ca8f4ee5c8af920a91da5c0bbd20e848a23",
+          "sizeBytes": 7237
+        },
+        {
+          "path": "dist/services/task/constants.js",
+          "sha256": "f912b1b9bb38be895a467eb8bb0238b7df72f6d43de553d4059f0d6998e01933",
+          "sizeBytes": 6012
+        },
+        {
+          "path": "dist/services/task/constants.js.map",
+          "sha256": "e72b29d69debbdcc758b91dcf723c41ea25bdb5f38a42c9b2b583d9ed634cc38",
+          "sizeBytes": 9183
+        },
+        {
+          "path": "dist/services/task/contact.js",
+          "sha256": "ea09cb06eb07a44bb9aae1e3bf8ff2d075ef8342ba98089f991b5e40a27d6b8a",
+          "sizeBytes": 16194
+        },
+        {
+          "path": "dist/services/task/contact.js.map",
+          "sha256": "676de8ee96e3921de026c03d1bf4297714b668cdb9381b7fa352be1dfe18f27b",
+          "sizeBytes": 29610
+        },
+        {
+          "path": "dist/services/task/dialer.js",
+          "sha256": "55b513cbbd741ec89508511dea46309967bc710548531a080f5de47310c1ae2d",
+          "sizeBytes": 6576
+        },
+        {
+          "path": "dist/services/task/dialer.js.map",
+          "sha256": "ef7c136dd5e517abf09e0dd76cab67b47f9f9bc326d4330754f0509ba62dea88",
+          "sizeBytes": 10869
+        },
+        {
+          "path": "dist/services/task/digital/Digital.js",
+          "sha256": "cf926a8a1c49bd4b8886e8c9afd78524cbc3f2e58137a7b54d5258846384e360",
+          "sizeBytes": 2905
+        },
+        {
+          "path": "dist/services/task/digital/Digital.js.map",
+          "sha256": "d5994640f65b2563a642649e68f0d834e36f163cee8d43c47b4b855698d1adac",
+          "sizeBytes": 6011
+        },
+        {
+          "path": "dist/services/task/state-machine/TaskStateMachine.js",
+          "sha256": "b81636c302c6496d2c26ae922875cf74043989c02e8bbb92c63e684a4dd08275",
+          "sizeBytes": 49498
+        },
+        {
+          "path": "dist/services/task/state-machine/TaskStateMachine.js.map",
+          "sha256": "8bbd73c4e0e705356c673a5963908cb7456f4858a9b753e56b5c0b137d3f00cf",
+          "sizeBytes": 83306
+        },
+        {
+          "path": "dist/services/task/state-machine/actions.js",
+          "sha256": "e43dfa018868e894b5ca20b21fa716752bca7202a05e11536d4b927a6769b70c",
+          "sizeBytes": 23497
+        },
+        {
+          "path": "dist/services/task/state-machine/actions.js.map",
+          "sha256": "85e4c1d6885cfbd875d0b5c3933c3718dbdd9eea00b06d0b400d2b57bacc4c51",
+          "sizeBytes": 48923
+        },
+        {
+          "path": "dist/services/task/state-machine/constants.js",
+          "sha256": "3f871cfaa3e986be053451c9f03b09c6ce6006631c786c90edcf54ec7793c32b",
+          "sizeBytes": 6498
+        },
+        {
+          "path": "dist/services/task/state-machine/constants.js.map",
+          "sha256": "91cd52f4a8baac73527814b50ce3fb8ccc4af692b391e97ed25db5490934d5b8",
+          "sizeBytes": 7379
+        },
+        {
+          "path": "dist/services/task/state-machine/guards.js",
+          "sha256": "2df59f2edb401547047810368aee7a155f4dde24b6b0cd64d76542e99698b66d",
+          "sizeBytes": 15814
+        },
+        {
+          "path": "dist/services/task/state-machine/guards.js.map",
+          "sha256": "770fdfc1f2bbeffbcb014ee3f8a347a26e89837d0f2b222361f9f6acfc45201d",
+          "sizeBytes": 30043
+        },
+        {
+          "path": "dist/services/task/state-machine/index.js",
+          "sha256": "ec7e813d3bc1301cca1f50d152887f5ebce3b1d2cca6ea72aba16a5f6a3cdc50",
+          "sizeBytes": 1253
+        },
+        {
+          "path": "dist/services/task/state-machine/index.js.map",
+          "sha256": "93ba5829ef32dc2d1916cf61ca1f6a776d150a0a122641907b31dc86ff5f464a",
+          "sizeBytes": 1038
+        },
+        {
+          "path": "dist/services/task/state-machine/types.js",
+          "sha256": "5b7d4b0519b9bf20a10bd8881ad2c22ad9b53051de2a7c9670fcb6d9ca2aa385",
+          "sizeBytes": 1025
+        },
+        {
+          "path": "dist/services/task/state-machine/types.js.map",
+          "sha256": "d93f81b5056e81f3dea68320aad1114aa7b1b96d963b5bf374ec5e0bd32564e7",
+          "sizeBytes": 10489
+        },
+        {
+          "path": "dist/services/task/state-machine/uiControlsComputer.js",
+          "sha256": "91fada5348b14756e71e2727db58b97c49abe053eb9857e8f82e868854cbc58f",
+          "sizeBytes": 40838
+        },
+        {
+          "path": "dist/services/task/state-machine/uiControlsComputer.js.map",
+          "sha256": "7591aca7b7124ed83b6fed979613a9d219ba7ad3cfe7a90c676cc7554a5a6fe5",
+          "sizeBytes": 77943
+        },
+        {
+          "path": "dist/services/task/taskDataNormalizer.js",
+          "sha256": "6a5e83564c0f6f820ba55995a7a18e5ecc88e1d715b50c8ecda2a7c27b9c06d1",
+          "sizeBytes": 3274
+        },
+        {
+          "path": "dist/services/task/taskDataNormalizer.js.map",
+          "sha256": "5bc3a82db304ea20f3a1e289fa8d719ecd66feffca420db2ada6688691772fac",
+          "sizeBytes": 6713
+        },
+        {
+          "path": "dist/services/task/types.js",
+          "sha256": "c2dee6898714b624ede0385c114623eecd44c337ed49a772d16d5dea32f13f40",
+          "sizeBytes": 27639
+        },
+        {
+          "path": "dist/services/task/types.js.map",
+          "sha256": "50b36eb8431e67d3e14dcf460d3e66036472a11cf1c3dacf17e69df8928c2bd7",
+          "sizeBytes": 79615
+        },
+        {
+          "path": "dist/services/task/voice/Voice.js",
+          "sha256": "dbeb155f788e90f30bd36d9115a3932ac6c679d8a80ba9e961995589681a866f",
+          "sizeBytes": 60631
+        },
+        {
+          "path": "dist/services/task/voice/Voice.js.map",
+          "sha256": "65eae10e2d7a352b39d386e38c45fd9585e1252be0c8aa4b9e443092637e19ac",
+          "sizeBytes": 116110
+        },
+        {
+          "path": "dist/services/task/voice/WebRTC.js",
+          "sha256": "704daa364ecbca730778687e87738403dd2d79f26000828c8d840ddca71fd4d5",
+          "sizeBytes": 5476
+        },
+        {
+          "path": "dist/services/task/voice/WebRTC.js.map",
+          "sha256": "bf913a4d572fbcef4fa821141f811d5b93ead36246d5cd8b96cd7bddd9ce4b19",
+          "sizeBytes": 11363
+        },
+        {
+          "path": "dist/services/task/voice/wxAppVoiceMethods.js",
+          "sha256": "940b3ba250af16088e3abb1b98c6bb5c7178a21c1ff4839a2b21f78ca74c971d",
+          "sizeBytes": 14643
+        },
+        {
+          "path": "dist/services/task/voice/wxAppVoiceMethods.js.map",
+          "sha256": "3b45d251de561d2e02e1fb05cd3443351c7c5981ae2d0cba2712175041b6f42a",
+          "sizeBytes": 31222
+        },
+        {
+          "path": "dist/services/wxAppDiagnosticLogging.js",
+          "sha256": "0708fe9ab1c2ff6c77936e8eb48f5ea1d27ee7144a7c9c1075813fc04a3af492",
+          "sizeBytes": 4103
+        },
+        {
+          "path": "dist/services/wxAppDiagnosticLogging.js.map",
+          "sha256": "f27a7ce9e650d3ebb5999bf4549b836fcc59525db5fab65d17ec3021b95488f5",
+          "sizeBytes": 9472
+        },
+        {
+          "path": "dist/services/wxAppTelephonyUtils.js",
+          "sha256": "e1a3e9cefde9b13fd9b2b4c188ad4f5863ad199507caee061ae771b7c35a4f33",
+          "sizeBytes": 631
+        },
+        {
+          "path": "dist/services/wxAppTelephonyUtils.js.map",
+          "sha256": "e26044d06db98a37778b50dd676ae61e6104350514d2dab570b2993b29701860",
+          "sizeBytes": 1071
+        },
+        {
+          "path": "dist/types/cc.d.ts",
+          "sha256": "b0f696741044226e145189b8e77516319afc74a2bac0f401d617bbfc2b3a5755",
+          "sizeBytes": 37373
+        },
+        {
+          "path": "dist/types/config.d.ts",
+          "sha256": "75939a49084e42336924b31a3db8dd04865b422921c19bb7589067d7b0e06cbe",
+          "sizeBytes": 2102
+        },
+        {
+          "path": "dist/types/constants.d.ts",
+          "sha256": "45f82b556af409401cb413f7b6f3092d12e615bfd7ddb839e788373c45c4b9c5",
+          "sizeBytes": 3519
+        },
+        {
+          "path": "dist/types/index.d.ts",
+          "sha256": "af7d60ef4b784a3f57c304a4eb783ce07c42b188bfbd9c8acdb169f40472e39a",
+          "sizeBytes": 6791
+        },
+        {
+          "path": "dist/types/logger-proxy.d.ts",
+          "sha256": "3642a40846bfbdd54550b235c51172dd3df1c240bd6601a0f0c92e96be5a6e79",
+          "sizeBytes": 2513
+        },
+        {
+          "path": "dist/types/metrics/MetricsManager.d.ts",
+          "sha256": "5c8e3c9f9f8ee4c33f4736d419ed1ea28dc41d185ff702beb09cd770ff91a2c3",
+          "sizeBytes": 7965
+        },
+        {
+          "path": "dist/types/metrics/behavioral-events.d.ts",
+          "sha256": "98096ed7bad87b45acd5ddad765ffeb3a9a9c9b20141365bcaa6035f3286b709",
+          "sizeBytes": 1207
+        },
+        {
+          "path": "dist/types/metrics/constants.d.ts",
+          "sha256": "1abf0041764d1140285b3e3c4e871b356b03065b04219de5ae127a50942e38a7",
+          "sizeBytes": 14905
+        },
+        {
+          "path": "dist/types/services/AddressBook.d.ts",
+          "sha256": "33c1d50bbb6f0b5be44ea1db1c689c28fb8a50a6661b2a080ad8997075c75835",
+          "sizeBytes": 2576
+        },
+        {
+          "path": "dist/types/services/AnswerCallOnWebexService.d.ts",
+          "sha256": "67ce5b96770b43219865517805ea9417963c2a7fc0ed3fae8a64c52012b0a5ab",
+          "sizeBytes": 1219
+        },
+        {
+          "path": "dist/types/services/ApiAiAssistant.d.ts",
+          "sha256": "ca8d5aac68d6e43c5903d19c8f32e2d217f2d7c8f44b748558dca828b4f499d0",
+          "sizeBytes": 4070
+        },
+        {
+          "path": "dist/types/services/EntryPoint.d.ts",
+          "sha256": "3f40e060e67889f3787abc8cebd884eca256fc3afad60d901e96dda82972f329",
+          "sizeBytes": 2369
+        },
+        {
+          "path": "dist/types/services/Queue.d.ts",
+          "sha256": "bdfc7551744cf9ac47d3ed0afb74e1159b4c0f7092570f2232b044b79b960426",
+          "sizeBytes": 2488
+        },
+        {
+          "path": "dist/types/services/UserPreference.d.ts",
+          "sha256": "11df3284409ebd6e2eb22b7bb378cdaff7f05ba26100125202d1200d45f49f69",
+          "sizeBytes": 4678
+        },
+        {
+          "path": "dist/types/services/WebCallingService.d.ts",
+          "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+          "sizeBytes": 11
+        },
+        {
+          "path": "dist/types/services/WebexCrossClientService.d.ts",
+          "sha256": "bed718030f5260c355bb6335887307f644af34fd1e1172ad704cafaf4b27eb62",
+          "sizeBytes": 1206
+        },
+        {
+          "path": "dist/types/services/WxAppTelephonyMercurySync.d.ts",
+          "sha256": "9a1cd9516b539835f37f04af6d5c7b5e623a81d397f53df956805ce97b6776e3",
+          "sizeBytes": 926
+        },
+        {
+          "path": "dist/types/services/agent/index.d.ts",
+          "sha256": "43461f28ca595d6793851a6119fcbea5d87483a5921b0ad380b0db73df74bb72",
+          "sizeBytes": 1314
+        },
+        {
+          "path": "dist/types/services/agent/types.d.ts",
+          "sha256": "28bf51c66b0f8adfed045b4a1b7628509c0151dca412ea4838888af43574bd2a",
+          "sizeBytes": 15187
+        },
+        {
+          "path": "dist/types/services/config/Util.d.ts",
+          "sha256": "93fce78b6632cd5135182783a7f4e9184e1c4380525f5f33168899282c1f4302",
+          "sizeBytes": 716
+        },
+        {
+          "path": "dist/types/services/config/constants.d.ts",
+          "sha256": "7a9a12914d33e23bbb999d0e450ffada36c4f81c561777a3657b1363df057f38",
+          "sizeBytes": 9250
+        },
+        {
+          "path": "dist/types/services/config/index.d.ts",
+          "sha256": "96960b7fbb800c2aae86a7874f19616090815ad27dbe280a177ea8f664528dd2",
+          "sizeBytes": 10065
+        },
+        {
+          "path": "dist/types/services/config/types.d.ts",
+          "sha256": "79f50aa4f56c2a21403d0dad0908c9a3284f4876008d5e09a978c8eefb958832",
+          "sizeBytes": 52164
+        },
+        {
+          "path": "dist/types/services/constants.d.ts",
+          "sha256": "56b21b5e6624ab87dbb682f33896d7204ecad31ba0b78f808a07cdf39c148fb0",
+          "sizeBytes": 2727
+        },
+        {
+          "path": "dist/types/services/core/Err.d.ts",
+          "sha256": "68ae23a8fe9595d906d3b7ea6169eb76138444476587cb59378af34d57b2147c",
+          "sizeBytes": 3732
+        },
+        {
+          "path": "dist/types/services/core/GlobalTypes.d.ts",
+          "sha256": "09f8719247f439f06f25e9476ef0bd4603638b778a6acd88aa8de6e261459c03",
+          "sizeBytes": 1691
+        },
+        {
+          "path": "dist/types/services/core/Utils.d.ts",
+          "sha256": "4b70545a6cf31657273e54567e163001ef55d7d23a8379afff80f70a8b7816ac",
+          "sizeBytes": 5974
+        },
+        {
+          "path": "dist/types/services/core/WebexRequest.d.ts",
+          "sha256": "aca024101dee4bf70cb4c4d4307517e663fb99c52826ea17ee086799f21fbd29",
+          "sizeBytes": 750
+        },
+        {
+          "path": "dist/types/services/core/aqm-reqs.d.ts",
+          "sha256": "59ad8809b01105f0bd0f57954e2090c6b1ee50e9543a32ee8aecb4724a410eff",
+          "sizeBytes": 2573
+        },
+        {
+          "path": "dist/types/services/core/constants.d.ts",
+          "sha256": "685079dd3b3e98f763f327a9373bd21d3bb919c5d219028ea0d9e7712cfdaaa5",
+          "sizeBytes": 2862
+        },
+        {
+          "path": "dist/types/services/core/types.d.ts",
+          "sha256": "943cf2a0ecd40a341f4538da5f7e4aaf6d809cbf1f804233ba125b108fb799b0",
+          "sizeBytes": 1587
+        },
+        {
+          "path": "dist/types/services/core/websocket/WebSocketManager.d.ts",
+          "sha256": "0e84ccf12cb785b15ace725568ac542c81f4bd5a997b5d025b39fe30194d8d36",
+          "sizeBytes": 1279
+        },
+        {
+          "path": "dist/types/services/core/websocket/connection-service.d.ts",
+          "sha256": "10738b3a4dd160c07f9307e7661937b98f5883d333975a349bbe9841171f3dc1",
+          "sizeBytes": 919
+        },
+        {
+          "path": "dist/types/services/core/websocket/keepalive.worker.d.ts",
+          "sha256": "96970057a5e816793c1cf811f1b2024a6183552849155e8d5b76254f2cb3f554",
+          "sizeBytes": 2471
+        },
+        {
+          "path": "dist/types/services/core/websocket/types.d.ts",
+          "sha256": "973044bd59d7045a40b2e6e1bfe5ef8490ebf33df4516634a149bc69f0bf79db",
+          "sizeBytes": 1420
+        },
+        {
+          "path": "dist/types/services/index.d.ts",
+          "sha256": "3a2b1fdfe74be17f1d26ee3f8397aa4ae06ed804c35c9b5c3678132e9e97be88",
+          "sizeBytes": 2301
+        },
+        {
+          "path": "dist/types/services/task/AutoWrapup.d.ts",
+          "sha256": "f2d051ac4ce4f14d4fc592f5c6d74fd6d58e90f7d52a1363960534b6d46305d3",
+          "sizeBytes": 1282
+        },
+        {
+          "path": "dist/types/services/task/Task.d.ts",
+          "sha256": "3f11db2fa96a54877509a44b232587d31132055f92136a07165f79228bedaee2",
+          "sizeBytes": 8353
+        },
+        {
+          "path": "dist/types/services/task/TaskFactory.d.ts",
+          "sha256": "554a4657d6c1094450b9cd381a47b79d633cd7b47d7ef2f875eb56fe34591ab6",
+          "sizeBytes": 710
+        },
+        {
+          "path": "dist/types/services/task/TaskManager.d.ts",
+          "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+          "sizeBytes": 11
+        },
+        {
+          "path": "dist/types/services/task/TaskUtils.d.ts",
+          "sha256": "07903739e6a2de1518ec85ad705d03c422f945246910c32a0235cddc0f12b7db",
+          "sizeBytes": 7618
+        },
+        {
+          "path": "dist/types/services/task/WebexCallingUtils.d.ts",
+          "sha256": "a2a5c92fc5e898d0db18363ae2858876d0eb7b9391b3f00f7adc26a5be4a91fe",
+          "sizeBytes": 776
+        },
+        {
+          "path": "dist/types/services/task/constants.d.ts",
+          "sha256": "19a8b6974786b57f8ca17eb55a0453bb692980262193e12fda2d9137be4dc997",
+          "sizeBytes": 4147
+        },
+        {
+          "path": "dist/types/services/task/contact.d.ts",
+          "sha256": "f87caf2000648279cfd70b0763feef3481e50b700f5abdf96236c80a6fb8f3ed",
+          "sizeBytes": 2673
+        },
+        {
+          "path": "dist/types/services/task/dialer.d.ts",
+          "sha256": "faad7b5f0ff455e1e3235be9751f0d636d918ddfe0ac67ff2d26b7553126a967",
+          "sizeBytes": 2981
+        },
+        {
+          "path": "dist/types/services/task/digital/Digital.d.ts",
+          "sha256": "1ba200a317ab4934bbc8f8c37fd3834b907b2423a3db00d51eab9e04106e0481",
+          "sizeBytes": 938
+        },
+        {
+          "path": "dist/types/services/task/state-machine/TaskStateMachine.d.ts",
+          "sha256": "b0d22c0f11b4323b8bf7d2f3fc46f09dfb5344ec2bab376a563b9c83135992ec",
+          "sizeBytes": 50281
+        },
+        {
+          "path": "dist/types/services/task/state-machine/actions.d.ts",
+          "sha256": "39a59133fbf4dfbfc240fe6c77bcc3d7c803985be923fb22ccb4496d5a787be7",
+          "sizeBytes": 771
+        },
+        {
+          "path": "dist/types/services/task/state-machine/constants.d.ts",
+          "sha256": "fbbd86fee6f11733e08a82b40161340094c58fe3aef3a455b7c265f16a6d84f0",
+          "sizeBytes": 4087
+        },
+        {
+          "path": "dist/types/services/task/state-machine/guards.d.ts",
+          "sha256": "13f1d149c04f1cdcb568328053dd87589f34044e1adab6dec8129df9b957239f",
+          "sizeBytes": 5202
+        },
+        {
+          "path": "dist/types/services/task/state-machine/index.d.ts",
+          "sha256": "07a48947c1eac6a55e94e619c94b67da338e834540e82bcb3dc8be7436f2c252",
+          "sizeBytes": 595
+        },
+        {
+          "path": "dist/types/services/task/state-machine/types.d.ts",
+          "sha256": "648729df89edaf7b52adc7ab6aca67e5c132c8c273944a133efb8d018e086f10",
+          "sizeBytes": 10424
+        },
+        {
+          "path": "dist/types/services/task/state-machine/uiControlsComputer.d.ts",
+          "sha256": "fabd6f257ade440f8da68340d5ec4bfb4771796c51d254aeb7a91b6341747a7b",
+          "sizeBytes": 532
+        },
+        {
+          "path": "dist/types/services/task/taskDataNormalizer.d.ts",
+          "sha256": "e45fb875558d7f11a32e52d3a956dc3a11277f3512249578a5e537000562c32d",
+          "sizeBytes": 510
+        },
+        {
+          "path": "dist/types/services/task/types.d.ts",
+          "sha256": "6ffa63a58c3f241e368de118ad2d9ab84c4052ac9e5879c39c78c23cb545eca9",
+          "sizeBytes": 72025
+        },
+        {
+          "path": "dist/types/services/task/voice/Voice.d.ts",
+          "sha256": "60dab7f21cbd4e615530cdadfa31d67d02ff251fc2ff205e9dbcf8635f8cdb82",
+          "sizeBytes": 8941
+        },
+        {
+          "path": "dist/types/services/task/voice/WebRTC.d.ts",
+          "sha256": "d20477a30b1801dd25b0ac2ed1a51d02eee11d74ab6412c398aeb1471daaa6c0",
+          "sizeBytes": 1756
+        },
+        {
+          "path": "dist/types/services/task/voice/wxAppVoiceMethods.d.ts",
+          "sha256": "fbeb48048ae87e1ea84b143241ce81045f7465bc9fe69fa889be769d97688a6e",
+          "sizeBytes": 3206
+        },
+        {
+          "path": "dist/types/services/wxAppDiagnosticLogging.d.ts",
+          "sha256": "8543b668aaa3247995e108a9959ff509a20f6aef0589e6175f68e05a58068d8b",
+          "sizeBytes": 2210
+        },
+        {
+          "path": "dist/types/services/wxAppTelephonyUtils.d.ts",
+          "sha256": "f6daf3b6a8988a7a00732f971dfd3d30054286ae54c9a566d3f0f223d9c0980a",
+          "sizeBytes": 246
+        },
+        {
+          "path": "dist/types/types.d.ts",
+          "sha256": "5ca805b513392fe59838d931f16eb39ae197dda6cb8fa803046ee2eeff7daad7",
+          "sizeBytes": 27755
+        },
+        {
+          "path": "dist/types/utils/PageCache.d.ts",
+          "sha256": "485255db6826391bdbad27cb20edd5411395321ef913eb21e46c91fc8b92a794",
+          "sizeBytes": 5471
+        },
+        {
+          "path": "dist/types/webex-config.d.ts",
+          "sha256": "afce94129a3caa54d735ace0af17032977572e2bb493fff5616abe7c5607d566",
+          "sizeBytes": 1453
+        },
+        {
+          "path": "dist/types/webex.d.ts",
+          "sha256": "cb1f8ec9e35e25ca5941703b3e8c53523925bd6f5bfcddbc5b9cf12d214b4ed9",
+          "sizeBytes": 231
+        },
+        {
+          "path": "dist/types.js",
+          "sha256": "8d1f5c745b43a05fe482278263f25614ba54418564b86c11d75e1a6079aa8b4c",
+          "sizeBytes": 12705
+        },
+        {
+          "path": "dist/types.js.map",
+          "sha256": "704c116397204bcaddc1d8027c8537083a6dd733ac46fe9f8dc9b1978143785c",
+          "sizeBytes": 37525
+        },
+        {
+          "path": "dist/utils/PageCache.js",
+          "sha256": "be7950adc843c26db0c0b4a28d9974438132b1d682cb6fce444e96c398cd90ed",
+          "sizeBytes": 5255
+        },
+        {
+          "path": "dist/utils/PageCache.js.map",
+          "sha256": "01a415b51a53d630ce60240698281903f0cc5977f0adc894bbe3cff592cc5556",
+          "sizeBytes": 10923
+        },
+        {
+          "path": "dist/webex-config.js",
+          "sha256": "1fca7b157e8ffa9bedff75dff2c06016cdf611c4c21942db91c3cdaa437d33e7",
+          "sizeBytes": 1698
+        },
+        {
+          "path": "dist/webex-config.js.map",
+          "sha256": "1a734a89b57f3bbced7645700ab8727a97de66d4e5e3b5376d66db47ea862f0e",
+          "sizeBytes": 2471
+        },
+        {
+          "path": "dist/webex.js",
+          "sha256": "c4b247f405c9221dc03635e28254f4d0771fb727cbb707f51614045bb1e69718",
+          "sizeBytes": 5290
+        },
+        {
+          "path": "dist/webex.js.map",
+          "sha256": "bd7356cfc0aa2b19853a6954fa8638d196af165bad2a6bd4e1b566b559161c24",
+          "sizeBytes": 6828
+        },
+        {
+          "path": "jest.config.js",
+          "sha256": "9a90f4a184a0bd692d6c280ff44ac961e27ed5e8ed523f0a9930acccbed602ab",
+          "sizeBytes": 1032
+        },
+        {
+          "path": "package.json",
+          "sha256": "08b16eacf28a7f27b959eeb9f54c3094e6327dd05605888df00956fe80c62e32",
+          "sizeBytes": 3328
+        },
+        {
+          "path": "src/cc.ts",
+          "sha256": "fe478d1f609f8b12d4be2873c22ced1adeb3672a6ba377a2c391777884b3433f",
+          "sizeBytes": 104872
+        },
+        {
+          "path": "src/config.ts",
+          "sha256": "60ea1a39b683c6f43d9d58ae36e921070955f6035b7928ad78cd3ceedb31d39e",
+          "sizeBytes": 1794
+        },
+        {
+          "path": "src/constants.ts",
+          "sha256": "3697fb30ade2bb5a8880935ae7b2409dbfa5978399edb861aeb72e2aac2cfd36",
+          "sizeBytes": 3951
+        },
+        {
+          "path": "src/index.ts",
+          "sha256": "44308383a987d66849cf01bf6d99a2eff0f56d995ae256c02075986d69439cc4",
+          "sizeBytes": 7301
+        },
+        {
+          "path": "src/logger-proxy.ts",
+          "sha256": "4f2c835abfb19c182d555faf9bc4d4a940228047e3aa9369109a3ed08ee1a02c",
+          "sizeBytes": 4467
+        },
+        {
+          "path": "src/metrics/MetricsManager.ts",
+          "sha256": "262bbd37faddb352359be5effc2d420c2fb29a288ec237203ffac435b9bb681e",
+          "sizeBytes": 15911
+        },
+        {
+          "path": "src/metrics/ai-docs/AGENTS.md",
+          "sha256": "c46dd8ca33e12e62bf8df6c80e7fbdbe9ead19a2bd4d49955ec801a46ada58a8",
+          "sizeBytes": 13742
+        },
+        {
+          "path": "src/metrics/ai-docs/ARCHITECTURE.md",
+          "sha256": "e8088c65a0f5a760d325a30b8240d0110e53cf6ee967aff0c5ba914b2400a766",
+          "sizeBytes": 15141
+        },
+        {
+          "path": "src/metrics/ai-docs/metrics-spec.md",
+          "sha256": "77b15e47a63e8f5112ecd7bde8a2a8e34b83155b795dbc461e23bcc49c034bc2",
+          "sizeBytes": 54756
+        },
+        {
+          "path": "src/metrics/behavioral-events.ts",
+          "sha256": "80a5914088c58f2b123ba510e6310ff2cc9f189f0bcd9dd9e19c5ebe10f8fcaf",
+          "sizeBytes": 16492
+        },
+        {
+          "path": "src/metrics/constants.ts",
+          "sha256": "e52847609599e86bc4747da1b9a2c774f37ed08854cb44912c6cfe6aaa2b115b",
+          "sizeBytes": 13959
+        },
+        {
+          "path": "src/services/AddressBook.ts",
+          "sha256": "aeca0107bc43438d0c00fbb429a915a070b1ead9ed9afcfeab12a9ef7a7f88e5",
+          "sizeBytes": 9229
+        },
+        {
+          "path": "src/services/AnswerCallOnWebexService.ts",
+          "sha256": "8f10892a8103f6d9e3e22a8494a140df292f5a24b21b3ea4bf92e331879075ee",
+          "sizeBytes": 6762
+        },
+        {
+          "path": "src/services/ApiAiAssistant.ts",
+          "sha256": "5a6e37e464cf62fdba1b7d9977d9c3356704e5c177ddf407fd5c76f48f17775d",
+          "sizeBytes": 20934
+        },
+        {
+          "path": "src/services/EntryPoint.ts",
+          "sha256": "0bb34b0a5513d2bc2397c53b8f22fb5a8861747dc3c12a74b5e1c63cfd783346",
+          "sizeBytes": 7495
+        },
+        {
+          "path": "src/services/Queue.ts",
+          "sha256": "4c107a87ccfc254f8409332cbb90f3ff59b9702a20ffa5ec21ab696fbde6a097",
+          "sizeBytes": 9138
+        },
+        {
+          "path": "src/services/UserPreference.ts",
+          "sha256": "c8e69f8cf4449157572707bd7507411326e41b2463fb3c326ff31a3e127791e9",
+          "sizeBytes": 14996
+        },
+        {
+          "path": "src/services/WebCallingService.ts",
+          "sha256": "40ddf7067b1748ed52399b36d35848eaa12de40e3846a0f2bafade2251d4fc06",
+          "sizeBytes": 9980
+        },
+        {
+          "path": "src/services/WebexCrossClientService.ts",
+          "sha256": "fc63d6315b20063733f60da78ae7cf611a368486ee61d255307fe4fedc6f52fd",
+          "sizeBytes": 8648
+        },
+        {
+          "path": "src/services/WxAppTelephonyMercurySync.ts",
+          "sha256": "59ee788db62b91b9773190d3d3ee8c81a2f5806c278bf741dba0cc9e0d1c88ec",
+          "sizeBytes": 4194
+        },
+        {
+          "path": "src/services/agent/ai-docs/AGENTS.md",
+          "sha256": "c77816af953056b3c5613f9b7fe3a7df8b932b388ba57ec24253c1967c299990",
+          "sizeBytes": 6188
+        },
+        {
+          "path": "src/services/agent/ai-docs/ARCHITECTURE.md",
+          "sha256": "578651dcdb7aea8b4727d56304621207417ac1ab592afadd97bfdcaaef23fb8c",
+          "sizeBytes": 8221
+        },
+        {
+          "path": "src/services/agent/ai-docs/agent-spec.md",
+          "sha256": "dcc1cbd5910a495fd748faf6f9dfe67460ac6465e58356f0f20f4fb0b27e2803",
+          "sizeBytes": 22465
+        },
+        {
+          "path": "src/services/agent/index.ts",
+          "sha256": "5453dc4536c7c28f014dacec25eaf6a6c6be0c7605dc6a5efd1b7ce6e3c7db4a",
+          "sizeBytes": 4298
+        },
+        {
+          "path": "src/services/agent/types.ts",
+          "sha256": "1bdfbe380dc46a8c990f4f23aaf7529d369bca3973b90ab507caa4e54502fa81",
+          "sizeBytes": 14668
+        },
+        {
+          "path": "src/services/ai-docs/AGENTS.md",
+          "sha256": "23b0111e38334a1278f3ae320ecf89de69ee2cae85a4ce90afe81c33c0c13a5a",
+          "sizeBytes": 22326
+        },
+        {
+          "path": "src/services/ai-docs/services-spec.md",
+          "sha256": "914ca70a29ad7170dc4fecf92526db833c3462bc79d2faff47f68854f9175b83",
+          "sizeBytes": 37543
+        },
+        {
+          "path": "src/services/config/Util.ts",
+          "sha256": "aea2ff6f52fe7c923dc824a58cfcd10e69dcba7d888add7bfc5c2e65e0668088",
+          "sizeBytes": 8892
+        },
+        {
+          "path": "src/services/config/ai-docs/AGENTS.md",
+          "sha256": "4750ae61d42310f2e5b399fcb08a9d4efeb63f24ec8cfb648789f641ac5d5e08",
+          "sizeBytes": 11420
+        },
+        {
+          "path": "src/services/config/ai-docs/ARCHITECTURE.md",
+          "sha256": "bbba921bb3ac9f27b2a4497d63dbc1a3a58f299fa57d005427ebe52f46afdb04",
+          "sizeBytes": 15875
+        },
+        {
+          "path": "src/services/config/ai-docs/config-spec.md",
+          "sha256": "2eae907e12547dd1c1bfba9ee761e9a8e4131744fe272c5312bf1eb66acc9386",
+          "sizeBytes": 35502
+        },
+        {
+          "path": "src/services/config/constants.ts",
+          "sha256": "22fd18b97856376dc07fc097a38e3600bdbd7329f512edd5d995d881bc1400ac",
+          "sizeBytes": 10788
+        },
+        {
+          "path": "src/services/config/index.ts",
+          "sha256": "80633cb31bef5cd17a5d24185e2a7af8483aaad2ffd09c350b58a23245c4f788",
+          "sizeBytes": 29045
+        },
+        {
+          "path": "src/services/config/types.ts",
+          "sha256": "d23191694781f0efcf0560df0c838272c40cc304cb2b5fd1a346ec0b54891d9d",
+          "sizeBytes": 39469
+        },
+        {
+          "path": "src/services/constants.ts",
+          "sha256": "7217fcefc26217a2be9de94d039ecd77d96bea079ec6402c4d9b839f640f9cc0",
+          "sizeBytes": 3272
+        },
+        {
+          "path": "src/services/core/Err.ts",
+          "sha256": "9ac1702a45854afd1d41b2f6f2f78998f90840b043a8abfcc97afcea5205a90c",
+          "sizeBytes": 4087
+        },
+        {
+          "path": "src/services/core/GlobalTypes.ts",
+          "sha256": "17ab238b8a4fe260a31cc28e0fea86e77505c7bd89bc8ae619e3dca1519109db",
+          "sizeBytes": 1632
+        },
+        {
+          "path": "src/services/core/Utils.ts",
+          "sha256": "82aad7e5aca1296b2058c0a9de58516e449de28d822052f5027c9c1d22a89edd",
+          "sizeBytes": 15847
+        },
+        {
+          "path": "src/services/core/WebexRequest.ts",
+          "sha256": "38f19811c01ae8fd7f1452d57506493fddd8c92bcfcadf22c0e11d4dc7249626",
+          "sizeBytes": 2948
+        },
+        {
+          "path": "src/services/core/ai-docs/AGENTS.md",
+          "sha256": "3c470795da6833be67a34cf54c3e671f09a096de5935b0c04b75630ccb8ed52e",
+          "sizeBytes": 12747
+        },
+        {
+          "path": "src/services/core/ai-docs/ARCHITECTURE.md",
+          "sha256": "558c092ccfdaee719eda45e51c08e51cfad457d7dfc8cb075e930ea1819b5508",
+          "sizeBytes": 27799
+        },
+        {
+          "path": "src/services/core/ai-docs/core-spec.md",
+          "sha256": "369f5b11a100cff5c40f56af857c2f43d69fc886e1f0aff2af6c070b31554f17",
+          "sizeBytes": 35106
+        },
+        {
+          "path": "src/services/core/aqm-reqs.ts",
+          "sha256": "24a0c8e0fcd782edcbb2957e6dfbc8642fcb6c46579947eba99c866c8cb9cf2a",
+          "sizeBytes": 11821
+        },
+        {
+          "path": "src/services/core/constants.ts",
+          "sha256": "2c7eaacee2ebb26ae15002f9a06bd9fb232379e719b45a4d83a193dc4ba865de",
+          "sizeBytes": 3144
+        },
+        {
+          "path": "src/services/core/types.ts",
+          "sha256": "562c221ff04d8ecf7c6b144acc5342fadb41e349939c959a6a3c38d0a6594200",
+          "sizeBytes": 2291
+        },
+        {
+          "path": "src/services/core/websocket/WebSocketManager.ts",
+          "sha256": "774ca8d702f1220aef1d93549197b17029de9f98def7c253749a189bc42e496e",
+          "sizeBytes": 7971
+        },
+        {
+          "path": "src/services/core/websocket/connection-service.ts",
+          "sha256": "c32334cf10205fe6e0047059f1b4b1fc997d5663c4b76711d1b7f1a1a7ac514f",
+          "sizeBytes": 4803
+        },
+        {
+          "path": "src/services/core/websocket/keepalive.worker.js",
+          "sha256": "702bcdc234186a0a749e2baac46b06ac09b2e5516f0f860d25e7aeb01cb1eefc",
+          "sizeBytes": 2430
+        },
+        {
+          "path": "src/services/core/websocket/types.ts",
+          "sha256": "234a34e7148c7b1043e51a9fc4894fb9259dfcd54e312c8c17231a56cf9be182",
+          "sizeBytes": 1407
+        },
+        {
+          "path": "src/services/index.ts",
+          "sha256": "edff51b2e1304ee814d8647809c6cb116d9a0a7734ff994920eb09c55ead30d9",
+          "sizeBytes": 3032
+        },
+        {
+          "path": "src/services/task/AutoWrapup.ts",
+          "sha256": "4f118534176be6f321b23f08c8f604eb44af6870dbdc76c39ffc542a45219414",
+          "sizeBytes": 2179
+        },
+        {
+          "path": "src/services/task/Task.ts",
+          "sha256": "1301ba09d1463ad4936bffd3a0568a3ee0648027a18ab048912db3cab1f5fdd9",
+          "sizeBytes": 38585
+        },
+        {
+          "path": "src/services/task/TaskFactory.ts",
+          "sha256": "37c044d0f974bf502073568b74d004c879c69641c5c7bd7f88b582f78379b86c",
+          "sizeBytes": 2152
+        },
+        {
+          "path": "src/services/task/TaskManager.ts",
+          "sha256": "d34e7c7dd350b45a85bb781c5b4aba08bab92d55f284669d4d40111ce23de60b",
+          "sizeBytes": 65120
+        },
+        {
+          "path": "src/services/task/TaskUtils.ts",
+          "sha256": "266bf7ccbd0cd75368d74d795026ac3a5ad943afdf7d82a00c482ff7aa9f2444",
+          "sizeBytes": 18629
+        },
+        {
+          "path": "src/services/task/WebexCallingUtils.ts",
+          "sha256": "5cce4a0a24367c55018144b1a8a9f01b4dbefd6e9f924c9d5bb83f7ce8bce2c1",
+          "sizeBytes": 3870
+        },
+        {
+          "path": "src/services/task/ai-docs/AGENTS.md",
+          "sha256": "61037202c6f7c4579ddc2fecb524f64fa4d3eab87be127eb501db15dd939bce0",
+          "sizeBytes": 16129
+        },
+        {
+          "path": "src/services/task/ai-docs/ARCHITECTURE.md",
+          "sha256": "4b2d8108d97cfb160b81ecdcc213e2b192eeda30cfefb5dd670f9a1d1415c575",
+          "sizeBytes": 17738
+        },
+        {
+          "path": "src/services/task/ai-docs/task-spec.md",
+          "sha256": "669bd14b3bac43cdb233ca29e2d843f1c2126b6d54ecb368d3bd9407d3b687ec",
+          "sizeBytes": 74845
+        },
+        {
+          "path": "src/services/task/constants.ts",
+          "sha256": "1900e2ee633f6247c566f5c916706363ddb36c06094c00848273c8be105cd8a2",
+          "sizeBytes": 4530
+        },
+        {
+          "path": "src/services/task/contact.ts",
+          "sha256": "5eaa165770c0e724bea2557f3c9256008667e53ac109785511ed27166b10719b",
+          "sizeBytes": 15168
+        },
+        {
+          "path": "src/services/task/dialer.ts",
+          "sha256": "b131827b5c6c925a363ee0959073d65cc5c6e434542520ef36c35737716a0a68",
+          "sizeBytes": 6369
+        },
+        {
+          "path": "src/services/task/digital/Digital.ts",
+          "sha256": "6ac11f6984db47d8609cbca4493765b587a761b27b8a0f982ffdea126a1a0e54",
+          "sizeBytes": 2960
+        },
+        {
+          "path": "src/services/task/state-machine/TaskStateMachine.ts",
+          "sha256": "b78049e61c9fc71ba6fd45df6341c3fc6a89c744b2681210145f523c174f12e9",
+          "sizeBytes": 51260
+        },
+        {
+          "path": "src/services/task/state-machine/actions.ts",
+          "sha256": "b07208d754e7d45c49c61678273cda521d709d30321d891b5cc1fc111ff9752f",
+          "sizeBytes": 25202
+        },
+        {
+          "path": "src/services/task/state-machine/ai-docs/AGENTS.md",
+          "sha256": "ffd3c4d673b6a90cbdaeeb633650c9f5304471a2b4f3db53e6c56603277ac2b9",
+          "sizeBytes": 13933
+        },
+        {
+          "path": "src/services/task/state-machine/ai-docs/ARCHITECTURE.md",
+          "sha256": "cd8fb1eecc53eaab0c0568af6d869b7967fab485bf708627250723ec45b8f183",
+          "sizeBytes": 60466
+        },
+        {
+          "path": "src/services/task/state-machine/ai-docs/task-state-machine-spec.md",
+          "sha256": "3b602fa744e6ebb84939754af6156af466a888ff99397772707675d25c79583d",
+          "sizeBytes": 101856
+        },
+        {
+          "path": "src/services/task/state-machine/constants.ts",
+          "sha256": "21af87ec6357226edb2fe7620c3e86e86aac62675053661e692f0d4443fad688",
+          "sizeBytes": 5071
+        },
+        {
+          "path": "src/services/task/state-machine/guards.ts",
+          "sha256": "9138793e3ddb546ba7afbe65198cde084bc0b5c7cd0a1bc5aef0ea7b4bf6e227",
+          "sizeBytes": 16352
+        },
+        {
+          "path": "src/services/task/state-machine/index.ts",
+          "sha256": "03eaa50787a5251b11cfdd6836baf2355c954bfcbf3711216eca2e8e9b001de7",
+          "sizeBytes": 657
+        },
+        {
+          "path": "src/services/task/state-machine/types.ts",
+          "sha256": "17a16cf2fae57edc98dd2fad8551fb673bfe91e9479e10010da4ed75da8d9ea5",
+          "sizeBytes": 9732
+        },
+        {
+          "path": "src/services/task/state-machine/uiControlsComputer.ts",
+          "sha256": "b5f7622f9290f27735b46693cd7610e2b9eba8435185c876a4df438d47f980e8",
+          "sizeBytes": 43244
+        },
+        {
+          "path": "src/services/task/taskDataNormalizer.ts",
+          "sha256": "07d95bf5559bb64d2bbd873fca5d3ec89dd708c5c7a0069dbb76456bd9369136",
+          "sizeBytes": 3562
+        },
+        {
+          "path": "src/services/task/types.ts",
+          "sha256": "288a444c9c7fa8e45a4229efac88873734051107cea016d465bd0ad2a30eecf2",
+          "sizeBytes": 71567
+        },
+        {
+          "path": "src/services/task/voice/Voice.ts",
+          "sha256": "08f8ff362bbcde168cfa5591b26b6b414e7b10dd2303425960c3b55f5003e300",
+          "sizeBytes": 62166
+        },
+        {
+          "path": "src/services/task/voice/WebRTC.ts",
+          "sha256": "f4aa962b993a9ca454574768145e71fa3abdc33bacb326a9daa12da761a1ca74",
+          "sizeBytes": 5815
+        },
+        {
+          "path": "src/services/task/voice/wxAppVoiceMethods.ts",
+          "sha256": "54b6703b36e9b5387ec89ae5b8b74078a6e696d1537ac366c5ab35c0cda68da3",
+          "sizeBytes": 16037
+        },
+        {
+          "path": "src/services/wxAppDiagnosticLogging.ts",
+          "sha256": "be232c63e24c4df012aee132d5cf854ed5ba6a206ad2e68bc84a49a6bbe1c6f8",
+          "sizeBytes": 5136
+        },
+        {
+          "path": "src/services/wxAppTelephonyUtils.ts",
+          "sha256": "3718842f75dd52c6c7456f86f7533ec4425a0fb97966c6d30935a555f6d7aba1",
+          "sizeBytes": 517
+        },
+        {
+          "path": "src/types.ts",
+          "sha256": "e607077860e58090d925acf57b7d0c38dabf0b5459b05b83afe621107d7efafe",
+          "sizeBytes": 32297
+        },
+        {
+          "path": "src/utils/AGENTS.md",
+          "sha256": "def06884cfcba69078610868294d67885fc8d0983b7a7e238ad50248eb138b42",
+          "sizeBytes": 10557
+        },
+        {
+          "path": "src/utils/PageCache.ts",
+          "sha256": "1046d000f65ed5a7b3735dd2eb31c571979c600280bba2cfb505e51b0f6a9315",
+          "sizeBytes": 7096
+        },
+        {
+          "path": "src/utils/ai-docs/utils-spec.md",
+          "sha256": "3b693ff28dbe8b50ff57d9c1361e9404b0e179406edefda150814a834c3e36e3",
+          "sizeBytes": 21688
+        },
+        {
+          "path": "src/webex-config.ts",
+          "sha256": "94cd164b5631dbbf4c994ac34b84eea4bbd8be5e6d7878f3ff6aa4f3f1f52cf9",
+          "sizeBytes": 1522
+        },
+        {
+          "path": "src/webex.js",
+          "sha256": "1a1a8c4781206d007ab0e8c11b1a0ce7b8862d0ac5b8b10264c37dabf240706e",
+          "sizeBytes": 4548
+        },
+        {
+          "path": "test/unit/fixtures/aiSummaryTestUtils.ts",
+          "sha256": "a9ae5cddf43f359c895f6ca4794182b5f608e061420c2b71b46c87daf9cf4675",
+          "sizeBytes": 1019
+        },
+        {
+          "path": "test/unit/spec/cc.ts",
+          "sha256": "1c1dbac955512cf854c7bd9a5e4b1cdad086e11ea11423d83051e0b8496598df",
+          "sizeBytes": 202258
+        },
+        {
+          "path": "test/unit/spec/index.ts",
+          "sha256": "f87c3fc8824c9c5b71c1abc4cd9a23ace3ab50f0abe233b25e84f712c647d977",
+          "sizeBytes": 28185
+        },
+        {
+          "path": "test/unit/spec/logger-proxy.ts",
+          "sha256": "6c8eab4546ef17875b4d611b2632a4d1e2017ef8e3062d3f4cbe9be15eb1595e",
+          "sizeBytes": 2346
+        },
+        {
+          "path": "test/unit/spec/metrics/MetricsManager.ts",
+          "sha256": "7fc0b68615ee3d9a16863b5d82d485d9f301c8a12503a9bfe9fdde2991010c8f",
+          "sizeBytes": 18815
+        },
+        {
+          "path": "test/unit/spec/metrics/behavioral-events.ts",
+          "sha256": "9ff35f1f6780cb47856f70a7228f68b0e0ace2770979435c5d215f52982727a6",
+          "sizeBytes": 6760
+        },
+        {
+          "path": "test/unit/spec/services/AddressBook.ts",
+          "sha256": "38c05a0112e4431a4d834007fde150cab59c1a5850a1a834af9bed60197c0597",
+          "sizeBytes": 11980
+        },
+        {
+          "path": "test/unit/spec/services/AnswerCallOnWebexService.ts",
+          "sha256": "4e9537cd3f44a98f80746ec554db78ddc118d80ca70e8c4942087d3b48e2b686",
+          "sizeBytes": 8617
+        },
+        {
+          "path": "test/unit/spec/services/ApiAiAssistant.ts",
+          "sha256": "e388bee6bcfc5e88c563d777895b6b9412824c89749832807bc96c898ed0e018",
+          "sizeBytes": 18925
+        },
+        {
+          "path": "test/unit/spec/services/EntryPoint.ts",
+          "sha256": "d697e154a55a352926334df637f06264285a6b4a268478cda08d2c302ce8c998",
+          "sizeBytes": 10808
+        },
+        {
+          "path": "test/unit/spec/services/Queue.ts",
+          "sha256": "bb7615720c0e947cb3c68f194648c73b0fec7df203915a842d1cda93fcfc124c",
+          "sizeBytes": 15940
+        },
+        {
+          "path": "test/unit/spec/services/UserPreference.ts",
+          "sha256": "bbc1231a1b531e95d29952e56a7e597cb1fb8cecf3a29ce0930c5b86e5c50bf0",
+          "sizeBytes": 12914
+        },
+        {
+          "path": "test/unit/spec/services/WebCallingService.ts",
+          "sha256": "711172d6ce2ce2774c7edda9a9a6ce3f545fc47549219b84c548483ad2632927",
+          "sizeBytes": 13550
+        },
+        {
+          "path": "test/unit/spec/services/WebexCrossClientService.ts",
+          "sha256": "67ef1137f10734032476d8ebc61dc11a281454cdbcd57fc301582a1d13068695",
+          "sizeBytes": 15313
+        },
+        {
+          "path": "test/unit/spec/services/WxAppTelephonyMercurySync.ts",
+          "sha256": "deb283a61fe90077c4bf09d5a9616edb69a7a9527cd35d9470c39aa4c81980b5",
+          "sizeBytes": 5116
+        },
+        {
+          "path": "test/unit/spec/services/agent/index.ts",
+          "sha256": "460e7c9a7a2342b466776daa9290267d65aabdea78838c7f110c6aaacdf96653",
+          "sizeBytes": 2133
+        },
+        {
+          "path": "test/unit/spec/services/config/Util.ts",
+          "sha256": "ac1b26e5ef1ac2b67af0ccb6c7d99feb50aac87f90fc45bd63b54f32430f116f",
+          "sizeBytes": 3740
+        },
+        {
+          "path": "test/unit/spec/services/config/index.ts",
+          "sha256": "23cfca78a42e083b5c89e2d98fea55f1c8c9ea4d8d1b14b43657ecdbac475b43",
+          "sizeBytes": 53616
+        },
+        {
+          "path": "test/unit/spec/services/core/Utils.ts",
+          "sha256": "cf6afce7a58d0430011daf88dd1c6ad5f7e3c55491d4f4b2100cca79570bd98e",
+          "sizeBytes": 32241
+        },
+        {
+          "path": "test/unit/spec/services/core/WebexRequest.ts",
+          "sha256": "217bb377d0ccbbe916a88f54712aaee4cb25f9872a19e2a9303a866a19dea55d",
+          "sizeBytes": 4614
+        },
+        {
+          "path": "test/unit/spec/services/core/aqm-reqs.ts",
+          "sha256": "6da445eb55b9f5665c0c80333c59fb6b1234767f6ed87fa1f4547b6c1eac992b",
+          "sizeBytes": 20096
+        },
+        {
+          "path": "test/unit/spec/services/core/websocket/WebSocketManager.ts",
+          "sha256": "bebba86cb2645ce7d1b5d913b5f1cb8fbf77a055939aacfcebba382b94c3671b",
+          "sizeBytes": 15135
+        },
+        {
+          "path": "test/unit/spec/services/core/websocket/connection-service.ts",
+          "sha256": "133e9c9596416908e7902fd61ab7cfd9e905a55b4eee339e9ba704f6800fd3b7",
+          "sizeBytes": 6772
+        },
+        {
+          "path": "test/unit/spec/services/task/AutoWrapup.ts",
+          "sha256": "4437799af650bdc8965f12c61ccb363b498152b8eed5d58f1643a4ce0ede5823",
+          "sizeBytes": 1694
+        },
+        {
+          "path": "test/unit/spec/services/task/Task.ts",
+          "sha256": "7a53260add57857d9f5160a184d55b8ecfac57cabe59873f362ccc683e2ff574",
+          "sizeBytes": 100100
+        },
+        {
+          "path": "test/unit/spec/services/task/TaskFactory.ts",
+          "sha256": "2eb3d386383a10800a3d1eb658f24c1f076c04f06e7887e8d7b0c1e8f6dc4b82",
+          "sizeBytes": 3804
+        },
+        {
+          "path": "test/unit/spec/services/task/TaskManager.ts",
+          "sha256": "201bccc8169081ddea280c51173cd56e030e76b94285c359f42a7643bc7e664a",
+          "sizeBytes": 224326
+        },
+        {
+          "path": "test/unit/spec/services/task/TaskUtils.ts",
+          "sha256": "7327930e7fa250e1be68ddf5ff11b0a1a0ab5698ba9fc4dbba37d391b4793a01",
+          "sizeBytes": 26964
+        },
+        {
+          "path": "test/unit/spec/services/task/WebexCallingUtils.ts",
+          "sha256": "2518b911842b5ca8f566b3168b7dc6cfbc0c5bfbca2cb86a2f22df6e338e3a23",
+          "sizeBytes": 5052
+        },
+        {
+          "path": "test/unit/spec/services/task/contact.ts",
+          "sha256": "17b338dff940d52d698962136a83c94c88cd20dad9ca770c5ebff624699f3c48",
+          "sizeBytes": 6829
+        },
+        {
+          "path": "test/unit/spec/services/task/dialer.ts",
+          "sha256": "b991343c28d4878c50ef9492a6e748deed05114d2928a9da441cea3102ad154d",
+          "sizeBytes": 12986
+        },
+        {
+          "path": "test/unit/spec/services/task/digital/Digital.ts",
+          "sha256": "c7f2cd6f4d0c6f83350c2de719d36849287cb3ca4011712b61d429dc73b5715f",
+          "sizeBytes": 4147
+        },
+        {
+          "path": "test/unit/spec/services/task/state-machine/TaskStateMachine.ts",
+          "sha256": "991cd67fb8c949eb1fad3bda42c7098b2f50d896466dd17d333d0270170a29b1",
+          "sizeBytes": 147962
+        },
+        {
+          "path": "test/unit/spec/services/task/state-machine/guards.ts",
+          "sha256": "431316bd9398e665b96a574f906783822e7587de533c409b08d42aaf3b201297",
+          "sizeBytes": 28901
+        },
+        {
+          "path": "test/unit/spec/services/task/state-machine/types.ts",
+          "sha256": "cbe3de741efb546ed07feb4bf58b5f2db669104d3b7dbc8a07b703f78efa265e",
+          "sizeBytes": 793
+        },
+        {
+          "path": "test/unit/spec/services/task/state-machine/uiControlsComputer.ts",
+          "sha256": "eb92fa595bbe57d4e44385697c1c30cea797d628ceafb9b04a5164864e14a672",
+          "sizeBytes": 107863
+        },
+        {
+          "path": "test/unit/spec/services/task/taskTestUtils.ts",
+          "sha256": "a0ceb80198a2d203eab0f534012da3c385c42257d9a839ea1cf988d3e3198da2",
+          "sizeBytes": 2465
+        },
+        {
+          "path": "test/unit/spec/services/task/voice/Voice.ts",
+          "sha256": "d3b20e9a36b071a21d56c60ac10fd527cf428071045b8c78a596c3b89e278a38",
+          "sizeBytes": 84108
+        },
+        {
+          "path": "test/unit/spec/services/task/voice/WebRTC.ts",
+          "sha256": "d9c40851993e991be08a60bd8750512b1a761af1e5dda2eb0bfec32c292eb0f2",
+          "sizeBytes": 9041
+        },
+        {
+          "path": "test/unit/spec/services/task/voice/wxAppVoiceMethods.ts",
+          "sha256": "06ddd0895310ecb10f5df5c2e8d6232bc4c85920427d4183175675a13b9b8d83",
+          "sizeBytes": 19192
+        },
+        {
+          "path": "test/unit/spec/services/wxAppDiagnosticLogging.ts",
+          "sha256": "bf42c719b0ab7b25f36fb3e3683c912c2b111bb970540c58374a21964efffaf5",
+          "sizeBytes": 4118
+        },
+        {
+          "path": "test/unit/spec/wellnessSampleUtils.ts",
+          "sha256": "26c6481caf68e56c47d6ab726b255e4ed22bf5868924e3844d95ddd78986e777",
+          "sizeBytes": 9586
+        },
+        {
+          "path": "tsconfig.json",
+          "sha256": "d00932e411051043c9e92ab16b90d6ec5d93a638a3b2876f4fc4e88b9d4788d7",
+          "sizeBytes": 82
+        },
+        {
+          "path": "typedoc.json",
+          "sha256": "fe33af679b041092b8d2e258e571fac8db3cf901670f99fb0c2e80324053871b",
+          "sizeBytes": 1107
+        },
+        {
+          "path": "typedoc.md",
+          "sha256": "34e60c24935da8b734f606db74c7042a698cf7c75e021115bf617736ed487725",
+          "sizeBytes": 7685
+        },
+        {
+          "path": "umd/contact-center.min.js",
+          "sha256": "ff4edf27f7834438331df4b33bd9504118e981ed3e1f87ec1dbea75ca8ab836c",
+          "sizeBytes": 1685693
+        },
+        {
+          "path": "umd/contact-center.min.js.map",
+          "sha256": "191eb014749110a0bf0a28e1126e1730b9e8fc911912a8e2d90d43719a1f13d7",
+          "sizeBytes": 6282659
+        }
+      ]
+    },
+    "declarations": [
+      {
+        "path": "dist/types/cc.d.ts",
+        "sha256": "b0f696741044226e145189b8e77516319afc74a2bac0f401d617bbfc2b3a5755",
+        "sizeBytes": 37373
+      },
+      {
+        "path": "dist/types/config.d.ts",
+        "sha256": "75939a49084e42336924b31a3db8dd04865b422921c19bb7589067d7b0e06cbe",
+        "sizeBytes": 2102
+      },
+      {
+        "path": "dist/types/constants.d.ts",
+        "sha256": "45f82b556af409401cb413f7b6f3092d12e615bfd7ddb839e788373c45c4b9c5",
+        "sizeBytes": 3519
+      },
+      {
+        "path": "dist/types/index.d.ts",
+        "sha256": "af7d60ef4b784a3f57c304a4eb783ce07c42b188bfbd9c8acdb169f40472e39a",
+        "sizeBytes": 6791
+      },
+      {
+        "path": "dist/types/logger-proxy.d.ts",
+        "sha256": "3642a40846bfbdd54550b235c51172dd3df1c240bd6601a0f0c92e96be5a6e79",
+        "sizeBytes": 2513
+      },
+      {
+        "path": "dist/types/metrics/MetricsManager.d.ts",
+        "sha256": "5c8e3c9f9f8ee4c33f4736d419ed1ea28dc41d185ff702beb09cd770ff91a2c3",
+        "sizeBytes": 7965
+      },
+      {
+        "path": "dist/types/metrics/behavioral-events.d.ts",
+        "sha256": "98096ed7bad87b45acd5ddad765ffeb3a9a9c9b20141365bcaa6035f3286b709",
+        "sizeBytes": 1207
+      },
+      {
+        "path": "dist/types/metrics/constants.d.ts",
+        "sha256": "1abf0041764d1140285b3e3c4e871b356b03065b04219de5ae127a50942e38a7",
+        "sizeBytes": 14905
+      },
+      {
+        "path": "dist/types/services/AddressBook.d.ts",
+        "sha256": "33c1d50bbb6f0b5be44ea1db1c689c28fb8a50a6661b2a080ad8997075c75835",
+        "sizeBytes": 2576
+      },
+      {
+        "path": "dist/types/services/AnswerCallOnWebexService.d.ts",
+        "sha256": "67ce5b96770b43219865517805ea9417963c2a7fc0ed3fae8a64c52012b0a5ab",
+        "sizeBytes": 1219
+      },
+      {
+        "path": "dist/types/services/ApiAiAssistant.d.ts",
+        "sha256": "ca8d5aac68d6e43c5903d19c8f32e2d217f2d7c8f44b748558dca828b4f499d0",
+        "sizeBytes": 4070
+      },
+      {
+        "path": "dist/types/services/EntryPoint.d.ts",
+        "sha256": "3f40e060e67889f3787abc8cebd884eca256fc3afad60d901e96dda82972f329",
+        "sizeBytes": 2369
+      },
+      {
+        "path": "dist/types/services/Queue.d.ts",
+        "sha256": "bdfc7551744cf9ac47d3ed0afb74e1159b4c0f7092570f2232b044b79b960426",
+        "sizeBytes": 2488
+      },
+      {
+        "path": "dist/types/services/UserPreference.d.ts",
+        "sha256": "11df3284409ebd6e2eb22b7bb378cdaff7f05ba26100125202d1200d45f49f69",
+        "sizeBytes": 4678
+      },
+      {
+        "path": "dist/types/services/WebCallingService.d.ts",
+        "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+        "sizeBytes": 11
+      },
+      {
+        "path": "dist/types/services/WebexCrossClientService.d.ts",
+        "sha256": "bed718030f5260c355bb6335887307f644af34fd1e1172ad704cafaf4b27eb62",
+        "sizeBytes": 1206
+      },
+      {
+        "path": "dist/types/services/WxAppTelephonyMercurySync.d.ts",
+        "sha256": "9a1cd9516b539835f37f04af6d5c7b5e623a81d397f53df956805ce97b6776e3",
+        "sizeBytes": 926
+      },
+      {
+        "path": "dist/types/services/agent/index.d.ts",
+        "sha256": "43461f28ca595d6793851a6119fcbea5d87483a5921b0ad380b0db73df74bb72",
+        "sizeBytes": 1314
+      },
+      {
+        "path": "dist/types/services/agent/types.d.ts",
+        "sha256": "28bf51c66b0f8adfed045b4a1b7628509c0151dca412ea4838888af43574bd2a",
+        "sizeBytes": 15187
+      },
+      {
+        "path": "dist/types/services/config/Util.d.ts",
+        "sha256": "93fce78b6632cd5135182783a7f4e9184e1c4380525f5f33168899282c1f4302",
+        "sizeBytes": 716
+      },
+      {
+        "path": "dist/types/services/config/constants.d.ts",
+        "sha256": "7a9a12914d33e23bbb999d0e450ffada36c4f81c561777a3657b1363df057f38",
+        "sizeBytes": 9250
+      },
+      {
+        "path": "dist/types/services/config/index.d.ts",
+        "sha256": "96960b7fbb800c2aae86a7874f19616090815ad27dbe280a177ea8f664528dd2",
+        "sizeBytes": 10065
+      },
+      {
+        "path": "dist/types/services/config/types.d.ts",
+        "sha256": "79f50aa4f56c2a21403d0dad0908c9a3284f4876008d5e09a978c8eefb958832",
+        "sizeBytes": 52164
+      },
+      {
+        "path": "dist/types/services/constants.d.ts",
+        "sha256": "56b21b5e6624ab87dbb682f33896d7204ecad31ba0b78f808a07cdf39c148fb0",
+        "sizeBytes": 2727
+      },
+      {
+        "path": "dist/types/services/core/Err.d.ts",
+        "sha256": "68ae23a8fe9595d906d3b7ea6169eb76138444476587cb59378af34d57b2147c",
+        "sizeBytes": 3732
+      },
+      {
+        "path": "dist/types/services/core/GlobalTypes.d.ts",
+        "sha256": "09f8719247f439f06f25e9476ef0bd4603638b778a6acd88aa8de6e261459c03",
+        "sizeBytes": 1691
+      },
+      {
+        "path": "dist/types/services/core/Utils.d.ts",
+        "sha256": "4b70545a6cf31657273e54567e163001ef55d7d23a8379afff80f70a8b7816ac",
+        "sizeBytes": 5974
+      },
+      {
+        "path": "dist/types/services/core/WebexRequest.d.ts",
+        "sha256": "aca024101dee4bf70cb4c4d4307517e663fb99c52826ea17ee086799f21fbd29",
+        "sizeBytes": 750
+      },
+      {
+        "path": "dist/types/services/core/aqm-reqs.d.ts",
+        "sha256": "59ad8809b01105f0bd0f57954e2090c6b1ee50e9543a32ee8aecb4724a410eff",
+        "sizeBytes": 2573
+      },
+      {
+        "path": "dist/types/services/core/constants.d.ts",
+        "sha256": "685079dd3b3e98f763f327a9373bd21d3bb919c5d219028ea0d9e7712cfdaaa5",
+        "sizeBytes": 2862
+      },
+      {
+        "path": "dist/types/services/core/types.d.ts",
+        "sha256": "943cf2a0ecd40a341f4538da5f7e4aaf6d809cbf1f804233ba125b108fb799b0",
+        "sizeBytes": 1587
+      },
+      {
+        "path": "dist/types/services/core/websocket/WebSocketManager.d.ts",
+        "sha256": "0e84ccf12cb785b15ace725568ac542c81f4bd5a997b5d025b39fe30194d8d36",
+        "sizeBytes": 1279
+      },
+      {
+        "path": "dist/types/services/core/websocket/connection-service.d.ts",
+        "sha256": "10738b3a4dd160c07f9307e7661937b98f5883d333975a349bbe9841171f3dc1",
+        "sizeBytes": 919
+      },
+      {
+        "path": "dist/types/services/core/websocket/keepalive.worker.d.ts",
+        "sha256": "96970057a5e816793c1cf811f1b2024a6183552849155e8d5b76254f2cb3f554",
+        "sizeBytes": 2471
+      },
+      {
+        "path": "dist/types/services/core/websocket/types.d.ts",
+        "sha256": "973044bd59d7045a40b2e6e1bfe5ef8490ebf33df4516634a149bc69f0bf79db",
+        "sizeBytes": 1420
+      },
+      {
+        "path": "dist/types/services/index.d.ts",
+        "sha256": "3a2b1fdfe74be17f1d26ee3f8397aa4ae06ed804c35c9b5c3678132e9e97be88",
+        "sizeBytes": 2301
+      },
+      {
+        "path": "dist/types/services/task/AutoWrapup.d.ts",
+        "sha256": "f2d051ac4ce4f14d4fc592f5c6d74fd6d58e90f7d52a1363960534b6d46305d3",
+        "sizeBytes": 1282
+      },
+      {
+        "path": "dist/types/services/task/Task.d.ts",
+        "sha256": "3f11db2fa96a54877509a44b232587d31132055f92136a07165f79228bedaee2",
+        "sizeBytes": 8353
+      },
+      {
+        "path": "dist/types/services/task/TaskFactory.d.ts",
+        "sha256": "554a4657d6c1094450b9cd381a47b79d633cd7b47d7ef2f875eb56fe34591ab6",
+        "sizeBytes": 710
+      },
+      {
+        "path": "dist/types/services/task/TaskManager.d.ts",
+        "sha256": "8e609bb71c20b858c77f0e9f90bb1319db8477b13f9f965f1a1e18524bf50881",
+        "sizeBytes": 11
+      },
+      {
+        "path": "dist/types/services/task/TaskUtils.d.ts",
+        "sha256": "07903739e6a2de1518ec85ad705d03c422f945246910c32a0235cddc0f12b7db",
+        "sizeBytes": 7618
+      },
+      {
+        "path": "dist/types/services/task/WebexCallingUtils.d.ts",
+        "sha256": "a2a5c92fc5e898d0db18363ae2858876d0eb7b9391b3f00f7adc26a5be4a91fe",
+        "sizeBytes": 776
+      },
+      {
+        "path": "dist/types/services/task/constants.d.ts",
+        "sha256": "19a8b6974786b57f8ca17eb55a0453bb692980262193e12fda2d9137be4dc997",
+        "sizeBytes": 4147
+      },
+      {
+        "path": "dist/types/services/task/contact.d.ts",
+        "sha256": "f87caf2000648279cfd70b0763feef3481e50b700f5abdf96236c80a6fb8f3ed",
+        "sizeBytes": 2673
+      },
+      {
+        "path": "dist/types/services/task/dialer.d.ts",
+        "sha256": "faad7b5f0ff455e1e3235be9751f0d636d918ddfe0ac67ff2d26b7553126a967",
+        "sizeBytes": 2981
+      },
+      {
+        "path": "dist/types/services/task/digital/Digital.d.ts",
+        "sha256": "1ba200a317ab4934bbc8f8c37fd3834b907b2423a3db00d51eab9e04106e0481",
+        "sizeBytes": 938
+      },
+      {
+        "path": "dist/types/services/task/state-machine/TaskStateMachine.d.ts",
+        "sha256": "b0d22c0f11b4323b8bf7d2f3fc46f09dfb5344ec2bab376a563b9c83135992ec",
+        "sizeBytes": 50281
+      },
+      {
+        "path": "dist/types/services/task/state-machine/actions.d.ts",
+        "sha256": "39a59133fbf4dfbfc240fe6c77bcc3d7c803985be923fb22ccb4496d5a787be7",
+        "sizeBytes": 771
+      },
+      {
+        "path": "dist/types/services/task/state-machine/constants.d.ts",
+        "sha256": "fbbd86fee6f11733e08a82b40161340094c58fe3aef3a455b7c265f16a6d84f0",
+        "sizeBytes": 4087
+      },
+      {
+        "path": "dist/types/services/task/state-machine/guards.d.ts",
+        "sha256": "13f1d149c04f1cdcb568328053dd87589f34044e1adab6dec8129df9b957239f",
+        "sizeBytes": 5202
+      },
+      {
+        "path": "dist/types/services/task/state-machine/index.d.ts",
+        "sha256": "07a48947c1eac6a55e94e619c94b67da338e834540e82bcb3dc8be7436f2c252",
+        "sizeBytes": 595
+      },
+      {
+        "path": "dist/types/services/task/state-machine/types.d.ts",
+        "sha256": "648729df89edaf7b52adc7ab6aca67e5c132c8c273944a133efb8d018e086f10",
+        "sizeBytes": 10424
+      },
+      {
+        "path": "dist/types/services/task/state-machine/uiControlsComputer.d.ts",
+        "sha256": "fabd6f257ade440f8da68340d5ec4bfb4771796c51d254aeb7a91b6341747a7b",
+        "sizeBytes": 532
+      },
+      {
+        "path": "dist/types/services/task/taskDataNormalizer.d.ts",
+        "sha256": "e45fb875558d7f11a32e52d3a956dc3a11277f3512249578a5e537000562c32d",
+        "sizeBytes": 510
+      },
+      {
+        "path": "dist/types/services/task/types.d.ts",
+        "sha256": "6ffa63a58c3f241e368de118ad2d9ab84c4052ac9e5879c39c78c23cb545eca9",
+        "sizeBytes": 72025
+      },
+      {
+        "path": "dist/types/services/task/voice/Voice.d.ts",
+        "sha256": "60dab7f21cbd4e615530cdadfa31d67d02ff251fc2ff205e9dbcf8635f8cdb82",
+        "sizeBytes": 8941
+      },
+      {
+        "path": "dist/types/services/task/voice/WebRTC.d.ts",
+        "sha256": "d20477a30b1801dd25b0ac2ed1a51d02eee11d74ab6412c398aeb1471daaa6c0",
+        "sizeBytes": 1756
+      },
+      {
+        "path": "dist/types/services/task/voice/wxAppVoiceMethods.d.ts",
+        "sha256": "fbeb48048ae87e1ea84b143241ce81045f7465bc9fe69fa889be769d97688a6e",
+        "sizeBytes": 3206
+      },
+      {
+        "path": "dist/types/services/wxAppDiagnosticLogging.d.ts",
+        "sha256": "8543b668aaa3247995e108a9959ff509a20f6aef0589e6175f68e05a58068d8b",
+        "sizeBytes": 2210
+      },
+      {
+        "path": "dist/types/services/wxAppTelephonyUtils.d.ts",
+        "sha256": "f6daf3b6a8988a7a00732f971dfd3d30054286ae54c9a566d3f0f223d9c0980a",
+        "sizeBytes": 246
+      },
+      {
+        "path": "dist/types/types.d.ts",
+        "sha256": "5ca805b513392fe59838d931f16eb39ae197dda6cb8fa803046ee2eeff7daad7",
+        "sizeBytes": 27755
+      },
+      {
+        "path": "dist/types/utils/PageCache.d.ts",
+        "sha256": "485255db6826391bdbad27cb20edd5411395321ef913eb21e46c91fc8b92a794",
+        "sizeBytes": 5471
+      },
+      {
+        "path": "dist/types/webex-config.d.ts",
+        "sha256": "afce94129a3caa54d735ace0af17032977572e2bb493fff5616abe7c5607d566",
+        "sizeBytes": 1453
+      },
+      {
+        "path": "dist/types/webex.d.ts",
+        "sha256": "cb1f8ec9e35e25ca5941703b3e8c53523925bd6f5bfcddbc5b9cf12d214b4ed9",
+        "sizeBytes": 231
+      }
+    ],
+    "contract": {
+      "taskFeatureEnablementEvent": "task:featureEnablement",
+      "timeoutMs": 15000,
+      "postWrapUpSameTaskProbe": "fulfilled"
+    }
+  },
+  "ux": {
+    "status": "sealed",
+    "resolutionRoot": ".",
+    "sealedAt": "2026-09-25T15:16:40.738Z",
+    "manifestSha256": "58d925e6d12c377589120f39fc170f1d80692d1901522fce0959b70e17f8c1b4",
+    "sourceManifestSha256": "a266410383fc773812cd0a3352313d8db5e3e3828d5e584aaeee1df42709f162",
+    "sourceIdentitySha256": "50073d2c12591ac4c682e8599c1ecae9f2797cae9ed85542bfebf068b5ebfecb",
+    "requirementSha256": "31061b7752dfc3e786905ee3a370527144aed1dc68641d641646dff0c1cf4c46",
+    "files": [
+      {
+        "sourceId": "UX-001",
+        "kind": "sceneGraph",
+        "path": ".ccwidgets/midcall/figma_target_8061_880455_compact.json",
+        "sha256": "7183f1b874339e30a7c820179d63fabc500a1721f2206194a3fe9c4317880603",
+        "sizeBytes": 3624197
+      },
+      {
+        "sourceId": "UX-001",
+        "kind": "textContent",
+        "path": ".ccwidgets/midcall/figma_target_8061_880455_text.json",
+        "sha256": "804b66441dcd6a1ae3c43d3907bd255c3db2a1457539b3f7e3888d593320d666",
+        "sizeBytes": 89734
+      },
+      {
+        "sourceId": "UX-001",
+        "kind": "screenshot",
+        "path": ".ccwidgets/midcall/midcall.png",
+        "sha256": "5fee49d4111bb9b5a950e441821abc001aa99a39fdd6607b7169e2754654db0f",
+        "sizeBytes": 326905
+      },
+      {
+        "sourceId": "UX-002",
+        "kind": "sceneGraph",
+        "path": ".ccwidgets/postcall_generating/figma_target_5669_263180_compact.json",
+        "sha256": "2c1ade086aaf3bea8f9719f37b6e3a06ca1d7e93737cea58b368bd49efbffd4a",
+        "sizeBytes": 3452432
+      },
+      {
+        "sourceId": "UX-002",
+        "kind": "textContent",
+        "path": ".ccwidgets/postcall_generating/figma_target_5669_263180_text.json",
+        "sha256": "42921d9839a89fa948acd22563579a62472b14a8cc6121b2d0c7883d5b71f3ce",
+        "sizeBytes": 97177
+      },
+      {
+        "sourceId": "UX-002",
+        "kind": "screenshot",
+        "path": ".ccwidgets/postcall_generating/postcall_generating.png",
+        "sha256": "0de0aeb692ae83a922898009577b11d9d027b21c8653b05c947ba03e64bc8a21",
+        "sizeBytes": 170221
+      },
+      {
+        "sourceId": "UX-003",
+        "kind": "sceneGraph",
+        "path": ".ccwidgets/postcall_summary_edit/figma_target_5669_263754_compact.json",
+        "sha256": "9e9378e384df92e816a3c05e7faff8c800da2e1f6334e149a9522e24c837aa66",
+        "sizeBytes": 3899550
+      },
+      {
+        "sourceId": "UX-003",
+        "kind": "textContent",
+        "path": ".ccwidgets/postcall_summary_edit/figma_target_5669_263754_text.json",
+        "sha256": "58457c269bf1c9efff9f43e63a92f33a7b08f8f18ad43653403084b5cb46fc50",
+        "sizeBytes": 100090
+      },
+      {
+        "sourceId": "UX-003",
+        "kind": "screenshot",
+        "path": ".ccwidgets/postcall_summary_edit/postcall_summary_edit.png",
+        "sha256": "92b2ef6fe8473c96f422ebcfece7699d5e3360503921ff40e36b281e355ba6f1",
+        "sizeBytes": 313979
+      },
+      {
+        "sourceId": "UX-004",
+        "kind": "sceneGraph",
+        "path": ".ccwidgets/postcall_summary_hover_thumbsup/figma_target_5669_264384_compact.json",
+        "sha256": "e084f1942b911286d4eb58e7db3082130e808e12c5197fba565d069860966e13",
+        "sizeBytes": 1016889
+      },
+      {
+        "sourceId": "UX-004",
+        "kind": "textContent",
+        "path": ".ccwidgets/postcall_summary_hover_thumbsup/figma_target_5669_264384_text.json",
+        "sha256": "c4e6025190ce7f9f6b0b81fabb3eb80c4686f69f5fb4b2ac3769896d203000b1",
+        "sizeBytes": 15397
+      },
+      {
+        "sourceId": "UX-004",
+        "kind": "screenshot",
+        "path": ".ccwidgets/postcall_summary_hover_thumbsup/postcall_summary_hover_thumbsup.png",
+        "sha256": "3f9013a7a0772aeef98b55bf8e301957c74dca912d500e87dfeaf12f55fc50ca",
+        "sizeBytes": 328615
+      },
+      {
+        "sourceId": "UX-005",
+        "kind": "sceneGraph",
+        "path": ".ccwidgets/postcall_summary_selected_thumbsup/figma_target_5669_264503_compact.json",
+        "sha256": "4330bf697349d52df2493b1675343d5d27c60075eddc0a6a96258b29f0fa79fb",
+        "sizeBytes": 1016754
+      },
+      {
+        "sourceId": "UX-005",
+        "kind": "textContent",
+        "path": ".ccwidgets/postcall_summary_selected_thumbsup/figma_target_5669_264503_text.json",
+        "sha256": "6a08810d6325a5cb7290712373047c61ed1044e7ca6f708d3ab202f80ad4ba00",
+        "sizeBytes": 15397
+      },
+      {
+        "sourceId": "UX-005",
+        "kind": "screenshot",
+        "path": ".ccwidgets/postcall_summary_selected_thumbsup/postcall_summary_selected_thumbsup.png",
+        "sha256": "3628b688d6d84ee61ed1c22e1b77ee6aabb7026656ff8d9d15739b549bdeeeca",
+        "sizeBytes": 316346
+      },
+      {
+        "sourceId": "UX-006",
+        "kind": "sceneGraph",
+        "path": ".ccwidgets/postcall_summary_hover_thumbsdown/figma_target_5669_264622_compact.json",
+        "sha256": "41f147d96db6b2133f0f6994561cc577b0ae121ad9cf966cfdcc300f8b6d9f8e",
+        "sizeBytes": 1016863
+      },
+      {
+        "sourceId": "UX-006",
+        "kind": "textContent",
+        "path": ".ccwidgets/postcall_summary_hover_thumbsdown/figma_target_5669_264622_text.json",
+        "sha256": "f22fa4cce01a2cc8cb9d7ce334c261176fce196116ea190ef06d5f9c26242268",
+        "sizeBytes": 15397
+      },
+      {
+        "sourceId": "UX-006",
+        "kind": "screenshot",
+        "path": ".ccwidgets/postcall_summary_hover_thumbsdown/postcall_summary_hover_thumbsdown.png",
+        "sha256": "098c803e608ce2cc2f8c79ec12208a41ce5ba8ee2ffc66f2071801e2b4872641",
+        "sizeBytes": 353903
+      },
+      {
+        "sourceId": "UX-007",
+        "kind": "sceneGraph",
+        "path": ".ccwidgets/postcall_summary_selected_thumbsdown/figma_target_5669_264860_compact.json",
+        "sha256": "d78d2465ad40c21102a167d5cce976f1541e9a26e415f45069f91297c2ca6550",
+        "sizeBytes": 1016754
+      },
+      {
+        "sourceId": "UX-007",
+        "kind": "textContent",
+        "path": ".ccwidgets/postcall_summary_selected_thumbsdown/figma_target_5669_264860_text.json",
+        "sha256": "5dfe180ec35e38af7df336bbe1acba5b6a5e58c7c476a5fa7d60aacf96e1cc6d",
+        "sizeBytes": 15397
+      },
+      {
+        "sourceId": "UX-007",
+        "kind": "screenshot",
+        "path": ".ccwidgets/postcall_summary_selected_thumbsdown/postcall_summary_selected_thumbsdown.png",
+        "sha256": "7510c740d754cd9e612fc0cfb8ec080682f66a927e941c705cfe13d167920203",
+        "sizeBytes": 316496
+      },
+      {
+        "sourceId": "UX-008",
+        "kind": "sceneGraph",
+        "path": ".ccwidgets/postcall_summary_hover_copy/figma_target_4920_216835_compact.json",
+        "sha256": "40d15e6e6e951c6ff05d451add94cde1e2a6ed1517489ba3c7153d104631eb61",
+        "sizeBytes": 1016801
+      },
+      {
+        "sourceId": "UX-008",
+        "kind": "textContent",
+        "path": ".ccwidgets/postcall_summary_hover_copy/figma_target_4920_216835_text.json",
+        "sha256": "15756650eb613cc81bfdc0d5aaa8f75f7e2009c66a79c28dd108ad39aab0caf7",
+        "sizeBytes": 15399
+      },
+      {
+        "sourceId": "UX-008",
+        "kind": "screenshot",
+        "path": ".ccwidgets/postcall_summary_hover_copy/postcall_summary_hover_copy.png",
+        "sha256": "3b1e78288b4316b4c1575f38112d924c319431f8f07bdcd88a11343a9fee6e21",
+        "sizeBytes": 402341
+      },
+      {
+        "sourceId": "UX-009",
+        "kind": "sceneGraph",
+        "path": ".ccwidgets/postcall_summary_selected_copy/figma_target_4920_216954_compact.json",
+        "sha256": "7b8b3f8148adb46ae59cf36ffdb63e9f81f0035f7d14a433840183df46926a7a",
+        "sizeBytes": 1016800
+      },
+      {
+        "sourceId": "UX-009",
+        "kind": "textContent",
+        "path": ".ccwidgets/postcall_summary_selected_copy/figma_target_4920_216954_text.json",
+        "sha256": "059a61503ef5c9eb452b7c03478bb94387143f9d2d84bc0bb433e18b8e003e33",
+        "sizeBytes": 15399
+      },
+      {
+        "sourceId": "UX-009",
+        "kind": "screenshot",
+        "path": ".ccwidgets/postcall_summary_selected_copy/postcall_summary_selected_copy.png",
+        "sha256": "71e19e3be8da9045fce78e674006cd8963bd95f15642ff6a3884686db5c5e4b1",
+        "sizeBytes": 307333
+      },
+      {
+        "sourceId": "UX-010",
+        "kind": "sceneGraph",
+        "path": ".ccwidgets/postcall_summary_error/figma_target_5669_264979_compact.json",
+        "sha256": "3ab596f96b5a49eb56822816be31f9d4f739bf79f4a50ad09521ccfc491b8de7",
+        "sizeBytes": 3383665
+      },
+      {
+        "sourceId": "UX-010",
+        "kind": "textContent",
+        "path": ".ccwidgets/postcall_summary_error/figma_target_5669_264979_text.json",
+        "sha256": "90de99f4579e9eacadf068fa6fb48eff70eadad76e97d342094363b22fe0dbaa",
+        "sizeBytes": 95936
+      },
+      {
+        "sourceId": "UX-010",
+        "kind": "screenshot",
+        "path": ".ccwidgets/postcall_summary_error/postcall_summary_error.png",
+        "sha256": "6d54cafe81f3693a16017e19adff9aaaf4a1adbae67b779a3f49d6c1fda15ff5",
+        "sizeBytes": 202810
+      }
+    ]
+  }
+}

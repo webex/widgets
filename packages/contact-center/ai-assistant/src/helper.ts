@@ -181,7 +181,7 @@ export const useRealTimeAssist = ({
   // Returns the SDK promise so the card only marks like/dislike as selected
   // once the action has actually reached the backend.
   const handleRealTimeAssistAction = useCallback(
-    (event: AIAssistantActionEvent, assist: RealTimeAssistPayload) => {
+    (event: AIAssistantActionEvent, assist: RealTimeAssistPayload): Promise<void> => {
       const api = store.cc?.apiAIAssistant;
       const adaptiveCardId = assist?.data?.adaptiveCardId;
       if (!interactionId || !agentId || !adaptiveCardId || !api?.sendRealTimeAssistanceUserAction) {
@@ -202,6 +202,7 @@ export const useRealTimeAssist = ({
           actionId: event.actionId,
           languageCode: typeof assist?.data?.languageCode === 'string' ? assist.data.languageCode : undefined,
         })
+        .then(() => undefined)
         .catch((error) => {
           store.logger?.error(`CC-Widgets: sendRealTimeAssistanceUserAction failed - ${error}`, {
             module: MODULE,
@@ -277,7 +278,10 @@ export const useAiAssistant = (input: UseAiAssistantInput) => {
   const chrome = useAIAssistantChrome(input);
   const realTimeAssist = useRealTimeAssist(input);
 
-  return useMemo(() => ({...chrome, ...realTimeAssist}), [chrome, realTimeAssist]);
+  return useMemo(
+    () => ({...chrome, ...realTimeAssist, receiverSummary: input.receiverSummary}),
+    [chrome, input.receiverSummary, realTimeAssist]
+  );
 };
 
 export {REAL_TIME_ASSIST_FLAG};

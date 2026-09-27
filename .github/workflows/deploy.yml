@@ -132,6 +132,10 @@ jobs:
         run: |
           echo "npmAuthToken: ${{ env.token }}" >> ~/.yarnrc.yml
 
+      - name: Assert Publishable Package Boundary
+        if: steps.check-changes.outputs.has_changes == 'true'
+        run: node tooling/src/publish.js assert-publishable
+
       - name: Sync and Increment Package Versions
         id: increment
         if: steps.check-changes.outputs.has_changes == 'true'

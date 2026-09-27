@@ -37,6 +37,38 @@ describe('useAiAssistant', () => {
     expect(result.current.requestStatus).toBe('idle');
   });
 
+  it('passes receiver summary state through and replaces it on branch changes', () => {
+    const firstReceiverSummary = {
+      surface: 'content' as const,
+      branchKey: 'interaction-1:agent-1:1',
+      content: {type: 'card' as const, adaptiveCard: {type: 'AdaptiveCard'}},
+      contentRevision: 1,
+      actionType: 'TRANSFER' as const,
+      selectedFeedback: 'none' as const,
+      midCallFeedbackPending: false,
+      controlsDisabled: false,
+      openReceiverSummary: jest.fn().mockReturnValue(true),
+      recordReceiverSummaryCopied: jest.fn().mockReturnValue(true),
+      setReceiverSummaryFeedback: jest.fn().mockResolvedValue({outcome: 'confirmed' as const}),
+    };
+    const replacementReceiverSummary = {
+      ...firstReceiverSummary,
+      branchKey: 'interaction-2:agent-1:1',
+      contentRevision: 2,
+    };
+    const {result, rerender} = renderHook(
+      ({receiverSummary}: {receiverSummary: typeof firstReceiverSummary}) =>
+        useAiAssistant({...baseProps, receiverSummary}),
+      {initialProps: {receiverSummary: firstReceiverSummary}}
+    );
+
+    expect(result.current.receiverSummary).toBe(firstReceiverSummary);
+
+    rerender({receiverSummary: replacementReceiverSummary});
+
+    expect(result.current.receiverSummary).toBe(replacementReceiverSummary);
+  });
+
   it('open/close/minimize/restore flips chrome state and fires callbacks', () => {
     const onOpen = jest.fn();
     const onClose = jest.fn();

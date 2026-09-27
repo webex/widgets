@@ -1,0 +1,403 @@
+{
+  "schema_version": 1,
+  "runner": "playwright",
+  "cwd": ".",
+  "discovery_argv": [
+    "yarn",
+    "playwright",
+    "test",
+    "--list",
+    "--project=AI Summary Deterministic",
+    "playwright/suites/ai-summary-tests.spec.ts",
+    "playwright/tests/ai-summary-test.spec.ts"
+  ],
+  "render_argv": [
+    "yarn",
+    "playwright",
+    "test",
+    "--workers=1",
+    "--project=AI Summary Deterministic",
+    "playwright/suites/ai-summary-tests.spec.ts",
+    "playwright/tests/ai-summary-test.spec.ts"
+  ],
+  "environment": {
+    "AI_SUMMARY_E2E": "1"
+  },
+  "required_environment_names": [
+    "MB_FLOW_BIN",
+    "WEBEX_JS_SDK_DIR"
+  ],
+  "input_paths": [
+    "package.json",
+    "yarn.lock",
+    "playwright.config.ts",
+    "playwright/Utils/aiSummaryUtils.ts",
+    "playwright/visual/ai-summary-visual-cases.ts",
+    "playwright/suites/ai-summary-tests.spec.ts",
+    "playwright/tests/ai-summary-test.spec.ts",
+    "widgets-samples/cc/samples-cc-react-app/src/index.tsx",
+    "widgets-samples/cc/samples-cc-react-app/webpack.config.js",
+    "widgets-samples/cc/samples-cc-react-app/src/AISummaryVisualFixture.tsx",
+    "widgets-samples/cc/samples-cc-react-app/src/ai-summary-visual-content.ts"
+  ],
+  "evidence_root": ".matrix/results/prog-mini-js/ux-visual",
+  "lifecycle": {
+    "server_owned_by_runner": true,
+    "browser_owned_by_runner": true
+  },
+  "acceptance_owners": [
+    "D8-browser-ux-validation",
+    "D9-release-validation"
+  ],
+  "mount": {
+    "kind": "component",
+    "entry": "widgets-samples/cc/samples-cc-react-app/src/index.tsx",
+    "provider_and_style_paths": [
+      "widgets-samples/cc/samples-cc-react-app/src/AISummaryVisualFixture.tsx"
+    ]
+  },
+  "scenarios": [
+    {
+      "scenario_id": "UX-001/S01",
+      "test_identity": "records UX-001/S01 evidence",
+      "state_id": "JNY-001:mid-call-summary",
+      "source_ids": [
+        "UX-001--S01"
+      ],
+      "driver": "playwright/Utils/aiSummaryUtils.ts",
+      "observed_selector": "[data-testid='consult-transfer:summary']",
+      "expected_assertions": [
+        "state:JNY-001:mid-call-summary",
+        "component:CallControlComponent",
+        "component:ConsultTransferPopoverComponent",
+        "component:AISummary",
+        "layout:consult-summary-readable",
+        "interaction:destination-hover-visible",
+        "capture:framing-complete"
+      ],
+      "interaction": "hover",
+      "capture": {
+        "kind": "clip",
+        "logical_viewport": {
+          "width": 642,
+          "height": 727
+        },
+        "device_scale_factor": 2,
+        "source_scale": 2,
+        "source_region": [
+          0,
+          0,
+          482,
+          582
+        ]
+      }
+    },
+    {
+      "scenario_id": "UX-002/S02",
+      "test_identity": "records UX-002/S02 evidence",
+      "state_id": "JNY-002:generating",
+      "source_ids": [
+        "UX-002--S02"
+      ],
+      "driver": "playwright/Utils/aiSummaryUtils.ts",
+      "observed_selector": "[data-testid='wrap-up-summary']",
+      "expected_assertions": [
+        "state:JNY-002:generating",
+        "component:CallControlComponent",
+        "component:WrapUpSummary",
+        "component:AISummary",
+        "interaction:generating-visible",
+        "capture:framing-complete"
+      ],
+      "interaction": "loading",
+      "capture": {
+        "kind": "clip",
+        "logical_viewport": {
+          "width": 602,
+          "height": 776
+        },
+        "device_scale_factor": 2,
+        "source_scale": 2,
+        "source_region": [
+          0,
+          0,
+          442,
+          621
+        ]
+      }
+    },
+    {
+      "scenario_id": "UX-003/S03",
+      "test_identity": "records UX-003/S03 evidence",
+      "state_id": "JNY-002:editing",
+      "source_ids": [
+        "UX-003--S03"
+      ],
+      "driver": "playwright/Utils/aiSummaryUtils.ts",
+      "observed_selector": "[data-testid='wrap-up-summary']",
+      "expected_assertions": [
+        "state:JNY-002:editing",
+        "component:CallControlComponent",
+        "component:WrapUpSummary",
+        "component:AISummary",
+        "interaction:editing-visible",
+        "capture:framing-complete"
+      ],
+      "interaction": "editing",
+      "capture": {
+        "kind": "clip",
+        "logical_viewport": {
+          "width": 603,
+          "height": 776
+        },
+        "device_scale_factor": 2,
+        "source_scale": 2,
+        "source_region": [
+          0,
+          0,
+          443,
+          621
+        ]
+      }
+    },
+    {
+      "scenario_id": "UX-004/S04",
+      "test_identity": "records UX-004/S04 evidence",
+      "state_id": "JNY-002:like-hover",
+      "source_ids": [
+        "UX-004--S04"
+      ],
+      "driver": "playwright/Utils/aiSummaryUtils.ts",
+      "observed_selector": "[data-testid='wrap-up-summary']",
+      "expected_assertions": [
+        "state:JNY-002:like-hover",
+        "component:CallControlComponent",
+        "component:WrapUpSummary",
+        "component:AISummary",
+        "interaction:hover-visible",
+        "capture:framing-complete"
+      ],
+      "interaction": "hover",
+      "capture": {
+        "kind": "clip",
+        "logical_viewport": {
+          "width": 563,
+          "height": 780
+        },
+        "device_scale_factor": 2,
+        "source_scale": 2,
+        "source_region": [
+          0,
+          0,
+          403,
+          624
+        ]
+      }
+    },
+    {
+      "scenario_id": "UX-005/S05",
+      "test_identity": "records UX-005/S05 evidence",
+      "state_id": "JNY-002:like-selected",
+      "source_ids": [
+        "UX-005--S05"
+      ],
+      "driver": "playwright/Utils/aiSummaryUtils.ts",
+      "observed_selector": "[data-testid='wrap-up-summary']",
+      "expected_assertions": [
+        "state:JNY-002:like-selected",
+        "component:CallControlComponent",
+        "component:WrapUpSummary",
+        "component:AISummary",
+        "interaction:selected-visible",
+        "capture:framing-complete"
+      ],
+      "interaction": "selected",
+      "capture": {
+        "kind": "clip",
+        "logical_viewport": {
+          "width": 562,
+          "height": 777
+        },
+        "device_scale_factor": 2,
+        "source_scale": 2,
+        "source_region": [
+          0,
+          0,
+          402,
+          622
+        ]
+      }
+    },
+    {
+      "scenario_id": "UX-006/S06",
+      "test_identity": "records UX-006/S06 evidence",
+      "state_id": "JNY-002:dislike-hover",
+      "source_ids": [
+        "UX-006--S06"
+      ],
+      "driver": "playwright/Utils/aiSummaryUtils.ts",
+      "observed_selector": "[data-testid='wrap-up-summary']",
+      "expected_assertions": [
+        "state:JNY-002:dislike-hover",
+        "component:CallControlComponent",
+        "component:WrapUpSummary",
+        "component:AISummary",
+        "interaction:hover-visible",
+        "capture:framing-complete"
+      ],
+      "interaction": "hover",
+      "capture": {
+        "kind": "clip",
+        "logical_viewport": {
+          "width": 593,
+          "height": 775
+        },
+        "device_scale_factor": 2,
+        "source_scale": 2,
+        "source_region": [
+          -2,
+          -1,
+          433,
+          621
+        ]
+      }
+    },
+    {
+      "scenario_id": "UX-007/S07-UX",
+      "test_identity": "records UX-007/S07-UX evidence",
+      "state_id": "JNY-002:dislike-selected",
+      "source_ids": [
+        "UX-007--S07-UX"
+      ],
+      "driver": "playwright/Utils/aiSummaryUtils.ts",
+      "observed_selector": "[data-testid='wrap-up-summary']",
+      "expected_assertions": [
+        "state:JNY-002:dislike-selected",
+        "component:CallControlComponent",
+        "component:WrapUpSummary",
+        "component:AISummary",
+        "interaction:selected-visible",
+        "capture:framing-complete"
+      ],
+      "interaction": "selected",
+      "capture": {
+        "kind": "clip",
+        "logical_viewport": {
+          "width": 563,
+          "height": 777
+        },
+        "device_scale_factor": 2,
+        "source_scale": 2,
+        "source_region": [
+          0,
+          0,
+          403,
+          622
+        ]
+      }
+    },
+    {
+      "scenario_id": "UX-008/S08",
+      "test_identity": "records UX-008/S08 evidence",
+      "state_id": "JNY-002:copy-hover",
+      "source_ids": [
+        "UX-008--S08"
+      ],
+      "driver": "playwright/Utils/aiSummaryUtils.ts",
+      "observed_selector": "[data-testid='wrap-up-summary']",
+      "expected_assertions": [
+        "state:JNY-002:copy-hover",
+        "component:CallControlComponent",
+        "component:WrapUpSummary",
+        "component:AISummary",
+        "interaction:hover-visible",
+        "capture:framing-complete"
+      ],
+      "interaction": "hover",
+      "capture": {
+        "kind": "clip",
+        "logical_viewport": {
+          "width": 601,
+          "height": 778
+        },
+        "device_scale_factor": 2,
+        "source_scale": 2,
+        "source_region": [
+          -39,
+          -9,
+          441,
+          632
+        ]
+      }
+    },
+    {
+      "scenario_id": "UX-009/S09",
+      "test_identity": "records UX-009/S09 evidence",
+      "state_id": "JNY-002:copy-selected",
+      "source_ids": [
+        "UX-009--S09"
+      ],
+      "driver": "playwright/Utils/aiSummaryUtils.ts",
+      "observed_selector": "[data-testid='wrap-up-summary']",
+      "expected_assertions": [
+        "state:JNY-002:copy-selected",
+        "component:CallControlComponent",
+        "component:WrapUpSummary",
+        "component:AISummary",
+        "interaction:copy-confirmed-visible",
+        "capture:framing-complete"
+      ],
+      "interaction": "selected",
+      "capture": {
+        "kind": "clip",
+        "logical_viewport": {
+          "width": 563,
+          "height": 780
+        },
+        "device_scale_factor": 2,
+        "source_scale": 2,
+        "source_region": [
+          0,
+          0,
+          403,
+          624
+        ]
+      }
+    },
+    {
+      "scenario_id": "UX-010/S10",
+      "test_identity": "records UX-010/S10 evidence",
+      "state_id": "JNY-002:error",
+      "source_ids": [
+        "UX-010--S10"
+      ],
+      "driver": "playwright/Utils/aiSummaryUtils.ts",
+      "observed_selector": "[data-testid='wrap-up-summary']",
+      "expected_assertions": [
+        "state:JNY-002:error",
+        "component:CallControlComponent",
+        "component:WrapUpSummary",
+        "component:AISummary",
+        "interaction:error-visible",
+        "requirement:completion-enabled",
+        "capture:framing-complete"
+      ],
+      "interaction": "error",
+      "capture": {
+        "kind": "clip",
+        "logical_viewport": {
+          "width": 603,
+          "height": 776
+        },
+        "device_scale_factor": 2,
+        "source_scale": 2,
+        "source_region": [
+          0,
+          0,
+          443,
+          621
+        ]
+      }
+    }
+  ]
+}

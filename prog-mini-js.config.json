@@ -1,0 +1,11 @@
+{
+  "_source": "auto:javascript:yarn",
+  "build_command": "yarn run build",
+  "build_timeout": 900,
+  "maximum_visual_iterations": 5,
+  "services": [],
+  "test_command": "yarn run test:unit",
+  "test_timeout": 3000,
+  "ux_harness_descriptor": "playwright/visual/ai-summary-harness.json",
+  "working_directory": "."
+}

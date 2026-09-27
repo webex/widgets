@@ -1,4 +1,7 @@
 import {
+  AISummaryActionType,
+  AISummaryFeedback,
+  AISummaryFeedbackResult,
   ILogger,
   ITask,
   IContactCenter,
@@ -15,8 +18,13 @@ import {
   AddressBookEntrySearchParams,
   AddressBookEntriesResponse,
   TaskUIControls,
+  AISummaryPreActionSendResult,
+  AISummaryRequestResult,
+  PostCallSubmissionResult,
 } from '@webex/cc-store';
 import {CampaignErrorType} from './CampaignErrorDialog/campaign-error-dialog.types';
+import type {ConsultTransferSummaryView} from './CallControl/CallControlCustom/consult-transfer-summary.types';
+import type {WrapUpSummaryView} from './CallControl/CallControlCustom/wrap-up-summary.types';
 
 type Enum<T extends Record<string, unknown>> = T[keyof T];
 
@@ -58,6 +66,26 @@ export type TargetType = (typeof TARGET_TYPE)[keyof typeof TARGET_TYPE];
 export type ParticipantDropAnnouncement = {
   type: 'success' | 'error';
   message: string;
+};
+
+export type WrapupCompletionResult = PostCallSubmissionResult;
+
+export type CallControlAISummaryProps = {
+  consult?: ConsultTransferSummaryView;
+  transfer?: ConsultTransferSummaryView;
+  postCall?: WrapUpSummaryView;
+  requestMidCallSummary?: (actionType: AISummaryActionType) => Promise<AISummaryRequestResult>;
+  setMidCallSummaryFeedback?: (
+    feedback: Exclude<AISummaryFeedback, 'none'>,
+    actionType: AISummaryActionType,
+    expectedRevision: number
+  ) => Promise<AISummaryFeedbackResult>;
+  setPostCallSummaryFeedback?: (feedback: Exclude<AISummaryFeedback, 'none'>, expectedRevision: number) => boolean;
+  onPostCallReasonCommit?: (reasonId: string, selectionRevision: number) => void;
+  sendMidCallSummaryBeforeAction?: (
+    actionType: AISummaryActionType,
+    expectedRevision: number
+  ) => Promise<AISummaryPreActionSendResult>;
 };
 
 /**
@@ -195,7 +223,7 @@ export type WxAppTelephonyErrorDisplay = {
   message: string;
   trackingId?: string;
   status?: number | string;
-  isWxAppTelephonyError: boolean;
+  isWxAppTelephonyError?: boolean;
 };
 
 export type TaskListComponentProps = Pick<
@@ -321,7 +349,7 @@ export interface ControlProps {
    * @param wrapupReason - The reason for wrapping up the call.
    * @param wrapupId - The ID associated with the wrap-up reason.
    */
-  wrapupCall: (wrapupReason: string, wrapupId: string) => void;
+  wrapupCall: (wrapupReason: string, wrapupId: string) => Promise<WrapupCompletionResult>;
 
   /**
    * Flag to determine if the task is held
@@ -370,7 +398,7 @@ export interface ControlProps {
    * @param destination - The destination to transfer the call to.
    * @param destinationType - The type of destination.
    */
-  transferCall: (destination: string, destinationType: DestinationType) => void;
+  transferCall: (destination: string, destinationType: DestinationType) => void | Promise<void>;
 
   /**
    *
@@ -382,12 +410,12 @@ export interface ControlProps {
     consultDestination: string,
     destinationType: DestinationType,
     allowParticipantsToInteract: boolean
-  ) => void;
+  ) => void | Promise<void>;
 
   /**
    * Function to merge the consult call in a conference.
    */
-  consultConference: () => void;
+  consultConference: () => void | Promise<void>;
 
   /**
    * Function to switch to conference call.
@@ -412,7 +440,7 @@ export interface ControlProps {
   /**
    * Function to transfer the consult call to a already established consult.
    */
-  consultTransfer: () => void;
+  consultTransfer: () => void | Promise<void>;
 
   /**
    * Label for the state timer (e.g., "Wrap Up", "Post Call").
@@ -559,6 +587,11 @@ export interface ControlProps {
   consultTransferOptions?: ConsultTransferOptions;
 
   /**
+   * AI summary presentation/adapters supplied by the task package.
+   */
+  aiSummary?: CallControlAISummaryProps;
+
+  /**
    * Agent ID of the logged-in user
    */
   agentId: string;
@@ -623,6 +656,7 @@ export type CallControlComponentProps = Pick<
   | 'getEntryPoints'
   | 'getQueuesFetcher'
   | 'consultTransferOptions'
+  | 'aiSummary'
   | 'conferenceEnabled'
 > &
   Partial<
@@ -733,6 +767,7 @@ export interface ConsultTransferListComponentProps {
   presence?: 'active' | 'away';
   buttonIcon: string;
   onButtonPress: () => void;
+  actionDisabled?: boolean;
   className?: string;
   logger: ILogger;
 }
@@ -752,6 +787,8 @@ export interface ConsultTransferDialNumberComponentProps {
 /**
  * Interface representing the properties for ConsultTransferPopover component.
  */
+export type ConsultTransferDestinationLayout = 'voice-radio' | 'non-voice-pill' | 'existing-party-action';
+
 export interface ConsultTransferPopoverComponentProps {
   heading: string;
   buttonIcon: string;
@@ -767,6 +804,13 @@ export interface ConsultTransferPopoverComponentProps {
   onDialNumberSelect: (dialNumber: string, allowParticipantsToInteract: boolean) => void;
   action: 'Consult' | 'Transfer';
   availableDestinations: TaskUIControls['consultTransferDestinations']['consult'];
+  destinationLayout?: ConsultTransferDestinationLayout;
+  interactionId?: string;
+  isActionPending?: boolean;
+  onExistingPartyConfirm?: () => void;
+  existingPartyConfirmLabel?: string;
+  summaryActionType?: AISummaryActionType;
+  requestSummaryOnOpen?: boolean;
   /** Options governing popover visibility/behavior */
   consultTransferOptions?: ConsultTransferOptions;
   isConferenceInProgress?: boolean;
@@ -780,9 +824,9 @@ export interface CallControlConsultComponentsProps {
   agentName: string;
   consultTimerLabel: string;
   consultTimerTimestamp: number;
-  consultTransfer: () => void;
+  consultTransfer: () => void | Promise<void>;
   endConsultCall: () => void;
-  consultConference: () => void;
+  consultConference: () => void | Promise<void>;
   switchToMainCall: () => void;
   logger: ILogger;
   isMuted: boolean;
@@ -791,6 +835,7 @@ export interface CallControlConsultComponentsProps {
   conferenceEnabled: boolean;
   enableWxBetterTogether?: boolean;
   currentTask?: ITask | null;
+  aiSummary?: CallControlAISummaryProps;
 }
 
 /**

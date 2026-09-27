@@ -34,6 +34,7 @@ const MOMENTUM_ICON_URLS: Record<string, string> = {
   'like-filled.svg': likeFilledIcon,
   'like-regular.svg': likeRegularIcon,
 };
+const ALLOWED_MOMENTUM_RESOURCE_URLS = new Set(Object.values(MOMENTUM_ICON_URLS));
 
 /** Format an epoch (ms) into "HH:MM"; empty string on bad input. */
 const formatSourceTimestamp = (raw: number | string | undefined): string => {
@@ -59,6 +60,17 @@ const extractMomentumIconName = (value: string): string | null => {
   const match = trimmed.match(/([\w-]+\.svg)(?:[?#].*)?$/i);
   return match ? match[1].toLowerCase() : null;
 };
+
+const resolveAllowedResourceUrl = (value: string): string | undefined => {
+  const iconName = extractMomentumIconName(value);
+  if (!iconName) return undefined;
+  return resolveMomentumIconUrl(iconName) ?? undefined;
+};
+
+const isAllowedMomentumResourceUrl = (value: string): boolean => ALLOWED_MOMENTUM_RESOURCE_URLS.has(value);
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  Boolean(value && typeof value === 'object' && !Array.isArray(value));
 
 export const extractCustomerStatementTitle = (card: unknown): string | undefined => {
   if (Array.isArray(card)) {
@@ -128,20 +140,71 @@ export const prepareCardForRender = <T>(card: T, publishTimestamp?: number | str
   const formattedTimestamp = formatSourceTimestamp(publishTimestamp);
   const cardWithoutDuplicateHeader = removeDuplicateAssistantHeader(card as Record<string, unknown>, assistantTitle);
 
-  const visit = (node: unknown): unknown => {
-    if (Array.isArray(node)) return node.map(visit);
-    if (node && typeof node === 'object') {
+  const prepareResourceValue = (value: unknown): unknown | undefined => {
+    if (typeof value === 'string') {
+      return resolveAllowedResourceUrl(value);
+    }
+    if (!isRecord(value)) {
+      return undefined;
+    }
+    const url = value.url;
+    if (typeof url !== 'string') {
+      return undefined;
+    }
+    const allowedUrl = resolveAllowedResourceUrl(url);
+    if (!allowedUrl) {
+      return undefined;
+    }
+    const prepared = visit({...value, url: allowedUrl});
+    return isRecord(prepared) ? prepared : undefined;
+  };
+
+  const isImageUrl = (
+    record: Record<string, unknown>,
+    key: string,
+    context: {parentType?: string; parentKey?: string}
+  ): boolean =>
+    key === 'url' && (record.type === 'Image' || (context.parentType === 'ImageSet' && context.parentKey === 'images'));
+
+  const visit = (node: unknown, context: {parentType?: string; parentKey?: string} = {}): unknown => {
+    if (Array.isArray(node)) {
+      return node
+        .map((item) => visit(item, context))
+        .filter((item): item is Exclude<unknown, undefined> => item !== undefined);
+    }
+    if (isRecord(node)) {
       const out: Record<string, unknown> = {};
-      for (const [key, value] of Object.entries(node as Record<string, unknown>)) {
-        if (typeof value === 'string') {
-          const iconName = extractMomentumIconName(value);
-          if (iconName) {
-            const iconUrl = resolveMomentumIconUrl(iconName);
-            if (iconUrl) {
-              out[key] = iconUrl;
-              continue;
-            }
+      const record = node;
+      const recordType = typeof record.type === 'string' ? record.type : undefined;
+      for (const [key, value] of Object.entries(record)) {
+        if (key === 'backgroundImage') {
+          const preparedBackground = prepareResourceValue(value);
+          if (preparedBackground !== undefined) {
+            out[key] = preparedBackground;
           }
+          continue;
+        }
+        if (recordType === 'Media' && key === 'sources') {
+          continue;
+        }
+        if (recordType === 'Media' && key === 'poster') {
+          const preparedPoster = prepareResourceValue(value);
+          if (preparedPoster !== undefined) {
+            out[key] = preparedPoster;
+          }
+          continue;
+        }
+        if (
+          isImageUrl(record, key, context) ||
+          (key === 'iconUrl' && typeof recordType === 'string' && recordType.startsWith('Action.'))
+        ) {
+          const preparedResource = prepareResourceValue(value);
+          if (preparedResource !== undefined) {
+            out[key] = preparedResource;
+          }
+          continue;
+        }
+        if (typeof value === 'string') {
           if (value.includes(SOURCE_TIMESTAMP_PLACEHOLDER)) {
             out[key] = value.split(SOURCE_TIMESTAMP_PLACEHOLDER).join(formattedTimestamp);
             continue;
@@ -151,7 +214,7 @@ export const prepareCardForRender = <T>(card: T, publishTimestamp?: number | str
             continue;
           }
         }
-        out[key] = visit(value);
+        out[key] = visit(value, {parentType: recordType, parentKey: key});
       }
       if (out.id === LINE_SEPARATOR_ID) {
         out.separator = true;
@@ -162,6 +225,80 @@ export const prepareCardForRender = <T>(card: T, publishTimestamp?: number | str
   };
 
   return visit(cardWithoutDuplicateHeader) as T;
+};
+
+export const hasRenderableCardContent = (card: unknown): boolean => {
+  const hasText = (value: unknown): boolean => typeof value === 'string' && value.trim().length > 0;
+
+  const hasRenderableFact = (fact: unknown): boolean => {
+    if (!isRecord(fact)) return false;
+    return hasText(fact.title) || hasText(fact.value);
+  };
+
+  const hasRenderableNode = (node: unknown, context: {richTextInline?: boolean} = {}): boolean => {
+    if (Array.isArray(node)) {
+      return node.some((item) => hasRenderableNode(item, context));
+    }
+    if (typeof node === 'string') {
+      return context.richTextInline === true && hasText(node);
+    }
+    if (!isRecord(node)) {
+      return false;
+    }
+    const record = node;
+    if (record.type === 'TextBlock') {
+      return hasText(record.text);
+    }
+    if (record.type === 'TextRun') {
+      return context.richTextInline === true && hasText(record.text);
+    }
+    if (record.type === 'RichTextBlock') {
+      return hasRenderableNode(record.inlines, {richTextInline: true});
+    }
+    if (record.type === 'FactSet') {
+      return Array.isArray(record.facts) && record.facts.some(hasRenderableFact);
+    }
+    if (record.type === 'Image') {
+      return typeof record.url === 'string' && isAllowedMomentumResourceUrl(record.url);
+    }
+    if (record.type === 'ImageSet') {
+      return (
+        Array.isArray(record.images) &&
+        record.images.some(
+          (image) =>
+            (isRecord(image) && typeof image.url === 'string' && isAllowedMomentumResourceUrl(image.url)) ||
+            hasRenderableNode(image)
+        )
+      );
+    }
+    if (record.type === 'AdaptiveCard') {
+      return hasRenderableNode(record.body);
+    }
+    if (record.type === 'Container' || record.type === 'Column') {
+      return hasRenderableNode(record.items);
+    }
+    if (record.type === 'ColumnSet') {
+      return hasRenderableNode(record.columns);
+    }
+    if (record.type === 'Table') {
+      return hasRenderableNode(record.rows);
+    }
+    if (record.type === 'TableRow') {
+      return hasRenderableNode(record.cells);
+    }
+    if (record.type === 'TableCell') {
+      return hasRenderableNode(record.items);
+    }
+    return (
+      hasRenderableNode(record.body) ||
+      hasRenderableNode(record.items) ||
+      hasRenderableNode(record.columns) ||
+      hasRenderableNode(record.images) ||
+      (Array.isArray(record.facts) && record.facts.some(hasRenderableFact))
+    );
+  };
+
+  return hasRenderableNode(card);
 };
 
 /**

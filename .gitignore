@@ -22,6 +22,9 @@ yarn-error.log*
 .node_repl_history
 reports/
 .generated/
+.worktrees/
+vendor/
+!vendor/
 
 #IDEs
 .project
@@ -39,6 +42,9 @@ reports/
 
 #Local stuff
 *.json
+!prog-mini-js.config.json
+!playwright/visual/ai-summary-harness.json
+!playwright/tsconfig.ai-summary.json
 !docs/changelog/logs/*.json
 !.sdd/manifest.json
 .env*
@@ -54,3 +60,16 @@ node_modules/
 # Playwright reports
 **/test-results/
 **/playwright-report
+
+# Artificer runtime and local requirement/UX inputs
+.matrix/
+.prog/
+requirementVersion/
+.ccwidgets/
+
+# The implementation DAG is an Artificer design deliverable, not runtime state.
+!design/default/implementation_dag.json
+
+# Reviewed AI-summary admission artifacts.
+!design/default/sdk_package_lock.json
+!vendor/contact-center-cc-summaries.tgz

@@ -26,6 +26,9 @@ export const isIncomingTask = (task: ITask, agentId: string): boolean => {
   );
 };
 
+export const isTelephonyTask = (task: ITask | null | undefined): boolean =>
+  task?.data?.interaction?.mediaType === MEDIA_TYPE_TELEPHONY_LOWER;
+
 /**
  * Checks if the current agent is a secondary agent in a consultation scenario.
  * Secondary agents are those who were consulted (not the original call owner).
@@ -615,7 +618,7 @@ export const findMediaResourceId = (task: ITask, mType: string) => {
   }
 
   if (matchingMedia.length === 1) {
-    return matchingMedia[0].mediaResourceId;
+    return matchingMedia[0].mediaResourceId || '';
   }
 
   // In some consult flows, stale consult legs are retained in media. Prefer the

@@ -211,6 +211,8 @@ describe('Outdial Call Component', () => {
       const addressBookTab = tabs[0]; // First tab is address book
       fireEvent.click(addressBookTab);
       await screen.findByTestId('outdial-address-book-container');
+      await screen.findByText('John Doe');
+      await screen.findByText('Jane Smith');
       // Remove IDs to avoid snapshot issues with dynamic IDs
       container.querySelectorAll('[id^="mdc-input"]').forEach((el) => el.removeAttribute('id'));
       expect(container).toMatchSnapshot();

@@ -1,3 +1,5 @@
+import {AI_SUMMARY_MESSAGES} from '../AISummary/ai-summary.constants';
+
 // Shared text constants for task components
 export const UNTIL_AUTO_WRAPUP = 'Until auto wrap-up';
 export const CANCEL = 'Cancel';
@@ -9,7 +11,7 @@ export const PAUSE_RECORDING = 'Pause Recording';
 export const RESUME_RECORDING = 'Resume Recording';
 export const END = 'End';
 export const WRAP_UP = 'Wrap up';
-export const WRAP_UP_INTERACTION = 'Wrap up interaction';
+export const WRAP_UP_INTERACTION = AI_SUMMARY_MESSAGES.postCall.eyebrow;
 export const WRAP_UP_REASON = 'Wrap-up reason';
 export const SELECT = 'Select';
 export const SUBMIT_WRAP_UP = 'Submit & Wrap up';

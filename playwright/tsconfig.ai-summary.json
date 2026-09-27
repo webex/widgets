@@ -1,0 +1,16 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "target": "ES2022",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "types": ["node"]
+  },
+  "include": [
+    "../playwright.config.ts",
+    "Utils/aiSummaryUtils.ts",
+    "visual/ai-summary-visual-cases.ts",
+    "suites/ai-summary-tests.spec.ts",
+    "tests/ai-summary-test.spec.ts"
+  ]
+}

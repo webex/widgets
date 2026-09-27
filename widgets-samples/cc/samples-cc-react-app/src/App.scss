@@ -1,5 +1,21 @@
+@font-face {
+  font-family: Inter;
+  src: url('@momentum-ui/core/fonts/Inter.var.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+
 .app {
   height: 100vh;
+
+  // Fieldset's intrinsic minimum can widen the host past a narrow viewport.
+  .box,
+  .section-box,
+  .fieldset {
+    min-width: 0;
+    box-sizing: border-box;
+  }
 }
 
 .task-rejected-popup {
@@ -113,6 +129,8 @@ iframe {
 
 .stationLogoutButtonClass {
   margin-top: 0.313rem;
+  display: flex;
+  max-width: 100%;
 }
 
 .profile-loader-overlay {
@@ -224,4 +242,13 @@ iframe {
   max-width: none;
   min-height: 12rem;
   width: 100%;
+}
+
+.app.mds-typography,
+.ai-summary-visual-fixture {
+  // Bind the sample host's declared local font at the typography boundary;
+  // .mds-typography otherwise shadows the value inherited from #root.
+  --mds-font-family-primary: Inter, CiscoSans, 'Helvetica Neue', Arial, sans-serif;
+
+  font-family: Inter, CiscoSans, 'Helvetica Neue', Arial, sans-serif;
 }
