@@ -55,6 +55,7 @@ playwright/               # E2E suites
 ## Critical Rules
 1. **Code is the source of truth.** Never invent an SDK method, event, path, flag, or constant — read the
    real file (SDK surface: `@webex/contact-center` package types at `node_modules/@webex/contact-center/dist/types/index.d.ts`).
+2. **Ask before coding.** Present a plan / Spec Summary; wait for confirmation before non-trivial changes.
 3. **One-directional dependency flow.** `cc-widgets → widgets → cc-components → store → SDK`. Never import
    upstream (cc-components must not import widget packages; widgets must not import cc-widgets).
 4. **SDK only through the store.** Call `store.cc.methodName()` — never import the SDK directly in a widget

@@ -11,9 +11,12 @@ import {
   RealTimeTranscript,
   AIAssistant,
 } from '@webex/cc-widgets';
-import {StationLogoutResponse} from '@webex/contact-center';
+import type {AISummaryStatusDetail} from '@webex/cc-widgets';
+import '@webex/cc-widgets/wc';
+import Webex from '@webex/contact-center';
+import type {StationLogoutResponse} from '@webex/contact-center';
 import {ERROR_TRIGGERING_IDLE_CODES} from '@webex/cc-store';
-import Webex from 'webex';
+import type {InitParams, WithWebex} from '@webex/cc-store';
 import {
   ThemeProvider,
   IconProvider,
@@ -28,6 +31,74 @@ import {PopoverNext} from '@momentum-ui/react-collaboration';
 import './App.scss';
 import {observer} from 'mobx-react-lite';
 import EngageWidget from './EngageWidget';
+import {getAISummaryE2EBridge, isAISummaryE2ENavigation, type AISummaryE2EWebexConstructorProbe} from './aiSummaryE2E';
+
+type OAuthWebexInstance = WithWebex['webex'] & {
+  authorization?: {
+    initiateLogin?: () => void;
+  };
+  once: (event: 'ready', callback: () => void) => void;
+};
+
+type WebexConstructorProbeTarget = Pick<OAuthWebexInstance, 'authorization' | 'cc'>;
+
+type ContactCenterWebexConstructor = {
+  init: (attrs: {config: Record<string, unknown>}) => OAuthWebexInstance;
+  version?: string;
+};
+
+type AISummaryE2ECallControlElement = HTMLElement & {
+  onHoldResume?: (payload: unknown) => void;
+  onEnd?: (payload: unknown) => void;
+  onWrapUp?: (payload: unknown) => void;
+  onRecordingToggle?: (payload: unknown) => void;
+  onAISummaryStatusChange?: (detail: AISummaryStatusDetail) => void;
+  conferenceEnabled?: boolean;
+};
+
+type AISummaryE2ECallControlProps = {
+  onHoldResume: (payload: unknown) => void;
+  onEnd: (payload: unknown) => void;
+  onWrapUp: (payload: unknown) => void;
+  onRecordingToggle: (payload: unknown) => void;
+  onAISummaryStatusChange: (detail: AISummaryStatusDetail) => void;
+  conferenceEnabled: boolean;
+};
+
+const ContactCenterWebex = Webex as unknown as ContactCenterWebexConstructor;
+
+const createContactCenterWebex = (config: Record<string, unknown>): OAuthWebexInstance =>
+  ContactCenterWebex.init({config});
+
+const AISummaryE2ECallControl: React.FunctionComponent<AISummaryE2ECallControlProps> = ({
+  onHoldResume,
+  onEnd,
+  onWrapUp,
+  onRecordingToggle,
+  onAISummaryStatusChange,
+  conferenceEnabled,
+}) => {
+  const elementRef = React.useRef<AISummaryE2ECallControlElement | null>(null);
+
+  useEffect(() => {
+    const element = elementRef.current;
+    if (!element) {
+      return;
+    }
+
+    element.onHoldResume = onHoldResume;
+    element.onEnd = onEnd;
+    element.onWrapUp = onWrapUp;
+    element.onRecordingToggle = onRecordingToggle;
+    element.onAISummaryStatusChange = onAISummaryStatusChange;
+    element.conferenceEnabled = conferenceEnabled;
+  }, [conferenceEnabled, onAISummaryStatusChange, onEnd, onHoldResume, onRecordingToggle, onWrapUp]);
+
+  return React.createElement('widget-cc-call-control', {
+    ref: elementRef,
+    'data-testid': 'samples:ai-summary-public-call-control',
+  });
+};
 
 const defaultWidgets = {
   stationLogin: true,
@@ -43,6 +114,39 @@ const defaultWidgets = {
 };
 
 function App() {
+  const aiSummaryE2EBridge = getAISummaryE2EBridge();
+  const isAISummaryE2E = isAISummaryE2ENavigation();
+  useEffect(() => {
+    if (!aiSummaryE2EBridge) return;
+    // Read-only observations of production state; the browser driver mutates
+    // SDK events, never these store records.
+    aiSummaryE2EBridge.readSummaryState = () => ({
+      agentId: store.agentId,
+      states: Object.values(store.aiSummaryOwnerStates).map((state) => ({
+        kind: state.kind,
+        role: state.role,
+        ownerKey: {...state.ownerKey},
+        counters: {...state.counters},
+        contentRevision: state.contentRevision,
+        feedbackStatus: state.feedbackStatus,
+      })),
+      pendingRequests: Object.keys(store.aiSummaryPendingRequests).length,
+    });
+    aiSummaryE2EBridge.requestMidCallSummary = () => store.requestMidCallSummary('CONSULT');
+    aiSummaryE2EBridge.registerAgent = () => store.store.registerCC(aiSummaryE2EBridge.webex);
+    aiSummaryE2EBridge.requestPostCallSummary = (selectionRevision) =>
+      store.requestPostCallSummary({
+        type: 'reason-commit',
+        reasonId: 'aux-code-billing-follow-up',
+        selectionRevision,
+      });
+    return () => {
+      delete aiSummaryE2EBridge.readSummaryState;
+      delete aiSummaryE2EBridge.requestMidCallSummary;
+      delete aiSummaryE2EBridge.registerAgent;
+      delete aiSummaryE2EBridge.requestPostCallSummary;
+    };
+  }, [aiSummaryE2EBridge]);
   const [isSdkReady, setIsSdkReady] = useState(false);
   const [selectedWidgets, setSelectedWidgets] = useState(() => {
     const savedWidgets = window.localStorage.getItem('selectedWidgets');
@@ -165,6 +269,68 @@ function App() {
     }),
   };
 
+  const toWebexConstructorProbe = (webex: WebexConstructorProbeTarget): AISummaryE2EWebexConstructorProbe => {
+    const hasAuthorization = typeof webex.authorization?.initiateLogin === 'function';
+    const hasCc = Boolean(webex.cc);
+
+    return {
+      version: 1,
+      packageEntry: '@webex/contact-center',
+      constructorVersion: ContactCenterWebex.version,
+      hasAuthorization,
+      hasCc,
+      hasSameInstanceAuthorizationAndCc: hasAuthorization && hasCc,
+    };
+  };
+
+  const probeContactCenterWebexConstructor = (
+    probeWebex?: WebexConstructorProbeTarget
+  ): AISummaryE2EWebexConstructorProbe => {
+    if (probeWebex) {
+      return toWebexConstructorProbe(probeWebex);
+    }
+
+    const probeConfig = {
+      appName: 'sdk-samples',
+      appPlatform: 'ai-summary-e2e-probe',
+      fedramp: false,
+      logger: {
+        level: 'error',
+      },
+      credentials: {
+        client_id: 'ai-summary-e2e-probe',
+        redirect_uri: `${window.location.protocol}//${window.location.host}${window.location.pathname}`,
+        scope: 'spark:kms',
+      },
+      cc: {
+        disableWebRTCRegistration,
+        enableWxBetterTogether,
+      },
+    };
+
+    try {
+      return toWebexConstructorProbe(createContactCenterWebex(probeConfig));
+    } catch (error) {
+      return {
+        version: 1,
+        packageEntry: '@webex/contact-center',
+        constructorVersion: ContactCenterWebex.version,
+        hasAuthorization: false,
+        hasCc: false,
+        hasSameInstanceAuthorizationAndCc: false,
+        errorName: error instanceof Error ? error.name : 'UnknownError',
+      };
+    }
+  };
+
+  useEffect(() => {
+    if (!aiSummaryE2EBridge) {
+      return;
+    }
+
+    aiSummaryE2EBridge.recordWebexConstructorProbe?.(probeContactCenterWebexConstructor(aiSummaryE2EBridge.webex));
+  }, [aiSummaryE2EBridge, disableWebRTCRegistration, enableWxBetterTogether]);
+
   const onLogin = () => {
     setIsLoggedIn(true);
     console.log('Agent login has been successful');
@@ -229,6 +395,15 @@ function App() {
 
   const onToggleMute = ({isMuted, task}) => {
     console.log('onToggleMute invoked', {isMuted, task});
+  };
+
+  const onAISummaryStatusChange = (detail: AISummaryStatusDetail) => {
+    if (aiSummaryE2EBridge) {
+      aiSummaryE2EBridge.recordAISummaryStatusDetail?.(detail);
+      return;
+    }
+
+    console.log('onAISummaryStatusChange invoked', detail);
   };
 
   const enableDisableMultiLogin = () => {
@@ -353,32 +528,33 @@ function App() {
       new Set(ccMandatoryScopes.concat(webRTCCallingScopes).concat(additionalScopes))
     ).join(' ');
 
-    const webexConfig = {
-      config: {
-        appName: 'sdk-samples',
-        appPlatform: 'testClient',
-        fedramp: false,
-        logger: {
-          level: 'info',
-        },
-        credentials: {
-          ...(integrationEnv && {authorizeUrl: 'https://idbrokerbts.webex.com/idb/oauth2/v1/authorize'}),
-          client_id: integrationEnv
-            ? 'Cd0dd53db1f470a5a9941e5eee31575bd0889d7006e3a80a1443ad12a42049da1'
-            : 'C04ef08ffce356c3161bb66b15dbdd98d26b6c683c5ce1a1a89efad545fdadd74',
-          redirect_uri: redirectUri,
-          scope: requestedScopes,
-        },
-        cc: {
-          disableWebRTCRegistration,
-          enableWxBetterTogether,
-        },
+    const oauthWebexConfig = {
+      appName: 'sdk-samples',
+      appPlatform: 'testClient',
+      fedramp: false,
+      logger: {
+        level: 'info',
+      },
+      credentials: {
+        ...(integrationEnv && {authorizeUrl: 'https://idbrokerbts.webex.com/idb/oauth2/v1/authorize'}),
+        client_id: integrationEnv
+          ? 'Cd0dd53db1f470a5a9941e5eee31575bd0889d7006e3a80a1443ad12a42049da1'
+          : 'C04ef08ffce356c3161bb66b15dbdd98d26b6c683c5ce1a1a89efad545fdadd74',
+        redirect_uri: redirectUri,
+        scope: requestedScopes,
+      },
+      cc: {
+        disableWebRTCRegistration,
+        enableWxBetterTogether,
       },
     };
 
-    const webex = Webex.init(webexConfig);
+    const webex = createContactCenterWebex(oauthWebexConfig);
 
     webex.once('ready', () => {
+      if (typeof webex.authorization?.initiateLogin !== 'function') {
+        throw new Error('Webex authorization plugin unavailable');
+      }
       webex.authorization.initiateLogin();
     });
   };
@@ -461,9 +637,7 @@ function App() {
         return;
       }
 
-      void store.cc
-        ?.stationLogout({logoutReason: 'Page unload'})
-        .catch(() => undefined);
+      void store.cc?.stationLogout({}).catch(() => undefined);
     };
 
     window.addEventListener('pagehide', handlePageHide);
@@ -819,11 +993,14 @@ function App() {
             <br />
             <div>
               <Button
-                disabled={accessToken.trim() === ''}
+                disabled={!isAISummaryE2E && accessToken.trim() === ''}
                 onClick={() => {
                   setShowLoader(true);
+                  const initParams: InitParams = aiSummaryE2EBridge
+                    ? {webex: aiSummaryE2EBridge.webex}
+                    : {webexConfig, access_token: accessToken};
                   store
-                    .init({webexConfig, access_token: accessToken})
+                    .init(initParams)
                     .then(() => {
                       setIsSdkReady(true);
                       setShowLoader(false);
@@ -1053,14 +1230,25 @@ function App() {
                         <section className="section-box">
                           <fieldset className="fieldset">
                             <legend className="legend-box">Call Control</legend>
-                            <CallControl
-                              onHoldResume={onHoldResume}
-                              onEnd={onEnd}
-                              onWrapUp={onWrapUp}
-                              onRecordingToggle={onRecordingToggle}
-                              onToggleMute={onToggleMute}
-                              conferenceEnabled={conferenceEnabled}
-                            />
+                            {isAISummaryE2E ? (
+                              <AISummaryE2ECallControl
+                                onHoldResume={onHoldResume}
+                                onEnd={onEnd}
+                                onWrapUp={onWrapUp}
+                                onRecordingToggle={onRecordingToggle}
+                                onAISummaryStatusChange={onAISummaryStatusChange}
+                                conferenceEnabled={conferenceEnabled}
+                              />
+                            ) : (
+                              <CallControl
+                                onHoldResume={onHoldResume}
+                                onEnd={onEnd}
+                                onWrapUp={onWrapUp}
+                                onRecordingToggle={onRecordingToggle}
+                                onToggleMute={onToggleMute}
+                                conferenceEnabled={conferenceEnabled}
+                              />
+                            )}
                           </fieldset>
                         </section>
                       </div>

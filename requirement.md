@@ -8,24 +8,24 @@ ai-assistant-summary
 
 Add voice-only AI-generated mid-call and post-call summaries to the existing Contact Center widgets. The implementation must preserve the existing Contact Center package dependency direction: UI components do not call the SDK directly, the task and AI Assistant containers orchestrate UI behavior, and `@webex/cc-store` remains the SDK boundary.
 
-This requirement is the product authority for the decisions below. `ai-summary.md` and the conforming Contact Center SDK implementation are the API authority. When they conflict, the explicit decisions in this requirement govern widget behavior; the SDK adapter must accurately translate the concrete SDK contract without inventing methods, fields, events, or retries.
+This requirement is the product authority for the decisions below. `ai-summary.md` is the behavioral and wire-contract authority, while the conforming Contact Center SDK implementation is the public TypeScript API authority. When they conflict, the explicit decisions in this requirement govern widget behavior; otherwise the SDK adapter must accurately translate the concrete SDK contract without inventing methods, fields, events, or retries. In particular, the intended public feature-enablement surface is the task-owned `TASK_EVENTS.TASK_FEATURE_ENABLEMENT` / `task:featureEnablement` API from the `cc-summaries` branch.
 
-The in-development SDK source is expected on the `cc-summaries` branch of the sibling `webex-js-sdk` checkout. A development package may be built for this run, but it must be made immutable before use by recording the SDK repository path, branch, Git commit, package version, build command, packed tarball SHA-256, and public declaration hashes. The widget must never fall back to the currently installed non-conforming `@webex/contact-center` package.
+The in-development SDK source is expected on the `cc-summaries` branch of the sibling `webex-js-sdk` checkout. A development package may be built for this run, but it must be made immutable before use by recording the SDK repository path, branch, Git commit, staged package version, build command, packed tarball SHA-256, and public declaration hashes. The upstream monorepo intentionally assigns publishable package versions during release packaging, so the clean source workspace manifest is not required to contain `version`. D0 must leave that checkout byte-for-byte clean, create an isolated stage at the recorded commit, and assign the deterministic development version `<registry-base>-cc-summaries.<12-character-commit>`, where `<registry-base>` is the plain `X.Y.Z` base of the sole existing publishable `@webex/contact-center` dependency after removing any prerelease suffix. The staged and packed manifests, lock receipt, and tarball must all record that exact version. This run does not require that development-only version to be published to a registry: the private root may select the sealed tarball, while every publishable workspace manifest must retain a plain registry-resolvable dependency and every packed widget artifact must exclude the private override and vendored tarball. The widget must never fall back to the currently installed non-conforming `@webex/contact-center` package during validation.
 
 Figma MCP must not be used for this run. The local Figma scene-graph JSON, text JSON, and screenshots declared under `## UX Sources` are the complete design inputs. For visible conflicts use this precedence: screenshot, matching scene-graph/text JSON, then the written accessibility/product table in this requirement. Screenshots are visual ground truth; scene-graph JSON is structural and measurement authority; text JSON is copy authority.
 
 ### REQ-001: SDK package identity and public contracts
 
 - Build `@webex/contact-center` from the exact `cc-summaries` source commit with Node 22.14 and the SDK repository's pinned Yarn version.
-- Pack the built workspace into a local tarball usable by this widget repository. Record the branch, commit, package version, build command, tarball hash, declaration paths, and declaration hashes in a repository-owned lock receipt.
+- In an isolated stage at that commit, assign the deterministic development version defined above, build the workspace, and pack it into a local tarball usable by this widget repository. Record the branch, commit, staged and packed package version, build command, tarball hash, declaration paths, and declaration hashes in a repository-owned lock receipt.
 - Verify the public declarations and runtime behavior for:
-  - `task.requestPostCallSummary(): Promise<PostCallSummaryEventPayload>`;
-  - `task.sendPostCallSummaryResponse(payload: PostCallSummaryResponsePayload): Promise<void>`;
-  - `task.requestMidCallSummary(actionType: 'CONSULT' | 'TRANSFER'): Promise<MidCallSummaryEventPayload>`;
-  - `task.sendMidCallSummaryResponse(payload: MidCallSummaryResponsePayload, actionType: 'CONSULT' | 'TRANSFER'): Promise<void>`;
-  - `cc:featureEnablement` with `interactionId`, `midCallEnabled`, `postCallEnabled`, and UTC `actionTimestamp`;
-  - the initiating-agent mid-call event, receiving-agent event, and post-call event and payload types from `ai-summary.md`.
-- The `cc:featureEnablement` payload is interaction-scoped. Missing or malformed capability fields are treated as unavailable, never as enabled.
+  - `task.requestPostCallSummary(): Promise<AISummary>`;
+  - `task.sendPostCallSummaryResponse(response: AISummaryResponse): Promise<void>`;
+  - `task.requestMidCallSummary(action: AISummaryAction): Promise<AISummary>`;
+  - `task.sendMidCallSummaryResponse(response: AISummaryResponse, action: AISummaryAction): Promise<void>`;
+  - `TASK_EVENTS.TASK_FEATURE_ENABLEMENT` / `task:featureEnablement` on the matching `Task`, with `AISummaryFeatureEnablement` fields `interactionId`, optional `midCallEnabled`, optional `postCallEnabled`, and optional UTC `actionTimestamp`;
+  - initiating-agent mid-call and post-call `Promise<AISummary>` results, and receiving-agent `AISummary` content on `TASK_EVENTS.TASK_MID_CALL_SUMMARY_RECEIVED` / `task:midCallSummaryReceived`, as documented in `ai-summary.md`.
+- The `task:featureEnablement` payload is interaction-scoped. Missing or malformed capability fields are treated as unavailable, never as enabled.
 - Receiving-agent eligibility begins only when the receiving-agent content event arrives. There is no separate pre-content eligibility event.
 - The same `interactionId` is retained across consult-to-transfer promotion, additional transfers, and conference changes.
 - Summary request cancellation is not supported. The widget must use an interaction/agent/owner generation token to ignore settlements that are no longer current.
@@ -36,7 +36,7 @@ Figma MCP must not be used for this run. The local Figma scene-graph JSON, text 
 ### REQ-002: Feature eligibility, state isolation, and channels
 
 - Only voice interactions are eligible.
-- Eligibility is the conjunction of the current voice interaction, a matching `cc:featureEnablement` record, the applicable `midCallEnabled` or `postCallEnabled` flag, the relevant content/request lifecycle, and current agent authorization.
+- Eligibility is the conjunction of the current voice interaction, a matching `task:featureEnablement` record from that `Task`, the applicable `midCallEnabled` or `postCallEnabled` flag, the relevant content/request lifecycle, and current agent authorization.
 - State is keyed by `interactionId` plus agent identity and an ownership generation. Never show one interaction's summary, counters, feedback, error, or pending request in another interaction.
 - Preserve mid-call state across hold/resume and task end; clear it when wrap-up completes, when the interaction changes, on sign-out, or when the SDK session ends.
 - Preserve a successfully submitted post-call summary until the interaction changes. If the post-call response fails after wrap-up, retain the exact frozen failed response until the backend `AgentWrappedUp` event arrives, then discard it.
@@ -274,7 +274,7 @@ Screenshot and variant identifiers are stable local evidence keys. The variant i
 ## Acceptance Criteria
 
 - AC-01: The widget consumes a locally packed `@webex/contact-center` build only when its recorded `cc-summaries` commit, package version, tarball hash, declarations, and runtime probes match the lock receipt.
-- AC-02: Voice eligibility follows matching `cc:featureEnablement` data and never leaks state between interactions or agents.
+- AC-02: Voice eligibility follows matching task-owned `task:featureEnablement` data and never leaks state between interactions or agents.
 - AC-03: Initiating-agent consult/transfer renders typed sections or plain `summaryText` in the popover and ignores adaptive cards.
 - AC-04: Receiving-agent consult/transfer renders the adaptive card in the existing AI Assistant panel and ignores typed/plain fields.
 - AC-05: Post-call renders labeled structured sections or an unlabeled plain paragraph and ignores adaptive cards.

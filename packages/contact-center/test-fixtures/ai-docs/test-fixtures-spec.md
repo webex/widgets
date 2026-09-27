@@ -30,7 +30,7 @@ Every generated requirement below must cite concrete source evidence using `file
 ## Overview
 `test-fixtures` (`@webex/test-fixtures`) is a test-only utility package. It exports pre-built mock objects and small factory functions that other contact-center packages import inside their Jest unit tests, so widgets can be rendered and exercised without a live Contact Center SDK connection or backend. It owns no runtime behavior, holds no state, and ships nothing into the browser bundle of any consumer; consuming packages list it as a dev dependency only.
 
-The package is structured as a flat set of fixture modules under `src/`, each one re-exported by the barrel `src/index.ts`. `src/fixtures.ts` holds the core SDK-shaped mocks (`mockCC`, `mockProfile`, `mockTask`, queues, agents, address book, campaign-preview tasks). `src/incomingTaskFixtures.ts` and `src/taskListFixtures.ts` hold plain UI-data records keyed by scenario for the task widgets. `src/components/task/outdialCallFixtures.ts` composes `mockCC` into outdial-specific mocks.
+The package is structured as a flat set of fixture modules under `src/`, each one re-exported by the barrel `src/index.ts`. `src/fixtures.ts` holds the core SDK-shaped mocks (`mockCC`, `mockProfile`, `mockTask`, queues, agents, address book, campaign-preview tasks). `src/aiSummaryFixtures.ts` holds the SDK-independent D1 AI summary fixture inventory. `src/incomingTaskFixtures.ts` and `src/taskListFixtures.ts` hold plain UI-data records keyed by scenario for the task widgets. `src/components/task/outdialCallFixtures.ts` composes `mockCC` into outdial-specific mocks.
 
 The load-bearing contract of this module is structural: each exported mock is typed against the real SDK / store / cc-components type (e.g. `mockCC: IContactCenter`, `mockProfile: Profile`, `mockTask: ITask`) so that when a consuming test passes a fixture into production code, the shape matches what production code expects at compile time. A maintainer changing a fixture should start at `src/fixtures.ts` and keep the declared types intact.
 
@@ -43,7 +43,8 @@ TypeScript 5.6.3. No framework runtime — fixtures are plain objects whose meth
 ## Folder / Package Structure
 ```
 test-fixtures/src/
-├── index.ts                                # Barrel: re-exports all four fixture modules
+├── index.ts                                # Barrel: re-exports fixture modules and AI summary group inventory
+├── aiSummaryFixtures.ts                    # Raw AI summary D1 fixtures and exact group-name tuple
 ├── fixtures.ts                             # Core SDK-shaped mocks: mockCC, mockProfile, mockTask, queues, agents, address book, campaign tasks
 ├── incomingTaskFixtures.ts                 # mockIncomingTaskData — incoming-task UI data by channel scenario
 ├── taskListFixtures.ts                     # mockTaskData — task-list UI data by scenario (active/incoming/action/selection)
@@ -56,7 +57,8 @@ test-fixtures/src/
 
 | File | Holds |
 |---|---|
-| `packages/contact-center/test-fixtures/src/index.ts` | The public export barrel — the authoritative list of what consumers may import. |
+| `packages/contact-center/test-fixtures/src/index.ts` | The public export barrel — the authoritative list of what consumers may import, including `aiSummaryFixtures`, `aiSummaryFixtureGroupNames`, and `AISummaryFixtureGroupName`. |
+| `packages/contact-center/test-fixtures/src/aiSummaryFixtures.ts` | SDK-independent raw AI summary contract fixtures with the exact D1 group inventory: `featureEnablement`, `initiatingMidCall`, `receivingMidCall`, `postCall`, `malformed`, `errors`, `ordering`, `transfers`, `conferences`, `feedback`, `counters`, `wrapUp`, and `postWrapUpSend`. |
 | `packages/contact-center/test-fixtures/src/fixtures.ts` | Core fixture values and their type annotations (`IContactCenter`, `Profile`, `ITask`, etc.). Never re-infer these shapes elsewhere. |
 | `packages/contact-center/test-fixtures/src/incomingTaskFixtures.ts` | `mockIncomingTaskData` and its `MEDIA_CHANNEL` source import. |
 | `packages/contact-center/test-fixtures/src/taskListFixtures.ts` | `mockTaskData` and its `MEDIA_CHANNEL` source import. |
@@ -88,6 +90,8 @@ Internal Surface — consumed only by other packages' Jest tests in this monorep
 | `test-fixtures.mockOutdialCallProps` | data export | `mockOutdialCallProps` | `mockCC` spread + `startOutdial`/`getOutdialANIEntries` jest mocks | Spread of `mockCC` | `src/components/task/outdialCallFixtures.ts` | internal (`src/index.ts`) |
 | `test-fixtures.mockAniEntries` | data export | `mockAniEntries` | Outdial ANI entry list | Additive fields safe | `src/components/task/outdialCallFixtures.ts` | internal (`src/index.ts`) |
 | `test-fixtures.mockCCWithAni` | data export | `mockCCWithAni` | `mockCC` + `agentConfig.outdialANIId` + ANI-resolving `getOutdialAniEntries` | Spread of `mockCC` | `src/components/task/outdialCallFixtures.ts` | internal (`src/index.ts`) |
+| `test-fixtures.aiSummaryFixtureGroupNames` | data export | `aiSummaryFixtureGroupNames` | Readonly tuple that pins the thirteen D1 AI summary fixture groups. | Additive or renamed group names are contract changes; update D1 consumers and R-009 together. | `src/aiSummaryFixtures.ts` | internal (`src/index.ts`) |
+| `test-fixtures.aiSummaryFixtures` | data export | `aiSummaryFixtures` | SDK-independent raw objects covering AI summary feature enablement, initiating mid-call, receiving mid-call, post-call, malformed validation, the eight sanitized error categories, ordering, transfers, conferences, feedback, counters, wrap-up, and post-wrap-up-send cases. Conforming fixtures use the packed SDK vocabulary: capability fields `interactionId`/`midCallEnabled`/`postCallEnabled`/`actionTimestamp`; `AISummary.sections` object keys `initialContactReason`/`additionalContactReasons`/`additionalContext`/`keyActionsTaken`/`nextSteps`/`reasonForTransferOrConsult`; actions `CONSULT`/`TRANSFER`; feedback `none`/`thumbs_up`/`thumbs_down`; states `DEFAULT`/`EXCLUDED`/`IGNORED`/`MID_CALL_CANCELLED`/`NOT_RECEIVED`; local counters `viewed`/`edited`/`copied` plus response projections `numberOfTimesViewed`/`numberOfTimesEdited`/`numberOfTimesCopied`/`summaryReceived`; SDK errors using `data.errorCode`, message, or safe transport status fields; and post-wrap-up sends as fulfilled/rejected sequences with exactly one attempted `AISummaryResponse` send. Malformed, invented, or deliberately invalid values live only under the `malformed` validation group. | The thirteen group names are the immutable D1 inventory. No compatibility aliases or nested taxonomy are exported; consumers must use the named two-level groups directly. Do not import the SDK or cast to SDK types here; D0 proves assignability against the packed package. | `src/aiSummaryFixtures.ts` | internal (`src/index.ts`) |
 
 Compatibility notes:
 - Adding a new fixture export or an additive field on existing data fixtures is non-breaking. Removing or renaming an export, or removing a method on `mockCC`/`mockTask`, can break consumer test files that reference it — grep consumers before changing.
@@ -112,6 +116,7 @@ Compatibility notes:
 | `test-fixtures-R-006` | Outdial fixtures (`mockOutdialCallProps`, `mockCCWithAni`) are composed by spreading `mockCC` and adding outdial-specific jest mocks/config, keeping a single source of SDK shape. | Avoids a divergent second SDK mock; outdial tests inherit the canonical `mockCC`. | `src/components/task/outdialCallFixtures.ts` | none found | none | PRESENT |
 | `test-fixtures-R-007` | Every fixture and factory is re-exported through the barrel `src/index.ts`; non-barrelled internals (`mockAddressBook`, `mockQueuesResponse`) are not part of the public surface. | Consumers import from the package root; the barrel is the stability boundary. | `src/index.ts`, `src/fixtures.ts` (export list) | none found | none | PRESENT |
 | `test-fixtures-R-008` | `createMockTaskUIControls` starts from the SDK defaults, applies independent per-leg and active-leg overrides, and preserves or overrides the ordered `consultTransferDestinations.consult` and `.transfer` arrays. | Component tests must represent the same task-owned destination visibility and ordering contract used at runtime without rebuilding that policy in test code. | `src/taskUIControlsFixtures.ts` | Consumed by call-control tests in `packages/contact-center/cc-components/tests` | No package-local unit test; type and shape are checked by package builds and consumers. | PRESENT |
+| `test-fixtures-R-009` | `aiSummaryFixtures` exports one readonly SDK-independent raw-object fixture set whose enumerable D1 inventory is exactly `featureEnablement`, `initiatingMidCall`, `receivingMidCall`, `postCall`, `malformed`, `errors`, `ordering`, `transfers`, `conferences`, `feedback`, `counters`, `wrapUp`, and `postWrapUpSend`, with `aiSummaryFixtureGroupNames` pinning the same list and no compatibility aliases. Conforming fixtures use only the packed SDK AI summary vocabulary: capability fields `interactionId`, optional `midCallEnabled`, optional `postCallEnabled`, optional `actionTimestamp`; inbound `AISummary` fields with top-level SDK-keyed `sections` records instead of local section arrays or titles; `AISummaryAction` values `CONSULT`/`TRANSFER`; `AISummaryFeedback` values `none`/`thumbs_up`/`thumbs_down`; `AISummaryState` values `DEFAULT`/`EXCLUDED`/`IGNORED`/`MID_CALL_CANCELLED`/`NOT_RECEIVED`; local counters `viewed`/`edited`/`copied`; response counters `numberOfTimesViewed`/`numberOfTimesEdited`/`numberOfTimesCopied` plus optional `summaryReceived`; SDK error indicators through `data.errorCode`, message, or transport status; wrap-up code through `wrapUpCode`; and fulfilled/rejected post-wrap-up sends through an `AISummaryResponse` payload with `summary`, never `summaryText`, with exactly one attempted send per sequence. Receiver inbound fixtures omit action correlation (`actionType`), include mixed typed/plain/card fields only to prove the store derives action from the bound Task, and malformed or intentionally invented values are isolated under the explicitly named `malformed` validation group. | D1 supplies deterministic raw inputs without importing the SDK package, while the D0 packed-SDK proof owns compile/runtime assignability against `AISummaryFeatureEnablement`, `AISummary`, `AISummarySections`, `AISummaryFeedback`, `AISummaryState`, `WrapupPayLoad`, and `AISummaryResponse`. | `src/aiSummaryFixtures.ts`, `src/index.ts` | `yarn workspace @webex/test-fixtures build`; D0 proof: `yarn workspace @webex/cc-store test:unit --runInBand --runTestsByPath tests/ai-summary-contract.ts` | Runtime store/component behavior remains in consuming D2-D6 suites; this package owns only raw fixture inventory and vocabulary. | PRESENT |
 
 Do not record raw data/schema inventory as requirements. The per-field contents of each mock are descriptive data in `src/`, not behavioral requirements.
 
@@ -123,6 +128,8 @@ Shape fidelity is achieved by importing the real SDK/store types and annotating 
 Isolation is offered two ways. Static fixtures (`mockTask`, `mockCC`) are shared singletons — cheap but mutable, so tests that mutate must clone. Factory functions (`makeMockTask`, `makeMockCampaignTask`, `makeMockAddressBook`) return fresh objects with brand-new `jest.fn()`s each call, which is the safe path for tests that mutate or assert call counts.
 
 Composition keeps the SDK mock single-sourced: outdial fixtures spread `mockCC` rather than redeclaring it, so a change to `mockCC` propagates. The same principle is why `mockQueuesResponse` is derived by mapping `mockQueueDetails` instead of being hand-written twice.
+
+AI summary fixtures are deliberately one layer lower than store behavior. D1 keeps plain readonly objects and a closed group-name tuple; D0 (`store/tests/ai-summary-contract.ts`) imports the packed `@webex/contact-center` declarations and proves the fixture vocabulary and response examples are assignable to the SDK-facing contract. Do not move SDK imports into the fixture package to satisfy that proof.
 
 ## Data Flow
 In-process, compile-time only. A consumer test file imports a fixture from `@webex/test-fixtures`; the fixture (a plain object, often with `jest.fn()` methods) is either passed as a prop/argument into production code under test or used to build a `jest.mock('@webex/cc-store', …)` factory. No network, queue, or wire transport is involved.
@@ -201,20 +208,23 @@ Static base fixtures (`mockCC`, `mockTask`, `mockProfile`) are the roots. Factor
 - **Targeted type casts mask shape drift.** `mockTask.data` uses `as unknown as TaskData` and `makeMockAddressBook` uses `as {} as AddressBook`. These bypass `tsc` for those values, so a real SDK shape change to `TaskData`/`AddressBook` will NOT fail the build here — verify those fixtures manually when the SDK types change.
 - **`mockCC` is not a full `IContactCenter` of task methods.** Task lifecycle methods (`hold`, `resume`, `wrapup`, etc.) live on `mockTask`, not `mockCC`. The archived ARCHITECTURE doc incorrectly listed them and several proxies on `mockCC`; do not rely on that. `mockCC` exposes `LoggerProxy`, `taskManager`, and the listed `getX`/state/preview methods only.
 - **Jest global is assumed, not declared.** Fixtures call `jest.fn()` at module load. Importing this package outside a Jest environment throws `jest is not defined`. It is test-only by design (`deploy:npm` is a no-op).
+- **AI summary D1 is not the D0 packed-SDK proof.** `aiSummaryFixtures` must stay SDK-independent and expose the thirteen named groups only; compile/runtime assignability to the packed SDK belongs to the cc-store contract suite.
 
 ## Module Do's / Don'ts
 - DO: keep every fixture annotated with its real SDK/store type so `tsc` catches drift (`src/fixtures.ts`).
 - DO: add new mocks to the `src/index.ts` barrel and to the export list in `src/fixtures.ts`.
+- DO: keep `aiSummaryFixtures` SDK-independent; model raw payloads as plain readonly objects under the thirteen `aiSummaryFixtureGroupNames` entries and put deliberately bad values only in `malformed`.
 - DO: prefer `makeMock*` factories when a test mutates state or asserts call counts.
 - DON'T: import this package from non-test (runtime) code — it calls `jest.fn()` at load.
 - DON'T: redeclare a second SDK mock; spread `mockCC` like the outdial fixtures do.
+- DON'T: add invented AI summary response fields such as `summaryText`, UI feedback values such as `like`/`dislike`, local section arrays, or `error.category` to conforming AI summary fixtures.
 - DON'T: remove or rename an export without grepping sibling-package tests first.
 
 ## Export Stability
 Published/consumed as `@webex/test-fixtures` (`workspace:*`), but `deploy:npm` is a deliberate no-op (`package.json`) — it is an internal monorepo dev dependency, not an npm artifact. Stability rules: adding an export or an additive field on a data fixture is a minor/non-breaking change; removing/renaming an export, or removing a mocked method on `mockCC`/`mockTask`, is breaking for consumer test files and must be done with a repo-wide grep of test imports. Type-declaration surface is emitted to `dist/types/` via `tsc`.
 
 ## Test-Case Strategy (module)
-The package ships no tests of its own (no `tests/` directory; confirmed by tree). Its correctness is enforced two ways: (1) `tsc` type-checking the typed fixtures against real SDK/store types during `yarn build:dev`, and (2) the sibling-package test suites that consume the fixtures — a fixture that breaks shape surfaces as a compile error in `task`/`station-login`/`user-state`/etc. tests. The cast-escaped fixtures (`TaskData`, `AddressBook`) and the factory isolation guarantee are the gaps a dedicated test would close.
+The package ships no tests of its own (no `tests/` directory; confirmed by tree). Its correctness is enforced through (1) `tsc` type-checking the typed fixtures against real SDK/store types during `yarn build:dev`, and (2) sibling-package tests that consume the fixtures. `store/tests/ai-summary.ts` explicitly checks the exact thirteen D1 groups and matching SDK error message/errorCode pairs; disabled and timeout examples must not mix mid-call and post-call indicators. `store/tests/ai-summary-contract.ts` checks assignability against the sealed SDK. The cast-escaped legacy fixtures (`TaskData`, `AddressBook`) and factory isolation remain candidates for additional dedicated coverage.
 
 | Behavior / Requirement | Existing test evidence | Gap |
 |---|---|---|
@@ -226,6 +236,7 @@ The package ships no tests of its own (no `tests/` directory; confirmed by tree)
 | `test-fixtures-R-006` (outdial composition) | None found | Consumed by outdial widget tests only |
 | `test-fixtures-R-007` (barrel surface) | None found | No test guarding the public export list |
 | `test-fixtures-R-008` (task UI controls) | Call-control consumer tests; `@webex/test-fixtures` and `@webex/cc-components` builds | No package-local assertion for destination override merging |
+| `test-fixtures-R-009` (AI summary raw fixtures) | `@webex/test-fixtures` build; D0 packed-SDK proof in `@webex/cc-store` `tests/ai-summary-contract.ts`; consumed by later AI summary store/component tests | No package-local behavior test; the package owns raw data only |
 
 ## Traceability
 - Repo architecture: [`ARCHITECTURE.md`](../../../../ai-docs/ARCHITECTURE.md) · Registry: [`SPEC_INDEX.md`](../../../../ai-docs/SPEC_INDEX.md)

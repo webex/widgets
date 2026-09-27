@@ -1,5 +1,5 @@
 import React from 'react';
-import {render, fireEvent} from '@testing-library/react';
+import {render, fireEvent, waitFor} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import CallControlConsultComponent from '../../../../../src/components/task/CallControl/CallControlCustom/call-control-consult';
 import {createMockTaskUIControls, disabledControl, enabledControl} from '@webex/test-fixtures';
@@ -27,7 +27,7 @@ class MockWorker {
     // Simulate worker timer behavior
     if (this.onmessage) {
       setTimeout(() => {
-        this.onmessage!({data: msg} as MessageEvent);
+        this.onmessage?.({data: msg} as MessageEvent);
       }, 0);
     }
   }
@@ -53,6 +53,16 @@ class MockWorker {
 
 // Mock setTimeout for mute toggle tests
 jest.useFakeTimers();
+
+const deferred = <T,>() => {
+  let resolve!: (value: T) => void;
+  let reject!: (reason?: unknown) => void;
+  const promise = new Promise<T>((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+  return {promise, resolve, reject};
+};
 
 describe('CallControlConsultComponent', () => {
   const mockOnTransfer = jest.fn();
@@ -85,6 +95,17 @@ describe('CallControlConsultComponent', () => {
     controls: mockConsultControls,
     conferenceEnabled: true,
   };
+
+  const createMidCallSummary = (actionType: 'CONSULT' | 'TRANSFER', revision = 7) => ({
+    state: 'content' as const,
+    content: {type: 'text' as const, summaryText: 'Customer needs billing support.'},
+    contentRevision: revision,
+    actionType,
+    selectedFeedback: 'none' as const,
+    onEdit: jest.fn(),
+    onCopy: jest.fn().mockReturnValue(true),
+    onFeedback: jest.fn().mockResolvedValue({outcome: 'confirmed'}),
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -291,6 +312,122 @@ describe('CallControlConsultComponent', () => {
     // Verify cancel/end consult icon
     const cancelIcon = screen.container.querySelector('.call-control-consult-button-cancel-icon');
     expect(cancelIcon).toBeInTheDocument();
+  });
+
+  it('routes consult-surface transfer through summary confirmation when content is present', async () => {
+    const response = deferred<{outcome: 'sent'}>();
+    const sendMidCallSummaryBeforeAction = jest.fn().mockReturnValue(response.promise);
+    const requestMidCallSummary = jest.fn().mockResolvedValue({outcome: 'accepted', revision: 7});
+    const screen = render(
+      <CallControlConsultComponent
+        {...defaultProps}
+        aiSummary={{
+          transfer: createMidCallSummary('TRANSFER', 7),
+          requestMidCallSummary,
+          sendMidCallSummaryBeforeAction,
+        }}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('transfer-consult-btn'));
+    fireEvent.click(await screen.findByTestId('consult-transfer:existing-party-confirm'));
+    await Promise.resolve();
+
+    expect(sendMidCallSummaryBeforeAction).toHaveBeenCalledWith('TRANSFER', 7);
+    expect(mockOnTransfer).not.toHaveBeenCalled();
+    response.resolve({outcome: 'sent'});
+    await waitFor(() => expect(mockOnTransfer).toHaveBeenCalledTimes(1));
+    expect(requestMidCallSummary).toHaveBeenCalledWith('TRANSFER');
+  });
+
+  it.each([
+    {buttonKey: 'transfer', summaryKey: 'transfer', action: 'TRANSFER'},
+    {buttonKey: 'conference', summaryKey: 'consult', action: 'CONSULT'},
+  ] as const)(
+    'prepares an eligible fresh consult-surface $buttonKey and guards confirmation',
+    async ({buttonKey, summaryKey, action}) => {
+      const requestMidCallSummary = jest.fn().mockResolvedValue({outcome: 'accepted', revision: 25});
+      const response = deferred<{outcome: 'sent'}>();
+      const sendMidCallSummaryBeforeAction = jest.fn().mockReturnValue(response.promise);
+      const telephony = buttonKey === 'transfer' ? mockOnTransfer : mockConsultConference;
+      const component = (state: 'omitted' | 'generating' | 'content', requestPending = false) => (
+        <CallControlConsultComponent
+          {...defaultProps}
+          aiSummary={{
+            [summaryKey]: {...createMidCallSummary(action, 25), state, requestPending},
+            requestMidCallSummary,
+            sendMidCallSummaryBeforeAction,
+          }}
+        />
+      );
+      const screen = render(component('omitted'));
+
+      fireEvent.click(screen.getByTestId(`${buttonKey}-consult-btn`));
+      await waitFor(() => expect(requestMidCallSummary).toHaveBeenCalledWith(action));
+      expect(telephony).not.toHaveBeenCalled();
+
+      screen.rerender(component('generating', true));
+      const confirm = await screen.findByTestId('consult-transfer:existing-party-confirm');
+      expect(confirm).toHaveAttribute('aria-disabled', 'true');
+      fireEvent.click(confirm);
+      expect(sendMidCallSummaryBeforeAction).not.toHaveBeenCalled();
+      expect(telephony).not.toHaveBeenCalled();
+
+      screen.rerender(component('content'));
+      fireEvent.click(confirm);
+      fireEvent.click(confirm);
+      await waitFor(() => expect(sendMidCallSummaryBeforeAction).toHaveBeenCalledTimes(1));
+      expect(sendMidCallSummaryBeforeAction).toHaveBeenCalledWith(action, 25);
+      expect(telephony).not.toHaveBeenCalled();
+      response.resolve({outcome: 'sent'});
+      await waitFor(() => expect(telephony).toHaveBeenCalledTimes(1));
+      expect(requestMidCallSummary).toHaveBeenCalledTimes(1);
+    }
+  );
+
+  it.each(['transfer', 'conference'])(
+    'keeps absent/ineligible consult-surface %s on the immediate legacy path',
+    (buttonKey) => {
+      const requestMidCallSummary = jest.fn();
+      const sendMidCallSummaryBeforeAction = jest.fn();
+      const screen = render(
+        <CallControlConsultComponent
+          {...defaultProps}
+          aiSummary={{
+            requestMidCallSummary,
+            sendMidCallSummaryBeforeAction,
+          }}
+        />
+      );
+
+      fireEvent.click(screen.getByTestId(`${buttonKey}-consult-btn`));
+
+      expect(buttonKey === 'transfer' ? mockOnTransfer : mockConsultConference).toHaveBeenCalledTimes(1);
+      expect(requestMidCallSummary).not.toHaveBeenCalled();
+      expect(sendMidCallSummaryBeforeAction).not.toHaveBeenCalled();
+      expect(screen.queryByTestId('consult-transfer:existing-party-confirm')).not.toBeInTheDocument();
+    }
+  );
+
+  it('reuses an existing CONSULT summary for consult-surface Merge without another request', async () => {
+    const requestMidCallSummary = jest.fn();
+    const sendMidCallSummaryBeforeAction = jest.fn().mockResolvedValue({outcome: 'sent'});
+    const screen = render(
+      <CallControlConsultComponent
+        {...defaultProps}
+        aiSummary={{
+          consult: createMidCallSummary('CONSULT', 26),
+          requestMidCallSummary,
+          sendMidCallSummaryBeforeAction,
+        }}
+      />
+    );
+
+    fireEvent.click(screen.getByTestId('conference-consult-btn'));
+    fireEvent.click(await screen.findByTestId('consult-transfer:existing-party-confirm'));
+    await waitFor(() => expect(mockConsultConference).toHaveBeenCalledTimes(1));
+    expect(sendMidCallSummaryBeforeAction).toHaveBeenCalledWith('CONSULT', 26);
+    expect(requestMidCallSummary).not.toHaveBeenCalled();
   });
 
   it('verifies accessibility attributes for all buttons', async () => {

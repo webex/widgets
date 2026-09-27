@@ -1,4 +1,5 @@
 import {act, waitFor} from '@testing-library/react';
+import {autorun, observable} from 'mobx';
 
 // Add a global mock for MediaStreamTrack to avoid undefined errors
 // @ts-expect-error: Avoiding to mock the whole MediaStreamTrack class
@@ -23,10 +24,12 @@ console.error = jest.fn();
 console.log = jest.fn();
 
 import {CC_EVENTS, TASK_EVENTS} from '../src/store.types';
-import type {RealTimeAssistPayload} from '../src/store.types';
+import type {AISummaryPostCallOwnerState, RealTimeAssistPayload} from '../src/store.types';
 import storeWrapper from '../src/storeEventsWrapper';
 import {ITask} from '../src/store.types';
+import type {AISummary} from '@webex/contact-center';
 import {getConferenceParticipantDropRoster} from '../src/task-utils';
+import {aiSummaryFixtures} from '../../test-fixtures/src/aiSummaryFixtures';
 import {
   mockCC,
   mockTask as mockTaskFixture,
@@ -178,6 +181,419 @@ const mockAgentProfilePayload = {
   type: 'AgentStationLoginSuccess',
   voiceCount: 1,
 };
+
+type AISummaryTestTask = Omit<
+  ITask,
+  | 'aiSummaryCapabilities'
+  | 'requestMidCallSummary'
+  | 'requestPostCallSummary'
+  | 'sendMidCallSummaryResponse'
+  | 'sendPostCallSummaryResponse'
+> & {
+  aiSummaryCapabilities: ITask['aiSummaryCapabilities'];
+  requestMidCallSummary: jest.MockedFunction<ITask['requestMidCallSummary']>;
+  requestPostCallSummary: jest.MockedFunction<ITask['requestPostCallSummary']>;
+  sendMidCallSummaryResponse: jest.MockedFunction<ITask['sendMidCallSummaryResponse']>;
+  sendPostCallSummaryResponse: jest.MockedFunction<ITask['sendPostCallSummaryResponse']>;
+};
+
+const resetAISummaryTestState = (): void => {
+  storeWrapper['store'].agentId = 'agent-a';
+  storeWrapper['store'].isAgentLoggedIn = true;
+  storeWrapper['store'].aiSummaryCapabilities = {};
+  storeWrapper['store'].aiSummaryCurrentOwners = {};
+  storeWrapper['store'].aiSummaryOwnerStates = {};
+  storeWrapper['store'].aiSummaryPendingRequests = {};
+  storeWrapper['store'].aiSummaryLastResults = {};
+  storeWrapper['store'].pendingAISummaryStatusTransitions = [];
+  storeWrapper['aiSummaryLatestFreshness'] = {};
+  storeWrapper['aiSummaryLatestRequestSequences'] = {};
+  storeWrapper['retiredAISummaryInteractions'].clear();
+  storeWrapper['aiSummaryFeatureArrivalOrder'] = 0;
+  storeWrapper['aiSummaryPayloadArrivalOrder'] = 0;
+  storeWrapper['aiSummaryRequestSequence'] = 0;
+  storeWrapper['aiSummaryStatusSequence'] = 0;
+  storeWrapper['aiSummaryContentRevision'] = 0;
+  storeWrapper['aiSummaryOwnershipGeneration'] = 0;
+  storeWrapper['aiSummaryOwnershipCaptureSequence'] = 0;
+  storeWrapper['aiSummaryPostCallGeneration'] = 0;
+  storeWrapper['aiSummarySeededCapabilityTasks'] = new WeakSet();
+  storeWrapper['aiSummaryOwnerTasks'] = {};
+  storeWrapper['aiSummaryPendingRequestTasks'] = {};
+  storeWrapper['aiSummaryPendingOwnershipCaptures'] = {};
+  storeWrapper['aiSummaryAppliedOwnershipCaptureIds'] = new Set();
+  storeWrapper['aiSummaryObservedOwnershipBoundaries'] = new Set();
+  storeWrapper['aiSummaryTopologySignatures'] = {};
+  storeWrapper['aiSummaryWrappedUpSubscriptions'] = {};
+  storeWrapper['aiSummaryWrappedUpObservedOwnerKeys'] = new Set();
+  storeWrapper['postCallDraftCaptures'].clear();
+};
+
+const drainAISummaryStatusTransitions = (): void => {
+  for (const transition of storeWrapper.getPendingAISummaryStatusTransitions()) {
+    storeWrapper.acknowledgeAISummaryStatusTransition(transition.sequence);
+  }
+};
+
+const makeAISummaryTask = (overrides: Partial<AISummaryTestTask> = {}): AISummaryTestTask => {
+  const task: AISummaryTestTask = {
+    ...makeMockTask({
+      data: {
+        agentId: 'agent-a',
+        interactionId: 'interaction-main-1',
+        interaction: {
+          mainInteractionId: 'interaction-main-1',
+          interactionId: 'interaction-main-1',
+          mediaType: 'telephony',
+          media: {
+            'media-main': {mType: 'mainCall', mediaResourceId: 'interaction-main-1'},
+          },
+          participants: {
+            'agent-a': {id: 'agent-a', pType: 'Agent', hasJoined: true, hasLeft: false},
+          },
+        },
+      },
+    }),
+    aiSummaryCapabilities: {midCallEnabled: true, postCallEnabled: true},
+    requestMidCallSummary: jest
+      .fn<ReturnType<ITask['requestMidCallSummary']>, Parameters<ITask['requestMidCallSummary']>>()
+      .mockResolvedValue(aiSummaryFixtures.initiatingMidCall.typedSections),
+    requestPostCallSummary: jest
+      .fn<ReturnType<ITask['requestPostCallSummary']>, Parameters<ITask['requestPostCallSummary']>>()
+      .mockResolvedValue(aiSummaryFixtures.postCall.structured),
+    sendMidCallSummaryResponse: jest
+      .fn<ReturnType<ITask['sendMidCallSummaryResponse']>, Parameters<ITask['sendMidCallSummaryResponse']>>()
+      .mockResolvedValue(undefined),
+    sendPostCallSummaryResponse: jest
+      .fn<ReturnType<ITask['sendPostCallSummaryResponse']>, Parameters<ITask['sendPostCallSummaryResponse']>>()
+      .mockResolvedValue(undefined),
+  };
+
+  return Object.assign(task, overrides);
+};
+
+const configureAISummaryTaskIdentity = (
+  task: AISummaryTestTask,
+  options: {
+    agentId?: string;
+    interactionId?: string;
+    interaction?: unknown;
+  }
+): AISummaryTestTask => {
+  const interactionId = options.interactionId ?? task.data.interactionId;
+  const suppliedInteraction =
+    typeof options.interaction === 'object' && options.interaction !== null
+      ? (options.interaction as Record<string, unknown>)
+      : {};
+  const defaultMedia = {
+    'media-main': {mType: 'mainCall', mediaResourceId: interactionId},
+  };
+  const suppliedMedia = (suppliedInteraction.media ?? {}) as Record<string, Record<string, unknown>>;
+  const suppliedMainMedia = suppliedMedia['media-main'] ?? {};
+  task.data.agentId = options.agentId ?? task.data.agentId;
+  task.data.interactionId = interactionId;
+  task.data.interaction = {
+    ...task.data.interaction,
+    ...suppliedInteraction,
+    mainInteractionId: interactionId,
+    interactionId,
+    mediaType: 'telephony',
+    media: {
+      ...defaultMedia,
+      ...suppliedMedia,
+      'media-main': {...defaultMedia['media-main'], ...suppliedMainMedia},
+    },
+  } as unknown as AISummaryTestTask['data']['interaction'];
+  return task;
+};
+
+const withObservableAISummaryStore = async (runTest: () => Promise<void>): Promise<void> => {
+  const originalStore = storeWrapper['store'];
+  storeWrapper['store'] = observable.object(
+    {
+      ...originalStore,
+      aiSummaryCapabilities: {},
+      aiSummaryCurrentOwners: {},
+      aiSummaryOwnerStates: {},
+      aiSummaryPendingRequests: {},
+      aiSummaryLastResults: {},
+      pendingAISummaryStatusTransitions: [],
+    },
+    {
+      cc: observable.ref,
+      logger: observable.ref,
+      currentTask: observable.ref,
+      taskList: observable.ref,
+      realTimeAssist: observable.ref,
+      aiSummaryCapabilities: observable.ref,
+      aiSummaryCurrentOwners: observable.ref,
+      aiSummaryOwnerStates: observable.ref,
+      aiSummaryPendingRequests: observable.ref,
+      aiSummaryLastResults: observable.ref,
+      pendingAISummaryStatusTransitions: observable.ref,
+    }
+  ) as typeof originalStore;
+
+  try {
+    await runTest();
+  } finally {
+    storeWrapper['store'] = originalStore;
+    resetAISummaryTestState();
+  }
+};
+
+const deferred = <T = unknown>(): {
+  promise: Promise<T>;
+  resolve: (value: T) => void;
+  reject: (reason?: unknown) => void;
+} => {
+  let resolve: (value: T) => void = () => undefined;
+  let reject: (reason?: unknown) => void = () => undefined;
+  const promise = new Promise<T>((promiseResolve, promiseReject) => {
+    resolve = promiseResolve;
+    reject = promiseReject;
+  });
+  return {promise, resolve, reject};
+};
+
+const createSummaryError = (errorCode: string): Error & {data: {errorCode: string}} => {
+  const error = new Error(errorCode) as Error & {data: {errorCode: string}};
+  error.data = {errorCode};
+  return error;
+};
+
+type AISummaryRequestPath = 'mid-call' | 'post-call';
+
+type AISummaryNoRetryFailureCase = {
+  name: string;
+  expectedOutcome: 'failed' | 'stale';
+  configure: (
+    task: AISummaryTestTask,
+    path: AISummaryRequestPath
+  ) => {
+    settle?: () => void;
+  };
+};
+
+const validAISummaryForPath = (path: AISummaryRequestPath): AISummary =>
+  path === 'post-call' ? aiSummaryFixtures.postCall.plainText : aiSummaryFixtures.initiatingMidCall.plainText;
+
+const unsupportedAISummaryForPath = (path: AISummaryRequestPath): AISummary =>
+  path === 'post-call'
+    ? aiSummaryFixtures.postCall.cardOnlyUnsupported
+    : aiSummaryFixtures.initiatingMidCall.cardOnlyUnsupported;
+
+const malformedSectionsAISummaryForTest = (): AISummary => {
+  const summary: AISummary = {conversationId: 'interaction-main-1'};
+  Object.defineProperty(summary, 'sections', {
+    enumerable: true,
+    value: aiSummaryFixtures.malformed.sectionsNotRecord.sections,
+  });
+  return summary;
+};
+
+const configureAISummaryRequestImplementation = (
+  task: AISummaryTestTask,
+  path: AISummaryRequestPath,
+  implementation: () => Promise<AISummary>
+): void => {
+  if (path === 'mid-call') {
+    task.requestMidCallSummary.mockImplementationOnce(implementation);
+    return;
+  }
+  task.requestPostCallSummary.mockImplementationOnce(implementation);
+};
+
+const startAISummaryRequest = (path: AISummaryRequestPath, task: AISummaryTestTask) =>
+  path === 'mid-call'
+    ? storeWrapper.requestMidCallSummary('CONSULT', 'initiator', task)
+    : storeWrapper.requestPostCallSummary({type: 'reason-commit', reasonId: 'r1', selectionRevision: 1}, task);
+
+const expectAISummaryRequestCalledOnceWithoutCancellation = (
+  task: AISummaryTestTask,
+  path: AISummaryRequestPath
+): void => {
+  if (path === 'mid-call') {
+    expect(task.requestMidCallSummary.mock.calls).toEqual([['CONSULT']]);
+    return;
+  }
+  expect(task.requestPostCallSummary.mock.calls).toEqual([[]]);
+};
+
+const AI_SUMMARY_NO_RETRY_FAILURE_CASES: readonly AISummaryNoRetryFailureCase[] = [
+  {
+    name: 'rejected SDK request',
+    expectedOutcome: 'failed',
+    configure: (task, path) => {
+      configureAISummaryRequestImplementation(task, path, () => Promise.reject(new Error('request rejected')));
+      return {};
+    },
+  },
+  {
+    name: 'synchronous SDK throw',
+    expectedOutcome: 'failed',
+    configure: (task, path) => {
+      configureAISummaryRequestImplementation(task, path, () => {
+        throw new Error('request threw synchronously');
+      });
+      return {};
+    },
+  },
+  {
+    name: 'deadline timeout',
+    expectedOutcome: 'failed',
+    configure: (task, path) => {
+      const lateSettlement = deferred<AISummary>();
+      configureAISummaryRequestImplementation(task, path, () => lateSettlement.promise);
+      return {
+        settle: () => {
+          jest.setSystemTime(15001);
+          lateSettlement.resolve(validAISummaryForPath(path));
+        },
+      };
+    },
+  },
+  {
+    name: 'empty payload',
+    expectedOutcome: 'failed',
+    configure: (task, path) => {
+      configureAISummaryRequestImplementation(task, path, () =>
+        Promise.resolve({conversationId: 'interaction-main-1', summaryText: ''})
+      );
+      return {};
+    },
+  },
+  {
+    name: 'malformed sections',
+    expectedOutcome: 'failed',
+    configure: (task, path) => {
+      configureAISummaryRequestImplementation(task, path, () => Promise.resolve(malformedSectionsAISummaryForTest()));
+      return {};
+    },
+  },
+  {
+    name: 'unsupported payload',
+    expectedOutcome: 'failed',
+    configure: (task, path) => {
+      configureAISummaryRequestImplementation(task, path, () => Promise.resolve(unsupportedAISummaryForPath(path)));
+      return {};
+    },
+  },
+  {
+    name: 'stale interaction mismatch',
+    expectedOutcome: 'stale',
+    configure: (task, path) => {
+      configureAISummaryRequestImplementation(task, path, () =>
+        Promise.resolve(aiSummaryFixtures.ordering.mismatchedConversation.payload)
+      );
+      return {};
+    },
+  },
+  {
+    name: 'ownership change',
+    expectedOutcome: 'stale',
+    configure: (task, path) => {
+      const lateSettlement = deferred<AISummary>();
+      configureAISummaryRequestImplementation(task, path, () => lateSettlement.promise);
+      return {
+        settle: () => {
+          const captured = storeWrapper.getCurrentAISummaryOwnerKey(task);
+          expect(
+            storeWrapper.advanceAISummaryOwnership(
+              captured,
+              {type: 'consult-transfer', mode: 'reset', successorAgentId: 'agent-b'},
+              task
+            )
+          ).toEqual({outcome: 'advanced'});
+          lateSettlement.resolve(validAISummaryForPath(path));
+        },
+      };
+    },
+  },
+];
+
+const LOGGER_METHOD_NAMES = ['log', 'warn', 'error', 'info', 'trace'] as const;
+
+const serializeForSentinelSearch = (value: unknown, seen = new WeakSet<object>()): string => {
+  if (value === null || value === undefined) {
+    return String(value);
+  }
+  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+    return String(value);
+  }
+  if (typeof value === 'bigint' || typeof value === 'symbol') {
+    return value.toString();
+  }
+  if (typeof value === 'function') {
+    return `[Function ${(value as {name?: string}).name ?? 'anonymous'}]`;
+  }
+  if (typeof value !== 'object') {
+    return String(value);
+  }
+  if (seen.has(value)) {
+    return '[Circular]';
+  }
+  seen.add(value);
+  if (value instanceof Error) {
+    return [
+      value.name,
+      value.message,
+      ...Object.entries(value).map(([key, child]) => `${key}:${serializeForSentinelSearch(child, seen)}`),
+    ].join('|');
+  }
+  if (Array.isArray(value)) {
+    return value.map((child) => serializeForSentinelSearch(child, seen)).join('|');
+  }
+  return Object.entries(value as Record<string, unknown>)
+    .map(([key, child]) => `${key}:${serializeForSentinelSearch(child, seen)}`)
+    .join('|');
+};
+
+const getLoggerMock = (method: (typeof LOGGER_METHOD_NAMES)[number]): jest.Mock =>
+  storeWrapper['store'].logger[method] as unknown as jest.Mock;
+
+const resetLoggerMocks = (): void => {
+  LOGGER_METHOD_NAMES.forEach((method) => {
+    storeWrapper['store'].logger[method] = jest.fn();
+  });
+};
+
+const getProtectedSinkCallText = (spies: jest.SpyInstance[]): string => {
+  const loggerCalls = LOGGER_METHOD_NAMES.flatMap((method) => getLoggerMock(method).mock.calls);
+  const apiCalls = spies.flatMap((spy) => spy.mock.calls);
+  return serializeForSentinelSearch([...loggerCalls, ...apiCalls]);
+};
+
+const spyOnProtectedBrowserSinks = (): jest.SpyInstance[] => {
+  const spies: jest.SpyInstance[] = [];
+  if (typeof Storage !== 'undefined') {
+    spies.push(jest.spyOn(Storage.prototype, 'setItem'));
+  }
+  if (typeof history !== 'undefined') {
+    spies.push(jest.spyOn(history, 'pushState'));
+    spies.push(jest.spyOn(history, 'replaceState'));
+  }
+  if (typeof URL !== 'undefined' && typeof URL.createObjectURL === 'function') {
+    spies.push(jest.spyOn(URL, 'createObjectURL'));
+  }
+  if (typeof Location !== 'undefined') {
+    const assignDescriptor = Object.getOwnPropertyDescriptor(Location.prototype, 'assign');
+    const replaceDescriptor = Object.getOwnPropertyDescriptor(Location.prototype, 'replace');
+    if (assignDescriptor?.configurable) {
+      spies.push(jest.spyOn(Location.prototype, 'assign'));
+    }
+    if (replaceDescriptor?.configurable) {
+      spies.push(jest.spyOn(Location.prototype, 'replace'));
+    }
+  }
+  return spies;
+};
+
+const getMobXStrictModeMessages = (...spies: Array<jest.SpyInstance>): string[] =>
+  spies
+    .flatMap((spy) => spy.mock.calls)
+    .map((args) => args.map((arg) => String(arg)).join(' '))
+    .filter((message) => message.includes('[MobX]') && message.includes('changing'));
 
 describe('storeEventsWrapper', () => {
   describe('storeEventsWrapper Proxies', () => {
@@ -1959,6 +2375,8 @@ describe('storeEventsWrapper', () => {
 
     beforeEach(async () => {
       jest.clearAllMocks();
+      storeWrapper['aiSummaryWrappedUpSubscriptions'] = {};
+      storeWrapper['aiSummaryWrappedUpObservedOwnerKeys'] = new Set();
     });
 
     it('should initialize the store and set up event handlers for login and logout', async () => {
@@ -3872,6 +4290,2209 @@ describe('storeEventsWrapper', () => {
 
         expect(mockUserPreference.createUserPreference).not.toHaveBeenCalled();
         expect(mockUserPreference.updateUserPreference).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('AI summary SDK-bound store integration', () => {
+    beforeEach(() => {
+      jest.useRealTimers();
+      resetAISummaryTestState();
+      storeWrapper['store'].currentTask = null;
+      storeWrapper['store'].logger.trace = jest.fn();
+    });
+
+    it('projects eligible pre-request views from the canonical voice task without installing an owner', () => {
+      const task = makeAISummaryTask();
+      storeWrapper['registerTaskEventListeners'](task);
+
+      const midCallView = storeWrapper.getAISummaryViewModel('mid-call', 'initiator', task);
+      const postCallView = storeWrapper.getAISummaryViewModel('post-call', 'post-call', task);
+
+      expect(midCallView).toMatchObject({
+        key: 'mid-call:initiator',
+        eligible: true,
+        surface: 'omitted',
+        requestPending: false,
+      });
+      expect(postCallView).toMatchObject({
+        key: 'post-call:post-call',
+        eligible: true,
+        surface: 'omitted',
+        requestPending: false,
+      });
+      expect(storeWrapper.aiSummaryCurrentOwners).toEqual({});
+      expect(storeWrapper.aiSummaryOwnerStates).toEqual({});
+    });
+
+    it('omits every AI-summary role and mutates no owner state when the agent is not logged in', async () => {
+      const task = makeAISummaryTask();
+      storeWrapper['store'].isAgentLoggedIn = false;
+      storeWrapper.setCurrentTask(task);
+      storeWrapper['registerTaskEventListeners'](task);
+
+      expect(storeWrapper.getAISummaryViewModel('mid-call', 'initiator', task)).toMatchObject({
+        eligible: false,
+        surface: 'omitted',
+      });
+      expect(storeWrapper.getAISummaryViewModel('mid-call', 'receiver', task)).toMatchObject({
+        eligible: false,
+        surface: 'omitted',
+      });
+      expect(storeWrapper.getAISummaryViewModel('post-call', 'post-call', task)).toMatchObject({
+        eligible: false,
+        surface: 'omitted',
+      });
+      await expect(storeWrapper.requestMidCallSummary('CONSULT', 'initiator', task)).resolves.toEqual({
+        outcome: 'blocked',
+      });
+      storeWrapper['handleReceiverAISummaryPayload'](task, aiSummaryFixtures.receivingMidCall.adaptiveCard);
+      expect(storeWrapper.aiSummaryCapabilities).toEqual({});
+      expect(storeWrapper.aiSummaryCurrentOwners).toEqual({});
+      expect(storeWrapper.aiSummaryOwnerStates).toEqual({});
+      expect(storeWrapper.getPendingAISummaryStatusTransitions()).toEqual([]);
+    });
+
+    it('rejects non-voice capability and receiver ingress without binding summary listeners or status transitions', () => {
+      const task = makeAISummaryTask();
+      task.data.interaction.mediaType = 'chat';
+      storeWrapper.setCurrentTask(task);
+      storeWrapper['registerTaskEventListeners'](task);
+      const taskOnMock = task.on as unknown as jest.Mock;
+
+      expect(taskOnMock.mock.calls.some((call) => call[0] === TASK_EVENTS.TASK_FEATURE_ENABLEMENT)).toBe(false);
+      expect(taskOnMock.mock.calls.some((call) => call[0] === TASK_EVENTS.TASK_MID_CALL_SUMMARY_RECEIVED)).toBe(false);
+
+      storeWrapper.handleAISummaryFeatureEnablement(aiSummaryFixtures.featureEnablement.enabled, task);
+      storeWrapper['handleReceiverAISummaryPayload'](task, aiSummaryFixtures.receivingMidCall.adaptiveCard);
+
+      expect(storeWrapper.aiSummaryCapabilities).toEqual({});
+      expect(storeWrapper.getAISummaryViewModel('mid-call', 'receiver', task)).toMatchObject({
+        eligible: false,
+        surface: 'omitted',
+      });
+      expect(storeWrapper.getPendingAISummaryStatusTransitions()).toEqual([]);
+    });
+
+    it('drops receiver payloads for a different conversation before capability or owner mutation', () => {
+      const task = makeAISummaryTask();
+      storeWrapper.setCurrentTask(task);
+
+      storeWrapper['handleReceiverAISummaryPayload'](task, aiSummaryFixtures.ordering.mismatchedConversation.payload);
+
+      expect(storeWrapper.aiSummaryCapabilities).toEqual({});
+      expect(storeWrapper.aiSummaryCurrentOwners).toEqual({});
+      expect(storeWrapper.aiSummaryOwnerStates).toEqual({});
+      expect(storeWrapper.getAISummaryViewModel('mid-call', 'receiver', task)).toMatchObject({
+        eligible: false,
+        surface: 'omitted',
+      });
+      expect(storeWrapper.getPendingAISummaryStatusTransitions()).toEqual([]);
+    });
+
+    it('keeps AI-summary read paths pure and changes the status queue only on append or exact-head acknowledgement', async () => {
+      await withObservableAISummaryStore(async () => {
+        resetAISummaryTestState();
+        const task = makeAISummaryTask();
+        storeWrapper.setCurrentTask(task);
+        storeWrapper.handleAISummaryFeatureEnablement(
+          {
+            interactionId: task.data.interactionId,
+            midCallEnabled: true,
+            postCallEnabled: true,
+          },
+          task
+        );
+        const refs = {
+          capabilities: storeWrapper.aiSummaryCapabilities,
+          currentOwners: storeWrapper.aiSummaryCurrentOwners,
+          ownerStates: storeWrapper.aiSummaryOwnerStates,
+          pendingRequests: storeWrapper.aiSummaryPendingRequests,
+          lastResults: storeWrapper.aiSummaryLastResults,
+          statusQueue: storeWrapper.getPendingAISummaryStatusTransitions(),
+        };
+        const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+        const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+        let renderReadCount = 0;
+        let observedCapabilities: typeof refs.capabilities | undefined;
+        let observedCurrentOwners: typeof refs.currentOwners | undefined;
+        let observedOwnerStates: typeof refs.ownerStates | undefined;
+        let observedPendingRequests: typeof refs.pendingRequests | undefined;
+        let observedLastResults: typeof refs.lastResults | undefined;
+        let observedStatusQueue: typeof refs.statusQueue | undefined;
+        const dispose = autorun(() => {
+          renderReadCount += 1;
+          observedCapabilities = storeWrapper.aiSummaryCapabilities;
+          observedCurrentOwners = storeWrapper.aiSummaryCurrentOwners;
+          observedOwnerStates = storeWrapper.aiSummaryOwnerStates;
+          observedPendingRequests = storeWrapper.aiSummaryPendingRequests;
+          observedLastResults = storeWrapper.aiSummaryLastResults;
+          observedStatusQueue = storeWrapper.getPendingAISummaryStatusTransitions();
+          storeWrapper.getAISummaryViewModel('mid-call', 'initiator', task);
+        });
+        let disposed = false;
+        const disposeAutorun = (): void => {
+          if (!disposed) {
+            disposed = true;
+            dispose();
+          }
+        };
+
+        try {
+          expect(renderReadCount).toBe(1);
+          expect(observedCapabilities).toBe(refs.capabilities);
+          expect(observedCurrentOwners).toBe(refs.currentOwners);
+          expect(observedOwnerStates).toBe(refs.ownerStates);
+          expect(observedPendingRequests).toBe(refs.pendingRequests);
+          expect(observedLastResults).toBe(refs.lastResults);
+          expect(observedStatusQueue).toBe(refs.statusQueue);
+          expect(storeWrapper.getAISummaryViewModel('post-call', 'post-call', task)).toMatchObject({
+            eligible: true,
+            surface: 'omitted',
+          });
+          expect(storeWrapper.getPendingAISummaryStatusTransitions()).toBe(refs.statusQueue);
+          expect(renderReadCount).toBe(1);
+
+          disposeAutorun();
+          expect(storeWrapper.acknowledgeAISummaryStatusTransition(999)).toBe(false);
+          expect(storeWrapper.getPendingAISummaryStatusTransitions()).toBe(refs.statusQueue);
+
+          storeWrapper['appendAISummaryStatus']('mid-call', 'available');
+          const queued = storeWrapper.getPendingAISummaryStatusTransitions();
+          expect(queued).not.toBe(refs.statusQueue);
+          expect(queued).toEqual([expect.objectContaining({kind: 'mid-call', state: 'available'})]);
+
+          expect(storeWrapper.acknowledgeAISummaryStatusTransition(queued[0].sequence + 1)).toBe(false);
+          expect(storeWrapper.getPendingAISummaryStatusTransitions()).toBe(queued);
+          expect(storeWrapper.acknowledgeAISummaryStatusTransition(queued[0].sequence)).toBe(true);
+          expect(storeWrapper.getPendingAISummaryStatusTransitions()).not.toBe(queued);
+          expect(storeWrapper.getPendingAISummaryStatusTransitions()).toEqual([]);
+          expect(getMobXStrictModeMessages(warnSpy, errorSpy)).toEqual([]);
+        } finally {
+          disposeAutorun();
+          warnSpy.mockRestore();
+          errorSpy.mockRestore();
+        }
+      });
+    });
+
+    it('clears queued AI-summary statuses during global cleanup without reusing sequence numbers', () => {
+      storeWrapper['appendAISummaryStatus']('mid-call', 'available');
+      const [firstTransition] = storeWrapper.getPendingAISummaryStatusTransitions();
+      const firstSequence = firstTransition?.sequence ?? 0;
+      expect(firstSequence).toBe(1);
+
+      storeWrapper.cleanUpStore();
+
+      expect(storeWrapper.getPendingAISummaryStatusTransitions()).toEqual([]);
+
+      storeWrapper['appendAISummaryStatus']('post-call', 'submitted');
+
+      expect(storeWrapper.getPendingAISummaryStatusTransitions()).toEqual([
+        expect.objectContaining({
+          sequence: expect.any(Number),
+          kind: 'post-call',
+          state: 'submitted',
+        }),
+      ]);
+      expect(storeWrapper.getPendingAISummaryStatusTransitions()[0]?.sequence).toBeGreaterThan(firstSequence);
+    });
+
+    it('emits no AI-summary statuses for stale settlements after interaction switches or ownership changes', async () => {
+      const switchedSettlement = deferred<AISummary>();
+      const switchedTask = makeAISummaryTask({
+        requestMidCallSummary: jest.fn().mockReturnValue(switchedSettlement.promise),
+      });
+      storeWrapper.setCurrentTask(switchedTask);
+
+      const switchedRequest = storeWrapper.requestMidCallSummary('CONSULT', 'initiator', switchedTask);
+      const replacementTask = configureAISummaryTaskIdentity(makeAISummaryTask(), {
+        interactionId: 'interaction-main-2',
+      });
+      storeWrapper.setCurrentTask(replacementTask);
+      switchedSettlement.resolve(validAISummaryForPath('mid-call'));
+
+      await expect(switchedRequest).resolves.toEqual({outcome: 'stale'});
+      expect(storeWrapper.getPendingAISummaryStatusTransitions()).toEqual([]);
+
+      resetAISummaryTestState();
+      const ownershipSettlement = deferred<AISummary>();
+      const ownershipTask = makeAISummaryTask({
+        requestMidCallSummary: jest.fn().mockReturnValue(ownershipSettlement.promise),
+      });
+      storeWrapper.setCurrentTask(ownershipTask);
+
+      const ownershipRequest = storeWrapper.requestMidCallSummary('TRANSFER', 'initiator', ownershipTask);
+      const captured = storeWrapper.getCurrentAISummaryOwnerKey(ownershipTask);
+      expect(
+        storeWrapper.advanceAISummaryOwnership(
+          captured,
+          {type: 'consult-transfer', mode: 'reset', successorAgentId: 'agent-b'},
+          ownershipTask
+        )
+      ).toEqual({outcome: 'advanced'});
+      ownershipSettlement.resolve(validAISummaryForPath('mid-call'));
+
+      await expect(ownershipRequest).resolves.toEqual({outcome: 'stale'});
+      expect(storeWrapper.getPendingAISummaryStatusTransitions()).toEqual([]);
+    });
+
+    it('queues one mapped AI-summary status for the first accepted successor settlement', async () => {
+      const predecessorSettlement = deferred<AISummary>();
+      const successorSettlement = deferred<AISummary>();
+      const task = makeAISummaryTask({
+        requestMidCallSummary: jest
+          .fn()
+          .mockResolvedValueOnce(aiSummaryFixtures.initiatingMidCall.typedSections)
+          .mockReturnValueOnce(predecessorSettlement.promise)
+          .mockReturnValueOnce(successorSettlement.promise),
+      });
+      storeWrapper.setCurrentTask(task);
+
+      await expect(storeWrapper.requestMidCallSummary('CONSULT', 'initiator', task)).resolves.toEqual({
+        outcome: 'accepted',
+      });
+      drainAISummaryStatusTransitions();
+
+      const predecessorRequest = storeWrapper.requestMidCallSummary('TRANSFER', 'initiator', task);
+      const captured = storeWrapper.getCurrentAISummaryOwnerKey(task);
+      expect(
+        storeWrapper.advanceAISummaryOwnership(
+          captured,
+          {type: 'consult-transfer', mode: 'reset', successorAgentId: 'agent-a'},
+          task
+        )
+      ).toEqual({outcome: 'advanced'});
+      const successorRequest = storeWrapper.requestMidCallSummary('CONSULT', 'initiator', task);
+
+      predecessorSettlement.resolve({...aiSummaryFixtures.initiatingMidCall.typedSections, timestamp: 1001});
+      await expect(predecessorRequest).resolves.toEqual({outcome: 'stale'});
+      expect(storeWrapper.getPendingAISummaryStatusTransitions()).toEqual([]);
+
+      successorSettlement.resolve({...aiSummaryFixtures.initiatingMidCall.typedSections, timestamp: 1002});
+      await expect(successorRequest).resolves.toEqual({outcome: 'accepted'});
+      expect(storeWrapper.getPendingAISummaryStatusTransitions()).toEqual([
+        expect.objectContaining({
+          kind: 'mid-call',
+          state: 'available',
+        }),
+      ]);
+    });
+
+    it('seeds each exact task capability snapshot once without rekeying a leg-scoped task', () => {
+      const task = makeAISummaryTask();
+      task.data.interactionId = 'leg-consult-1';
+      task.data.interaction.interactionId = 'leg-consult-1';
+
+      storeWrapper['registerTaskEventListeners'](task);
+
+      expect(storeWrapper.aiSummaryCapabilities['interaction-main-1']).toBeUndefined();
+      expect(storeWrapper.getAISummaryViewModel('mid-call', 'initiator', task)).toMatchObject({
+        eligible: false,
+        surface: 'omitted',
+      });
+    });
+
+    it('keeps an initial post-call request visible as pending before content arrives', async () => {
+      const pending = deferred();
+      const task = makeAISummaryTask({
+        requestPostCallSummary: jest.fn().mockReturnValue(pending.promise),
+      });
+
+      const request = storeWrapper.requestPostCallSummary(
+        {type: 'reason-commit', reasonId: 'r1', selectionRevision: 1},
+        task
+      );
+      const pendingView = storeWrapper.getAISummaryViewModel('post-call', 'post-call', task);
+
+      expect(pendingView).toMatchObject({
+        eligible: true,
+        surface: 'generating',
+        requestPending: true,
+      });
+
+      pending.resolve(aiSummaryFixtures.postCall.structured);
+      await expect(request).resolves.toEqual({outcome: 'accepted'});
+    });
+
+    it('requests a mid-call summary, stores content, sends confirmed feedback, and queues available status', async () => {
+      const task = makeAISummaryTask();
+      storeWrapper.setCurrentTask(task);
+
+      const result = await storeWrapper.requestMidCallSummary('CONSULT', 'initiator', task);
+      const view = storeWrapper.getAISummaryViewModel('mid-call', 'initiator', task);
+      const viewed = storeWrapper.recordAISummaryViewed('mid-call', 'initiator', view.contentRevision ?? 0);
+      const feedbackResult = await storeWrapper.setMidCallSummaryFeedback(
+        'initiator',
+        'like',
+        'CONSULT',
+        view.contentRevision ?? 0
+      );
+
+      expect(result).toEqual({outcome: 'accepted'});
+      expect(view.surface).toBe('content');
+      expect(view.actionType).toBe('CONSULT');
+      expect(view.counters.viewed).toBe(0);
+      expect(viewed).toBe(true);
+      expect(task.requestMidCallSummary).toHaveBeenCalledWith('CONSULT');
+      expect(feedbackResult).toEqual({outcome: 'confirmed'});
+      expect(task.sendMidCallSummaryResponse).toHaveBeenCalledWith(
+        expect.objectContaining({
+          feedback: 'thumbs_up',
+          state: 'DEFAULT',
+          numberOfTimesViewed: 1,
+        }),
+        'CONSULT'
+      );
+      expect(storeWrapper.getPendingAISummaryStatusTransitions()).toEqual([
+        expect.objectContaining({kind: 'mid-call', state: 'available'}),
+      ]);
+      expect(storeWrapper.acknowledgeAISummaryStatusTransition(1)).toBe(true);
+      expect(storeWrapper.getPendingAISummaryStatusTransitions()).toEqual([]);
+    });
+
+    it('keeps the displayed mid-call action bound to accepted content when a later action request fails', async () => {
+      const task = makeAISummaryTask({
+        requestMidCallSummary: jest
+          .fn()
+          .mockResolvedValueOnce(aiSummaryFixtures.initiatingMidCall.typedSections)
+          .mockRejectedValueOnce(new Error('transport sentinel')),
+      });
+      storeWrapper.setCurrentTask(task);
+
+      await expect(storeWrapper.requestMidCallSummary('CONSULT', 'initiator', task)).resolves.toEqual({
+        outcome: 'accepted',
+      });
+      expect(storeWrapper.getAISummaryViewModel('mid-call', 'initiator', task)).toMatchObject({
+        surface: 'content',
+        actionType: 'CONSULT',
+      });
+
+      await expect(storeWrapper.requestMidCallSummary('TRANSFER', 'initiator', task)).resolves.toEqual({
+        outcome: 'failed',
+      });
+      expect(storeWrapper.getAISummaryViewModel('mid-call', 'initiator', task)).toMatchObject({
+        surface: 'content',
+        actionType: 'CONSULT',
+      });
+    });
+
+    it('sanitizes mismatched summary settlements to stale without payload identifiers', async () => {
+      const task = makeAISummaryTask({
+        requestMidCallSummary: jest.fn().mockResolvedValue(aiSummaryFixtures.ordering.mismatchedConversation.payload),
+      });
+      storeWrapper.setCurrentTask(task);
+
+      const result = await storeWrapper.requestMidCallSummary('CONSULT', 'initiator', task);
+
+      expect(result).toEqual({outcome: 'stale'});
+      expect(JSON.stringify(result)).not.toContain('other-interaction');
+    });
+
+    it('keeps mid-call feedback unpainted while the SDK send is pending and blocks overlaps', async () => {
+      const feedbackSend = deferred<void>();
+      const task = makeAISummaryTask({
+        sendMidCallSummaryResponse: jest.fn().mockReturnValue(feedbackSend.promise),
+      });
+      storeWrapper.setCurrentTask(task);
+      await storeWrapper.requestMidCallSummary('CONSULT', 'initiator', task);
+      const view = storeWrapper.getAISummaryViewModel('mid-call', 'initiator', task);
+
+      const pendingFeedback = storeWrapper.setMidCallSummaryFeedback(
+        'initiator',
+        'like',
+        'CONSULT',
+        view.contentRevision ?? 0
+      );
+      const pendingView = storeWrapper.getAISummaryViewModel('mid-call', 'initiator', task);
+
+      expect(pendingView.feedback).toBe('none');
+      expect(pendingView.midCallFeedbackPending).toBe(true);
+      expect(pendingView.requestPending).toBe(true);
+      await expect(
+        storeWrapper.setMidCallSummaryFeedback('initiator', 'dislike', 'CONSULT', view.contentRevision ?? 0)
+      ).resolves.toEqual({outcome: 'blocked'});
+      expect(task.sendMidCallSummaryResponse).toHaveBeenCalledTimes(1);
+
+      feedbackSend.resolve(undefined);
+      await expect(pendingFeedback).resolves.toEqual({outcome: 'confirmed'});
+      const confirmedView = storeWrapper.getAISummaryViewModel('mid-call', 'initiator', task);
+      expect(confirmedView.feedback).toBe('like');
+      expect(confirmedView.midCallFeedbackPending).toBe(false);
+      expect(confirmedView.requestPending).toBe(false);
+    });
+
+    it.each(['fulfilled', 'rejected'] as const)(
+      'preserves intervening counters when feedback is %s',
+      async (settlement) => {
+        const send = deferred<void>();
+        const task = makeAISummaryTask({sendMidCallSummaryResponse: jest.fn().mockReturnValue(send.promise)});
+        await storeWrapper.requestMidCallSummary('CONSULT', 'initiator', task);
+        const revision = storeWrapper.getAISummaryViewModel('mid-call', 'initiator', task).contentRevision ?? 0;
+        const feedback = storeWrapper.setMidCallSummaryFeedback('initiator', 'like', 'CONSULT', revision, task);
+        expect(storeWrapper.recordAISummaryViewed('mid-call', 'initiator', revision, task)).toBe(true);
+        expect(storeWrapper.recordAISummaryCopied('mid-call', 'initiator', revision, task)).toBe(true);
+        if (settlement === 'fulfilled') send.resolve(undefined);
+        else send.reject(new Error('send failed'));
+        await expect(feedback).resolves.toEqual({outcome: settlement === 'fulfilled' ? 'confirmed' : 'failed'});
+        expect(storeWrapper.getAISummaryViewModel('mid-call', 'initiator', task)).toMatchObject({
+          midCallFeedbackPending: false,
+          counters: {viewed: 1, copied: 1, liked: settlement === 'fulfilled' ? 1 : 0},
+        });
+      }
+    );
+
+    it.each(['fulfilled', 'rejected'] as const)(
+      'retires %s feedback after an edit without painting or logging it',
+      async (settlement) => {
+        const send = deferred<void>();
+        const task = makeAISummaryTask({sendMidCallSummaryResponse: jest.fn().mockReturnValue(send.promise)});
+        await storeWrapper.requestMidCallSummary('CONSULT', 'initiator', task);
+        const revision = storeWrapper.getAISummaryViewModel('mid-call', 'initiator', task).contentRevision ?? 0;
+        const feedback = storeWrapper.setMidCallSummaryFeedback('initiator', 'like', 'CONSULT', revision, task);
+        expect(
+          storeWrapper.editAISummary(
+            'mid-call',
+            'initiator',
+            {key: 'additionalContext', value: 'Edited context'},
+            revision,
+            task
+          )
+        ).toBe(true);
+        const edited = storeWrapper.getAISummaryViewModel('mid-call', 'initiator', task);
+        const trace = jest.spyOn(storeWrapper.logger, 'trace');
+        trace.mockClear();
+        if (settlement === 'fulfilled') send.resolve(undefined);
+        else send.reject(new Error('stale private error'));
+        await expect(feedback).resolves.toEqual({outcome: 'stale'});
+        expect(storeWrapper.getAISummaryViewModel('mid-call', 'initiator', task)).toMatchObject({
+          content: edited.content,
+          contentRevision: edited.contentRevision,
+          feedback: 'none',
+          midCallFeedbackPending: false,
+          counters: {edited: 1, liked: 0},
+        });
+        expect(trace).not.toHaveBeenCalled();
+      }
+    );
+
+    it('omits receiver content from a different current interaction and never sends feedback through it', async () => {
+      const taskX = makeAISummaryTask();
+      const taskY = configureAISummaryTaskIdentity(makeAISummaryTask(), {interactionId: 'interaction-main-2'});
+
+      storeWrapper.setCurrentTask(taskX);
+      storeWrapper['handleReceiverAISummaryPayload'](taskX, aiSummaryFixtures.receivingMidCall.adaptiveCard);
+      const xView = storeWrapper.getAISummaryViewModel('mid-call', 'receiver', taskX);
+      expect(xView.surface).toBe('content');
+
+      storeWrapper.setCurrentTask(taskY);
+      storeWrapper['registerTaskEventListeners'](taskY);
+
+      expect(storeWrapper.getAISummaryViewModel('mid-call', 'receiver', taskY)).toMatchObject({
+        surface: 'omitted',
+        content: undefined,
+      });
+      await expect(
+        storeWrapper.setMidCallSummaryFeedback('receiver', 'like', 'TRANSFER', xView.contentRevision ?? 0, taskY)
+      ).resolves.toEqual({outcome: 'stale'});
+      expect(taskY.sendMidCallSummaryResponse).not.toHaveBeenCalled();
+      expect(taskX.sendMidCallSummaryResponse).not.toHaveBeenCalled();
+    });
+
+    it('omits post-call content from a different wrap-up interaction and refuses its draft capture', async () => {
+      const taskX = makeAISummaryTask();
+      const taskY = configureAISummaryTaskIdentity(makeAISummaryTask(), {interactionId: 'interaction-main-2'});
+
+      storeWrapper.setCurrentTask(taskX);
+      await storeWrapper.requestPostCallSummary({type: 'reason-commit', reasonId: 'r1', selectionRevision: 1}, taskX);
+      expect(storeWrapper.getAISummaryViewModel('post-call', 'post-call', taskX).surface).toBe('content');
+
+      storeWrapper.setCurrentTask(taskY);
+      storeWrapper['registerTaskEventListeners'](taskY);
+
+      expect(storeWrapper.getAISummaryViewModel('post-call', 'post-call', taskY)).toMatchObject({
+        surface: 'omitted',
+        content: undefined,
+      });
+      expect(storeWrapper.capturePostCallDraft(aiSummaryFixtures.wrapUp.distinctReasonAndCode.auxCodeId, taskY)).toBe(
+        undefined
+      );
+      expect(taskY.sendPostCallSummaryResponse).not.toHaveBeenCalled();
+    });
+
+    it('preserves same-agent remount counters and starts zero counters after terminal re-entry', async () => {
+      const task = makeAISummaryTask();
+      storeWrapper.setCurrentTask(task);
+      await storeWrapper.requestMidCallSummary('CONSULT', 'initiator', task);
+      const firstView = storeWrapper.getAISummaryViewModel('mid-call', 'initiator', task);
+      expect(storeWrapper.recordAISummaryViewed('mid-call', 'initiator', firstView.contentRevision ?? 0, task)).toBe(
+        true
+      );
+
+      const remountTask = configureAISummaryTaskIdentity(makeAISummaryTask(), {
+        interactionId: task.data.interactionId,
+      });
+      storeWrapper.setCurrentTask(remountTask);
+      expect(storeWrapper.getAISummaryViewModel('mid-call', 'initiator', remountTask).counters.viewed).toBe(1);
+
+      storeWrapper.handleTaskRemove(remountTask);
+      const reentryTask = configureAISummaryTaskIdentity(makeAISummaryTask(), {
+        interactionId: task.data.interactionId,
+      });
+      storeWrapper.setCurrentTask(reentryTask);
+      await storeWrapper.requestMidCallSummary('CONSULT', 'initiator', reentryTask);
+      const reentryView = storeWrapper.getAISummaryViewModel('mid-call', 'initiator', reentryTask);
+
+      expect(reentryView.counters).toEqual({viewed: 0, copied: 0, edited: 0, liked: 0, disliked: 0});
+      expect(reentryView.ownerKey?.ownershipGeneration).toBeGreaterThan(firstView.ownerKey?.ownershipGeneration ?? 0);
+    });
+
+    it('retains mid-call content through task end and clears it on wrapped-up', async () => {
+      const task = makeAISummaryTask();
+      storeWrapper['store'].cc.taskManager.getAllTasks = jest.fn().mockReturnValue({
+        [task.data.interactionId]: task,
+      });
+      storeWrapper.setCurrentTask(task);
+      await storeWrapper.requestMidCallSummary('CONSULT', 'initiator', task);
+      const initial = storeWrapper.getAISummaryViewModel('mid-call', 'initiator', task);
+      storeWrapper.recordAISummaryViewed('mid-call', 'initiator', initial.contentRevision ?? 0, task);
+      const beforeEnd = storeWrapper.getAISummaryViewModel('mid-call', 'initiator', task);
+
+      storeWrapper.handleTaskEnd(task);
+      await Promise.resolve();
+      expect(storeWrapper.getAISummaryViewModel('mid-call', 'initiator', task)).toEqual(beforeEnd);
+      storeWrapper['handleAISummaryWrappedUp'](task);
+      expect(storeWrapper.getAISummaryViewModel('mid-call', 'initiator', task).content).toBeUndefined();
+      expect(storeWrapper.aiSummaryOwnerStates).toEqual({});
+      expect(storeWrapper.aiSummaryPendingRequests).toEqual({});
+    });
+
+    it('clears summary state and fences late settlement on the SDK logout event', async () => {
+      const cc = storeWrapper['store'].cc;
+      const registered = jest.spyOn(cc, 'on');
+      registered.mockClear();
+      storeWrapper.setupIncomingTaskHandler(cc);
+      const registeredAgent = registered.mock.calls.find(([event]) => event === CC_EVENTS.AGENT_DN_REGISTERED)?.[1];
+      expect(registeredAgent).toEqual(expect.any(Function));
+      registeredAgent?.({});
+      const logout = registered.mock.calls.find(([event]) => event === CC_EVENTS.AGENT_LOGOUT_SUCCESS)?.[1];
+      expect(logout).toEqual(expect.any(Function));
+      const late = deferred<AISummary>();
+      const task = makeAISummaryTask();
+      storeWrapper.setCurrentTask(task);
+      storeWrapper['registerTaskEventListeners'](task);
+      await storeWrapper.requestMidCallSummary('CONSULT', 'initiator', task);
+      task.requestMidCallSummary.mockReturnValueOnce(late.promise);
+      const request = storeWrapper.requestMidCallSummary('CONSULT', 'initiator', task);
+      storeWrapper['store'].cc.taskManager.getAllTasks = jest.fn().mockReturnValue({});
+
+      logout?.({});
+      late.resolve(aiSummaryFixtures.initiatingMidCall.typedSections);
+      await expect(request).resolves.toEqual({outcome: 'stale'});
+      expect(storeWrapper.aiSummaryCapabilities).toEqual({});
+      expect(storeWrapper.aiSummaryCurrentOwners).toEqual({});
+      expect(storeWrapper.aiSummaryOwnerStates).toEqual({});
+      expect(storeWrapper.aiSummaryPendingRequests).toEqual({});
+      expect(storeWrapper.aiSummaryLastResults).toEqual({});
+      expect(storeWrapper.getPendingAISummaryStatusTransitions()).toEqual([]);
+      expect(storeWrapper['aiSummaryLatestRequestSequences']).toEqual({});
+      expect(storeWrapper['aiSummaryLatestFreshness']).toEqual({});
+      expect(storeWrapper['postCallDraftCaptures'].size).toBe(0);
+      expect(task.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_FEATURE_ENABLEMENT, expect.any(Function));
+    });
+
+    it('advances captured owner keys once, carries same-agent content, and stales predecessor settlements', async () => {
+      const lateSettlement = deferred<AISummary>();
+      const task = makeAISummaryTask({
+        requestMidCallSummary: jest
+          .fn()
+          .mockResolvedValueOnce(aiSummaryFixtures.initiatingMidCall.typedSections)
+          .mockReturnValueOnce(lateSettlement.promise),
+      });
+      storeWrapper.setCurrentTask(task);
+      await storeWrapper.requestMidCallSummary('TRANSFER', 'initiator', task);
+      const firstView = storeWrapper.getAISummaryViewModel('mid-call', 'initiator', task);
+      expect(storeWrapper.recordAISummaryViewed('mid-call', 'initiator', firstView.contentRevision ?? 0, task)).toBe(
+        true
+      );
+
+      const predecessorRequest = storeWrapper.requestMidCallSummary('TRANSFER', 'initiator', task);
+      const captured = storeWrapper.getCurrentAISummaryOwnerKey(task);
+      expect(
+        storeWrapper.advanceAISummaryOwnership(captured, {type: 'consult-conference', mode: 'carry-forward'}, task)
+      ).toEqual({
+        outcome: 'advanced',
+      });
+      const successorView = storeWrapper.getAISummaryViewModel('mid-call', 'initiator', task);
+
+      expect(successorView).toMatchObject({
+        surface: 'content',
+        content: firstView.content,
+        counters: expect.objectContaining({viewed: 1}),
+        actionType: 'TRANSFER',
+        requestPending: false,
+      });
+      expect(successorView.ownerKey?.ownershipGeneration).toBeGreaterThan(firstView.ownerKey?.ownershipGeneration ?? 0);
+      expect(
+        storeWrapper.advanceAISummaryOwnership(captured, {type: 'consult-conference', mode: 'carry-forward'}, task)
+      ).toEqual({
+        outcome: 'duplicate',
+      });
+
+      lateSettlement.resolve({
+        conversationId: task.data.interactionId,
+        timestamp: 9999,
+        summaryText: 'Late predecessor settlement.',
+      });
+      await expect(predecessorRequest).resolves.toEqual({outcome: 'stale'});
+      expect(storeWrapper.getAISummaryViewModel('mid-call', 'initiator', task).content).toEqual(firstView.content);
+    });
+
+    it('resets successor views for cross-agent owner advancement', async () => {
+      const task = makeAISummaryTask();
+      storeWrapper.setCurrentTask(task);
+      await storeWrapper.requestMidCallSummary('TRANSFER', 'initiator', task);
+      const firstView = storeWrapper.getAISummaryViewModel('mid-call', 'initiator', task);
+      expect(storeWrapper.recordAISummaryViewed('mid-call', 'initiator', firstView.contentRevision ?? 0, task)).toBe(
+        true
+      );
+
+      const captured = storeWrapper.getCurrentAISummaryOwnerKey(task);
+      expect(
+        storeWrapper.advanceAISummaryOwnership(
+          captured,
+          {type: 'consult-transfer', mode: 'reset', successorAgentId: 'agent-b'},
+          task
+        )
+      ).toEqual({outcome: 'advanced'});
+
+      expect(storeWrapper.getAISummaryViewModel('mid-call', 'initiator', task)).toMatchObject({
+        surface: 'omitted',
+        content: undefined,
+      });
+
+      storeWrapper['store'].agentId = 'agent-b';
+      expect(storeWrapper.getAISummaryViewModel('mid-call', 'initiator', task)).toMatchObject({
+        ownerKey: expect.objectContaining({agentId: 'agent-b'}),
+        surface: 'omitted',
+        content: undefined,
+        counters: {viewed: 0, copied: 0, edited: 0, liked: 0, disliked: 0},
+      });
+    });
+
+    it.each(['initiator', 'receiver'] as const)(
+      "preserves a non-owner conference participant's %s summary and counters",
+      async (role) => {
+        storeWrapper['store'].agentId = 'agent-b';
+        const task = configureAISummaryTaskIdentity(makeAISummaryTask(), {
+          agentId: 'agent-b',
+          interaction: {
+            owner: 'agent-a',
+            participants: {
+              'agent-a': {id: 'agent-a', pType: 'Agent', hasJoined: true, hasLeft: false},
+              'agent-b': {id: 'agent-b', pType: 'Agent', hasJoined: true, hasLeft: false},
+            },
+          },
+        });
+        storeWrapper.setCurrentTask(task);
+        storeWrapper['registerTaskEventListeners'](task);
+        if (role === 'receiver') {
+          storeWrapper['handleReceiverAISummaryPayload'](task, aiSummaryFixtures.receivingMidCall.adaptiveCard);
+        } else {
+          await storeWrapper.requestMidCallSummary('CONSULT', role, task);
+        }
+        const initial = storeWrapper.getAISummaryViewModel('mid-call', role, task);
+        expect(initial.surface).toBe('content');
+        expect(storeWrapper.recordAISummaryViewed('mid-call', role, initial.contentRevision ?? 0, task)).toBe(true);
+        expect(storeWrapper.recordAISummaryCopied('mid-call', role, initial.contentRevision ?? 0, task)).toBe(true);
+        const beforeEvent = storeWrapper.getAISummaryViewModel('mid-call', role, task);
+        const conferenceTask = configureAISummaryTaskIdentity(makeAISummaryTask(), {
+          agentId: 'agent-b',
+          interaction: {
+            owner: 'agent-a',
+            participants: {
+              'agent-a': {id: 'agent-a', pType: 'Agent', hasJoined: true, hasLeft: false},
+              'agent-b': {id: 'agent-b', pType: 'Agent', hasJoined: true, hasLeft: false},
+            },
+          },
+        });
+        conferenceTask.data.isConferenceInProgress = true;
+        storeWrapper['store'].cc.taskManager.getAllTasks = jest.fn().mockReturnValue({
+          [conferenceTask.data.interactionId]: conferenceTask,
+        });
+
+        storeWrapper.handleConferenceStarted(conferenceTask);
+        const afterEvent = storeWrapper.getAISummaryViewModel('mid-call', role, conferenceTask);
+        expect(afterEvent).toMatchObject({
+          surface: 'content',
+          ownerKey: expect.objectContaining({agentId: 'agent-b'}),
+          content: beforeEvent.content,
+          contentRevision: beforeEvent.contentRevision,
+          counters: beforeEvent.counters,
+        });
+        expect(afterEvent.ownerKey?.ownershipGeneration).toBeGreaterThan(
+          beforeEvent.ownerKey?.ownershipGeneration ?? 0
+        );
+        storeWrapper.handleConferenceStarted(conferenceTask);
+        expect(storeWrapper.getAISummaryViewModel('mid-call', role, conferenceTask).ownerKey).toEqual(
+          afterEvent.ownerKey
+        );
+      }
+    );
+
+    it('advances confirmed conference task events once for the same topology', async () => {
+      const task = makeAISummaryTask();
+      storeWrapper.setCurrentTask(task);
+      storeWrapper['registerTaskEventListeners'](task);
+      await storeWrapper.requestMidCallSummary('CONSULT', 'initiator', task);
+      const beforeEvent = storeWrapper.getAISummaryViewModel('mid-call', 'initiator', task);
+      const conferenceTask = configureAISummaryTaskIdentity(makeAISummaryTask(), {
+        interactionId: task.data.interactionId,
+        interaction: {
+          owner: 'agent-a',
+          participants: {
+            'agent-a': {id: 'agent-a', pType: 'Agent', hasJoined: true, hasLeft: false},
+            'agent-b': {id: 'agent-b', pType: 'Agent', hasJoined: true, hasLeft: false},
+          },
+          media: {
+            'media-main': {
+              mType: 'mainCall',
+              mediaResourceId: task.data.interactionId,
+              participants: ['agent-a', 'agent-b'],
+            },
+          },
+        },
+      });
+      conferenceTask.data.isConferenceInProgress = true;
+      storeWrapper['store'].cc.taskManager.getAllTasks = jest.fn().mockReturnValue({
+        [conferenceTask.data.interactionId]: conferenceTask,
+      });
+
+      storeWrapper.handleConferenceStarted(conferenceTask);
+      const afterEvent = storeWrapper.getAISummaryViewModel('mid-call', 'initiator', conferenceTask);
+      storeWrapper.handleConferenceStarted(conferenceTask);
+      const afterDuplicate = storeWrapper.getAISummaryViewModel('mid-call', 'initiator', conferenceTask);
+
+      expect(afterEvent.content).toEqual(beforeEvent.content);
+      expect(afterEvent.ownerKey?.ownershipGeneration).toBeGreaterThan(beforeEvent.ownerKey?.ownershipGeneration ?? 0);
+      expect(afterDuplicate.ownerKey?.ownershipGeneration).toBe(afterEvent.ownerKey?.ownershipGeneration);
+    });
+
+    it.each(['fulfilled', 'rejected'] as const)(
+      'discards a %s pre-action response after the interaction changes',
+      async (settlement) => {
+        const send = deferred<void>();
+        const task = makeAISummaryTask({sendMidCallSummaryResponse: jest.fn().mockReturnValue(send.promise)});
+        storeWrapper.setCurrentTask(task);
+        await storeWrapper.requestMidCallSummary('CONSULT', 'initiator', task);
+        const revision = storeWrapper.getAISummaryViewModel('mid-call', 'initiator', task).contentRevision ?? 0;
+        const response = storeWrapper.sendMidCallSummaryBeforeAction('initiator', 'CONSULT', revision, task);
+        storeWrapper.setCurrentTask(
+          configureAISummaryTaskIdentity(makeAISummaryTask(), {interactionId: 'next-interaction'})
+        );
+        const trace = jest.spyOn(storeWrapper.logger, 'trace');
+        trace.mockClear();
+        if (settlement === 'fulfilled') send.resolve(undefined);
+        else send.reject(new Error('stale pre-action error'));
+        await expect(response).resolves.toEqual({outcome: 'stale'});
+        expect(trace).not.toHaveBeenCalled();
+      }
+    );
+
+    it.each(['CONSULT', 'TRANSFER'] as const)(
+      'sends NOT_RECEIVED after %s generation failure before telephony',
+      async (actionType) => {
+        const task = makeAISummaryTask({
+          requestMidCallSummary: jest.fn().mockRejectedValue(new Error('generation failed')),
+        });
+        await expect(storeWrapper.requestMidCallSummary(actionType, 'initiator', task)).resolves.toEqual({
+          outcome: 'failed',
+        });
+        await expect(storeWrapper.sendMidCallSummaryBeforeAction('initiator', actionType, 0, task)).resolves.toEqual({
+          outcome: 'sent',
+        });
+        expect(task.sendMidCallSummaryResponse).toHaveBeenCalledWith(
+          expect.objectContaining({
+            summary: '',
+            state: 'NOT_RECEIVED',
+            summaryReceived: false,
+            numberOfTimesViewed: 0,
+            numberOfTimesEdited: 0,
+            numberOfTimesCopied: 0,
+          }),
+          actionType
+        );
+      }
+    );
+
+    it('does not send NOT_RECEIVED while generation is still pending', async () => {
+      const generation = deferred<AISummary>();
+      const task = makeAISummaryTask({requestMidCallSummary: jest.fn().mockReturnValue(generation.promise)});
+      const request = storeWrapper.requestMidCallSummary('CONSULT', 'initiator', task);
+      await expect(storeWrapper.sendMidCallSummaryBeforeAction('initiator', 'CONSULT', 0, task)).resolves.toEqual({
+        outcome: 'blocked',
+      });
+      expect(task.sendMidCallSummaryResponse).not.toHaveBeenCalled();
+      generation.resolve(aiSummaryFixtures.initiatingMidCall.typedSections);
+      await request;
+    });
+
+    it('uses SDK settlement for pre-action mid-call response sends without scheduling a timer', async () => {
+      const task = makeAISummaryTask({
+        sendMidCallSummaryResponse: jest.fn().mockResolvedValue(undefined),
+      });
+      storeWrapper.setCurrentTask(task);
+      await storeWrapper.requestMidCallSummary('CONSULT', 'initiator', task);
+      const view = storeWrapper.getAISummaryViewModel('mid-call', 'initiator', task);
+      const setTimeoutSpy = jest.spyOn(global, 'setTimeout');
+
+      try {
+        await expect(
+          storeWrapper.sendMidCallSummaryBeforeAction('initiator', 'CONSULT', view.contentRevision ?? 0)
+        ).resolves.toEqual({outcome: 'sent'});
+
+        expect(task.sendMidCallSummaryResponse).toHaveBeenCalledTimes(1);
+        expect(setTimeoutSpy).not.toHaveBeenCalled();
+      } finally {
+        setTimeoutSpy.mockRestore();
+      }
+    });
+
+    it('rejects unchanged edits and advances the revision token for accepted edits', async () => {
+      const task = makeAISummaryTask();
+      storeWrapper.setCurrentTask(task);
+      await storeWrapper.requestMidCallSummary('CONSULT', 'initiator', task);
+      const view = storeWrapper.getAISummaryViewModel('mid-call', 'initiator', task);
+      const originalRevision = view.contentRevision ?? 0;
+
+      expect(
+        storeWrapper.editAISummary(
+          'mid-call',
+          'initiator',
+          {key: 'reasonForTransferOrConsult', value: 'Customer needs billing help.'},
+          originalRevision
+        )
+      ).toBe(true);
+      expect(storeWrapper.getAISummaryViewModel('mid-call', 'initiator', task)).toMatchObject({
+        contentRevision: originalRevision,
+        counters: expect.objectContaining({edited: 0}),
+      });
+      expect(
+        storeWrapper.editAISummary(
+          'mid-call',
+          'initiator',
+          {key: 'reasonForTransferOrConsult', value: 'Updated intent'},
+          originalRevision
+        )
+      ).toBe(true);
+
+      const editedView = storeWrapper.getAISummaryViewModel('mid-call', 'initiator', task);
+      expect(editedView.contentRevision).not.toBe(originalRevision);
+      expect(editedView.counters.edited).toBe(1);
+      expect(storeWrapper.recordAISummaryCopied('mid-call', 'initiator', originalRevision)).toBe(false);
+      expect(storeWrapper.recordAISummaryCopied('mid-call', 'initiator', editedView.contentRevision ?? 0)).toBe(true);
+    });
+
+    it('uses the SDK settlement and deadline fence for post-call timeouts without scheduling a timer', async () => {
+      jest.useFakeTimers();
+      jest.setSystemTime(0);
+      const setTimeoutSpy = jest.spyOn(global, 'setTimeout');
+      let resolveLate: (value: AISummary) => void = () => undefined;
+      const task = makeAISummaryTask({
+        requestPostCallSummary: jest.fn<
+          ReturnType<ITask['requestPostCallSummary']>,
+          Parameters<ITask['requestPostCallSummary']>
+        >(
+          () =>
+            new Promise<AISummary>((resolve) => {
+              resolveLate = resolve;
+            })
+        ),
+      });
+      storeWrapper.setCurrentTask(task);
+
+      const request = storeWrapper.requestPostCallSummary(
+        {type: 'reason-commit', reasonId: 'r1', selectionRevision: 1},
+        task
+      );
+      await Promise.resolve();
+      expect(setTimeoutSpy).not.toHaveBeenCalled();
+      jest.setSystemTime(15001);
+      resolveLate(aiSummaryFixtures.ordering.lateSuccessAfterTimeout.lateSettlement.payload);
+      await expect(request).resolves.toEqual({outcome: 'failed'});
+      const viewAfterTimeout = storeWrapper.getAISummaryViewModel('post-call', 'post-call', task);
+
+      expect(viewAfterTimeout.surface).toBe('generic-error');
+      expect(storeWrapper.getAISummaryViewModel('post-call', 'post-call', task).surface).toBe('generic-error');
+      expect(storeWrapper['store'].logger.trace).toHaveBeenCalledTimes(1);
+      expect(storeWrapper['store'].logger.trace).toHaveBeenCalledWith('CC-Widgets: AI summary failure: timeout', {
+        module: 'storeEventsWrapper.ts',
+        method: 'observeAISummaryFailure',
+      });
+      setTimeoutSpy.mockRestore();
+      jest.useRealTimers();
+    });
+
+    describe.each(['mid-call', 'post-call'] as const)('%s summary request failure guard', (path) => {
+      it.each(AI_SUMMARY_NO_RETRY_FAILURE_CASES)(
+        'does not schedule a client retry or cancellation after $name',
+        async (failureCase) => {
+          jest.useFakeTimers();
+          jest.setSystemTime(0);
+          try {
+            const task = makeAISummaryTask();
+            storeWrapper.setCurrentTask(task);
+            const configuredFailure = failureCase.configure(task, path);
+
+            const request = startAISummaryRequest(path, task);
+            configuredFailure.settle?.();
+
+            await expect(request).resolves.toEqual({outcome: failureCase.expectedOutcome});
+            expectAISummaryRequestCalledOnceWithoutCancellation(task, path);
+            expect(task.sendMidCallSummaryResponse).not.toHaveBeenCalled();
+            expect(task.sendPostCallSummaryResponse).not.toHaveBeenCalled();
+            expect(storeWrapper.aiSummaryPendingRequests).toEqual({});
+            expect(jest.getTimerCount()).toBe(0);
+
+            jest.advanceTimersByTime(60000);
+            await Promise.resolve();
+
+            expectAISummaryRequestCalledOnceWithoutCancellation(task, path);
+            expect(task.sendMidCallSummaryResponse).not.toHaveBeenCalled();
+            expect(task.sendPostCallSummaryResponse).not.toHaveBeenCalled();
+            expect(jest.getTimerCount()).toBe(0);
+          } finally {
+            jest.useRealTimers();
+          }
+        }
+      );
+    });
+
+    it('emits content-free summary failure diagnostics and keeps forbidden paths silent', async () => {
+      resetLoggerMocks();
+      const browserSinkSpies = spyOnProtectedBrowserSinks();
+      const sentinels = {
+        summary: 'summary-content-sentinel-rf42',
+        interaction: 'interaction-id-sentinel-rf42',
+        agent: 'agent-id-sentinel-rf42',
+        rawError: 'raw-error-sentinel-rf42',
+        timestamp: '4242424242',
+        duration: 'duration-sentinel-rf42',
+        invalidToken: 'invalid-token-sentinel-rf42',
+      };
+      const forbiddenTokens = Object.values(sentinels);
+      let interactionCounter = 0;
+      const nextInteractionId = (): string => `${sentinels.interaction}-${++interactionCounter}`;
+      const makeSummary = (interactionId: string): AISummary => ({
+        conversationId: interactionId,
+        timestamp: Number(sentinels.timestamp),
+        summaryText: sentinels.summary,
+      });
+      const makeRawError = (
+        label: string,
+        status = 503
+      ): Error & {
+        response: {status: number; data: {interactionId: string; summary: string}};
+        data: {duration: string; timestamp: string};
+      } => {
+        const error = new Error(`${label}:${sentinels.rawError}`) as Error & {
+          response: {status: number; data: {interactionId: string; summary: string}};
+          data: {duration: string; timestamp: string};
+        };
+        error.response = {status, data: {interactionId: sentinels.interaction, summary: sentinels.summary}};
+        error.data = {duration: sentinels.duration, timestamp: sentinels.timestamp};
+        return error;
+      };
+      const prepareTask = (interactionId: string, overrides: Partial<AISummaryTestTask> = {}): AISummaryTestTask => {
+        const task = configureAISummaryTaskIdentity(makeAISummaryTask(overrides), {
+          agentId: sentinels.agent,
+          interactionId,
+        });
+        storeWrapper['store'].agentId = sentinels.agent;
+        storeWrapper.setCurrentTask(task);
+        return task;
+      };
+      const expectTraceCount = (count: number): void => {
+        expect(getLoggerMock('trace')).toHaveBeenCalledTimes(count);
+      };
+
+      try {
+        const generationInteractionId = nextInteractionId();
+        const generationTask = prepareTask(generationInteractionId, {
+          requestMidCallSummary: jest.fn().mockRejectedValue(makeRawError('generation-failure')),
+        });
+        await expect(storeWrapper.requestMidCallSummary('CONSULT', 'initiator', generationTask)).resolves.toEqual({
+          outcome: 'failed',
+        });
+
+        const unsupportedInteractionId = nextInteractionId();
+        const unsupportedTask = prepareTask(unsupportedInteractionId, {
+          requestMidCallSummary: jest.fn().mockResolvedValue({
+            conversationId: unsupportedInteractionId,
+            timestamp: Number(sentinels.timestamp),
+            adaptiveCard: {body: [{text: sentinels.summary}]},
+          }),
+        });
+        await expect(storeWrapper.requestMidCallSummary('CONSULT', 'initiator', unsupportedTask)).resolves.toEqual({
+          outcome: 'failed',
+        });
+        expectTraceCount(1);
+
+        const staleInteractionId = nextInteractionId();
+        const olderSettlement = deferred<AISummary>();
+        const newerSettlement = deferred<AISummary>();
+        const staleTask = prepareTask(staleInteractionId, {
+          requestMidCallSummary: jest
+            .fn()
+            .mockReturnValueOnce(olderSettlement.promise)
+            .mockReturnValueOnce(newerSettlement.promise),
+        });
+        const staleRequest = storeWrapper.requestMidCallSummary('CONSULT', 'initiator', staleTask);
+        const currentRequest = storeWrapper.requestMidCallSummary('CONSULT', 'initiator', staleTask);
+        olderSettlement.reject(makeRawError('stale-generation-failure'));
+        await expect(staleRequest).resolves.toEqual({outcome: 'stale'});
+        expectTraceCount(1);
+        newerSettlement.resolve(makeSummary(staleInteractionId));
+        await expect(currentRequest).resolves.toEqual({outcome: 'accepted'});
+
+        const discardedInteractionId = nextInteractionId();
+        const discardedTask = prepareTask(discardedInteractionId);
+        storeWrapper['handleReceiverAISummaryPayload'](discardedTask, {
+          conversationId: `${discardedInteractionId}-discarded`,
+          timestamp: Number(sentinels.timestamp),
+          adaptiveCard: {body: [{text: sentinels.summary}]},
+        });
+        expectTraceCount(1);
+
+        const clipboardInteractionId = nextInteractionId();
+        const clipboardTask = prepareTask(clipboardInteractionId, {
+          requestMidCallSummary: jest.fn().mockResolvedValue(makeSummary(clipboardInteractionId)),
+        });
+        await storeWrapper.requestMidCallSummary('CONSULT', 'initiator', clipboardTask);
+        const clipboardView = storeWrapper.getAISummaryViewModel('mid-call', 'initiator', clipboardTask);
+        expect(
+          storeWrapper.recordAISummaryCopied('mid-call', 'initiator', clipboardView.contentRevision ?? 0, clipboardTask)
+        ).toBe(true);
+        expectTraceCount(1);
+
+        const blockedInteractionId = nextInteractionId();
+        const blockedSend = deferred<void>();
+        const blockedTask = prepareTask(blockedInteractionId, {
+          requestMidCallSummary: jest.fn().mockResolvedValue(makeSummary(blockedInteractionId)),
+          sendMidCallSummaryResponse: jest.fn().mockReturnValue(blockedSend.promise),
+        });
+        await storeWrapper.requestMidCallSummary('CONSULT', 'initiator', blockedTask);
+        const blockedView = storeWrapper.getAISummaryViewModel('mid-call', 'initiator', blockedTask);
+        const pendingBlockedFeedback = storeWrapper.setMidCallSummaryFeedback(
+          'initiator',
+          'like',
+          'CONSULT',
+          blockedView.contentRevision ?? 0,
+          blockedTask
+        );
+        await expect(
+          storeWrapper.setMidCallSummaryFeedback(
+            'initiator',
+            'dislike',
+            'CONSULT',
+            blockedView.contentRevision ?? 0,
+            blockedTask
+          )
+        ).resolves.toEqual({outcome: 'blocked'});
+        expectTraceCount(1);
+        blockedSend.resolve(undefined);
+        await expect(pendingBlockedFeedback).resolves.toEqual({outcome: 'confirmed'});
+
+        const feedbackInteractionId = nextInteractionId();
+        const feedbackTask = prepareTask(feedbackInteractionId, {
+          requestMidCallSummary: jest.fn().mockResolvedValue(makeSummary(feedbackInteractionId)),
+          sendMidCallSummaryResponse: jest.fn().mockRejectedValue(makeRawError('feedback-failure')),
+        });
+        await storeWrapper.requestMidCallSummary('CONSULT', 'initiator', feedbackTask);
+        const feedbackView = storeWrapper.getAISummaryViewModel('mid-call', 'initiator', feedbackTask);
+        await expect(
+          storeWrapper.setMidCallSummaryFeedback(
+            'initiator',
+            'like',
+            'CONSULT',
+            feedbackView.contentRevision ?? 0,
+            feedbackTask
+          )
+        ).resolves.toEqual({outcome: 'failed'});
+
+        const preActionInteractionId = nextInteractionId();
+        const preActionTask = prepareTask(preActionInteractionId, {
+          requestMidCallSummary: jest.fn().mockResolvedValue(makeSummary(preActionInteractionId)),
+          sendMidCallSummaryResponse: jest.fn().mockRejectedValue(makeRawError('pre-action-failure', 0)),
+        });
+        await storeWrapper.requestMidCallSummary('CONSULT', 'initiator', preActionTask);
+        const preActionView = storeWrapper.getAISummaryViewModel('mid-call', 'initiator', preActionTask);
+        await expect(
+          storeWrapper.sendMidCallSummaryBeforeAction(
+            'initiator',
+            'CONSULT',
+            preActionView.contentRevision ?? 0,
+            preActionTask
+          )
+        ).resolves.toEqual({outcome: 'failed'});
+
+        const invalidTokenTraceCount = getLoggerMock('trace').mock.calls.length;
+        await expect(
+          storeWrapper.freezeAndSendPostCallSummary(Symbol(sentinels.invalidToken) as never)
+        ).resolves.toEqual({
+          wrapup: 'succeeded',
+          response: 'response-failed',
+        });
+        expectTraceCount(invalidTokenTraceCount);
+
+        const finalResponseInteractionId = nextInteractionId();
+        const finalResponseTask = prepareTask(finalResponseInteractionId, {
+          requestPostCallSummary: jest.fn().mockResolvedValue(makeSummary(finalResponseInteractionId)),
+          sendPostCallSummaryResponse: jest.fn().mockRejectedValue(makeRawError('final-response-failure')),
+        });
+        await storeWrapper.requestPostCallSummary(
+          {type: 'reason-commit', reasonId: `${sentinels.summary}-reason`, selectionRevision: 1},
+          finalResponseTask
+        );
+        const token = storeWrapper.capturePostCallDraft(`${sentinels.summary}-wrapup`, finalResponseTask);
+        expect(token).toBeDefined();
+        await expect(storeWrapper.freezeAndSendPostCallSummary(token!)).resolves.toEqual({
+          wrapup: 'succeeded',
+          response: 'response-failed',
+        });
+
+        expect(getLoggerMock('trace').mock.calls).toEqual([
+          [
+            'CC-Widgets: AI summary failure: unavailable',
+            {module: 'storeEventsWrapper.ts', method: 'observeAISummaryFailure'},
+          ],
+          [
+            'CC-Widgets: AI summary failure: unavailable',
+            {module: 'storeEventsWrapper.ts', method: 'observeAISummaryFailure'},
+          ],
+          [
+            'CC-Widgets: AI summary failure: offline',
+            {module: 'storeEventsWrapper.ts', method: 'observeAISummaryFailure'},
+          ],
+          [
+            'CC-Widgets: AI summary failure: response-failed',
+            {module: 'storeEventsWrapper.ts', method: 'observeAISummaryFailure'},
+          ],
+        ]);
+        expect(getLoggerMock('log')).not.toHaveBeenCalled();
+        browserSinkSpies.forEach((spy) => expect(spy).not.toHaveBeenCalled());
+        const protectedSinkText = getProtectedSinkCallText(browserSinkSpies);
+        forbiddenTokens.forEach((token) => {
+          expect(protectedSinkText).not.toContain(token);
+        });
+      } finally {
+        browserSinkSpies.forEach((spy) => spy.mockRestore());
+      }
+    });
+
+    it('keeps the post-call completion escape sticky through retry and resets it for a new reason', async () => {
+      const retry = deferred();
+      const nextReason = deferred();
+      const task = makeAISummaryTask({
+        requestPostCallSummary: jest
+          .fn()
+          .mockRejectedValueOnce(new Error('transport sentinel'))
+          .mockReturnValueOnce(retry.promise)
+          .mockReturnValueOnce(nextReason.promise),
+      });
+      storeWrapper.setCurrentTask(task);
+
+      await expect(
+        storeWrapper.requestPostCallSummary({type: 'reason-commit', reasonId: 'r1', selectionRevision: 1}, task)
+      ).resolves.toEqual({outcome: 'failed'});
+      expect(storeWrapper.getAISummaryViewModel('post-call', 'post-call', task)).toMatchObject({
+        surface: 'generic-error',
+        requestPending: false,
+        completionEscape: true,
+      });
+
+      const retryRequest = storeWrapper.requestPostCallSummary({type: 'retry'}, task);
+      expect(storeWrapper.getAISummaryViewModel('post-call', 'post-call', task)).toMatchObject({
+        surface: 'generating',
+        requestPending: true,
+        completionEscape: true,
+      });
+
+      retry.reject(new Error('retry sentinel'));
+      await expect(retryRequest).resolves.toEqual({outcome: 'failed'});
+      expect(storeWrapper.getAISummaryViewModel('post-call', 'post-call', task).completionEscape).toBe(true);
+
+      const nextReasonRequest = storeWrapper.requestPostCallSummary(
+        {type: 'reason-commit', reasonId: 'r2', selectionRevision: 2},
+        task
+      );
+      expect(storeWrapper.getAISummaryViewModel('post-call', 'post-call', task)).toMatchObject({
+        surface: 'generating',
+        requestPending: true,
+        completionEscape: false,
+      });
+
+      nextReason.resolve(aiSummaryFixtures.postCall.cardOnlyUnsupported);
+      await expect(nextReasonRequest).resolves.toEqual({outcome: 'failed'});
+      expect(storeWrapper.getAISummaryViewModel('post-call', 'post-call', task)).toMatchObject({
+        surface: 'unavailable',
+        requestPending: false,
+        completionEscape: true,
+      });
+    });
+
+    it('marks successful no-draft wrap-up terminal and stales a pending post-call settlement', async () => {
+      const retry = deferred<AISummary>();
+      const task = makeAISummaryTask({
+        requestPostCallSummary: jest
+          .fn()
+          .mockRejectedValueOnce(new Error('initial failure'))
+          .mockReturnValueOnce(retry.promise),
+      });
+      storeWrapper.setCurrentTask(task);
+
+      await expect(
+        storeWrapper.requestPostCallSummary({type: 'reason-commit', reasonId: 'r1', selectionRevision: 1}, task)
+      ).resolves.toEqual({outcome: 'failed'});
+      const retryRequest = storeWrapper.requestPostCallSummary({type: 'retry'}, task);
+      expect(storeWrapper.getAISummaryViewModel('post-call', 'post-call', task)).toMatchObject({
+        surface: 'generating',
+        requestPending: true,
+        completionEscape: true,
+      });
+
+      expect(storeWrapper.markPostCallWrapupCompleted('aux-terminal', task)).toBe(true);
+      expect(storeWrapper.getAISummaryViewModel('post-call', 'post-call', task)).toMatchObject({
+        surface: 'generic-error',
+        requestPending: false,
+        completionEscape: true,
+      });
+
+      retry.resolve(aiSummaryFixtures.postCall.structured);
+      await expect(retryRequest).resolves.toEqual({outcome: 'stale'});
+      expect(storeWrapper.getAISummaryViewModel('post-call', 'post-call', task)).toMatchObject({
+        surface: 'generic-error',
+        requestPending: false,
+      });
+      expect(storeWrapper.getPendingAISummaryStatusTransitions()).toEqual([
+        expect.objectContaining({kind: 'post-call', state: 'unavailable'}),
+      ]);
+    });
+
+    it('omits unauthorized and initialization failures without availability transitions', async () => {
+      const midCallTask = makeAISummaryTask({
+        requestMidCallSummary: jest.fn().mockRejectedValue({response: {status: 401}}),
+      });
+      storeWrapper.setCurrentTask(midCallTask);
+
+      await expect(storeWrapper.requestMidCallSummary('CONSULT', 'initiator', midCallTask)).resolves.toEqual({
+        outcome: 'failed',
+      });
+      expect(storeWrapper.getAISummaryViewModel('mid-call', 'initiator', midCallTask)).toMatchObject({
+        eligible: false,
+        surface: 'omitted',
+      });
+      expect(storeWrapper.getPendingAISummaryStatusTransitions()).toEqual([]);
+
+      resetAISummaryTestState();
+      const receiverTask = makeAISummaryTask({
+        requestMidCallSummary: jest.fn().mockRejectedValue(createSummaryError('AI_ASSISTANT_BASE_URL_NOT_AVAILABLE')),
+      });
+      storeWrapper.setCurrentTask(receiverTask);
+
+      await expect(storeWrapper.requestMidCallSummary('TRANSFER', 'receiver', receiverTask)).resolves.toEqual({
+        outcome: 'failed',
+      });
+      expect(storeWrapper.getAISummaryViewModel('mid-call', 'receiver', receiverTask)).toMatchObject({
+        eligible: false,
+        surface: 'omitted',
+      });
+      expect(storeWrapper.getPendingAISummaryStatusTransitions()).toEqual([]);
+
+      resetAISummaryTestState();
+      const postCallTask = makeAISummaryTask({
+        requestPostCallSummary: jest.fn().mockRejectedValue({status: 403}),
+      });
+      storeWrapper.setCurrentTask(postCallTask);
+
+      await expect(
+        storeWrapper.requestPostCallSummary({type: 'reason-commit', reasonId: 'r1', selectionRevision: 1}, postCallTask)
+      ).resolves.toEqual({outcome: 'failed'});
+      expect(storeWrapper.getAISummaryViewModel('post-call', 'post-call', postCallTask)).toMatchObject({
+        eligible: false,
+        surface: 'omitted',
+      });
+      expect(storeWrapper.getPendingAISummaryStatusTransitions()).toEqual([]);
+    });
+
+    it('repaints observers for pending and failed regeneration when draft content already exists', async () => {
+      await withObservableAISummaryStore(async () => {
+        resetAISummaryTestState();
+        const task = makeAISummaryTask();
+        storeWrapper.setCurrentTask(task);
+        await storeWrapper.requestPostCallSummary({type: 'reason-commit', reasonId: 'r1', selectionRevision: 1}, task);
+        const retry = deferred<AISummary>();
+        task.requestPostCallSummary.mockReturnValueOnce(retry.promise);
+        const observed: Array<{surface: string; requestPending: boolean}> = [];
+        const dispose = autorun(() => {
+          const view = storeWrapper.getAISummaryViewModel('post-call', 'post-call', task);
+          observed.push({surface: view.surface, requestPending: view.requestPending});
+        });
+
+        try {
+          const request = storeWrapper.requestPostCallSummary({type: 'retry'}, task);
+          await waitFor(() => {
+            expect(observed).toContainEqual({surface: 'content', requestPending: true});
+          });
+
+          retry.reject(new Error('transport sentinel'));
+          await expect(request).resolves.toEqual({outcome: 'failed'});
+          await waitFor(() => {
+            expect(observed[observed.length - 1]).toEqual({surface: 'content', requestPending: false});
+          });
+        } finally {
+          dispose();
+        }
+      });
+    });
+
+    it('repaints observers for timeout, unsupported, stale, and successful settlements without state churn', async () => {
+      await withObservableAISummaryStore(async () => {
+        resetAISummaryTestState();
+        const task = makeAISummaryTask();
+        storeWrapper.setCurrentTask(task);
+        await storeWrapper.requestMidCallSummary('CONSULT', 'initiator', task);
+        const observed: Array<{surface: string; requestPending: boolean; revision: number}> = [];
+        const dispose = autorun(() => {
+          const view = storeWrapper.getAISummaryViewModel('mid-call', 'initiator', task);
+          observed.push({
+            surface: view.surface,
+            requestPending: view.requestPending,
+            revision: view.contentRevision ?? 0,
+          });
+        });
+
+        try {
+          const older = deferred<AISummary>();
+          const newer = deferred<AISummary>();
+          task.requestMidCallSummary.mockReturnValueOnce(older.promise).mockReturnValueOnce(newer.promise);
+
+          const staleRequest = storeWrapper.requestMidCallSummary('CONSULT', 'initiator', task);
+          const successfulRequest = storeWrapper.requestMidCallSummary('CONSULT', 'initiator', task);
+          newer.resolve({...aiSummaryFixtures.initiatingMidCall.typedSections, timestamp: 2005});
+          await expect(successfulRequest).resolves.toEqual({outcome: 'accepted'});
+          await waitFor(() => {
+            expect(observed[observed.length - 1]).toMatchObject({surface: 'content', requestPending: true});
+          });
+
+          older.resolve({...aiSummaryFixtures.initiatingMidCall.typedSections, timestamp: 1000});
+          await expect(staleRequest).resolves.toEqual({outcome: 'stale'});
+          await waitFor(() => {
+            expect(observed[observed.length - 1]).toMatchObject({surface: 'content', requestPending: false});
+          });
+        } finally {
+          dispose();
+        }
+
+        const receiverObserved: Array<{surface: string; requestPending: boolean}> = [];
+        const receiverState = storeWrapper['ensureOwnerState']({
+          kind: 'mid-call',
+          role: 'receiver',
+          task,
+          actionType: 'TRANSFER',
+        });
+        expect(receiverState).toBeDefined();
+        const receiverDispose = autorun(() => {
+          const view = storeWrapper.getAISummaryViewModel('mid-call', 'receiver', task);
+          receiverObserved.push({surface: view.surface, requestPending: view.requestPending});
+        });
+
+        try {
+          storeWrapper['handleReceiverAISummaryPayload'](task, aiSummaryFixtures.receivingMidCall.typedOnlyUnsupported);
+          await waitFor(() => {
+            expect(receiverObserved[receiverObserved.length - 1]).toEqual({
+              surface: 'unavailable',
+              requestPending: false,
+            });
+          });
+        } finally {
+          receiverDispose();
+        }
+
+        const timeout = deferred<AISummary>();
+        task.requestMidCallSummary.mockReturnValueOnce(timeout.promise);
+        const timeoutObserved: Array<{surface: string; requestPending: boolean}> = [];
+        const timeoutDispose = autorun(() => {
+          const view = storeWrapper.getAISummaryViewModel('mid-call', 'initiator', task);
+          timeoutObserved.push({surface: view.surface, requestPending: view.requestPending});
+        });
+        try {
+          const request = storeWrapper.requestMidCallSummary('CONSULT', 'initiator', task);
+          expect(timeoutObserved).toContainEqual({surface: 'content', requestPending: true});
+          timeout.reject(createSummaryError('MID_CALL_SUMMARY_TIMEOUT'));
+          await expect(request).resolves.toEqual({outcome: 'failed'});
+          expect(timeoutObserved[timeoutObserved.length - 1]).toEqual({
+            surface: 'content',
+            requestPending: false,
+          });
+        } finally {
+          timeoutDispose();
+        }
+      });
+    });
+
+    it.each([
+      ['presentGreaterTimestamp', 'accepted'],
+      ['presentEqualTimestamp', 'accepted'],
+      ['presentLowerTimestamp', 'stale'],
+      ['omittedTimestampPair', 'accepted'],
+      ['mixedPresentOmitted', 'accepted'],
+      ['mixedOmittedPresent', 'accepted'],
+    ] as const)('applies SDK-shaped %s fixtures at the store boundary', async (fixtureName, outcome) => {
+      const fixture = aiSummaryFixtures.ordering[fixtureName];
+      const task = makeAISummaryTask({
+        requestMidCallSummary: jest
+          .fn()
+          .mockResolvedValueOnce(fixture.previous)
+          .mockResolvedValueOnce(fixture.incoming),
+      });
+      storeWrapper.setCurrentTask(task);
+      await expect(storeWrapper.requestMidCallSummary('CONSULT', 'initiator', task)).resolves.toEqual({
+        outcome: 'accepted',
+      });
+      await expect(storeWrapper.requestMidCallSummary('CONSULT', 'initiator', task)).resolves.toEqual({outcome});
+      expect(storeWrapper.getAISummaryViewModel('mid-call', 'initiator', task).content).toEqual({
+        type: 'text',
+        summaryText: outcome === 'accepted' ? fixture.incoming.summaryText : fixture.previous.summaryText,
+      });
+      expect(task.requestMidCallSummary).toHaveBeenCalledTimes(2);
+    });
+
+    it('orders untimestamped same-generation settlements by settlement arrival', async () => {
+      const firstSettlement = deferred();
+      const secondSettlement = deferred();
+      const task = makeAISummaryTask({
+        requestMidCallSummary: jest
+          .fn()
+          .mockReturnValueOnce(firstSettlement.promise)
+          .mockReturnValueOnce(secondSettlement.promise),
+      });
+      storeWrapper.setCurrentTask(task);
+
+      const firstRequest = storeWrapper.requestMidCallSummary('CONSULT', 'initiator', task);
+      const secondRequest = storeWrapper.requestMidCallSummary('CONSULT', 'initiator', task);
+
+      secondSettlement.resolve({
+        conversationId: 'interaction-main-1',
+        summaryText: 'Second request settled first.',
+      });
+      await expect(secondRequest).resolves.toEqual({outcome: 'accepted'});
+      expect(storeWrapper.getAISummaryViewModel('mid-call', 'initiator', task).content).toEqual({
+        type: 'text',
+        summaryText: 'Second request settled first.',
+      });
+
+      firstSettlement.resolve({
+        conversationId: 'interaction-main-1',
+        summaryText: 'First request settled last.',
+      });
+      await expect(firstRequest).resolves.toEqual({outcome: 'accepted'});
+      expect(storeWrapper.getAISummaryViewModel('mid-call', 'initiator', task).content).toEqual({
+        type: 'text',
+        summaryText: 'First request settled last.',
+      });
+    });
+
+    it('suppresses an older rejection while a newer matching request remains open', async () => {
+      const older = deferred<AISummary>();
+      const newer = deferred<AISummary>();
+      const task = makeAISummaryTask({
+        requestMidCallSummary: jest.fn().mockReturnValueOnce(older.promise).mockReturnValueOnce(newer.promise),
+      });
+      storeWrapper.setCurrentTask(task);
+
+      const olderRequest = storeWrapper.requestMidCallSummary('CONSULT', 'initiator', task);
+      const newerRequest = storeWrapper.requestMidCallSummary('CONSULT', 'initiator', task);
+
+      older.reject(new Error('older rejection'));
+      await expect(olderRequest).resolves.toEqual({outcome: 'stale'});
+      expect(storeWrapper.getAISummaryViewModel('mid-call', 'initiator', task)).toMatchObject({
+        surface: 'generating',
+        requestPending: true,
+      });
+      expect(storeWrapper.getPendingAISummaryStatusTransitions()).toEqual([]);
+
+      newer.reject(new Error('newer rejection'));
+      await expect(newerRequest).resolves.toEqual({outcome: 'failed'});
+      expect(storeWrapper.getAISummaryViewModel('mid-call', 'initiator', task)).toMatchObject({
+        surface: 'generic-error',
+        requestPending: false,
+      });
+      expect(storeWrapper.getPendingAISummaryStatusTransitions()).toEqual([
+        expect.objectContaining({kind: 'mid-call', state: 'unavailable'}),
+      ]);
+    });
+
+    it.each(['fulfilled', 'rejected'] as const)(
+      'suppresses older rejection after the newer request has %s',
+      async (settlement) => {
+        const older = deferred<AISummary>();
+        const newer = deferred<AISummary>();
+        const task = makeAISummaryTask({
+          requestMidCallSummary: jest.fn().mockReturnValueOnce(older.promise).mockReturnValueOnce(newer.promise),
+        });
+        const oldRequest = storeWrapper.requestMidCallSummary('CONSULT', 'initiator', task);
+        const newRequest = storeWrapper.requestMidCallSummary('CONSULT', 'initiator', task);
+        if (settlement === 'fulfilled') newer.resolve(aiSummaryFixtures.initiatingMidCall.typedSections);
+        else newer.reject(new Error('newer error'));
+        await newRequest;
+        const results = {...storeWrapper['store'].aiSummaryLastResults};
+        const statuses = [...storeWrapper.getPendingAISummaryStatusTransitions()];
+        const trace = jest.spyOn(storeWrapper.logger, 'trace');
+        trace.mockClear();
+        older.reject(new Error('obsolete error'));
+        await expect(oldRequest).resolves.toEqual({outcome: 'stale'});
+        expect(storeWrapper['store'].aiSummaryLastResults).toEqual(results);
+        expect(storeWrapper.getPendingAISummaryStatusTransitions()).toEqual(statuses);
+        expect(trace).not.toHaveBeenCalled();
+      }
+    );
+
+    it('keeps older post-call generation settlements stale and accepts a successor generation with a lower timestamp', async () => {
+      const olderGeneration = deferred();
+      const successorGeneration = deferred();
+      const task = makeAISummaryTask({
+        requestPostCallSummary: jest
+          .fn()
+          .mockResolvedValueOnce({
+            conversationId: 'interaction-main-1',
+            timestamp: 3000,
+            summaryText: 'Retained older draft.',
+          })
+          .mockReturnValueOnce(olderGeneration.promise)
+          .mockReturnValueOnce(successorGeneration.promise),
+      });
+      storeWrapper.setCurrentTask(task);
+
+      await expect(
+        storeWrapper.requestPostCallSummary({type: 'reason-commit', reasonId: 'r1', selectionRevision: 1}, task)
+      ).resolves.toEqual({outcome: 'accepted'});
+
+      const olderRequest = storeWrapper.requestPostCallSummary(
+        {type: 'reason-commit', reasonId: 'r2', selectionRevision: 2},
+        task
+      );
+      const successorRequest = storeWrapper.requestPostCallSummary(
+        {type: 'reason-commit', reasonId: 'r3', selectionRevision: 3},
+        task
+      );
+
+      olderGeneration.resolve({
+        conversationId: 'interaction-main-1',
+        timestamp: 4000,
+        summaryText: 'Older generation must not replace the draft.',
+      });
+      await expect(olderRequest).resolves.toEqual({outcome: 'stale'});
+      expect(storeWrapper.getAISummaryViewModel('post-call', 'post-call', task).content).toEqual({
+        type: 'text',
+        summaryText: 'Retained older draft.',
+      });
+
+      successorGeneration.resolve({
+        conversationId: 'interaction-main-1',
+        timestamp: 2500,
+        summaryText: 'Successor generation lower timestamp.',
+      });
+      await expect(successorRequest).resolves.toEqual({outcome: 'accepted'});
+      expect(storeWrapper.getAISummaryViewModel('post-call', 'post-call', task).content).toEqual({
+        type: 'text',
+        summaryText: 'Successor generation lower timestamp.',
+      });
+    });
+
+    it('resets post-call ownership A-to-B-to-C, rejects predecessor settlements, and preserves conference content', async () => {
+      const conferenceIdentity = aiSummaryFixtures.conferences.twoPartyHost;
+      const interactionId = conferenceIdentity.canonicalInteractionId;
+      const taskA = configureAISummaryTaskIdentity(
+        makeAISummaryTask({
+          requestPostCallSummary: jest.fn().mockResolvedValue({
+            conversationId: interactionId,
+            timestamp: 3000,
+            summaryText: 'Agent A initial post-call summary.',
+          }),
+        }),
+        {
+          agentId: 'agent-a',
+          interactionId,
+          interaction: conferenceIdentity.sdkProjection,
+        }
+      );
+      const taskBSettlement = deferred();
+      const taskB = configureAISummaryTaskIdentity(
+        makeAISummaryTask({
+          requestPostCallSummary: jest.fn().mockReturnValue(taskBSettlement.promise),
+        }),
+        {agentId: 'agent-b', interactionId, interaction: conferenceIdentity.sdkProjection}
+      );
+      const taskCSettlement = deferred();
+      const taskC = configureAISummaryTaskIdentity(
+        makeAISummaryTask({
+          requestPostCallSummary: jest.fn().mockReturnValue(taskCSettlement.promise),
+        }),
+        {agentId: 'agent-c', interactionId, interaction: conferenceIdentity.sdkProjection}
+      );
+
+      storeWrapper['store'].agentId = 'agent-a';
+      storeWrapper.setCurrentTask(taskA);
+      await expect(
+        storeWrapper.requestPostCallSummary({type: 'reason-commit', reasonId: 'r1', selectionRevision: 1}, taskA)
+      ).resolves.toEqual({outcome: 'accepted'});
+      const viewA = storeWrapper.getAISummaryViewModel('post-call', 'post-call', taskA);
+      expect(storeWrapper.recordAISummaryViewed('post-call', 'post-call', viewA.contentRevision ?? 0)).toBe(true);
+      expect(storeWrapper.recordAISummaryCopied('post-call', 'post-call', viewA.contentRevision ?? 0)).toBe(true);
+      expect(storeWrapper.getAISummaryViewModel('post-call', 'post-call', taskA).counters).toMatchObject({
+        viewed: 1,
+        copied: 1,
+      });
+
+      storeWrapper['store'].agentId = 'agent-b';
+      const requestB = storeWrapper.requestPostCallSummary(
+        {type: 'reason-commit', reasonId: 'r2', selectionRevision: 2},
+        taskB
+      );
+      expect(storeWrapper.getAISummaryViewModel('post-call', 'post-call', taskB)).toMatchObject({
+        ownerKey: expect.objectContaining({agentId: 'agent-b'}),
+        surface: 'generating',
+        content: undefined,
+        counters: {viewed: 0, copied: 0, edited: 0, liked: 0, disliked: 0},
+        requestPending: true,
+      });
+      storeWrapper['store'].agentId = 'agent-a';
+      expect(storeWrapper.getAISummaryViewModel('post-call', 'post-call', taskA)).toMatchObject({
+        surface: 'omitted',
+        content: undefined,
+      });
+
+      storeWrapper['store'].agentId = 'agent-c';
+      const requestC = storeWrapper.requestPostCallSummary(
+        {type: 'reason-commit', reasonId: 'r3', selectionRevision: 3},
+        taskC
+      );
+      taskBSettlement.resolve({
+        conversationId: interactionId,
+        timestamp: 3001,
+        summaryText: 'Agent B stale summary must not paint.',
+      });
+      await expect(requestB).resolves.toEqual({outcome: 'stale'});
+
+      const conferenceSummary =
+        'Agent C final conference summary preserves Agent A, Agent B, Agent C, and Customer context.';
+      taskCSettlement.resolve({
+        conversationId: interactionId,
+        timestamp: 3002,
+        summaryText: conferenceSummary,
+      });
+      await expect(requestC).resolves.toEqual({outcome: 'accepted'});
+
+      const viewC = storeWrapper.getAISummaryViewModel('post-call', 'post-call', taskC);
+      expect(viewC).toMatchObject({
+        ownerKey: expect.objectContaining({agentId: 'agent-c'}),
+        counters: {viewed: 0, copied: 0, edited: 0, liked: 0, disliked: 0},
+      });
+      expect(viewC.content).toEqual({type: 'text', summaryText: conferenceSummary});
+      storeWrapper['store'].agentId = 'agent-b';
+      expect(storeWrapper.getAISummaryViewModel('post-call', 'post-call', taskB)).toMatchObject({
+        surface: 'omitted',
+        content: undefined,
+      });
+
+      storeWrapper['store'].agentId = 'agent-a';
+      await expect(
+        storeWrapper.requestPostCallSummary({type: 'reason-commit', reasonId: 'r4', selectionRevision: 4}, taskA)
+      ).resolves.toEqual({outcome: 'accepted'});
+      const returnedAView = storeWrapper.getAISummaryViewModel('post-call', 'post-call', taskA);
+      const returnedAState = Object.values(storeWrapper['store'].aiSummaryOwnerStates).find(
+        (state): state is AISummaryPostCallOwnerState =>
+          state.kind === 'post-call' &&
+          state.ownerKey.agentId === 'agent-a' &&
+          state.ownerKey.ownershipGeneration === returnedAView.ownerKey?.ownershipGeneration
+      );
+      expect(returnedAView).toMatchObject({
+        ownerKey: expect.objectContaining({agentId: 'agent-a'}),
+        counters: {viewed: 0, copied: 0, edited: 0, liked: 0, disliked: 0},
+      });
+      expect(returnedAView.ownerKey?.ownershipGeneration).toBeGreaterThan(viewA.ownerKey?.ownershipGeneration ?? 0);
+      expect(returnedAState?.postCallGeneration).toBe(4);
+    });
+
+    it('keeps a submitted draft terminal when a pending regeneration settles', async () => {
+      const retry = deferred<AISummary>();
+      const task = makeAISummaryTask({
+        requestPostCallSummary: jest
+          .fn()
+          .mockResolvedValueOnce(aiSummaryFixtures.postCall.structured)
+          .mockReturnValueOnce(retry.promise),
+      });
+      await storeWrapper.requestPostCallSummary({type: 'reason-commit', reasonId: 'r1', selectionRevision: 1}, task);
+      const request = storeWrapper.requestPostCallSummary({type: 'retry'}, task);
+      const token = storeWrapper.capturePostCallDraft('aux-code', task);
+      expect(token).toBeDefined();
+      await expect(storeWrapper.freezeAndSendPostCallSummary(token!)).resolves.toEqual({
+        wrapup: 'succeeded',
+        response: 'submitted',
+      });
+      const submitted = storeWrapper.getAISummaryViewModel('post-call', 'post-call', task);
+      expect(submitted).toMatchObject({controlsDisabled: true, requestPending: false});
+      retry.resolve(aiSummaryFixtures.postCall.structured);
+      await expect(request).resolves.toEqual({outcome: 'stale'});
+      expect(storeWrapper.getAISummaryViewModel('post-call', 'post-call', task)).toEqual(submitted);
+      expect(
+        storeWrapper.editAISummary(
+          'post-call',
+          'post-call',
+          {key: 'additionalContext', value: 'Late edit'},
+          submitted.contentRevision ?? 0,
+          task
+        )
+      ).toBe(false);
+      expect(storeWrapper.setPostCallSummaryFeedback('like', submitted.contentRevision ?? 0, task)).toBe(false);
+      expect(storeWrapper.capturePostCallDraft('aux-code', task)).toBeUndefined();
+      await expect(
+        storeWrapper.requestPostCallSummary({type: 'reason-commit', reasonId: 'late', selectionRevision: 2}, task)
+      ).resolves.toEqual({outcome: 'blocked'});
+    });
+
+    it('captures a post-call draft with the aux-code wrapUpCode and retains failed-response state', async () => {
+      const task = makeAISummaryTask({
+        sendPostCallSummaryResponse: jest.fn().mockRejectedValue(new Error('transport sentinel')),
+      });
+      storeWrapper.setCurrentTask(task);
+
+      const result = await storeWrapper.requestPostCallSummary(
+        {type: 'reason-commit', reasonId: 'r1', selectionRevision: 1},
+        task
+      );
+      const view = storeWrapper.getAISummaryViewModel('post-call', 'post-call', task);
+      const rated = storeWrapper.setPostCallSummaryFeedback('dislike', view.contentRevision ?? 0);
+      const token = storeWrapper.capturePostCallDraft(aiSummaryFixtures.wrapUp.distinctReasonAndCode.auxCodeId, task);
+      const capturedView = storeWrapper.getAISummaryViewModel('post-call', 'post-call', task);
+      const lateGeneration = deferred<AISummary>();
+      task.requestPostCallSummary.mockReturnValueOnce(lateGeneration.promise);
+      const lateRequest = storeWrapper.requestPostCallSummary({type: 'retry'}, task);
+      lateGeneration.resolve(aiSummaryFixtures.postCall.structured);
+      await expect(lateRequest).resolves.toEqual({outcome: 'blocked'});
+      expect(task.requestPostCallSummary).toHaveBeenCalledTimes(1);
+      const submission = token ? await storeWrapper.freezeAndSendPostCallSummary(token) : undefined;
+      const failedView = storeWrapper.getAISummaryViewModel('post-call', 'post-call', task);
+
+      expect(result).toEqual({outcome: 'accepted'});
+      expect(rated).toBe(true);
+      expect(capturedView).toMatchObject({
+        controlsDisabled: true,
+        contentRevision: view.contentRevision,
+      });
+      expect(
+        storeWrapper.editAISummary(
+          'post-call',
+          'post-call',
+          {key: 'initialContactReason', value: 'Late edit'},
+          view.contentRevision ?? 0
+        )
+      ).toBe(false);
+      expect(storeWrapper.recordAISummaryViewed('post-call', 'post-call', view.contentRevision ?? 0)).toBe(false);
+      expect(storeWrapper.recordAISummaryCopied('post-call', 'post-call', view.contentRevision ?? 0)).toBe(false);
+      expect(storeWrapper.setPostCallSummaryFeedback('like', view.contentRevision ?? 0)).toBe(false);
+      expect(submission).toEqual({wrapup: 'succeeded', response: 'response-failed'});
+      expect(task.sendPostCallSummaryResponse).toHaveBeenCalledWith(
+        expect.objectContaining({
+          feedback: 'thumbs_down',
+          wrapUpCode: aiSummaryFixtures.wrapUp.distinctReasonAndCode.auxCodeId,
+        })
+      );
+      expect(aiSummaryFixtures.wrapUp.distinctReasonAndCode.auxCodeId).not.toBe(
+        aiSummaryFixtures.wrapUp.distinctReasonAndCode.wrapUpReason
+      );
+      expect(failedView.feedbackStatus).toBe('not-confirmed');
+      expect(failedView.controlsDisabled).toBe(true);
+      expect(storeWrapper.setPostCallSummaryFeedback('like', failedView.contentRevision ?? 0)).toBe(false);
+      expect(task.sendPostCallSummaryResponse).toHaveBeenCalledTimes(1);
+      expect(token).toBeDefined();
+      await expect(storeWrapper.freezeAndSendPostCallSummary(token!)).resolves.toEqual({
+        wrapup: 'succeeded',
+        response: 'response-failed',
+      });
+      expect(task.sendPostCallSummaryResponse).toHaveBeenCalledTimes(1);
+
+      storeWrapper['handleAISummaryWrappedUp'](task);
+      expect(storeWrapper.getAISummaryViewModel('post-call', 'post-call', task)).toMatchObject({
+        surface: 'omitted',
+        content: undefined,
+      });
+    });
+
+    it('sends the captured draft after wrapped-up and task removal, retaining success until the next interaction', async () => {
+      const task = makeAISummaryTask();
+      storeWrapper.setCurrentTask(task);
+      await storeWrapper.requestPostCallSummary({type: 'reason-commit', reasonId: 'r1', selectionRevision: 1}, task);
+      const token = storeWrapper.capturePostCallDraft('aux-code', task);
+      expect(token).toBeDefined();
+      storeWrapper['handleAISummaryWrappedUp'](task);
+      storeWrapper.handleTaskRemove(task);
+      await expect(storeWrapper.freezeAndSendPostCallSummary(token!)).resolves.toEqual({
+        wrapup: 'succeeded',
+        response: 'submitted',
+      });
+      expect(task.sendPostCallSummaryResponse).toHaveBeenCalledTimes(1);
+      expect(storeWrapper.getAISummaryViewModel('post-call', 'post-call', task)).toMatchObject({
+        surface: 'content',
+        controlsDisabled: true,
+      });
+      const nextTask = configureAISummaryTaskIdentity(makeAISummaryTask(), {interactionId: 'next-interaction'});
+      storeWrapper.setCurrentTask(nextTask);
+      expect(storeWrapper.getAISummaryViewModel('post-call', 'post-call', task).content).toBeUndefined();
+    });
+
+    it('retains a failed draft and its wrapped-up listener when the SDK removes the task first', async () => {
+      const task = makeAISummaryTask({
+        sendPostCallSummaryResponse: jest.fn().mockRejectedValue(new Error('send failed')),
+      });
+      storeWrapper.setCurrentTask(task);
+      await storeWrapper.requestPostCallSummary({type: 'reason-commit', reasonId: 'r1', selectionRevision: 1}, task);
+      const token = storeWrapper.capturePostCallDraft('aux-code', task);
+      const wrappedUp = (task.on as unknown as jest.Mock).mock.calls.find(
+        ([event]) => event === TASK_EVENTS.TASK_WRAPPEDUP
+      )?.[1];
+      expect(wrappedUp).toBeDefined();
+      await storeWrapper.freezeAndSendPostCallSummary(token!);
+      const failed = storeWrapper.getAISummaryViewModel('post-call', 'post-call', task);
+      storeWrapper.handleTaskRemove(task);
+      storeWrapper.setCurrentTask(
+        configureAISummaryTaskIdentity(makeAISummaryTask(), {interactionId: 'next-interaction'})
+      );
+      expect(storeWrapper.getAISummaryViewModel('post-call', 'post-call', task)).toEqual(failed);
+      expect(task.off).not.toHaveBeenCalledWith(TASK_EVENTS.TASK_WRAPPEDUP, wrappedUp);
+      wrappedUp();
+      expect(storeWrapper.getAISummaryViewModel('post-call', 'post-call', task).content).toBeUndefined();
+      expect(task.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_WRAPPEDUP, wrappedUp);
+    });
+
+    it('discards a frozen post-call response when AgentWrappedUp arrives before the send rejection', async () => {
+      const responseSend = deferred<void>();
+      const task = makeAISummaryTask({
+        sendPostCallSummaryResponse: jest.fn().mockReturnValue(responseSend.promise),
+      });
+
+      await storeWrapper.requestPostCallSummary({type: 'reason-commit', reasonId: 'r1', selectionRevision: 1}, task);
+      const token = storeWrapper.capturePostCallDraft(aiSummaryFixtures.wrapUp.distinctReasonAndCode.auxCodeId, task);
+      expect(token).toBeDefined();
+      const submission = storeWrapper.freezeAndSendPostCallSummary(token!);
+      await Promise.resolve();
+
+      storeWrapper['handleAISummaryWrappedUp'](task);
+      // Until the send settles it can still succeed, in which case the
+      // requirement retains the submitted content until interaction change.
+      expect(storeWrapper.getAISummaryViewModel('post-call', 'post-call', task)).toMatchObject({
+        surface: 'content',
+        controlsDisabled: true,
+      });
+
+      responseSend.reject(new Error('transport sentinel'));
+      await expect(submission).resolves.toEqual({wrapup: 'succeeded', response: 'response-failed'});
+      await expect(storeWrapper.freezeAndSendPostCallSummary(token!)).resolves.toEqual({
+        wrapup: 'succeeded',
+        response: 'response-failed',
+      });
+      expect(task.sendPostCallSummaryResponse).toHaveBeenCalledTimes(1);
+      expect(storeWrapper.getAISummaryViewModel('post-call', 'post-call', task)).toMatchObject({
+        surface: 'omitted',
+        content: undefined,
+      });
+    });
+
+    it('keeps a failed frozen post-call response locked until the matching AgentWrappedUp event', async () => {
+      const task = makeAISummaryTask({
+        sendPostCallSummaryResponse: jest.fn().mockRejectedValue(new Error('transport sentinel')),
+      });
+
+      await storeWrapper.requestPostCallSummary({type: 'reason-commit', reasonId: 'r1', selectionRevision: 1}, task);
+      const view = storeWrapper.getAISummaryViewModel('post-call', 'post-call', task);
+      expect(storeWrapper.setPostCallSummaryFeedback('dislike', view.contentRevision ?? 0, task)).toBe(true);
+      const token = storeWrapper.capturePostCallDraft(aiSummaryFixtures.wrapUp.distinctReasonAndCode.auxCodeId, task);
+      expect(token).toBeDefined();
+
+      await expect(storeWrapper.freezeAndSendPostCallSummary(token!)).resolves.toEqual({
+        wrapup: 'succeeded',
+        response: 'response-failed',
+      });
+      const failedView = storeWrapper.getAISummaryViewModel('post-call', 'post-call', task);
+      expect(failedView).toMatchObject({
+        surface: 'content',
+        feedbackStatus: 'not-confirmed',
+        controlsDisabled: true,
+      });
+      expect(
+        storeWrapper.editAISummary(
+          'post-call',
+          'post-call',
+          {key: 'initialContactReason', value: 'Late edit must be blocked.'},
+          failedView.contentRevision ?? 0,
+          task
+        )
+      ).toBe(false);
+
+      storeWrapper['handleAISummaryWrappedUp'](task);
+      expect(storeWrapper.getAISummaryViewModel('post-call', 'post-call', task)).toMatchObject({
+        surface: 'omitted',
+        content: undefined,
+      });
+      expect(task.sendPostCallSummaryResponse).toHaveBeenCalledTimes(1);
+    });
+
+    it('evicts only the wrapped interaction and leaves another failed frozen response retained', async () => {
+      const taskX = makeAISummaryTask({
+        sendPostCallSummaryResponse: jest.fn().mockRejectedValue(new Error('x response failed')),
+      });
+      const taskY = configureAISummaryTaskIdentity(
+        makeAISummaryTask({
+          requestMidCallSummary: jest.fn().mockResolvedValue({
+            ...aiSummaryFixtures.initiatingMidCall.typedSections,
+            conversationId: 'interaction-main-2',
+          }),
+          requestPostCallSummary: jest.fn().mockResolvedValue({
+            ...aiSummaryFixtures.postCall.structured,
+            conversationId: 'interaction-main-2',
+          }),
+          sendPostCallSummaryResponse: jest.fn().mockRejectedValue(new Error('y response failed')),
+        }),
+        {interactionId: 'interaction-main-2'}
+      );
+
+      await storeWrapper.requestMidCallSummary('CONSULT', 'initiator', taskX);
+      await storeWrapper.requestMidCallSummary('CONSULT', 'initiator', taskY);
+      await storeWrapper.requestPostCallSummary({type: 'reason-commit', reasonId: 'x', selectionRevision: 1}, taskX);
+      await storeWrapper.requestPostCallSummary({type: 'reason-commit', reasonId: 'y', selectionRevision: 1}, taskY);
+      const tokenX = storeWrapper.capturePostCallDraft('aux-code-x', taskX);
+      const tokenY = storeWrapper.capturePostCallDraft('aux-code-y', taskY);
+      expect(tokenX).toBeDefined();
+      expect(tokenY).toBeDefined();
+      await expect(storeWrapper.freezeAndSendPostCallSummary(tokenX!)).resolves.toEqual({
+        wrapup: 'succeeded',
+        response: 'response-failed',
+      });
+      await expect(storeWrapper.freezeAndSendPostCallSummary(tokenY!)).resolves.toEqual({
+        wrapup: 'succeeded',
+        response: 'response-failed',
+      });
+
+      storeWrapper['handleAISummaryWrappedUp'](taskX);
+
+      expect(storeWrapper.getAISummaryViewModel('mid-call', 'initiator', taskX)).toMatchObject({
+        surface: 'omitted',
+        content: undefined,
+      });
+      expect(storeWrapper.getAISummaryViewModel('post-call', 'post-call', taskX)).toMatchObject({
+        surface: 'omitted',
+        content: undefined,
+      });
+      expect(storeWrapper.getAISummaryViewModel('post-call', 'post-call', taskY)).toMatchObject({
+        surface: 'content',
+        feedbackStatus: 'not-confirmed',
+        controlsDisabled: true,
+      });
+      expect(taskX.sendPostCallSummaryResponse).toHaveBeenCalledTimes(1);
+      expect(taskY.sendPostCallSummaryResponse).toHaveBeenCalledTimes(1);
+    });
+
+    it('rejects unknown, released, and reused post-call capture tokens without resending', async () => {
+      const task = makeAISummaryTask();
+      storeWrapper.setCurrentTask(task);
+      await storeWrapper.requestPostCallSummary({type: 'reason-commit', reasonId: 'r1', selectionRevision: 1}, task);
+
+      const unknownToken = Symbol('post-call-ai-summary-capture') as never;
+      await expect(storeWrapper.freezeAndSendPostCallSummary(unknownToken)).resolves.toEqual({
+        wrapup: 'succeeded',
+        response: 'response-failed',
+      });
+      expect(task.sendPostCallSummaryResponse).not.toHaveBeenCalled();
+
+      const releasedToken = storeWrapper.capturePostCallDraft('aux-code-release', task);
+      expect(releasedToken).toBeDefined();
+      expect(releasedToken && storeWrapper.releasePostCallDraft(releasedToken)).toBe(true);
+      await expect(releasedToken && storeWrapper.freezeAndSendPostCallSummary(releasedToken)).resolves.toEqual({
+        wrapup: 'succeeded',
+        response: 'response-failed',
+      });
+      expect(task.sendPostCallSummaryResponse).not.toHaveBeenCalled();
+
+      const submittedToken = storeWrapper.capturePostCallDraft('aux-code-submit', task);
+      expect(submittedToken).toBeDefined();
+      await expect(submittedToken && storeWrapper.freezeAndSendPostCallSummary(submittedToken)).resolves.toEqual({
+        wrapup: 'succeeded',
+        response: 'submitted',
+      });
+      await expect(submittedToken && storeWrapper.freezeAndSendPostCallSummary(submittedToken)).resolves.toEqual({
+        wrapup: 'succeeded',
+        response: 'response-failed',
+      });
+      expect(task.sendPostCallSummaryResponse).toHaveBeenCalledTimes(1);
+      expect(storeWrapper.getPendingAISummaryStatusTransitions()).toEqual([
+        expect.objectContaining({kind: 'post-call', state: 'available'}),
+        expect.objectContaining({kind: 'post-call', state: 'submitted'}),
+      ]);
+    });
+
+    it('binds task feature and receiver-summary events through task-owned listeners', () => {
+      const task = makeAISummaryTask();
+      storeWrapper.setCurrentTask(task);
+      storeWrapper['registerTaskEventListeners'](task);
+
+      const taskOnMock = task.on as unknown as jest.Mock;
+      const featureListener = taskOnMock.mock.calls.find(
+        (call) => call[0] === TASK_EVENTS.TASK_FEATURE_ENABLEMENT
+      )?.[1];
+      const receiverListener = taskOnMock.mock.calls.find(
+        (call) => call[0] === TASK_EVENTS.TASK_MID_CALL_SUMMARY_RECEIVED
+      )?.[1];
+
+      expect(featureListener).toEqual(expect.any(Function));
+      expect(receiverListener).toEqual(expect.any(Function));
+
+      featureListener?.({...aiSummaryFixtures.featureEnablement.enabled, actionTimestamp: 1002});
+      featureListener?.(aiSummaryFixtures.featureEnablement.missingActionTimestamp);
+      expect(storeWrapper.aiSummaryCapabilities['interaction-main-1']).toMatchObject({
+        midCallEnabled: false,
+        postCallEnabled: false,
+        timestamp: {present: false},
+      });
+
+      featureListener?.({...aiSummaryFixtures.featureEnablement.enabled, actionTimestamp: 1003});
+      expect(aiSummaryFixtures.receivingMidCall.adaptiveCard).not.toHaveProperty('actionType');
+      receiverListener?.(aiSummaryFixtures.receivingMidCall.adaptiveCard);
+
+      const view = storeWrapper.getAISummaryViewModel('mid-call', 'receiver', task);
+      expect(view.surface).toBe('content');
+      expect(view.content?.type).toBe('card');
+      expect(view.counters.viewed).toBe(0);
+      expect(storeWrapper.recordAISummaryViewed('mid-call', 'receiver', view.contentRevision ?? 0)).toBe(true);
+      expect(storeWrapper.recordAISummaryViewed('mid-call', 'receiver', view.contentRevision ?? 0)).toBe(true);
+      expect(storeWrapper.getAISummaryViewModel('mid-call', 'receiver', task).counters.viewed).toBe(2);
+    });
+
+    it('round trips receiver copy and confirmed feedback through the store boundary', async () => {
+      const feedbackSend = deferred<void>();
+      const task = makeAISummaryTask({
+        sendMidCallSummaryResponse: jest.fn().mockReturnValue(feedbackSend.promise),
+      });
+      storeWrapper.setCurrentTask(task);
+      storeWrapper['registerTaskEventListeners'](task);
+      const taskOnMock = task.on as unknown as jest.Mock;
+      const featureListener = taskOnMock.mock.calls.find(
+        (call) => call[0] === TASK_EVENTS.TASK_FEATURE_ENABLEMENT
+      )?.[1];
+      const receiverListener = taskOnMock.mock.calls.find(
+        (call) => call[0] === TASK_EVENTS.TASK_MID_CALL_SUMMARY_RECEIVED
+      )?.[1];
+
+      featureListener?.({...aiSummaryFixtures.featureEnablement.enabled, actionTimestamp: 1002});
+      receiverListener?.(aiSummaryFixtures.receivingMidCall.adaptiveCard);
+      const view = storeWrapper.getAISummaryViewModel('mid-call', 'receiver', task);
+
+      expect(view.surface).toBe('content');
+      expect(view.content?.type).toBe('card');
+      expect(storeWrapper.recordAISummaryViewed('mid-call', 'receiver', view.contentRevision ?? 0)).toBe(true);
+      expect(storeWrapper.recordAISummaryCopied('mid-call', 'receiver', view.contentRevision ?? 0)).toBe(true);
+
+      const pendingFeedback = storeWrapper.setMidCallSummaryFeedback(
+        'receiver',
+        'like',
+        'TRANSFER',
+        view.contentRevision ?? 0
+      );
+      const pendingView = storeWrapper.getAISummaryViewModel('mid-call', 'receiver', task);
+
+      expect(pendingView.feedback).toBe('none');
+      expect(pendingView.midCallFeedbackPending).toBe(true);
+      expect(pendingView.requestPending).toBe(true);
+      await expect(
+        storeWrapper.setMidCallSummaryFeedback('receiver', 'dislike', 'TRANSFER', view.contentRevision ?? 0)
+      ).resolves.toEqual({outcome: 'blocked'});
+
+      feedbackSend.resolve(undefined);
+      await expect(pendingFeedback).resolves.toEqual({outcome: 'confirmed'});
+      const confirmedView = storeWrapper.getAISummaryViewModel('mid-call', 'receiver', task);
+      const response = task.sendMidCallSummaryResponse.mock.calls[0][0];
+
+      expect(confirmedView.feedback).toBe('like');
+      expect(confirmedView.midCallFeedbackPending).toBe(false);
+      expect(confirmedView.counters).toMatchObject({viewed: 1, copied: 1, liked: 1});
+      expect(response).toEqual(
+        expect.objectContaining({
+          summary: 'Customer needs billing help.\nInvoice discrepancy is the active topic.',
+          feedback: 'thumbs_up',
+          state: 'DEFAULT',
+          numberOfTimesViewed: 1,
+          numberOfTimesCopied: 1,
+          summaryReceived: true,
+        })
+      );
+      expect(task.sendMidCallSummaryResponse).toHaveBeenCalledWith(response, 'TRANSFER');
+      expect(task.sendMidCallSummaryResponse).toHaveBeenCalledTimes(1);
+    });
+
+    it('rejects stale receiver revisions after owner replacement and evicts receiver listeners on task removal', async () => {
+      const task = makeAISummaryTask();
+      storeWrapper.setCurrentTask(task);
+      storeWrapper['handleReceiverAISummaryPayload'](task, aiSummaryFixtures.receivingMidCall.adaptiveCard);
+      const firstView = storeWrapper.getAISummaryViewModel('mid-call', 'receiver', task);
+      const firstRevision = firstView.contentRevision ?? 0;
+      const replacementTask = makeAISummaryTask({
+        sendMidCallSummaryResponse: jest.fn().mockResolvedValue(undefined),
+      });
+      replacementTask.data.agentId = 'agent-b';
+      storeWrapper['store'].agentId = 'agent-b';
+      storeWrapper.setCurrentTask(replacementTask);
+      storeWrapper['handleReceiverAISummaryPayload'](replacementTask, {
+        ...aiSummaryFixtures.receivingMidCall.adaptiveCard,
+        timestamp: 2200,
+      });
+
+      const replacementView = storeWrapper.getAISummaryViewModel('mid-call', 'receiver', replacementTask);
+      expect(replacementView.ownerKey?.agentId).toBe('agent-b');
+      expect(storeWrapper.recordAISummaryCopied('mid-call', 'receiver', firstRevision)).toBe(false);
+      await expect(
+        storeWrapper.setMidCallSummaryFeedback('receiver', 'like', 'TRANSFER', firstRevision)
+      ).resolves.toEqual({outcome: 'stale'});
+      expect(replacementTask.sendMidCallSummaryResponse).not.toHaveBeenCalled();
+
+      storeWrapper['registerTaskEventListeners'](replacementTask);
+      const taskOnMock = replacementTask.on as unknown as jest.Mock;
+      const receiverListener = taskOnMock.mock.calls.find(
+        (call) => call[0] === TASK_EVENTS.TASK_MID_CALL_SUMMARY_RECEIVED
+      )?.[1];
+
+      storeWrapper.handleTaskRemove(replacementTask);
+
+      expect(replacementTask.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_MID_CALL_SUMMARY_RECEIVED, receiverListener);
+      expect(storeWrapper['aiSummaryReceiverListeners'][replacementTask.data.interactionId]).toBeUndefined();
+    });
+
+    it('evicts AI-summary interaction state and wrapped-up subscriptions on task removal', async () => {
+      const task = makeAISummaryTask();
+      storeWrapper.setCurrentTask(task);
+      await storeWrapper.requestPostCallSummary({type: 'reason-commit', reasonId: 'r1', selectionRevision: 1}, task);
+      storeWrapper['registerTaskEventListeners'](task);
+      const taskOffMock = task.off as unknown as jest.Mock;
+      const wrappedUpListener = (task.on as unknown as jest.Mock).mock.calls.find(
+        (call) => call[0] === TASK_EVENTS.TASK_WRAPPEDUP
+      )?.[1];
+
+      storeWrapper.handleTaskRemove(task);
+
+      expect(taskOffMock).toHaveBeenCalledWith(TASK_EVENTS.TASK_WRAPPEDUP, wrappedUpListener);
+      expect(Object.values(storeWrapper['aiSummaryWrappedUpSubscriptions'])).toEqual([]);
+      expect(storeWrapper.getAISummaryViewModel('post-call', 'post-call', task)).toMatchObject({
+        surface: 'omitted',
+        content: undefined,
       });
     });
   });

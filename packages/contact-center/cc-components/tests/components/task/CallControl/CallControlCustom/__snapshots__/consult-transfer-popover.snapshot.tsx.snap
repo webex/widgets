@@ -23,7 +23,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
         class="md-text-input-container"
       >
         <input
-          aria-labelledby="consult-search-label"
+          aria-label="Search destinations"
           id="consult-search"
           placeholder="Search..."
           type="text"
@@ -150,138 +150,133 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
   </div>
   <div
     class="consult-list-container"
+    tabindex="0"
   >
     <ul
       class="agent-list md-list-wrapper"
     >
-      <div
-        class="consult-list-item-wrapper"
+      <li
+        aria-label="Agent One"
+        class="call-control-list-item consult-list-item-wrapper md-list-item-base-wrapper"
+        data-allow-text-select="false"
+        data-disabled="false"
+        data-interactive="true"
+        data-padded="true"
+        data-shape="rectangle"
+        data-size="50"
+        role="listitem"
+        tabindex="-1"
       >
-        <li
-          aria-label="Agent One"
-          class="call-control-list-item md-list-item-base-wrapper"
-          data-allow-text-select="false"
-          data-disabled="false"
-          data-interactive="true"
-          data-padded="true"
-          data-shape="rectangle"
-          data-size="50"
-          role="listitem"
-          tabindex="-1"
+        <div
+          class="call-control-list-item-start"
+          data-position="start"
+        >
+          <mdc-avatar
+            aria-hidden="true"
+            size="32"
+          />
+        </div>
+        <div
+          class="call-control-list-item-middle"
+          data-position="middle"
+        >
+          <mdc-text
+            class="md-text-wrapper call-control-list-item-title"
+            tagname="div"
+            type="body-large-regular"
+          >
+            Agent One
+          </mdc-text>
+        </div>
+        <div
+          class="call-control-list-item-end"
+          data-position="end"
         >
           <div
-            class="call-control-list-item-start"
-            data-position="start"
+            class="hover-button"
           >
-            <mdc-avatar
-              aria-hidden="true"
-              size="32"
-            />
-          </div>
-          <div
-            class="call-control-list-item-middle"
-            data-position="middle"
-          >
-            <mdc-text
-              class="md-text-wrapper call-control-list-item-title"
-              tagname="div"
-              type="body-large-regular"
+            <button
+              aria-label="Select Agent One"
+              class="md-button-circle-wrapper md-button-simple-wrapper md-focus-ring-wrapper children"
+              data-color="join"
+              data-disabled="false"
+              data-ghost="false"
+              data-inverted="false"
+              data-multiple-children="false"
+              data-outline="false"
+              data-shallow-disabled="false"
+              data-size="32"
+              tabindex="-1"
+              type="button"
             >
-              Agent One
-            </mdc-text>
+              <mdc-icon
+                name="agent-icon"
+              />
+            </button>
           </div>
-          <div
-            class="call-control-list-item-end"
-            data-position="end"
-          >
-            <div
-              class="hover-button"
-            >
-              <button
-                class="md-button-circle-wrapper md-button-simple-wrapper md-focus-ring-wrapper children"
-                data-color="join"
-                data-disabled="false"
-                data-ghost="false"
-                data-inverted="false"
-                data-multiple-children="false"
-                data-outline="false"
-                data-shallow-disabled="false"
-                data-size="32"
-                tabindex="-1"
-                type="button"
-              >
-                <mdc-icon
-                  name="agent-icon"
-                />
-              </button>
-            </div>
-          </div>
-        </li>
-      </div>
-      <div
-        class="consult-list-item-wrapper"
+        </div>
+      </li>
+      <li
+        aria-label="Agent Two"
+        class="call-control-list-item consult-list-item-wrapper md-list-item-base-wrapper"
+        data-allow-text-select="false"
+        data-disabled="false"
+        data-interactive="true"
+        data-padded="true"
+        data-shape="rectangle"
+        data-size="50"
+        role="listitem"
+        tabindex="-1"
       >
-        <li
-          aria-label="Agent Two"
-          class="call-control-list-item md-list-item-base-wrapper"
-          data-allow-text-select="false"
-          data-disabled="false"
-          data-interactive="true"
-          data-padded="true"
-          data-shape="rectangle"
-          data-size="50"
-          role="listitem"
-          tabindex="-1"
+        <div
+          class="call-control-list-item-start"
+          data-position="start"
+        >
+          <mdc-avatar
+            aria-hidden="true"
+            size="32"
+          />
+        </div>
+        <div
+          class="call-control-list-item-middle"
+          data-position="middle"
+        >
+          <mdc-text
+            class="md-text-wrapper call-control-list-item-title"
+            tagname="div"
+            type="body-large-regular"
+          >
+            Agent Two
+          </mdc-text>
+        </div>
+        <div
+          class="call-control-list-item-end"
+          data-position="end"
         >
           <div
-            class="call-control-list-item-start"
-            data-position="start"
+            class="hover-button"
           >
-            <mdc-avatar
-              aria-hidden="true"
-              size="32"
-            />
-          </div>
-          <div
-            class="call-control-list-item-middle"
-            data-position="middle"
-          >
-            <mdc-text
-              class="md-text-wrapper call-control-list-item-title"
-              tagname="div"
-              type="body-large-regular"
+            <button
+              aria-label="Select Agent Two"
+              class="md-button-circle-wrapper md-button-simple-wrapper"
+              data-color="join"
+              data-disabled="false"
+              data-ghost="false"
+              data-inverted="false"
+              data-multiple-children="false"
+              data-outline="false"
+              data-shallow-disabled="false"
+              data-size="32"
+              tabindex="-1"
+              type="button"
             >
-              Agent Two
-            </mdc-text>
+              <mdc-icon
+                name="agent-icon"
+              />
+            </button>
           </div>
-          <div
-            class="call-control-list-item-end"
-            data-position="end"
-          >
-            <div
-              class="hover-button"
-            >
-              <button
-                class="md-button-circle-wrapper md-button-simple-wrapper"
-                data-color="join"
-                data-disabled="false"
-                data-ghost="false"
-                data-inverted="false"
-                data-multiple-children="false"
-                data-outline="false"
-                data-shallow-disabled="false"
-                data-size="32"
-                tabindex="-1"
-                type="button"
-              >
-                <mdc-icon
-                  name="agent-icon"
-                />
-              </button>
-            </div>
-          </div>
-        </li>
-      </div>
+        </div>
+      </li>
     </ul>
   </div>
 </div>
@@ -310,7 +305,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
         class="md-text-input-container"
       >
         <input
-          aria-labelledby="consult-search-label"
+          aria-label="Search destinations"
           id="consult-search"
           placeholder="Search..."
           type="text"
@@ -437,75 +432,73 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
   </div>
   <div
     class="consult-list-container"
+    tabindex="0"
   >
     <div>
       <ul
         class="agent-list md-list-wrapper"
       >
-        <div
-          class="consult-list-item-wrapper"
+        <li
+          aria-label="Queue One"
+          class="call-control-list-item consult-list-item-wrapper md-list-item-base-wrapper"
+          data-allow-text-select="false"
+          data-disabled="false"
+          data-interactive="true"
+          data-padded="true"
+          data-shape="rectangle"
+          data-size="50"
+          role="listitem"
+          tabindex="-1"
         >
-          <li
-            aria-label="Queue One"
-            class="call-control-list-item md-list-item-base-wrapper"
-            data-allow-text-select="false"
-            data-disabled="false"
-            data-interactive="true"
-            data-padded="true"
-            data-shape="rectangle"
-            data-size="50"
-            role="listitem"
-            tabindex="-1"
+          <div
+            class="call-control-list-item-start"
+            data-position="start"
+          >
+            <mdc-avatar
+              aria-hidden="true"
+              size="32"
+            />
+          </div>
+          <div
+            class="call-control-list-item-middle"
+            data-position="middle"
+          >
+            <mdc-text
+              class="md-text-wrapper call-control-list-item-title"
+              tagname="div"
+              type="body-large-regular"
+            >
+              Queue One
+            </mdc-text>
+          </div>
+          <div
+            class="call-control-list-item-end"
+            data-position="end"
           >
             <div
-              class="call-control-list-item-start"
-              data-position="start"
+              class="hover-button"
             >
-              <mdc-avatar
-                aria-hidden="true"
-                size="32"
-              />
-            </div>
-            <div
-              class="call-control-list-item-middle"
-              data-position="middle"
-            >
-              <mdc-text
-                class="md-text-wrapper call-control-list-item-title"
-                tagname="div"
-                type="body-large-regular"
+              <button
+                aria-label="Select Queue One"
+                class="md-button-circle-wrapper md-button-simple-wrapper md-focus-ring-wrapper children"
+                data-color="join"
+                data-disabled="false"
+                data-ghost="false"
+                data-inverted="false"
+                data-multiple-children="false"
+                data-outline="false"
+                data-shallow-disabled="false"
+                data-size="32"
+                tabindex="-1"
+                type="button"
               >
-                Queue One
-              </mdc-text>
+                <mdc-icon
+                  name="agent-icon"
+                />
+              </button>
             </div>
-            <div
-              class="call-control-list-item-end"
-              data-position="end"
-            >
-              <div
-                class="hover-button"
-              >
-                <button
-                  class="md-button-circle-wrapper md-button-simple-wrapper md-focus-ring-wrapper children"
-                  data-color="join"
-                  data-disabled="false"
-                  data-ghost="false"
-                  data-inverted="false"
-                  data-multiple-children="false"
-                  data-outline="false"
-                  data-shallow-disabled="false"
-                  data-size="32"
-                  tabindex="-1"
-                  type="button"
-                >
-                  <mdc-icon
-                    name="agent-icon"
-                  />
-                </button>
-              </div>
-            </div>
-          </li>
-        </div>
+          </div>
+        </li>
       </ul>
     </div>
   </div>
@@ -535,7 +528,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
         class="md-text-input-container"
       >
         <input
-          aria-labelledby="consult-search-label"
+          aria-label="Search destinations"
           id="consult-search"
           placeholder="Search..."
           type="text"
@@ -662,75 +655,73 @@ exports[`ConsultTransferPopoverComponent Snapshots Interactions should render co
   </div>
   <div
     class="consult-list-container"
+    tabindex="0"
   >
     <div>
       <ul
         class="agent-list md-list-wrapper"
       >
-        <div
-          class="consult-list-item-wrapper"
+        <li
+          aria-label="Queue One"
+          class="call-control-list-item consult-list-item-wrapper md-list-item-base-wrapper"
+          data-allow-text-select="false"
+          data-disabled="false"
+          data-interactive="true"
+          data-padded="true"
+          data-shape="rectangle"
+          data-size="50"
+          role="listitem"
+          tabindex="-1"
         >
-          <li
-            aria-label="Queue One"
-            class="call-control-list-item md-list-item-base-wrapper"
-            data-allow-text-select="false"
-            data-disabled="false"
-            data-interactive="true"
-            data-padded="true"
-            data-shape="rectangle"
-            data-size="50"
-            role="listitem"
-            tabindex="-1"
+          <div
+            class="call-control-list-item-start"
+            data-position="start"
+          >
+            <mdc-avatar
+              aria-hidden="true"
+              size="32"
+            />
+          </div>
+          <div
+            class="call-control-list-item-middle"
+            data-position="middle"
+          >
+            <mdc-text
+              class="md-text-wrapper call-control-list-item-title"
+              tagname="div"
+              type="body-large-regular"
+            >
+              Queue One
+            </mdc-text>
+          </div>
+          <div
+            class="call-control-list-item-end"
+            data-position="end"
           >
             <div
-              class="call-control-list-item-start"
-              data-position="start"
+              class="hover-button"
             >
-              <mdc-avatar
-                aria-hidden="true"
-                size="32"
-              />
-            </div>
-            <div
-              class="call-control-list-item-middle"
-              data-position="middle"
-            >
-              <mdc-text
-                class="md-text-wrapper call-control-list-item-title"
-                tagname="div"
-                type="body-large-regular"
+              <button
+                aria-label="Select Queue One"
+                class="md-button-circle-wrapper md-button-simple-wrapper"
+                data-color="join"
+                data-disabled="false"
+                data-ghost="false"
+                data-inverted="false"
+                data-multiple-children="false"
+                data-outline="false"
+                data-shallow-disabled="false"
+                data-size="32"
+                tabindex="-1"
+                type="button"
               >
-                Queue One
-              </mdc-text>
+                <mdc-icon
+                  name="agent-icon"
+                />
+              </button>
             </div>
-            <div
-              class="call-control-list-item-end"
-              data-position="end"
-            >
-              <div
-                class="hover-button"
-              >
-                <button
-                  class="md-button-circle-wrapper md-button-simple-wrapper"
-                  data-color="join"
-                  data-disabled="false"
-                  data-ghost="false"
-                  data-inverted="false"
-                  data-multiple-children="false"
-                  data-outline="false"
-                  data-shallow-disabled="false"
-                  data-size="32"
-                  tabindex="-1"
-                  type="button"
-                >
-                  <mdc-icon
-                    name="agent-icon"
-                  />
-                </button>
-              </div>
-            </div>
-          </li>
-        </div>
+          </div>
+        </li>
       </ul>
     </div>
   </div>
@@ -760,7 +751,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         class="md-text-input-container"
       >
         <input
-          aria-labelledby="consult-search-label"
+          aria-label="Search destinations"
           id="consult-search"
           placeholder="Search..."
           type="text"
@@ -887,138 +878,133 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
   </div>
   <div
     class="consult-list-container"
+    tabindex="0"
   >
     <ul
       class="agent-list md-list-wrapper"
     >
-      <div
-        class="consult-list-item-wrapper"
+      <li
+        aria-label="Agent One"
+        class="call-control-list-item consult-list-item-wrapper md-list-item-base-wrapper"
+        data-allow-text-select="false"
+        data-disabled="false"
+        data-interactive="true"
+        data-padded="true"
+        data-shape="rectangle"
+        data-size="50"
+        role="listitem"
+        tabindex="-1"
       >
-        <li
-          aria-label="Agent One"
-          class="call-control-list-item md-list-item-base-wrapper"
-          data-allow-text-select="false"
-          data-disabled="false"
-          data-interactive="true"
-          data-padded="true"
-          data-shape="rectangle"
-          data-size="50"
-          role="listitem"
-          tabindex="-1"
+        <div
+          class="call-control-list-item-start"
+          data-position="start"
+        >
+          <mdc-avatar
+            aria-hidden="true"
+            size="32"
+          />
+        </div>
+        <div
+          class="call-control-list-item-middle"
+          data-position="middle"
+        >
+          <mdc-text
+            class="md-text-wrapper call-control-list-item-title"
+            tagname="div"
+            type="body-large-regular"
+          >
+            Agent One
+          </mdc-text>
+        </div>
+        <div
+          class="call-control-list-item-end"
+          data-position="end"
         >
           <div
-            class="call-control-list-item-start"
-            data-position="start"
+            class="hover-button"
           >
-            <mdc-avatar
-              aria-hidden="true"
-              size="32"
-            />
-          </div>
-          <div
-            class="call-control-list-item-middle"
-            data-position="middle"
-          >
-            <mdc-text
-              class="md-text-wrapper call-control-list-item-title"
-              tagname="div"
-              type="body-large-regular"
+            <button
+              aria-label="Select Agent One"
+              class="md-button-circle-wrapper md-button-simple-wrapper"
+              data-color="join"
+              data-disabled="false"
+              data-ghost="false"
+              data-inverted="false"
+              data-multiple-children="false"
+              data-outline="false"
+              data-shallow-disabled="false"
+              data-size="32"
+              tabindex="-1"
+              type="button"
             >
-              Agent One
-            </mdc-text>
+              <mdc-icon
+                name="agent-icon"
+              />
+            </button>
           </div>
-          <div
-            class="call-control-list-item-end"
-            data-position="end"
-          >
-            <div
-              class="hover-button"
-            >
-              <button
-                class="md-button-circle-wrapper md-button-simple-wrapper"
-                data-color="join"
-                data-disabled="false"
-                data-ghost="false"
-                data-inverted="false"
-                data-multiple-children="false"
-                data-outline="false"
-                data-shallow-disabled="false"
-                data-size="32"
-                tabindex="-1"
-                type="button"
-              >
-                <mdc-icon
-                  name="agent-icon"
-                />
-              </button>
-            </div>
-          </div>
-        </li>
-      </div>
-      <div
-        class="consult-list-item-wrapper"
+        </div>
+      </li>
+      <li
+        aria-label="Agent Two"
+        class="call-control-list-item consult-list-item-wrapper md-list-item-base-wrapper"
+        data-allow-text-select="false"
+        data-disabled="false"
+        data-interactive="true"
+        data-padded="true"
+        data-shape="rectangle"
+        data-size="50"
+        role="listitem"
+        tabindex="-1"
       >
-        <li
-          aria-label="Agent Two"
-          class="call-control-list-item md-list-item-base-wrapper"
-          data-allow-text-select="false"
-          data-disabled="false"
-          data-interactive="true"
-          data-padded="true"
-          data-shape="rectangle"
-          data-size="50"
-          role="listitem"
-          tabindex="-1"
+        <div
+          class="call-control-list-item-start"
+          data-position="start"
+        >
+          <mdc-avatar
+            aria-hidden="true"
+            size="32"
+          />
+        </div>
+        <div
+          class="call-control-list-item-middle"
+          data-position="middle"
+        >
+          <mdc-text
+            class="md-text-wrapper call-control-list-item-title"
+            tagname="div"
+            type="body-large-regular"
+          >
+            Agent Two
+          </mdc-text>
+        </div>
+        <div
+          class="call-control-list-item-end"
+          data-position="end"
         >
           <div
-            class="call-control-list-item-start"
-            data-position="start"
+            class="hover-button"
           >
-            <mdc-avatar
-              aria-hidden="true"
-              size="32"
-            />
-          </div>
-          <div
-            class="call-control-list-item-middle"
-            data-position="middle"
-          >
-            <mdc-text
-              class="md-text-wrapper call-control-list-item-title"
-              tagname="div"
-              type="body-large-regular"
+            <button
+              aria-label="Select Agent Two"
+              class="md-button-circle-wrapper md-button-simple-wrapper"
+              data-color="join"
+              data-disabled="false"
+              data-ghost="false"
+              data-inverted="false"
+              data-multiple-children="false"
+              data-outline="false"
+              data-shallow-disabled="false"
+              data-size="32"
+              tabindex="-1"
+              type="button"
             >
-              Agent Two
-            </mdc-text>
+              <mdc-icon
+                name="agent-icon"
+              />
+            </button>
           </div>
-          <div
-            class="call-control-list-item-end"
-            data-position="end"
-          >
-            <div
-              class="hover-button"
-            >
-              <button
-                class="md-button-circle-wrapper md-button-simple-wrapper"
-                data-color="join"
-                data-disabled="false"
-                data-ghost="false"
-                data-inverted="false"
-                data-multiple-children="false"
-                data-outline="false"
-                data-shallow-disabled="false"
-                data-size="32"
-                tabindex="-1"
-                type="button"
-              >
-                <mdc-icon
-                  name="agent-icon"
-                />
-              </button>
-            </div>
-          </div>
-        </li>
-      </div>
+        </div>
+      </li>
     </ul>
   </div>
 </div>
@@ -1047,7 +1033,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         class="md-text-input-container"
       >
         <input
-          aria-labelledby="consult-search-label"
+          aria-label="Search destinations"
           id="consult-search"
           placeholder="Search..."
           type="text"
@@ -1156,138 +1142,133 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
   </div>
   <div
     class="consult-list-container"
+    tabindex="0"
   >
     <ul
       class="agent-list md-list-wrapper"
     >
-      <div
-        class="consult-list-item-wrapper"
+      <li
+        aria-label="Agent One"
+        class="call-control-list-item consult-list-item-wrapper md-list-item-base-wrapper"
+        data-allow-text-select="false"
+        data-disabled="false"
+        data-interactive="true"
+        data-padded="true"
+        data-shape="rectangle"
+        data-size="50"
+        role="listitem"
+        tabindex="-1"
       >
-        <li
-          aria-label="Agent One"
-          class="call-control-list-item md-list-item-base-wrapper"
-          data-allow-text-select="false"
-          data-disabled="false"
-          data-interactive="true"
-          data-padded="true"
-          data-shape="rectangle"
-          data-size="50"
-          role="listitem"
-          tabindex="-1"
+        <div
+          class="call-control-list-item-start"
+          data-position="start"
+        >
+          <mdc-avatar
+            aria-hidden="true"
+            size="32"
+          />
+        </div>
+        <div
+          class="call-control-list-item-middle"
+          data-position="middle"
+        >
+          <mdc-text
+            class="md-text-wrapper call-control-list-item-title"
+            tagname="div"
+            type="body-large-regular"
+          >
+            Agent One
+          </mdc-text>
+        </div>
+        <div
+          class="call-control-list-item-end"
+          data-position="end"
         >
           <div
-            class="call-control-list-item-start"
-            data-position="start"
+            class="hover-button"
           >
-            <mdc-avatar
-              aria-hidden="true"
-              size="32"
-            />
-          </div>
-          <div
-            class="call-control-list-item-middle"
-            data-position="middle"
-          >
-            <mdc-text
-              class="md-text-wrapper call-control-list-item-title"
-              tagname="div"
-              type="body-large-regular"
+            <button
+              aria-label="Select Agent One"
+              class="md-button-circle-wrapper md-button-simple-wrapper"
+              data-color="join"
+              data-disabled="false"
+              data-ghost="false"
+              data-inverted="false"
+              data-multiple-children="false"
+              data-outline="false"
+              data-shallow-disabled="false"
+              data-size="32"
+              tabindex="-1"
+              type="button"
             >
-              Agent One
-            </mdc-text>
+              <mdc-icon
+                name="agent-icon"
+              />
+            </button>
           </div>
-          <div
-            class="call-control-list-item-end"
-            data-position="end"
-          >
-            <div
-              class="hover-button"
-            >
-              <button
-                class="md-button-circle-wrapper md-button-simple-wrapper"
-                data-color="join"
-                data-disabled="false"
-                data-ghost="false"
-                data-inverted="false"
-                data-multiple-children="false"
-                data-outline="false"
-                data-shallow-disabled="false"
-                data-size="32"
-                tabindex="-1"
-                type="button"
-              >
-                <mdc-icon
-                  name="agent-icon"
-                />
-              </button>
-            </div>
-          </div>
-        </li>
-      </div>
-      <div
-        class="consult-list-item-wrapper"
+        </div>
+      </li>
+      <li
+        aria-label="Agent Two"
+        class="call-control-list-item consult-list-item-wrapper md-list-item-base-wrapper"
+        data-allow-text-select="false"
+        data-disabled="false"
+        data-interactive="true"
+        data-padded="true"
+        data-shape="rectangle"
+        data-size="50"
+        role="listitem"
+        tabindex="-1"
       >
-        <li
-          aria-label="Agent Two"
-          class="call-control-list-item md-list-item-base-wrapper"
-          data-allow-text-select="false"
-          data-disabled="false"
-          data-interactive="true"
-          data-padded="true"
-          data-shape="rectangle"
-          data-size="50"
-          role="listitem"
-          tabindex="-1"
+        <div
+          class="call-control-list-item-start"
+          data-position="start"
+        >
+          <mdc-avatar
+            aria-hidden="true"
+            size="32"
+          />
+        </div>
+        <div
+          class="call-control-list-item-middle"
+          data-position="middle"
+        >
+          <mdc-text
+            class="md-text-wrapper call-control-list-item-title"
+            tagname="div"
+            type="body-large-regular"
+          >
+            Agent Two
+          </mdc-text>
+        </div>
+        <div
+          class="call-control-list-item-end"
+          data-position="end"
         >
           <div
-            class="call-control-list-item-start"
-            data-position="start"
+            class="hover-button"
           >
-            <mdc-avatar
-              aria-hidden="true"
-              size="32"
-            />
-          </div>
-          <div
-            class="call-control-list-item-middle"
-            data-position="middle"
-          >
-            <mdc-text
-              class="md-text-wrapper call-control-list-item-title"
-              tagname="div"
-              type="body-large-regular"
+            <button
+              aria-label="Select Agent Two"
+              class="md-button-circle-wrapper md-button-simple-wrapper"
+              data-color="join"
+              data-disabled="false"
+              data-ghost="false"
+              data-inverted="false"
+              data-multiple-children="false"
+              data-outline="false"
+              data-shallow-disabled="false"
+              data-size="32"
+              tabindex="-1"
+              type="button"
             >
-              Agent Two
-            </mdc-text>
+              <mdc-icon
+                name="agent-icon"
+              />
+            </button>
           </div>
-          <div
-            class="call-control-list-item-end"
-            data-position="end"
-          >
-            <div
-              class="hover-button"
-            >
-              <button
-                class="md-button-circle-wrapper md-button-simple-wrapper"
-                data-color="join"
-                data-disabled="false"
-                data-ghost="false"
-                data-inverted="false"
-                data-multiple-children="false"
-                data-outline="false"
-                data-shallow-disabled="false"
-                data-size="32"
-                tabindex="-1"
-                type="button"
-              >
-                <mdc-icon
-                  name="agent-icon"
-                />
-              </button>
-            </div>
-          </div>
-        </li>
-      </div>
+        </div>
+      </li>
     </ul>
   </div>
 </div>
@@ -1316,7 +1297,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         class="md-text-input-container"
       >
         <input
-          aria-labelledby="consult-search-label"
+          aria-label="Search destinations"
           id="consult-search"
           placeholder="Search..."
           type="text"
@@ -1443,202 +1424,194 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
   </div>
   <div
     class="consult-list-container"
+    tabindex="0"
   >
     <ul
       class="agent-list md-list-wrapper"
     >
-      <div
-        class="consult-list-item-wrapper"
+      <li
+        aria-label="Available Agent"
+        class="call-control-list-item consult-list-item-wrapper md-list-item-base-wrapper"
+        data-allow-text-select="false"
+        data-disabled="false"
+        data-interactive="true"
+        data-padded="true"
+        data-shape="rectangle"
+        data-size="50"
+        role="listitem"
+        tabindex="-1"
       >
-        <li
-          aria-label="Available Agent"
-          class="call-control-list-item md-list-item-base-wrapper"
-          data-allow-text-select="false"
-          data-disabled="false"
-          data-interactive="true"
-          data-padded="true"
-          data-shape="rectangle"
-          data-size="50"
-          role="listitem"
-          tabindex="-1"
+        <div
+          class="call-control-list-item-start"
+          data-position="start"
+        >
+          <mdc-avatar
+            aria-hidden="true"
+            size="32"
+          />
+        </div>
+        <div
+          class="call-control-list-item-middle"
+          data-position="middle"
+        >
+          <mdc-text
+            class="md-text-wrapper call-control-list-item-title"
+            tagname="div"
+            type="body-large-regular"
+          >
+            Available Agent
+          </mdc-text>
+        </div>
+        <div
+          class="call-control-list-item-end"
+          data-position="end"
         >
           <div
-            class="call-control-list-item-start"
-            data-position="start"
+            class="hover-button"
           >
-            <mdc-avatar
-              aria-hidden="true"
-              size="32"
-            />
-          </div>
-          <div
-            class="call-control-list-item-middle"
-            data-position="middle"
-          >
-            <mdc-text
-              class="md-text-wrapper call-control-list-item-title"
-              tagname="div"
-              type="body-large-regular"
+            <button
+              aria-label="Select Available Agent"
+              class="md-button-circle-wrapper md-button-simple-wrapper"
+              data-color="join"
+              data-disabled="false"
+              data-ghost="false"
+              data-inverted="false"
+              data-multiple-children="false"
+              data-outline="false"
+              data-shallow-disabled="false"
+              data-size="32"
+              tabindex="-1"
+              type="button"
             >
-              Available Agent
-            </mdc-text>
+              <mdc-icon
+                name="agent-icon"
+              />
+            </button>
           </div>
-          <div
-            class="call-control-list-item-end"
-            data-position="end"
-          >
-            <div
-              class="hover-button"
-            >
-              <button
-                class="md-button-circle-wrapper md-button-simple-wrapper"
-                data-color="join"
-                data-disabled="false"
-                data-ghost="false"
-                data-inverted="false"
-                data-multiple-children="false"
-                data-outline="false"
-                data-shallow-disabled="false"
-                data-size="32"
-                tabindex="-1"
-                type="button"
-              >
-                <mdc-icon
-                  name="agent-icon"
-                />
-              </button>
-            </div>
-          </div>
-        </li>
-      </div>
-      <div
-        class="consult-list-item-wrapper"
+        </div>
+      </li>
+      <li
+        aria-label="Busy Agent"
+        class="call-control-list-item consult-list-item-wrapper md-list-item-base-wrapper"
+        data-allow-text-select="false"
+        data-disabled="false"
+        data-interactive="true"
+        data-padded="true"
+        data-shape="rectangle"
+        data-size="50"
+        role="listitem"
+        tabindex="-1"
       >
-        <li
-          aria-label="Busy Agent"
-          class="call-control-list-item md-list-item-base-wrapper"
-          data-allow-text-select="false"
-          data-disabled="false"
-          data-interactive="true"
-          data-padded="true"
-          data-shape="rectangle"
-          data-size="50"
-          role="listitem"
-          tabindex="-1"
+        <div
+          class="call-control-list-item-start"
+          data-position="start"
+        >
+          <mdc-avatar
+            aria-hidden="true"
+            size="32"
+          />
+        </div>
+        <div
+          class="call-control-list-item-middle"
+          data-position="middle"
+        >
+          <mdc-text
+            class="md-text-wrapper call-control-list-item-title"
+            tagname="div"
+            type="body-large-regular"
+          >
+            Busy Agent
+          </mdc-text>
+        </div>
+        <div
+          class="call-control-list-item-end"
+          data-position="end"
         >
           <div
-            class="call-control-list-item-start"
-            data-position="start"
+            class="hover-button"
           >
-            <mdc-avatar
-              aria-hidden="true"
-              size="32"
-            />
-          </div>
-          <div
-            class="call-control-list-item-middle"
-            data-position="middle"
-          >
-            <mdc-text
-              class="md-text-wrapper call-control-list-item-title"
-              tagname="div"
-              type="body-large-regular"
+            <button
+              aria-label="Select Busy Agent"
+              class="md-button-circle-wrapper md-button-simple-wrapper"
+              data-color="join"
+              data-disabled="false"
+              data-ghost="false"
+              data-inverted="false"
+              data-multiple-children="false"
+              data-outline="false"
+              data-shallow-disabled="false"
+              data-size="32"
+              tabindex="-1"
+              type="button"
             >
-              Busy Agent
-            </mdc-text>
+              <mdc-icon
+                name="agent-icon"
+              />
+            </button>
           </div>
-          <div
-            class="call-control-list-item-end"
-            data-position="end"
-          >
-            <div
-              class="hover-button"
-            >
-              <button
-                class="md-button-circle-wrapper md-button-simple-wrapper"
-                data-color="join"
-                data-disabled="false"
-                data-ghost="false"
-                data-inverted="false"
-                data-multiple-children="false"
-                data-outline="false"
-                data-shallow-disabled="false"
-                data-size="32"
-                tabindex="-1"
-                type="button"
-              >
-                <mdc-icon
-                  name="agent-icon"
-                />
-              </button>
-            </div>
-          </div>
-        </li>
-      </div>
-      <div
-        class="consult-list-item-wrapper"
+        </div>
+      </li>
+      <li
+        aria-label="Idle Agent"
+        class="call-control-list-item consult-list-item-wrapper md-list-item-base-wrapper"
+        data-allow-text-select="false"
+        data-disabled="false"
+        data-interactive="true"
+        data-padded="true"
+        data-shape="rectangle"
+        data-size="50"
+        role="listitem"
+        tabindex="-1"
       >
-        <li
-          aria-label="Idle Agent"
-          class="call-control-list-item md-list-item-base-wrapper"
-          data-allow-text-select="false"
-          data-disabled="false"
-          data-interactive="true"
-          data-padded="true"
-          data-shape="rectangle"
-          data-size="50"
-          role="listitem"
-          tabindex="-1"
+        <div
+          class="call-control-list-item-start"
+          data-position="start"
+        >
+          <mdc-avatar
+            aria-hidden="true"
+            size="32"
+          />
+        </div>
+        <div
+          class="call-control-list-item-middle"
+          data-position="middle"
+        >
+          <mdc-text
+            class="md-text-wrapper call-control-list-item-title"
+            tagname="div"
+            type="body-large-regular"
+          >
+            Idle Agent
+          </mdc-text>
+        </div>
+        <div
+          class="call-control-list-item-end"
+          data-position="end"
         >
           <div
-            class="call-control-list-item-start"
-            data-position="start"
+            class="hover-button"
           >
-            <mdc-avatar
-              aria-hidden="true"
-              size="32"
-            />
-          </div>
-          <div
-            class="call-control-list-item-middle"
-            data-position="middle"
-          >
-            <mdc-text
-              class="md-text-wrapper call-control-list-item-title"
-              tagname="div"
-              type="body-large-regular"
+            <button
+              aria-label="Select Idle Agent"
+              class="md-button-circle-wrapper md-button-simple-wrapper"
+              data-color="join"
+              data-disabled="false"
+              data-ghost="false"
+              data-inverted="false"
+              data-multiple-children="false"
+              data-outline="false"
+              data-shallow-disabled="false"
+              data-size="32"
+              tabindex="-1"
+              type="button"
             >
-              Idle Agent
-            </mdc-text>
+              <mdc-icon
+                name="agent-icon"
+              />
+            </button>
           </div>
-          <div
-            class="call-control-list-item-end"
-            data-position="end"
-          >
-            <div
-              class="hover-button"
-            >
-              <button
-                class="md-button-circle-wrapper md-button-simple-wrapper"
-                data-color="join"
-                data-disabled="false"
-                data-ghost="false"
-                data-inverted="false"
-                data-multiple-children="false"
-                data-outline="false"
-                data-shallow-disabled="false"
-                data-size="32"
-                tabindex="-1"
-                type="button"
-              >
-                <mdc-icon
-                  name="agent-icon"
-                />
-              </button>
-            </div>
-          </div>
-        </li>
-      </div>
+        </div>
+      </li>
     </ul>
   </div>
 </div>
@@ -1667,7 +1640,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         class="md-text-input-container"
       >
         <input
-          aria-labelledby="consult-search-label"
+          aria-label="Search destinations"
           id="consult-search"
           placeholder="Search..."
           type="text"
@@ -1794,6 +1767,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
   </div>
   <div
     class="consult-list-container"
+    tabindex="0"
   >
     <div
       class="consult-empty-state"
@@ -1834,7 +1808,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         class="md-text-input-container"
       >
         <input
-          aria-labelledby="consult-search-label"
+          aria-label="Search destinations"
           id="consult-search"
           placeholder="Search..."
           type="text"
@@ -1961,138 +1935,133 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
   </div>
   <div
     class="consult-list-container"
+    tabindex="0"
   >
     <ul
       class="agent-list md-list-wrapper"
     >
-      <div
-        class="consult-list-item-wrapper"
+      <li
+        aria-label="Agent One"
+        class="call-control-list-item consult-list-item-wrapper md-list-item-base-wrapper"
+        data-allow-text-select="false"
+        data-disabled="false"
+        data-interactive="true"
+        data-padded="true"
+        data-shape="rectangle"
+        data-size="50"
+        role="listitem"
+        tabindex="-1"
       >
-        <li
-          aria-label="Agent One"
-          class="call-control-list-item md-list-item-base-wrapper"
-          data-allow-text-select="false"
-          data-disabled="false"
-          data-interactive="true"
-          data-padded="true"
-          data-shape="rectangle"
-          data-size="50"
-          role="listitem"
-          tabindex="-1"
+        <div
+          class="call-control-list-item-start"
+          data-position="start"
+        >
+          <mdc-avatar
+            aria-hidden="true"
+            size="32"
+          />
+        </div>
+        <div
+          class="call-control-list-item-middle"
+          data-position="middle"
+        >
+          <mdc-text
+            class="md-text-wrapper call-control-list-item-title"
+            tagname="div"
+            type="body-large-regular"
+          >
+            Agent One
+          </mdc-text>
+        </div>
+        <div
+          class="call-control-list-item-end"
+          data-position="end"
         >
           <div
-            class="call-control-list-item-start"
-            data-position="start"
+            class="hover-button"
           >
-            <mdc-avatar
-              aria-hidden="true"
-              size="32"
-            />
-          </div>
-          <div
-            class="call-control-list-item-middle"
-            data-position="middle"
-          >
-            <mdc-text
-              class="md-text-wrapper call-control-list-item-title"
-              tagname="div"
-              type="body-large-regular"
+            <button
+              aria-label="Select Agent One"
+              class="md-button-circle-wrapper md-button-simple-wrapper"
+              data-color="join"
+              data-disabled="false"
+              data-ghost="false"
+              data-inverted="false"
+              data-multiple-children="false"
+              data-outline="false"
+              data-shallow-disabled="false"
+              data-size="32"
+              tabindex="-1"
+              type="button"
             >
-              Agent One
-            </mdc-text>
+              <mdc-icon
+                name="agent-icon"
+              />
+            </button>
           </div>
-          <div
-            class="call-control-list-item-end"
-            data-position="end"
-          >
-            <div
-              class="hover-button"
-            >
-              <button
-                class="md-button-circle-wrapper md-button-simple-wrapper"
-                data-color="join"
-                data-disabled="false"
-                data-ghost="false"
-                data-inverted="false"
-                data-multiple-children="false"
-                data-outline="false"
-                data-shallow-disabled="false"
-                data-size="32"
-                tabindex="-1"
-                type="button"
-              >
-                <mdc-icon
-                  name="agent-icon"
-                />
-              </button>
-            </div>
-          </div>
-        </li>
-      </div>
-      <div
-        class="consult-list-item-wrapper"
+        </div>
+      </li>
+      <li
+        aria-label="Agent Two"
+        class="call-control-list-item consult-list-item-wrapper md-list-item-base-wrapper"
+        data-allow-text-select="false"
+        data-disabled="false"
+        data-interactive="true"
+        data-padded="true"
+        data-shape="rectangle"
+        data-size="50"
+        role="listitem"
+        tabindex="-1"
       >
-        <li
-          aria-label="Agent Two"
-          class="call-control-list-item md-list-item-base-wrapper"
-          data-allow-text-select="false"
-          data-disabled="false"
-          data-interactive="true"
-          data-padded="true"
-          data-shape="rectangle"
-          data-size="50"
-          role="listitem"
-          tabindex="-1"
+        <div
+          class="call-control-list-item-start"
+          data-position="start"
+        >
+          <mdc-avatar
+            aria-hidden="true"
+            size="32"
+          />
+        </div>
+        <div
+          class="call-control-list-item-middle"
+          data-position="middle"
+        >
+          <mdc-text
+            class="md-text-wrapper call-control-list-item-title"
+            tagname="div"
+            type="body-large-regular"
+          >
+            Agent Two
+          </mdc-text>
+        </div>
+        <div
+          class="call-control-list-item-end"
+          data-position="end"
         >
           <div
-            class="call-control-list-item-start"
-            data-position="start"
+            class="hover-button"
           >
-            <mdc-avatar
-              aria-hidden="true"
-              size="32"
-            />
-          </div>
-          <div
-            class="call-control-list-item-middle"
-            data-position="middle"
-          >
-            <mdc-text
-              class="md-text-wrapper call-control-list-item-title"
-              tagname="div"
-              type="body-large-regular"
+            <button
+              aria-label="Select Agent Two"
+              class="md-button-circle-wrapper md-button-simple-wrapper"
+              data-color="join"
+              data-disabled="false"
+              data-ghost="false"
+              data-inverted="false"
+              data-multiple-children="false"
+              data-outline="false"
+              data-shallow-disabled="false"
+              data-size="32"
+              tabindex="-1"
+              type="button"
             >
-              Agent Two
-            </mdc-text>
+              <mdc-icon
+                name="agent-icon"
+              />
+            </button>
           </div>
-          <div
-            class="call-control-list-item-end"
-            data-position="end"
-          >
-            <div
-              class="hover-button"
-            >
-              <button
-                class="md-button-circle-wrapper md-button-simple-wrapper"
-                data-color="join"
-                data-disabled="false"
-                data-ghost="false"
-                data-inverted="false"
-                data-multiple-children="false"
-                data-outline="false"
-                data-shallow-disabled="false"
-                data-size="32"
-                tabindex="-1"
-                type="button"
-              >
-                <mdc-icon
-                  name="agent-icon"
-                />
-              </button>
-            </div>
-          </div>
-        </li>
-      </div>
+        </div>
+      </li>
     </ul>
   </div>
 </div>
@@ -2121,7 +2090,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         class="md-text-input-container"
       >
         <input
-          aria-labelledby="consult-search-label"
+          aria-label="Search destinations"
           id="consult-search"
           placeholder="Search..."
           type="text"
@@ -2248,6 +2217,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
   </div>
   <div
     class="consult-list-container"
+    tabindex="0"
   >
     <div
       class="consult-empty-state"
@@ -2288,7 +2258,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         class="md-text-input-container"
       >
         <input
-          aria-labelledby="consult-search-label"
+          aria-label="Search destinations"
           id="consult-search"
           placeholder="Search..."
           type="text"
@@ -2412,6 +2382,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
   </div>
   <div
     class="consult-list-container"
+    tabindex="0"
   >
     <div
       class="consult-loading-spinner"
@@ -2445,7 +2416,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         class="md-text-input-container"
       >
         <input
-          aria-labelledby="consult-search-label"
+          aria-label="Search destinations"
           id="consult-search"
           placeholder="Search..."
           type="text"
@@ -2572,74 +2543,72 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
   </div>
   <div
     class="consult-list-container"
+    tabindex="0"
   >
     <ul
       class="agent-list md-list-wrapper"
     >
-      <div
-        class="consult-list-item-wrapper"
+      <li
+        aria-label="Single Agent"
+        class="call-control-list-item consult-list-item-wrapper md-list-item-base-wrapper"
+        data-allow-text-select="false"
+        data-disabled="false"
+        data-interactive="true"
+        data-padded="true"
+        data-shape="rectangle"
+        data-size="50"
+        role="listitem"
+        tabindex="-1"
       >
-        <li
-          aria-label="Single Agent"
-          class="call-control-list-item md-list-item-base-wrapper"
-          data-allow-text-select="false"
-          data-disabled="false"
-          data-interactive="true"
-          data-padded="true"
-          data-shape="rectangle"
-          data-size="50"
-          role="listitem"
-          tabindex="-1"
+        <div
+          class="call-control-list-item-start"
+          data-position="start"
+        >
+          <mdc-avatar
+            aria-hidden="true"
+            size="32"
+          />
+        </div>
+        <div
+          class="call-control-list-item-middle"
+          data-position="middle"
+        >
+          <mdc-text
+            class="md-text-wrapper call-control-list-item-title"
+            tagname="div"
+            type="body-large-regular"
+          >
+            Single Agent
+          </mdc-text>
+        </div>
+        <div
+          class="call-control-list-item-end"
+          data-position="end"
         >
           <div
-            class="call-control-list-item-start"
-            data-position="start"
+            class="hover-button"
           >
-            <mdc-avatar
-              aria-hidden="true"
-              size="32"
-            />
-          </div>
-          <div
-            class="call-control-list-item-middle"
-            data-position="middle"
-          >
-            <mdc-text
-              class="md-text-wrapper call-control-list-item-title"
-              tagname="div"
-              type="body-large-regular"
+            <button
+              aria-label="Select Single Agent"
+              class="md-button-circle-wrapper md-button-simple-wrapper"
+              data-color="join"
+              data-disabled="false"
+              data-ghost="false"
+              data-inverted="false"
+              data-multiple-children="false"
+              data-outline="false"
+              data-shallow-disabled="false"
+              data-size="32"
+              tabindex="-1"
+              type="button"
             >
-              Single Agent
-            </mdc-text>
+              <mdc-icon
+                name="agent-icon"
+              />
+            </button>
           </div>
-          <div
-            class="call-control-list-item-end"
-            data-position="end"
-          >
-            <div
-              class="hover-button"
-            >
-              <button
-                class="md-button-circle-wrapper md-button-simple-wrapper"
-                data-color="join"
-                data-disabled="false"
-                data-ghost="false"
-                data-inverted="false"
-                data-multiple-children="false"
-                data-outline="false"
-                data-shallow-disabled="false"
-                data-size="32"
-                tabindex="-1"
-                type="button"
-              >
-                <mdc-icon
-                  name="agent-icon"
-                />
-              </button>
-            </div>
-          </div>
-        </li>
-      </div>
+        </div>
+      </li>
     </ul>
   </div>
 </div>
@@ -2668,7 +2637,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         class="md-text-input-container"
       >
         <input
-          aria-labelledby="consult-search-label"
+          aria-label="Search destinations"
           id="consult-search"
           placeholder="Search..."
           type="text"
@@ -2795,75 +2764,73 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
   </div>
   <div
     class="consult-list-container"
+    tabindex="0"
   >
     <div>
       <ul
         class="agent-list md-list-wrapper"
       >
-        <div
-          class="consult-list-item-wrapper"
+        <li
+          aria-label="Single Queue"
+          class="call-control-list-item consult-list-item-wrapper md-list-item-base-wrapper"
+          data-allow-text-select="false"
+          data-disabled="false"
+          data-interactive="true"
+          data-padded="true"
+          data-shape="rectangle"
+          data-size="50"
+          role="listitem"
+          tabindex="-1"
         >
-          <li
-            aria-label="Single Queue"
-            class="call-control-list-item md-list-item-base-wrapper"
-            data-allow-text-select="false"
-            data-disabled="false"
-            data-interactive="true"
-            data-padded="true"
-            data-shape="rectangle"
-            data-size="50"
-            role="listitem"
-            tabindex="-1"
+          <div
+            class="call-control-list-item-start"
+            data-position="start"
+          >
+            <mdc-avatar
+              aria-hidden="true"
+              size="32"
+            />
+          </div>
+          <div
+            class="call-control-list-item-middle"
+            data-position="middle"
+          >
+            <mdc-text
+              class="md-text-wrapper call-control-list-item-title"
+              tagname="div"
+              type="body-large-regular"
+            >
+              Single Queue
+            </mdc-text>
+          </div>
+          <div
+            class="call-control-list-item-end"
+            data-position="end"
           >
             <div
-              class="call-control-list-item-start"
-              data-position="start"
+              class="hover-button"
             >
-              <mdc-avatar
-                aria-hidden="true"
-                size="32"
-              />
-            </div>
-            <div
-              class="call-control-list-item-middle"
-              data-position="middle"
-            >
-              <mdc-text
-                class="md-text-wrapper call-control-list-item-title"
-                tagname="div"
-                type="body-large-regular"
+              <button
+                aria-label="Select Single Queue"
+                class="md-button-circle-wrapper md-button-simple-wrapper"
+                data-color="join"
+                data-disabled="false"
+                data-ghost="false"
+                data-inverted="false"
+                data-multiple-children="false"
+                data-outline="false"
+                data-shallow-disabled="false"
+                data-size="32"
+                tabindex="-1"
+                type="button"
               >
-                Single Queue
-              </mdc-text>
+                <mdc-icon
+                  name="agent-icon"
+                />
+              </button>
             </div>
-            <div
-              class="call-control-list-item-end"
-              data-position="end"
-            >
-              <div
-                class="hover-button"
-              >
-                <button
-                  class="md-button-circle-wrapper md-button-simple-wrapper"
-                  data-color="join"
-                  data-disabled="false"
-                  data-ghost="false"
-                  data-inverted="false"
-                  data-multiple-children="false"
-                  data-outline="false"
-                  data-shallow-disabled="false"
-                  data-size="32"
-                  tabindex="-1"
-                  type="button"
-                >
-                  <mdc-icon
-                    name="agent-icon"
-                  />
-                </button>
-              </div>
-            </div>
-          </li>
-        </div>
+          </div>
+        </li>
       </ul>
     </div>
   </div>
@@ -2893,7 +2860,7 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
         class="md-text-input-container"
       >
         <input
-          aria-labelledby="consult-search-label"
+          aria-label="Search destinations"
           id="consult-search"
           placeholder="Search..."
           type="text"
@@ -3020,138 +2987,133 @@ exports[`ConsultTransferPopoverComponent Snapshots Rendering - Tests for UI elem
   </div>
   <div
     class="consult-list-container"
+    tabindex="0"
   >
     <ul
       class="agent-list md-list-wrapper"
     >
-      <div
-        class="consult-list-item-wrapper"
+      <li
+        aria-label="Agent One"
+        class="call-control-list-item consult-list-item-wrapper md-list-item-base-wrapper"
+        data-allow-text-select="false"
+        data-disabled="false"
+        data-interactive="true"
+        data-padded="true"
+        data-shape="rectangle"
+        data-size="50"
+        role="listitem"
+        tabindex="-1"
       >
-        <li
-          aria-label="Agent One"
-          class="call-control-list-item md-list-item-base-wrapper"
-          data-allow-text-select="false"
-          data-disabled="false"
-          data-interactive="true"
-          data-padded="true"
-          data-shape="rectangle"
-          data-size="50"
-          role="listitem"
-          tabindex="-1"
+        <div
+          class="call-control-list-item-start"
+          data-position="start"
+        >
+          <mdc-avatar
+            aria-hidden="true"
+            size="32"
+          />
+        </div>
+        <div
+          class="call-control-list-item-middle"
+          data-position="middle"
+        >
+          <mdc-text
+            class="md-text-wrapper call-control-list-item-title"
+            tagname="div"
+            type="body-large-regular"
+          >
+            Agent One
+          </mdc-text>
+        </div>
+        <div
+          class="call-control-list-item-end"
+          data-position="end"
         >
           <div
-            class="call-control-list-item-start"
-            data-position="start"
+            class="hover-button"
           >
-            <mdc-avatar
-              aria-hidden="true"
-              size="32"
-            />
-          </div>
-          <div
-            class="call-control-list-item-middle"
-            data-position="middle"
-          >
-            <mdc-text
-              class="md-text-wrapper call-control-list-item-title"
-              tagname="div"
-              type="body-large-regular"
+            <button
+              aria-label="Select Agent One"
+              class="md-button-circle-wrapper md-button-simple-wrapper"
+              data-color="join"
+              data-disabled="false"
+              data-ghost="false"
+              data-inverted="false"
+              data-multiple-children="false"
+              data-outline="false"
+              data-shallow-disabled="false"
+              data-size="32"
+              tabindex="-1"
+              type="button"
             >
-              Agent One
-            </mdc-text>
+              <mdc-icon
+                name="agent-icon"
+              />
+            </button>
           </div>
-          <div
-            class="call-control-list-item-end"
-            data-position="end"
-          >
-            <div
-              class="hover-button"
-            >
-              <button
-                class="md-button-circle-wrapper md-button-simple-wrapper"
-                data-color="join"
-                data-disabled="false"
-                data-ghost="false"
-                data-inverted="false"
-                data-multiple-children="false"
-                data-outline="false"
-                data-shallow-disabled="false"
-                data-size="32"
-                tabindex="-1"
-                type="button"
-              >
-                <mdc-icon
-                  name="agent-icon"
-                />
-              </button>
-            </div>
-          </div>
-        </li>
-      </div>
-      <div
-        class="consult-list-item-wrapper"
+        </div>
+      </li>
+      <li
+        aria-label="Agent Two"
+        class="call-control-list-item consult-list-item-wrapper md-list-item-base-wrapper"
+        data-allow-text-select="false"
+        data-disabled="false"
+        data-interactive="true"
+        data-padded="true"
+        data-shape="rectangle"
+        data-size="50"
+        role="listitem"
+        tabindex="-1"
       >
-        <li
-          aria-label="Agent Two"
-          class="call-control-list-item md-list-item-base-wrapper"
-          data-allow-text-select="false"
-          data-disabled="false"
-          data-interactive="true"
-          data-padded="true"
-          data-shape="rectangle"
-          data-size="50"
-          role="listitem"
-          tabindex="-1"
+        <div
+          class="call-control-list-item-start"
+          data-position="start"
+        >
+          <mdc-avatar
+            aria-hidden="true"
+            size="32"
+          />
+        </div>
+        <div
+          class="call-control-list-item-middle"
+          data-position="middle"
+        >
+          <mdc-text
+            class="md-text-wrapper call-control-list-item-title"
+            tagname="div"
+            type="body-large-regular"
+          >
+            Agent Two
+          </mdc-text>
+        </div>
+        <div
+          class="call-control-list-item-end"
+          data-position="end"
         >
           <div
-            class="call-control-list-item-start"
-            data-position="start"
+            class="hover-button"
           >
-            <mdc-avatar
-              aria-hidden="true"
-              size="32"
-            />
-          </div>
-          <div
-            class="call-control-list-item-middle"
-            data-position="middle"
-          >
-            <mdc-text
-              class="md-text-wrapper call-control-list-item-title"
-              tagname="div"
-              type="body-large-regular"
+            <button
+              aria-label="Select Agent Two"
+              class="md-button-circle-wrapper md-button-simple-wrapper"
+              data-color="join"
+              data-disabled="false"
+              data-ghost="false"
+              data-inverted="false"
+              data-multiple-children="false"
+              data-outline="false"
+              data-shallow-disabled="false"
+              data-size="32"
+              tabindex="-1"
+              type="button"
             >
-              Agent Two
-            </mdc-text>
+              <mdc-icon
+                name="agent-icon"
+              />
+            </button>
           </div>
-          <div
-            class="call-control-list-item-end"
-            data-position="end"
-          >
-            <div
-              class="hover-button"
-            >
-              <button
-                class="md-button-circle-wrapper md-button-simple-wrapper"
-                data-color="join"
-                data-disabled="false"
-                data-ghost="false"
-                data-inverted="false"
-                data-multiple-children="false"
-                data-outline="false"
-                data-shallow-disabled="false"
-                data-size="32"
-                tabindex="-1"
-                type="button"
-              >
-                <mdc-icon
-                  name="agent-icon"
-                />
-              </button>
-            </div>
-          </div>
-        </li>
-      </div>
+        </div>
+      </li>
     </ul>
   </div>
 </div>
@@ -3180,7 +3142,7 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
         class="md-text-input-container"
       >
         <input
-          aria-labelledby="consult-search-label"
+          aria-label="Search destinations"
           id="consult-search"
           placeholder="Search..."
           type="text"
@@ -3307,69 +3269,67 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
   </div>
   <div
     class="consult-list-container"
+    tabindex="0"
   >
     <ul
       class="agent-list md-list-wrapper"
     >
-      <div
-        class="consult-list-item-wrapper"
+      <li
+        aria-label="New Agent One"
+        class="call-control-list-item consult-list-item-wrapper md-list-item-base-wrapper"
+        data-allow-text-select="false"
+        data-disabled="false"
+        data-interactive="true"
+        data-padded="true"
+        data-shape="rectangle"
+        data-size="50"
+        role="listitem"
+        tabindex="-1"
       >
-        <li
-          aria-label="New Agent One"
-          class="call-control-list-item md-list-item-base-wrapper"
-          data-allow-text-select="false"
-          data-disabled="false"
-          data-interactive="true"
-          data-padded="true"
-          data-shape="rectangle"
-          data-size="50"
-          role="listitem"
-          tabindex="-1"
+        <div
+          class="call-control-list-item-start"
+          data-position="start"
+        >
+          <mdc-avatar
+            aria-hidden="true"
+          />
+        </div>
+        <div
+          class="call-control-list-item-middle"
+          data-position="middle"
+        >
+          <mdc-text
+            class="md-text-wrapper call-control-list-item-title"
+          >
+            New Agent One
+          </mdc-text>
+        </div>
+        <div
+          class="call-control-list-item-end"
+          data-position="end"
         >
           <div
-            class="call-control-list-item-start"
-            data-position="start"
+            class="hover-button"
           >
-            <mdc-avatar
-              aria-hidden="true"
-            />
-          </div>
-          <div
-            class="call-control-list-item-middle"
-            data-position="middle"
-          >
-            <mdc-text
-              class="md-text-wrapper call-control-list-item-title"
+            <button
+              aria-label="Select New Agent One"
+              class="md-button-circle-wrapper md-button-simple-wrapper"
+              data-color="join"
+              data-disabled="false"
+              data-ghost="false"
+              data-inverted="false"
+              data-multiple-children="false"
+              data-outline="false"
+              data-shallow-disabled="false"
+              data-size="32"
+              tabindex="-1"
+              type="button"
             >
-              New Agent One
-            </mdc-text>
+              <mdc-icon />
+            </button>
           </div>
-          <div
-            class="call-control-list-item-end"
-            data-position="end"
-          >
-            <div
-              class="hover-button"
-            >
-              <button
-                class="md-button-circle-wrapper md-button-simple-wrapper"
-                data-color="join"
-                data-disabled="false"
-                data-ghost="false"
-                data-inverted="false"
-                data-multiple-children="false"
-                data-outline="false"
-                data-shallow-disabled="false"
-                data-size="32"
-                tabindex="-1"
-                type="button"
-              >
-                <mdc-icon />
-              </button>
-            </div>
-          </div>
-        </li>
-      </div>
+        </div>
+      </li>
     </ul>
   </div>
 </div>
@@ -3398,7 +3358,7 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
         class="md-text-input-container"
       >
         <input
-          aria-labelledby="consult-search-label"
+          aria-label="Search destinations"
           id="consult-search"
           placeholder="Search..."
           type="text"
@@ -3525,138 +3485,133 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
   </div>
   <div
     class="consult-list-container"
+    tabindex="0"
   >
     <ul
       class="agent-list md-list-wrapper"
     >
-      <div
-        class="consult-list-item-wrapper"
+      <li
+        aria-label="Agent One"
+        class="call-control-list-item consult-list-item-wrapper md-list-item-base-wrapper"
+        data-allow-text-select="false"
+        data-disabled="false"
+        data-interactive="true"
+        data-padded="true"
+        data-shape="rectangle"
+        data-size="50"
+        role="listitem"
+        tabindex="-1"
       >
-        <li
-          aria-label="Agent One"
-          class="call-control-list-item md-list-item-base-wrapper"
-          data-allow-text-select="false"
-          data-disabled="false"
-          data-interactive="true"
-          data-padded="true"
-          data-shape="rectangle"
-          data-size="50"
-          role="listitem"
-          tabindex="-1"
+        <div
+          class="call-control-list-item-start"
+          data-position="start"
+        >
+          <mdc-avatar
+            aria-hidden="true"
+            size="32"
+          />
+        </div>
+        <div
+          class="call-control-list-item-middle"
+          data-position="middle"
+        >
+          <mdc-text
+            class="md-text-wrapper call-control-list-item-title"
+            tagname="div"
+            type="body-large-regular"
+          >
+            Agent One
+          </mdc-text>
+        </div>
+        <div
+          class="call-control-list-item-end"
+          data-position="end"
         >
           <div
-            class="call-control-list-item-start"
-            data-position="start"
+            class="hover-button"
           >
-            <mdc-avatar
-              aria-hidden="true"
-              size="32"
-            />
-          </div>
-          <div
-            class="call-control-list-item-middle"
-            data-position="middle"
-          >
-            <mdc-text
-              class="md-text-wrapper call-control-list-item-title"
-              tagname="div"
-              type="body-large-regular"
+            <button
+              aria-label="Select Agent One"
+              class="md-button-circle-wrapper md-button-simple-wrapper"
+              data-color="join"
+              data-disabled="false"
+              data-ghost="false"
+              data-inverted="false"
+              data-multiple-children="false"
+              data-outline="false"
+              data-shallow-disabled="false"
+              data-size="32"
+              tabindex="-1"
+              type="button"
             >
-              Agent One
-            </mdc-text>
+              <mdc-icon
+                name="agent-icon"
+              />
+            </button>
           </div>
-          <div
-            class="call-control-list-item-end"
-            data-position="end"
-          >
-            <div
-              class="hover-button"
-            >
-              <button
-                class="md-button-circle-wrapper md-button-simple-wrapper"
-                data-color="join"
-                data-disabled="false"
-                data-ghost="false"
-                data-inverted="false"
-                data-multiple-children="false"
-                data-outline="false"
-                data-shallow-disabled="false"
-                data-size="32"
-                tabindex="-1"
-                type="button"
-              >
-                <mdc-icon
-                  name="agent-icon"
-                />
-              </button>
-            </div>
-          </div>
-        </li>
-      </div>
-      <div
-        class="consult-list-item-wrapper"
+        </div>
+      </li>
+      <li
+        aria-label="Agent Two"
+        class="call-control-list-item consult-list-item-wrapper md-list-item-base-wrapper"
+        data-allow-text-select="false"
+        data-disabled="false"
+        data-interactive="true"
+        data-padded="true"
+        data-shape="rectangle"
+        data-size="50"
+        role="listitem"
+        tabindex="-1"
       >
-        <li
-          aria-label="Agent Two"
-          class="call-control-list-item md-list-item-base-wrapper"
-          data-allow-text-select="false"
-          data-disabled="false"
-          data-interactive="true"
-          data-padded="true"
-          data-shape="rectangle"
-          data-size="50"
-          role="listitem"
-          tabindex="-1"
+        <div
+          class="call-control-list-item-start"
+          data-position="start"
+        >
+          <mdc-avatar
+            aria-hidden="true"
+            size="32"
+          />
+        </div>
+        <div
+          class="call-control-list-item-middle"
+          data-position="middle"
+        >
+          <mdc-text
+            class="md-text-wrapper call-control-list-item-title"
+            tagname="div"
+            type="body-large-regular"
+          >
+            Agent Two
+          </mdc-text>
+        </div>
+        <div
+          class="call-control-list-item-end"
+          data-position="end"
         >
           <div
-            class="call-control-list-item-start"
-            data-position="start"
+            class="hover-button"
           >
-            <mdc-avatar
-              aria-hidden="true"
-              size="32"
-            />
-          </div>
-          <div
-            class="call-control-list-item-middle"
-            data-position="middle"
-          >
-            <mdc-text
-              class="md-text-wrapper call-control-list-item-title"
-              tagname="div"
-              type="body-large-regular"
+            <button
+              aria-label="Select Agent Two"
+              class="md-button-circle-wrapper md-button-simple-wrapper"
+              data-color="join"
+              data-disabled="false"
+              data-ghost="false"
+              data-inverted="false"
+              data-multiple-children="false"
+              data-outline="false"
+              data-shallow-disabled="false"
+              data-size="32"
+              tabindex="-1"
+              type="button"
             >
-              Agent Two
-            </mdc-text>
+              <mdc-icon
+                name="agent-icon"
+              />
+            </button>
           </div>
-          <div
-            class="call-control-list-item-end"
-            data-position="end"
-          >
-            <div
-              class="hover-button"
-            >
-              <button
-                class="md-button-circle-wrapper md-button-simple-wrapper"
-                data-color="join"
-                data-disabled="false"
-                data-ghost="false"
-                data-inverted="false"
-                data-multiple-children="false"
-                data-outline="false"
-                data-shallow-disabled="false"
-                data-size="32"
-                tabindex="-1"
-                type="button"
-              >
-                <mdc-icon
-                  name="agent-icon"
-                />
-              </button>
-            </div>
-          </div>
-        </li>
-      </div>
+        </div>
+      </li>
     </ul>
   </div>
 </div>
@@ -3685,7 +3640,7 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
         class="md-text-input-container"
       >
         <input
-          aria-labelledby="consult-search-label"
+          aria-label="Search destinations"
           id="consult-search"
           placeholder="Search..."
           type="text"
@@ -3812,75 +3767,73 @@ exports[`ConsultTransferPopoverComponent Snapshots State Management should updat
   </div>
   <div
     class="consult-list-container"
+    tabindex="0"
   >
     <div>
       <ul
         class="agent-list md-list-wrapper"
       >
-        <div
-          class="consult-list-item-wrapper"
+        <li
+          aria-label="New Queue One"
+          class="call-control-list-item consult-list-item-wrapper md-list-item-base-wrapper"
+          data-allow-text-select="false"
+          data-disabled="false"
+          data-interactive="true"
+          data-padded="true"
+          data-shape="rectangle"
+          data-size="50"
+          role="listitem"
+          tabindex="-1"
         >
-          <li
-            aria-label="New Queue One"
-            class="call-control-list-item md-list-item-base-wrapper"
-            data-allow-text-select="false"
-            data-disabled="false"
-            data-interactive="true"
-            data-padded="true"
-            data-shape="rectangle"
-            data-size="50"
-            role="listitem"
-            tabindex="-1"
+          <div
+            class="call-control-list-item-start"
+            data-position="start"
+          >
+            <mdc-avatar
+              aria-hidden="true"
+              size="32"
+            />
+          </div>
+          <div
+            class="call-control-list-item-middle"
+            data-position="middle"
+          >
+            <mdc-text
+              class="md-text-wrapper call-control-list-item-title"
+              tagname="div"
+              type="body-large-regular"
+            >
+              New Queue One
+            </mdc-text>
+          </div>
+          <div
+            class="call-control-list-item-end"
+            data-position="end"
           >
             <div
-              class="call-control-list-item-start"
-              data-position="start"
+              class="hover-button"
             >
-              <mdc-avatar
-                aria-hidden="true"
-                size="32"
-              />
-            </div>
-            <div
-              class="call-control-list-item-middle"
-              data-position="middle"
-            >
-              <mdc-text
-                class="md-text-wrapper call-control-list-item-title"
-                tagname="div"
-                type="body-large-regular"
+              <button
+                aria-label="Select New Queue One"
+                class="md-button-circle-wrapper md-button-simple-wrapper"
+                data-color="join"
+                data-disabled="false"
+                data-ghost="false"
+                data-inverted="false"
+                data-multiple-children="false"
+                data-outline="false"
+                data-shallow-disabled="false"
+                data-size="32"
+                tabindex="-1"
+                type="button"
               >
-                New Queue One
-              </mdc-text>
+                <mdc-icon
+                  name="agent-icon"
+                />
+              </button>
             </div>
-            <div
-              class="call-control-list-item-end"
-              data-position="end"
-            >
-              <div
-                class="hover-button"
-              >
-                <button
-                  class="md-button-circle-wrapper md-button-simple-wrapper"
-                  data-color="join"
-                  data-disabled="false"
-                  data-ghost="false"
-                  data-inverted="false"
-                  data-multiple-children="false"
-                  data-outline="false"
-                  data-shallow-disabled="false"
-                  data-size="32"
-                  tabindex="-1"
-                  type="button"
-                >
-                  <mdc-icon
-                    name="agent-icon"
-                  />
-                </button>
-              </div>
-            </div>
-          </li>
-        </div>
+          </div>
+        </li>
       </ul>
     </div>
   </div>

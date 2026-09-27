@@ -17,6 +17,8 @@ import {
   TARGET_TYPE,
   ParticipantDropAnnouncement,
   PendingParticipantDropRequest,
+  WrapupCompletionResult,
+  CallControlAISummaryProps as BaseCallControlAISummaryProps,
 } from './task.types';
 import store, {
   TASK_EVENTS,
@@ -29,6 +31,11 @@ import store, {
   findMediaResourceId,
   MEDIA_TYPE_TELEPHONY_LOWER,
   RealTimeTranscriptionData,
+  AISummaryActionType,
+  AISummaryEditableField,
+  AISummaryFeedback,
+  AISummaryFeedbackResult,
+  AISummaryRequestResult,
 } from '@webex/cc-store';
 import {shouldShowWxAppTelephonyControls} from '@webex/cc-components';
 import {
@@ -52,11 +59,51 @@ import {useHoldTimer} from './Utils/useHoldTimer';
 import {OutdialAniEntriesResponse} from '@webex/contact-center/dist/types/services/config/types';
 import {enqueueMuteToggle, resetMuteCoordinatorForInteraction} from './mute-coordinator';
 import {isLatestOfferActionAttempt, nextOfferActionAttempt} from './offer-action-attempts';
+import {
+  editMidCallSummary,
+  getMidCallSummaryView,
+  recordMidCallSummaryCopied,
+  recordMidCallSummaryViewed,
+  requestMidCallSummary,
+  sendMidCallSummaryBeforeAction,
+  setMidCallSummaryFeedback,
+} from './ai-summary-mid-call';
+import {
+  completeWrapupWithSummary,
+  editPostCallSummary,
+  getPostCallSummaryView,
+  recordPostCallSummaryCopied,
+  recordPostCallSummaryViewed,
+  requestPostCallSummaryForReason,
+  retryPostCallSummary,
+  setPostCallSummaryFeedback,
+} from './ai-summary-post-call';
 
 const ENGAGED_LABEL = 'ENGAGED';
 const ENGAGED_USERNAME = 'Engaged';
 const PARTICIPANT_DROP_SUCCESS_MESSAGE = 'Participant removed from the conference.';
 const PARTICIPANT_DROP_FAILURE_MESSAGE = 'Unable to drop participant from the call. Try again.';
+
+type MidCallSummaryRequestCache = {
+  preparationKey?: string;
+  requests: Partial<Record<AISummaryActionType, Promise<AISummaryRequestResult>>>;
+};
+
+type CallControlAISummaryProps = BaseCallControlAISummaryProps & {
+  requestMidCallSummary?: (actionType: AISummaryActionType) => Promise<AISummaryRequestResult>;
+  setMidCallSummaryFeedback?: (
+    feedback: Exclude<AISummaryFeedback, 'none'>,
+    actionType: AISummaryActionType,
+    expectedRevision: number
+  ) => Promise<AISummaryFeedbackResult>;
+  setPostCallSummaryFeedback?: (feedback: Exclude<AISummaryFeedback, 'none'>, expectedRevision: number) => boolean;
+};
+
+const getAISummaryPreparationKey = (task?: ITask): string | undefined => {
+  const interactionId = task?.data?.interaction?.mainInteractionId ?? task?.data?.interactionId;
+  const agentId = task?.data?.agentId ?? store.agentId;
+  return interactionId && agentId ? `${interactionId}:${agentId}` : undefined;
+};
 
 const getLatestEligibleParticipantDropTarget = (
   task: ITask,
@@ -492,6 +539,119 @@ export const useIncomingTask = (props: UseTaskProps) => {
     declineControl,
     offerActionError,
     clearOfferActionError,
+  };
+};
+
+export const useAISummaryActions = (currentTask?: ITask): CallControlAISummaryProps | undefined => {
+  const midCallRequestCacheRef = useRef<MidCallSummaryRequestCache>({requests: {}});
+  const summaryPreparationKey = getAISummaryPreparationKey(currentTask);
+
+  const requestInitiatorMidCallSummary = useCallback(
+    (actionType: AISummaryActionType): Promise<AISummaryRequestResult> => {
+      if (!currentTask || !summaryPreparationKey) {
+        return Promise.resolve({outcome: 'blocked'});
+      }
+
+      const cache = midCallRequestCacheRef.current;
+      if (cache.preparationKey !== summaryPreparationKey) {
+        cache.preparationKey = summaryPreparationKey;
+        cache.requests = {};
+      }
+
+      cache.requests[actionType] =
+        cache.requests[actionType] ?? requestMidCallSummary(actionType, 'initiator', currentTask);
+      return cache.requests[actionType]!;
+    },
+    [currentTask, summaryPreparationKey]
+  );
+
+  const editInitiatorMidCallSummary = useCallback(
+    (field: AISummaryEditableField, expectedRevision: number) =>
+      editMidCallSummary('initiator', field, expectedRevision, currentTask),
+    [currentTask]
+  );
+  const recordInitiatorMidCallSummaryViewed = useCallback(
+    (expectedRevision: number) => recordMidCallSummaryViewed('initiator', expectedRevision, currentTask),
+    [currentTask]
+  );
+  const recordInitiatorMidCallSummaryCopied = useCallback(
+    (expectedRevision: number) => recordMidCallSummaryCopied('initiator', expectedRevision, currentTask),
+    [currentTask]
+  );
+  const setInitiatorMidCallSummaryFeedback = useCallback(
+    (feedback: Exclude<AISummaryFeedback, 'none'>, actionType: AISummaryActionType, expectedRevision: number) =>
+      setMidCallSummaryFeedback('initiator', feedback, actionType, expectedRevision, currentTask),
+    [currentTask]
+  );
+  const sendInitiatorMidCallSummaryBeforeAction = useCallback(
+    (actionType: AISummaryActionType, expectedRevision: number) =>
+      sendMidCallSummaryBeforeAction('initiator', actionType, expectedRevision, currentTask),
+    [currentTask]
+  );
+  const editCurrentPostCallSummary = useCallback(
+    (field: AISummaryEditableField, expectedRevision: number) =>
+      editPostCallSummary(field, expectedRevision, currentTask),
+    [currentTask]
+  );
+  const recordCurrentPostCallSummaryCopied = useCallback(
+    (expectedRevision: number) => recordPostCallSummaryCopied(expectedRevision, currentTask),
+    [currentTask]
+  );
+  const recordCurrentPostCallSummaryViewed = useCallback(
+    (expectedRevision: number) => recordPostCallSummaryViewed(expectedRevision, currentTask),
+    [currentTask]
+  );
+  const setCurrentPostCallSummaryFeedback = useCallback(
+    (feedback: Exclude<AISummaryFeedback, 'none'>, expectedRevision: number) =>
+      setPostCallSummaryFeedback(feedback, expectedRevision, currentTask),
+    [currentTask]
+  );
+  const retryCurrentPostCallSummary = useCallback(() => retryPostCallSummary(currentTask), [currentTask]);
+
+  const buildMidCallSummary = (actionType: AISummaryActionType) => {
+    const view = getMidCallSummaryView('initiator', actionType, currentTask);
+    if (!view) {
+      return undefined;
+    }
+    return {
+      ...view,
+      onEdit: editInitiatorMidCallSummary,
+      onViewed: recordInitiatorMidCallSummaryViewed,
+      onCopy: recordInitiatorMidCallSummaryCopied,
+      onFeedback: setInitiatorMidCallSummaryFeedback,
+    };
+  };
+
+  const consult = buildMidCallSummary('CONSULT');
+  const transfer = buildMidCallSummary('TRANSFER');
+  const postCallView = getPostCallSummaryView(currentTask);
+  const postCall = postCallView
+    ? {
+        ...postCallView,
+        onEdit: editCurrentPostCallSummary,
+        onViewed: recordCurrentPostCallSummaryViewed,
+        onCopy: recordCurrentPostCallSummaryCopied,
+        onFeedback: setCurrentPostCallSummaryFeedback,
+        onRetry: retryCurrentPostCallSummary,
+        onCopyVisualStateChange: () => undefined,
+      }
+    : undefined;
+
+  if (!consult && !transfer && !postCall) {
+    return undefined;
+  }
+
+  return {
+    consult,
+    transfer,
+    postCall,
+    onPostCallReasonCommit: (reasonId: string, selectionRevision: number) => {
+      void requestPostCallSummaryForReason(reasonId, selectionRevision, currentTask);
+    },
+    requestMidCallSummary: requestInitiatorMidCallSummary,
+    setMidCallSummaryFeedback: setInitiatorMidCallSummaryFeedback,
+    setPostCallSummaryFeedback: setCurrentPostCallSummaryFeedback,
+    sendMidCallSummaryBeforeAction: sendInitiatorMidCallSummaryBeforeAction,
   };
 };
 
@@ -1240,37 +1400,65 @@ export const useCallControl = (props: useCallControlProps) => {
     }
   };
 
-  const wrapupCall = (wrapUpReason: string, auxCodeId: string) => {
+  const wrapupCall = async (wrapUpReason: string, auxCodeId: string): Promise<WrapupCompletionResult> => {
     try {
       // Store auxCodeId for use in wrapupCallCallback
       lastWrapupAuxCodeIdRef.current = auxCodeId;
 
-      currentTask
-        .wrapup({wrapUpReason: wrapUpReason, auxCodeId: auxCodeId})
-        .then(() => {
-          const taskKeys = Object.keys(store.taskList);
-          if (taskKeys.length > 0) {
-            store.setCurrentTask(store.taskList[taskKeys[0]]);
-            store.setState({
-              developerName: ENGAGED_LABEL,
-              name: ENGAGED_USERNAME,
+      if (!currentTask) {
+        return {wrapup: 'failed'};
+      }
+
+      const postCallView = getPostCallSummaryView(currentTask);
+      const result = await completeWrapupWithSummary({
+        task: currentTask,
+        wrapUpReason,
+        auxCodeId,
+        responseRequired: postCallView?.state === 'content',
+        onWrapupCommitted: () => {
+          try {
+            const taskKeys = Object.keys(store.taskList);
+            if (taskKeys.length > 0) {
+              store.setCurrentTask(store.taskList[taskKeys[0]]);
+              store.setState({
+                developerName: ENGAGED_LABEL,
+                name: ENGAGED_USERNAME,
+              });
+            }
+          } catch (error) {
+            logger?.error(`CC-Widgets: Task: Error committing wrapup success - ${error.message}`, {
+              module: 'useCallControl',
+              method: 'wrapupCall',
             });
           }
-        })
-        .catch((error: Error) => {
-          logError(`Error wrapping up call: ${error}`, 'wrapupCall');
-        });
+        },
+      });
+      if (result.wrapup !== 'succeeded') {
+        logError('Error wrapping up call', 'wrapupCall');
+      }
+      return result;
     } catch (error) {
       logger?.error(`CC-Widgets: Task: Error in wrapupCall - ${error.message}`, {
         module: 'useCallControl',
         method: 'wrapupCall',
       });
+      return {wrapup: 'failed'};
     }
   };
 
   const transferCall = async (to: string, type: DestinationType) => {
+    const capturedOwnerKey = store.getCurrentAISummaryOwnerKey(currentTask);
     try {
       await currentTask.transfer({to, destinationType: type});
+      store.advanceAISummaryOwnership(
+        capturedOwnerKey,
+        {
+          type: 'direct-transfer',
+          mode: 'reset',
+          successorAgentId: type === 'agent' ? to : undefined,
+        },
+        currentTask
+      );
       logger.info('transferCall success', {module: 'useCallControl', method: 'transferCall'});
     } catch (error) {
       logger.error(`Error transferring call: ${error}`, {module: 'useCallControl', method: 'transferCall'});
@@ -1279,8 +1467,18 @@ export const useCallControl = (props: useCallControlProps) => {
   };
 
   const consultConference = async () => {
+    const capturedOwnerKey = store.getCurrentAISummaryOwnerKey(currentTask);
     try {
       await currentTask.consultConference();
+      store.advanceAISummaryOwnership(
+        capturedOwnerKey,
+        {
+          type: 'consult-conference',
+          mode: 'carry-forward',
+          successorAgentId: store.agentId,
+        },
+        currentTask
+      );
       logger.info('consultConference success', {
         module: 'useCallControl',
         method: 'consultConference',
@@ -1387,6 +1585,8 @@ export const useCallControl = (props: useCallControlProps) => {
       return;
     }
 
+    const capturedOwnerKey = store.getCurrentAISummaryOwnerKey(currentTask);
+
     try {
       const shouldUseTransferConference =
         currentTask.data.isConferenceInProgress ||
@@ -1399,6 +1599,14 @@ export const useCallControl = (props: useCallControlProps) => {
           method: 'consultTransfer',
         });
         await currentTask.transferConference();
+        store.advanceAISummaryOwnership(
+          capturedOwnerKey,
+          {
+            type: 'transfer-conference',
+            mode: 'reset',
+          },
+          currentTask
+        );
       } else {
         let destination = store.lastConsultDestination;
 
@@ -1445,6 +1653,15 @@ export const useCallControl = (props: useCallControlProps) => {
 
         logger.info('Consult transfer initiated', {module: 'useCallControl', method: 'consultTransfer'});
         await currentTask.transfer(destination);
+        store.advanceAISummaryOwnership(
+          capturedOwnerKey,
+          {
+            type: 'consult-transfer',
+            mode: 'reset',
+            successorAgentId: destination.destinationType === 'agent' ? destination.to : undefined,
+          },
+          currentTask
+        );
       }
     } catch (error) {
       logError(`Error transferring consult call: ${error}`, 'consultTransfer');
@@ -1592,6 +1809,7 @@ export const useCallControl = (props: useCallControlProps) => {
   }, [currentTask, controls, agentId, consultMediaIsHold, consultMediaId, participantConsultState]);
 
   const isCampaignCall = currentTask ? isCampaignPreviewTask(currentTask) : false;
+  const aiSummary = useAISummaryActions(currentTask);
 
   return {
     currentTask,
@@ -1643,6 +1861,7 @@ export const useCallControl = (props: useCallControlProps) => {
     getEntryPoints,
     getQueuesFetcher,
     isCampaignCall,
+    ...(aiSummary ? {aiSummary} : {}),
     telephonyToast,
     dismissTelephonyToast,
   };

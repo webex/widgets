@@ -9,6 +9,7 @@ import {
   copySuggestion,
   detectActionKind,
   extractCardText,
+  hasRenderableCardContent,
   preloadIcons,
   prepareCardForRender,
   toggleActionControls,
@@ -101,7 +102,12 @@ const AdaptiveCardRendererBody: React.FC<AdaptiveCardRendererProps> = ({
         }
         onActionRef.current?.(action);
       };
-      adaptiveCard.parse(prepareCardForRender(card, publishTimestamp, assistantTitle));
+      const preparedCard = prepareCardForRender(card, publishTimestamp, assistantTitle);
+      if (!hasRenderableCardContent(preparedCard)) {
+        showBoundary(new Error('Adaptive card has no renderable content after sanitization.'));
+        return undefined;
+      }
+      adaptiveCard.parse(preparedCard);
       const rendered = adaptiveCard.render();
       if (rendered) {
         container.appendChild(rendered);
@@ -156,7 +162,10 @@ const AdaptiveCardRenderer: React.FC<AdaptiveCardRendererProps> = ({
       className={`ai-assistant__card${isCustomerStatement ? ' ai-assistant__card--customer-statement' : ''}`}
       data-testid="ai-assistant:adaptive-card"
     >
-      <ErrorBoundary fallbackRender={() => <AdaptiveCardFallback fallbackText={fallbackText} />}>
+      <ErrorBoundary
+        fallbackRender={() => <AdaptiveCardFallback fallbackText={fallbackText} />}
+        resetKeys={[card, assistantTitle, publishTimestamp]}
+      >
         <AdaptiveCardRendererBody
           card={card}
           assistantTitle={assistantTitle}

@@ -129,6 +129,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
     conferenceEnabled = true,
     isCampaignCall = false,
     enableWxBetterTogether = false,
+    aiSummary,
   } = props;
 
   const formatTime = (time: number): string => {
@@ -531,6 +532,7 @@ const CallControlCADComponent: React.FC<CallControlComponentProps> = (props) => 
               conferenceEnabled={conferenceEnabled}
               enableWxBetterTogether={enableWxBetterTogether}
               currentTask={currentTask}
+              aiSummary={aiSummary}
             />
           </div>
         )}

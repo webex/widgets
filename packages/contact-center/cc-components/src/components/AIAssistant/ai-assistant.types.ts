@@ -1,4 +1,11 @@
-import type {ILogger, RealTimeAssistPayload} from '@webex/cc-store';
+import type {
+  AISummaryActionType,
+  AISummaryContent,
+  AISummaryFeedback,
+  AISummaryFeedbackResult,
+  ILogger,
+  RealTimeAssistPayload,
+} from '@webex/cc-store';
 
 /** Visual state of the AI Assistant panel chrome. */
 export type AIAssistantChromeState = 'closed' | 'open' | 'minimized';
@@ -18,6 +25,38 @@ export type AIAssistantChatEntry =
       type: 'assistant';
       id: string;
       realTimeAssist?: RealTimeAssistPayload;
+    };
+
+export type AIAssistantReceiverSummary =
+  | {
+      surface: 'content';
+      branchKey: string;
+      content: Extract<AISummaryContent, {type: 'card'}>;
+      contentRevision: number;
+      actionType: AISummaryActionType;
+      selectedFeedback: AISummaryFeedback;
+      midCallFeedbackPending: boolean;
+      controlsDisabled: boolean;
+      openReceiverSummary: () => boolean;
+      recordReceiverSummaryCopied: (expectedRevision: number) => boolean;
+      setReceiverSummaryFeedback: (
+        feedback: Exclude<AISummaryFeedback, 'none'>,
+        actionType: AISummaryActionType,
+        expectedRevision: number
+      ) => Promise<AISummaryFeedbackResult>;
+    }
+  | {
+      surface: 'unavailable' | 'generic-error';
+      branchKey: string;
+      content?: never;
+      contentRevision?: never;
+      actionType?: never;
+      selectedFeedback?: never;
+      midCallFeedbackPending?: never;
+      controlsDisabled?: never;
+      recordReceiverSummaryCopied?: never;
+      setReceiverSummaryFeedback?: never;
+      openReceiverSummary: () => boolean;
     };
 
 /** Props for the top-level AIAssistant presentational component. */
@@ -44,6 +83,8 @@ export interface AIAssistantComponentProps {
   agentName?: string;
   /** Whether the first real-time assist request has completed successfully. */
   hasInitialRequestSucceeded: boolean;
+  /** Optional receiving-agent summary branch. */
+  receiverSummary?: AIAssistantReceiverSummary;
   /** Transition the chrome to `open`. */
   open: () => void;
   /** Transition the chrome to `closed`; preserves chat state. */

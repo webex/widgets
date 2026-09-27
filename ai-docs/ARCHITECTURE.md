@@ -57,6 +57,53 @@ subscribes to store observables → user action (e.g. set state, accept task) �
 → SDK responds and/or emits an event → store updates observables in `runInAction()` → observing widgets
 re-render. Grounded in `packages/contact-center/store/src/store.ts` and `storeEventsWrapper.ts`.
 
+**AI Summary visual evidence:** `playwright/visual/ai-summary-harness.json` binds the
+accepted UX source/state IDs to the existing Playwright project, sample-app
+production-component mount, observable assertions, and 2x capture geometry.
+`playwright/Utils/aiSummaryUtils.ts` runs browser assertions and writes raw
+PNG/DOM/comparison records under `.matrix/results/prog-mini-js/ux-visual/<phase>/`.
+These records do not assert visual fidelity; the prog-mini-js visual task must
+inspect the target/render pairs and publish a separate attempt-bound handoff.
+The deterministic host owns browser startup and cleanup. Do not turn a
+machine-generated comparison score into a claim of model image inspection.
+
+**UX seal revalidation:** `tooling/src/ai-summary-sdk-lock.js seal-ux` independently
+reopens and hashes the admitted target files on every call. If an existing seal
+matches the complete validated evidence and authority metadata, it preserves the
+original lock-file bytes and `ux.sealedAt`; repeated DAG acceptance must not make
+visual receipts stale merely by refreshing a timestamp. Missing, symlinked, or
+changed inputs and mismatched sealed metadata fail closed without replacing the
+receipt. A genuinely changed authority requires an explicit admission repair,
+not an automatic reseal during acceptance. Regression coverage lives in
+`tooling/tests/ai-summary-sdk-lock.test.js`.
+
+**Local UX provenance:** `tooling/src/verify-ai-summary-release.js` checks the
+harness descriptor, active visual plan/receipts, and archived JSON evidence.
+The exact `figma_mcp_policy: "forbidden"` and `mcp_policy: "forbidden"` declarations
+are prohibitions, not evidence of MCP use. Explicit use/transport/tool records
+and remote Figma references remain rejected; ambiguous MCP policies fail closed.
+Local scene-graph node/file IDs and evidence filenames alone do not establish
+remote acquisition. Provenance failures identify the repository-relative file
+and JSON field, without printing evidence values or remote credentials.
+Regression coverage lives in `tooling/tests/verify-ai-summary-release.test.js`.
+
+**AI summary SDK validation:** initiating/post-call requests resolve `Promise<AISummary>`;
+receiver content uses `task:midCallSummaryReceived` and capability updates use
+`task:featureEnablement` on the matching Task. The packed runtime and its extracted declarations
+are checked together, including a TypeScript compiler probe explicitly mapped to the candidate.
+Legacy seals cannot skip runtime validation or omit required source/build provenance. The combined
+lock verification also packs and inspects all six AI-summary workspace boundaries in an isolated
+child environment. See [`ai-summary.md`](../ai-summary.md) for the exact API and current sealed-package defect.
+
+**Release evidence binding:** release manifests are nonempty, hash every named file, and match live
+Git changes since an ancestor `baseCommit`. Verification runs on the requirement's promotion branch.
+Each gate names a repository-contained receipt with an explicit passing status, matching file hash,
+and matching HEAD. The D8b gate also binds the packaging receipt hash; actual tarball file lists must
+match that receipt. Executable provenance scanning inspects calls rather than matching explanatory
+comments, regular expressions, or test source strings. Privacy scanning permits raw-error variables
+used for normalization while rejecting their use as arguments to known logging sinks. These checks
+do not turn unexecuted browser/visual or failed SDK checks into passing release evidence.
+
 ## Dependencies
 | Dependency | Type (internal / external / peer) | How used | Failure / version handling |
 |---|---|---|---|
