@@ -1,5 +1,5 @@
 import React from 'react';
-import {fireEvent, render, screen} from '@testing-library/react';
+import {fireEvent, render, screen, waitFor} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import AIAssistantComponent from '../../../src/components/AIAssistant/ai-assistant';
 import type {
@@ -578,9 +578,59 @@ describe('AIAssistantComponent', () => {
     expect(screen.getByText('5')).toHaveClass('wellness-break-modal__countdown-digit--active');
   });
 
+  it('uses an injected animation loader only during an animated break', async () => {
+    const animationData = {v: '5.0'};
+    const animation = {
+      totalFrames: 20,
+      goToAndPlay: jest.fn(),
+      goToAndStop: jest.fn(),
+      destroy: jest.fn(),
+    };
+    const loadWellnessAnimation = jest.fn().mockResolvedValue(animation);
+    const wellness = {
+      enabled: true,
+      phase: 'starting' as const,
+      requestAvailable: false,
+      hasBlockingTasks: false,
+      elapsedSeconds: 0,
+      animationData,
+      reducedMotion: false,
+      onRequest: jest.fn(),
+      onAccept: jest.fn(),
+      onLater: jest.fn(),
+      onMediaError: jest.fn(),
+    };
+    const {rerender, unmount} = render(
+      <AIAssistantComponent {...createProps({chrome: 'closed', wellness, loadWellnessAnimation})} />
+    );
+
+    await waitFor(() => expect(loadWellnessAnimation).toHaveBeenCalledWith(expect.any(HTMLDivElement), animationData));
+    expect(animation.goToAndStop).toHaveBeenCalledWith(0, true);
+
+    rerender(
+      <AIAssistantComponent
+        {...createProps({chrome: 'closed', wellness: {...wellness, phase: 'playing'}, loadWellnessAnimation})}
+      />
+    );
+    expect(animation.goToAndPlay).toHaveBeenCalledWith(0, true);
+
+    rerender(
+      <AIAssistantComponent
+        {...createProps({chrome: 'closed', wellness: {...wellness, phase: 'ending'}, loadWellnessAnimation})}
+      />
+    );
+    expect(animation.goToAndStop).toHaveBeenCalledWith(19, true);
+    expect(loadWellnessAnimation).toHaveBeenCalledTimes(1);
+    unmount();
+    expect(animation.destroy).toHaveBeenCalledTimes(1);
+  });
+
   it('locks and restores document scrolling for the default viewport overlay', () => {
     document.documentElement.style.overflow = 'auto';
     document.body.style.overflow = 'scroll';
+    const transformedHost = document.createElement('div');
+    transformedHost.style.transform = 'translateZ(0)';
+    document.body.append(transformedHost);
 
     const {unmount} = render(
       <AIAssistantComponent
@@ -599,10 +649,14 @@ describe('AIAssistantComponent', () => {
             onMediaError: jest.fn(),
           },
         })}
-      />
+      />,
+      {container: transformedHost}
     );
 
-    expect(screen.getByTestId('wellness-break:overlay')).toHaveClass('wellness-break-overlay--viewport');
+    const overlay = screen.getByTestId('wellness-break:overlay');
+    expect(overlay).toHaveClass('wellness-break-overlay--viewport');
+    expect(overlay.parentElement).toBe(document.body);
+    expect(transformedHost).not.toContainElement(overlay);
     expect(document.documentElement.style.overflow).toBe('hidden');
     expect(document.body.style.overflow).toBe('hidden');
 
@@ -611,6 +665,7 @@ describe('AIAssistantComponent', () => {
     expect(document.body.style.overflow).toBe('scroll');
     document.documentElement.style.removeProperty('overflow');
     document.body.style.removeProperty('overflow');
+    transformedHost.remove();
   });
 
   it('can scope the wellness overlay to the assistant container', () => {

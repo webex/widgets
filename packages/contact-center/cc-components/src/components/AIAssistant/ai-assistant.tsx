@@ -47,6 +47,7 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
   className,
   wellnessBreakOverlayTarget,
   wellness,
+  loadWellnessAnimation,
 }) => {
   const [headerActionId] = useState(() => {
     assistantHeaderSequence += 1;
@@ -305,6 +306,7 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
           reducedMotion={wellness.reducedMotion}
           onMediaError={wellness.onMediaError}
           overlayTarget={wellnessBreakOverlayTarget}
+          loadAnimation={loadWellnessAnimation}
         />
       ) : null}
       {showWellnessOffer && wellness ? (

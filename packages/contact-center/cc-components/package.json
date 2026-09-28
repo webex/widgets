@@ -40,7 +40,6 @@
     "@webex/cc-store": "workspace:*",
     "@webex/cc-ui-logging": "workspace:*",
     "adaptivecards": "^3.0.0",
-    "lottie-web": "5.13.0",
     "react-error-boundary": "^6.0.0",
     "swiper": "^12.1.2"
   },

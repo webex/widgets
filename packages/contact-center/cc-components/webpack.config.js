@@ -3,18 +3,6 @@ const path = require('path');
 
 const baseConfig = require('../../../webpack.config');
 
-// Preserve the renderer import only in the file that loads it. Other TypeScript
-// files retain the package's CommonJS setting and do not create extra chunks.
-const rendererFile = /WellnessBreak\/wellness-break-modal\.tsx$/;
-baseConfig.module.rules = baseConfig.module.rules.flatMap((rule) =>
-  String(rule.test) === String(/\.(ts|tsx)$/)
-    ? [
-        {...rule, exclude: [rule.exclude, rendererFile]},
-        {...rule, test: rendererFile, use: {loader: 'ts-loader', options: {compilerOptions: {module: 'esnext'}}}},
-      ]
-    : [rule]
-);
-
 // Helper function to resolve paths relative to the monorepo root
 const resolveMonorepoRoot = (...segments) => path.resolve(__dirname, '../../../', ...segments);
 
@@ -36,7 +24,6 @@ module.exports = mergeWithCustomize({
     filename: '[name].js',
     libraryTarget: 'commonjs2',
     publicPath: 'auto',
-    chunkFilename: 'assets/wellness/[name].[contenthash:8].js',
   },
   externals: {
     react: 'react',

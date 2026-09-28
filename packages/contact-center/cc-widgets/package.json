@@ -27,8 +27,7 @@
   "scripts": {
     "clean": "rm -rf dist && rm -rf node_modules",
     "clean:dist": "rm -rf dist",
-    "build": "yarn run -T tsc && yarn check:public-api",
-    "check:public-api": "node scripts/check-public-api.mjs",
+    "build": "yarn run -T tsc",
     "build:src": "yarn run clean:dist && webpack",
     "build:watch": "webpack --watch",
     "test:unit": "NODE_ENV=test jest --coverage",

@@ -1,11 +1,17 @@
 import React, {useEffect, useRef} from 'react';
 import {createPortal} from 'react-dom';
-import type {AnimationConfigWithData, AnimationItem} from 'lottie-web';
-import type {WellnessBreakModalProps, WellnessBreakOverlayTarget} from '../ai-assistant.types';
+import type {
+  WellnessAnimationController,
+  WellnessBreakModalProps,
+  WellnessBreakOverlayTarget,
+} from '../ai-assistant.types';
 
 const COUNTDOWN_DIGITS = [5, 4, 3, 2, 1];
 
-const syncAnimationPhase = (animation: AnimationItem | undefined, phase: WellnessBreakModalProps['phase']): void => {
+const syncAnimationPhase = (
+  animation: WellnessAnimationController | undefined,
+  phase: WellnessBreakModalProps['phase']
+): void => {
   if (!animation) return;
   if (phase === 'playing') {
     animation.goToAndPlay(0, true);
@@ -24,11 +30,12 @@ const WellnessBreakModal: React.FC<WellnessBreakModalProps> = ({
   reducedMotion,
   onMediaError,
   overlayTarget,
+  loadAnimation,
 }) => {
   const overlayRef = useRef<HTMLDivElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<HTMLDivElement>(null);
-  const animationItemRef = useRef<AnimationItem>();
+  const animationItemRef = useRef<WellnessAnimationController>();
   const phaseRef = useRef(phase);
   phaseRef.current = phase;
   const resolvedTarget: WellnessBreakOverlayTarget =
@@ -89,19 +96,14 @@ const WellnessBreakModal: React.FC<WellnessBreakModalProps> = ({
 
   useEffect(() => {
     let cancelled = false;
-    if (reducedMotion || !animationData || !animationRef.current) return undefined;
+    if (reducedMotion || !animationData || !animationRef.current || !loadAnimation) return undefined;
 
-    void import(/* webpackChunkName: "lottie-web" */ 'lottie-web')
-      .then(({default: lottie}) => {
-        if (cancelled || !animationRef.current) return;
-        const animation = lottie.loadAnimation({
-          container: animationRef.current,
-          renderer: 'svg',
-          loop: false,
-          autoplay: false,
-          animationData: animationData as AnimationConfigWithData['animationData'],
-          rendererSettings: {preserveAspectRatio: 'xMidYMid slice'},
-        });
+    void loadAnimation(animationRef.current, animationData)
+      .then((animation) => {
+        if (cancelled || !animationRef.current) {
+          animation.destroy();
+          return;
+        }
         animationItemRef.current = animation;
         syncAnimationPhase(animation, phaseRef.current);
       })
@@ -112,7 +114,7 @@ const WellnessBreakModal: React.FC<WellnessBreakModalProps> = ({
       animationItemRef.current?.destroy();
       animationItemRef.current = undefined;
     };
-  }, [animationData, onMediaError, reducedMotion]);
+  }, [animationData, loadAnimation, onMediaError, reducedMotion]);
 
   useEffect(() => {
     syncAnimationPhase(animationItemRef.current, phase);
@@ -206,7 +208,8 @@ const WellnessBreakModal: React.FC<WellnessBreakModalProps> = ({
     </div>
   );
 
-  return overlayScope === 'custom' ? createPortal(overlay, resolvedTarget as HTMLElement) : overlay;
+  if (overlayScope === 'assistant' || typeof document === 'undefined') return overlay;
+  return createPortal(overlay, overlayScope === 'viewport' ? document.body : (resolvedTarget as HTMLElement));
 };
 
 export default WellnessBreakModal;

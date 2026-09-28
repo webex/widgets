@@ -318,9 +318,40 @@ describe('useWellnessBreak', () => {
     expect(result.current.history.map(({type}) => type)).toEqual(['offer', 'user-action', 'acknowledgement']);
     expect(result.current.history[0]).toMatchObject({type: 'offer', actionable: false, event: provide});
 
+    rerender({
+      ...baseInput,
+      wellnessBreakState: {phase: 'waiting-for-safe-state', event: provide},
+      wellnessEventSequence: 1,
+    });
     act(() => result.current.onClearHistory());
     expect(result.current.history).toEqual([]);
     expect(result.current.contentCleared).toBe(true);
+  });
+
+  it('keeps the current offer actionable when Clear removes prior history', async () => {
+    const denied = {...event, actionEvent: 'WELLNESS_BREAK_NOT_ALLOWED' as const};
+    const provide = {...event, actionEvent: 'PROVIDE_WELLNESS_BREAK' as const};
+    const {result, rerender} = renderHook((props: UseWellnessBreakInput) => useWellnessBreak(props), {
+      initialProps: {
+        ...baseInput,
+        wellnessBreakState: {phase: 'request-pending', event: denied},
+        wellnessEventSequence: 1,
+      },
+    });
+
+    await waitFor(() => expect(result.current.history[0]).toMatchObject({type: 'notice', notice: 'not-allowed'}));
+    rerender({...baseInput, wellnessBreakState: {phase: 'idle', event: provide}, wellnessEventSequence: 2});
+    await waitFor(() => expect(result.current.history.map(({type}) => type)).toEqual(['notice', 'offer']));
+    rerender({...baseInput, wellnessBreakState: {phase: 'offer-pending', event: provide}, wellnessEventSequence: 2});
+
+    act(() => result.current.onClearHistory());
+
+    expect(result.current.contentCleared).toBe(false);
+    expect(result.current.history).toEqual([expect.objectContaining({type: 'offer', actionable: true})]);
+
+    await act(async () => result.current.onLater('card'));
+    expect(storeMock.cc.apiAIAssistant.respondToWellnessBreak).toHaveBeenCalledWith({action: 'REJECTED'});
+    expect(result.current.history[0]).toMatchObject({type: 'offer', actionable: false});
   });
 
   it('keeps a rotated-session offer in history without leaving its actions enabled', async () => {
@@ -637,6 +668,48 @@ describe('useWellnessBreak', () => {
       } as unknown as UseWellnessBreakInput['taskList'],
     });
     expect(result.current.hasBlockingTasks).toBe(true);
+  });
+
+  it('requires a full safe settle window after a task briefly blocks the break', async () => {
+    jest.useFakeTimers();
+    const audio = {
+      load: jest.fn(),
+      pause: jest.fn(),
+      play: jest.fn().mockResolvedValue(undefined),
+      removeAttribute: jest.fn(),
+    } as unknown as HTMLAudioElement;
+    window.Audio = jest.fn(() => audio) as unknown as typeof Audio;
+    const provide = {...event, actionEvent: 'PROVIDE_WELLNESS_BREAK' as const};
+    const {result, rerender} = renderHook((props: UseWellnessBreakInput) => useWellnessBreak(props), {
+      initialProps: {
+        ...baseInput,
+        wellnessAudioUrl: '/wellness.mp3',
+        wellnessBreakState: {phase: 'offer-pending', event: provide},
+      },
+    });
+
+    await act(async () => result.current.onAccept());
+    const safeInput: UseWellnessBreakInput = {
+      ...baseInput,
+      wellnessAudioUrl: '/wellness.mp3',
+      legacyAgentState: 'Idle',
+      legacyAuxCodeId: 'wellness',
+      wellnessBreakState: {phase: 'waiting-for-safe-state', event: provide},
+    };
+    rerender(safeInput);
+    act(() => jest.advanceTimersByTime(1000));
+    rerender({
+      ...safeInput,
+      taskList: {active: {data: {interaction: {state: 'connected'}}}} as unknown as UseWellnessBreakInput['taskList'],
+    });
+    act(() => jest.advanceTimersByTime(200));
+    rerender(safeInput);
+
+    act(() => jest.advanceTimersByTime(900));
+    expect(storeMock.setWellnessBreakState).not.toHaveBeenCalledWith({phase: 'starting'});
+
+    act(() => jest.advanceTimersByTime(1100));
+    expect(storeMock.setWellnessBreakState).toHaveBeenCalledWith({phase: 'starting'});
   });
 
   it('preloads break audio during the starting countdown and plays it with the timeline', async () => {

@@ -6,6 +6,7 @@ import {ErrorBoundary} from 'react-error-boundary';
 import {AIAssistantComponent} from '@webex/cc-components';
 import {useAiAssistant, REAL_TIME_ASSIST_FLAG} from '../helper';
 import {useWellnessBreak} from '../wellness/useWellnessBreak';
+import {loadWellnessAnimation} from '../wellness/animation';
 import {IAIAssistantProps} from '../ai-assistant.types';
 
 const AIAssistantInternal: React.FunctionComponent<IAIAssistantProps> = observer((props) => {
@@ -77,6 +78,7 @@ const AIAssistantInternal: React.FunctionComponent<IAIAssistantProps> = observer
       className={props.className}
       wellnessBreakOverlayTarget={props.wellnessBreakOverlayTarget}
       wellness={wellness}
+      loadWellnessAnimation={loadWellnessAnimation}
       clearContent={clearContent}
       hasClearableContent={hasClearableContent}
     />

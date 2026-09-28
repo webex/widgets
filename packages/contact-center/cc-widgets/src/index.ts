@@ -2,17 +2,8 @@ import {StationLogin} from '@webex/cc-station-login';
 import {UserState} from '@webex/cc-user-state';
 import {IncomingTask, TaskList, CallControl, CallControlCAD, OutdialCall, RealTimeTranscript} from '@webex/cc-task';
 import {DigitalChannels} from '@webex/cc-digital-channels';
-import {AIAssistant} from '@webex/cc-ai-assistant';
 import store from '@webex/cc-store';
 import '@momentum-ui/core/css/momentum-ui.min.css';
-
-export type {
-  IAIAssistantProps,
-  WellnessBreakError,
-  WellnessBreakErrorCode,
-  WellnessBreakOverlayTarget,
-  WellnessBreakPhase,
-} from '@webex/cc-ai-assistant';
 
 export {
   StationLogin,
@@ -24,6 +15,5 @@ export {
   OutdialCall,
   RealTimeTranscript,
   DigitalChannels,
-  AIAssistant,
   store,
 };

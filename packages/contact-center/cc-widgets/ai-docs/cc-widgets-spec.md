@@ -31,9 +31,9 @@ as approved unknowns only when the human explicitly defers or does not know.
 ## Overview
 `cc-widgets` is the aggregator and distribution surface for the Webex Contact Center widget suite. It
 owns no widget UI or business logic of its own; instead it re-exports the React components produced by
-the individual widget packages (`@webex/cc-station-login`, `@webex/cc-user-state`, `@webex/cc-task`,
-`@webex/cc-digital-channels`) plus the shared MobX `store`, and it converts those same React components
-into framework-agnostic custom elements via `@r2wc/react-to-web-component` (r2wc).
+the individual non-assistant widget packages (`@webex/cc-station-login`, `@webex/cc-user-state`,
+`@webex/cc-task`, `@webex/cc-digital-channels`) plus the shared MobX `store`. Its existing Web Component
+entry also registers AI Assistant through `@r2wc/react-to-web-component` (r2wc).
 
 The package has exactly two source files. `src/index.ts` is the React entry point (`main` /
 `dist/index.js`): a re-export barrel that also imports Momentum UI base CSS so React consumers get
@@ -73,7 +73,8 @@ packages/contact-center/cc-widgets/src/
 
 ## Public Surface
 Two consumption modes share one package: React named imports from `@webex/cc-widgets`, and custom
-elements registered by importing `@webex/cc-widgets/wc`. Widget prop/event contracts are owned by the
+elements registered by importing `@webex/cc-widgets/wc`. React hosts import AI Assistant from
+`@webex/cc-ai-assistant`; the existing WC entry still registers it. Widget prop/event contracts are owned by the
 upstream widget packages; this module only re-exports them and maps a subset across the Web Component
 boundary (see `src/wc.ts`).
 
@@ -88,7 +89,7 @@ boundary (see `src/wc.ts`).
 | `cc-widgets.OutdialCall` | SDK | React export `OutdialCall`; tag `widget-cc-outdial-call` (no mapped props; store-driven) | Outbound dialing UI | stable; export/tag change = major | `src/index.ts`, `src/wc.ts` | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
 | `cc-widgets.RealTimeTranscript` | SDK | React export `RealTimeTranscript`; tag `widget-cc-realtime-transcript` (props `liveTranscriptEntries:json`, `className:string`) | Live transcript UI | stable; export/tag change = major | `src/index.ts`, `src/wc.ts` | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
 | `cc-widgets.DigitalChannels` | SDK | React export `DigitalChannels`; tag `widget-cc-digital-channels` (no mapped props; store-driven) | Digital channels UI | stable; export/tag change = major | `src/index.ts`, `src/wc.ts` | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
-| `cc-widgets.AIAssistant` | SDK | React export `AIAssistant`; tag `widget-cc-ai-assistant` | Real-time Assist and Agent Wellness Break | Wellness callbacks, audio URL, and overlay target mirror `IAIAssistantProps` | `src/index.ts`, `src/wc.ts` | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
+| `ai-assistant.AIAssistant` | React package and WC aggregate | React `AIAssistant` from `@webex/cc-ai-assistant`; tag `widget-cc-ai-assistant` from `@webex/cc-widgets/wc` | Real-time Assist and Agent Wellness Break | React aggregate entry excludes it; WC entry retains it | `packages/contact-center/ai-assistant/src/index.ts`, `src/wc.ts` | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
 | `cc-widgets.store` | SDK | React export `store`; also re-exported from `src/wc.ts` | Shared MobX singleton (`@webex/cc-store`) callers init before mounting widgets | stable; the single shared store instance | `src/index.ts`, `src/wc.ts` | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
 
 Compatibility notes:
@@ -100,7 +101,7 @@ Compatibility notes:
 ## Requires (dependencies)
 - Internal widget packages (workspace `*`): `@webex/cc-station-login`, `@webex/cc-user-state`,
   `@webex/cc-task` (provides `IncomingTask`, `TaskList`, `CallControl`, `CallControlCAD`, `OutdialCall`,
-  `RealTimeTranscript`), `@webex/cc-digital-channels`. Source: `package.json` dependencies, `src/index.ts`,
+  `RealTimeTranscript`), `@webex/cc-digital-channels`, and `@webex/cc-ai-assistant` for WC registration. Source: `package.json` dependencies, `src/index.ts`,
   `src/wc.ts`.
 - `@webex/cc-store` (workspace `*`) — the shared MobX singleton re-exported to consumers.
 - `@r2wc/react-to-web-component` `2.0.3` — React→custom-element conversion (`src/wc.ts`).
@@ -112,20 +113,19 @@ Compatibility notes:
 ## Requirements
 | ID | WHAT | WHY | Source Evidence | Test / Example Evidence | Assumptions / Gaps | Confidence |
 |---|---|---|---|---|---|---|
-| `cc-widgets-R-001` | Re-export the React widgets `StationLogin`, `UserState`, `IncomingTask`, `CallControl`, `CallControlCAD`, `TaskList`, `OutdialCall`, `RealTimeTranscript`, `DigitalChannels`, `AIAssistant`, and `store`, plus AI Assistant wellness types, from the package root. | Single-package install: consumers import the whole suite + store from `@webex/cc-widgets` without tracking each widget package. | `packages/contact-center/cc-widgets/src/index.ts` | Build/type verification | No single export inventory unit test. | PRESENT |
-| `cc-widgets-R-002` | Register each widget as a custom element under its `widget-cc-*` tag, including `widget-cc-ai-assistant`, when `./wc` is loaded. | Framework-agnostic embedding: HTML/Angular/Vue/vanilla hosts use the suite without React. | `packages/contact-center/cc-widgets/src/wc.ts` | Web Component sample; build verification | No unit test verifies registration. | WEAK |
+| `cc-widgets-R-001` | Re-export `StationLogin`, `UserState`, `IncomingTask`, `CallControl`, `CallControlCAD`, `TaskList`, `OutdialCall`, `RealTimeTranscript`, `DigitalChannels`, and `store` from the package root. | React consumers of non-assistant widgets do not bundle wellness media through this entry. | `packages/contact-center/cc-widgets/src/index.ts` | Production build and entry inspection | Installing the aggregate still installs AI Assistant for the WC entry. | PRESENT |
+| `cc-widgets-R-002` | Register all `widget-cc-*` custom elements, including `widget-cc-ai-assistant`, when `./wc` is loaded. | Preserve the existing WC host import and tag registration. | `packages/contact-center/cc-widgets/src/wc.ts` | Web Component sample; build verification | No unit test verifies registration. | WEAK |
 | `cc-widgets-R-003` | Guard each `customElements.define` with `customElements.get(name)` so re-importing the WC bundle does not throw a duplicate-definition error. | Importing the bundle more than once (multiple micro-frontends/scripts) must be idempotent. | `packages/contact-center/cc-widgets/src/wc.ts` | None found | No regression test for double-import. | WEAK |
 | `cc-widgets-R-004` | Map complex/callback props across the WC boundary with explicit r2wc prop types: `function` callbacks, `json` for object props (`incomingTask`, `liveTranscriptEntries`), `boolean` (`hasCampaignPreviewEnabled`), and `string` (`className`). | HTML attributes are strings only; functions and objects must be set as element properties with the right r2wc coercion or the widget won't receive them. | `packages/contact-center/cc-widgets/src/wc.ts` | None found | Prop maps are the WC public contract; no test asserts the type map. | WEAK |
 | `cc-widgets-R-005` | Import Momentum UI base CSS in the React entry so React consumers get widget styling without a separate import. | Avoids unstyled widgets in React hosts (a documented prior support issue). | `packages/contact-center/cc-widgets/src/index.ts` | None found | CSS side-effect import is untested. | WEAK |
 | `cc-widgets-R-006` | Treat React/ReactDOM as peer dependencies (`>=18.3.1`) rather than bundled runtime deps for the React export. | A single host React instance prevents "Invalid hook call" / duplicate-React failures. | `packages/contact-center/cc-widgets/package.json` | None found | Peer-dep enforcement is by package manager, not tested here. | WEAK |
 | `cc-widgets-R-007` | The existing React `CallControlCAD` export and `widget-cc-call-control-cad` wrapper inherit participant Drop through `@webex/cc-task` without adding an r2wc prop mapping, attribute, property, event, or feature flag; `CallControl` remains unchanged. | Both consumption modes receive the same store-driven behavior without expanding or breaking the host contract. | `src/index.ts`, `src/wc.ts`, `packages/contact-center/task/src/CallControlCAD/index.tsx` | `@webex/cc-task` and `@webex/cc-components` tests; this package currently has no tests | Wrapper registration itself is unchanged. | PRESENT |
-| `cc-widgets-R-008` | `widget-cc-ai-assistant` maps all wellness callbacks as functions and maps `wellnessAudioUrl` plus the serializable `viewport`/`assistant` overlay modes as strings; the React barrel re-exports the wellness public types, including the React-only custom `HTMLElement` target. The aggregate build copies lazy wellness chunks and MP3 beside its bundles. | React and custom-element hosts must receive the same lifecycle and load packaged media successfully while React hosts may opt into a custom portal target. | `src/index.ts`, `src/wc.ts`, `webpack.config.js` | aggregate build verification; WC sample | PRESENT |
+| `cc-widgets-R-008` | Keep AI Assistant and wellness type imports out of the React entry, but retain the existing AI Assistant WC registration and copy its lazy wellness assets for WC hosts. | React hosts that import only the aggregate entry avoid wellness media in their application bundle without changing WC registration. | `src/index.ts`, `src/wc.ts`, `webpack.config.js`, `package.json` | Production build and entry inspection | The aggregate package archive still contains the WC assets. | PRESENT |
 
 ## Design Overview
 The module is a pure composition/distribution layer with two entry points and no internal state. The React
-path (`index.ts`) is a tree-shakeable re-export barrel: the host bundler pulls actual widget code from the
-workspace packages, so the React bundle is small and uses the host's React instance. The only side effect
-is the Momentum CSS import.
+path (`index.ts`) re-exports the non-assistant widgets and imports Momentum CSS. Its prebuilt CommonJS
+entry does not import AI Assistant, while the WC entry still includes it.
 
 The Web Component path (`wc.ts`) is self-contained. Each React widget is passed to `r2wc(Component, {props})`
 to produce a custom-element class. The `props` map tells r2wc how to bridge each prop: `function` props are
@@ -329,12 +329,13 @@ potentially breaking change for hosts.
 This module is the host-mount surface for the widget suite.
 - **Custom-element tags:** `widget-cc-user-state`, `widget-cc-station-login`, `widget-cc-incoming-task`,
   `widget-cc-task-list`, `widget-cc-call-control`, `widget-cc-call-control-cad`, `widget-cc-outdial-call`,
-  `widget-cc-realtime-transcript`, `widget-cc-digital-channels` (`src/wc.ts`).
-- **Mount contract (WC mode):** load `@webex/cc-widgets/wc` (registers the elements at import time),
+  `widget-cc-realtime-transcript`, `widget-cc-digital-channels`, `widget-cc-ai-assistant` (`src/wc.ts`).
+- **Mount contract (WC mode):** load `@webex/cc-widgets/wc` (registers all widget elements at import time),
   initialize the shared `store`, then place the custom elements in the DOM and assign callbacks/objects as
   element properties.
-- **Mount contract (React mode):** import widgets + `store` from `@webex/cc-widgets`, init `store`, render
-  as JSX. The host provides React/ReactDOM (peers).
+- **Mount contract (React mode):** import non-assistant widgets + `store` from `@webex/cc-widgets` and
+  `AIAssistant` from `@webex/cc-ai-assistant`, init `store`, then render as JSX. The host provides
+  React/ReactDOM (peers).
 - **Theming:** React consumers get Momentum base styling via the `@momentum-ui/core` CSS imported in
   `src/index.ts`; hosts also need the Momentum peer packages (`@momentum-ui/react-collaboration`,
   `@momentum-ui/web-components`). Do not assume the host's framework version beyond the declared peer

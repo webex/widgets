@@ -17,6 +17,18 @@ export type WellnessBreakResponseSource = 'card' | 'notification';
 /** Where the active wellness-break overlay is rendered. */
 export type WellnessBreakOverlayTarget = 'viewport' | 'assistant' | HTMLElement;
 
+export interface WellnessAnimationController {
+  totalFrames: number;
+  goToAndPlay(frame: number, isFrame: boolean): void;
+  goToAndStop(frame: number, isFrame: boolean): void;
+  destroy(): void;
+}
+
+export type WellnessAnimationLoader = (
+  container: HTMLElement,
+  animationData: unknown
+) => Promise<WellnessAnimationController>;
+
 interface WellnessBreakHistoryEntryBase {
   id: string;
   createdAt: number;
@@ -137,6 +149,8 @@ export interface AIAssistantComponentProps {
   wellnessBreakOverlayTarget?: WellnessBreakOverlayTarget;
   /** Independent Agent Wellness Break cards and overlay. */
   wellness?: WellnessBreakViewModel;
+  /** Optional renderer supplied by the AI Assistant widget. */
+  loadWellnessAnimation?: WellnessAnimationLoader;
 }
 
 export interface WellnessBreakRequestCardProps {
@@ -174,6 +188,7 @@ export interface WellnessBreakModalProps {
   reducedMotion: boolean;
   onMediaError: () => void;
   overlayTarget?: WellnessBreakOverlayTarget;
+  loadAnimation?: WellnessAnimationLoader;
 }
 
 export interface WellnessBreakErrorProps {

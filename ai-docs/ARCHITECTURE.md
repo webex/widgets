@@ -24,7 +24,7 @@ SDK at runtime — so there is no datastore, schema, or migration discipline to 
 |---|---|---|
 | `store/` | MobX singleton: global CC state, SDK event wiring, SDK access surface | `packages/contact-center/store/ai-docs/store-spec.md` |
 | `cc-components/` | Pure presentational React primitives (props-only) | `packages/contact-center/cc-components/ai-docs/cc-components-spec.md` |
-| `cc-widgets/` | r2wc Web Component wrappers; aggregates and exports all widgets | `packages/contact-center/cc-widgets/ai-docs/cc-widgets-spec.md` |
+| `cc-widgets/` | r2wc Web Component wrappers for all widgets; React entry excludes AI Assistant | `packages/contact-center/cc-widgets/ai-docs/cc-widgets-spec.md` |
 | `ai-assistant/` | AI Assistant observer/orchestrator for Real-time Assist and Agent Wellness Break | `packages/contact-center/ai-assistant/ai-docs/ai-assistant-spec.md` |
 | `station-login/` | Agent login widget (team + device selection) | `packages/contact-center/station-login/ai-docs/station-login-spec.md` |
 | `user-state/` | Agent state widget (state, idle codes, timer) | `packages/contact-center/user-state/ai-docs/user-state-spec.md` |

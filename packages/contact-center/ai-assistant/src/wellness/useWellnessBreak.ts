@@ -162,12 +162,16 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
   }, []);
 
   const clearHistory = useCallback(() => {
-    setHistory([]);
-    setContentCleared(true);
+    const offerPending = phaseRef.current === 'offer-pending';
+    const activeOfferId = activeOfferHistoryIdRef.current;
+    setHistory((current) =>
+      offerPending ? current.filter((entry) => entry.type === 'offer' && entry.id === activeOfferId) : []
+    );
+    setContentCleared(!offerPending);
     setRequestAvailable(false);
     setNotice(undefined);
     setError(undefined);
-    activeOfferHistoryIdRef.current = undefined;
+    if (!offerPending) activeOfferHistoryIdRef.current = undefined;
   }, []);
 
   const setPhase = useCallback(
@@ -786,9 +790,14 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
       input.legacyAuxCodeId === input.wellbeingBreakIdleCode?.id &&
       normalizeWellnessState(input.legacyAgentState) === 'idle';
     const safe = stateConfirmed && areAllTasksSafeForWellness(input.taskList);
-    if (!safe && phase === 'starting') {
-      clearTimeline();
-      setPhase('waiting-for-safe-state', acceptedEventRef.current ? {event: acceptedEventRef.current} : {});
+    if (!safe) {
+      if (phase === 'starting') {
+        clearTimeline();
+        setPhase('waiting-for-safe-state', acceptedEventRef.current ? {event: acceptedEventRef.current} : {});
+      } else if (settleTimerRef.current !== undefined) {
+        window.clearTimeout(settleTimerRef.current);
+        settleTimerRef.current = undefined;
+      }
     } else if (safe && phase === 'waiting-for-safe-state' && stateRequestResolvedRef.current) {
       if (settleTimerRef.current === undefined) {
         settleTimerRef.current = window.setTimeout(() => {

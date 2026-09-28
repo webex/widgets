@@ -1,6 +1,6 @@
 # Agent Wellness Break — widgets implementation contract (WXCC-12423)
 
-Status: implemented for Widgets and aligned with `@webex/contact-center` 3.12.0-next.128 on 2026-09-28;
+Status: implemented for Widgets and aligned with `@webex/contact-center` 3.12.0-next.131 on 2026-09-28;
 final live-flow verification is pending with a wellness-enabled test agent.
 
 ## Scope and ownership
@@ -9,8 +9,9 @@ final live-flow verification is pending with a wellness-enabled test agent.
 `WellbeingBreak` code, `WellnessBreak` event, and legacy state. It uses only the wellness API that the
 SDK publishes from its package root.
 `@webex/cc-ai-assistant` owns request/offer actions, safe-state orchestration, timers, media, recovery,
-and host callbacks. `@webex/cc-components` remains props-only. `@webex/cc-widgets` mirrors the public
-surface through `widget-cc-ai-assistant` and distributes lazy media chunks.
+and host callbacks. `@webex/cc-components` remains props-only and accepts an injected animation
+loader. React hosts import `@webex/cc-ai-assistant` directly. The existing `@webex/cc-widgets/wc`
+entry registers `widget-cc-ai-assistant` and distributes its lazy media.
 
 ## Behavioral contract
 
@@ -42,8 +43,8 @@ surface through `widget-cc-ai-assistant` and distributes lazy media chunks.
   `PROVIDE` `actionText` is the offer body, and `WELLNESS_BREAK_NOT_ALLOWED` `actionText` is the denial
   body. Blank text uses the approved local fallback for that state.
 - Start requires exact legacy `Idle / WellbeingBreak` confirmation, all `store.taskList` entries safe,
-  and a two-second event settle window. Waiting copy mentions current
-  work only while `store.taskList` contains an actual blocking task.
+  and two continuous safe seconds; any unsafe transition restarts that settle window. Waiting copy
+  mentions current work only while `store.taskList` contains an actual blocking task.
 - The User State widget renders the system-owned `WellbeingBreak` code as the current, timed state while
   it is active, without adding it to the manually selectable idle-code list or echoing SDK-driven entry
   and restoration transitions back through `setAgentState`. It waits for the system-code lookup before
@@ -76,14 +77,15 @@ surface through `widget-cc-ai-assistant` and distributes lazy media chunks.
 
 `IAIAssistantProps` adds `onWellnessBreakOffered`, `onWellnessBreakAccepted`,
 `onWellnessBreakStarted`, `onWellnessBreakEnded`, `onWellnessBreakError`, `wellnessAudioUrl`, and
-`wellnessBreakOverlayTarget`. The overlay target defaults to `viewport`; `assistant` scopes it to the
-widget root, while React hosts may pass an `HTMLElement` to portal into a custom positioned container.
+`wellnessBreakOverlayTarget`. The overlay target defaults to `viewport` and portals to the document body;
+`assistant` scopes it to the widget root, while React hosts may pass an `HTMLElement` to portal into
+a custom positioned container.
 The serializable Web Component modes are `viewport` and `assistant`.
-`WellnessBreakPhase`, `WellnessBreakErrorCode`, and `WellnessBreakError` are exported by both
-`@webex/cc-ai-assistant` and the aggregate React entry.
+`WellnessBreakPhase`, `WellnessBreakErrorCode`, and `WellnessBreakError` are exported by
+`@webex/cc-ai-assistant`.
 
-The widget does not consume or expose State Control V2 or an AI Assistant RTD status event. These
-surfaces are not part of the published SDK wellness contract.
+The widget does not consume an AI Assistant RTD status event; that event is not part of the
+published SDK wellness contract.
 
 The React sample exposes all three modes in an **AI Assistant → Wellness break overlay target** selector.
 Its custom mode passes the bordered demo container's `HTMLElement`, making coverage behavior verifiable
@@ -94,7 +96,8 @@ on cleanup. This prevents the document scrollbar gutter from showing beside a vi
 offers, user actions, acknowledgements, denials/timeouts, and completion messages append to a chronological
 assistant transcript. Closing, minimizing, reopening, receiving another wellness event, or rotating the
 station session does not clear that transcript. Only the first header action, **Clear**, clears displayed
-Real-time Assist and wellness history; it does not cancel an active offer/break or fabricate a backend action.
+Real-time Assist and prior wellness history while retaining an actionable current offer; it does not cancel an
+active offer/break or fabricate a backend action.
 
 The landing feature list matches Desktop copy and icons exactly: `✨ Real-time Assist`, `🪷 Wellness breaks`,
 and `✍🏻 Smart summaries`, with their approved Desktop descriptions.
@@ -110,22 +113,25 @@ and `✍🏻 Smart summaries`, with their approved Desktop descriptions.
 The renderer, theme JSON, and audio URL module are dynamic imports. The MP3 is emitted as
 `assets/wellness/WellnessBreakSound.mp3`; `wellnessAudioUrl` overrides it for CDN/subpath deployments.
 
-Development-build entry sizes were compared against commit `4733dbcd` with the same toolchain:
+A production build followed by `npm pack --dry-run --json` shows the media boundary:
 
-| Package `dist/index.js`  |     Baseline | With wellness |     Delta |
-| ------------------------ | -----------: | ------------: | --------: |
-| `@webex/cc-components`   |  6,667,210 B |   6,657,766 B |  -9,444 B |
-| `@webex/cc-ai-assistant` |  7,231,925 B |   7,299,093 B | +67,168 B |
-| `@webex/cc-widgets`      | 45,710,210 B |  45,789,248 B | +79,038 B |
+| Package | Lottie renderer chunk | Wellness MP3 |
+| --- | --- | --- |
+| `@webex/cc-components` | absent | absent |
+| `@webex/cc-ai-assistant` | present (305,431 B) | present (2,603,884 B) |
+| `@webex/cc-widgets` | present for its WC entry (305,431 B) | present for its WC entry (2,603,884 B) |
 
-Imminent playback adds lazy assets of 2,603,884 B (MP3), 40,840 B (both transformed JSON chunks),
-1,230 B (audio URL module), and 643,561 B (Lottie renderer). None are requested by the wellness UI gate
-or initial bundle alone.
+The React entry of `@webex/cc-widgets` does not import AI Assistant or reference its wellness media.
+The WC entry preserves the existing AI Assistant registration and copies its lazy media into the
+aggregate package. The assistant loads the renderer and audio for imminent playback. Hosts that consume
+the prebuilt WC entry must serve its lazy chunks and MP3 from the expected public path; the React sample
+builds the assistant from source and emits those files itself. The Web Component sample does not copy
+the aggregate package's media into its output automatically.
 
 ## Release gates
 
-- Keep the store and React sample pinned to the published `@webex/contact-center` 3.12.0-next.128 build.
-  Pair the React sample with `webex` 3.12.0-next.214 so `Webex.init()` loads the same SDK. Consume its
+- Keep the store and React sample pinned to the published `@webex/contact-center` 3.12.0-next.131 build.
+  Pair the React sample with `webex` 3.12.0-next.217 so `Webex.init()` loads the same SDK. Consume its
   wellness constants and types from the package root. Do not add local paths, tarballs, or structural
   copies of the SDK wellness contract.
 - Retain the media redistribution approval and checksum record.
@@ -137,4 +143,4 @@ or initial bundle alone.
 The React and Web Component samples use real store/SDK events, expose the lifecycle callbacks, log only
 lifecycle/error categories, and do not include a fake wellness event generator. Verify the legacy state
 flow, active voice/digital work, RONA phase boundaries, refresh recovery, media failure, reduced motion,
-focus restoration, and aggregate asset loading with a wellness-enabled test agent.
+focus restoration, and lazy asset loading with a wellness-enabled test agent.

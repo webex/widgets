@@ -9,9 +9,8 @@ import {
   store,
   OutdialCall,
   RealTimeTranscript,
-  AIAssistant,
-  type WellnessBreakOverlayTarget,
 } from '@webex/cc-widgets';
+import {AIAssistant, type WellnessBreakOverlayTarget} from '@webex/cc-ai-assistant';
 import {StationLogoutResponse} from '@webex/contact-center';
 import {ERROR_TRIGGERING_IDLE_CODES} from '@webex/cc-store';
 import Webex from 'webex';

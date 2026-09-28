@@ -22,6 +22,7 @@
     "@momentum-ui/tokens": "1.7.1",
     "@momentum-ui/utils": "6.2.15",
     "@momentum-ui/web-components": "^2.26.20",
+    "@webex/cc-ai-assistant": "workspace:*",
     "@webex/cc-widgets": "workspace:*",
     "@webex/contact-center": "3.12.0-next.131",
     "babel-loader": "^9.2.1",
