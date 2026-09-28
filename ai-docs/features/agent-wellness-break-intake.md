@@ -1,6 +1,6 @@
 # Agent Wellness Break — widgets implementation contract (WXCC-12423)
 
-Status: implemented for Widgets and aligned with `@webex/contact-center` 3.12.0-next.126 on 2026-09-22;
+Status: implemented for Widgets and aligned with `@webex/contact-center` 3.12.0-next.128 on 2026-09-28;
 final live-flow verification is pending with a wellness-enabled test agent.
 
 ## Scope and ownership
@@ -26,7 +26,7 @@ surface through `widget-cc-ai-assistant` and distributes lazy media chunks.
   own the assistant body while visible; the normal landing or Real-time Assist surface is not stacked
   beneath them.
 - A provided offer expires after five minutes and emits `NO_RESPONSE` once. Session rotation invalidates
-  it without a response action. When the assistant panel is closed or minimized,
+  it without a response action and leaves its history card visible with disabled actions. When the assistant panel is closed or minimized,
   a Desktop-style actionable toast exposes the same Take a break and Later actions; opening the panel
   shows the offer in the assistant body without duplicating the toast.
 - Wellness notification eligibility is scoped to the current agent and organization, not to equality
@@ -46,17 +46,24 @@ surface through `widget-cc-ai-assistant` and distributes lazy media chunks.
   work only while `store.taskList` contains an actual blocking task.
 - The User State widget renders the system-owned `WellbeingBreak` code as the current, timed state while
   it is active, without adding it to the manually selectable idle-code list or echoing SDK-driven entry
-  and restoration transitions back through `setAgentState`.
+  and restoration transitions back through `setAgentState`. It waits for the system-code lookup before
+  deciding whether a state change is SDK-owned; a user selection made during lookup is sent after it completes.
 - Playback is 5 seconds starting, 60 seconds playing (copy changes at 40 seconds), and 5 seconds ending.
   Audio and animation are independently lazy-loaded during the starting countdown. The full-bleed
   animation holds its first frame behind the inline `5 4 3 2 1` start sequence, plays with the 60-second
   timeline, then holds its final frame behind the ending sequence; audio is rewound and starts with playback.
-- Restoration returns agents to their captured Available or legacy idle-code state (for example,
-  `Meeting`), tries three times with ten-second spacing, and has five bounded background recovery attempts.
+- When the break ends, the widget immediately requests Available (`auxCodeId: 0`), including when the
+  agent was in another idle state before the break or an external state appeared during playback.
+  The request is attempted up to three times with ten-second spacing, with five additional bounded
+  background attempts after exhaustion.
+  Each accepted break resets that background retry budget. Unmount waits for a pending change-to-break
+  request, uses the same guarded Available request and retries, and preserves an external state.
   Before playback, an incompatible external/RONA transition cancels and restores;
   during playback/ending it does not interrupt the timeline.
 - A host-scoped `sessionStorage` marker contains only its version, station session, and captured legacy
   state and idle code. Refresh never replays an offer, action, or media.
+  Registration uses the SDK's projected active station session and prior auxiliary code when available;
+  it clears stale session data when the projection is absent. This requires the companion SDK release.
 - The full-screen dialog is independent of assistant chrome, traps focus, ignores Escape, restores focus,
   exposes live announcements, and honors reduced motion without changing timing. Its rounded canvas,
   full-bleed animation crop, overlaid phase copy, and bottom progress treatment follow Desktop.
@@ -117,7 +124,8 @@ or initial bundle alone.
 
 ## Release gates
 
-- Keep the store pinned to the published `@webex/contact-center` 3.12.0-next.126 build. Consume its
+- Keep the store and React sample pinned to the published `@webex/contact-center` 3.12.0-next.128 build.
+  Pair the React sample with `webex` 3.12.0-next.214 so `Webex.init()` loads the same SDK. Consume its
   wellness constants and types from the package root. Do not add local paths, tarballs, or structural
   copies of the SDK wellness contract.
 - Retain the media redistribution approval and checksum record.

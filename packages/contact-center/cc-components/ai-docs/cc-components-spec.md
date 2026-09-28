@@ -375,3 +375,10 @@ Each component is tested in isolation with React Testing Library: render from a 
 
 See [`agent-wellness-break-intake.md`](../../../../ai-docs/features/agent-wellness-break-intake.md) for
 copy, timing, media provenance, and release gates.
+
+The production loader preserves the named Lottie dynamic import
+only in `wellness-break-modal.tsx`; other TypeScript files keep the package's normal module setting.
+This confines the wellness-specific lazy import to its renderer source. The production build still
+emits thousands of icon chunks from Momentum's dynamic icon loader; this is independent of the
+wellness TypeScript override. Evidence:
+`webpack.config.js`, `src/components/AIAssistant/WellnessBreak/wellness-break-modal.tsx`.

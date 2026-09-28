@@ -321,6 +321,13 @@ Hook tests (`tests/helper.ts`) use `renderHook` with a mocked `Worker` (postMess
 | `USER-STATE-R-011` | `tests/helper.ts` "Error Handling" suite (8 cases) | none |
 | `USER-STATE-R-012` | While the SDK reports the system-owned `WellbeingBreak` code as current, append it only to the rendered state data, keep the elapsed timer visible, and treat both entry into wellness and the following restoration as externally managed so neither transition is echoed through `cc.setAgentState`. | The agent must see Desktop-equivalent status/timing without exposing a manually selectable system code or creating duplicate backend state requests. | `src/user-state/index.tsx`, `src/helper.ts`                                            | `tests/user-state/index.tsx`, `tests/helper.ts`, `packages/contact-center/cc-components/tests/components/UserState/user-state.tsx`                                          | none                                                                | PRESENT    |
 
+While the store resolves the system code after registration, User State records incoming SDK state
+without calling `setAgentState`. An explicit dropdown selection made during lookup remains pending
+and is sent after lookup completes, unless a newer SDK state replaces it. When the code resolves,
+User State marks `WellbeingBreak` as externally managed before processing another change. This
+prevents an SDK-owned state from being echoed during refresh without losing a user selection.
+Evidence: `src/helper.ts`, `src/user-state/index.tsx`, `tests/helper.ts`.
+
 ## Traceability
 - Repo architecture: `../../../../ai-docs/ARCHITECTURE.md` · Registry: `../../../../ai-docs/SPEC_INDEX.md` · Contracts: `../../../../ai-docs/CONTRACTS.md`
 - Coverage state & contracts baseline: `.sdd/manifest.json`

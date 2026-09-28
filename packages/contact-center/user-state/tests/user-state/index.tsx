@@ -25,6 +25,7 @@ jest.mock('@webex/cc-store', () => {
     customState: null,
     currentState: '0',
     wellbeingBreakIdleCode: undefined,
+    wellnessIdleCodeLookupPending: false,
     onErrorCallback: jest.fn(),
   };
 });
@@ -32,6 +33,7 @@ jest.mock('@webex/cc-store', () => {
 const mutableStore = store as unknown as {
   currentState: string;
   wellbeingBreakIdleCode?: {id: string; name: string; isSystem: boolean; isDefault: boolean};
+  wellnessIdleCodeLookupPending: boolean;
 };
 
 describe('UserState Component', () => {
@@ -42,6 +44,7 @@ describe('UserState Component', () => {
     jest.clearAllMocks();
     mutableStore.currentState = '0';
     mutableStore.wellbeingBreakIdleCode = undefined;
+    mutableStore.wellnessIdleCodeLookupPending = false;
     // Suppress console.error for error boundary tests
     jest.spyOn(console, 'error').mockImplementation(() => {});
 
@@ -80,6 +83,7 @@ describe('UserState Component', () => {
       lastStateChangeTimestamp: expect.any(Number),
       lastIdleCodeChangeTimestamp: undefined,
       isCurrentStateExternallyManaged: false,
+      wellnessIdleCodeLookupPending: false,
       logger: {
         log: expect.any(Function),
         info: expect.any(Function),
@@ -107,6 +111,7 @@ describe('UserState Component', () => {
         currentState: 'wellness',
         idleCodes: [expect.objectContaining({id: 'wellness', name: 'WellbeingBreak'})],
         isCurrentStateExternallyManaged: true,
+        wellnessIdleCodeLookupPending: false,
       })
     );
     expect(screen.getByTestId('elapsed-time')).toBeInTheDocument();

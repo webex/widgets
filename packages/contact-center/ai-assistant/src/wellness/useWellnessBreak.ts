@@ -44,19 +44,9 @@ type CapturedBreakState = {
   theme: string;
 } & Pick<WellnessBreakRecoveryMarkerV1, 'preBreakLegacyState' | 'preBreakLegacyAuxCodeId'>;
 
-const getLegacyRestoreState = (
-  captured?: Pick<CapturedBreakState, 'preBreakLegacyState' | 'preBreakLegacyAuxCodeId'>
-): {state: 'Available' | 'Idle'; auxCodeId: string} => {
-  if (
-    normalizeWellnessState(captured?.preBreakLegacyState) === 'idle' &&
-    captured?.preBreakLegacyAuxCodeId &&
-    captured.preBreakLegacyAuxCodeId !== '0'
-  ) {
-    return {state: 'Idle', auxCodeId: captured.preBreakLegacyAuxCodeId};
-  }
+type RestoreResult = 'restored' | 'not-owned' | 'failed' | 'cancelled';
 
-  return {state: 'Available', auxCodeId: '0'};
-};
+const AVAILABLE_STATE = {state: 'Available' as const, auxCodeId: '0'};
 
 const wait = (milliseconds: number): Promise<void> =>
   new Promise((resolve) => {
@@ -94,6 +84,7 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
   const acceptedEventRef = useRef<WellnessBreakEvent>();
   const completionRef = useRef(false);
   const legacyRecoveryCountRef = useRef(0);
+  const pendingStateRequestRef = useRef<Promise<boolean>>();
   const reportedErrorCodeRef = useRef<WellnessBreakErrorCode>();
   const historySequenceRef = useRef(0);
   const activeOfferHistoryIdRef = useRef<string>();
@@ -266,71 +257,128 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
     }
   }, []);
 
-  const performRestore = useCallback(
-    async (completedTimeline: boolean, attempts = RESTORE_ATTEMPTS): Promise<boolean> => {
-      if (restoringRef.current) return false;
-      restoringRef.current = true;
-      const restoreSourcePhase = phaseRef.current;
-      clearOfferTimer();
-      clearTimeline();
-      stopMedia();
-      setPhase('restoring');
-      const operation = ++operationRef.current;
-
-      let lastFailure = false;
+  const requestAvailableState = useCallback(
+    async (
+      captured: CapturedBreakState,
+      sessionId: string,
+      agentId: string,
+      wellnessCodeId: string | undefined,
+      ownStateRequestSucceeded: boolean,
+      completedTimeline: boolean,
+      operation: number,
+      attempts: number
+    ): Promise<RestoreResult> => {
       for (let attempt = 1; attempt <= attempts; attempt += 1) {
-        const latest = latestRef.current;
-        if (!latest.agentSessionId || operation !== operationRef.current) {
-          restoringRef.current = false;
-          return false;
+        if (
+          operation !== operationRef.current ||
+          latestRef.current.agentSessionId !== sessionId ||
+          ('wellnessAgentSessionId' in store && store.wellnessAgentSessionId !== sessionId)
+        ) {
+          return 'cancelled';
         }
-        try {
-          const captured = capturedRef.current;
-          if (
-            latest.legacyAuxCodeId === latest.wellbeingBreakIdleCode?.id ||
-            normalizeWellnessState(latest.legacyAgentState) === 'wellbeingbreak' ||
-            (restoreSourcePhase === 'changing-to-break' && stateRequestResolvedRef.current)
-          ) {
-            await store.cc.setAgentState({
-              ...getLegacyRestoreState(captured),
-              agentId: latest.agentId,
-              lastStateChangeReason: 'wellness-break-complete',
-            });
-          }
 
-          if (attempt > 1) {
-            logWellnessMetric(WELLNESS_METRIC.RESTORE_STATE_RETRY_ATTEMPT, {attempt, success: true});
+        const currentState = store.legacyAgentState || latestRef.current.legacyAgentState;
+        const currentCode = store.legacyAuxCodeId || latestRef.current.legacyAuxCodeId;
+        const ownsCurrentState =
+          currentCode === wellnessCodeId || normalizeWellnessState(currentState) === 'wellbeingbreak';
+        const unchangedPreBreakState =
+          currentCode === captured.preBreakLegacyAuxCodeId &&
+          normalizeWellnessState(currentState) === normalizeWellnessState(captured.preBreakLegacyState);
+        if (completedTimeline && currentCode === '0' && normalizeWellnessState(currentState) === 'available') {
+          return 'not-owned';
+        }
+        if (!completedTimeline && !ownsCurrentState && !(ownStateRequestSucceeded && unchangedPreBreakState)) {
+          return 'not-owned';
+        }
+
+        try {
+          await store.cc.setAgentState({
+            ...AVAILABLE_STATE,
+            agentId,
+            lastStateChangeReason: 'wellness-break-complete',
+          });
+          if (
+            operation !== operationRef.current ||
+            latestRef.current.agentSessionId !== sessionId ||
+            ('wellnessAgentSessionId' in store && store.wellnessAgentSessionId !== sessionId)
+          ) {
+            return 'cancelled';
           }
-          clearRecoveryMarker();
-          capturedRef.current = undefined;
-          stateRequestResolvedRef.current = false;
-          restoringRef.current = false;
-          setError(undefined);
-          setRequestAvailable(false);
-          setNotice(completedTimeline ? 'completed' : undefined);
-          setPhase('idle');
-          if (completedTimeline) {
-            appendNotice('completed');
-            logWellnessMetric(WELLNESS_METRIC.BREAK_ENDED);
-            invokeHost(callbackRef.current.onWellnessBreakEnded, 'onWellnessBreakEnded');
-          }
-          return true;
+          if (attempt > 1) logWellnessMetric(WELLNESS_METRIC.RESTORE_STATE_RETRY_ATTEMPT, {attempt, success: true});
+          return 'restored';
         } catch {
-          lastFailure = true;
           store.logger?.warn(`CC-Widgets: Agent Wellness Break restore attempt ${attempt} failed`, {
             module: MODULE,
-            method: 'performRestore',
+            method: 'requestAvailableState',
           });
           logWellnessMetric(WELLNESS_METRIC.RESTORE_STATE_RETRY_ATTEMPT, {attempt, success: false});
           if (attempt < attempts) await wait(WELLNESS_RESTORE_RETRY_MS);
         }
       }
-
-      restoringRef.current = false;
-      if (lastFailure) reportError('RESTORE_FAILED', 'restoring', true);
-      return false;
+      return 'failed';
     },
-    [appendNotice, clearOfferTimer, clearRecoveryMarker, clearTimeline, invokeHost, reportError, setPhase, stopMedia]
+    []
+  );
+
+  const performRestore = useCallback(
+    async (completedTimeline: boolean, attempts = RESTORE_ATTEMPTS): Promise<boolean> => {
+      if (restoringRef.current) return false;
+      restoringRef.current = true;
+      clearOfferTimer();
+      clearTimeline();
+      stopMedia();
+      setPhase('restoring');
+      const operation = ++operationRef.current;
+      const latest = latestRef.current;
+      const captured = capturedRef.current;
+      const pendingStateRequest = pendingStateRequestRef.current;
+      const ownStateRequestSucceeded = pendingStateRequest
+        ? await pendingStateRequest
+        : stateRequestResolvedRef.current;
+      const result =
+        latest.agentSessionId && captured
+          ? await requestAvailableState(
+              captured,
+              latest.agentSessionId,
+              latest.agentId,
+              latest.wellbeingBreakIdleCode?.id,
+              ownStateRequestSucceeded,
+              completedTimeline,
+              operation,
+              attempts
+            )
+          : 'cancelled';
+      restoringRef.current = false;
+      if (result === 'cancelled') return false;
+      if (result === 'failed') {
+        reportError('RESTORE_FAILED', 'restoring', true);
+        return false;
+      }
+      clearRecoveryMarker();
+      capturedRef.current = undefined;
+      stateRequestResolvedRef.current = false;
+      setError(undefined);
+      setRequestAvailable(false);
+      setNotice(completedTimeline ? 'completed' : undefined);
+      setPhase('idle');
+      if (completedTimeline) {
+        appendNotice('completed');
+        logWellnessMetric(WELLNESS_METRIC.BREAK_ENDED);
+        invokeHost(callbackRef.current.onWellnessBreakEnded, 'onWellnessBreakEnded');
+      }
+      return true;
+    },
+    [
+      appendNotice,
+      clearOfferTimer,
+      clearRecoveryMarker,
+      clearTimeline,
+      invokeHost,
+      reportError,
+      requestAvailableState,
+      setPhase,
+      stopMedia,
+    ]
   );
 
   const prepareAudio = useCallback((): Promise<HTMLAudioElement | undefined> => {
@@ -484,6 +532,8 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
         return;
       }
 
+      legacyRecoveryCountRef.current = 0;
+
       const operation = ++operationRef.current;
       const sessionId = latest.agentSessionId;
       const scheduledAfterWork = !areAllTasksSafeForWellness(latest.taskList);
@@ -505,22 +555,31 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
       );
       setPhase('changing-to-break', {event});
 
-      try {
-        await store.cc.setAgentState({
-          state: 'Idle',
-          auxCodeId: latest.wellbeingBreakIdleCode.id,
-          agentId: latest.agentId,
-          lastStateChangeReason: 'wellness-break',
-        });
-        if (operation !== operationRef.current || latestRef.current.agentSessionId !== sessionId) return;
-        stateRequestResolvedRef.current = true;
-      } catch {
+      const stateRequest = Promise.resolve()
+        .then(() =>
+          store.cc.setAgentState({
+            state: 'Idle',
+            auxCodeId: latest.wellbeingBreakIdleCode.id,
+            agentId: latest.agentId,
+            lastStateChangeReason: 'wellness-break',
+          })
+        )
+        .then(
+          () => true,
+          () => false
+        );
+      pendingStateRequestRef.current = stateRequest;
+      const stateChanged = await stateRequest;
+      if (pendingStateRequestRef.current === stateRequest) pendingStateRequestRef.current = undefined;
+      if (operation !== operationRef.current || latestRef.current.agentSessionId !== sessionId) return;
+      if (!stateChanged) {
         if (operation !== operationRef.current || latestRef.current.agentSessionId !== sessionId) return;
         clearRecoveryMarker();
         capturedRef.current = undefined;
         reportError('STATE_CHANGE_FAILED', 'changing-to-break', true);
         return;
       }
+      stateRequestResolvedRef.current = true;
 
       if (sendAccepted) {
         try {
@@ -781,9 +840,11 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
     setRequestAvailable(false);
     setNotice(undefined);
     setError(undefined);
+    resolveActiveOffer();
     capturedRef.current = undefined;
+    legacyRecoveryCountRef.current = 0;
     if (previousSessionId) clearRecoveryMarker();
-  }, [clearOfferTimer, clearRecoveryMarker, clearTimeline, input.agentSessionId, stopMedia]);
+  }, [clearOfferTimer, clearRecoveryMarker, clearTimeline, input.agentSessionId, resolveActiveOffer, stopMedia]);
 
   // Feature revocation hides new controls only after state-owned work restores.
   useEffect(() => {
@@ -837,8 +898,8 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
     performRestore,
   ]);
 
-  // Legacy exhaustion recovery continues in the background while this host
-  // still owns the wellness state, bounded to five additional attempts.
+  // After a completed break, keep trying Available. For an early exit,
+  // continue only while this host still owns the wellness state.
   useEffect(() => {
     if (input.wellnessBreakState.phase !== 'error' || error?.code !== 'RESTORE_FAILED' || !capturedRef.current) {
       return undefined;
@@ -849,7 +910,7 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
         return;
       }
       const latest = latestRef.current;
-      if (latest.legacyAuxCodeId !== latest.wellbeingBreakIdleCode?.id) {
+      if (!completionRef.current && latest.legacyAuxCodeId !== latest.wellbeingBreakIdleCode?.id) {
         clearRecoveryMarker();
         window.clearInterval(timer);
         return;
@@ -871,26 +932,51 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
 
   useEffect(
     () => () => {
-      operationRef.current += 1;
+      const restoring = restoringRef.current;
+      if (!restoring) operationRef.current += 1;
       clearOfferTimer();
       clearTimeline();
       stopMedia();
       const latest = latestRef.current;
       const captured = capturedRef.current;
-      if (phaseRef.current === 'offer-pending' || phaseRef.current === 'request-pending') {
+      if (!captured && (phaseRef.current === 'offer-pending' || phaseRef.current === 'request-pending')) {
         store.setWellnessBreakState({phase: 'idle'});
       }
-      if (captured && latest.agentSessionId && ACTIVE_PHASES.has(phaseRef.current)) {
-        void store.cc
-          .setAgentState({
-            ...getLegacyRestoreState(captured),
-            agentId: latest.agentId,
-            lastStateChangeReason: 'wellness-break-complete',
-          })
-          .catch(() => {});
+      if (!restoring && captured && latest.agentSessionId) {
+        const operation = operationRef.current;
+        const pendingStateRequest = pendingStateRequestRef.current;
+        void (async () => {
+          const ownStateRequestSucceeded = pendingStateRequest
+            ? await pendingStateRequest
+            : stateRequestResolvedRef.current;
+          if (pendingStateRequest && !ownStateRequestSucceeded) {
+            clearRecoveryMarker();
+            return;
+          }
+          const result = await requestAvailableState(
+            captured,
+            latest.agentSessionId,
+            latest.agentId,
+            latest.wellbeingBreakIdleCode?.id,
+            ownStateRequestSucceeded,
+            false,
+            operation,
+            RESTORE_ATTEMPTS
+          );
+          if (result === 'restored' || result === 'not-owned') {
+            clearRecoveryMarker();
+          } else if (result === 'failed') {
+            if ('wellnessAgentSessionId' in store && store.wellnessAgentSessionId !== latest.agentSessionId) return;
+            store.logger?.error('CC-Widgets: Agent Wellness Break unmount restore failed', {
+              module: MODULE,
+              method: 'restoreOnUnmount',
+            });
+            store.setWellnessBreakState({phase: 'error', errorCode: 'RESTORE_FAILED'});
+          }
+        })();
       }
     },
-    [clearOfferTimer, clearTimeline, stopMedia]
+    [clearOfferTimer, clearRecoveryMarker, clearTimeline, requestAvailableState, stopMedia]
   );
 
   const uiEnabled = Boolean(

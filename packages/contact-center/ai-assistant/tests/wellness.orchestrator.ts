@@ -323,6 +323,24 @@ describe('useWellnessBreak', () => {
     expect(result.current.contentCleared).toBe(true);
   });
 
+  it('keeps a rotated-session offer in history without leaving its actions enabled', async () => {
+    const provide = {...event, actionEvent: 'PROVIDE_WELLNESS_BREAK' as const};
+    const {result, rerender} = renderHook((props: UseWellnessBreakInput) => useWellnessBreak(props), {
+      initialProps: {
+        ...baseInput,
+        wellnessBreakState: {phase: 'idle', event: provide},
+        wellnessEventSequence: 1,
+      },
+    });
+
+    await waitFor(() => expect(result.current.history[0]).toMatchObject({type: 'offer', actionable: true}));
+    rerender({...baseInput, agentSessionId: 'session-2', wellnessBreakState: {phase: 'idle'}});
+
+    expect(result.current.history[0]).toMatchObject({type: 'offer', actionable: false});
+    act(() => result.current.onAccept('card'));
+    expect(storeMock.cc.apiAIAssistant.respondToWellnessBreak).not.toHaveBeenCalled();
+  });
+
   it('sends REJECTED exactly once when Later is selected for a direct PROVIDE', async () => {
     const provide = {...event, actionEvent: 'PROVIDE_WELLNESS_BREAK' as const};
     const {result} = renderHook(() =>
@@ -427,7 +445,7 @@ describe('useWellnessBreak', () => {
     });
   });
 
-  it('restores the exact pre-break legacy Meeting idle code after the break', async () => {
+  it('sets Available when the break ends even if the agent was in Meeting before it', async () => {
     jest.useFakeTimers();
     const provide = {...event, actionEvent: 'PROVIDE_WELLNESS_BREAK' as const};
     const input = {
@@ -455,15 +473,101 @@ describe('useWellnessBreak', () => {
 
     await waitFor(() =>
       expect(storeMock.cc.setAgentState).toHaveBeenLastCalledWith({
-        state: 'Idle',
-        auxCodeId: 'meeting',
+        state: 'Available',
+        auxCodeId: '0',
         agentId: 'agent-1',
         lastStateChangeReason: 'wellness-break-complete',
       })
     );
   });
 
-  it('restores a refresh marker after the first session hydration', async () => {
+  it('sets Available at the scheduled end even after an external state change during playback', async () => {
+    jest.useFakeTimers();
+    const provide = {...event, actionEvent: 'PROVIDE_WELLNESS_BREAK' as const};
+    const {result, rerender} = renderHook((props: UseWellnessBreakInput) => useWellnessBreak(props), {
+      initialProps: {...baseInput, wellnessBreakState: {phase: 'offer-pending', event: provide}},
+    });
+
+    await act(async () => result.current.onAccept());
+    rerender({
+      ...baseInput,
+      legacyAgentState: 'Idle',
+      legacyAuxCodeId: 'wellness',
+      wellnessBreakState: {phase: 'waiting-for-safe-state', event: provide},
+    });
+    await act(async () => {
+      jest.advanceTimersByTime(2_000 + 5_000);
+      await Promise.resolve();
+    });
+    rerender({
+      ...baseInput,
+      legacyAgentState: 'Idle',
+      legacyAuxCodeId: 'rona',
+      wellnessBreakState: {phase: 'playing', event: provide},
+    });
+    await act(async () => {
+      jest.advanceTimersByTime(60_000 + 5_000);
+      await Promise.resolve();
+    });
+
+    expect(storeMock.cc.setAgentState).toHaveBeenLastCalledWith({
+      state: 'Available',
+      auxCodeId: '0',
+      agentId: 'agent-1',
+      lastStateChangeReason: 'wellness-break-complete',
+    });
+  });
+
+  it('keeps retrying Available after a completed break even when the last observed state was external', async () => {
+    jest.useFakeTimers();
+    let restoreAttempts = 0;
+    storeMock.cc.setAgentState.mockImplementation(({lastStateChangeReason}) => {
+      if (lastStateChangeReason === 'wellness-break') return Promise.resolve();
+      restoreAttempts += 1;
+      return restoreAttempts <= 3 ? Promise.reject(new Error('restore failed')) : Promise.resolve();
+    });
+    const provide = {...event, actionEvent: 'PROVIDE_WELLNESS_BREAK' as const};
+    const {result, rerender} = renderHook((props: UseWellnessBreakInput) => useWellnessBreak(props), {
+      initialProps: {...baseInput, wellnessBreakState: {phase: 'offer-pending', event: provide}},
+    });
+
+    await act(async () => result.current.onAccept());
+    rerender({
+      ...baseInput,
+      legacyAgentState: 'Idle',
+      legacyAuxCodeId: 'wellness',
+      wellnessBreakState: {phase: 'waiting-for-safe-state', event: provide},
+    });
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(2_000 + 5_000);
+    });
+    rerender({
+      ...baseInput,
+      legacyAgentState: 'Idle',
+      legacyAuxCodeId: 'rona',
+      wellnessBreakState: {phase: 'playing', event: provide},
+    });
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(60_000 + 5_000 + 20_000);
+    });
+    expect(restoreAttempts).toBe(3);
+
+    rerender({
+      ...baseInput,
+      legacyAgentState: 'Idle',
+      legacyAuxCodeId: 'rona',
+      wellnessBreakState: {phase: 'error', errorCode: 'RESTORE_FAILED'},
+    });
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(20_000);
+    });
+    expect(restoreAttempts).toBe(4);
+    expect(storeMock.cc.setAgentState).toHaveBeenLastCalledWith(
+      expect.objectContaining({state: 'Available', auxCodeId: '0'})
+    );
+  });
+
+  it('sets Available from a refresh marker after the first session hydration', async () => {
     window.sessionStorage.setItem(
       WELLNESS_RECOVERY_KEY,
       JSON.stringify({
@@ -491,8 +595,8 @@ describe('useWellnessBreak', () => {
 
     await waitFor(() =>
       expect(storeMock.cc.setAgentState).toHaveBeenCalledWith({
-        state: 'Idle',
-        auxCodeId: 'meeting',
+        state: 'Available',
+        auxCodeId: '0',
         agentId: 'agent-1',
         lastStateChangeReason: 'wellness-break-complete',
       })
@@ -598,5 +702,137 @@ describe('useWellnessBreak', () => {
     rerender({...baseInput, wellnessBreakState: {phase: 'request-pending'}});
     unmount();
     expect(storeMock.setWellnessBreakState).toHaveBeenCalledWith({phase: 'idle'});
+  });
+
+  it('waits for a pending break-state request before restoring on feature revocation', async () => {
+    let resolveState: (() => void) | undefined;
+    storeMock.cc.setAgentState.mockImplementationOnce(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveState = resolve;
+        })
+    );
+    const provide = {...event, actionEvent: 'PROVIDE_WELLNESS_BREAK' as const};
+    const {result, rerender} = renderHook((props: UseWellnessBreakInput) => useWellnessBreak(props), {
+      initialProps: {...baseInput, wellnessBreakState: {phase: 'offer-pending', event: provide}},
+    });
+
+    act(() => result.current.onAccept('card'));
+    await act(async () => {
+      await Promise.resolve();
+    });
+    rerender({...baseInput, enabled: false, wellnessBreakState: {phase: 'changing-to-break', event: provide}});
+    expect(storeMock.cc.setAgentState).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      resolveState?.();
+      await Promise.resolve();
+    });
+    await waitFor(() => expect(storeMock.cc.setAgentState).toHaveBeenCalledTimes(2));
+    expect(storeMock.cc.setAgentState).toHaveBeenLastCalledWith(
+      expect.objectContaining({state: 'Available', auxCodeId: '0', lastStateChangeReason: 'wellness-break-complete'})
+    );
+  });
+
+  it('waits for a pending break-state request before restoring on unmount', async () => {
+    let resolveState: (() => void) | undefined;
+    storeMock.cc.setAgentState.mockImplementationOnce(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveState = resolve;
+        })
+    );
+    const provide = {...event, actionEvent: 'PROVIDE_WELLNESS_BREAK' as const};
+    const {result, unmount} = renderHook(() =>
+      useWellnessBreak({...baseInput, wellnessBreakState: {phase: 'offer-pending', event: provide}})
+    );
+
+    act(() => result.current.onAccept('card'));
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(storeMock.cc.setAgentState).toHaveBeenCalledTimes(1);
+
+    unmount();
+    expect(storeMock.cc.setAgentState).toHaveBeenCalledTimes(1);
+    await act(async () => {
+      resolveState?.();
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    await waitFor(() => expect(storeMock.cc.setAgentState).toHaveBeenCalledTimes(2));
+    expect(storeMock.cc.setAgentState).toHaveBeenLastCalledWith(
+      expect.objectContaining({state: 'Available', auxCodeId: '0', lastStateChangeReason: 'wellness-break-complete'})
+    );
+    expect(storeMock.cc.apiAIAssistant.respondToWellnessBreak).not.toHaveBeenCalled();
+  });
+
+  it('does not overwrite an external state when unmounted during playback', async () => {
+    const provide = {...event, actionEvent: 'PROVIDE_WELLNESS_BREAK' as const};
+    const {result, rerender, unmount} = renderHook((props: UseWellnessBreakInput) => useWellnessBreak(props), {
+      initialProps: {...baseInput, wellnessBreakState: {phase: 'offer-pending', event: provide}},
+    });
+
+    await act(async () => result.current.onAccept('card'));
+    rerender({
+      ...baseInput,
+      legacyAgentState: 'Idle',
+      legacyAuxCodeId: 'rona',
+      wellnessBreakState: {phase: 'playing', event: provide},
+    });
+    unmount();
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(storeMock.cc.setAgentState).toHaveBeenCalledTimes(1);
+    expect(window.sessionStorage.getItem(WELLNESS_RECOVERY_KEY)).toBeNull();
+  });
+
+  it('gives a later break a fresh background restore retry budget', async () => {
+    jest.useFakeTimers();
+    storeMock.cc.apiAIAssistant.respondToWellnessBreak.mockRejectedValue(new Error('accept failed'));
+    storeMock.cc.setAgentState.mockImplementation(({lastStateChangeReason}) =>
+      lastStateChangeReason === 'wellness-break' ? Promise.resolve() : Promise.reject(new Error('restore failed'))
+    );
+    const provide = {...event, actionEvent: 'PROVIDE_WELLNESS_BREAK' as const};
+    const offerInput = {...baseInput, wellnessBreakState: {phase: 'offer-pending' as const, event: provide}};
+    const errorInput = {
+      ...baseInput,
+      legacyAgentState: 'Idle',
+      legacyAuxCodeId: 'wellness',
+      wellnessBreakState: {phase: 'error' as const, errorCode: 'RESTORE_FAILED' as const},
+    };
+    const {result, rerender, unmount} = renderHook((props: UseWellnessBreakInput) => useWellnessBreak(props), {
+      initialProps: offerInput,
+    });
+    const advance = async (milliseconds: number) => {
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(milliseconds);
+      });
+    };
+    const restoreCalls = () =>
+      storeMock.cc.setAgentState.mock.calls.filter(
+        ([params]) => params.lastStateChangeReason === 'wellness-break-complete'
+      ).length;
+
+    await act(async () => result.current.onAccept('card'));
+    await advance(20_000);
+    expect(restoreCalls()).toBe(3);
+    rerender(errorInput);
+    await advance(100_000);
+    expect(restoreCalls()).toBe(8);
+
+    rerender(offerInput);
+    await act(async () => result.current.onAccept('card'));
+    await advance(20_000);
+    expect(restoreCalls()).toBe(11);
+    rerender(errorInput);
+    await advance(20_000);
+    expect(restoreCalls()).toBe(12);
+
+    rerender({...baseInput, agentSessionId: 'session-2'});
+    unmount();
   });
 });

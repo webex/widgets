@@ -1,6 +1,6 @@
 import store, {CC_EVENTS, WellnessBreakEvent} from '../src';
 import {getFeatureFlags} from '../src/util';
-import {mockCC} from '@webex/test-fixtures';
+import {mockCC, mockProfile} from '@webex/test-fixtures';
 
 const wellnessEvent: WellnessBreakEvent = {
   agentId: 'agent-1',
@@ -21,6 +21,7 @@ describe('Agent Wellness Break store projection', () => {
     store.store.wellnessBreakState = {phase: 'idle'};
     store.store.wellnessEventSequence = 0;
     store.store.wellbeingBreakIdleCode = undefined;
+    store.store.wellnessIdleCodeLookupPending = false;
     store.store.currentState = '0';
     store.store.lastStateChangeTimestamp = undefined;
     store.store.lastIdleCodeChangeTimestamp = undefined;
@@ -56,6 +57,65 @@ describe('Agent Wellness Break store projection', () => {
 
     expect(store.wellbeingBreakIdleCode?.id).toBe('wellbeing-break');
     expect(store.idleCodes.map(({id}) => id)).toEqual(['ordinary']);
+  });
+
+  it('marks the system-code lookup pending until its current request settles', async () => {
+    let resolveIdleCode: ((value: Awaited<ReturnType<typeof mockCC.getWellbeingBreakIdleCode>>) => void) | undefined;
+    mockCC.getWellbeingBreakIdleCode.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveIdleCode = resolve;
+        })
+    );
+
+    const pendingLoad = store.loadWellbeingBreakIdleCode();
+    expect(store.wellnessIdleCodeLookupPending).toBe(true);
+    resolveIdleCode?.({id: 'wellbeing-break', name: 'WellbeingBreak', isSystem: true, isDefault: false});
+    await pendingLoad;
+
+    expect(store.wellnessIdleCodeLookupPending).toBe(false);
+    expect(store.wellbeingBreakIdleCode?.id).toBe('wellbeing-break');
+  });
+
+  it('hydrates the registered station session and legacy state after page refresh', async () => {
+    let resolveIdleCode: ((value: Awaited<ReturnType<typeof mockCC.getWellbeingBreakIdleCode>>) => void) | undefined;
+    mockCC.getWellbeingBreakIdleCode.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveIdleCode = resolve;
+        })
+    );
+    mockCC.register.mockResolvedValueOnce({
+      ...mockProfile,
+      isWellnessBreakEnabled: true,
+      isAgentLoggedIn: true,
+      agentSessionId: 'session-after-refresh',
+      lastStateAuxCodeId: 'meeting',
+    });
+    store.store.wellnessAgentSessionId = 'stale-session';
+
+    await store.registerCC();
+
+    expect(store.wellnessAgentSessionId).toBe('session-after-refresh');
+    expect(store.legacyAgentState).toBe('Idle');
+    expect(store.legacyAuxCodeId).toBe('meeting');
+    expect(store.wellnessBreakState).toEqual({phase: 'idle'});
+    expect(store.wellnessIdleCodeLookupPending).toBe(true);
+    expect(mockCC.getWellbeingBreakIdleCode).toHaveBeenCalled();
+    resolveIdleCode?.({id: 'wellbeing-break', name: 'WellbeingBreak', isSystem: true, isDefault: false});
+    await Promise.resolve();
+    expect(store.wellnessIdleCodeLookupPending).toBe(false);
+  });
+
+  it('clears a stale station session when registration has no active session', async () => {
+    mockCC.register.mockResolvedValueOnce({...mockProfile, isWellnessBreakEnabled: true, agentSessionId: undefined});
+    store.store.wellnessAgentSessionId = 'stale-session';
+
+    await store.registerCC();
+
+    expect(store.wellnessAgentSessionId).toBe('');
+    expect(store.legacyAgentState).toBe('');
+    expect(store.legacyAuxCodeId).toBe('');
   });
 
   it('ignores a stale system-code response after logout', async () => {

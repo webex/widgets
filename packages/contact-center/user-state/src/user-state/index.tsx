@@ -18,6 +18,7 @@ const UserStateInternal: React.FunctionComponent<IUserStateProps> = observer(({o
     customState,
     logger,
     wellbeingBreakIdleCode,
+    wellnessIdleCodeLookupPending,
   } = store;
   const isWellnessBreakState = Boolean(wellbeingBreakIdleCode && currentState === wellbeingBreakIdleCode.id);
   const displayedIdleCodes =
@@ -36,6 +37,7 @@ const UserStateInternal: React.FunctionComponent<IUserStateProps> = observer(({o
       onStateChange,
       lastIdleCodeChangeTimestamp,
       isCurrentStateExternallyManaged: isWellnessBreakState,
+      wellnessIdleCodeLookupPending,
     }),
     customState,
     logger,

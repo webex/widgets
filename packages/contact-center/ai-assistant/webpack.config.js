@@ -3,12 +3,15 @@ const path = require('path');
 
 const baseConfig = require('../../../webpack.config');
 
-// Preserve dynamic imports so animation data and audio are fetched only when a
-// break is about to play.
-baseConfig.module.rules = baseConfig.module.rules.map((rule) =>
+// Preserve lazy media imports only in the wellness hook.
+const wellnessHookFile = /wellness\/useWellnessBreak\.ts$/;
+baseConfig.module.rules = baseConfig.module.rules.flatMap((rule) =>
   String(rule.test) === String(/\.(ts|tsx)$/)
-    ? {...rule, use: {loader: 'ts-loader', options: {compilerOptions: {module: 'esnext'}}}}
-    : rule
+    ? [
+        {...rule, exclude: [rule.exclude, wellnessHookFile]},
+        {...rule, test: wellnessHookFile, use: {loader: 'ts-loader', options: {compilerOptions: {module: 'esnext'}}}},
+      ]
+    : [rule]
 );
 
 class CopyMatchingFilesPlugin {

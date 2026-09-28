@@ -48,7 +48,7 @@ Owns Contact Center client-side state and the SDK boundary: initialize/register 
 
 ## Stack
 
-TypeScript 5.6.3, MobX 6.13.5 (`makeAutoObservable`, `observable.ref`, `runInAction`). Consumed in React 18 via `mobx-react-lite` `observer()` in downstream packages (not a dependency of this package itself). SDK dependency `@webex/contact-center` 3.12.0-next.126. Tests: Jest 29 + ts compile (`tsc --project tsconfig.test.json && jest --coverage`). Build target: `dist/index.js` (Webpack). Evidence: `packages/contact-center/store/package.json`.
+TypeScript 5.6.3, MobX 6.13.5 (`makeAutoObservable`, `observable.ref`, `runInAction`). Consumed in React 18 via `mobx-react-lite` `observer()` in downstream packages (not a dependency of this package itself). SDK dependency `@webex/contact-center` 3.12.0-next.128. Tests: Jest 29 + ts compile (`tsc --project tsconfig.test.json && jest --coverage`). Build target: `dist/index.js` (Webpack). Evidence: `packages/contact-center/store/package.json`.
 
 ## Folder / Package Structure
 
@@ -94,7 +94,7 @@ Compatibility notes:
 
 ## Requires (dependencies)
 
-- `@webex/contact-center` SDK (pinned in `package.json` at `3.12.0-next.126`) — the entire CC runtime: `Webex.init()`, `webex.cc.*` methods, the CC/task event stream, agent `Profile`, `webex.credentials.getUserToken()`. Consumed ONLY through the store. Fallback on unavailability: `Store.init()` rejects after a 6000ms timeout (`src/store.ts:140-142`); the wrapper wraps the rejection and invokes `onErrorCallback('Store', err)` (`src/storeEventsWrapper.ts:442-452`).
+- `@webex/contact-center` SDK (pinned in `package.json` at `3.12.0-next.128`) — the entire CC runtime: `Webex.init()`, `webex.cc.*` methods, the CC/task event stream, agent `Profile`, `webex.credentials.getUserToken()`. Consumed ONLY through the store. Fallback on unavailability: `Store.init()` rejects after a 6000ms timeout (`src/store.ts:140-142`); the wrapper wraps the rejection and invokes `onErrorCallback('Store', err)` (`src/storeEventsWrapper.ts:442-452`).
 - `mobx` ^6.13.5 — observable state and `runInAction` for all mutations.
 - Internal: none upstream. The store is the lowest widget-layer dependency (`cc-components → widget packages → store → SDK`); it imports no widget package.
 
@@ -413,6 +413,14 @@ Unit tests are split by source file. `tests/store.ts` covers the singleton defau
 | `STORE-R-036` | Submit widgets behavioral events through `webex.internal.newMetrics` using explicit agent/target/verb taxonomy and flat bounded properties; missing or failed metrics transport is logged and never interrupts the wellness lifecycle. | `src/storeEventsWrapper.ts`, `src/store.types.ts` | `tests/wellness.ts` |
 | `STORE-R-037` | Project confirmed legacy `WellbeingBreak` state and backend timestamps through `currentState`, `legacyAgentState`, `legacyAuxCodeId`, `lastStateChangeTimestamp`, and `lastIdleCodeChangeTimestamp`, while keeping the system code out of ordinary idle-code choices.                                                                                                                               | `src/store.ts`, `src/storeEventsWrapper.ts`                       | `tests/wellness.ts`                                |
 
-The store consumes the public Wellness Break symbols from `@webex/contact-center` 3.12.0-next.126.
+On registration, the store reads the SDK-owned `Profile.agentSessionId` when present, derives the
+legacy Available/Idle state from `lastStateAuxCodeId`, and clears any stale session when the profile
+has no active session. This supports refresh recovery without using a notification's session ID.
+The store also marks system-code lookup pending until its current request settles so User State
+does not echo an unresolved system-owned state. Evidence: `src/store.ts`,
+`src/storeEventsWrapper.ts`, and `tests/wellness.ts`.
+
+The store consumes the existing public Wellness Break symbols from `@webex/contact-center` 3.12.0-next.128.
+The registration session projection requires the companion SDK change and a later published package.
 It does not declare or consume unpublished State Control V2 or AI Assistant RTD surfaces. See
 [`agent-wellness-break-intake.md`](../../../../ai-docs/features/agent-wellness-break-intake.md).

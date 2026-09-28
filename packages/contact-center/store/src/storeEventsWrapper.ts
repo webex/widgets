@@ -227,6 +227,10 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.wellbeingBreakIdleCode;
   }
 
+  get wellnessIdleCodeLookupPending() {
+    return this.store.wellnessIdleCodeLookupPending;
+  }
+
   get wellnessBreakState() {
     return this.store.wellnessBreakState;
   }
@@ -404,6 +408,7 @@ class StoreWrapper implements IStoreWrapper {
     runInAction(() => {
       this.store.wellnessAgentSessionId = '';
       this.store.wellbeingBreakIdleCode = undefined;
+      this.store.wellnessIdleCodeLookupPending = false;
       this.store.wellnessBreakState = {phase: 'idle'};
       this.store.wellnessEventSequence = (this.store.wellnessEventSequence ?? 0) + 1;
       this.store.legacyAgentState = '';

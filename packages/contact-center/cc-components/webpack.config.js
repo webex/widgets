@@ -3,11 +3,16 @@ const path = require('path');
 
 const baseConfig = require('../../../webpack.config');
 
-// Preserve dynamic imports so the wellness renderer stays out of the initial bundle.
-baseConfig.module.rules = baseConfig.module.rules.map((rule) =>
+// Preserve the renderer import only in the file that loads it. Other TypeScript
+// files retain the package's CommonJS setting and do not create extra chunks.
+const rendererFile = /WellnessBreak\/wellness-break-modal\.tsx$/;
+baseConfig.module.rules = baseConfig.module.rules.flatMap((rule) =>
   String(rule.test) === String(/\.(ts|tsx)$/)
-    ? {...rule, use: {loader: 'ts-loader', options: {compilerOptions: {module: 'esnext'}}}}
-    : rule
+    ? [
+        {...rule, exclude: [rule.exclude, rendererFile]},
+        {...rule, test: rendererFile, use: {loader: 'ts-loader', options: {compilerOptions: {module: 'esnext'}}}},
+      ]
+    : [rule]
 );
 
 // Helper function to resolve paths relative to the monorepo root

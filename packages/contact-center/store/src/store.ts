@@ -71,6 +71,7 @@ class Store implements IStore {
   isWellnessBreakEnabled = false;
   wellnessAgentSessionId = '';
   wellbeingBreakIdleCode?: IdleCode;
+  wellnessIdleCodeLookupPending = false;
   wellnessBreakState: WellnessBreakState = {phase: 'idle'};
   wellnessEventSequence = 0;
   legacyAgentState = '';
@@ -118,8 +119,20 @@ class Store implements IStore {
         // wire up logger into feature‐flag extraction
         this.featureFlags = getFeatureFlags(response);
         const isWellnessBreakEnabled = response.isWellnessBreakEnabled === true;
+        const registeredSessionId =
+          response.isAgentLoggedIn && 'agentSessionId' in response && typeof response.agentSessionId === 'string'
+            ? response.agentSessionId
+            : '';
         runInAction(() => {
           this.isWellnessBreakEnabled = isWellnessBreakEnabled;
+          this.wellnessIdleCodeLookupPending = isWellnessBreakEnabled && Boolean(response.isAgentLoggedIn);
+          if (this.wellnessAgentSessionId && this.wellnessAgentSessionId !== registeredSessionId) {
+            this.wellnessBreakState = {phase: 'idle'};
+            this.wellnessEventSequence += 1;
+          }
+          this.wellnessAgentSessionId = registeredSessionId;
+          this.legacyAuxCodeId = registeredSessionId ? response.lastStateAuxCodeId || '' : '';
+          this.legacyAgentState = this.legacyAuxCodeId ? (this.legacyAuxCodeId === '0' ? 'Available' : 'Idle') : '';
         });
         //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         this.teams = response.teams;
@@ -157,6 +170,7 @@ class Store implements IStore {
           if (!hasStateOwnedWellnessLifecycle) {
             runInAction(() => {
               this.wellbeingBreakIdleCode = undefined;
+              this.wellnessIdleCodeLookupPending = false;
               this.wellnessBreakState = {phase: 'idle'};
             });
           }
@@ -179,13 +193,19 @@ class Store implements IStore {
     if (!this.isWellnessBreakEnabled || !this.isAgentLoggedIn) {
       runInAction(() => {
         this.wellbeingBreakIdleCode = undefined;
+        this.wellnessIdleCodeLookupPending = false;
       });
       return;
     }
 
+    runInAction(() => {
+      this.wellnessIdleCodeLookupPending = true;
+    });
+
     if (!this.cc?.getWellbeingBreakIdleCode) {
       runInAction(() => {
         this.wellbeingBreakIdleCode = undefined;
+        this.wellnessIdleCodeLookupPending = false;
         this.wellnessBreakState = {phase: 'error', errorCode: 'SYSTEM_CODE_UNAVAILABLE'};
       });
       this.logger?.error('CC-Widgets: WellbeingBreak system code API is unavailable', {
@@ -200,6 +220,7 @@ class Store implements IStore {
       if (requestGeneration !== this.wellnessIdleCodeRequestGeneration) return;
 
       runInAction(() => {
+        this.wellnessIdleCodeLookupPending = false;
         if (this.isWellnessBreakEnabled && this.isAgentLoggedIn) {
           this.wellbeingBreakIdleCode = idleCode;
           if (this.wellnessBreakState.errorCode === 'SYSTEM_CODE_UNAVAILABLE') {
@@ -218,6 +239,7 @@ class Store implements IStore {
 
       runInAction(() => {
         this.wellbeingBreakIdleCode = undefined;
+        this.wellnessIdleCodeLookupPending = false;
         this.wellnessBreakState = {
           phase: 'error',
           errorCode: 'SYSTEM_CODE_UNAVAILABLE',

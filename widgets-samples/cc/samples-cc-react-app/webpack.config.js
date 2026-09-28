@@ -1,3 +1,4 @@
+const fs = require('fs');
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const {HotModuleReplacementPlugin, ProvidePlugin} = require('webpack');
@@ -20,6 +21,14 @@ const WELLNESS_LAZY_SRC = [
   resolveMonorepoRoot('packages/contact-center/ai-assistant/src/wellness'),
   resolveMonorepoRoot('packages/contact-center/cc-components/src/components/AIAssistant/WellnessBreak'),
 ];
+const contactCenterSdkRoot = process.env.WEBEX_CONTACT_CENTER_SDK_PATH;
+const contactCenterSdkEntry = contactCenterSdkRoot
+  ? path.resolve(contactCenterSdkRoot, 'packages/@webex/contact-center/dist/webex.js')
+  : undefined;
+
+if (contactCenterSdkEntry && !fs.existsSync(contactCenterSdkEntry)) {
+  throw new Error(`WEBEX_CONTACT_CENTER_SDK_PATH does not contain ${contactCenterSdkEntry}`);
+}
 
 module.exports = {
   mode: process.env.NODE_ENV || 'development',
@@ -56,6 +65,7 @@ module.exports = {
       '@webex/cc-components': path.resolve(__dirname, '../../../packages/contact-center/cc-components/src'),
       '@webex/cc-ui-logging': path.resolve(__dirname, '../../../packages/contact-center/ui-logging/src'),
       '@webex/cc-digital-channels': path.resolve(__dirname, '../../../packages/contact-center/cc-digital-channels/src'),
+      ...(contactCenterSdkEntry ? {'@webex/contact-center$': contactCenterSdkEntry} : {}),
       // Ensure single React instance across all packages
       react: resolveMonorepoRoot('node_modules/react'),
       'react-dom': resolveMonorepoRoot('node_modules/react-dom'),

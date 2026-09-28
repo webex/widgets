@@ -91,7 +91,7 @@ const WellnessBreakModal: React.FC<WellnessBreakModalProps> = ({
     let cancelled = false;
     if (reducedMotion || !animationData || !animationRef.current) return undefined;
 
-    void import('lottie-web')
+    void import(/* webpackChunkName: "lottie-web" */ 'lottie-web')
       .then(({default: lottie}) => {
         if (cancelled || !animationRef.current) return;
         const animation = lottie.loadAnimation({

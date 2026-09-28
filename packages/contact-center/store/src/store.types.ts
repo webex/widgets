@@ -314,6 +314,7 @@ interface IStore {
   isWellnessBreakEnabled: boolean;
   wellnessAgentSessionId: string;
   wellbeingBreakIdleCode?: IdleCode;
+  wellnessIdleCodeLookupPending: boolean;
   wellnessBreakState: WellnessBreakState;
   wellnessEventSequence: number;
   legacyAgentState: string;
