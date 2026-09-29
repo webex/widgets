@@ -66,6 +66,17 @@
   width: 100%;
 }
 
+#teams-dropdown {
+  --mdc-select-listbox-height: 15rem;
+
+  // Floating UI writes max-height/overflow inline on the popover content to fit the viewport,
+  // so the cap needs !important, and needs to stay below the space actually available.
+  &::part(popover-content) {
+    max-height: min(15rem, var(--mdc-popover-internal-available-height, 15rem)) !important;
+    overflow-y: auto;
+  }
+}
+
 .md-text-input-wrapper .md-text-input-container {
   border: 0.0625rem solid var(--mds-color-theme-outline-input-normal) !important;
 }
@@ -84,11 +95,11 @@
   fill: var(--color-theme-inverted-background-normal, #000);
   stroke-width: 0.0625rem;
   stroke: var(--color-theme-common-control-share-content-inactive, #707070);
-  filter: drop-shadow(0 1.5rem 3rem rgba(0, 0, 0, 0.20));
+  filter: drop-shadow(0 1.5rem 3rem rgba(0, 0, 0, 0.2));
 }
 
-
-mdc-select, mdc-input {
+mdc-select,
+mdc-input {
   padding-bottom: 1rem;
 }
 
@@ -102,7 +113,9 @@ mdc-select, mdc-input {
   border-color: transparent;
 
   /* Elevation/elevation-2 */
-  box-shadow: 0rem 0.25rem 0.5rem 0rem rgba(0, 0, 0, 0.16), 0rem 0rem 0.0625rem 0rem rgba(0, 0, 0, 0.16);
+  box-shadow:
+    0rem 0.25rem 0.5rem 0rem rgba(0, 0, 0, 0.16),
+    0rem 0rem 0.0625rem 0rem rgba(0, 0, 0, 0.16);
 }
 
 .dialog-modal-content {
@@ -112,5 +125,5 @@ mdc-select, mdc-input {
 }
 
 .error-text-color {
-  color: var(--color-theme-text-error-normal, #AB0A15);
+  color: var(--color-theme-text-error-normal, #ab0a15);
 }
