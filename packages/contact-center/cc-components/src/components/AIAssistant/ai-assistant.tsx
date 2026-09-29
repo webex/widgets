@@ -54,7 +54,14 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
     return `ai-assistant-header-${assistantHeaderSequence}`;
   });
   // Fullscreen is consumer-owned: we emit onFullScreenToggle; the host owns layout.
-  const rootClass = ['ai-assistant', className || ''].filter(Boolean).join(' ');
+  const wellnessOverlayPhase = wellness && isWellnessOverlayPhase(wellness.phase) ? wellness.phase : undefined;
+  const rootClass = [
+    'ai-assistant',
+    wellnessOverlayPhase && wellnessBreakOverlayTarget === 'assistant' && 'ai-assistant--wellness-overlay',
+    className,
+  ]
+    .filter(Boolean)
+    .join(' ');
   const panelClass = ['ai-assistant__panel', isFullScreen ? 'ai-assistant__panel--full-screen' : '']
     .filter(Boolean)
     .join(' ');
@@ -87,7 +94,6 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
       ['changing-to-break', 'waiting-for-safe-state', 'restoring'].includes(wellness.phase)
   );
   const showWellnessError = Boolean(wellness?.enabled && !wellness.contentCleared && wellness.phase === 'error');
-  const wellnessOverlayPhase = wellness && isWellnessOverlayPhase(wellness.phase) ? wellness.phase : undefined;
   const showWellnessOverlay = Boolean(wellnessOverlayPhase);
   const showWellnessContent = Boolean(
     showWellnessSuggestion ||

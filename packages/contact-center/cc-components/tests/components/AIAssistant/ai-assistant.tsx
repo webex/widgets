@@ -668,30 +668,35 @@ describe('AIAssistantComponent', () => {
     transformedHost.remove();
   });
 
-  it('can scope the wellness overlay to the assistant container', () => {
-    render(
-      <AIAssistantComponent
-        {...createProps({
-          wellnessBreakOverlayTarget: 'assistant',
-          wellness: {
-            enabled: true,
-            phase: 'playing',
-            requestAvailable: false,
-            hasBlockingTasks: false,
-            elapsedSeconds: 10,
-            reducedMotion: true,
-            onRequest: jest.fn(),
-            onAccept: jest.fn(),
-            onLater: jest.fn(),
-            onMediaError: jest.fn(),
-          },
-        })}
-      />
-    );
+  it('keeps an assistant-scoped overlay canvas while chrome is closed or minimized', () => {
+    const wellness = {
+      enabled: true,
+      phase: 'playing' as const,
+      requestAvailable: false,
+      hasBlockingTasks: false,
+      elapsedSeconds: 10,
+      reducedMotion: true,
+      onRequest: jest.fn(),
+      onAccept: jest.fn(),
+      onLater: jest.fn(),
+      onMediaError: jest.fn(),
+    };
+    const props = createProps({chrome: 'closed', wellnessBreakOverlayTarget: 'assistant', wellness});
+    const {rerender} = render(<AIAssistantComponent {...props} />);
 
+    const root = screen.getByTestId('ai-assistant:root');
     const overlay = screen.getByTestId('wellness-break:overlay');
+    expect(root).toHaveClass('ai-assistant--wellness-overlay');
     expect(overlay).toHaveClass('wellness-break-overlay--assistant');
-    expect(overlay.parentElement).toBe(screen.getByTestId('ai-assistant:root'));
+    expect(overlay.parentElement).toBe(root);
+
+    rerender(<AIAssistantComponent {...props} chrome="minimized" />);
+    expect(root).toHaveClass('ai-assistant--wellness-overlay');
+    expect(screen.getByTestId('wellness-break:overlay').parentElement).toBe(root);
+
+    rerender(<AIAssistantComponent {...props} wellness={{...wellness, phase: 'idle'}} />);
+    expect(root).not.toHaveClass('ai-assistant--wellness-overlay');
+    expect(screen.queryByTestId('wellness-break:overlay')).not.toBeInTheDocument();
   });
 
   it('can portal the wellness overlay into a custom container and restores its styles', () => {

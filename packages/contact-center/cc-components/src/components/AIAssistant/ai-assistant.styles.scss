@@ -10,6 +10,10 @@
   width: 100%;
 }
 
+.ai-assistant--wellness-overlay {
+  min-height: min(32rem, 90vh);
+}
+
 .ai-assistant__launcher {
   align-items: center;
   align-self: flex-start;

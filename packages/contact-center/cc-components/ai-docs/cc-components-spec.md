@@ -374,8 +374,9 @@ Each component is tested in isolation with React Testing Library: render from a 
 | `CC-COMPONENTS-R-027` | Match Desktop landing feature copy and icons exactly: `✨ Real-time Assist`, `🪷 Wellness breaks`, and `✍🏻 Smart summaries`, including their approved descriptions.                                                                                                                                                                                                                                                                                                                                                                                                                                          | `src/components/AIAssistant/ai-assistant-landing.tsx`, `src/components/AIAssistant/constants.ts`                                      | `tests/components/AIAssistant/ai-assistant.tsx`                                                     |
 
 The default viewport wellness overlay portals to `document.body` so transformed or clipped host
-containers cannot bound it. Assistant mode remains in the widget root; a custom target uses its
-provided element.
+containers cannot bound it. Assistant mode remains in the widget root, which keeps a panel-height
+canvas during an active overlay even when the assistant is closed or minimized. A custom target uses
+its provided element.
 
 See [`agent-wellness-break-intake.md`](../../../../ai-docs/features/agent-wellness-break-intake.md) for
 copy, timing, media provenance, and release gates.

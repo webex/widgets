@@ -149,7 +149,8 @@ its timer expires. Playback requires two continuous safe seconds; a task or unco
 the current settle timer.
 The overlay is supplied to `cc-components` independently of assistant chrome, so it remains visible while
 the launcher is closed or minimized. Its host-facing target defaults to the current viewport; React hosts
-may scope it to the assistant root or portal it into a supplied element. See
+may scope it to the assistant root, which expands to panel height during an active overlay, or portal it
+into a supplied element. See
 [`agent-wellness-break-intake.md`](../../../../ai-docs/features/agent-wellness-break-intake.md).
 
 ## Design Overview
