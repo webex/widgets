@@ -67,8 +67,6 @@
 }
 
 #teams-dropdown {
-  --mdc-select-listbox-height: 15rem;
-
   // Floating UI writes max-height/overflow inline on the popover content to fit the viewport,
   // so the cap needs !important, and needs to stay below the space actually available.
   &::part(popover-content) {
