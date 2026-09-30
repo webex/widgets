@@ -25,7 +25,9 @@ class EmitWellnessAssetsPlugin {
             const sourcePath = path.resolve(__dirname, 'src/wellness/assets', filename);
             compilation.emitAsset(
               `assets/wellness/${filename}`,
-              new compiler.webpack.sources.RawSource(fs.readFileSync(sourcePath))
+              new compiler.webpack.sources.RawSource(fs.readFileSync(sourcePath)),
+              // A consuming Webpack build must still recognize require.ensure's require callback.
+              {minimized: filename.endsWith('.cjs')}
             );
           }
         }
