@@ -17,10 +17,17 @@ const UserStateInternal: React.FunctionComponent<IUserStateProps> = observer(({o
     lastIdleCodeChangeTimestamp,
     customState,
     logger,
+    wellbeingBreakIdleCode,
+    wellnessIdleCodeLookupPending,
   } = store;
+  const isWellnessBreakState = Boolean(wellbeingBreakIdleCode && currentState === wellbeingBreakIdleCode.id);
+  const displayedIdleCodes =
+    isWellnessBreakState && wellbeingBreakIdleCode && !idleCodes.some(({id}) => id === wellbeingBreakIdleCode.id)
+      ? [...idleCodes, wellbeingBreakIdleCode]
+      : idleCodes;
   const props: UserStateComponentsProps = {
     ...useUserState({
-      idleCodes,
+      idleCodes: displayedIdleCodes,
       agentId,
       cc,
       currentState,
@@ -29,6 +36,8 @@ const UserStateInternal: React.FunctionComponent<IUserStateProps> = observer(({o
       logger,
       onStateChange,
       lastIdleCodeChangeTimestamp,
+      isCurrentStateExternallyManaged: isWellnessBreakState,
+      wellnessIdleCodeLookupPending,
     }),
     customState,
     logger,

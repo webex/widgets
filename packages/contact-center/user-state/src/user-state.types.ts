@@ -13,4 +13,9 @@ export type UseUserStateProps = Pick<
   | 'logger'
   | 'onStateChange'
   | 'lastIdleCodeChangeTimestamp'
->;
+> & {
+  /** True when an SDK-owned lifecycle, rather than the dropdown, changed the current state. */
+  isCurrentStateExternallyManaged?: boolean;
+  /** True until the SDK identifies the system-owned wellness idle code. */
+  wellnessIdleCodeLookupPending?: boolean;
+};

@@ -1,3 +1,4 @@
+const fs = require('fs');
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const {HotModuleReplacementPlugin, ProvidePlugin} = require('webpack');
@@ -8,6 +9,7 @@ const resolveMonorepoRoot = (...segments) => path.resolve(__dirname, '../../../'
 const PKG_SRC = [
   'packages/contact-center/store/src',
   'packages/contact-center/cc-widgets/src',
+  'packages/contact-center/ai-assistant/src',
   'packages/contact-center/station-login/src',
   'packages/contact-center/user-state/src',
   'packages/contact-center/task/src',
@@ -15,6 +17,14 @@ const PKG_SRC = [
   'packages/contact-center/ui-logging/src',
   'packages/contact-center/cc-digital-channels/src',
 ].map((p) => resolveMonorepoRoot(p));
+const contactCenterSdkRoot = process.env.WEBEX_CONTACT_CENTER_SDK_PATH;
+const contactCenterSdkEntry = contactCenterSdkRoot
+  ? path.resolve(contactCenterSdkRoot, 'packages/@webex/contact-center/dist/webex.js')
+  : undefined;
+
+if (contactCenterSdkEntry && !fs.existsSync(contactCenterSdkEntry)) {
+  throw new Error(`WEBEX_CONTACT_CENTER_SDK_PATH does not contain ${contactCenterSdkEntry}`);
+}
 
 module.exports = {
   mode: process.env.NODE_ENV || 'development',
@@ -44,12 +54,14 @@ module.exports = {
     alias: {
       '@webex/cc-store': path.resolve(__dirname, '../../../packages/contact-center/store/src'),
       '@webex/cc-widgets': path.resolve(__dirname, '../../../packages/contact-center/cc-widgets/src'),
+      '@webex/cc-ai-assistant': path.resolve(__dirname, '../../../packages/contact-center/ai-assistant/src'),
       '@webex/cc-station-login': path.resolve(__dirname, '../../../packages/contact-center/station-login/src'),
       '@webex/cc-user-state': path.resolve(__dirname, '../../../packages/contact-center/user-state/src'),
       '@webex/cc-task': path.resolve(__dirname, '../../../packages/contact-center/task/src'),
       '@webex/cc-components': path.resolve(__dirname, '../../../packages/contact-center/cc-components/src'),
       '@webex/cc-ui-logging': path.resolve(__dirname, '../../../packages/contact-center/ui-logging/src'),
       '@webex/cc-digital-channels': path.resolve(__dirname, '../../../packages/contact-center/cc-digital-channels/src'),
+      ...(contactCenterSdkEntry ? {'@webex/contact-center$': contactCenterSdkEntry} : {}),
       // Ensure single React instance across all packages
       react: resolveMonorepoRoot('node_modules/react'),
       'react-dom': resolveMonorepoRoot('node_modules/react-dom'),
@@ -127,6 +139,8 @@ module.exports = {
     path: path.resolve(__dirname, '../../../docs/samples-cc-react-app'), // Output directory
     filename: 'bundle.js', // Output bundle file name
     clean: true, // Clean dist folder before each build
+    publicPath: 'auto',
+    chunkFilename: 'assets/[name].[contenthash:8].js',
   },
   plugins: [
     new HtmlWebpackPlugin({

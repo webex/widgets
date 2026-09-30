@@ -12,7 +12,7 @@
 | Doc kind                                | Module spec                                                                   |
 | Coverage score                          | Pending coverage assessment                                                   |
 | Generated from                          | `module-spec` @ SDLC template library `0.1.0-draft`                           |
-| generated_by / approved_by / updated_at | generated_by: migration agent / approved_by: pending / updated_at: 2026-06-29 |
+| generated_by / approved_by / updated_at | generated_by: migration agent / approved_by: pending / updated_at: 2026-09-04 |
 | Validation status                       | not-run                                                                       |
 
 Coverage score: `Pending coverage assessment` before the first report; after assessment, replace with
@@ -48,7 +48,7 @@ Owns Contact Center client-side state and the SDK boundary: initialize/register 
 
 ## Stack
 
-TypeScript 5.6.3, MobX 6.13.5 (`makeAutoObservable`, `observable.ref`, `runInAction`). Consumed in React 18 via `mobx-react-lite` `observer()` in downstream packages (not a dependency of this package itself). SDK dependency `@webex/contact-center` 3.12.0-next.123. Tests: Jest 29 + ts compile (`tsc --project tsconfig.test.json && jest --coverage`). Build target: `dist/index.js` (Webpack). Evidence: `packages/contact-center/store/package.json`.
+TypeScript 5.6.3, MobX 6.13.5 (`makeAutoObservable`, `observable.ref`, `runInAction`). Consumed in React 18 via `mobx-react-lite` `observer()` in downstream packages (not a dependency of this package itself). SDK dependency `@webex/contact-center` 3.12.0-next.131. Tests: Jest 29 + ts compile (`tsc --project tsconfig.test.json && jest --coverage`). Build target: `dist/index.js` (Webpack). Evidence: `packages/contact-center/store/package.json`.
 
 ## Folder / Package Structure
 
@@ -90,10 +90,11 @@ Compatibility notes:
 
 - Adding a new observable getter or mutator is additive (minor). Removing/renaming an observable, mutator, or changing the `CC_EVENTS`/`TASK_EVENTS` enum values is breaking (major) — widgets and the SDK event stream depend on the exact string values.
 - The `CC_EVENTS` / `TASK_EVENTS` enums are locally declared until the SDK exports them (see `// TODO: remove this once cc sdk exports this enum`, `store.types.ts:247`). They must stay byte-identical to the SDK's emitted event strings.
+- Wellness constants and types come from the SDK package root. Do not add unpublished event or state-control surfaces to the store.
 
 ## Requires (dependencies)
 
-- `@webex/contact-center` SDK (pinned in `package.json` at `3.12.0-next.123`) — the entire CC runtime: `Webex.init()`, `webex.cc.*` methods, the CC/task event stream, agent `Profile`, `webex.credentials.getUserToken()`. Consumed ONLY through the store. Fallback on unavailability: `Store.init()` rejects after a 6000ms timeout (`src/store.ts:140-142`); the wrapper wraps the rejection and invokes `onErrorCallback('Store', err)` (`src/storeEventsWrapper.ts:442-452`).
+- `@webex/contact-center` SDK (pinned in `package.json` at `3.12.0-next.131`) — the entire CC runtime: `Webex.init()`, `webex.cc.*` methods, the CC/task event stream, agent `Profile`, `webex.credentials.getUserToken()`. Consumed ONLY through the store. Fallback on unavailability: `Store.init()` rejects after a 6000ms timeout (`src/store.ts:140-142`); the wrapper wraps the rejection and invokes `onErrorCallback('Store', err)` (`src/storeEventsWrapper.ts:442-452`).
 - `mobx` ^6.13.5 — observable state and `runInAction` for all mutations.
 - Internal: none upstream. The store is the lowest widget-layer dependency (`cc-components → widget packages → store → SDK`); it imports no widget package.
 
@@ -400,3 +401,26 @@ Unit tests are split by source file. `tests/store.ts` covers the singleton defau
 
 - Repo architecture: [`ARCHITECTURE.md`](../../../../ai-docs/ARCHITECTURE.md) · Registry: [`SPEC_INDEX.md`](../../../../ai-docs/SPEC_INDEX.md) · Contracts: [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md)
 - Coverage state & contracts baseline: `.sdd/manifest.json`
+
+## Agent Wellness Break addendum (WXCC-12423)
+
+| ID | Requirement | Source evidence | Test evidence |
+|---|---|---|---|
+| `STORE-R-032` | Project only the SDK's effective `Profile.isWellnessBreakEnabled`; never rebuild licensing or rollout rules from raw AI configuration. | `src/store.ts`, `src/util.ts` | `tests/wellness.ts` |
+| `STORE-R-033` | Own the active station `agentSessionId`, `WellbeingBreak` system-code lookup, and one stable public wellness listener. Accept valid current-agent wellness notifications regardless of their diagnostic notification `agentSessionId`. Model the public action contract exactly: `requestWellnessBreak()` accepts no arguments and `respondToWellnessBreak({action})` accepts no identity override because the SDK supplies its active registration and login/relogin context. Never log notification payloads. | `src/store.ts`, `src/storeEventsWrapper.ts`, `src/store.types.ts` | `tests/wellness.ts`, `tests/storeEventsWrapper.ts`, `packages/contact-center/ai-assistant/tests/wellness.orchestrator.ts` |
+| `STORE-R-034` | Logout, session rotation, and current-session multi-login close reset session-owned wellness state. Keep the registration-level wellness listener active across logout and relogin. Active lifecycle/restoration remains state-owned during feature revocation. | `src/storeEventsWrapper.ts`, `src/store.ts` | `tests/wellness.ts`, `tests/storeEventsWrapper.ts` |
+| `STORE-R-035` | Import the SDK's public wellness constants and types from the package root, project only legacy agent state, and ignore stale system-code lookup results after logout or feature revocation. All event and promise mutations use MobX actions. | `src/store.ts`, `src/storeEventsWrapper.ts`, `src/store.types.ts` | `tests/wellness.ts`, declaration-surface check |
+| `STORE-R-036` | Submit widgets behavioral events through `webex.internal.newMetrics` using explicit agent/target/verb taxonomy and flat bounded properties; missing or failed metrics transport is logged and never interrupts the wellness lifecycle. | `src/storeEventsWrapper.ts`, `src/store.types.ts` | `tests/wellness.ts` |
+| `STORE-R-037` | Project confirmed legacy `WellbeingBreak` state and backend timestamps through `currentState`, `legacyAgentState`, `legacyAuxCodeId`, `lastStateChangeTimestamp`, and `lastIdleCodeChangeTimestamp`, while keeping the system code out of ordinary idle-code choices.                                                                                                                               | `src/store.ts`, `src/storeEventsWrapper.ts`                       | `tests/wellness.ts`                                |
+
+On registration, the store reads the SDK-owned `Profile.agentSessionId` when present, derives the
+legacy Available/Idle state from `lastStateAuxCodeId`, and clears any stale session when the profile
+has no active session. This supports refresh recovery without using a notification's session ID.
+The store also marks system-code lookup pending until its current request settles so User State
+does not echo an unresolved system-owned state. Evidence: `src/store.ts`,
+`src/storeEventsWrapper.ts`, and `tests/wellness.ts`.
+
+The store consumes the existing public Wellness Break symbols from `@webex/contact-center` 3.12.0-next.131.
+The registration session projection requires the companion SDK change and a later published package.
+It does not consume an AI Assistant RTD status event. See
+[`agent-wellness-break-intake.md`](../../../../ai-docs/features/agent-wellness-break-intake.md).

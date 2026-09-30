@@ -39,6 +39,8 @@ reports/
 
 #Local stuff
 *.json
+!packages/contact-center/ai-assistant/src/wellness/assets/WellnessBreakAnimationDark.json
+!packages/contact-center/ai-assistant/src/wellness/assets/WellnessBreakAnimationLight.json
 !docs/changelog/logs/*.json
 !.sdd/manifest.json
 .env*

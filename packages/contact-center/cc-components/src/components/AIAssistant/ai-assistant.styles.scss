@@ -6,7 +6,12 @@
   flex-direction: column;
   font-family: var(--mds-font-family-primary, CiscoSans, 'Helvetica Neue', Arial, sans-serif);
   padding: 0.75rem 0.5rem;
+  position: relative;
   width: 100%;
+}
+
+.ai-assistant--wellness-overlay {
+  min-height: min(32rem, 90vh);
 }
 
 .ai-assistant__launcher {
@@ -108,6 +113,12 @@
 .ai-assistant__body--landing {
   overflow-y: auto;
   padding: 0;
+}
+
+.ai-assistant__body--wellness-suggestion {
+  isolation: isolate;
+  overflow: hidden;
+  position: relative;
 }
 
 .ai-assistant__landing {

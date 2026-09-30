@@ -1,4 +1,15 @@
-import type {RealTimeAssistPayload} from '@webex/cc-store';
+import type {
+  IdleCode,
+  ITask,
+  RealTimeAssistPayload,
+  WellnessBreakError,
+  WellnessBreakEvent,
+  WellnessBreakState,
+} from '@webex/cc-store';
+import type {WellnessBreakOverlayTarget} from '@webex/cc-components';
+
+export type {WellnessBreakError, WellnessBreakErrorCode, WellnessBreakPhase} from '@webex/cc-store';
+export type {WellnessBreakOverlayTarget} from '@webex/cc-components';
 
 /**
  * Public props for the `AIAssistant` widget.  All callbacks are optional —
@@ -19,6 +30,20 @@ export interface IAIAssistantProps {
   onRealTimeAssistReceived?: (payload: RealTimeAssistPayload) => void;
   /** Optional extra class applied to the widget root. */
   className?: string;
+  /** Fired for a valid backend-provided actionable offer. */
+  onWellnessBreakOffered?: (event: WellnessBreakEvent) => void;
+  /** Fired after the break request changes agent state and any required ACCEPTED action is delivered. */
+  onWellnessBreakAccepted?: (event: WellnessBreakEvent) => void;
+  /** Fired when the timed break begins playing. */
+  onWellnessBreakStarted?: () => void;
+  /** Fired after the timed break ends and state restoration succeeds. */
+  onWellnessBreakEnded?: () => void;
+  /** Fired with a stable, non-PII lifecycle error shape. */
+  onWellnessBreakError?: (error: WellnessBreakError) => void;
+  /** Optional host/CDN audio URL. Defaults to the packaged wellness audio asset. */
+  wellnessAudioUrl?: string;
+  /** Controls whether the break covers the viewport, assistant root, or a host element. */
+  wellnessBreakOverlayTarget?: WellnessBreakOverlayTarget;
 }
 
 export interface UseAiAssistantInput extends IAIAssistantProps {
@@ -39,3 +64,27 @@ export type UseRealTimeAssistInput = Pick<
 >;
 
 export type UserMessage = {id: string; text: string; sentAt: number};
+
+/** @internal */
+export interface UseWellnessBreakInput
+  extends Pick<
+    IAIAssistantProps,
+    | 'onWellnessBreakOffered'
+    | 'onWellnessBreakAccepted'
+    | 'onWellnessBreakStarted'
+    | 'onWellnessBreakEnded'
+    | 'onWellnessBreakError'
+    | 'wellnessAudioUrl'
+  > {
+  enabled: boolean;
+  isLoggedIn: boolean;
+  agentId: string;
+  agentSessionId: string;
+  wellbeingBreakIdleCode?: IdleCode;
+  wellnessBreakState: WellnessBreakState;
+  wellnessEventSequence: number;
+  legacyAgentState: string;
+  legacyAuxCodeId: string;
+  taskList: Record<string, ITask>;
+  theme: string;
+}

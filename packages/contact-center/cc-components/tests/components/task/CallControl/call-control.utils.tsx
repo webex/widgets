@@ -886,7 +886,7 @@ describe('CallControl Utils', () => {
   describe('applyWxAppTelephonyControlVisibility', () => {
     const wxAppTask = {
       getWebexCallingCallId: () => 'call-123',
-    } as ITask;
+    } as unknown as ITask;
 
     const baseButtons = buildCallControlButtons(
       false,

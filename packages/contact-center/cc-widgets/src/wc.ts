@@ -74,6 +74,13 @@ const WebAIAssistant = r2wc(AIAssistant, {
     onClose: 'function',
     onFullScreenToggle: 'function',
     onRealTimeAssistReceived: 'function',
+    onWellnessBreakOffered: 'function',
+    onWellnessBreakAccepted: 'function',
+    onWellnessBreakStarted: 'function',
+    onWellnessBreakEnded: 'function',
+    onWellnessBreakError: 'function',
+    wellnessAudioUrl: 'string',
+    wellnessBreakOverlayTarget: 'string',
     className: 'string',
   },
 });

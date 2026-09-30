@@ -28,7 +28,7 @@
     "clean": "rm -rf dist && rm -rf node_modules",
     "clean:dist": "rm -rf dist",
     "build": "yarn run -T tsc",
-    "build:src": "yarn run clean:dist && webpack",
+    "build:src": "yarn workspace @webex/cc-ai-assistant build:src && yarn run clean:dist && webpack",
     "build:watch": "webpack --watch",
     "test:unit": "NODE_ENV=test jest --coverage",
     "test:styles": "eslint",

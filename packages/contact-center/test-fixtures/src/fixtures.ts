@@ -69,6 +69,7 @@ const mockProfile: Profile = {
   lostConnectionRecoveryTimeout: 30000,
   maskSensitiveData: false,
   isAgentLoggedIn: true,
+  isWellnessBreakEnabled: false,
   lastStateAuxCodeId: 'auxCodeId',
   lastStateChangeTimestamp: 123456789,
   lastIdleCodeChangeTimestamp: 123456789,
@@ -621,6 +622,12 @@ const mockCC: IContactCenter = {
   getEntryPoints: jest.fn().mockResolvedValue(mockEntryPointsResponse),
   addressBook: mockAddressBook,
   setAgentState: jest.fn().mockResolvedValue({}),
+  getWellbeingBreakIdleCode: jest.fn().mockResolvedValue({
+    id: 'wellbeing-break',
+    name: 'WellbeingBreak',
+    isSystem: true,
+    isDefault: false,
+  }),
   getOutdialAniEntries: jest.fn().mockResolvedValue({entries: []}),
   getAccessToken: jest.fn().mockResolvedValue('mock-access-token'),
   startOutdial: jest.fn().mockResolvedValue({}),
@@ -630,6 +637,8 @@ const mockCC: IContactCenter = {
   apiAIAssistant: {
     getRealTimeAssistance: jest.fn().mockResolvedValue({}),
     sendRealTimeAssistanceUserAction: jest.fn().mockResolvedValue({}),
+    requestWellnessBreak: jest.fn().mockResolvedValue(undefined),
+    respondToWellnessBreak: jest.fn().mockResolvedValue(undefined),
   },
 };
 

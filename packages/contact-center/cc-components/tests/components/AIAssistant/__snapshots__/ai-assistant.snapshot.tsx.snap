@@ -23,22 +23,46 @@ exports[`AIAssistantComponent snapshots matches a full-screen RealTimeAssist con
         </mdc-text>
         <div
           class="ai-assistant__header-actions"
+          data-testid="ai-assistant:header-actions"
         >
+          <mdc-button
+            aria-label="Clear"
+            data-testid="ai-assistant:header-clear"
+            id="ai-assistant-header-5-clear"
+            prefix-icon="clean-up-bold"
+          />
+          <mdc-tooltip
+            data-testid="ai-assistant:header-clear-tooltip"
+          >
+            Clear
+          </mdc-tooltip>
           <mdc-button
             aria-label="Minimize"
             data-testid="ai-assistant:header-minimize"
+            id="ai-assistant-header-5-minimize"
             prefix-icon="minimize-bold"
           />
+          <mdc-tooltip>
+            Minimize
+          </mdc-tooltip>
           <mdc-button
             aria-label="Exit full screen"
             data-testid="ai-assistant:header-fullscreen"
+            id="ai-assistant-header-5-fullscreen"
             prefix-icon="fullscreen-exit-bold"
           />
+          <mdc-tooltip>
+            Exit full screen
+          </mdc-tooltip>
           <mdc-button
             aria-label="Close"
             data-testid="ai-assistant:header-close"
+            id="ai-assistant-header-5-close"
             prefix-icon="cancel-bold"
           />
+          <mdc-tooltip>
+            Close
+          </mdc-tooltip>
         </div>
       </header>
       <div
@@ -394,22 +418,46 @@ exports[`AIAssistantComponent snapshots matches the AI features landing state 1`
         </mdc-text>
         <div
           class="ai-assistant__header-actions"
+          data-testid="ai-assistant:header-actions"
         >
+          <mdc-button
+            aria-label="Clear"
+            data-testid="ai-assistant:header-clear"
+            id="ai-assistant-header-4-clear"
+            prefix-icon="clean-up-bold"
+          />
+          <mdc-tooltip
+            data-testid="ai-assistant:header-clear-tooltip"
+          >
+            Clear
+          </mdc-tooltip>
           <mdc-button
             aria-label="Minimize"
             data-testid="ai-assistant:header-minimize"
+            id="ai-assistant-header-4-minimize"
             prefix-icon="minimize-bold"
           />
+          <mdc-tooltip>
+            Minimize
+          </mdc-tooltip>
           <mdc-button
             aria-label="Full screen"
             data-testid="ai-assistant:header-fullscreen"
+            id="ai-assistant-header-4-fullscreen"
             prefix-icon="fullscreen-bold"
           />
+          <mdc-tooltip>
+            Full screen
+          </mdc-tooltip>
           <mdc-button
             aria-label="Close"
             data-testid="ai-assistant:header-close"
+            id="ai-assistant-header-4-close"
             prefix-icon="cancel-bold"
           />
+          <mdc-tooltip>
+            Close
+          </mdc-tooltip>
         </div>
       </header>
       <div
@@ -764,13 +812,21 @@ exports[`AIAssistantComponent snapshots matches the minimized shared chrome 1`] 
           <mdc-button
             aria-label="Restore"
             data-testid="ai-assistant:minimized-restore"
+            id="ai-assistant-header-2-restore"
             prefix-icon="arrow-up-bold"
           />
+          <mdc-tooltip>
+            Restore
+          </mdc-tooltip>
           <mdc-button
             aria-label="Close"
             data-testid="ai-assistant:minimized-close"
+            id="ai-assistant-header-2-minimized-close"
             prefix-icon="cancel-bold"
           />
+          <mdc-tooltip>
+            Close
+          </mdc-tooltip>
         </div>
       </div>
     </div>
@@ -801,22 +857,46 @@ exports[`AIAssistantComponent snapshots matches the open RealTimeAssist empty st
         </mdc-text>
         <div
           class="ai-assistant__header-actions"
+          data-testid="ai-assistant:header-actions"
         >
+          <mdc-button
+            aria-label="Clear"
+            data-testid="ai-assistant:header-clear"
+            id="ai-assistant-header-3-clear"
+            prefix-icon="clean-up-bold"
+          />
+          <mdc-tooltip
+            data-testid="ai-assistant:header-clear-tooltip"
+          >
+            Clear
+          </mdc-tooltip>
           <mdc-button
             aria-label="Minimize"
             data-testid="ai-assistant:header-minimize"
+            id="ai-assistant-header-3-minimize"
             prefix-icon="minimize-bold"
           />
+          <mdc-tooltip>
+            Minimize
+          </mdc-tooltip>
           <mdc-button
             aria-label="Full screen"
             data-testid="ai-assistant:header-fullscreen"
+            id="ai-assistant-header-3-fullscreen"
             prefix-icon="fullscreen-bold"
           />
+          <mdc-tooltip>
+            Full screen
+          </mdc-tooltip>
           <mdc-button
             aria-label="Close"
             data-testid="ai-assistant:header-close"
+            id="ai-assistant-header-3-close"
             prefix-icon="cancel-bold"
           />
+          <mdc-tooltip>
+            Close
+          </mdc-tooltip>
         </div>
       </header>
       <div

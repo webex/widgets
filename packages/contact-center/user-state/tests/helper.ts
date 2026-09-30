@@ -316,6 +316,117 @@ describe('useUserState Hook', () => {
     });
   });
 
+  it('does not echo externally managed wellness state transitions back to the SDK', async () => {
+    const wellnessIdleCodes = [
+      ...idleCodes,
+      {id: 'wellness', name: 'WellbeingBreak', isSystem: true, isDefault: false},
+    ];
+    const {rerender} = renderHook(
+      ({currentState, isCurrentStateExternallyManaged, lastStateChangeTimestamp}) =>
+        useUserState({
+          idleCodes: wellnessIdleCodes,
+          agentId,
+          cc: mockCC,
+          currentState,
+          customState: null,
+          lastStateChangeTimestamp,
+          lastIdleCodeChangeTimestamp: lastStateChangeTimestamp,
+          isCurrentStateExternallyManaged,
+          logger,
+          onStateChange,
+        }),
+      {
+        initialProps: {
+          currentState: '1',
+          isCurrentStateExternallyManaged: false,
+          lastStateChangeTimestamp: 1_000,
+        },
+      }
+    );
+
+    rerender({
+      currentState: 'wellness',
+      isCurrentStateExternallyManaged: true,
+      lastStateChangeTimestamp: 2_000,
+    });
+    rerender({
+      currentState: '1',
+      isCurrentStateExternallyManaged: false,
+      lastStateChangeTimestamp: 3_000,
+    });
+
+    await waitFor(() => expect(onStateChange).toHaveBeenCalledWith(expect.objectContaining({name: 'WellbeingBreak'})));
+    expect(mockCC.setAgentState).not.toHaveBeenCalled();
+    expect(workerMock.postMessage).toHaveBeenCalledWith({type: 'reset', startTime: 2_000});
+    expect(workerMock.postMessage).toHaveBeenCalledWith({type: 'reset', startTime: 3_000});
+  });
+
+  it('waits for wellness-code resolution before sending a state change', async () => {
+    const wellnessIdleCodes = [
+      ...idleCodes,
+      {id: 'wellness', name: 'WellbeingBreak', isSystem: true, isDefault: false},
+    ];
+    const {rerender} = renderHook(
+      ({currentState, wellnessIdleCodeLookupPending, isCurrentStateExternallyManaged}) =>
+        useUserState({
+          idleCodes: wellnessIdleCodes,
+          agentId,
+          cc: mockCC,
+          currentState,
+          customState: null,
+          lastStateChangeTimestamp: 1_000,
+          lastIdleCodeChangeTimestamp: 1_000,
+          wellnessIdleCodeLookupPending,
+          isCurrentStateExternallyManaged,
+          logger,
+          onStateChange,
+        }),
+      {
+        initialProps: {
+          currentState: '1',
+          wellnessIdleCodeLookupPending: true,
+          isCurrentStateExternallyManaged: false,
+        },
+      }
+    );
+
+    rerender({currentState: 'wellness', wellnessIdleCodeLookupPending: true, isCurrentStateExternallyManaged: false});
+    expect(mockCC.setAgentState).not.toHaveBeenCalled();
+
+    rerender({currentState: 'wellness', wellnessIdleCodeLookupPending: false, isCurrentStateExternallyManaged: true});
+    rerender({currentState: '1', wellnessIdleCodeLookupPending: false, isCurrentStateExternallyManaged: false});
+    expect(mockCC.setAgentState).not.toHaveBeenCalled();
+
+    rerender({currentState: '2', wellnessIdleCodeLookupPending: false, isCurrentStateExternallyManaged: false});
+    await waitFor(() => expect(mockCC.setAgentState).toHaveBeenCalledWith(expect.objectContaining({auxCodeId: '2'})));
+  });
+
+  it('sends an explicit user selection after wellness-code lookup completes', async () => {
+    const {result, rerender} = renderHook(
+      ({currentState, wellnessIdleCodeLookupPending}) =>
+        useUserState({
+          idleCodes,
+          agentId,
+          cc: mockCC,
+          currentState,
+          customState: null,
+          lastStateChangeTimestamp: 1_000,
+          lastIdleCodeChangeTimestamp: 1_000,
+          wellnessIdleCodeLookupPending,
+          logger,
+          onStateChange,
+        }),
+      {initialProps: {currentState: '1', wellnessIdleCodeLookupPending: true}}
+    );
+
+    act(() => result.current.setAgentStatus('2'));
+    rerender({currentState: '2', wellnessIdleCodeLookupPending: true});
+    expect(mockCC.setAgentState).not.toHaveBeenCalled();
+
+    rerender({currentState: '2', wellnessIdleCodeLookupPending: false});
+    await waitFor(() => expect(mockCC.setAgentState).toHaveBeenCalledWith(expect.objectContaining({auxCodeId: '2'})));
+  });
+
   it('should handle errors from setAgentState and revert state', async () => {
     ccSetAgentStateSpy.mockRejectedValueOnce(new Error('Error setting agent status'));
     const {rerender} = renderHook(

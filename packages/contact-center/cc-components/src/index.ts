@@ -11,6 +11,11 @@ import CampaignTaskComponent from './components/task/CampaignTask/campaign-task'
 import RealTimeTranscriptComponent from './components/task/RealTimeTranscript/real-time-transcript';
 import E911Modal from './components/StationLogin/E911Modal/e911-modal';
 import AIAssistantComponent from './components/AIAssistant/ai-assistant';
+import WellnessBreakError from './components/AIAssistant/WellnessBreak/wellness-break-error';
+import WellnessBreakModal from './components/AIAssistant/WellnessBreak/wellness-break-modal';
+import WellnessBreakOfferCard from './components/AIAssistant/WellnessBreak/wellness-break-offer-card';
+import WellnessBreakOfferToast from './components/AIAssistant/WellnessBreak/wellness-break-offer-toast';
+import WellnessBreakRequestCard from './components/AIAssistant/WellnessBreak/wellness-break-request-card';
 import TelephonyActionToast from './components/task/TelephonyActionToast/telephony-action-toast';
 import WxAppOfferActionError from './components/task/WxAppOfferActionError/wxapp-offer-action-error';
 
@@ -28,6 +33,11 @@ export {
   RealTimeTranscriptComponent,
   E911Modal,
   AIAssistantComponent,
+  WellnessBreakRequestCard,
+  WellnessBreakOfferCard,
+  WellnessBreakOfferToast,
+  WellnessBreakModal,
+  WellnessBreakError,
   TelephonyActionToast,
   WxAppOfferActionError,
 };

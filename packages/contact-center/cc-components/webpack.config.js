@@ -23,7 +23,7 @@ module.exports = mergeWithCustomize({
     path: path.resolve(__dirname, 'dist'),
     filename: '[name].js',
     libraryTarget: 'commonjs2',
-    publicPath: '',
+    publicPath: 'auto',
   },
   externals: {
     react: 'react',
