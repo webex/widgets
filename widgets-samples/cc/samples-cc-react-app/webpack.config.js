@@ -17,10 +17,6 @@ const PKG_SRC = [
   'packages/contact-center/ui-logging/src',
   'packages/contact-center/cc-digital-channels/src',
 ].map((p) => resolveMonorepoRoot(p));
-const WELLNESS_LAZY_SRC = [
-  resolveMonorepoRoot('packages/contact-center/ai-assistant/src/wellness'),
-  resolveMonorepoRoot('packages/contact-center/cc-components/src/components/AIAssistant/WellnessBreak'),
-];
 const contactCenterSdkRoot = process.env.WEBEX_CONTACT_CENTER_SDK_PATH;
 const contactCenterSdkEntry = contactCenterSdkRoot
   ? path.resolve(contactCenterSdkRoot, 'packages/@webex/contact-center/dist/webex.js')
@@ -83,27 +79,9 @@ module.exports = {
       {
         test: /\.[jt]sx?$/,
         include: [path.resolve(__dirname, 'src'), ...PKG_SRC, resolveMonorepoRoot('node_modules/xxh3-ts')],
-        exclude: WELLNESS_LAZY_SRC,
         loader: 'ts-loader',
         options: {
           transpileOnly: true, // ✅ disables type-checking
-        },
-      },
-      {
-        test: /\.[jt]sx?$/,
-        include: WELLNESS_LAZY_SRC,
-        loader: 'ts-loader',
-        options: {
-          transpileOnly: true,
-          // Preserve only the wellness imports that intentionally split media.
-          compilerOptions: {module: 'esnext', moduleResolution: 'bundler'},
-        },
-      },
-      {
-        test: /WellnessBreakSound\.mp3$/,
-        type: 'asset/resource',
-        generator: {
-          filename: 'assets/wellness/[name][ext]',
         },
       },
       {
@@ -162,7 +140,7 @@ module.exports = {
     filename: 'bundle.js', // Output bundle file name
     clean: true, // Clean dist folder before each build
     publicPath: 'auto',
-    chunkFilename: 'assets/wellness/[name].[contenthash:8].js',
+    chunkFilename: 'assets/[name].[contenthash:8].js',
   },
   plugins: [
     new HtmlWebpackPlugin({

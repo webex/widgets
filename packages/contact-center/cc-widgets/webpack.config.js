@@ -3,21 +3,6 @@ const path = require('path');
 
 const baseConfig = require('../../../webpack.config');
 
-class CopyDirectoryPlugin {
-  constructor(source, destination) {
-    this.source = source;
-    this.destination = destination;
-  }
-
-  apply(compiler) {
-    compiler.hooks.afterEmit.tap('CopyDirectoryPlugin', () => {
-      if (require('fs').existsSync(this.source)) {
-        require('fs').cpSync(this.source, this.destination, {recursive: true});
-      }
-    });
-  }
-}
-
 // Helper function to resolve paths relative to the monorepo root
 const resolveMonorepoRoot = (...segments) => path.resolve(__dirname, '../../../', ...segments);
 
@@ -49,6 +34,7 @@ module.exports = merge(baseConfig, {
     'react/jsx-runtime': 'react/jsx-runtime',
     'react/jsx-dev-runtime': 'react/jsx-dev-runtime',
     '@webex/cc-store': '@webex/cc-store',
+    '@webex/cc-ai-assistant': 'commonjs @webex/cc-ai-assistant',
     '@momentum-ui/react-collaboration': '@momentum-ui/react-collaboration',
     '@momentum-ui/web-components': '@momentum-ui/web-components',
   },
@@ -101,10 +87,4 @@ module.exports = merge(baseConfig, {
       },
     ],
   },
-  plugins: [
-    new CopyDirectoryPlugin(
-      path.resolve(__dirname, '../ai-assistant/dist/assets/wellness'),
-      path.resolve(__dirname, 'dist/assets/wellness')
-    ),
-  ],
 });

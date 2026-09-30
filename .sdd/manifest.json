@@ -50,7 +50,7 @@
       "package": "@webex/cc-widgets",
       "path": "packages/contact-center/cc-widgets",
       "spec": "packages/contact-center/cc-widgets/ai-docs/cc-widgets-spec.md",
-      "responsibility": "r2wc Web Component wrappers aggregating widget packages for framework-agnostic consumption.",
+      "responsibility": "React widget aggregate and r2wc Web Component wrappers for framework-agnostic consumption.",
       "coverageState": "DRAFT",
       "tier": 1
     },

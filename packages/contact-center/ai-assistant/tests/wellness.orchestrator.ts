@@ -3,6 +3,11 @@ import type {UseWellnessBreakInput} from '../src/ai-assistant.types';
 import {useWellnessBreak, WELLNESS_OFFER_TIMEOUT_MS, WELLNESS_RECOVERY_KEY} from '../src/wellness/useWellnessBreak';
 import store from '@webex/cc-store';
 
+jest.mock('../src/wellness/assets/media.cjs', () => ({
+  loadWellnessSoundUrl: jest.fn().mockResolvedValue('/wellness.mp3'),
+  loadWellnessAnimationData: jest.fn().mockResolvedValue({}),
+}));
+
 jest.mock('@webex/cc-store', () => ({
   __esModule: true,
   WELLNESS_BREAK_NOTIFICATION_ACTIONS: {

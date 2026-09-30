@@ -17,6 +17,7 @@ import {
   parseWellnessRecoveryMarker,
 } from './wellness.utils';
 import {logWellnessMetric, WELLNESS_METRIC} from './wellness.metrics';
+import {loadWellnessAnimationData, loadWellnessSoundUrl} from './assets/media.cjs';
 
 export const WELLNESS_OFFER_TIMEOUT_MS = 5 * 60 * 1000;
 export const WELLNESS_STATE_SETTLE_MS = 2 * 1000;
@@ -393,7 +394,7 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
     const mediaOperation = mediaOperationRef.current;
     const audioUrlPromise = latest.wellnessAudioUrl
       ? Promise.resolve(latest.wellnessAudioUrl)
-      : import('./assets/WellnessBreakSound.mp3').then((asset) => asset.default);
+      : loadWellnessSoundUrl();
     const audioLoadPromise = audioUrlPromise
       .then((audioUrl) => {
         if (mediaOperation !== mediaOperationRef.current) return undefined;
@@ -419,10 +420,10 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
     const latest = latestRef.current;
     const mediaOperation = mediaOperationRef.current;
     try {
-      const animation = normalizeWellnessState(capturedRef.current?.theme || latest.theme).includes('dark')
-        ? await import('./assets/WellnessBreakAnimationDark.json')
-        : await import('./assets/WellnessBreakAnimationLight.json');
-      if (mediaOperation === mediaOperationRef.current) setAnimationData(animation.default);
+      const animation = await loadWellnessAnimationData(
+        normalizeWellnessState(capturedRef.current?.theme || latest.theme).includes('dark') ? 'dark' : 'light'
+      );
+      if (mediaOperation === mediaOperationRef.current) setAnimationData(animation);
     } catch {
       reportError('MEDIA_UNAVAILABLE', phaseRef.current, true, false);
     }

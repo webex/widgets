@@ -1,8 +1,9 @@
 import type {AnimationConfigWithData} from 'lottie-web';
 import type {WellnessAnimationLoader} from '@webex/cc-components';
+import {loadLottie} from './assets/media.cjs';
 
 export const loadWellnessAnimation: WellnessAnimationLoader = async (container, animationData) => {
-  const {default: lottie} = await import(/* webpackChunkName: "lottie-web" */ 'lottie-web');
+  const lottie = await loadLottie();
   return lottie.loadAnimation({
     container,
     renderer: 'svg',
