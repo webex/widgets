@@ -392,9 +392,7 @@ export const useWellnessBreak = (input: UseWellnessBreakInput): WellnessBreakVie
 
     const latest = latestRef.current;
     const mediaOperation = mediaOperationRef.current;
-    const audioUrlPromise = latest.wellnessAudioUrl
-      ? Promise.resolve(latest.wellnessAudioUrl)
-      : loadWellnessSoundUrl();
+    const audioUrlPromise = latest.wellnessAudioUrl ? Promise.resolve(latest.wellnessAudioUrl) : loadWellnessSoundUrl();
     const audioLoadPromise = audioUrlPromise
       .then((audioUrl) => {
         if (mediaOperation !== mediaOperationRef.current) return undefined;

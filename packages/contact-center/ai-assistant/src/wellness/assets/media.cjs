@@ -1,7 +1,6 @@
 // Keep these CommonJS requests visible to the consuming Webpack build. The
 // assistant's package build leaves this file alongside its published assets.
-exports.loadWellnessSoundUrl = () =>
-  Promise.resolve(require('!!./emit-wellness-asset.cjs!./WellnessBreakSound.mp3'));
+exports.loadWellnessSoundUrl = () => Promise.resolve(require('!!./emit-wellness-asset.cjs!./WellnessBreakSound.mp3'));
 
 exports.loadWellnessAnimationData = (theme) =>
   new Promise((resolve, reject) => {
@@ -24,10 +23,5 @@ exports.loadWellnessAnimationData = (theme) =>
 
 exports.loadLottie = () =>
   new Promise((resolve, reject) => {
-    require.ensure(
-      [],
-      (require) => resolve(require('lottie-web')),
-      reject,
-      'lottie-web'
-    );
+    require.ensure([], (require) => resolve(require('lottie-web')), reject, 'lottie-web');
   });
