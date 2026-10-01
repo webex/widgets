@@ -1,7 +1,12 @@
 import React from 'react';
 import {fireEvent, render, waitFor} from '@testing-library/react';
 import CallControlCADComponent from '../../../../src/components/task/CallControlCAD/call-control-cad';
-import {CallControlComponentProps, TARGET_TYPE, OUTBOUND_TYPE} from '../../../../src/components/task/task.types';
+import {
+  CallControlComponentProps,
+  CallAssociatedDataMap,
+  TARGET_TYPE,
+  OUTBOUND_TYPE,
+} from '../../../../src/components/task/task.types';
 import {
   mockTask,
   createEnabledMainTaskUIControls,
@@ -900,6 +905,147 @@ describe('CallControlCADComponent', () => {
       );
 
       expect(screen.queryByTestId('call-control:participants-trigger')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('global variable accumulation (CAI-8143)', () => {
+    const makePropsWithCallAssociatedData = (cad: CallAssociatedDataMap): CallControlComponentProps => ({
+      ...defaultProps,
+      currentTask: {
+        ...defaultProps.currentTask,
+        data: {
+          ...defaultProps.currentTask.data,
+          interaction: {
+            ...defaultProps.currentTask.data.interaction,
+            callAssociatedData: cad,
+          } as typeof defaultProps.currentTask.data.interaction & {callAssociatedData: CallAssociatedDataMap},
+        },
+      },
+    });
+
+    it('should accumulate global variables across re-renders', () => {
+      const firstPayload: CallAssociatedDataMap = {
+        Global_Language: {
+          name: 'Global_Language',
+          displayName: 'Customer Language',
+          value: 'English',
+          type: 'STRING',
+          agentEditable: false,
+          agentViewable: true,
+          global: true,
+          isSecure: false,
+          secureKeyId: '',
+          secureKeyVersion: 0,
+        },
+      };
+
+      const secondPayload: CallAssociatedDataMap = {
+        Global_FeedbackSurveyOptIn: {
+          name: 'Global_FeedbackSurveyOptIn',
+          displayName: 'Post Call Survey Opt-in',
+          value: 'true',
+          type: 'STRING',
+          agentEditable: false,
+          agentViewable: true,
+          global: true,
+          isSecure: false,
+          secureKeyId: '',
+          secureKeyVersion: 0,
+        },
+      };
+
+      // First render with only Global_Language
+      const screen = render(<CallControlCADComponent {...makePropsWithCallAssociatedData(firstPayload)} />);
+      expect(screen.getByText('Customer Language:')).toBeInTheDocument();
+      expect(screen.getByText('English')).toBeInTheDocument();
+
+      // Re-render with only Global_FeedbackSurveyOptIn (simulating a new websocket payload)
+      screen.rerender(<CallControlCADComponent {...makePropsWithCallAssociatedData(secondPayload)} />);
+
+      // Both variables should now be visible (merged, not replaced)
+      expect(screen.getByText('Customer Language:')).toBeInTheDocument();
+      expect(screen.getByText('English')).toBeInTheDocument();
+      expect(screen.getByText('Post Call Survey Opt-in:')).toBeInTheDocument();
+      expect(screen.getByText('true')).toBeInTheDocument();
+    });
+
+    it('should update existing variable values when re-rendered with new data', () => {
+      const initialPayload: CallAssociatedDataMap = {
+        Global_Language: {
+          name: 'Global_Language',
+          displayName: 'Customer Language',
+          value: 'English',
+          type: 'STRING',
+          agentEditable: false,
+          agentViewable: true,
+          global: true,
+          isSecure: false,
+          secureKeyId: '',
+          secureKeyVersion: 0,
+        },
+      };
+
+      const updatedPayload: CallAssociatedDataMap = {
+        Global_Language: {
+          name: 'Global_Language',
+          displayName: 'Customer Language',
+          value: 'Spanish',
+          type: 'STRING',
+          agentEditable: false,
+          agentViewable: true,
+          global: true,
+          isSecure: false,
+          secureKeyId: '',
+          secureKeyVersion: 0,
+        },
+      };
+
+      const screen = render(<CallControlCADComponent {...makePropsWithCallAssociatedData(initialPayload)} />);
+      expect(screen.getByText('English')).toBeInTheDocument();
+
+      // Re-render with updated value for the same variable
+      screen.rerender(<CallControlCADComponent {...makePropsWithCallAssociatedData(updatedPayload)} />);
+      expect(screen.getByText('Spanish')).toBeInTheDocument();
+      expect(screen.queryByText('English')).not.toBeInTheDocument();
+    });
+
+    it('should reset global variables when interaction changes', () => {
+      const payload: CallAssociatedDataMap = {
+        Global_Language: {
+          name: 'Global_Language',
+          displayName: 'Customer Language',
+          value: 'English',
+          type: 'STRING',
+          agentEditable: false,
+          agentViewable: true,
+          global: true,
+          isSecure: false,
+          secureKeyId: '',
+          secureKeyVersion: 0,
+        },
+      };
+
+      const screen = render(<CallControlCADComponent {...makePropsWithCallAssociatedData(payload)} />);
+      expect(screen.getByText('Customer Language:')).toBeInTheDocument();
+
+      // Re-render with a different interaction ID and no global variables
+      const newInteractionProps = {
+        ...defaultProps,
+        currentTask: {
+          ...defaultProps.currentTask,
+          data: {
+            ...defaultProps.currentTask.data,
+            interaction: {
+              ...defaultProps.currentTask.data.interaction,
+              interactionId: 'new-interaction-456',
+            },
+          },
+        },
+      };
+      screen.rerender(<CallControlCADComponent {...newInteractionProps} />);
+
+      // Old variables should be cleared for the new interaction
+      expect(screen.queryByText('Customer Language:')).not.toBeInTheDocument();
     });
   });
 });
