@@ -116,7 +116,7 @@ class Store implements IStore {
           module: 'cc-store#store.ts',
           method: 'registerCC',
         });
-        // wire up logger into feature‐flag extraction
+        // wire up logger into feature‐flag extraction.
         this.featureFlags = getFeatureFlags(response);
         const isWellnessBreakEnabled = response.isWellnessBreakEnabled === true;
         const registeredSessionId =
