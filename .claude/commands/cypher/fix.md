@@ -1,3 +1,8 @@
+---
+description: Stage 3 of bug-fix pipeline - implement fixes for triaged bugs, create PRs, poll review feedback
+argument-hint: "[TICKET-ID...]"
+---
+
 # Fix Command
 
 ## Description
@@ -107,7 +112,7 @@ Agent({
   subagent_type: "general-purpose",
   model: "sonnet",
   description: "Fix ticket {TICKET_ID}",
-  prompt: `You are a fixer agent. Follow the instructions in .claude/agents/fixer.md.
+  prompt: `You are a fixer agent. Follow the instructions in .claude/agents/cypher/fixer.md.
 
 TICKET_ID: {TICKET_ID}
 WORKTREE_PATH: /tmp/claude-widgets/{TICKET_ID}
@@ -127,7 +132,7 @@ Description:
 
 Dependencies are already installed and packages are already built in the worktree.
 
-Read .claude/agents/fixer.md for your full workflow. Implement the fix, run tests, stage changes (NO commit), and return result JSON.`,
+Read .claude/agents/cypher/fixer.md for your full workflow. Implement the fix, run tests, stage changes (NO commit), and return result JSON.`,
   run_in_background: true
 })
 ```
