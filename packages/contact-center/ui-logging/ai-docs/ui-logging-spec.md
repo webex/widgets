@@ -54,9 +54,15 @@ mount and `WIDGET_UNMOUNTED` on unmount via the store logger. Does NOT own the l
 log persistence, or prop sanitization.
 
 ## Stack
+
+The bundle uses the root Webpack mode from `NODE_ENV`. Production builds must
+publish normal JavaScript exports rather than development `eval()` modules, so
+consumer bundlers can read `withMetrics` and its dependencies. The default mode
+remains development when `NODE_ENV` is not set.
+
 TypeScript ^5.6.3, React (peer `>=18.3.1`, `react-dom >=18.3.1`) HOC + hooks. Tests: Jest 29.7.0 +
 React Testing Library 16.0.1 + `@testing-library/jest-dom`, jsdom environment. Build: Webpack 5
-(`webpack --mode=development`), output to `dist/`. Source of truth: `package.json`.
+(`webpack`), output to `dist/`. Source of truth: `package.json`.
 
 ## Folder / Package Structure
 ```

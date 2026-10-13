@@ -89,11 +89,31 @@ Import `AIAssistant` from `@webex/cc-widgets` or directly from `@webex/cc-ai-ass
 separate AI Assistant WC entry. This package owns `lottie-web` and the wellness
 MP3; `cc-components` receives an animation loader as a prop and has no media dependency.
 
-The CommonJS package includes the MP3, animation data, and its media loader under
-`dist/assets/wellness`. Webpack emits the MP3 and lazy Lottie/animation chunks into
-the consuming app without an asset rule or copy step. The browser fetches them
-only when the wellness UI uses them. The React sample also supports this path
-when it builds the assistant source.
+The CommonJS package includes its media loader and generated `.mjs` modules under
+`dist/assets/wellness`. The package build converts the MP3 to an audio data URL
+and each theme's JSON to a JavaScript export. It retains the approved MP3 and JSON
+files for hosts that serve them directly. The media loader uses standard dynamic
+imports for the generated modules and `lottie-web`; it contains no inline asset
+loader requests, `require.ensure()`, or Webpack public-path globals. Consumers do
+not need an MP3/JSON loader or a copy step for the default media. Consumers that
+support code splitting can fetch these JavaScript modules when the wellness UI
+uses them. Development dependency prebundling can combine lazy modules.
+
+The React sample compiles the widget TypeScript from source. Its Webpack config
+routes the wellness media import to this package's built media loader. Run
+`yarn build:dev` before building or serving the sample. The package build tracks
+the original media files as dependencies, so its watch build regenerates modules
+when these files change.
+
+The default audio requires CSP `media-src` to permit `data:` URLs. Hosts that
+permit only hosted audio must set the existing `wellnessAudioUrl` prop to an
+allowed URL. The override bypasses the packaged audio import. Test the packed
+package with Webpack, Vite, Rollup, esbuild, and Parcel, including delayed loading,
+audio decoding, both animation themes, and an app deployed below a URL subpath.
+The Lottie import accepts both a module default export and a direct CommonJS
+export; Parcel and the other consumer bundlers can return different forms.
+`tooling/tests/wellness-media.js` checks the emitted modules, unchanged raw media,
+standard import requests, source dependencies, and regeneration after a source change.
 
 The orchestration uses only the published wellness contract and legacy `setAgentState()` path from the
 store. It does not consume an AI Assistant RTD status event.
