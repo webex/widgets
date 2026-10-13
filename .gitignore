@@ -43,6 +43,7 @@ reports/
 !packages/contact-center/ai-assistant/src/wellness/assets/WellnessBreakAnimationLight.json
 !docs/changelog/logs/*.json
 !.sdd/manifest.json
+!tooling/consumer-builds/config.json
 .env*
 !.env.default
 !package.json
