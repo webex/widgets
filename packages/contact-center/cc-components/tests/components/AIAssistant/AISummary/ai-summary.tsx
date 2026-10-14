@@ -3,13 +3,13 @@ import {act, fireEvent, render, screen, waitFor, within} from '@testing-library/
 import '@testing-library/jest-dom';
 import type {AISummaryEntry} from '@webex/cc-store';
 import AISummaryComponent, {
-  AI_SUMMARY_MESSAGES,
-  AI_SUMMARY_SECTION_ORDER,
+  AI_ASSISTANT_SUMMARY_MESSAGES,
+  AI_ASSISTANT_SUMMARY_SECTION_ORDER,
   getDisplaySections,
-} from '../../../src/components/AISummary';
+} from '../../../../src/components/AIAssistant/AISummary';
 
 type AISummaryContent = NonNullable<AISummaryEntry['content']>;
-import {COPIED_FEEDBACK_MS} from '../../../src/components/AIAssistant/constants';
+import {COPIED_FEEDBACK_MS} from '../../../../src/components/AIAssistant/constants';
 
 const sectionContent: AISummaryContent = {
   conversationId: 'interaction-main-1',
@@ -190,9 +190,9 @@ describe('AISummary', () => {
   });
 
   it('exports a unique display order and places Outcome among the SDK sections', () => {
-    expect(AI_SUMMARY_MESSAGES.postCall.completeAction).toBe(COMPLETE_WRAP_UP_LABEL);
-    expect(AI_SUMMARY_SECTION_ORDER).toEqual(SECTION_DISPLAY_KEYS);
-    expect([...new Set(AI_SUMMARY_SECTION_ORDER)]).toEqual(AI_SUMMARY_SECTION_ORDER);
+    expect(AI_ASSISTANT_SUMMARY_MESSAGES.postCall.completeAction).toBe(COMPLETE_WRAP_UP_LABEL);
+    expect(AI_ASSISTANT_SUMMARY_SECTION_ORDER).toEqual(SECTION_DISPLAY_KEYS);
+    expect([...new Set(AI_ASSISTANT_SUMMARY_SECTION_ORDER)]).toEqual(AI_ASSISTANT_SUMMARY_SECTION_ORDER);
     const projected = getDisplaySections(sectionContent);
     expect(projected.map((section) => section.key)).toEqual(['initialContactReason', 'resolution', 'nextSteps']);
     expect(projected.find((section) => section.key === 'resolution')).toMatchObject({
@@ -224,12 +224,12 @@ describe('AISummary', () => {
 
     const spinner = screen.getByTestId('ai-summary:generating').querySelector('mdc-spinner');
     expect(spinner).toHaveAttribute('aria-hidden', 'true');
-    expect(screen.getByText(AI_SUMMARY_MESSAGES.generatingDescription)).toBeInTheDocument();
-    expect(screen.getByRole('heading', {name: AI_SUMMARY_MESSAGES.generatingTitle})).toHaveClass(
+    expect(screen.getByText(AI_ASSISTANT_SUMMARY_MESSAGES.generatingDescription)).toBeInTheDocument();
+    expect(screen.getByRole('heading', {name: AI_ASSISTANT_SUMMARY_MESSAGES.generatingTitle})).toHaveClass(
       'ai-summary__status-title--generating'
     );
-    expect(AI_SUMMARY_MESSAGES.generatingDescription).toContain('—');
-    expect(AI_SUMMARY_MESSAGES.generatingDescription).not.toContain('_');
+    expect(AI_ASSISTANT_SUMMARY_MESSAGES.generatingDescription).toContain('—');
+    expect(AI_ASSISTANT_SUMMARY_MESSAGES.generatingDescription).not.toContain('_');
     expect(document.body).not.toHaveTextContent(/%[^%]+%/);
 
     render(
@@ -244,11 +244,11 @@ describe('AISummary', () => {
       />
     );
 
-    expect(screen.getByText(AI_SUMMARY_MESSAGES.generationError)).toBeInTheDocument();
-    expect(screen.getByRole('heading', {name: AI_SUMMARY_MESSAGES.generationError})).toHaveClass(
+    expect(screen.getByText(AI_ASSISTANT_SUMMARY_MESSAGES.generationError)).toBeInTheDocument();
+    expect(screen.getByRole('heading', {name: AI_ASSISTANT_SUMMARY_MESSAGES.generationError})).toHaveClass(
       'ai-summary__status-title--error'
     );
-    expect(screen.getByText(AI_SUMMARY_MESSAGES.generationErrorDescription)).toBeInTheDocument();
+    expect(screen.getByText(AI_ASSISTANT_SUMMARY_MESSAGES.generationErrorDescription)).toBeInTheDocument();
   });
 
   it('renders literal en-US labels and state copy without importing expected strings from the component constants', async () => {
@@ -357,7 +357,7 @@ describe('AISummary', () => {
         onRetry={jest.fn().mockResolvedValue({outcome: 'blocked'})}
       />
     );
-    expect(screen.getByText(AI_SUMMARY_MESSAGES.unavailable)).toBeInTheDocument();
+    expect(screen.getByText(AI_ASSISTANT_SUMMARY_MESSAGES.unavailable)).toBeInTheDocument();
 
     rerender(
       <AISummary
@@ -493,39 +493,39 @@ describe('AISummary', () => {
     const surface = screen.getByTestId('ai-summary:editor-surface');
     expect(surface).toContainElement(
       screen.getByRole('button', {
-        name: AI_SUMMARY_MESSAGES.editSectionLabel(AI_SUMMARY_MESSAGES.sectionLabels.initialContactReason),
+        name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason),
       })
     );
     expect(surface).toContainElement(
       screen.getByRole('button', {
-        name: AI_SUMMARY_MESSAGES.editSectionLabel(AI_SUMMARY_MESSAGES.sectionLabels.nextSteps),
+        name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.nextSteps),
       })
     );
     expect(surface).toContainElement(screen.getByTestId('ai-summary:actions'));
-    expect(screen.queryByRole('textbox', {name: AI_SUMMARY_MESSAGES.sectionLabels.resolution})).not.toBeInTheDocument();
+    expect(screen.queryByRole('textbox', {name: AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.resolution})).not.toBeInTheDocument();
     expect(
-      screen.getByRole('button', {name: AI_SUMMARY_MESSAGES.copySummary}).querySelector('mdc-icon')
+      screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary}).querySelector('mdc-icon')
     ).toHaveProperty('name', 'copy-regular');
-    expect(screen.getByRole('button', {name: AI_SUMMARY_MESSAGES.like}).querySelector('mdc-icon')).toHaveProperty(
+    expect(screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.like}).querySelector('mdc-icon')).toHaveProperty(
       'name',
       'like-regular'
     );
     fireEvent.click(
       screen.getByRole('button', {
-        name: AI_SUMMARY_MESSAGES.editSectionLabel(AI_SUMMARY_MESSAGES.sectionLabels.initialContactReason),
+        name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason),
       })
     );
-    expect(screen.getByRole('textbox', {name: AI_SUMMARY_MESSAGES.sectionLabels.initialContactReason})).toHaveFocus();
+    expect(screen.getByRole('textbox', {name: AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason})).toHaveFocus();
     fireEvent.change(screen.getByDisplayValue('Customer asked for invoice help.'), {target: {value: ''}});
     expect(onEdit).toHaveBeenCalledWith('initialContactReason', '', 7);
-    fireEvent.blur(screen.getByRole('textbox', {name: AI_SUMMARY_MESSAGES.sectionLabels.initialContactReason}));
+    fireEvent.blur(screen.getByRole('textbox', {name: AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason}));
     expect(
       screen.getByRole('button', {
-        name: AI_SUMMARY_MESSAGES.editSectionLabel(AI_SUMMARY_MESSAGES.sectionLabels.initialContactReason),
+        name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason),
       })
     ).toBeInTheDocument();
-    expect(screen.getByText(AI_SUMMARY_MESSAGES.sectionLabels.resolution)).toBeInTheDocument();
-    expect(screen.getByText(AI_SUMMARY_MESSAGES.attribution)).toBeInTheDocument();
+    expect(screen.getByText(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.resolution)).toBeInTheDocument();
+    expect(screen.getByText(AI_ASSISTANT_SUMMARY_MESSAGES.attribution)).toBeInTheDocument();
   });
 
   it('keeps structured previews compact, text-only and read-only while controls are disabled', () => {
@@ -544,14 +544,14 @@ describe('AISummary', () => {
     );
     expect(
       screen.getByRole('button', {
-        name: AI_SUMMARY_MESSAGES.editSectionLabel(AI_SUMMARY_MESSAGES.sectionLabels.initialContactReason),
+        name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason),
       })
     ).toBeDisabled();
     expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
     expect(screen.getByText('Customer asked for invoice help.')).toBeInTheDocument();
     expect(
       screen.queryByRole('button', {
-        name: AI_SUMMARY_MESSAGES.editSectionLabel(AI_SUMMARY_MESSAGES.sectionLabels.resolution),
+        name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.resolution),
       })
     ).not.toBeInTheDocument();
   });
@@ -579,17 +579,17 @@ describe('AISummary', () => {
     );
 
     const summaryPreview = screen.getByRole('button', {
-      name: AI_SUMMARY_MESSAGES.editSectionLabel(AI_SUMMARY_MESSAGES.sectionLabels.initialContactReason),
+      name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason),
     });
     expect(
-      within(summaryPreview).getByText(`${AI_SUMMARY_MESSAGES.sectionLabels.initialContactReason}:`)
+      within(summaryPreview).getByText(`${AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason}:`)
     ).toHaveAttribute('dir', 'auto');
     expect(within(summaryPreview).getByText('שלום ticket 42')).toHaveAttribute('dir', 'auto');
 
     const actionPreview = screen.getByRole('button', {
-      name: AI_SUMMARY_MESSAGES.editSectionLabel(AI_SUMMARY_MESSAGES.sectionLabels.keyActionsTaken),
+      name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.keyActionsTaken),
     });
-    expect(within(actionPreview).getByText(`${AI_SUMMARY_MESSAGES.sectionLabels.keyActionsTaken}:`)).toHaveAttribute(
+    expect(within(actionPreview).getByText(`${AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.keyActionsTaken}:`)).toHaveAttribute(
       'dir',
       'auto'
     );
@@ -602,9 +602,9 @@ describe('AISummary', () => {
     expect(within(inlineList).getByText('Send invoice INV-42')).toBeInTheDocument();
 
     const nextStepsPreview = screen.getByRole('button', {
-      name: AI_SUMMARY_MESSAGES.editSectionLabel(AI_SUMMARY_MESSAGES.sectionLabels.nextSteps),
+      name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.nextSteps),
     });
-    expect(within(nextStepsPreview).getByText(`${AI_SUMMARY_MESSAGES.sectionLabels.nextSteps}:`)).toHaveAttribute(
+    expect(within(nextStepsPreview).getByText(`${AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.nextSteps}:`)).toHaveAttribute(
       'dir',
       'auto'
     );
@@ -677,7 +677,7 @@ describe('AISummary', () => {
     );
 
     expect(screen.queryByText('<img src=x onerror=alert(1)>:')).not.toBeInTheDocument();
-    expect(screen.getByText(`${AI_SUMMARY_MESSAGES.sectionLabels.initialContactReason}:`)).toBeInTheDocument();
+    expect(screen.getByText(`${AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason}:`)).toBeInTheDocument();
     expect(screen.getByText('<script>alert("summary")</script>')).toBeInTheDocument();
     expect(screen.getByText('<b onclick=alert(2)>Follow up</b>')).toBeInTheDocument();
     expect(container.querySelector('img')).toBeNull();
@@ -703,28 +703,28 @@ describe('AISummary', () => {
       />
     );
 
-    fireEvent.click(screen.getByRole('button', {name: AI_SUMMARY_MESSAGES.copySummary}));
+    fireEvent.click(screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary}));
     expect(navigator.clipboard.writeText).toHaveBeenCalledTimes(1);
     expect(onCopy).not.toHaveBeenCalled();
     await waitFor(() => expect(onCopy).toHaveBeenCalledWith(3));
-    fireEvent.mouseEnter(screen.getByRole('button', {name: AI_SUMMARY_MESSAGES.copySummary}));
-    fireEvent.mouseLeave(screen.getByRole('button', {name: AI_SUMMARY_MESSAGES.copySummary}));
+    fireEvent.mouseEnter(screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary}));
+    fireEvent.mouseLeave(screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary}));
     expect(navigator.clipboard.writeText).toHaveBeenCalledTimes(1);
-    expect(screen.getByRole('button', {name: AI_SUMMARY_MESSAGES.copySummary})).toHaveTextContent(
-      AI_SUMMARY_MESSAGES.copiedSummary
+    expect(screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary})).toHaveTextContent(
+      AI_ASSISTANT_SUMMARY_MESSAGES.copiedSummary
     );
 
     act(() => {
       jest.advanceTimersByTime(COPIED_FEEDBACK_MS - 1);
     });
-    expect(screen.getByRole('button', {name: AI_SUMMARY_MESSAGES.copySummary})).toHaveTextContent(
-      AI_SUMMARY_MESSAGES.copiedSummary
+    expect(screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary})).toHaveTextContent(
+      AI_ASSISTANT_SUMMARY_MESSAGES.copiedSummary
     );
     act(() => {
       jest.advanceTimersByTime(1);
     });
-    expect(screen.getByRole('button', {name: AI_SUMMARY_MESSAGES.copySummary})).toHaveTextContent(
-      AI_SUMMARY_MESSAGES.copySummary
+    expect(screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary})).toHaveTextContent(
+      AI_ASSISTANT_SUMMARY_MESSAGES.copySummary
     );
     expect(navigator.clipboard.writeText).toHaveBeenCalledTimes(1);
   });
@@ -858,7 +858,7 @@ describe('AISummary', () => {
       />
     );
 
-    fireEvent.click(screen.getByRole('button', {name: AI_SUMMARY_MESSAGES.copySummary}));
+    fireEvent.click(screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary}));
     await waitFor(() =>
       expect(navigator.clipboard.writeText).toHaveBeenLastCalledWith(
         'Initial contact reason: Customer asked for invoice help.\n\nOutcome: Correction approved\n\nNext Steps: Send the updated invoice.'
@@ -879,7 +879,7 @@ describe('AISummary', () => {
       />
     );
 
-    fireEvent.click(screen.getByRole('button', {name: AI_SUMMARY_MESSAGES.copySummary}));
+    fireEvent.click(screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary}));
     await waitFor(() =>
       expect(navigator.clipboard.writeText).toHaveBeenLastCalledWith(
         'Initial contact reason: Customer asked for invoice help.\n\nNext Steps: Send the updated invoice.'
@@ -903,11 +903,11 @@ describe('AISummary', () => {
       />
     );
 
-    fireEvent.click(screen.getByRole('button', {name: AI_SUMMARY_MESSAGES.copySummary}));
+    fireEvent.click(screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary}));
     expect(navigator.clipboard.writeText).not.toHaveBeenCalled();
     expect(onCopy).not.toHaveBeenCalled();
-    expect(screen.getByRole('button', {name: AI_SUMMARY_MESSAGES.copySummary})).toHaveTextContent(
-      AI_SUMMARY_MESSAGES.copySummary
+    expect(screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary})).toHaveTextContent(
+      AI_ASSISTANT_SUMMARY_MESSAGES.copySummary
     );
 
     rerender(
@@ -926,7 +926,7 @@ describe('AISummary', () => {
         onRetry={jest.fn().mockResolvedValue({outcome: 'blocked'})}
       />
     );
-    fireEvent.click(screen.getByRole('button', {name: AI_SUMMARY_MESSAGES.copySummary}));
+    fireEvent.click(screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary}));
     expect(navigator.clipboard.writeText).not.toHaveBeenCalled();
     expect(onCopy).not.toHaveBeenCalled();
 
@@ -942,7 +942,7 @@ describe('AISummary', () => {
       />
     );
 
-    fireEvent.click(screen.getByRole('button', {name: AI_SUMMARY_MESSAGES.copySummary}));
+    fireEvent.click(screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary}));
     expect(navigator.clipboard.writeText).not.toHaveBeenCalled();
     expect(onCopy).not.toHaveBeenCalled();
   });
@@ -963,10 +963,10 @@ describe('AISummary', () => {
       />
     );
 
-    fireEvent.click(screen.getByRole('button', {name: AI_SUMMARY_MESSAGES.copySummary}));
+    fireEvent.click(screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary}));
     await waitFor(() =>
-      expect(screen.getByRole('button', {name: AI_SUMMARY_MESSAGES.copySummary})).toHaveTextContent(
-        AI_SUMMARY_MESSAGES.copiedSummary
+      expect(screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary})).toHaveTextContent(
+        AI_ASSISTANT_SUMMARY_MESSAGES.copiedSummary
       )
     );
 
@@ -983,8 +983,8 @@ describe('AISummary', () => {
       />
     );
 
-    expect(screen.getByRole('button', {name: AI_SUMMARY_MESSAGES.copySummary})).toHaveTextContent(
-      AI_SUMMARY_MESSAGES.copySummary
+    expect(screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary})).toHaveTextContent(
+      AI_ASSISTANT_SUMMARY_MESSAGES.copySummary
     );
     expect(jest.getTimerCount()).toBe(0);
   });
@@ -1004,12 +1004,12 @@ describe('AISummary', () => {
       />
     );
 
-    fireEvent.click(screen.getByRole('button', {name: AI_SUMMARY_MESSAGES.copySummary}));
+    fireEvent.click(screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary}));
     await waitFor(() => expect(navigator.clipboard.writeText).toHaveBeenCalled());
     await flushUnhandledRejectionQueues();
     expect(onCopy).not.toHaveBeenCalled();
-    expect(screen.getByRole('button', {name: AI_SUMMARY_MESSAGES.copySummary})).toHaveTextContent(
-      AI_SUMMARY_MESSAGES.copySummary
+    expect(screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary})).toHaveTextContent(
+      AI_ASSISTANT_SUMMARY_MESSAGES.copySummary
     );
   });
 
@@ -1028,9 +1028,9 @@ describe('AISummary', () => {
       />
     );
 
-    const like = screen.getByRole('button', {name: AI_SUMMARY_MESSAGES.like});
-    const dislike = screen.getByRole('button', {name: AI_SUMMARY_MESSAGES.dislike});
-    const pendingDescription = screen.getByText(AI_SUMMARY_MESSAGES.feedback.pendingSubmission);
+    const like = screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.like});
+    const dislike = screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.dislike});
+    const pendingDescription = screen.getByText(AI_ASSISTANT_SUMMARY_MESSAGES.feedback.pendingSubmission);
     const pendingDescriptionId = pendingDescription.id;
     expect(like).toHaveClass('ai-summary__feedback-button--selected');
     expect(pendingDescriptionId).toMatch(/^ai-summary-feedback-/);
@@ -1056,8 +1056,8 @@ describe('AISummary', () => {
       />
     );
     const {rerender} = render(renderSummary());
-    const like = screen.getByRole('button', {name: AI_SUMMARY_MESSAGES.like});
-    const dislike = screen.getByRole('button', {name: AI_SUMMARY_MESSAGES.dislike});
+    const like = screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.like});
+    const dislike = screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.dislike});
     fireEvent.click(like);
     fireEvent.click(dislike);
     expect(onFeedback.mock.calls).toEqual([
@@ -1086,30 +1086,30 @@ describe('AISummary', () => {
       />
     );
 
-    const like = screen.getByRole('button', {name: AI_SUMMARY_MESSAGES.like});
+    const like = screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.like});
     expect(like).toHaveAttribute('aria-pressed', 'true');
     expect(like).not.toHaveAttribute('title');
     fireEvent.mouseEnter(getActionWrapper(like));
     await waitFor(() => expect(screen.getByRole('tooltip', {hidden: true})).toHaveAttribute('visible'));
     const feedbackTooltip = screen.getByRole('tooltip', {hidden: true});
     expect(feedbackTooltip.tagName).toBe('MDC-TOOLTIP');
-    expect(feedbackTooltip).toHaveTextContent(AI_SUMMARY_MESSAGES.like);
+    expect(feedbackTooltip).toHaveTextContent(AI_ASSISTANT_SUMMARY_MESSAGES.like);
     expect(feedbackTooltip).toHaveAttribute('trigger', 'manual');
     expect(feedbackTooltip).toHaveAttribute('triggerid', like.id);
     expect(feedbackTooltip).toHaveAttribute('offset', '0');
     expect(feedbackTooltip).toHaveAttribute('tooltip-type', 'none');
-    expect(like).toHaveAccessibleDescription(AI_SUMMARY_MESSAGES.feedback.pendingSubmission);
+    expect(like).toHaveAccessibleDescription(AI_ASSISTANT_SUMMARY_MESSAGES.feedback.pendingSubmission);
     fireEvent.mouseLeave(getActionWrapper(like));
     expect(screen.queryByRole('tooltip', {hidden: true})).not.toBeInTheDocument();
 
-    const copy = screen.getByRole('button', {name: AI_SUMMARY_MESSAGES.copySummary});
-    const dislike = screen.getByRole('button', {name: AI_SUMMARY_MESSAGES.dislike});
+    const copy = screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary});
+    const dislike = screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.dislike});
     expect(copy).not.toHaveAttribute('title');
     expect(dislike).not.toHaveAttribute('title');
     fireEvent.mouseEnter(getActionWrapper(copy));
     await waitFor(() => expect(screen.getByRole('tooltip', {hidden: true})).toHaveAttribute('visible'));
     expect(screen.getAllByRole('tooltip', {hidden: true})).toHaveLength(1);
-    expect(screen.getByRole('tooltip', {hidden: true})).toHaveTextContent(AI_SUMMARY_MESSAGES.copySummary);
+    expect(screen.getByRole('tooltip', {hidden: true})).toHaveTextContent(AI_ASSISTANT_SUMMARY_MESSAGES.copySummary);
     expect(screen.getByRole('tooltip', {hidden: true})).toHaveAttribute('triggerid', copy.id);
   });
 
@@ -1128,7 +1128,7 @@ describe('AISummary', () => {
       />
     );
 
-    const like = screen.getByRole('button', {name: AI_SUMMARY_MESSAGES.like});
+    const like = screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.like});
     const action = getActionWrapper(like);
     fireEvent.mouseEnter(action);
     const tooltip = await screen.findByRole('tooltip', {hidden: true});
@@ -1158,7 +1158,7 @@ describe('AISummary', () => {
       </div>
     );
 
-    const like = screen.getByRole('button', {name: AI_SUMMARY_MESSAGES.like});
+    const like = screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.like});
     act(() => {
       like.focus();
     });
@@ -1190,7 +1190,7 @@ describe('AISummary', () => {
     );
     const external = screen.getByRole('button', {name: 'External control'});
     act(() => external.focus());
-    fireEvent.mouseEnter(screen.getByRole('button', {name: AI_SUMMARY_MESSAGES.like}));
+    fireEvent.mouseEnter(screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.like}));
     await waitFor(() => expect(screen.getByRole('tooltip', {hidden: true})).toHaveAttribute('visible'));
     fireEvent.keyDown(external, {key: 'Escape'});
     expect(screen.queryByRole('tooltip', {hidden: true})).not.toBeInTheDocument();
@@ -1199,7 +1199,7 @@ describe('AISummary', () => {
 
     fireEvent.keyDown(external, {key: 'Escape'});
     expect(parentEscape).toHaveBeenCalledTimes(1);
-    fireEvent.mouseEnter(screen.getByRole('button', {name: AI_SUMMARY_MESSAGES.like}));
+    fireEvent.mouseEnter(screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.like}));
     unmount();
     expect(fireEvent.keyDown(document.body, {key: 'Escape'})).toBe(true);
   });
@@ -1296,7 +1296,7 @@ describe('AISummary', () => {
       />
     );
 
-    fireEvent.click(screen.getByRole('button', {name: AI_SUMMARY_MESSAGES.copySummary}));
+    fireEvent.click(screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary}));
     await waitFor(() => expect(onCopy).toHaveBeenCalledWith(10));
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith('Visible card text');
     expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
@@ -1306,9 +1306,9 @@ describe('AISummary', () => {
     render(<AISummary mode="mid-call-receiver" state={state} />);
 
     expect(screen.queryByTestId('ai-summary:actions')).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', {name: AI_SUMMARY_MESSAGES.copySummary})).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', {name: AI_SUMMARY_MESSAGES.like})).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', {name: AI_SUMMARY_MESSAGES.dislike})).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary})).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.like})).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.dislike})).not.toBeInTheDocument();
   });
 
   it('recovers focus to the containing panel when receiver actions are removed', async () => {
@@ -1329,9 +1329,9 @@ describe('AISummary', () => {
     );
 
     act(() => {
-      screen.getByRole('button', {name: AI_SUMMARY_MESSAGES.copySummary}).focus();
+      screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary}).focus();
     });
-    expect(screen.getByRole('button', {name: AI_SUMMARY_MESSAGES.copySummary})).toHaveFocus();
+    expect(screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary})).toHaveFocus();
 
     rerender(
       <div>
@@ -1371,7 +1371,7 @@ describe('AISummary', () => {
     );
 
     const summaryPreview = screen.getByRole('button', {
-      name: AI_SUMMARY_MESSAGES.editSectionLabel(AI_SUMMARY_MESSAGES.sectionLabels.initialContactReason),
+      name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason),
     });
     act(() => {
       summaryPreview.focus();
@@ -1401,7 +1401,7 @@ describe('AISummary', () => {
     await waitFor(() =>
       expect(
         screen.getByRole('button', {
-          name: AI_SUMMARY_MESSAGES.editSectionLabel(AI_SUMMARY_MESSAGES.sectionLabels.nextSteps),
+          name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.nextSteps),
         })
       ).toHaveFocus()
     );
@@ -1488,10 +1488,10 @@ describe('AISummary', () => {
 
     fireEvent.click(
       screen.getByRole('button', {
-        name: AI_SUMMARY_MESSAGES.editSectionLabel(AI_SUMMARY_MESSAGES.sectionLabels.initialContactReason),
+        name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason),
       })
     );
-    const editor = screen.getByRole('textbox', {name: AI_SUMMARY_MESSAGES.sectionLabels.initialContactReason});
+    const editor = screen.getByRole('textbox', {name: AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason});
     act(() => {
       editor.focus();
     });
@@ -1502,7 +1502,7 @@ describe('AISummary', () => {
     await waitFor(() =>
       expect(
         screen.getByRole('button', {
-          name: AI_SUMMARY_MESSAGES.editSectionLabel(AI_SUMMARY_MESSAGES.sectionLabels.nextSteps),
+          name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.nextSteps),
         })
       ).toHaveFocus()
     );
@@ -1527,10 +1527,10 @@ describe('AISummary', () => {
 
     fireEvent.click(
       screen.getByRole('button', {
-        name: AI_SUMMARY_MESSAGES.editSectionLabel(AI_SUMMARY_MESSAGES.sectionLabels.initialContactReason),
+        name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason),
       })
     );
-    const editor = screen.getByRole('textbox', {name: AI_SUMMARY_MESSAGES.sectionLabels.initialContactReason});
+    const editor = screen.getByRole('textbox', {name: AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason});
     const external = screen.getByRole('button', {name: 'External destination'});
     act(() => {
       editor.focus();
@@ -1577,7 +1577,7 @@ describe('AISummary', () => {
     render(<Harness />);
 
     act(() => {
-      screen.getByRole('button', {name: AI_SUMMARY_MESSAGES.copySummary}).focus();
+      screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary}).focus();
     });
     act(() => {
       setState('unavailable');

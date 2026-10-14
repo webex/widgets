@@ -355,13 +355,14 @@ Each component is tested in isolation with React Testing Library: render from a 
 | `CC-COMPONENTS-R-017`  | `tests/components/task/CallControlCAD/call-control-cad.tsx` (Momentum structure/configuration, sections, immediate/confirmed Drop, pending/consult disabled state, read-only rows, focus fallback, live regions) | Momentum overlay keyboard behavior and visual placement receive final manual coverage |
 | `CC-COMPONENTS-R-018`  | `tests/components/task/CallControl/CallControlCustom/consult-transfer-popover.tsx`, `tests/components/task/CallControl/CallControlCustom/consult-transfer-popover.snapshot.tsx`                                  | None                                                                                  |
 
-## AI summary presentation
+## AI Assistant summary presentation
 
-The internal `components/AISummary` surface renders generating, unavailable, error,
+The internal `components/AIAssistant/AISummary` surface renders generating, unavailable, error,
 and content states from props. Initiator and post-call summaries support keyed text
 edits, copy and feedback. Post-call supports Retry and a read-only Outcome from SDK
 `resolution`; the display labels never become SDK section keys. Receiver summaries
-use copy and feedback actions around a display-only Adaptive Card.
+use copy and feedback actions around a display-only Adaptive Card. Receiver content
+without an Adaptive Card renders as unavailable and exposes no summary actions.
 
 Summary content props retain the store's SDK `AISummary` shape, including the required
 `conversationId`; feedback and lifecycle values are supplied by the widget from the
@@ -375,10 +376,11 @@ labels, plain-text clipboard formatting, bullet presentation and auto-sizing nat
 editors belong to this component; edits, copy counts, feedback and submission belong
 to the store's actions and separate SDK response record.
 
-Summary loading, Retry and tooltip presentation use the same Momentum primitives as
-Real-time Assist and Wellness Break. Tooltip visibility remains controlled to keep
-hovered content reachable and consume Escape before the containing panel handles it;
-button labels and the pending-feedback description remain unchanged. Keyed editing,
+Summary loading, Retry, editable section activation and tooltip presentation use the
+same Momentum primitives as Real-time Assist and Wellness Break. Tooltip visibility
+remains controlled to keep hovered content reachable and consume Escape before the
+containing panel handles it; button labels and the pending-feedback description
+remain unchanged. Keyed editing,
 clipboard formatting, revision acceptance and focus recovery stay summary-specific.
 
 `AIAssistantComponent.receiverSummary` adds View summary to closed/minimized chrome
@@ -393,11 +395,14 @@ error boundary when replacement content arrives. Summary components recover focu
 when a focused summary control or branch is removed and no connected control has
 taken focus.
 
-These components receive data and callbacks through props and make no SDK calls.
+Summary presentation constants use the `AI_ASSISTANT_SUMMARY_` prefix. These components
+receive data and callbacks through props and make no SDK calls.
+`ai-summary.tsx` owns the rendered UI; `ai-summary.hooks.ts` owns summary interaction,
+clipboard, tooltip, and focus behavior.
 `AISummary` remains internal; it is not exported by the package's root React barrel.
 
-Evidence: `components/AISummary/` and `components/AIAssistant/`; tests:
-`tests/components/AISummary/ai-summary.tsx`,
+Evidence: `components/AIAssistant/AISummary/` and `components/AIAssistant/`; tests:
+`tests/components/AIAssistant/AISummary/ai-summary.tsx`,
 `tests/components/AIAssistant/ai-assistant.tsx`, and
 `tests/components/AIAssistant/adaptive-card-renderer.test.tsx`.
 

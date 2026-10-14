@@ -1,4 +1,6 @@
-export const AI_SUMMARY_MESSAGES = {
+import type {AISummaryFeedbackButton, AISummarySectionKey} from './ai-summary.types';
+
+export const AI_ASSISTANT_SUMMARY_MESSAGES = {
   viewSummary: 'View summary',
   generatingTitle: 'Generating summary...',
   generatingDescription: 'Just a sec—the details are coming together.',
@@ -45,7 +47,7 @@ export const AI_SUMMARY_MESSAGES = {
 } as const;
 
 /** Presentation order for SDK sections and the read-only resolution. */
-export const AI_SUMMARY_SECTION_ORDER = [
+export const AI_ASSISTANT_SUMMARY_SECTION_ORDER = [
   'reasonForTransferOrConsult',
   'initialContactReason',
   'additionalContactReasons',
@@ -53,4 +55,15 @@ export const AI_SUMMARY_SECTION_ORDER = [
   'keyActionsTaken',
   'resolution',
   'nextSteps',
-] as const satisfies readonly (keyof typeof AI_SUMMARY_MESSAGES.sectionLabels)[];
+] as const satisfies readonly (keyof typeof AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels)[];
+
+export const AI_ASSISTANT_SUMMARY_FEEDBACK_BUTTONS = [
+  {feedback: 'thumbs_up', icon: 'like', label: AI_ASSISTANT_SUMMARY_MESSAGES.like},
+  {feedback: 'thumbs_down', icon: 'dislike', label: AI_ASSISTANT_SUMMARY_MESSAGES.dislike},
+] as const satisfies readonly AISummaryFeedbackButton[];
+
+export const AI_ASSISTANT_SUMMARY_BULLETED_SECTION_KEYS: ReadonlySet<AISummarySectionKey> = new Set([
+  'additionalContactReasons',
+  'keyActionsTaken',
+  'nextSteps',
+]);

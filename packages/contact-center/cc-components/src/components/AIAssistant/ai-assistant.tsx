@@ -2,7 +2,7 @@ import React, {useEffect, useLayoutEffect, useRef, useState} from 'react';
 import {Button, Text, Tooltip} from '@momentum-design/components/dist/react';
 import {withMetrics} from '@webex/cc-ui-logging';
 import RealTimeAssist from './RealTimeAssist/real-time-assist';
-import AISummary, {AI_SUMMARY_MESSAGES} from '../AISummary';
+import AISummary, {AI_ASSISTANT_SUMMARY_MESSAGES} from './AISummary';
 import AIAssistantLanding from './ai-assistant-landing';
 import CiscoAIAssistantColorIcon from './CiscoAIAssistantColorIcon';
 import WellnessBreakError from './WellnessBreak/wellness-break-error';
@@ -92,8 +92,11 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
   );
   const showLanding = !showReceiverSummary && (!hasActiveInteraction || !isFeatureEnabled);
   const receiverBranchKey = receiverSummary?.branchKey;
+  const receiverCardAvailable = Boolean(
+    receiverSummary?.surface === 'content' && receiverSummary.content.adaptiveCard
+  );
   const receiverActionsVisible = Boolean(
-    showReceiverSummary && receiverSummary?.surface === 'content' && receiverCardReady
+    showReceiverSummary && receiverCardAvailable && receiverCardReady
   );
 
   const wellnessHistory = wellness?.history ?? [];
@@ -250,11 +253,6 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
     restore();
   };
 
-  const closePanel = () => {
-    setViewingReceiverKey(null);
-    close();
-  };
-
   const openReceiverSummary = () => {
     if (!receiverSummary) {
       return;
@@ -270,11 +268,7 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
     }
   };
 
-  const renderReceiverSummary = () => {
-    if (!receiverSummary) {
-      return null;
-    }
-
+  const renderReceiverSummary = (summary: NonNullable<typeof receiverSummary>) => {
     return (
       <div
         ref={receiverBranchRef}
@@ -282,33 +276,36 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
         data-testid="ai-assistant:receiver-summary"
         dir="ltr"
       >
-        {receiverSummary.surface === 'content' ? (
+        {summary.surface === 'content' && summary.content.adaptiveCard ? (
           <div dir="auto">
             <AdaptiveCardRenderer
-              card={receiverSummary.content.adaptiveCard}
+              card={summary.content.adaptiveCard}
               displayOnly
               onRender={setReceiverCardReady}
-              contentRevision={receiverSummary.contentRevision}
-              fallbackText={AI_SUMMARY_MESSAGES.unavailable}
+              contentRevision={summary.contentRevision}
+              fallbackText={AI_ASSISTANT_SUMMARY_MESSAGES.unavailable}
               logger={logger}
             />
           </div>
         ) : null}
-        {receiverSummary.surface === 'content' && receiverActionsVisible ? (
+        {summary.surface === 'content' && receiverActionsVisible ? (
           <AISummary
             mode="mid-call-receiver"
             containingPanelFocusTarget={panelRef}
             state="content"
-            requestPending={receiverSummary.feedbackPending}
-            selectedFeedback={receiverSummary.selectedFeedback}
-            contentRevision={receiverSummary.contentRevision}
+            requestPending={summary.feedbackPending}
+            selectedFeedback={summary.selectedFeedback}
+            contentRevision={summary.contentRevision}
             getReceiverCopyText={() => (receiverBranchRef.current ? extractCardText(receiverBranchRef.current) : '')}
-            onCopy={receiverSummary.recordReceiverSummaryCopied}
-            onFeedback={receiverSummary.setReceiverSummaryFeedback}
+            onCopy={summary.recordReceiverSummaryCopied}
+            onFeedback={summary.setReceiverSummaryFeedback}
           />
         ) : null}
-        {receiverSummary.surface === 'unavailable' || receiverSummary.surface === 'generic-error' ? (
-          <AISummary mode="mid-call-receiver" containingPanelFocusTarget={panelRef} state={receiverSummary.surface} />
+        {summary.surface === 'unavailable' || summary.surface === 'generic-error' ? (
+          <AISummary mode="mid-call-receiver" containingPanelFocusTarget={panelRef} state={summary.surface} />
+        ) : null}
+        {summary.surface === 'content' && !summary.content.adaptiveCard ? (
+          <AISummary mode="mid-call-receiver" containingPanelFocusTarget={panelRef} state="unavailable" />
         ) : null}
       </div>
     );
@@ -316,16 +313,18 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
 
   const renderReceiverSummaryTrigger = (classNameSuffix = '') =>
     canViewReceiverSummary ? (
-      <button
+      <Button
         type="button"
+        variant="tertiary"
+        size={28}
         onClick={openReceiverSummary}
         className={`ai-assistant__summary-trigger${classNameSuffix}`}
         data-testid="ai-assistant:view-summary"
-        aria-label={AI_SUMMARY_MESSAGES.viewSummary}
-        title={AI_SUMMARY_MESSAGES.viewSummary}
+        aria-label={AI_ASSISTANT_SUMMARY_MESSAGES.viewSummary}
+        title={AI_ASSISTANT_SUMMARY_MESSAGES.viewSummary}
       >
-        {AI_SUMMARY_MESSAGES.viewSummary}
-      </button>
+        {AI_ASSISTANT_SUMMARY_MESSAGES.viewSummary}
+      </Button>
     ) : null;
 
   const renderLauncherButton = () => (
@@ -382,7 +381,7 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
                 prefix-icon="cancel-bold"
                 aria-label="Close"
                 data-testid="ai-assistant:minimized-close"
-                onClick={closePanel}
+                onClick={close}
               />
               <Tooltip triggerID={`${headerActionId}-minimized-close`} placement="bottom" tooltipType="label">
                 Close
@@ -457,7 +456,7 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
                 prefix-icon="cancel-bold"
                 aria-label="Close"
                 data-testid="ai-assistant:header-close"
-                onClick={closePanel}
+                onClick={close}
               />
               <Tooltip triggerID={`${headerActionId}-close`} placement="bottom" tooltipType="label">
                 Close
@@ -476,27 +475,6 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
                 onAccept={() => wellness.onAccept('card')}
                 onLater={() => wellness.onLater('card')}
               />
-            ) : null}
-            {!showWellnessContent ? (
-              showReceiverSummary ? (
-                renderReceiverSummary()
-              ) : showLanding ? (
-                <AIAssistantLanding agentName={agentName} showRealTimeAssist={isFeatureEnabled} />
-              ) : (
-                <RealTimeAssist
-                  status={requestStatus}
-                  errorMessage={errorMessage}
-                  chatEntries={chatEntries}
-                  contextDraft={contextDraft}
-                  isRequesting={isRequesting}
-                  onRequestRealTimeAssist={requestRealTimeAssist}
-                  onContextDraftChange={setContextDraft}
-                  onSubmitContext={submitContext}
-                  hasInitialRequestSucceeded={hasInitialRequestSucceeded}
-                  onRealTimeAssistAction={onRealTimeAssistAction}
-                  logger={logger}
-                />
-              )
             ) : null}
             {(showWellnessSuggestion || (showWellnessRequestState && !showWellnessHistory)) && wellness ? (
               <WellnessBreakRequestCard
@@ -529,6 +507,27 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
               </section>
             ) : null}
             {showWellnessError && wellness ? <WellnessBreakError error={wellness.error} /> : null}
+            {!showWellnessContent ? (
+              showReceiverSummary ? (
+                renderReceiverSummary(receiverSummary!)
+              ) : showLanding ? (
+                <AIAssistantLanding agentName={agentName} showRealTimeAssist={isFeatureEnabled} />
+              ) : (
+                <RealTimeAssist
+                  status={requestStatus}
+                  errorMessage={errorMessage}
+                  chatEntries={chatEntries}
+                  contextDraft={contextDraft}
+                  isRequesting={isRequesting}
+                  onRequestRealTimeAssist={requestRealTimeAssist}
+                  onContextDraftChange={setContextDraft}
+                  onSubmitContext={submitContext}
+                  hasInitialRequestSucceeded={hasInitialRequestSucceeded}
+                  onRealTimeAssistAction={onRealTimeAssistAction}
+                  logger={logger}
+                />
+              )
+            ) : null}
           </div>
           {showFooter ? (
             <footer className="ai-assistant__footer" data-testid="ai-assistant:footer">

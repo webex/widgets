@@ -2,7 +2,7 @@ import React from 'react';
 import {act, fireEvent, render, screen, waitFor, within} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import AIAssistantComponent from '../../../src/components/AIAssistant/ai-assistant';
-import {AI_SUMMARY_MESSAGES} from '../../../src/components/AISummary';
+import {AI_ASSISTANT_SUMMARY_MESSAGES} from '../../../src/components/AIAssistant/AISummary';
 import type {
   AIAssistantComponentProps,
   AIAssistantActionEvent,
@@ -427,9 +427,9 @@ describe('AIAssistantComponent', () => {
 
     const trigger = screen.getByTestId('ai-assistant:view-summary');
     expect(trigger.tagName.toLowerCase()).toBe('button');
-    expect(trigger).toHaveTextContent(AI_SUMMARY_MESSAGES.viewSummary);
-    expect(trigger).toHaveAttribute('aria-label', AI_SUMMARY_MESSAGES.viewSummary);
-    expect(trigger).toHaveAttribute('title', AI_SUMMARY_MESSAGES.viewSummary);
+    expect(trigger).toHaveTextContent(AI_ASSISTANT_SUMMARY_MESSAGES.viewSummary);
+    expect(trigger).toHaveAttribute('aria-label', AI_ASSISTANT_SUMMARY_MESSAGES.viewSummary);
+    expect(trigger).toHaveAttribute('title', AI_ASSISTANT_SUMMARY_MESSAGES.viewSummary);
     expect(screen.getByTestId('ai-assistant:closed-chrome')).toContainElement(trigger);
 
     rerender(<AIAssistantComponent {...createProps({chrome: 'minimized', receiverSummary})} />);
@@ -547,7 +547,7 @@ describe('AIAssistantComponent', () => {
     const card = await screen.findByTestId('ai-assistant:adaptive-card');
     expect(within(card).queryByRole('button')).not.toBeInTheDocument();
 
-    const copyButton = await screen.findByRole('button', {name: AI_SUMMARY_MESSAGES.copySummary});
+    const copyButton = await screen.findByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary});
     expect(card).not.toContainElement(screen.getByTestId('ai-summary:actions'));
     fireEvent.click(copyButton);
 
@@ -560,7 +560,7 @@ describe('AIAssistantComponent', () => {
     renderStatefulReceiver('closed', receiverSummary);
 
     fireEvent.click(screen.getByTestId('ai-assistant:view-summary'));
-    const like = await screen.findByRole('button', {name: AI_SUMMARY_MESSAGES.like});
+    const like = await screen.findByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.like});
     fireEvent.click(like);
 
     expect(receiverSummary.setReceiverSummaryFeedback).toHaveBeenCalledWith('thumbs_up', 3);
@@ -572,12 +572,12 @@ describe('AIAssistantComponent', () => {
     renderStatefulReceiver('closed', receiverSummary);
 
     const viewSummary = screen.getByTestId('ai-assistant:view-summary');
-    expect(viewSummary).toHaveAttribute('aria-label', AI_SUMMARY_MESSAGES.viewSummary);
-    expect(viewSummary).toHaveAttribute('title', AI_SUMMARY_MESSAGES.viewSummary);
+    expect(viewSummary).toHaveAttribute('aria-label', AI_ASSISTANT_SUMMARY_MESSAGES.viewSummary);
+    expect(viewSummary).toHaveAttribute('title', AI_ASSISTANT_SUMMARY_MESSAGES.viewSummary);
     fireEvent.click(viewSummary);
 
     expect(await screen.findByTestId('ai-assistant:receiver-summary')).toBeInTheDocument();
-    expect(await screen.findByRole('button', {name: AI_SUMMARY_MESSAGES.like})).toBeDisabled();
+    expect(await screen.findByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.like})).toBeDisabled();
   });
 
   it('opens the receiver branch when Real-time Assist is disabled', async () => {
@@ -641,7 +641,7 @@ describe('AIAssistantComponent', () => {
     render(<Harness />);
 
     fireEvent.click(screen.getByTestId('ai-assistant:view-summary'));
-    const copyButton = await screen.findByRole('button', {name: AI_SUMMARY_MESSAGES.copySummary});
+    const copyButton = await screen.findByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary});
     act(() => {
       copyButton.focus();
     });
@@ -652,14 +652,14 @@ describe('AIAssistantComponent', () => {
     });
 
     expect(await screen.findByTestId('ai-assistant:adaptive-card-fallback')).toHaveTextContent(
-      AI_SUMMARY_MESSAGES.unavailable
+      AI_ASSISTANT_SUMMARY_MESSAGES.unavailable
     );
     await waitFor(() => expect(screen.queryByTestId('ai-summary:actions')).not.toBeInTheDocument());
-    expect(screen.queryByRole('button', {name: AI_SUMMARY_MESSAGES.copySummary})).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary})).not.toBeInTheDocument();
     expect(screen.getByTestId('ai-assistant:panel')).toHaveFocus();
   });
 
-  it.each([AI_SUMMARY_MESSAGES.copySummary, AI_SUMMARY_MESSAGES.like, AI_SUMMARY_MESSAGES.dislike])(
+  it.each([AI_ASSISTANT_SUMMARY_MESSAGES.copySummary, AI_ASSISTANT_SUMMARY_MESSAGES.like, AI_ASSISTANT_SUMMARY_MESSAGES.dislike])(
     'keeps the focused %s action connected when a valid receiver card is replaced',
     async (name) => {
       const receiverSummary = createReceiverSummary();
@@ -755,7 +755,7 @@ describe('AIAssistantComponent', () => {
     render(<Harness />);
 
     fireEvent.click(screen.getByTestId('ai-assistant:view-summary'));
-    const copyButton = await screen.findByRole('button', {name: AI_SUMMARY_MESSAGES.copySummary});
+    const copyButton = await screen.findByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary});
     act(() => {
       copyButton.focus();
     });

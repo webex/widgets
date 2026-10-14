@@ -1,10 +1,29 @@
 import type {RefObject, TextareaHTMLAttributes} from 'react';
 import type {AISummaryEntry, AISummaryFeedback, AISummarySections, getAISummarySurface} from '@webex/cc-store';
 
+export type AISummarySectionKey = keyof AISummarySections | 'resolution';
+
+export type AISummaryDisplaySection = {key: AISummarySectionKey; value: string};
+
+export type AISummaryTooltipControl = 'copy' | Exclude<AISummaryFeedback, 'none'>;
+
 export type AISummaryPresentationState = Exclude<ReturnType<typeof getAISummarySurface>, 'omitted'>;
 
 export type AISummaryEditorProps = Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, 'value'> & {
   value: string;
+};
+
+export type AISummarySectionEditorProps = {
+  section: AISummaryDisplaySection;
+  disabled: boolean;
+  onChange: (value: string) => void;
+  onEditorBlur: () => void;
+};
+
+export type AISummaryFeedbackButton = {
+  feedback: Exclude<AISummaryFeedback, 'none'>;
+  icon: string;
+  label: string;
 };
 
 type AISummaryBaseProps = {

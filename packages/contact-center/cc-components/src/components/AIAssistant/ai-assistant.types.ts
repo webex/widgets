@@ -100,6 +100,7 @@ export type AIAssistantChatEntry =
 export type AIAssistantReceiverSummary =
   | {
       surface: 'content';
+      /** Stable identity for this interaction's receiver summary; changes when the active interaction changes. */
       branchKey: string;
       content: NonNullable<AISummaryEntry['content']>;
       contentRevision: number;
@@ -110,6 +111,7 @@ export type AIAssistantReceiverSummary =
     }
   | {
       surface: 'unavailable' | 'generic-error';
+      /** Stable identity for this interaction's receiver summary; changes when the active interaction changes. */
       branchKey: string;
     };
 
