@@ -399,13 +399,17 @@ Unit tests are split by source file. `tests/store.ts` covers the singleton defau
 
 ## AI summaries
 
-`StoreWrapper` is the SDK boundary for summaries. `aiSummaries[interactionId][role]`
+`StoreWrapper` is the SDK boundary for summaries. `cc.aiSummaries[interactionId][role]`
 keeps the SDK summary, SDK response record and request state for `initiator`, `receiver`,
-and `post-call`. Requests, receiver events and actions read these records directly
-and replace them inside `runInAction`. A new result snapshots
-original sections and resets the response's edits, copy count and feedback. Refreshing
-or failing a request retains content already displayed and its response record; task
-removal and logout clear them.
+and `post-call`. Store requests and receiver events update these records inside
+`runInAction`; `src/aiAssistantHelper.ts` holds local copy and initiator/post-call
+feedback updates for those records. A new result snapshots original sections and resets the
+response's edits, copy count and feedback. Refreshing or failing a request retains
+content already displayed and its response record; task removal and logout clear them.
+
+The store observes `cc` by reference, so `registerCC` annotates `cc.aiSummaries` as an
+observable reference once. Replacing the summary map then notifies MobX consumers without
+making the SDK object deeply observable.
 
 An agent can receive a transferred call and then consult or transfer it again. The
 received card remains in AI Assistant while the initiator summary is used in the
@@ -415,10 +419,11 @@ interaction ID lets task cleanup remove them together; entries are created as ne
 
 - `requestMidCallSummary(action, task)` and `requestPostCallSummary(task)` call the
   corresponding Task SDK methods when `task.aiSummaryCapabilities` enables that summary
-  kind. Like suggested responses, summary requests and responses check the SDK flags
-  directly, with no additional media-type restriction. The SDK owns transport and request correlation;
-  the store keeps a request generation on the existing entry so an older settlement cannot
-  overwrite a newer request, even when the displayed content is edited during a refresh.
+  kind and return the SDK `AISummary` or `undefined`. Like suggested responses, summary
+  requests and responses check the SDK flags directly, with no additional media-type
+  restriction. The SDK owns transport and request correlation; the store keeps a request
+  generation on the existing entry so an older settlement cannot overwrite a newer
+  request, even when the displayed content is edited during a refresh.
 - `TASK_FEATURE_ENABLEMENT` (`task:featureEnablement`) refreshes the task view after the
   SDK updates `task.aiSummaryCapabilities`. The current task is refreshed so observers
   read the latest flags, including enablement arriving after the task and later disabling
@@ -430,11 +435,9 @@ interaction ID lets task cleanup remove them together; entries are created as ne
   summary text, cards and SDK metadata. The store does not filter sections, trim text,
   choose a display format or reject a received payload because of its format. Components
   choose what they display and edit from the SDK fields; edits preserve the other fields.
-  `getAISummarySurface` maps the request
-  lifecycle to a display state and respects the SDK's `areTranscriptsAvailable: false`
-  flag as unavailable; an SDK request rejection is a generic error. A failed refresh
-  keeps previously received content visible. Invalid transport payloads belong to the
-  SDK boundary.
+  Consumers use the request status and SDK `areTranscriptsAvailable` flag to select a
+  display state. A failed refresh keeps previously received content visible. Invalid
+  transport payloads belong to the SDK boundary.
 - Edits, copies and feedback carry the displayed revision. Initiator/post-call feedback
   remains local until the response is sent; receiver feedback is sent immediately and
   displayed as selected after the SDK confirms it. Each entry stores an SDK
@@ -449,9 +452,8 @@ interaction ID lets task cleanup remove them together; entries are created as ne
   preserving the other SDK fields and received-section snapshot. It sets
   `response.numberOfTimesEdited` to one; an unchanged value is a no-op. Each edit, copy
   and feedback action checks the displayed content and revision before updating its
-  record. Store access, result handling, logging and status notification are inline
-  in the owning request, action or SDK event handler; there are no private wrappers
-  around these operations.
+  record. The shared request method handles the two SDK request paths; actions and
+  receiver events update the same records.
 - Structured responses contain only sections whose values differ from the received
   snapshot, matching Agent Desktop. Each section edit updates that difference in the
   stored response; reverting it removes that section while preserving other edits.
@@ -459,18 +461,21 @@ interaction ID lets task cleanup remove them together; entries are created as ne
   Plain-text responses use the current SDK summary text. Receiver responses always use
   SDK `summaryText`, even when the same payload also contains sections or an adaptive
   card. Senders forward the SDK response record; receiver feedback sends the selected
-  feedback and commits it to the record after confirmation. The lifecycle selector
-  is exported from `src/storeEventsWrapper.ts` with the other summary operations.
-  There is no separate summary utility module, response composer, payload normalizer
-  or edit helper.
-- `getPostCallSummaryResponse` stores the wrap-up code on the SDK response record and
-  captures that record before wrap-up removes the task. Subsequent store updates replace
-  the record so the captured response remains stable. If no summary entry exists, it
-  returns an ignored response without creating an entry.
-  `sendPostCallSummaryResponse(response, task)` requires that original task to send it
-  afterward, because `currentTask` may already refer to another interaction. It reports
-  `submitted` or `response-failed` through `onAISummaryStatusChange`. Status details contain
-  no summary content.
+  feedback and commits it to the record after confirmation.
+  Local copy and initiator/post-call feedback updates are exported from
+  `src/aiAssistantHelper.ts` through the store package entry;
+  request, response, and receiver event handling remain in `StoreWrapper`.
+- `sendMidCallSummaryResponse(action, task)` and `sendPostCallSummaryResponse(wrapUpCode, task)`
+  return `AISummaryResponseSubmissionResult`: `submitted` after SDK acknowledgement,
+  `response-failed` after a failed send, or `not-applicable` when the required task or
+  summary capability is absent. Failed sends are logged and resolve with an outcome so
+  the initiating consult, transfer or wrap-up action can continue.
+- `sendPostCallSummaryResponse(wrapUpCode, task)` adds the wrap-up code to the SDK response
+  record and sends it on that task before `task.wrapup()` runs. This keeps the exact task
+  context available and removes the need for callers to capture and later submit a response.
+  If no summary entry exists, it sends an ignored response without creating an entry. It
+  resolves to `submitted` or `response-failed`; disabled post-call summaries return
+  `not-applicable`.
 
 The integration consumes `AISummary`, `AISummarySections`, `AISummaryResponse`,
 `AISummaryAction`, and `AISummaryFeedback` from `@webex/contact-center`.

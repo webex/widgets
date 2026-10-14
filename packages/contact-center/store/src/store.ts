@@ -1,4 +1,4 @@
-import {makeAutoObservable, observable, runInAction} from 'mobx';
+import {extendObservable, isObservableProp, makeAutoObservable, observable, runInAction} from 'mobx';
 import Webex, {ITask} from '@webex/contact-center';
 import {
   IContactCenter,
@@ -78,12 +78,9 @@ class Store implements IStore {
   legacyAuxCodeId = '';
   private wellnessIdleCodeRequestGeneration = 0;
 
-  aiSummaries: IStore['aiSummaries'] = {};
-
   constructor() {
     makeAutoObservable(this, {
       cc: observable.ref,
-      aiSummaries: observable.ref,
     });
   }
 
@@ -100,6 +97,9 @@ class Store implements IStore {
   registerCC(webex?: WithWebex['webex']): Promise<void> {
     if (webex) {
       this.cc = webex.cc;
+      if (!isObservableProp(this.cc, 'aiSummaries')) {
+        extendObservable(this.cc, {aiSummaries: {}}, {aiSummaries: observable.ref});
+      }
     }
 
     if (typeof webex === 'undefined' && typeof this.cc === 'undefined') {

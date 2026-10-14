@@ -59,6 +59,8 @@ import {
 
 //  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
 interface IContactCenter {
+  /** Widget-owned AI summary state associated with this SDK contact-center instance. */
+  aiSummaries: Record<string, Partial<Record<AISummaryRole, AISummaryEntry>>>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   on: (event: string, callback: (data: any) => void) => void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -327,7 +329,6 @@ interface IStore {
   legacyAgentState: string;
   legacyAuxCodeId: string;
 
-  aiSummaries: Record<string, Partial<Record<AISummaryRole, AISummaryEntry>>>;
   init(params: InitParams, callback: (ccSDK: IContactCenter) => void): Promise<void>;
   registerCC(webex?: WithWebex['webex']): Promise<void>;
   loadWellbeingBreakIdleCode(): Promise<void>;
@@ -381,19 +382,12 @@ interface IStoreWrapper extends IStore {
   submitBehavioralMetric(metric: WidgetsBehavioralMetric): void;
   resetWellnessSession(): void;
 
-  requestMidCallSummary(action: AISummaryAction, task?: ITask): Promise<void>;
-  requestPostCallSummary(task?: ITask): Promise<void>;
+  requestMidCallSummary(action: AISummaryAction, task?: ITask): Promise<AISummary | undefined>;
+  requestPostCallSummary(task?: ITask): Promise<AISummary | undefined>;
   editAISummary(
     role: AISummaryRole,
     key: keyof AISummarySections | 'summaryText',
     value: string,
-    expectedRevision: number,
-    task?: ITask
-  ): boolean;
-  recordAISummaryCopied(role: AISummaryRole, expectedRevision: number, task?: ITask): boolean;
-  setAISummaryFeedback(
-    role: Exclude<AISummaryRole, 'receiver'>,
-    feedback: Exclude<AISummaryFeedback, 'none'>,
     expectedRevision: number,
     task?: ITask
   ): boolean;
@@ -402,10 +396,8 @@ interface IStoreWrapper extends IStore {
     expectedRevision: number,
     task?: ITask
   ): Promise<void>;
-  sendMidCallSummaryResponse(action: AISummaryAction, task?: ITask): Promise<void>;
-  getPostCallSummaryResponse(wrapUpCode: string, task?: ITask): AISummaryResponse | undefined;
-  sendPostCallSummaryResponse(response: AISummaryResponse, task: ITask): Promise<'submitted' | 'response-failed'>;
-  onAISummaryStatusChange(listener: (detail: AISummaryStatusDetail) => void): () => void;
+  sendMidCallSummaryResponse(action: AISummaryAction, task?: ITask): Promise<AISummaryResponseSubmissionResult>;
+  sendPostCallSummaryResponse(wrapUpCode: string, task: ITask): Promise<AISummaryResponseSubmissionResult>;
 }
 
 interface IWrapupCode {
@@ -692,7 +684,7 @@ export const CAMPAIGN_PREVIEW_CAMPAIGN_TYPES = ['preview_standard', 'preview_dir
 /** The consult/transfer initiator's summary, the receiving agent's summary, or the wrap-up summary. */
 export type AISummaryRole = 'initiator' | 'receiver' | 'post-call';
 
-/** One summary of an interaction, stored at `aiSummaries[interactionId][role]`. */
+/** One summary of an interaction, stored at `cc.aiSummaries[interactionId][role]`. */
 export type AISummaryEntry = {
   /** Lifecycle of the latest request, or of the pushed receiver summary. */
   status: 'loading' | 'ready' | 'error';
@@ -714,7 +706,5 @@ export type AISummaryEntry = {
   action?: AISummaryAction;
 };
 
-/** Content-free summary status reported to the host through `onAISummaryStatusChange`. */
-export type AISummaryStatusDetail =
-  | {kind: 'mid-call'; state: 'available' | 'unavailable'}
-  | {kind: 'post-call'; state: 'available' | 'unavailable' | 'submitted' | 'response-failed'};
+/** Outcome of sending a mid-call or post-call summary response through the SDK. */
+export type AISummaryResponseSubmissionResult = 'submitted' | 'response-failed' | 'not-applicable';

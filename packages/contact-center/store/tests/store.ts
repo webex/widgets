@@ -9,6 +9,8 @@ let webexInitSpy;
 console.log = jest.fn(); // Mock console.log
 
 jest.mock('mobx', () => ({
+  extendObservable: (target, properties) => Object.assign(target, properties),
+  isObservableProp: (target, key) => Object.prototype.hasOwnProperty.call(target, key),
   makeAutoObservable: jest.fn(),
   observable: {ref: jest.fn()},
   runInAction: (action: () => void) => action(),
@@ -73,7 +75,6 @@ describe('Store', () => {
 
     expect(makeAutoObservable).toHaveBeenCalledWith(storeInstance, {
       cc: expect.any(Function),
-      aiSummaries: expect.any(Function),
     });
   });
 
