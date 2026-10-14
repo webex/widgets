@@ -23,10 +23,11 @@ console.error = jest.fn();
 console.log = jest.fn();
 
 import {CC_EVENTS, TASK_EVENTS} from '../src/store.types';
-import type {AISummaryAction, AISummaryEntry, AISummaryRole, RealTimeAssistPayload} from '../src/store.types';
+import type {AISummaryAction, AISummaryRole, RealTimeAssistPayload} from '../src/store.types';
 import type {AISummary, AISummaryResponse} from '@webex/contact-center';
 import {aiSummaryFixtures} from '../../test-fixtures/src/aiSummaryFixtures';
-import storeWrapper, {getAISummarySurface} from '../src/storeEventsWrapper';
+import {recordAISummaryCopied, setAISummaryFeedback} from '../src/aiAssistantHelper';
+import storeWrapper from '../src/storeEventsWrapper';
 import {ITask} from '../src/store.types';
 import {getConferenceParticipantDropRoster} from '../src/task-utils';
 import {
@@ -64,6 +65,7 @@ jest.mock('../src/store', () => ({
     teams: 'mockTeams',
     loginOptions: 'mockLoginOptions',
     cc: {
+      aiSummaries: {},
       on: jest.fn(),
       off: jest.fn(),
       addressBook: {
@@ -138,7 +140,6 @@ jest.mock('../src/store', () => ({
     showE911Modal: false,
     isEmergencyModalAlreadyDisplayed: false,
     realTimeAssist: {},
-    aiSummaries: {},
     setShowMultipleLoginAlert: jest.fn(),
     setCurrentState: jest.fn(),
     setLastStateChangeTimestamp: jest.fn(),
@@ -3914,7 +3915,7 @@ describe('storeEventsWrapper', () => {
 
     const summaryError = (errorCode: string) => Object.assign(new Error(errorCode), {data: {errorCode}});
 
-    const entryFor = (role: AISummaryRole) => storeWrapper.aiSummaries[INTERACTION_ID]?.[role];
+    const entryFor = (role: AISummaryRole) => storeWrapper.cc.aiSummaries[INTERACTION_ID]?.[role];
 
     const registerTaskEventListeners = (task: ITask) =>
       (storeWrapper as unknown as {registerTaskEventListeners: (t: ITask) => void}).registerTaskEventListeners(task);
@@ -3922,51 +3923,13 @@ describe('storeEventsWrapper', () => {
     const receivedListenerOf = (task: AISummaryTestTask) =>
       task.on.mock.calls.find(([event]) => event === TASK_EVENTS.TASK_MID_CALL_SUMMARY_RECEIVED)?.[1];
 
-    let statusListener: jest.Mock;
-    let unsubscribe: () => void;
-
     beforeEach(() => {
-      storeWrapper['store'].aiSummaries = {};
+      storeWrapper['store'].cc.aiSummaries = {};
       storeWrapper['aiSummaryReceivedListeners'] = {};
-      statusListener = jest.fn();
-      unsubscribe = storeWrapper.onAISummaryStatusChange(statusListener);
     });
 
     afterEach(() => {
-      unsubscribe();
-      storeWrapper['store'].aiSummaries = {};
-    });
-
-    describe('getAISummarySurface', () => {
-      const entryWith = (content?: Partial<AISummary>, overrides: Partial<AISummaryEntry> = {}): AISummaryEntry => ({
-        status: content ? 'ready' : 'loading',
-        revision: content ? 1 : 0,
-        response: {
-          summary: '',
-          feedback: 'none',
-          state: content ? 'DEFAULT' : 'IGNORED',
-          numberOfTimesViewed: content ? 1 : 0,
-          numberOfTimesEdited: 0,
-          numberOfTimesCopied: 0,
-        },
-        content: content ? {conversationId: INTERACTION_ID, ...content} : undefined,
-        originalSections: content?.sections ? {...content.sections} : undefined,
-        ...overrides,
-      });
-
-      it('should derive the surface from request state while keeping received content visible during a refresh', () => {
-        expect(getAISummarySurface(undefined)).toBe('omitted');
-        expect(getAISummarySurface(entryWith())).toBe('generating');
-        expect(getAISummarySurface(entryWith(undefined, {status: 'error'}))).toBe('generic-error');
-        expect(getAISummarySurface(entryWith({summaryText: 'Summary'}, {status: 'loading'}))).toBe('content');
-        expect(getAISummarySurface(entryWith({summaryText: 'Summary'}, {status: 'error'}))).toBe('content');
-      });
-
-      it('should use the SDK transcript availability flag without interpreting the payload format', () => {
-        expect(getAISummarySurface(entryWith({areTranscriptsAvailable: false}))).toBe('unavailable');
-        expect(getAISummarySurface(entryWith(aiSummaryFixtures.postCall.cardOnlyUnsupported))).toBe('content');
-        expect(getAISummarySurface(entryWith({sections: {nextSteps: ''}, summaryText: '  '}))).toBe('content');
-      });
+      storeWrapper['store'].cc.aiSummaries = {};
     });
 
     describe('requests', () => {
@@ -3990,7 +3953,6 @@ describe('storeEventsWrapper', () => {
           content: {sections: expect.any(Object)},
         });
         expect(entryFor('initiator').content).toEqual(aiSummaryFixtures.initiatingMidCall.typedSections);
-        expect(statusListener).toHaveBeenCalledWith({kind: 'mid-call', state: 'available'});
       });
 
       it('should preserve SDK fields without filtering sections or choosing a display format', async () => {
@@ -4018,8 +3980,7 @@ describe('storeEventsWrapper', () => {
 
         expect(postCallOnly.requestMidCallSummary).not.toHaveBeenCalled();
         expect(midCallOnly.requestPostCallSummary).not.toHaveBeenCalled();
-        expect(storeWrapper.aiSummaries).toEqual({});
-        expect(statusListener).not.toHaveBeenCalled();
+        expect(storeWrapper.cc.aiSummaries).toEqual({});
       });
 
       it('should use SDK summary enablement without filtering the task media type', async () => {
@@ -4032,7 +3993,7 @@ describe('storeEventsWrapper', () => {
         expect(task.requestMidCallSummary).toHaveBeenCalledWith('CONSULT');
         expect(task.requestPostCallSummary).toHaveBeenCalledTimes(1);
         expect(task.sendMidCallSummaryResponse).toHaveBeenCalledWith(entryFor('initiator').response, 'CONSULT');
-        expect(storeWrapper.getPostCallSummaryResponse('aux-billing', task)).toBe(entryFor('post-call').response);
+        expect(entryFor('post-call').response.wrapUpCode).toBeUndefined();
       });
 
       it('should apply only the latest request when the SDK replaces an earlier one', async () => {
@@ -4062,7 +4023,6 @@ describe('storeEventsWrapper', () => {
         const task = makeAISummaryTask();
         await storeWrapper.requestMidCallSummary('CONSULT', task);
         const shown = entryFor('initiator');
-        statusListener.mockClear();
         task.requestMidCallSummary.mockRejectedValueOnce(summaryError('MID_CALL_SUMMARY_TIMEOUT'));
 
         await storeWrapper.requestMidCallSummary('TRANSFER', task);
@@ -4074,7 +4034,6 @@ describe('storeEventsWrapper', () => {
           revision: shown.revision,
           action: 'CONSULT',
         });
-        expect(statusListener).not.toHaveBeenCalled();
       });
 
       it.each(['initiator', 'post-call'] as const)(
@@ -4096,7 +4055,6 @@ describe('storeEventsWrapper', () => {
           await first;
 
           expect(entryFor(role)).toMatchObject({status: 'loading'});
-          expect(statusListener).not.toHaveBeenCalled();
 
           newer.resolve(aiSummaryFixtures.initiatingMidCall.plainText);
           await latest;
@@ -4106,7 +4064,6 @@ describe('storeEventsWrapper', () => {
             revision: 1,
             content: {summaryText: aiSummaryFixtures.initiatingMidCall.plainText.summaryText},
           });
-          expect(statusListener).toHaveBeenCalledTimes(1);
         }
       );
 
@@ -4122,7 +4079,6 @@ describe('storeEventsWrapper', () => {
         await first;
 
         expect(entryFor('initiator')).toMatchObject({status: 'loading', revision: 0});
-        expect(statusListener).not.toHaveBeenCalled();
 
         newer.resolve(aiSummaryFixtures.initiatingMidCall.plainText);
         await latest;
@@ -4135,14 +4091,13 @@ describe('storeEventsWrapper', () => {
         });
       });
 
-      it('should record a failed first request and report it as unavailable', async () => {
+      it('should record a failed first request', async () => {
         const task = makeAISummaryTask();
         task.requestPostCallSummary.mockRejectedValueOnce(summaryError('POST_CALL_SUMMARY_TIMEOUT'));
 
         await storeWrapper.requestPostCallSummary(task);
 
         expect(entryFor('post-call')).toMatchObject({status: 'error', response: {state: 'NOT_RECEIVED'}});
-        expect(statusListener).toHaveBeenCalledWith({kind: 'post-call', state: 'unavailable'});
         expect(storeWrapper['store'].logger.error).toHaveBeenCalledWith(
           'CC-Widgets: AI summary request failed: Error: POST_CALL_SUMMARY_TIMEOUT',
           {module: 'storeEventsWrapper.ts', method: 'request'}
@@ -4159,10 +4114,9 @@ describe('storeEventsWrapper', () => {
           status: 'ready',
           content: aiSummaryFixtures.postCall.cardOnlyUnsupported,
         });
-        expect(statusListener).toHaveBeenCalledWith({kind: 'post-call', state: 'available'});
       });
 
-      it('should retain the SDK reply and report unavailable when transcripts are unavailable', async () => {
+      it('should retain the SDK reply when transcripts are unavailable', async () => {
         const task = makeAISummaryTask();
         const payload: AISummary = {conversationId: INTERACTION_ID, areTranscriptsAvailable: false};
         task.requestPostCallSummary.mockResolvedValueOnce(payload);
@@ -4170,7 +4124,6 @@ describe('storeEventsWrapper', () => {
         await storeWrapper.requestPostCallSummary(task);
 
         expect(entryFor('post-call')).toMatchObject({status: 'ready', content: payload});
-        expect(statusListener).toHaveBeenCalledWith({kind: 'post-call', state: 'unavailable'});
       });
 
       it('should drop a reply that arrives after the task was removed', async () => {
@@ -4183,14 +4136,13 @@ describe('storeEventsWrapper', () => {
         reply.resolve(aiSummaryFixtures.initiatingMidCall.typedSections);
         await request;
 
-        expect(storeWrapper.aiSummaries[INTERACTION_ID]).toBeUndefined();
-        expect(statusListener).not.toHaveBeenCalled();
+        expect(storeWrapper.cc.aiSummaries[INTERACTION_ID]).toBeUndefined();
       });
 
       it('should do nothing without a task', async () => {
         await storeWrapper.requestPostCallSummary(undefined);
 
-        expect(storeWrapper.aiSummaries).toEqual({});
+        expect(storeWrapper.cc.aiSummaries).toEqual({});
       });
     });
 
@@ -4208,7 +4160,6 @@ describe('storeEventsWrapper', () => {
           content: {adaptiveCard: expect.any(Object)},
         });
         expect(entryFor('receiver').content).toEqual(aiSummaryFixtures.receivingMidCall.adaptiveCard);
-        expect(statusListener).toHaveBeenCalledWith({kind: 'mid-call', state: 'available'});
 
         const consultTask = makeAISummaryTask({
           callProcessingDetails: {relationshipType: 'consult', parentInteractionId: 'parent-interaction'},
@@ -4229,7 +4180,6 @@ describe('storeEventsWrapper', () => {
           status: 'ready',
           content: aiSummaryFixtures.receivingMidCall.typedOnlyUnsupported,
         });
-        expect(statusListener).toHaveBeenCalledWith({kind: 'mid-call', state: 'available'});
       });
 
       it('should rebind the listener for a replacement task object and remove it with the task', () => {
@@ -4301,7 +4251,7 @@ describe('storeEventsWrapper', () => {
         await storeWrapper.requestMidCallSummary('CONSULT');
         await storeWrapper.requestPostCallSummary();
         await storeWrapper.sendMidCallSummaryResponse('CONSULT');
-        expect(storeWrapper.getPostCallSummaryResponse('aux-billing')).toBeDefined();
+        await expect(storeWrapper.sendPostCallSummaryResponse('aux-billing', task)).resolves.toBe('submitted');
 
         Object.assign(task, {aiSummaryCapabilities: disabled});
         featureListener({interactionId: INTERACTION_ID, ...disabled});
@@ -4313,7 +4263,7 @@ describe('storeEventsWrapper', () => {
         expect(task.requestMidCallSummary).toHaveBeenCalledTimes(1);
         expect(task.requestPostCallSummary).toHaveBeenCalledTimes(1);
         expect(task.sendMidCallSummaryResponse).toHaveBeenCalledTimes(1);
-        expect(storeWrapper.getPostCallSummaryResponse('aux-billing')).toBeUndefined();
+        await expect(storeWrapper.sendPostCallSummaryResponse('aux-billing', task)).resolves.toBe('not-applicable');
 
         getAllTasks.mockReturnValue({});
         storeWrapper.handleTaskRemove(task);
@@ -4331,8 +4281,8 @@ describe('storeEventsWrapper', () => {
         await storeWrapper.requestMidCallSummary('CONSULT', task);
 
         storeWrapper.editAISummary('initiator', 'additionalContext', 'Edited context', 1, task);
-        storeWrapper.recordAISummaryCopied('initiator', 1, task);
-        storeWrapper.setAISummaryFeedback('initiator', 'thumbs_up', 1, task);
+        recordAISummaryCopied(storeWrapper['store'].cc, 'initiator', 1, task);
+        setAISummaryFeedback(storeWrapper['store'].cc, 'initiator', 'thumbs_up', 1, task);
 
         const response: AISummaryResponse = {
           summary: {additionalContext: 'Edited context'},
@@ -4365,7 +4315,7 @@ describe('storeEventsWrapper', () => {
               : storeWrapper.requestPostCallSummary(task);
           const response = async () => {
             if (role === 'post-call') {
-              return storeWrapper.getPostCallSummaryResponse('aux-billing', task);
+              return entryFor('post-call')?.response;
             }
             await storeWrapper.sendMidCallSummaryResponse('CONSULT', task);
             return task.sendMidCallSummaryResponse.mock.calls[task.sendMidCallSummaryResponse.mock.calls.length - 1][0];
@@ -4400,9 +4350,9 @@ describe('storeEventsWrapper', () => {
         const task = makeAISummaryTask();
         await storeWrapper.requestMidCallSummary('CONSULT', task);
 
-        expect(storeWrapper.recordAISummaryCopied('initiator', 1, task)).toBe(true);
-        expect(storeWrapper.recordAISummaryCopied('initiator', 0, task)).toBe(false);
-        expect(storeWrapper.recordAISummaryCopied('receiver', 1, task)).toBe(false);
+        expect(recordAISummaryCopied(storeWrapper['store'].cc, 'initiator', 1, task)).toBe(true);
+        expect(recordAISummaryCopied(storeWrapper['store'].cc, 'initiator', 0, task)).toBe(false);
+        expect(recordAISummaryCopied(storeWrapper['store'].cc, 'receiver', 1, task)).toBe(false);
 
         expect(entryFor('initiator')).toMatchObject({response: {numberOfTimesCopied: 1, numberOfTimesEdited: 0}});
       });
@@ -4436,7 +4386,7 @@ describe('storeEventsWrapper', () => {
           content: {...payload, sections: {...payload.sections, nextSteps: 'Email the invoice.'}},
           originalSections: payload.sections,
         });
-        expect(storeWrapper.getPostCallSummaryResponse('aux-billing', task).summary).toEqual({
+        expect(entryFor('post-call').response.summary).toEqual({
           nextSteps: 'Email the invoice.',
         });
       });
@@ -4467,9 +4417,9 @@ describe('storeEventsWrapper', () => {
       it('should start a new summary without the previous copies, edits or feedback', async () => {
         const task = makeAISummaryTask();
         await storeWrapper.requestPostCallSummary(task);
-        storeWrapper.recordAISummaryCopied('post-call', 1, task);
+        recordAISummaryCopied(storeWrapper['store'].cc, 'post-call', 1, task);
         storeWrapper.editAISummary('post-call', 'summaryText', 'Edited', 1, task);
-        storeWrapper.setAISummaryFeedback('post-call', 'thumbs_up', 1, task);
+        setAISummaryFeedback(storeWrapper['store'].cc, 'post-call', 'thumbs_up', 1, task);
 
         await storeWrapper.requestPostCallSummary(task);
 
@@ -4487,8 +4437,8 @@ describe('storeEventsWrapper', () => {
         const request = storeWrapper.requestPostCallSummary(task);
 
         expect(storeWrapper.editAISummary('post-call', 'summaryText', 'Edited', 1, task)).toBe(true);
-        expect(storeWrapper.recordAISummaryCopied('post-call', 1, task)).toBe(true);
-        expect(storeWrapper.setAISummaryFeedback('post-call', 'thumbs_up', 1, task)).toBe(true);
+        expect(recordAISummaryCopied(storeWrapper['store'].cc, 'post-call', 1, task)).toBe(true);
+        expect(setAISummaryFeedback(storeWrapper['store'].cc, 'post-call', 'thumbs_up', 1, task)).toBe(true);
 
         refreshed.resolve(aiSummaryFixtures.postCall.plainText);
         await request;
@@ -4506,7 +4456,7 @@ describe('storeEventsWrapper', () => {
         task.requestMidCallSummary.mockReturnValue(deferred<AISummary>().promise);
         void storeWrapper.requestMidCallSummary('CONSULT', task);
 
-        expect(storeWrapper.recordAISummaryCopied('initiator', 0, task)).toBe(false);
+        expect(recordAISummaryCopied(storeWrapper['store'].cc, 'initiator', 0, task)).toBe(false);
         expect(storeWrapper.editAISummary('initiator', 'additionalContext', 'x', 0, task)).toBe(false);
       });
     });
@@ -4516,8 +4466,8 @@ describe('storeEventsWrapper', () => {
         const task = makeAISummaryTask();
         await storeWrapper.requestMidCallSummary('CONSULT', task);
 
-        expect(storeWrapper.setAISummaryFeedback('initiator', 'thumbs_up', 1, task)).toBe(true);
-        expect(storeWrapper.setAISummaryFeedback('initiator', 'thumbs_down', 0, task)).toBe(false);
+        expect(setAISummaryFeedback(storeWrapper['store'].cc, 'initiator', 'thumbs_up', 1, task)).toBe(true);
+        expect(setAISummaryFeedback(storeWrapper['store'].cc, 'initiator', 'thumbs_down', 0, task)).toBe(false);
         expect(entryFor('initiator')).toMatchObject({response: {feedback: 'thumbs_up'}});
         expect(task.sendMidCallSummaryResponse).not.toHaveBeenCalled();
 
@@ -4548,7 +4498,7 @@ describe('storeEventsWrapper', () => {
           'TRANSFER'
         );
 
-        storeWrapper.recordAISummaryCopied('receiver', 1, task);
+        recordAISummaryCopied(storeWrapper['store'].cc, 'receiver', 1, task);
         send.resolve();
         await feedback;
         expect(entryFor('receiver')).toMatchObject({
@@ -4619,7 +4569,7 @@ describe('storeEventsWrapper', () => {
         const task = makeAISummaryTask();
         await storeWrapper.requestMidCallSummary('CONSULT', task);
 
-        await storeWrapper.sendMidCallSummaryResponse('TRANSFER', task);
+        await expect(storeWrapper.sendMidCallSummaryResponse('TRANSFER', task)).resolves.toBe('submitted');
 
         expect(task.sendMidCallSummaryResponse).toHaveBeenCalledWith(
           expect.objectContaining({state: 'DEFAULT', numberOfTimesViewed: 1}),
@@ -4653,7 +4603,7 @@ describe('storeEventsWrapper', () => {
       it('should send nothing when mid-call summaries are disabled for the task', async () => {
         const task = makeAISummaryTask({}, {midCallEnabled: false, postCallEnabled: true});
 
-        await storeWrapper.sendMidCallSummaryResponse('CONSULT', task);
+        await expect(storeWrapper.sendMidCallSummaryResponse('CONSULT', task)).resolves.toBe('not-applicable');
 
         expect(task.sendMidCallSummaryResponse).not.toHaveBeenCalled();
       });
@@ -4679,11 +4629,11 @@ describe('storeEventsWrapper', () => {
         expect(entryFor('initiator').response.state).toBe('DEFAULT');
       });
 
-      it('should resolve even when the response send fails so the action can continue', async () => {
+      it('should return a failed outcome without rejecting so the action can continue', async () => {
         const task = makeAISummaryTask();
         task.sendMidCallSummaryResponse.mockRejectedValueOnce(new Error('503'));
 
-        await expect(storeWrapper.sendMidCallSummaryResponse('CONSULT', task)).resolves.toBeUndefined();
+        await expect(storeWrapper.sendMidCallSummaryResponse('CONSULT', task)).resolves.toBe('response-failed');
       });
     });
 
@@ -4692,49 +4642,30 @@ describe('storeEventsWrapper', () => {
         const task = makeAISummaryTask();
         await storeWrapper.requestPostCallSummary(task);
 
-        expect(storeWrapper.setAISummaryFeedback('post-call', 'thumbs_up', 1, task)).toBe(true);
+        expect(setAISummaryFeedback(storeWrapper['store'].cc, 'post-call', 'thumbs_up', 1, task)).toBe(true);
 
         expect(entryFor('post-call').response.feedback).toBe('thumbs_up');
         expect(task.sendPostCallSummaryResponse).not.toHaveBeenCalled();
       });
 
-      it('should capture the SDK response with the wrap-up code whenever post-call summaries are enabled', async () => {
+      it('should add the wrap-up code and send the SDK response before task wrap-up', async () => {
         const task = makeAISummaryTask();
 
-        expect(storeWrapper.getPostCallSummaryResponse('aux-billing', task)).toMatchObject({
-          summary: '',
-          state: 'IGNORED',
-          wrapUpCode: 'aux-billing',
-        });
-        expect(entryFor('post-call')).toBeUndefined();
-
         await storeWrapper.requestPostCallSummary(task);
-        const response = storeWrapper.getPostCallSummaryResponse('aux-billing', task);
-        expect(response).toMatchObject({
+        await expect(storeWrapper.sendPostCallSummaryResponse('aux-billing', task)).resolves.toBe('submitted');
+
+        expect(entryFor('post-call').response).toMatchObject({
           summary: aiSummaryFixtures.postCall.plainText.summaryText,
           state: 'DEFAULT',
           wrapUpCode: 'aux-billing',
         });
-        expect(response).toBe(entryFor('post-call').response);
-        storeWrapper.editAISummary('post-call', 'summaryText', 'Later edit', 1, task);
-        expect(entryFor('post-call').response.summary).toBe('Later edit');
-        expect(response.summary).toBe(aiSummaryFixtures.postCall.plainText.summaryText);
+        expect(task.sendPostCallSummaryResponse).toHaveBeenCalledWith(entryFor('post-call').response);
 
         const disabledTask = makeAISummaryTask({}, {midCallEnabled: true, postCallEnabled: false});
-        expect(storeWrapper.getPostCallSummaryResponse('aux-billing', disabledTask)).toBeUndefined();
-      });
-
-      it('should send the final response once and report it as submitted', async () => {
-        const task = makeAISummaryTask();
-        await storeWrapper.requestPostCallSummary(task);
-        const response = storeWrapper.getPostCallSummaryResponse('aux-billing', task);
-
-        await expect(storeWrapper.sendPostCallSummaryResponse(response, task)).resolves.toBe('submitted');
-
-        expect(task.sendPostCallSummaryResponse).toHaveBeenCalledTimes(1);
-        expect(task.sendPostCallSummaryResponse).toHaveBeenCalledWith(response);
-        expect(task.sendPostCallSummaryResponse.mock.calls[0][0]).toBe(response);
-        expect(statusListener).toHaveBeenCalledWith({kind: 'post-call', state: 'submitted'});
+        await expect(storeWrapper.sendPostCallSummaryResponse('aux-billing', disabledTask)).resolves.toBe(
+          'not-applicable'
+        );
+        expect(disabledTask.sendPostCallSummaryResponse).not.toHaveBeenCalled();
       });
 
       it('should report a failed final response without retrying it', async () => {
@@ -4742,59 +4673,41 @@ describe('storeEventsWrapper', () => {
         await storeWrapper.requestPostCallSummary(task);
         task.sendPostCallSummaryResponse.mockRejectedValueOnce(new Error('503'));
 
-        await expect(
-          storeWrapper.sendPostCallSummaryResponse(storeWrapper.getPostCallSummaryResponse('aux-billing', task), task)
-        ).resolves.toBe('response-failed');
+        await expect(storeWrapper.sendPostCallSummaryResponse('aux-billing', task)).resolves.toBe('response-failed');
 
         expect(task.sendPostCallSummaryResponse).toHaveBeenCalledTimes(1);
-        expect(statusListener).toHaveBeenCalledWith({kind: 'post-call', state: 'response-failed'});
+        expect(task.sendPostCallSummaryResponse).toHaveBeenCalledWith(
+          expect.objectContaining({wrapUpCode: 'aux-billing'})
+        );
       });
 
-      it('should report the outcome without recreating a summary removed with its task', async () => {
+      it('should update only the post-call response for the submitted task', async () => {
         const task = makeAISummaryTask();
         const nextTask = makeAISummaryTask();
         nextTask.data.interactionId = 'next-interaction';
         await storeWrapper.requestPostCallSummary(task);
-        const response = storeWrapper.getPostCallSummaryResponse('aux-billing', task);
-        storeWrapper.handleTaskRemove(task);
         storeWrapper['store'].currentTask = nextTask;
 
-        await expect(storeWrapper.sendPostCallSummaryResponse(response, task)).resolves.toBe('submitted');
+        await expect(storeWrapper.sendPostCallSummaryResponse('aux-billing', task)).resolves.toBe('submitted');
 
-        expect(task.sendPostCallSummaryResponse).toHaveBeenCalledWith(response);
+        expect(task.sendPostCallSummaryResponse).toHaveBeenCalledWith(
+          expect.objectContaining({wrapUpCode: 'aux-billing'})
+        );
         expect(nextTask.sendPostCallSummaryResponse).not.toHaveBeenCalled();
-        expect(storeWrapper.aiSummaries[INTERACTION_ID]).toBeUndefined();
-        expect(statusListener).toHaveBeenCalledWith({kind: 'post-call', state: 'submitted'});
       });
-    });
-
-    it('should stop notifying an unsubscribed listener and isolate a throwing one', async () => {
-      const task = makeAISummaryTask();
-      const throwingListener = jest.fn(() => {
-        throw new Error('host callback failed');
-      });
-      const unsubscribeThrowing = storeWrapper.onAISummaryStatusChange(throwingListener);
-      unsubscribe();
-
-      await expect(storeWrapper.requestMidCallSummary('CONSULT', task)).resolves.toBeUndefined();
-
-      expect(throwingListener).toHaveBeenCalledWith({kind: 'mid-call', state: 'available'});
-      expect(statusListener).not.toHaveBeenCalled();
-      expect(entryFor('initiator').status).toBe('ready');
-      unsubscribeThrowing();
     });
 
     it('should clear only the removed interaction summaries', async () => {
       const task = makeAISummaryTask();
       await storeWrapper.requestMidCallSummary('CONSULT', task);
-      storeWrapper['store'].aiSummaries = {
-        ...storeWrapper['store'].aiSummaries,
+      storeWrapper['store'].cc.aiSummaries = {
+        ...storeWrapper['store'].cc.aiSummaries,
         'other-interaction': {'post-call': entryFor('initiator')},
       };
 
       storeWrapper.handleTaskRemove(task);
 
-      expect(Object.keys(storeWrapper.aiSummaries)).toEqual(['other-interaction']);
+      expect(Object.keys(storeWrapper.cc.aiSummaries)).toEqual(['other-interaction']);
     });
   });
 

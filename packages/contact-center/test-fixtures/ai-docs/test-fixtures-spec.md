@@ -34,6 +34,8 @@ The package is structured as a flat set of fixture modules under `src/`, each on
 
 The load-bearing contract of this module is structural: each exported mock is typed against the real SDK / store / cc-components type (e.g. `mockCC: IContactCenter`, `mockProfile: Profile`, `mockTask: ITask`) so that when a consuming test passes a fixture into production code, the shape matches what production code expects at compile time. A maintainer changing a fixture should start at `src/fixtures.ts` and keep the declared types intact.
 
+`mockTask` and `makeMockTask` use the store's exported `ITask` contract. They provide disabled AI summary capabilities and stub request/response methods, so store consumers see the same task shape in tests.
+
 ## Purpose / Responsibility
 Provides shared, type-checked mock SDK instances, mock profile/task/queue/agent data, and component-prop fixtures consumed by other packages' Jest tests; it does NOT provide runtime behavior, test runners, or shared test-render helpers.
 
@@ -121,6 +123,9 @@ The module is a pass-through fixture library: no control flow, no async orchestr
 Shape fidelity is achieved by importing the real SDK/store types and annotating each fixture (`const mockCC: IContactCenter = {…}`). `tsc` then fails the build if a fixture drifts from the production type, which is the package's only automated guard. Where the SDK type is broader than what a fixture can fully populate, the code uses a targeted cast (`as unknown as TaskData`, `as {} as AddressBook`) — a deliberate, localized escape hatch documented in Pitfalls.
 
 Isolation is offered two ways. Static fixtures (`mockTask`, `mockCC`) are shared singletons — cheap but mutable, so tests that mutate must clone. Factory functions (`makeMockTask`, `makeMockCampaignTask`, `makeMockAddressBook`) return fresh objects with brand-new `jest.fn()`s each call, which is the safe path for tests that mutate or assert call counts.
+
+`mockCC.aiSummaries` starts empty to match the widget-owned state on `IContactCenter`; tests that
+populate it must reset or replace it to keep summary state isolated.
 
 Composition keeps the SDK mock single-sourced: outdial fixtures spread `mockCC` rather than redeclaring it, so a change to `mockCC` propagates. The same principle is why `mockQueuesResponse` is derived by mapping `mockQueueDetails` instead of being hand-written twice.
 
@@ -229,7 +234,8 @@ The package ships no tests of its own (no `tests/` directory; confirmed by tree)
 
 ## AI summary fixtures
 
-`src/aiSummaryFixtures.ts` exports SDK-typed inputs used by the store's widget-integration
+`src/aiSummaryFixtures.ts` exports inputs checked against the SDK summary type through
+`AISummaryEntry['content']` from the store. They are used by the store's widget-integration
 tests: initiating mid-call sections/plain text, receiving-agent Adaptive Cards with
 SDK summary text distinct from the displayed card, unsupported content, and post-call
 content with Outcome boundaries. The receiver text verifies that feedback preserves

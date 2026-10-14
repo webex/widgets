@@ -1240,26 +1240,35 @@ export const useCallControl = (props: useCallControlProps) => {
     }
   };
 
-  const wrapupCall = (wrapUpReason: string, auxCodeId: string) => {
+  const wrapupCall = async (wrapUpReason: string, auxCodeId: string): Promise<void> => {
     try {
       // Store auxCodeId for use in wrapupCallCallback
       lastWrapupAuxCodeIdRef.current = auxCodeId;
 
-      currentTask
-        .wrapup({wrapUpReason: wrapUpReason, auxCodeId: auxCodeId})
-        .then(() => {
-          const taskKeys = Object.keys(store.taskList);
-          if (taskKeys.length > 0) {
-            store.setCurrentTask(store.taskList[taskKeys[0]]);
-            store.setState({
-              developerName: ENGAGED_LABEL,
-              name: ENGAGED_USERNAME,
-            });
-          }
-        })
-        .catch((error: Error) => {
-          logError(`Error wrapping up call: ${error}`, 'wrapupCall');
-        });
+      if (currentTask.aiSummaryCapabilities?.postCallEnabled) {
+        try {
+          await store.sendPostCallSummaryResponse(auxCodeId, currentTask);
+        } catch (error) {
+          logger?.error(`CC-Widgets: AI summary response failed: ${error}`, {
+            module: 'useCallControl',
+            method: 'wrapupCall',
+          });
+        }
+      }
+
+      try {
+        await currentTask.wrapup({wrapUpReason, auxCodeId});
+        const taskKeys = Object.keys(store.taskList);
+        if (taskKeys.length > 0) {
+          store.setCurrentTask(store.taskList[taskKeys[0]]);
+          store.setState({
+            developerName: ENGAGED_LABEL,
+            name: ENGAGED_USERNAME,
+          });
+        }
+      } catch (error) {
+        logError(`Error wrapping up call: ${error}`, 'wrapupCall');
+      }
     } catch (error) {
       logger?.error(`CC-Widgets: Task: Error in wrapupCall - ${error.message}`, {
         module: 'useCallControl',
