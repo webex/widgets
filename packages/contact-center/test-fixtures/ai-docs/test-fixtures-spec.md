@@ -34,6 +34,8 @@ The package is structured as a flat set of fixture modules under `src/`, each on
 
 The load-bearing contract of this module is structural: each exported mock is typed against the real SDK / store / cc-components type (e.g. `mockCC: IContactCenter`, `mockProfile: Profile`, `mockTask: ITask`) so that when a consuming test passes a fixture into production code, the shape matches what production code expects at compile time. A maintainer changing a fixture should start at `src/fixtures.ts` and keep the declared types intact.
 
+`mockTask` and `makeMockTask` use the store's exported `ITask` contract. They provide disabled AI summary capabilities and stub request/response methods, so store consumers see the same task shape in tests.
+
 ## Purpose / Responsibility
 Provides shared, type-checked mock SDK instances, mock profile/task/queue/agent data, and component-prop fixtures consumed by other packages' Jest tests; it does NOT provide runtime behavior, test runners, or shared test-render helpers.
 
@@ -232,7 +234,8 @@ The package ships no tests of its own (no `tests/` directory; confirmed by tree)
 
 ## AI summary fixtures
 
-`src/aiSummaryFixtures.ts` exports SDK-typed inputs used by the store's widget-integration
+`src/aiSummaryFixtures.ts` exports inputs checked against the SDK summary type through
+`AISummaryEntry['content']` from the store. They are used by the store's widget-integration
 tests: initiating mid-call sections/plain text, receiving-agent Adaptive Cards with
 SDK summary text distinct from the displayed card, unsupported content, and post-call
 content with Outcome boundaries. The receiver text verifies that feedback preserves

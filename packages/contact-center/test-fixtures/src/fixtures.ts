@@ -1,5 +1,4 @@
 import type {
-  ITask,
   Interaction,
   Profile,
   TaskData,
@@ -9,7 +8,7 @@ import type {
   AddressBookEntriesResponse,
   ContactServiceQueuesResponse,
 } from '@webex/contact-center';
-import {IContactCenter} from '@webex/cc-store';
+import type {IContactCenter, ITask} from '@webex/cc-store';
 
 const mockProfile: Profile = {
   teams: [{teamId: 'team1', teamName: 'Team 1'}],
@@ -166,6 +165,11 @@ const mockTask = {
   } as unknown as TaskData,
   webCallMap: {},
   autoWrapup: undefined,
+  aiSummaryCapabilities: {midCallEnabled: false, postCallEnabled: false},
+  requestMidCallSummary: jest.fn().mockResolvedValue({}),
+  requestPostCallSummary: jest.fn().mockResolvedValue({}),
+  sendMidCallSummaryResponse: jest.fn().mockResolvedValue(undefined),
+  sendPostCallSummaryResponse: jest.fn().mockResolvedValue(undefined),
   on: jest.fn(),
   off: jest.fn(),
   emit: jest.fn(),
@@ -222,6 +226,10 @@ const makeMockTask = (overrides?: MakeMockTaskOverrides): ITask => {
         ...interactionOverrides,
       },
     } as unknown as TaskData,
+    requestMidCallSummary: jest.fn().mockResolvedValue({}),
+    requestPostCallSummary: jest.fn().mockResolvedValue({}),
+    sendMidCallSummaryResponse: jest.fn().mockResolvedValue(undefined),
+    sendPostCallSummaryResponse: jest.fn().mockResolvedValue(undefined),
     on: jest.fn(),
     off: jest.fn(),
     once: jest.fn(),

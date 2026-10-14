@@ -7961,7 +7961,7 @@ describe('Task Hook Error Handling and Logging', () => {
       });
     });
 
-    it('should handle synchronous errors in wrapupCall', () => {
+    it('should handle synchronous errors in wrapupCall', async () => {
       const errorTask = {
         ...mockTaskWithInteraction,
         wrapup: jest.fn().mockImplementation(() => {
@@ -7979,17 +7979,14 @@ describe('Task Hook Error Handling and Logging', () => {
         })
       );
 
-      act(() => {
-        result.current.wrapupCall('test reason', '123');
+      await act(async () => {
+        await result.current.wrapupCall('test reason', '123');
       });
 
-      expect(logger.error).toHaveBeenCalledWith(
-        'CC-Widgets: Task: Error in wrapupCall - wrapupCall synchronous error',
-        {
-          module: 'useCallControl',
-          method: 'wrapupCall',
-        }
-      );
+      expect(logger.error).toHaveBeenCalledWith('Error wrapping up call: Error: wrapupCall synchronous error', {
+        module: 'widget-cc-task#helper.ts',
+        method: 'useCallControl#wrapupCall',
+      });
     });
 
     it('should handle errors in getAddressBookEntries', async () => {
