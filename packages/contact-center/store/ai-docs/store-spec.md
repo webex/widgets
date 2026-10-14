@@ -403,13 +403,16 @@ Unit tests are split by source file. `tests/store.ts` covers the singleton defau
 keeps the SDK summary, SDK response record and request state for `initiator`, `receiver`,
 and `post-call`. Store requests and receiver events update these records inside
 `runInAction`; `src/aiAssistantHelper.ts` holds local copy and initiator/post-call
-feedback updates for those records. A new result snapshots original sections and resets the
-response's edits, copy count and feedback. Refreshing or failing a request retains
+feedback updates for those records, with its argument types in `src/store.types.ts`.
+A new result snapshots original sections and resets the response's edits, copy count
+and feedback. Refreshing or failing a request retains
 content already displayed and its response record; task removal and logout clear them.
 
-The store observes `cc` by reference, so `registerCC` annotates `cc.aiSummaries` as an
-observable reference once. Replacing the summary map then notifies MobX consumers without
-making the SDK object deeply observable.
+The store observes `cc` by reference. `registerCC` initializes the widget-owned
+`cc.aiSummaries` map when the SDK does not provide one; it does not make SDK fields
+observable. SDK events and request results update the map, while current consumers
+read it through the summary APIs. A component that directly observes this map in the
+future will need an observable state path.
 
 An agent can receive a transferred call and then consult or transfer it again. The
 received card remains in AI Assistant while the initiator summary is used in the
@@ -417,10 +420,10 @@ consult/transfer modal, so their content, copies and feedback stay independent.
 The post-call entry holds the wrap-up summary. Grouping these entries under the task's
 interaction ID lets task cleanup remove them together; entries are created as needed.
 
-- `requestMidCallSummary(action, task)` and `requestPostCallSummary(task)` call the
-  corresponding Task SDK methods when `task.aiSummaryCapabilities` enables that summary
-  kind and return the SDK `AISummary` or `undefined`. Like suggested responses, summary
-  requests and responses check the SDK flags directly, with no additional media-type
+- `requestMidCallSummary(action, task)` and `requestPostCallSummary(task)` each call their
+  corresponding Task SDK method directly when `task.aiSummaryCapabilities` enables that
+  summary kind, and return the SDK `AISummary` or `undefined`. Like suggested responses,
+  summary requests and responses check the SDK flags directly, with no additional media-type
   restriction. The SDK owns transport and request correlation; the store keeps a request
   generation on the existing entry so an older settlement cannot overwrite a newer
   request, even when the displayed content is edited during a refresh.
@@ -452,8 +455,8 @@ interaction ID lets task cleanup remove them together; entries are created as ne
   preserving the other SDK fields and received-section snapshot. It sets
   `response.numberOfTimesEdited` to one; an unchanged value is a no-op. Each edit, copy
   and feedback action checks the displayed content and revision before updating its
-  record. The shared request method handles the two SDK request paths; actions and
-  receiver events update the same records.
+  record. Each request method handles its own SDK path; actions and receiver events
+  update the same records.
 - Structured responses contain only sections whose values differ from the received
   snapshot, matching Agent Desktop. Each section edit updates that difference in the
   stored response; reverting it removes that section while preserving other edits.

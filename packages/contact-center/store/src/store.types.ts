@@ -684,6 +684,12 @@ export const CAMPAIGN_PREVIEW_CAMPAIGN_TYPES = ['preview_standard', 'preview_dir
 /** The consult/transfer initiator's summary, the receiving agent's summary, or the wrap-up summary. */
 export type AISummaryRole = 'initiator' | 'receiver' | 'post-call';
 
+/** Store-owned summary map used by local copy and feedback updates. */
+export type AISummaryCC = Pick<IContactCenter, 'aiSummaries'>;
+
+/** Task identity needed by local copy and feedback updates. */
+export type AISummaryTask = {data?: {interactionId?: string}};
+
 /** One summary of an interaction, stored at `cc.aiSummaries[interactionId][role]`. */
 export type AISummaryEntry = {
   /** Lifecycle of the latest request, or of the pushed receiver summary. */

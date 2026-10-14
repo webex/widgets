@@ -480,31 +480,25 @@ class StoreWrapper implements IStoreWrapper {
     });
   };
 
-  // The SDK correlates replies; the store also guards settlements so an older request cannot replace
-  // a newer request's UI state, including when its send acknowledgement fails after replacement.
+  // The SDK correlates replies; the store also guards settlements so an older request
+  // cannot replace a newer request's state, including when the older request fails.
 
-  private async requestAISummary(
-    task: ITask,
-    requestOptions: {
-      action?: AISummaryAction;
-      enabled: boolean;
-      request: () => Promise<AISummary>;
-      role: 'initiator' | 'post-call';
-    }
-  ): Promise<AISummary | undefined> {
-    const {action, enabled, request, role} = requestOptions;
-    if (!enabled) {
+  requestMidCallSummary = async (
+    action: AISummaryAction,
+    task: ITask = this.currentTask
+  ): Promise<AISummary | undefined> => {
+    if (!task?.aiSummaryCapabilities?.midCallEnabled) {
       return undefined;
     }
     const interactionId = task.data.interactionId;
     const requestGeneration = ++this.aiSummaryRequestGeneration;
-    const entry = this.store.cc.aiSummaries[interactionId]?.[role];
+    const entry = this.store.cc.aiSummaries[interactionId]?.initiator;
     runInAction(() => {
       this.store.cc.aiSummaries = {
         ...this.store.cc.aiSummaries,
         [interactionId]: {
           ...this.store.cc.aiSummaries[interactionId],
-          [role]: {
+          initiator: {
             revision: 0,
             ...entry,
             response: entry?.content ? entry.response : {...EMPTY_AI_SUMMARY_RESPONSE},
@@ -517,14 +511,14 @@ class StoreWrapper implements IStoreWrapper {
 
     let result: AISummary | undefined;
     try {
-      result = await request();
+      result = await task.requestMidCallSummary(action);
     } catch (error) {
       this.store.logger?.error(`CC-Widgets: AI summary request failed: ${error}`, {
         module: 'storeEventsWrapper.ts',
         method: 'request',
       });
     }
-    const current = this.store.cc.aiSummaries[interactionId]?.[role];
+    const current = this.store.cc.aiSummaries[interactionId]?.initiator;
     if (current?.requestGeneration !== requestGeneration) {
       return undefined;
     }
@@ -542,7 +536,7 @@ class StoreWrapper implements IStoreWrapper {
             state: 'DEFAULT',
             numberOfTimesViewed: 1,
           },
-          action: action ?? current.action,
+          action,
         }
       : {
           ...current,
@@ -553,26 +547,76 @@ class StoreWrapper implements IStoreWrapper {
     runInAction(() => {
       this.store.cc.aiSummaries = {
         ...this.store.cc.aiSummaries,
-        [interactionId]: {...this.store.cc.aiSummaries[interactionId], [role]: updated},
+        [interactionId]: {...this.store.cc.aiSummaries[interactionId], initiator: updated},
       };
     });
     return result;
-  }
+  };
 
-  requestMidCallSummary = (action: AISummaryAction, task: ITask = this.currentTask): Promise<AISummary | undefined> =>
-    this.requestAISummary(task, {
-      action,
-      enabled: task?.aiSummaryCapabilities.midCallEnabled === true,
-      request: () => task.requestMidCallSummary(action),
-      role: 'initiator',
+  requestPostCallSummary = async (task: ITask = this.currentTask): Promise<AISummary | undefined> => {
+    if (!task?.aiSummaryCapabilities?.postCallEnabled) {
+      return undefined;
+    }
+    const interactionId = task.data.interactionId;
+    const requestGeneration = ++this.aiSummaryRequestGeneration;
+    const entry = this.store.cc.aiSummaries[interactionId]?.['post-call'];
+    runInAction(() => {
+      this.store.cc.aiSummaries = {
+        ...this.store.cc.aiSummaries,
+        [interactionId]: {
+          ...this.store.cc.aiSummaries[interactionId],
+          'post-call': {
+            revision: 0,
+            ...entry,
+            response: entry?.content ? entry.response : {...EMPTY_AI_SUMMARY_RESPONSE},
+            status: 'loading',
+            requestGeneration,
+          },
+        },
+      };
     });
 
-  requestPostCallSummary = (task: ITask = this.currentTask): Promise<AISummary | undefined> =>
-    this.requestAISummary(task, {
-      enabled: task?.aiSummaryCapabilities.postCallEnabled === true,
-      request: () => task.requestPostCallSummary(),
-      role: 'post-call',
+    let result: AISummary | undefined;
+    try {
+      result = await task.requestPostCallSummary();
+    } catch (error) {
+      this.store.logger?.error(`CC-Widgets: AI summary request failed: ${error}`, {
+        module: 'storeEventsWrapper.ts',
+        method: 'request',
+      });
+    }
+    const current = this.store.cc.aiSummaries[interactionId]?.['post-call'];
+    if (current?.requestGeneration !== requestGeneration) {
+      return undefined;
+    }
+
+    // A new result resets edits, copies and feedback; a failed refresh keeps the summary already shown.
+    const updated: AISummaryEntry = result
+      ? {
+          status: 'ready',
+          content: result,
+          originalSections: result.sections ? {...result.sections} : undefined,
+          revision: current.revision + 1,
+          response: {
+            ...EMPTY_AI_SUMMARY_RESPONSE,
+            summary: result.sections ? {} : (result.summaryText ?? ''),
+            state: 'DEFAULT',
+            numberOfTimesViewed: 1,
+          },
+        }
+      : {
+          ...current,
+          status: 'error',
+          response: current.content ? current.response : {...current.response, state: 'NOT_RECEIVED'},
+        };
+    runInAction(() => {
+      this.store.cc.aiSummaries = {
+        ...this.store.cc.aiSummaries,
+        [interactionId]: {...this.store.cc.aiSummaries[interactionId], 'post-call': updated},
+      };
     });
+    return result;
+  };
 
   editAISummary = (
     role: AISummaryRole,

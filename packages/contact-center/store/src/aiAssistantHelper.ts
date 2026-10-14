@@ -1,8 +1,5 @@
 import {runInAction} from 'mobx';
-import type {AISummaryFeedback, AISummaryRole, IContactCenter} from './store.types';
-
-type AISummaryTask = {data?: {interactionId?: string}};
-type AISummaryCC = Pick<IContactCenter, 'aiSummaries'>;
+import type {AISummaryCC, AISummaryFeedback, AISummaryRole, AISummaryTask} from './store.types';
 
 /** Records that a displayed AI summary was copied without making an SDK call. */
 export const recordAISummaryCopied = (
