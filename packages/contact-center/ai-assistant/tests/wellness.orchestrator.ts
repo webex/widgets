@@ -2,6 +2,7 @@ import {act, renderHook, waitFor} from '@testing-library/react';
 import type {UseWellnessBreakInput} from '../src/ai-assistant.types';
 import {useWellnessBreak, WELLNESS_OFFER_TIMEOUT_MS, WELLNESS_RECOVERY_KEY} from '../src/wellness/useWellnessBreak';
 import store from '@webex/cc-store';
+import {loadWellnessSoundUrl} from '../src/wellness/assets/media.cjs';
 
 jest.mock('../src/wellness/assets/media.cjs', () => ({
   loadWellnessSoundUrl: jest.fn().mockResolvedValue('/wellness.mp3'),
@@ -753,6 +754,7 @@ describe('useWellnessBreak', () => {
       await Promise.resolve();
     });
     expect(audioConstructor).toHaveBeenCalledWith('/wellness.mp3');
+    expect(loadWellnessSoundUrl).not.toHaveBeenCalled();
     expect(audio.load).toHaveBeenCalledTimes(1);
     expect(audio.play).not.toHaveBeenCalled();
 

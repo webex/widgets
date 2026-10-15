@@ -40,7 +40,7 @@ export interface IAIAssistantProps {
   onWellnessBreakEnded?: () => void;
   /** Fired with a stable, non-PII lifecycle error shape. */
   onWellnessBreakError?: (error: WellnessBreakError) => void;
-  /** Optional host/CDN audio URL. Defaults to the packaged wellness audio asset. */
+  /** Optional host/CDN audio URL. The packaged default is a data URL; use this override if CSP blocks data media. */
   wellnessAudioUrl?: string;
   /** Controls whether the break covers the viewport, assistant root, or a host element. */
   wellnessBreakOverlayTarget?: WellnessBreakOverlayTarget;
