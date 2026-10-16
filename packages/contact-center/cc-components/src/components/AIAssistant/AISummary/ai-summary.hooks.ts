@@ -38,11 +38,30 @@ const flattenContentForCopy = (content: NonNullable<AISummaryEntry['content']>):
     .join('\n\n');
 };
 
+// Local edits are a presentation overlay; retain the SDK payload as the action identity.
+const getDisplayContent = (props: AISummaryProps): AISummaryEntry['content'] => {
+  const {content} = props;
+  if (!content || props.mode === 'mid-call-receiver' || props.editedSummary === undefined) {
+    return content;
+  }
+  return typeof props.editedSummary === 'string'
+    ? {...content, summaryText: props.editedSummary}
+    : {...content, sections: {...content.sections, ...props.editedSummary}};
+};
+
 export const useAISummaryInteractions = (props: AISummaryProps) => {
   const rootRef = useRef<HTMLDivElement>(null);
-  const latestPropsRef = useRef(props);
+  const displayContent = getDisplayContent(props);
+  // Compare visible values, so response bookkeeping does not reset copy feedback.
+  const displayValue =
+    props.mode === 'mid-call-receiver' || !displayContent
+      ? undefined
+      : JSON.stringify(
+          displayContent.sections ? getDisplaySections(displayContent) : (displayContent.summaryText ?? '')
+        );
+  const latestPropsRef = useRef({props, displayValue});
   useLayoutEffect(() => {
-    latestPropsRef.current = props;
+    latestPropsRef.current = {props, displayValue};
   });
   const focusedControlRef = useRef<HTMLElement | null>(null);
   const successorRef = useRef<HTMLElement | null>(null);
@@ -65,7 +84,7 @@ export const useAISummaryInteractions = (props: AISummaryProps) => {
 
   useEffect(() => {
     setCopied(false);
-  }, [props.content, props.mode, props.state]);
+  }, [props.content, props.mode, props.state, displayValue]);
 
   useEffect(() => {
     if (!copied) {
@@ -152,8 +171,8 @@ export const useAISummaryInteractions = (props: AISummaryProps) => {
       const text =
         props.mode === 'mid-call-receiver'
           ? props.getReceiverCopyText()
-          : props.content
-            ? flattenContentForCopy(props.content)
+          : displayContent
+            ? flattenContentForCopy(displayContent)
             : '';
       if (text.trim().length === 0) {
         return;
@@ -162,14 +181,15 @@ export const useAISummaryInteractions = (props: AISummaryProps) => {
     } catch {
       return;
     }
-    // Clipboard writes can finish after another SDK summary is displayed.
-    // Keep completion local to the content and surface that initiated the copy.
-    const current = latestPropsRef.current;
+    // Clipboard writes can finish after another summary or local edit is displayed.
+    // Keep completion local to the content and visible values that initiated the copy.
+    const {props: current, displayValue: currentDisplayValue} = latestPropsRef.current;
     if (
       !rootRef.current ||
       current.state !== 'content' ||
       current.mode !== props.mode ||
-      current.content !== props.content
+      current.content !== props.content ||
+      currentDisplayValue !== displayValue
     ) {
       return;
     }
@@ -196,6 +216,7 @@ export const useAISummaryInteractions = (props: AISummaryProps) => {
 
   return {
     rootRef,
+    displayContent,
     copied,
     setCopied,
     hoveredTooltip,

@@ -423,6 +423,28 @@ Evidence: `components/AIAssistant/AISummary/` and `components/AIAssistant/`; tes
 `tests/components/AIAssistant/ai-assistant.tsx`, and
 `tests/components/AIAssistant/adaptive-card-renderer.test.tsx`.
 
+## AI summaries in CallControl
+
+Consult/transfer and wrap-up panels forward their summary view props to the shared
+`AIAssistant/AISummary` component. The widget binds callbacks to the displayed SDK
+content and supplies local response edits separately through `editedSummary`, so
+raw content retains its identity. These components perform no SDK operations.
+
+The wrap-up panel owns reason search and selection. Complete Wrap-Up stays enabled
+while summary generation is pending and disables completion and summary editing
+while wrap-up itself is pending. Failed completion retains the selected reason and
+draft. An absent summary prop preserves the existing CallControl form.
+
+Summary focus recovery applies only after a focused summary control is removed and
+no connected control has taken focus. Consult/transfer retains its summary layout
+until the popover closes after capability revocation, preserving its focus target
+and close action. React-generated heading IDs label the panels. Requests, local
+response changes, retry and submission remain in the widget/store layers.
+
+Evidence: `components/task/CallControl/call-control.tsx` and `CallControlCustom/`;
+tests: `tests/components/task/CallControl/call-control.tsx`,
+`CallControlCustom/consult-transfer-popover.tsx`, and `CallControlCustom/wrap-up-summary.tsx`.
+
 ## Traceability
 
 - Repo architecture: [`ARCHITECTURE.md`](../../../../ai-docs/ARCHITECTURE.md) · Registry: [`SPEC_INDEX.md`](../../../../ai-docs/SPEC_INDEX.md) · Contracts: [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md)

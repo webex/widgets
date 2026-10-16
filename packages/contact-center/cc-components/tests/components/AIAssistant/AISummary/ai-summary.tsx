@@ -1,7 +1,7 @@
 import React from 'react';
 import {act, fireEvent, render, screen, waitFor, within} from '@testing-library/react';
 import '@testing-library/jest-dom';
-import type {AISummaryEntry} from '@webex/cc-store';
+import type {AISummaryEntry, AISummaryResponse} from '@webex/cc-store';
 import AISummaryComponent, {
   AI_ASSISTANT_SUMMARY_MESSAGES,
   AI_ASSISTANT_SUMMARY_SECTION_ORDER,
@@ -673,6 +673,154 @@ describe('AISummary', () => {
     expect(container.querySelector('img')).toBeNull();
     expect(container.querySelector('script')).toBeNull();
     expect(container.querySelector('[aria-live], [role="status"], [role="alert"]')).toBeNull();
+  });
+
+  it.each(['mid-call-initiator', 'post-call'] as const)(
+    'renders and copies controlled plain edits in %s without replacing the SDK payload',
+    async (mode) => {
+      const content = Object.freeze({...textContent});
+      const onCopy = jest.fn().mockReturnValue(true);
+      const ControlledSummary = () => {
+        const [editedSummary, setEditedSummary] = React.useState('Agent correction');
+        const editableProps = {
+          state: 'content' as const,
+          content,
+          editedSummary,
+          onEdit: (key: 'summaryText' | keyof NonNullable<AISummaryContent['sections']>, value: string) => {
+            expect(key).toBe('summaryText');
+            setEditedSummary(value);
+            return true;
+          },
+          onCopy,
+          onFeedback: jest.fn(),
+        };
+        return mode === 'post-call' ? (
+          <AISummary {...editableProps} mode="post-call" onRetry={jest.fn()} />
+        ) : (
+          <AISummary {...editableProps} mode="mid-call-initiator" />
+        );
+      };
+      render(<ControlledSummary />);
+
+      const editor = screen.getByRole('textbox', {name: AI_ASSISTANT_SUMMARY_MESSAGES.plainSummary});
+      expect(editor).toHaveValue('Agent correction');
+      fireEvent.change(editor, {target: {value: 'Final agent correction'}});
+      expect(editor).toHaveValue('Final agent correction');
+      fireEvent.click(await screen.findByRole('button', {name: LITERAL_SUMMARY_COPY.copySummary}));
+
+      await waitFor(() => expect(onCopy).toHaveBeenCalledTimes(1));
+      expect(navigator.clipboard.writeText).toHaveBeenCalledWith('Final agent correction');
+      expect(content).toEqual(textContent);
+    }
+  );
+
+  it('merges controlled section edits over the SDK sections and keeps SDK Outcome read-only', async () => {
+    const content = Object.freeze({...sectionContent, sections: Object.freeze({...sectionContent.sections})});
+    const onCopy = jest.fn().mockReturnValue(true);
+    render(
+      <AISummary
+        mode="post-call"
+        state="content"
+        content={content}
+        editedSummary={{initialContactReason: 'Agent corrected the contact reason.'}}
+        onEdit={jest.fn()}
+        onCopy={onCopy}
+        onFeedback={jest.fn()}
+        onRetry={jest.fn()}
+      />
+    );
+
+    expect(screen.getByText('Agent corrected the contact reason.')).toBeInTheDocument();
+    expect(screen.getByText(sectionContent.sections?.nextSteps ?? '')).toBeInTheDocument();
+    expect(screen.getByText(sectionContent.resolution ?? '')).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', {
+        name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.resolution),
+      })
+    ).not.toBeInTheDocument();
+    fireEvent.click(await screen.findByRole('button', {name: LITERAL_SUMMARY_COPY.copySummary}));
+
+    await waitFor(() => expect(onCopy).toHaveBeenCalledTimes(1));
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+      `${AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason}: Agent corrected the contact reason.\n\n` +
+        `${AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.resolution}: ${sectionContent.resolution}\n\n` +
+        `${AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.nextSteps}: ${sectionContent.sections?.nextSteps}`
+    );
+    expect(content).toEqual(sectionContent);
+  });
+
+  it.each([
+    ['plain', textContent, 'First agent correction', 'Second agent correction'],
+    [
+      'structured',
+      sectionContent,
+      {initialContactReason: 'First agent correction'},
+      {initialContactReason: 'Second agent correction'},
+    ],
+  ] as const)(
+    'ignores a pending clipboard completion after %s edits change on the same SDK payload',
+    async (_kind, content, initialEdit, nextEdit) => {
+      let finishCopy: () => void = () => undefined;
+      clipboardWrite(
+        () =>
+          new Promise<void>((resolve) => {
+            finishCopy = resolve;
+          })
+      );
+      const onCopy = jest.fn().mockReturnValue(true);
+      const renderSummary = (editedSummary: AISummaryResponse['summary']) => (
+        <AISummary
+          mode="post-call"
+          state="content"
+          content={content}
+          editedSummary={editedSummary}
+          onEdit={jest.fn()}
+          onCopy={onCopy}
+          onFeedback={jest.fn()}
+          onRetry={jest.fn()}
+        />
+      );
+      const {rerender} = render(renderSummary(initialEdit));
+      fireEvent.click(await screen.findByRole('button', {name: LITERAL_SUMMARY_COPY.copySummary}));
+
+      rerender(renderSummary(nextEdit));
+      await act(async () => finishCopy());
+
+      expect(onCopy).not.toHaveBeenCalled();
+      expect(screen.getByRole('button', {name: LITERAL_SUMMARY_COPY.copySummary})).toHaveTextContent(
+        LITERAL_SUMMARY_COPY.copySummary
+      );
+    }
+  );
+
+  it('retains copied feedback for equivalent edit values and clears it when the displayed edit changes', async () => {
+    const onCopy = jest.fn().mockReturnValue(true);
+    const renderSummary = (value: string, selectedFeedback: 'none' | 'thumbs_up' = 'none') => (
+      <AISummary
+        mode="post-call"
+        state="content"
+        content={sectionContent}
+        editedSummary={{initialContactReason: value}}
+        selectedFeedback={selectedFeedback}
+        onEdit={jest.fn()}
+        onCopy={onCopy}
+        onFeedback={jest.fn()}
+        onRetry={jest.fn()}
+      />
+    );
+    const {rerender} = render(renderSummary('Agent correction'));
+    fireEvent.click(await screen.findByRole('button', {name: LITERAL_SUMMARY_COPY.copySummary}));
+    const copy = screen.getByRole('button', {name: LITERAL_SUMMARY_COPY.copySummary});
+    await waitFor(() => expect(copy).toHaveTextContent(LITERAL_SUMMARY_COPY.copied));
+
+    rerender(renderSummary('Agent correction', 'thumbs_up'));
+    expect(copy).toHaveTextContent(LITERAL_SUMMARY_COPY.copied);
+    expect(onCopy).toHaveBeenCalledTimes(1);
+
+    rerender(renderSummary('', 'thumbs_up'));
+    expect(copy).toHaveTextContent(LITERAL_SUMMARY_COPY.copySummary);
+    expect(screen.queryByText('Agent correction')).not.toBeInTheDocument();
+    expect(screen.queryByText(sectionContent.sections?.initialContactReason ?? '')).not.toBeInTheDocument();
   });
 
   it('observes clipboard fulfillment before recording copy and reverts confirmed state at 1500 ms', async () => {
