@@ -293,6 +293,18 @@ describe('CallControlConsultComponent', () => {
     expect(cancelIcon).toBeInTheDocument();
   });
 
+  it.each(['transfer', 'conference'] as const)(
+    'should run the consult-surface %s immediately without a summary popover',
+    (buttonKey) => {
+      const screen = render(<CallControlConsultComponent {...defaultProps} />);
+
+      fireEvent.click(screen.getByTestId(`${buttonKey}-consult-btn`));
+
+      expect(buttonKey === 'transfer' ? mockOnTransfer : mockConsultConference).toHaveBeenCalledTimes(1);
+      expect(screen.queryByTestId('consult-transfer:summary')).not.toBeInTheDocument();
+    }
+  );
+
   it('verifies accessibility attributes for all buttons', async () => {
     const screen = await render(<CallControlConsultComponent {...defaultProps} />);
 

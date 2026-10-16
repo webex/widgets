@@ -97,6 +97,10 @@ const SummarySectionEditor: React.FC<AISummarySectionEditorProps> = ({section, d
       </label>
     );
   }
+  // Keep a cleared editor mounted until blur, then omit the empty preview row.
+  if (!section.value.trim()) {
+    return null;
+  }
   return (
     <Button
       type="button"
@@ -119,6 +123,7 @@ const SummarySectionEditor: React.FC<AISummarySectionEditorProps> = ({section, d
 const AISummary = (props: AISummaryProps): React.ReactElement => {
   const {
     rootRef,
+    displayContent,
     copied,
     setCopied,
     hoveredTooltip,
@@ -148,7 +153,7 @@ const AISummary = (props: AISummaryProps): React.ReactElement => {
         </div>
       );
     }
-    if (props.state === 'unavailable') {
+    if (props.state === 'unavailable' || (props.state === 'content' && !displayContent)) {
       return (
         <div className="ai-summary__status" data-testid="ai-summary:unavailable">
           <p className="ai-summary__description">{AI_ASSISTANT_SUMMARY_MESSAGES.unavailable}</p>
@@ -183,10 +188,10 @@ const AISummary = (props: AISummaryProps): React.ReactElement => {
   };
 
   const renderContent = () => {
-    if (props.state !== 'content' || props.mode === 'mid-call-receiver' || !props.content) {
+    if (props.state !== 'content' || props.mode === 'mid-call-receiver' || !displayContent) {
       return null;
     }
-    if (!props.content.sections) {
+    if (!displayContent.sections) {
       return (
         <div className="ai-summary__content" data-testid="ai-summary:content">
           <label className="ai-summary__section">
@@ -194,7 +199,7 @@ const AISummary = (props: AISummaryProps): React.ReactElement => {
             <SummaryEditor
               className="ai-summary__textarea"
               dir="auto"
-              value={props.content.summaryText ?? ''}
+              value={displayContent.summaryText ?? ''}
               disabled={disabled}
               onChange={(event) => props.onEdit('summaryText', event.currentTarget.value)}
             />
@@ -204,7 +209,7 @@ const AISummary = (props: AISummaryProps): React.ReactElement => {
     }
     return (
       <div className="ai-summary__content" data-testid="ai-summary:content">
-        {getDisplaySections(props.content).map((section) => {
+        {getDisplaySections(displayContent).map((section) => {
           const {key} = section;
           return key !== 'resolution' ? (
             <SummarySectionEditor
@@ -235,8 +240,8 @@ const AISummary = (props: AISummaryProps): React.ReactElement => {
       ? AI_ASSISTANT_SUMMARY_MESSAGES.feedback.pendingSubmission
       : undefined;
 
-  const showActions = props.state === 'content';
-  const showSummaryHeading = props.mode === 'post-call' && props.state === 'content';
+  const showActions = props.state === 'content' && Boolean(displayContent);
+  const showSummaryHeading = props.mode === 'post-call' && showActions;
   const copyLabel = copied ? AI_ASSISTANT_SUMMARY_MESSAGES.copiedSummary : AI_ASSISTANT_SUMMARY_MESSAGES.copySummary;
   // Keep visibility controlled so Escape dismisses the tooltip before the panel.
   // Existing button labels and the pending-feedback description remain authoritative.

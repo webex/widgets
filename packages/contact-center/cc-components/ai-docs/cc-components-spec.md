@@ -367,8 +367,10 @@ without an Adaptive Card renders as unavailable and exposes no summary actions.
 Summary content props retain the store's SDK `AISummary` shape, including the required
 `conversationId`; feedback and lifecycle values are supplied by the widget from the
 store entry. Generating and error states accept absent content so widgets can pass
-the store value directly without constructing an empty SDK payload. Component tests
-use that same SDK shape. Receiver rendering and focus
+the store value directly without constructing an empty SDK payload. An editable
+content state without a payload falls back to unavailable and exposes no actions.
+Edit callbacks notify the owner without requiring a return value. Component tests
+use the same SDK shape. Receiver rendering and focus
 handlers live in the assistant component alongside its chrome and summary branch.
 The mode-specific prop union separates editable summaries from receiver actions and
 requires content and callbacks only when receiver content is available. The shared
@@ -388,6 +390,16 @@ remains controlled to keep hovered content reachable and consume Escape before t
 containing panel handles it; button labels and the pending-feedback description
 remain unchanged. Keyed editing, clipboard formatting, confirmation state and focus
 recovery stay summary-specific.
+
+Structured section previews size the Momentum button host to their full wrapped
+content and allow wrapping through its exposed `button-text` part. Each section
+reserves its actual text height, including bullet lists, in consult/transfer and
+post-call views. Disabled previews retain readable text and keyboard focus styling
+targets the host; activating an enabled preview still opens its keyed editor.
+Empty or whitespace-only section values render no preview label or row in either
+editable summary mode. A focused editor stays mounted when its text is cleared;
+the empty row disappears after editing ends. Values and cleared section keys remain
+unchanged in the SDK payload and the owner's local response, and copy omits blank sections.
 
 `AIAssistantComponent.receiverSummary` adds View summary to closed/minimized chrome
 and opens the receiver branch independently of Real-time Assist enablement. Copy uses
@@ -422,6 +434,31 @@ Evidence: `components/AIAssistant/AISummary/` and `components/AIAssistant/`; tes
 `tests/components/AIAssistant/AISummary/ai-summary.tsx`,
 `tests/components/AIAssistant/ai-assistant.tsx`, and
 `tests/components/AIAssistant/adaptive-card-renderer.test.tsx`.
+
+## AI summaries in CallControl
+
+Consult/transfer and wrap-up panels forward their summary view props to the shared
+`AIAssistant/AISummary` component. The widget binds callbacks to the displayed SDK
+content and supplies local response edits separately through `editedSummary`, so
+raw content retains its identity. These components perform no SDK operations.
+
+The wrap-up panel owns reason search and selection. Complete Wrap-Up stays enabled
+while summary generation is pending and disables completion and summary editing
+while wrap-up itself is pending. Failed completion retains the selected reason and
+draft. An absent summary prop preserves the existing CallControl form.
+
+Each CallControl panel stylesheet owns its constrained flex and scroll layout;
+the shared summary stylesheet owns the editor, status, and action presentation.
+
+Summary focus recovery applies only after a focused summary control is removed and
+no connected control has taken focus. Consult/transfer retains its summary layout
+until the popover closes after capability revocation, preserving its focus target
+and close action. React-generated heading IDs label the panels. Requests, local
+response changes, retry and submission remain in the widget/store layers.
+
+Evidence: `components/task/CallControl/call-control.tsx` and `CallControlCustom/`;
+tests: `tests/components/task/CallControl/call-control.tsx`,
+`CallControlCustom/consult-transfer-popover.tsx`, and `CallControlCustom/wrap-up-summary.tsx`.
 
 ## Traceability
 

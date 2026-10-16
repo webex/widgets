@@ -1,5 +1,5 @@
 import type {RefObject, TextareaHTMLAttributes} from 'react';
-import type {AISummaryEntry, AISummaryFeedback, AISummarySections} from '@webex/cc-store';
+import type {AISummaryEntry, AISummaryFeedback, AISummaryResponse, AISummarySections} from '@webex/cc-store';
 
 export type AISummarySectionKey = keyof AISummarySections | 'resolution';
 
@@ -41,7 +41,8 @@ type AISummaryActions = {
 
 type AISummaryEditableActions = AISummaryActions & {
   content?: AISummaryEntry['content'];
-  onEdit: (key: keyof AISummarySections | 'summaryText', value: string) => boolean;
+  editedSummary?: AISummaryResponse['summary'];
+  onEdit: (key: keyof AISummarySections | 'summaryText', value: string) => void;
 };
 
 export type AISummaryMidCallInitiatorProps = AISummaryBaseProps &
