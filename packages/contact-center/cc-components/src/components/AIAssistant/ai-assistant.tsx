@@ -92,12 +92,8 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
   );
   const showLanding = !showReceiverSummary && (!hasActiveInteraction || !isFeatureEnabled);
   const receiverBranchKey = receiverSummary?.branchKey;
-  const receiverCardAvailable = Boolean(
-    receiverSummary?.surface === 'content' && receiverSummary.content.adaptiveCard
-  );
-  const receiverActionsVisible = Boolean(
-    showReceiverSummary && receiverCardAvailable && receiverCardReady
-  );
+  const receiverCardAvailable = Boolean(receiverSummary?.surface === 'content' && receiverSummary.content.adaptiveCard);
+  const receiverActionsVisible = Boolean(showReceiverSummary && receiverCardAvailable && receiverCardReady);
 
   const wellnessHistory = wellness?.history ?? [];
   const hasWellnessHistory = Boolean(wellness?.enabled && !wellness.contentCleared && wellnessHistory.length > 0);
@@ -114,9 +110,14 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
   );
   // Keep prior messages in the view model, but let a newly eligible Desktop-style
   // suggestion temporarily own the complete assistant body.
-  const showWellnessHistory = hasWellnessHistory && !showWellnessSuggestion;
+  // An explicitly opened summary takes precedence over a completed/dismissed
+  // wellness transcript, while in-progress wellness flows keep their priority.
+  const showRetainedWellness = !showReceiverSummary || wellness?.phase !== 'idle';
+  const showWellnessHistory = hasWellnessHistory && !showWellnessSuggestion && showRetainedWellness;
   const showWellnessRequestState = Boolean(
-    wellness?.enabled && !wellness.contentCleared && (wellness.phase === 'request-pending' || wellness.notice)
+    wellness?.enabled &&
+      !wellness.contentCleared &&
+      (wellness.phase === 'request-pending' || (wellness.notice && showRetainedWellness))
   );
   const showWellnessOffer = Boolean(
     wellness?.enabled && !wellness.contentCleared && wellness.phase === 'offer-pending'
@@ -147,6 +148,13 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
       pendingReceiverActivationFocusRef.current = false;
     }
   }, [viewingReceiverKey, receiverBranchKey]);
+
+  useEffect(() => {
+    if (chrome === 'closed') {
+      setViewingReceiverKey(null);
+      pendingReceiverActivationFocusRef.current = false;
+    }
+  }, [chrome]);
 
   const focusTarget = (target: HTMLElement | null | undefined): boolean => {
     if (
@@ -203,8 +211,8 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
     clearReceiverFocusSnapshot();
   };
 
-  // Recover only when the previously focused control was removed. Connected
-  // controls and focus outside the assistant keep their current focus.
+  // Recover only when a focused summary control was removed. Ordinary assistant
+  // controls and connected focus outside the summary keep their existing behavior.
   useLayoutEffect(() => {
     if (pendingReceiverActivationFocusRef.current && chrome === 'open' && showReceiverSummary) {
       pendingReceiverActivationFocusRef.current = false;
@@ -232,7 +240,7 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
     clearReceiverFocusSnapshot();
   });
 
-  const handleRootFocusCapture = (event: React.FocusEvent<HTMLDivElement>) => {
+  const handleReceiverFocusCapture = (event: React.FocusEvent<HTMLElement>) => {
     const target = event.target;
     if (!(target instanceof HTMLElement)) {
       return;
@@ -241,6 +249,19 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
     const index = controls.indexOf(target);
     lastFocusedElementRef.current = target;
     lastFocusSuccessorRef.current = index >= 0 ? (controls[index + 1] ?? null) : null;
+  };
+
+  const handleReceiverBlurCapture = (event: React.FocusEvent<HTMLElement>) => {
+    const next = event.relatedTarget;
+    if (next instanceof HTMLElement && next !== document.body && next.isConnected) {
+      clearReceiverFocusSnapshot();
+    }
+  };
+
+  const closeAssistant = () => {
+    setViewingReceiverKey(null);
+    pendingReceiverActivationFocusRef.current = false;
+    close();
   };
 
   const openRealTimeAssist = () => {
@@ -272,6 +293,8 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
     return (
       <div
         ref={receiverBranchRef}
+        onFocusCapture={handleReceiverFocusCapture}
+        onBlurCapture={handleReceiverBlurCapture}
         className="ai-assistant__receiver-summary"
         data-testid="ai-assistant:receiver-summary"
         dir="ltr"
@@ -282,7 +305,6 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
               card={summary.content.adaptiveCard}
               displayOnly
               onRender={setReceiverCardReady}
-              contentRevision={summary.contentRevision}
               fallbackText={AI_ASSISTANT_SUMMARY_MESSAGES.unavailable}
               logger={logger}
             />
@@ -295,8 +317,10 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
             state="content"
             requestPending={summary.feedbackPending}
             selectedFeedback={summary.selectedFeedback}
-            contentRevision={summary.contentRevision}
-            getReceiverCopyText={() => (receiverBranchRef.current ? extractCardText(receiverBranchRef.current) : '')}
+            content={summary.content}
+            getReceiverCopyText={() =>
+              receiverBranchRef.current ? extractCardText(receiverBranchRef.current, {visibleOnly: true}) : ''
+            }
             onCopy={summary.recordReceiverSummaryCopied}
             onFeedback={summary.setReceiverSummaryFeedback}
           />
@@ -318,6 +342,8 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
         variant="tertiary"
         size={28}
         onClick={openReceiverSummary}
+        onFocusCapture={handleReceiverFocusCapture}
+        onBlurCapture={handleReceiverBlurCapture}
         className={`ai-assistant__summary-trigger${classNameSuffix}`}
         data-testid="ai-assistant:view-summary"
         aria-label={AI_ASSISTANT_SUMMARY_MESSAGES.viewSummary}
@@ -342,7 +368,7 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
   );
 
   return (
-    <div className={rootClass} data-testid="ai-assistant:root" onFocusCapture={handleRootFocusCapture} ref={rootRef}>
+    <div className={rootClass} data-testid="ai-assistant:root" ref={rootRef}>
       {chrome === 'closed' ? (
         canViewReceiverSummary ? (
           <div className="ai-assistant__closed-chrome" data-testid="ai-assistant:closed-chrome">
@@ -381,7 +407,7 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
                 prefix-icon="cancel-bold"
                 aria-label="Close"
                 data-testid="ai-assistant:minimized-close"
-                onClick={close}
+                onClick={closeAssistant}
               />
               <Tooltip triggerID={`${headerActionId}-minimized-close`} placement="bottom" tooltipType="label">
                 Close
@@ -456,7 +482,7 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
                 prefix-icon="cancel-bold"
                 aria-label="Close"
                 data-testid="ai-assistant:header-close"
-                onClick={close}
+                onClick={closeAssistant}
               />
               <Tooltip triggerID={`${headerActionId}-close`} placement="bottom" tooltipType="label">
                 Close

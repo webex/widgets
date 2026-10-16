@@ -371,29 +371,46 @@ the store value directly without constructing an empty SDK payload. Component te
 use that same SDK shape. Receiver rendering and focus
 handlers live in the assistant component alongside its chrome and summary branch.
 The mode-specific prop union separates editable summaries from receiver actions and
-requires callbacks only when receiver content is available. Section ordering,
-labels, plain-text clipboard formatting, bullet presentation and auto-sizing native
-editors belong to this component; edits, copy counts, feedback and submission belong
-to the store's actions and separate SDK response record.
+requires content and callbacks only when receiver content is available. The shared
+action surface uses that SDK payload only as identity; the assistant card branch
+still owns receiver rendering. Callbacks are bound by the widget to the displayed
+SDK summary and accept no numeric revision. Section ordering, labels, plain-text
+clipboard formatting, bullet presentation and auto-sizing native editors belong to
+this component. Widget helpers keep local edits, copy counts and
+deferred feedback in the SDK response record; SDK submission stays in the store.
+The presentation-state union is declared locally rather than derived from a store
+selector. Pending clipboard completions cannot update confirmation after the
+displayed SDK payload changes.
 
 Summary loading, Retry, editable section activation and tooltip presentation use the
 same Momentum primitives as Real-time Assist and Wellness Break. Tooltip visibility
 remains controlled to keep hovered content reachable and consume Escape before the
 containing panel handles it; button labels and the pending-feedback description
-remain unchanged. Keyed editing,
-clipboard formatting, revision acceptance and focus recovery stay summary-specific.
+remain unchanged. Keyed editing, clipboard formatting, confirmation state and focus
+recovery stay summary-specific.
 
 `AIAssistantComponent.receiverSummary` adds View summary to closed/minimized chrome
 and opens the receiver branch independently of Real-time Assist enablement. Copy uses
-rendered card text through the existing Adaptive Card text extractor. The renderer
-uses Adaptive Cards' `supportsInteractivity: false` for receiver content, keeping
+visible rendered card text through an opt-in filter in the shared Adaptive Card
+text extractor. Hidden receiver text blocks and descendants of hidden card
+containers are excluded from summary copying; ordinary Real-time Assist copying
+keeps its existing behavior. Visible nested blocks keep their text and line breaks.
+The renderer uses Adaptive Cards' `supportsInteractivity: false` for receiver content, keeping
 card-provided actions, select actions and inputs inert without rewriting the SDK
 card. Its render callback controls whether the separate copy/feedback controls are
 shown; parsing or rendering failure hides them. Valid replacement cards preserve
-those controls and their focus. The receiver content revision resets the renderer's
-error boundary when replacement content arrives. Summary components recover focus
-when a focused summary control or branch is removed and no connected control has
-taken focus.
+those controls and their focus. Replacing a display-only receiver card resets its
+error boundary; ordinary Real-time Assist cards keep their existing recovery
+behavior. Closing either chrome clears the receiver selection before invoking the
+host callback, so external reopening returns to the ordinary assistant view.
+An explicitly selected receiver summary takes precedence over retained wellness
+history; an active wellness offer, transition, error or overlay retains priority.
+Wellness history remains available when returning to the ordinary assistant view.
+Focus capture is limited to the receiver branch and View summary trigger. It is
+cleared when focus moves to an ordinary assistant or host control. Summary
+components recover focus only when a focused summary control or branch is removed
+and no connected control has taken focus; ordinary Real-time Assist and wellness
+controls retain their existing focus behavior.
 
 Summary presentation constants use the `AI_ASSISTANT_SUMMARY_` prefix. These components
 receive data and callbacks through props and make no SDK calls.

@@ -196,7 +196,7 @@ const AISummary = (props: AISummaryProps): React.ReactElement => {
               dir="auto"
               value={props.content.summaryText ?? ''}
               disabled={disabled}
-              onChange={(event) => props.onEdit('summaryText', event.currentTarget.value, props.contentRevision)}
+              onChange={(event) => props.onEdit('summaryText', event.currentTarget.value)}
             />
           </label>
         </div>
@@ -211,7 +211,7 @@ const AISummary = (props: AISummaryProps): React.ReactElement => {
               key={key}
               section={section}
               disabled={disabled}
-              onChange={(value) => props.onEdit(key, value, props.contentRevision)}
+              onChange={(value) => props.onEdit(key, value)}
               onEditorBlur={handleLocalControlRemoval}
             />
           ) : (

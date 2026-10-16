@@ -103,11 +103,11 @@ export type AIAssistantReceiverSummary =
       /** Stable identity for this interaction's receiver summary; changes when the active interaction changes. */
       branchKey: string;
       content: NonNullable<AISummaryEntry['content']>;
-      contentRevision: number;
       selectedFeedback: AISummaryFeedback;
       feedbackPending: boolean;
-      recordReceiverSummaryCopied: (expectedRevision: number) => boolean;
-      setReceiverSummaryFeedback: (feedback: Exclude<AISummaryFeedback, 'none'>, expectedRevision: number) => void;
+      /** Bound by the widget to the displayed SDK summary. */
+      recordReceiverSummaryCopied: () => boolean;
+      setReceiverSummaryFeedback: (feedback: Exclude<AISummaryFeedback, 'none'>) => void;
     }
   | {
       surface: 'unavailable' | 'generic-error';
@@ -248,8 +248,6 @@ export interface AdaptiveCardRendererProps {
   displayOnly?: boolean;
   /** Reports whether card content rendered, so the container can show its controls. */
   onRender?: (rendered: boolean) => void;
-  /** Receiver summary revision; resets a failed card when a replacement summary arrives. */
-  contentRevision?: number;
   /** Title already rendered by RealTimeAssist; removes the matching header embedded in backend cards. */
   assistantTitle?: string;
   /** Plain-text fallback rendered when the Adaptive Card cannot be parsed/rendered. */

@@ -40,6 +40,10 @@ const flattenContentForCopy = (content: NonNullable<AISummaryEntry['content']>):
 
 export const useAISummaryInteractions = (props: AISummaryProps) => {
   const rootRef = useRef<HTMLDivElement>(null);
+  const latestPropsRef = useRef(props);
+  useLayoutEffect(() => {
+    latestPropsRef.current = props;
+  });
   const focusedControlRef = useRef<HTMLElement | null>(null);
   const successorRef = useRef<HTMLElement | null>(null);
   const [copied, setCopied] = useState(false);
@@ -61,7 +65,7 @@ export const useAISummaryInteractions = (props: AISummaryProps) => {
 
   useEffect(() => {
     setCopied(false);
-  }, [props.contentRevision]);
+  }, [props.content, props.mode, props.state]);
 
   useEffect(() => {
     if (!copied) {
@@ -158,12 +162,23 @@ export const useAISummaryInteractions = (props: AISummaryProps) => {
     } catch {
       return;
     }
-    setCopied(props.onCopy(props.contentRevision));
+    // Clipboard writes can finish after another SDK summary is displayed.
+    // Keep completion local to the content and surface that initiated the copy.
+    const current = latestPropsRef.current;
+    if (
+      !rootRef.current ||
+      current.state !== 'content' ||
+      current.mode !== props.mode ||
+      current.content !== props.content
+    ) {
+      return;
+    }
+    setCopied(props.onCopy());
   };
 
   const handleFeedback = (feedback: Exclude<AISummaryFeedback, 'none'>) => {
     if (!disabled && props.state === 'content') {
-      props.onFeedback(feedback, props.contentRevision);
+      props.onFeedback(feedback);
     }
   };
 

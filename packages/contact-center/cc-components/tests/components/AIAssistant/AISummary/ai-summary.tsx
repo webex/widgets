@@ -117,32 +117,26 @@ const omittedStateIsRejected: React.ComponentProps<typeof AISummaryComponent> = 
   state: 'omitted',
   containingPanelFocusTarget: typeOnlyPanelRef,
 };
-// @ts-expect-error Receiver content is rendered by the AI Assistant card branch, not the shared action surface.
-const receiverContentIsRejected: React.ComponentProps<typeof AISummaryComponent> = {
+// @ts-expect-error A receiver content surface needs the displayed SDK payload for asynchronous copy ownership.
+const receiverWithoutContentIsRejected: React.ComponentProps<typeof AISummaryComponent> = {
   mode: 'mid-call-receiver',
   state: 'content',
-  contentRevision: 1,
-  content: textContent,
   getReceiverCopyText: () => 'Receiver text',
   onCopy: () => true,
-  onFeedback: async () => ({outcome: 'confirmed'}),
+  onFeedback: jest.fn(),
   containingPanelFocusTarget: typeOnlyPanelRef,
 };
-// @ts-expect-error Receiver card content must not be accepted by the shared presentation component props.
-const receiverCardContentIsRejected: React.ComponentProps<typeof AISummaryComponent> = {
+// @ts-expect-error A receiver status surface exposes no content or actions.
+const receiverStatusContentIsRejected: React.ComponentProps<typeof AISummaryComponent> = {
   mode: 'mid-call-receiver',
-  state: 'content',
-  contentRevision: 1,
-  content: {conversationId: 'interaction-main-1', adaptiveCard: {type: 'AdaptiveCard'}},
-  getReceiverCopyText: () => 'Receiver text',
-  onCopy: () => true,
-  onFeedback: async () => ({outcome: 'confirmed'}),
+  state: 'unavailable',
+  content: textContent,
   containingPanelFocusTarget: typeOnlyPanelRef,
 };
 const receiverChildrenAreRejected: React.ComponentProps<typeof AISummaryComponent> = {
   mode: 'mid-call-receiver',
   state: 'content',
-  contentRevision: 1,
+  content: textContent,
   getReceiverCopyText: () => 'Receiver text',
   onCopy: () => true,
   onFeedback: async () => ({outcome: 'confirmed'}),
@@ -154,7 +148,6 @@ const postCallActionTypeIsRejected: React.ComponentProps<typeof AISummaryCompone
   mode: 'post-call',
   state: 'content',
   content: textContent,
-  contentRevision: 1,
   // @ts-expect-error Post-call summaries cannot carry a mid-call action type.
   actionType: 'TRANSFER',
   onEdit: jest.fn(),
@@ -167,7 +160,6 @@ const initiatorReceiverCopyIsRejected: React.ComponentProps<typeof AISummaryComp
   mode: 'mid-call-initiator',
   state: 'content',
   content: textContent,
-  contentRevision: 1,
   onEdit: jest.fn(),
   onCopy: jest.fn(),
   onFeedback: jest.fn(),
@@ -177,8 +169,8 @@ const initiatorReceiverCopyIsRejected: React.ComponentProps<typeof AISummaryComp
 };
 
 void omittedStateIsRejected;
-void receiverContentIsRejected;
-void receiverCardContentIsRejected;
+void receiverWithoutContentIsRejected;
+void receiverStatusContentIsRejected;
 void receiverChildrenAreRejected;
 void postCallActionTypeIsRejected;
 void initiatorReceiverCopyIsRejected;
@@ -214,7 +206,6 @@ describe('AISummary', () => {
       <AISummary
         mode="post-call"
         state="generating"
-        contentRevision={1}
         onEdit={jest.fn()}
         onCopy={jest.fn()}
         onFeedback={jest.fn()}
@@ -236,7 +227,6 @@ describe('AISummary', () => {
       <AISummary
         mode="post-call"
         state="generic-error"
-        contentRevision={1}
         onEdit={jest.fn()}
         onCopy={jest.fn()}
         onFeedback={jest.fn()}
@@ -257,7 +247,6 @@ describe('AISummary', () => {
         mode="post-call"
         state="generating"
         content={textContent}
-        contentRevision={1}
         onEdit={jest.fn()}
         onCopy={jest.fn()}
         onFeedback={jest.fn()}
@@ -273,7 +262,6 @@ describe('AISummary', () => {
         mode="post-call"
         state="unavailable"
         content={textContent}
-        contentRevision={1}
         onEdit={jest.fn()}
         onCopy={jest.fn()}
         onFeedback={jest.fn()}
@@ -287,7 +275,6 @@ describe('AISummary', () => {
         mode="post-call"
         state="generic-error"
         content={textContent}
-        contentRevision={1}
         onEdit={jest.fn()}
         onCopy={jest.fn()}
         onFeedback={jest.fn()}
@@ -303,7 +290,6 @@ describe('AISummary', () => {
         mode="post-call"
         state="content"
         content={textContent}
-        contentRevision={1}
         onEdit={jest.fn()}
         onCopy={jest.fn()}
         onFeedback={jest.fn()}
@@ -322,7 +308,6 @@ describe('AISummary', () => {
         mode="post-call"
         state="content"
         content={textContent}
-        contentRevision={2}
         onEdit={jest.fn()}
         onCopy={jest.fn()}
         onFeedback={jest.fn()}
@@ -336,7 +321,6 @@ describe('AISummary', () => {
         mode="post-call"
         state="generating"
         content={textContent}
-        contentRevision={2}
         onEdit={jest.fn()}
         onCopy={jest.fn()}
         onFeedback={jest.fn()}
@@ -350,7 +334,6 @@ describe('AISummary', () => {
         mode="post-call"
         state="unavailable"
         content={textContent}
-        contentRevision={2}
         onEdit={jest.fn()}
         onCopy={jest.fn()}
         onFeedback={jest.fn()}
@@ -364,7 +347,6 @@ describe('AISummary', () => {
         mode="post-call"
         state="generic-error"
         content={textContent}
-        contentRevision={2}
         onEdit={jest.fn()}
         onCopy={jest.fn()}
         onFeedback={jest.fn()}
@@ -402,7 +384,7 @@ describe('AISummary', () => {
         <AISummary
           mode={mode}
           state={state}
-          contentRevision={41}
+          content={textContent}
           getReceiverCopyText={() => 'Visible receiver copy'}
           onCopy={jest.fn().mockReturnValue(true)}
           onFeedback={jest.fn().mockResolvedValue({outcome: 'confirmed'})}
@@ -414,7 +396,6 @@ describe('AISummary', () => {
           mode={mode}
           state={state}
           content={textContent}
-          contentRevision={41}
           onEdit={sharedCallbacks.onEdit}
           onCopy={sharedCallbacks.onCopy}
           onFeedback={sharedCallbacks.onFeedback}
@@ -426,7 +407,6 @@ describe('AISummary', () => {
           mode={mode}
           state={state}
           content={textContent}
-          contentRevision={41}
           onEdit={sharedCallbacks.onEdit}
           onCopy={sharedCallbacks.onCopy}
           onFeedback={jest.fn().mockReturnValue(true)}
@@ -463,7 +443,6 @@ describe('AISummary', () => {
           mode="post-call"
           state={state}
           content={textContent}
-          contentRevision={56}
           onEdit={jest.fn()}
           onCopy={jest.fn()}
           onFeedback={jest.fn()}
@@ -475,14 +454,13 @@ describe('AISummary', () => {
     }
   );
 
-  it('edits exact section keys and keeps cleared keys present', () => {
+  it('edits exact section keys and keeps cleared keys present', async () => {
     const onEdit = jest.fn().mockReturnValue(true);
     render(
       <AISummary
         mode="post-call"
         state="content"
         content={sectionContent}
-        contentRevision={7}
         onEdit={onEdit}
         onCopy={jest.fn()}
         onFeedback={jest.fn()}
@@ -492,49 +470,59 @@ describe('AISummary', () => {
 
     const surface = screen.getByTestId('ai-summary:editor-surface');
     expect(surface).toContainElement(
-      screen.getByRole('button', {
-        name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason),
+      await screen.findByRole('button', {
+        name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(
+          AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason
+        ),
       })
     );
     expect(surface).toContainElement(
-      screen.getByRole('button', {
+      await screen.findByRole('button', {
         name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.nextSteps),
       })
     );
     expect(surface).toContainElement(screen.getByTestId('ai-summary:actions'));
-    expect(screen.queryByRole('textbox', {name: AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.resolution})).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('textbox', {name: AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.resolution})
+    ).not.toBeInTheDocument();
     expect(
       screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary}).querySelector('mdc-icon')
     ).toHaveProperty('name', 'copy-regular');
-    expect(screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.like}).querySelector('mdc-icon')).toHaveProperty(
-      'name',
-      'like-regular'
-    );
+    expect(
+      screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.like}).querySelector('mdc-icon')
+    ).toHaveProperty('name', 'like-regular');
     fireEvent.click(
-      screen.getByRole('button', {
-        name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason),
+      await screen.findByRole('button', {
+        name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(
+          AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason
+        ),
       })
     );
-    expect(screen.getByRole('textbox', {name: AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason})).toHaveFocus();
-    fireEvent.change(screen.getByDisplayValue('Customer asked for invoice help.'), {target: {value: ''}});
-    expect(onEdit).toHaveBeenCalledWith('initialContactReason', '', 7);
-    fireEvent.blur(screen.getByRole('textbox', {name: AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason}));
     expect(
-      screen.getByRole('button', {
-        name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason),
+      screen.getByRole('textbox', {name: AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason})
+    ).toHaveFocus();
+    fireEvent.change(screen.getByDisplayValue('Customer asked for invoice help.'), {target: {value: ''}});
+    expect(onEdit).toHaveBeenCalledWith('initialContactReason', '');
+    fireEvent.blur(
+      screen.getByRole('textbox', {name: AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason})
+    );
+    expect(
+      await screen.findByRole('button', {
+        name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(
+          AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason
+        ),
       })
     ).toBeInTheDocument();
     expect(screen.getByText(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.resolution)).toBeInTheDocument();
     expect(screen.getByText(AI_ASSISTANT_SUMMARY_MESSAGES.attribution)).toBeInTheDocument();
   });
 
-  it('keeps structured previews compact, text-only and read-only while controls are disabled', () => {
+  it('keeps structured previews compact, text-only and read-only while controls are disabled', async () => {
     render(
       <AISummary
         mode="post-call"
         state="content"
         content={sectionContent}
-        contentRevision={7}
         controlsDisabled
         onEdit={jest.fn()}
         onCopy={jest.fn()}
@@ -543,8 +531,10 @@ describe('AISummary', () => {
       />
     );
     expect(
-      screen.getByRole('button', {
-        name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason),
+      await screen.findByRole('button', {
+        name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(
+          AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason
+        ),
       })
     ).toBeDisabled();
     expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
@@ -556,7 +546,7 @@ describe('AISummary', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('applies automatic direction to mixed-direction structured summary text boundaries', () => {
+  it('applies automatic direction to mixed-direction structured summary text boundaries', async () => {
     const bidiContent: AISummaryContent = {
       conversationId: 'interaction-main-1',
       sections: {
@@ -570,7 +560,6 @@ describe('AISummary', () => {
         mode="post-call"
         state="content"
         content={bidiContent}
-        contentRevision={13}
         onEdit={jest.fn()}
         onCopy={jest.fn()}
         onFeedback={jest.fn()}
@@ -578,21 +567,22 @@ describe('AISummary', () => {
       />
     );
 
-    const summaryPreview = screen.getByRole('button', {
-      name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason),
+    const summaryPreview = await screen.findByRole('button', {
+      name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(
+        AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason
+      ),
     });
     expect(
       within(summaryPreview).getByText(`${AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason}:`)
     ).toHaveAttribute('dir', 'auto');
     expect(within(summaryPreview).getByText('שלום ticket 42')).toHaveAttribute('dir', 'auto');
 
-    const actionPreview = screen.getByRole('button', {
+    const actionPreview = await screen.findByRole('button', {
       name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.keyActionsTaken),
     });
-    expect(within(actionPreview).getByText(`${AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.keyActionsTaken}:`)).toHaveAttribute(
-      'dir',
-      'auto'
-    );
+    expect(
+      within(actionPreview).getByText(`${AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.keyActionsTaken}:`)
+    ).toHaveAttribute('dir', 'auto');
     const inlineList = within(actionPreview).getByRole('list');
     expect(inlineList).toHaveAttribute('dir', 'auto');
     within(inlineList)
@@ -601,13 +591,12 @@ describe('AISummary', () => {
     expect(within(inlineList).getByText('اتصل بالعميل')).toBeInTheDocument();
     expect(within(inlineList).getByText('Send invoice INV-42')).toBeInTheDocument();
 
-    const nextStepsPreview = screen.getByRole('button', {
+    const nextStepsPreview = await screen.findByRole('button', {
       name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.nextSteps),
     });
-    expect(within(nextStepsPreview).getByText(`${AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.nextSteps}:`)).toHaveAttribute(
-      'dir',
-      'auto'
-    );
+    expect(
+      within(nextStepsPreview).getByText(`${AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.nextSteps}:`)
+    ).toHaveAttribute('dir', 'auto');
   });
 
   it('projects every post-call display section in canonical order and appends Outcome when needed', () => {
@@ -668,7 +657,6 @@ describe('AISummary', () => {
         mode="post-call"
         state="content"
         content={maliciousContent}
-        contentRevision={40}
         onEdit={jest.fn()}
         onCopy={jest.fn()}
         onFeedback={jest.fn()}
@@ -677,7 +665,9 @@ describe('AISummary', () => {
     );
 
     expect(screen.queryByText('<img src=x onerror=alert(1)>:')).not.toBeInTheDocument();
-    expect(screen.getByText(`${AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason}:`)).toBeInTheDocument();
+    expect(
+      screen.getByText(`${AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason}:`)
+    ).toBeInTheDocument();
     expect(screen.getByText('<script>alert("summary")</script>')).toBeInTheDocument();
     expect(screen.getByText('<b onclick=alert(2)>Follow up</b>')).toBeInTheDocument();
     expect(container.querySelector('img')).toBeNull();
@@ -695,7 +685,6 @@ describe('AISummary', () => {
         mode="post-call"
         state="content"
         content={textContent}
-        contentRevision={3}
         onEdit={jest.fn()}
         onCopy={onCopy}
         onFeedback={jest.fn()}
@@ -706,7 +695,7 @@ describe('AISummary', () => {
     fireEvent.click(screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary}));
     expect(navigator.clipboard.writeText).toHaveBeenCalledTimes(1);
     expect(onCopy).not.toHaveBeenCalled();
-    await waitFor(() => expect(onCopy).toHaveBeenCalledWith(3));
+    await waitFor(() => expect(onCopy).toHaveBeenCalledWith());
     fireEvent.mouseEnter(screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary}));
     fireEvent.mouseLeave(screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary}));
     expect(navigator.clipboard.writeText).toHaveBeenCalledTimes(1);
@@ -736,7 +725,6 @@ describe('AISummary', () => {
         mode="post-call"
         state="content"
         content={textContent}
-        contentRevision={42}
         onEdit={jest.fn()}
         onCopy={jest.fn().mockReturnValue(true)}
         onFeedback={jest.fn()}
@@ -755,14 +743,13 @@ describe('AISummary', () => {
     expect(jest.getTimerCount()).toBe(0);
   });
 
-  it('keeps a copy the store rejects as stale from painting success', async () => {
+  it('keeps a rejected copy recording from painting success', async () => {
     const falseRecorder = jest.fn().mockReturnValue(false);
     render(
       <AISummary
         mode="post-call"
         state="content"
         content={textContent}
-        contentRevision={45}
         onEdit={jest.fn()}
         onCopy={falseRecorder}
         onFeedback={jest.fn()}
@@ -771,7 +758,7 @@ describe('AISummary', () => {
     );
 
     fireEvent.click(screen.getByRole('button', {name: LITERAL_SUMMARY_COPY.copySummary}));
-    await waitFor(() => expect(falseRecorder).toHaveBeenCalledWith(45));
+    await waitFor(() => expect(falseRecorder).toHaveBeenCalledWith());
     expect(screen.getByRole('button', {name: LITERAL_SUMMARY_COPY.copySummary})).toHaveTextContent(
       LITERAL_SUMMARY_COPY.copySummary
     );
@@ -783,7 +770,7 @@ describe('AISummary', () => {
       <AISummary
         mode="mid-call-receiver"
         state="content"
-        contentRevision={47}
+        content={textContent}
         getReceiverCopyText={() => {
           throw new Error('no rendered receiver text');
         }}
@@ -809,7 +796,7 @@ describe('AISummary', () => {
       <AISummary
         mode="mid-call-receiver"
         state="content"
-        contentRevision={48}
+        content={textContent}
         getReceiverCopyText={() => 'Visible receiver copy'}
         onCopy={onCopy}
         onFeedback={jest.fn().mockResolvedValue({outcome: 'confirmed'})}
@@ -830,7 +817,7 @@ describe('AISummary', () => {
       <AISummary
         mode="mid-call-receiver"
         state="content"
-        contentRevision={49}
+        content={textContent}
         getReceiverCopyText={() => 'Visible receiver copy'}
         onCopy={onCopy}
         onFeedback={jest.fn().mockResolvedValue({outcome: 'confirmed'})}
@@ -850,7 +837,6 @@ describe('AISummary', () => {
         mode="post-call"
         state="content"
         content={sectionContent}
-        contentRevision={16}
         onEdit={jest.fn()}
         onCopy={onCopy}
         onFeedback={jest.fn()}
@@ -864,14 +850,13 @@ describe('AISummary', () => {
         'Initial contact reason: Customer asked for invoice help.\n\nOutcome: Correction approved\n\nNext Steps: Send the updated invoice.'
       )
     );
-    expect(onCopy).toHaveBeenCalledWith(16);
+    expect(onCopy).toHaveBeenCalledWith();
 
     rerender(
       <AISummary
         mode="post-call"
         state="content"
         content={{...sectionContent, resolution: undefined}}
-        contentRevision={17}
         onEdit={jest.fn()}
         onCopy={onCopy}
         onFeedback={jest.fn()}
@@ -885,7 +870,7 @@ describe('AISummary', () => {
         'Initial contact reason: Customer asked for invoice help.\n\nNext Steps: Send the updated invoice.'
       )
     );
-    expect(onCopy).toHaveBeenCalledWith(17);
+    expect(onCopy).toHaveBeenCalledWith();
   });
 
   it('blocks empty plain, structured and receiver copy output before Clipboard access', () => {
@@ -895,7 +880,6 @@ describe('AISummary', () => {
         mode="post-call"
         state="content"
         content={{conversationId: 'interaction-main-1', summaryText: ' \n\t '}}
-        contentRevision={18}
         onEdit={jest.fn()}
         onCopy={onCopy}
         onFeedback={jest.fn()}
@@ -919,7 +903,6 @@ describe('AISummary', () => {
           sections: {initialContactReason: ' '},
           resolution: '',
         }}
-        contentRevision={19}
         onEdit={jest.fn()}
         onCopy={onCopy}
         onFeedback={jest.fn()}
@@ -935,7 +918,7 @@ describe('AISummary', () => {
       <AISummary
         mode="mid-call-receiver"
         state="content"
-        contentRevision={20}
+        content={textContent}
         getReceiverCopyText={jest.fn().mockReturnValue('')}
         onCopy={onCopy}
         onFeedback={jest.fn().mockResolvedValue({outcome: 'confirmed'})}
@@ -955,7 +938,6 @@ describe('AISummary', () => {
         mode="post-call"
         state="content"
         content={textContent}
-        contentRevision={21}
         onEdit={jest.fn()}
         onCopy={onCopy}
         onFeedback={jest.fn()}
@@ -975,7 +957,6 @@ describe('AISummary', () => {
         mode="post-call"
         state="content"
         content={{conversationId: 'interaction-main-1', summaryText: 'Replacement summary'}}
-        contentRevision={22}
         onEdit={jest.fn()}
         onCopy={onCopy}
         onFeedback={jest.fn()}
@@ -989,6 +970,39 @@ describe('AISummary', () => {
     expect(jest.getTimerCount()).toBe(0);
   });
 
+  it('ignores a clipboard completion after the displayed SDK summary has been replaced', async () => {
+    let finishCopy: () => void = () => undefined;
+    clipboardWrite(
+      () =>
+        new Promise<void>((resolve) => {
+          finishCopy = resolve;
+        })
+    );
+    const onCopy = jest.fn().mockReturnValue(true);
+    const renderSummary = (content: AISummaryContent) => (
+      <AISummary
+        mode="post-call"
+        state="content"
+        content={content}
+        onEdit={jest.fn()}
+        onCopy={onCopy}
+        onFeedback={jest.fn()}
+        onRetry={jest.fn()}
+      />
+    );
+    const {rerender} = render(renderSummary(textContent));
+    fireEvent.click(screen.getByRole('button', {name: LITERAL_SUMMARY_COPY.copySummary}));
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(textContent.summaryText);
+
+    rerender(renderSummary({...textContent, summaryText: 'Replacement SDK summary'}));
+    await act(async () => finishCopy());
+
+    expect(onCopy).not.toHaveBeenCalled();
+    expect(screen.getByRole('button', {name: LITERAL_SUMMARY_COPY.copySummary})).toHaveTextContent(
+      LITERAL_SUMMARY_COPY.copySummary
+    );
+  });
+
   it('swallows clipboard rejection without recorder calls or success paint', async () => {
     const onCopy = jest.fn().mockReturnValue(true);
     clipboardWrite(() => Promise.reject(new Error('denied')));
@@ -997,7 +1011,6 @@ describe('AISummary', () => {
         mode="mid-call-initiator"
         state="content"
         content={textContent}
-        contentRevision={4}
         onEdit={jest.fn()}
         onCopy={onCopy}
         onFeedback={jest.fn().mockResolvedValue({outcome: 'confirmed'})}
@@ -1019,7 +1032,6 @@ describe('AISummary', () => {
         mode="post-call"
         state="content"
         content={textContent}
-        contentRevision={5}
         selectedFeedback="thumbs_up"
         onEdit={jest.fn()}
         onCopy={jest.fn()}
@@ -1040,14 +1052,13 @@ describe('AISummary', () => {
     expect(dislike).toHaveAccessibleDescription(LITERAL_SUMMARY_COPY.pendingSubmission);
   });
 
-  it('reports feedback clicks with the shown revision and paints the selection the store keeps', () => {
+  it('reports feedback clicks and paints only the selection provided by its container', () => {
     const onFeedback = jest.fn().mockReturnValue(true);
     const renderSummary = (selectedFeedback?: 'thumbs_up' | 'thumbs_down') => (
       <AISummary
         mode="post-call"
         state="content"
         content={textContent}
-        contentRevision={5}
         selectedFeedback={selectedFeedback}
         onEdit={jest.fn()}
         onCopy={jest.fn()}
@@ -1060,10 +1071,7 @@ describe('AISummary', () => {
     const dislike = screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.dislike});
     fireEvent.click(like);
     fireEvent.click(dislike);
-    expect(onFeedback.mock.calls).toEqual([
-      ['thumbs_up', 5],
-      ['thumbs_down', 5],
-    ]);
+    expect(onFeedback.mock.calls).toEqual([['thumbs_up'], ['thumbs_down']]);
     expect(like).toHaveAttribute('aria-pressed', 'false');
 
     rerender(renderSummary('thumbs_down'));
@@ -1077,7 +1085,6 @@ describe('AISummary', () => {
         mode="post-call"
         state="content"
         content={textContent}
-        contentRevision={6}
         selectedFeedback="thumbs_up"
         onEdit={jest.fn()}
         onCopy={jest.fn()}
@@ -1119,7 +1126,6 @@ describe('AISummary', () => {
         mode="post-call"
         state="content"
         content={textContent}
-        contentRevision={6}
         selectedFeedback="thumbs_up"
         onEdit={jest.fn()}
         onCopy={jest.fn()}
@@ -1148,7 +1154,6 @@ describe('AISummary', () => {
           mode="post-call"
           state="content"
           content={textContent}
-          contentRevision={6}
           selectedFeedback="thumbs_up"
           onEdit={jest.fn()}
           onCopy={jest.fn()}
@@ -1180,7 +1185,6 @@ describe('AISummary', () => {
           mode="post-call"
           state="content"
           content={textContent}
-          contentRevision={6}
           onEdit={jest.fn()}
           onCopy={jest.fn()}
           onFeedback={jest.fn()}
@@ -1211,7 +1215,6 @@ describe('AISummary', () => {
         mode="post-call"
         state="generic-error"
         content={textContent}
-        contentRevision={51}
         selectedFeedback="none"
         onEdit={jest.fn()}
         onCopy={jest.fn()}
@@ -1229,7 +1232,6 @@ describe('AISummary', () => {
         mode="post-call"
         state="content"
         content={textContent}
-        contentRevision={52}
         selectedFeedback="none"
         onEdit={jest.fn()}
         onCopy={jest.fn()}
@@ -1248,7 +1250,6 @@ describe('AISummary', () => {
       <AISummary
         mode="post-call"
         state="generic-error"
-        contentRevision={51}
         requestPending
         onEdit={jest.fn()}
         onCopy={jest.fn()}
@@ -1267,7 +1268,6 @@ describe('AISummary', () => {
   it('recovers panel focus when the shared Retry button is removed', async () => {
     const props = {
       mode: 'post-call',
-      contentRevision: 51,
       onEdit: jest.fn(),
       onCopy: jest.fn(),
       onFeedback: jest.fn(),
@@ -1282,14 +1282,14 @@ describe('AISummary', () => {
     expect(screen.getByTestId('ai-summary:test-panel')).toHaveFocus();
   });
 
-  it('uses synchronous receiver copy text without card JSON or editable content props', async () => {
+  it('copies rendered receiver text without rendering its SDK payload as an editor', async () => {
     const getReceiverCopyText = jest.fn().mockReturnValue('Visible card text');
     const onCopy = jest.fn().mockReturnValue(true);
     render(
       <AISummary
         mode="mid-call-receiver"
         state="content"
-        contentRevision={10}
+        content={textContent}
         getReceiverCopyText={getReceiverCopyText}
         onCopy={onCopy}
         onFeedback={jest.fn().mockResolvedValue({outcome: 'confirmed'})}
@@ -1297,7 +1297,7 @@ describe('AISummary', () => {
     );
 
     fireEvent.click(screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary}));
-    await waitFor(() => expect(onCopy).toHaveBeenCalledWith(10));
+    await waitFor(() => expect(onCopy).toHaveBeenCalledWith());
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith('Visible card text');
     expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
   });
@@ -1319,7 +1319,7 @@ describe('AISummary', () => {
         <AISummary
           mode="mid-call-receiver"
           state="content"
-          contentRevision={11}
+          content={textContent}
           containingPanelFocusTarget={panelRef}
           getReceiverCopyText={() => 'Visible card text'}
           onCopy={jest.fn().mockReturnValue(true)}
@@ -1360,7 +1360,6 @@ describe('AISummary', () => {
           mode="post-call"
           state="content"
           content={firstContent}
-          contentRevision={51}
           containingPanelFocusTarget={panelRef}
           onEdit={jest.fn()}
           onCopy={jest.fn()}
@@ -1370,8 +1369,10 @@ describe('AISummary', () => {
       </div>
     );
 
-    const summaryPreview = screen.getByRole('button', {
-      name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason),
+    const summaryPreview = await screen.findByRole('button', {
+      name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(
+        AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason
+      ),
     });
     act(() => {
       summaryPreview.focus();
@@ -1388,7 +1389,6 @@ describe('AISummary', () => {
             conversationId: 'interaction-main-1',
             sections: {nextSteps: 'Follow-up value'},
           }}
-          contentRevision={52}
           containingPanelFocusTarget={panelRef}
           onEdit={jest.fn()}
           onCopy={jest.fn()}
@@ -1398,9 +1398,9 @@ describe('AISummary', () => {
       </div>
     );
 
-    await waitFor(() =>
+    await waitFor(async () =>
       expect(
-        screen.getByRole('button', {
+        await screen.findByRole('button', {
           name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.nextSteps),
         })
       ).toHaveFocus()
@@ -1422,7 +1422,6 @@ describe('AISummary', () => {
             conversationId: 'interaction-main-1',
             sections: {nextSteps: 'Follow-up value'},
           }}
-          contentRevision={53}
           containingPanelFocusTarget={panelRef}
           onEdit={jest.fn()}
           onCopy={jest.fn()}
@@ -1441,7 +1440,6 @@ describe('AISummary', () => {
         mode="post-call"
         state="content"
         content={textContent}
-        contentRevision={54}
         onEdit={jest.fn()}
         onCopy={jest.fn()}
         onFeedback={jest.fn().mockReturnValue(true)}
@@ -1460,7 +1458,6 @@ describe('AISummary', () => {
         mode="post-call"
         state="content"
         content={{conversationId: 'interaction-main-1', summaryText: 'Updated while focus remains on Like.'}}
-        contentRevision={55}
         selectedFeedback="thumbs_up"
         onEdit={jest.fn()}
         onCopy={jest.fn()}
@@ -1478,7 +1475,6 @@ describe('AISummary', () => {
         mode="post-call"
         state="content"
         content={sectionContent}
-        contentRevision={13}
         onEdit={jest.fn()}
         onCopy={jest.fn()}
         onFeedback={jest.fn().mockReturnValue(true)}
@@ -1487,11 +1483,15 @@ describe('AISummary', () => {
     );
 
     fireEvent.click(
-      screen.getByRole('button', {
-        name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason),
+      await screen.findByRole('button', {
+        name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(
+          AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason
+        ),
       })
     );
-    const editor = screen.getByRole('textbox', {name: AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason});
+    const editor = screen.getByRole('textbox', {
+      name: AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason,
+    });
     act(() => {
       editor.focus();
     });
@@ -1499,9 +1499,9 @@ describe('AISummary', () => {
 
     fireEvent.blur(editor, {relatedTarget: null});
 
-    await waitFor(() =>
+    await waitFor(async () =>
       expect(
-        screen.getByRole('button', {
+        await screen.findByRole('button', {
           name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.nextSteps),
         })
       ).toHaveFocus()
@@ -1515,7 +1515,6 @@ describe('AISummary', () => {
           mode="post-call"
           state="content"
           content={sectionContent}
-          contentRevision={14}
           onEdit={jest.fn()}
           onCopy={jest.fn()}
           onFeedback={jest.fn().mockReturnValue(true)}
@@ -1526,11 +1525,15 @@ describe('AISummary', () => {
     );
 
     fireEvent.click(
-      screen.getByRole('button', {
-        name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason),
+      await screen.findByRole('button', {
+        name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(
+          AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason
+        ),
       })
     );
-    const editor = screen.getByRole('textbox', {name: AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason});
+    const editor = screen.getByRole('textbox', {
+      name: AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason,
+    });
     const external = screen.getByRole('button', {name: 'External destination'});
     act(() => {
       editor.focus();
@@ -1562,7 +1565,7 @@ describe('AISummary', () => {
             <AISummary
               mode="mid-call-receiver"
               state="content"
-              contentRevision={15}
+              content={textContent}
               containingPanelFocusTarget={panelRef}
               getReceiverCopyText={() => 'Visible card text'}
               onCopy={jest.fn().mockReturnValue(true)}
