@@ -1,27 +1,10 @@
-// Keep these CommonJS requests visible to the consuming Webpack build. The
-// assistant's package build leaves this file alongside its published assets.
-exports.loadWellnessSoundUrl = () => Promise.resolve(require('!!./emit-wellness-asset.cjs!./WellnessBreakSound.mp3'));
+// The package build generates JavaScript modules for the checked-in media.
+// Consumers can load them without an MP3 or JSON loader.
+exports.loadWellnessSoundUrl = () => import('./WellnessBreakSound.mjs').then((module) => module.default);
 
 exports.loadWellnessAnimationData = (theme) =>
-  new Promise((resolve, reject) => {
-    if (theme === 'dark') {
-      require.ensure(
-        [],
-        (require) => resolve(require('./WellnessBreakAnimationDark.json')),
-        reject,
-        'wellness-animation-dark'
-      );
-    } else {
-      require.ensure(
-        [],
-        (require) => resolve(require('./WellnessBreakAnimationLight.json')),
-        reject,
-        'wellness-animation-light'
-      );
-    }
-  });
+  (theme === 'dark' ? import('./WellnessBreakAnimationDark.mjs') : import('./WellnessBreakAnimationLight.mjs')).then(
+    (module) => module.default
+  );
 
-exports.loadLottie = () =>
-  new Promise((resolve, reject) => {
-    require.ensure([], (require) => resolve(require('lottie-web')), reject, 'lottie-web');
-  });
+exports.loadLottie = () => import('lottie-web').then((module) => module.default ?? module);
