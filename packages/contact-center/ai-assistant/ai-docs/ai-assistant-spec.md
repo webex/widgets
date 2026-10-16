@@ -294,15 +294,21 @@ snapshots) is covered in `cc-components/tests/components/AIAssistant/`.
 ## Receiving-agent AI summaries
 
 `getReceiverSummary` in `src/helper.ts` reads the current interaction's receiver entry
-from `store.aiSummaries`, maps its surface with `getAISummarySurface`, and passes the
-raw SDK content, revision, confirmed feedback from `entry.response.feedback` and
-pending state to the presentation component. Its copy and feedback callbacks pass the
-captured Task and displayed revision to the store. The widget makes no summary SDK calls.
+from `store.cc.aiSummaries`, maps its request status and SDK `areTranscriptsAvailable`
+flag to a display surface, and passes the raw SDK content, confirmed feedback from
+`entry.response.feedback` and pending state to the presentation component. Received
+content remains visible during a failed or pending refresh. Copy callbacks increment
+`response.numberOfTimesCopied` in `store.cc.aiSummaries` inside `runInAction`.
+Copy and feedback callbacks retain the displayed SDK content and Task identities;
+replacement content or a different active Task invalidates those callbacks. Feedback
+passes that SDK payload and Task to `store.setReceiverSummaryFeedback`, which owns
+submission and acknowledgement. The widget makes no summary SDK calls.
 
 The receiver branch is independent of Real-time Assist enablement. A missing receiver
 entry supplies no branch. SDK content with `areTranscriptsAvailable: false` supplies
 the unavailable surface, and a rejected request supplies the generic error surface.
-Card rendering and unsupported-card fallback belong to the presentation component.
+Raw content without an adaptive card still supplies a branch; card rendering and
+unsupported-card fallback belong to the presentation component.
 Summary changes are observed by `AIAssistantInternal`.
 
 Evidence: `src/helper.ts`, `src/ai-assistant/index.tsx`;

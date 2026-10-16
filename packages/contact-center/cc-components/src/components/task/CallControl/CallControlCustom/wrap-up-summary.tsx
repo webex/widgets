@@ -1,7 +1,7 @@
 import React, {useLayoutEffect, useRef, useState} from 'react';
 import {RadioGroupNext as RadioGroup, TextInput} from '@momentum-ui/react-collaboration';
 import {Button, Icon} from '@momentum-design/components/dist/react';
-import AISummary, {AI_SUMMARY_MESSAGES} from '../../../AISummary';
+import AISummary, {AI_ASSISTANT_SUMMARY_MESSAGES as AI_SUMMARY_MESSAGES} from '../../../AIAssistant/AISummary';
 import {CLEAR_SEARCH, WRAP_UP_INTERACTION} from '../../constants';
 import type {WrapUpSummaryProps} from '../../task.types';
 import './wrap-up-summary.styles.scss';
@@ -97,6 +97,12 @@ const WrapUpSummary: React.FC<WrapUpSummaryProps> = ({
             className={`wrap-up-summary__body${summary.state === 'content' ? ' wrap-up-summary__body--content' : ''}`}
             data-testid="wrap-up-summary:body"
             onFocusCapture={handleSummaryFocusCapture}
+            onBlurCapture={(event) => {
+              const nextTarget = event.relatedTarget;
+              if (nextTarget instanceof HTMLElement && nextTarget !== document.body && nextTarget.isConnected) {
+                summaryFocusedControlRef.current = null;
+              }
+            }}
           >
             <AISummary
               {...summary}

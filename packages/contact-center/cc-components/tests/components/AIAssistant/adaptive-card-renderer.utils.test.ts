@@ -1,5 +1,6 @@
 import {
   buildHostConfig,
+  extractCardText,
   extractCustomerStatementTitle,
   prepareCardForRender,
   resolveMomentumIconUrl,
@@ -128,6 +129,35 @@ describe('AdaptiveCardRenderer utilities', () => {
       iconUrl: 'unknown-icon.svg',
       text: 'Source · ',
     });
+  });
+
+  it('preserves existing extraction of hidden RTA text unless visible-only copying is requested', () => {
+    const container = document.createElement('div');
+    container.innerHTML = `
+      <div class="ac-textBlock">Visible suggestion</div>
+      <div style="display: none"><div class="ac-textBlock">Hidden suggestion</div></div>
+      <div class="ac-richTextBlock" hidden>Hidden details</div>
+      <div class="ac-textBlock">Source</div>
+    `;
+
+    expect(extractCardText(container)).toBe('Visible suggestion\nHidden suggestion\nHidden details');
+  });
+
+  it('excludes text blocks hidden by HTML attributes, CSS, or their ancestors', () => {
+    const container = document.createElement('div');
+    container.innerHTML = `
+      <div class="ac-textBlock">Visible summary</div>
+      <div hidden><div class="ac-textBlock">Hidden parent</div></div>
+      <div style="display: none"><div class="ac-textBlock">Collapsed parent</div></div>
+      <div class="ac-textBlock" hidden>Hidden block</div>
+      <div class="ac-textBlock" style="visibility: hidden">Invisible block</div>
+      <div style="visibility: hidden"><div class="ac-textBlock">Invisible parent</div></div>
+      <div class="ac-richTextBlock" style="visibility: collapse">Collapsed block</div>
+      <div class="ac-textBlock">Source</div>
+      <div><div class="ac-richTextBlock">Visible next steps</div></div>
+    `;
+
+    expect(extractCardText(container, {visibleOnly: true})).toBe('Visible summary\nVisible next steps');
   });
 
   it('uses transparent card containers and the compact action layout', () => {

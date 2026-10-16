@@ -561,14 +561,23 @@ Tests are split between widget-shell render tests (each `tests/<Widget>/index.ts
 ## AI summaries in CallControl
 
 `getAISummaryProps` in `src/helper.ts` maps the current task's SDK capabilities and
-store summary entries into optional mid-call and post-call views with store callbacks.
+`store.cc.aiSummaries` entries into optional mid-call and post-call views.
 It reads `task.aiSummaryCapabilities` directly, with no additional media-type filter,
 and supplies no summary props when both capabilities are disabled. Each view receives
 the entry's raw SDK content, which can be absent during generation or failure, and
-confirmed feedback from `entry.response.feedback`. The adapter imports the component
-view prop type directly from `@webex/cc-components` and derives its callback types from
-that contract. It forwards arguments to store actions without constructing a second
-summary or response model.
+feedback from `entry.response.feedback`. An enabled view without an entry starts in
+the generating state. Unavailable transcripts take priority over content; retained
+content remains visible during a refresh or after a failed refresh. The adapter imports
+the view prop type from `@webex/cc-components` and passes the SDK content unchanged,
+with `entry.response.summary` supplied separately as the editable display values.
+Edits, copy counts and deferred feedback update that existing SDK response record in
+`runInAction`; they never mutate the SDK summary. Each callback captures the selected
+task and raw SDK content identity, so a task switch, replacement summary or pending
+refresh rejects stale controls. Only displayed SDK fields can be edited; unchanged
+values leave the response untouched, and reverting a structured field removes that
+field's response override. The edit count is the existing zero-or-one edited flag.
+Requests and response submission remain store/SDK
+operations, with no widget-owned transport validation or correlation.
 
 Opening consult/transfer requests the corresponding mid-call summary. `consultCall`
 and `transferCall` send the initiator response through the store as the existing SDK
@@ -582,10 +591,19 @@ boolean so the summary UI can retain its draft after failure and disable complet
 while wrap-up is pending. Concurrent wrap-up calls for the same active task share one
 in-flight completion promise, so rapid repeated activation cannot submit the same task twice.
 
-CallControl accepts optional `onAISummaryStatusChange`; the outer widget subscribes
-while that callback is present and unsubscribes on replacement or unmount. The exported
-`AISummaryStatusDetail` contains only kind and state. Widgets access summary APIs
-through `@webex/cc-store`.
+Widgets access summary APIs through `@webex/cc-store`.
+
+### Integration blockers
+
+The merged store marks `cc` as `observable.ref` but adds `cc.aiSummaries` as an ordinary
+property. Replacing that nested property does not notify summary observers. The store
+needs a separate observability fix before live summary arrival, request completion and
+local response changes can reliably update these views. This change leaves the store
+untouched.
+
+The existing `onAISummaryStatusChange` subscription and `AISummaryStatusDetail` export
+still reference APIs removed from the merged store. They remain an outstanding widget
+contract cleanup and currently prevent the task package's full TypeScript check.
 
 Evidence: `src/helper.ts`, `src/CallControl/index.tsx`, `src/task.types.ts`;
 tests: AI summary cases in `tests/helper.ts` and `tests/CallControl/index.tsx`.

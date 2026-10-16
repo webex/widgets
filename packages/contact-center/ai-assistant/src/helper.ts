@@ -1,5 +1,6 @@
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import store, {getAISummarySurface} from '@webex/cc-store';
+import {runInAction} from 'mobx';
+import store from '@webex/cc-store';
 import type {ITask, RealTimeAssistPayload} from '@webex/cc-store';
 import type {
   AIAssistantActionEvent,
@@ -302,24 +303,53 @@ export const useAiAssistant = (input: UseAiAssistantInput) => {
 /** The receiving agent's consult/transfer summary, pushed by the backend for the task's interaction. */
 export const getReceiverSummary = (task?: ITask): AIAssistantReceiverSummary | undefined => {
   const interactionId = task?.data.interactionId;
-  const entry = interactionId ? store.aiSummaries[interactionId]?.receiver : undefined;
-  const surface = getAISummarySurface(entry);
+  const entry = interactionId ? store.cc.aiSummaries[interactionId]?.receiver : undefined;
+  if (!task || !interactionId || !entry) {
+    return undefined;
+  }
   const branchKey = `mid-call:receiver:${interactionId}`;
-  if (surface === 'content' && entry.content.adaptiveCard) {
+  const content = entry.content;
+  if (content?.areTranscriptsAvailable === false) {
+    return {surface: 'unavailable', branchKey};
+  }
+  if (content) {
+    const getDisplayedEntry = () => {
+      const current = store.cc.aiSummaries[interactionId]?.receiver;
+      return store.currentTask === task && current?.content === content ? current : undefined;
+    };
     return {
-      surface,
+      surface: 'content',
       branchKey,
-      content: entry.content,
-      contentRevision: entry.revision,
+      content,
       selectedFeedback: entry.response.feedback,
       feedbackPending: Boolean(entry.feedbackPending),
-      recordReceiverSummaryCopied: (expectedRevision) =>
-        store.recordAISummaryCopied('receiver', expectedRevision, task),
-      setReceiverSummaryFeedback: (feedback, expectedRevision) =>
-        void store.setReceiverSummaryFeedback(feedback, expectedRevision, task),
+      recordReceiverSummaryCopied: () => {
+        const current = getDisplayedEntry();
+        if (!current || current.feedbackPending) {
+          return false;
+        }
+        runInAction(() => {
+          store.cc.aiSummaries = {
+            ...store.cc.aiSummaries,
+            [interactionId]: {
+              ...store.cc.aiSummaries[interactionId],
+              receiver: {
+                ...current,
+                response: {...current.response, numberOfTimesCopied: current.response.numberOfTimesCopied + 1},
+              },
+            },
+          };
+        });
+        return true;
+      },
+      setReceiverSummaryFeedback: (feedback) => {
+        if (getDisplayedEntry()) {
+          void store.setReceiverSummaryFeedback(feedback, content, task);
+        }
+      },
     };
   }
-  return surface === 'unavailable' || surface === 'generic-error' ? {surface, branchKey} : undefined;
+  return entry.status === 'error' ? {surface: 'generic-error', branchKey} : undefined;
 };
 
 export {REAL_TIME_ASSIST_FLAG};

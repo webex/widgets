@@ -135,7 +135,7 @@ describe('AdaptiveCardRenderer', () => {
     expect(sourceImage).not.toHaveAttribute('hidden');
   });
 
-  it('resets a receiver summary error when its content revision changes', async () => {
+  it('resets a receiver summary error when its card is replaced', async () => {
     jest.requireMock('adaptivecards').AdaptiveCard.mockImplementationOnce(() => ({
       parse: jest.fn(() => {
         throw new Error('Malformed card');
@@ -144,11 +144,7 @@ describe('AdaptiveCardRenderer', () => {
       getAllActions: jest.fn(() => []),
     }));
     const {rerender} = render(
-      <AdaptiveCardRenderer
-        card={{type: 'AdaptiveCard'}}
-        contentRevision={1}
-        fallbackText="The summary is not available"
-      />
+      <AdaptiveCardRenderer card={{type: 'AdaptiveCard'}} displayOnly fallbackText="The summary is not available" />
     );
 
     expect(await screen.findByTestId('ai-assistant:adaptive-card-fallback')).toHaveTextContent(
@@ -158,7 +154,7 @@ describe('AdaptiveCardRenderer', () => {
     rerender(
       <AdaptiveCardRenderer
         card={{type: 'AdaptiveCard', version: '1.5'}}
-        contentRevision={2}
+        displayOnly
         fallbackText="The summary is not available"
       />
     );
@@ -167,7 +163,31 @@ describe('AdaptiveCardRenderer', () => {
     expect(await screen.findByLabelText('Like suggestion')).toBeInTheDocument();
   });
 
-  it('renders receiver cards without actions or inputs and preserves their visible text', async () => {
+  it('keeps the ordinary RTA error fallback when its card is replaced', async () => {
+    jest.requireMock('adaptivecards').AdaptiveCard.mockImplementationOnce(() => ({
+      parse: jest.fn(() => {
+        throw new Error('Malformed card');
+      }),
+      render: jest.fn(),
+      getAllActions: jest.fn(() => []),
+    }));
+    const {rerender} = render(
+      <AdaptiveCardRenderer card={{type: 'AdaptiveCard'}} fallbackText="Suggestion unavailable" />
+    );
+
+    expect(await screen.findByTestId('ai-assistant:adaptive-card-fallback')).toHaveTextContent(
+      'Suggestion unavailable'
+    );
+
+    rerender(
+      <AdaptiveCardRenderer card={{type: 'AdaptiveCard', version: '1.5'}} fallbackText="Suggestion unavailable" />
+    );
+
+    expect(screen.getByTestId('ai-assistant:adaptive-card-fallback')).toHaveTextContent('Suggestion unavailable');
+    expect(screen.queryByLabelText('Like suggestion')).not.toBeInTheDocument();
+  });
+
+  it('renders receiver cards without actions or inputs and copies only their visible text', async () => {
     // Adaptive Cards writes plain text through innerText, which jsdom does not implement.
     const innerText = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'innerText');
     Object.defineProperty(HTMLElement.prototype, 'innerText', {
@@ -196,12 +216,22 @@ describe('AdaptiveCardRenderer', () => {
         selectAction: {type: 'Action.Submit', title: 'Select card'},
         body: [
           {type: 'TextBlock', text: 'Receiver summary'},
+          {type: 'TextBlock', text: 'Hidden summary', isVisible: false},
+          {
+            type: 'Container',
+            isVisible: false,
+            items: [{type: 'TextBlock', text: 'Hidden container text'}],
+          },
           {
             type: 'Container',
             selectAction: {type: 'Action.OpenUrl', title: 'Open container', url: 'https://example.com'},
             items: [
               {type: 'RichTextBlock', inlines: [{type: 'TextRun', text: 'Next steps'}]},
               {type: 'FactSet', facts: [{title: 'Outcome', value: 'Resolved'}]},
+              {
+                type: 'Container',
+                items: [{type: 'TextBlock', text: '• Confirm resolution\n• Thank the customer', wrap: true}],
+              },
               {type: 'Input.Text', id: 'edit', value: 'Hidden input'},
               {type: 'ActionSet', actions: [{type: 'Action.Submit', title: 'Like'}]},
             ],
@@ -224,8 +254,10 @@ describe('AdaptiveCardRenderer', () => {
       expect(screen.getByText('Next steps')).toBeInTheDocument();
       expect(screen.getByText('Outcome')).toBeInTheDocument();
       expect(screen.getByText('Resolved')).toBeInTheDocument();
-      expect(extractCardText(screen.getByTestId('ai-assistant:adaptive-card'))).toBe(
-        'Receiver summary\nNext steps\nOutcome\nResolved'
+      expect(screen.getByText('Hidden summary')).not.toBeVisible();
+      expect(screen.getByText('Hidden container text')).not.toBeVisible();
+      expect(extractCardText(screen.getByTestId('ai-assistant:adaptive-card'), {visibleOnly: true})).toBe(
+        'Receiver summary\nNext steps\nOutcome\nResolved\n• Confirm resolution\n• Thank the customer'
       );
       expect(screen.queryByRole('button')).not.toBeInTheDocument();
       expect(screen.queryByRole('textbox')).not.toBeInTheDocument();

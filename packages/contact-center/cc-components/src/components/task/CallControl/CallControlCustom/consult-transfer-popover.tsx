@@ -9,7 +9,7 @@ import {
   RadioGroupNext as RadioGroup,
 } from '@momentum-ui/react-collaboration';
 import {Icon, Checkbox, Spinner} from '@momentum-design/components/dist/react';
-import AISummary, {AI_SUMMARY_MESSAGES} from '../../../AISummary';
+import AISummary, {AI_ASSISTANT_SUMMARY_MESSAGES as AI_SUMMARY_MESSAGES} from '../../../AIAssistant/AISummary';
 import ConsultTransferListComponent from './consult-transfer-list-item';
 import {
   CategoryType,
@@ -137,6 +137,13 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
     const target = event.target;
     if (target instanceof HTMLElement) {
       summaryFocusedControlRef.current = target;
+    }
+  };
+
+  const handleSummaryBlurCapture = (event: React.FocusEvent<HTMLElement>) => {
+    const relatedTarget = event.relatedTarget;
+    if (relatedTarget instanceof HTMLElement && relatedTarget !== document.body && relatedTarget.isConnected) {
+      summaryFocusedControlRef.current = null;
     }
   };
 
@@ -461,6 +468,7 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
           className="consult-transfer-summary"
           data-testid="consult-transfer:summary"
           onFocusCapture={handleSummaryFocusCapture}
+          onBlurCapture={handleSummaryBlurCapture}
         >
           <Text tagName="h4" className="consult-transfer-summary__heading" type="body-midsize-regular">
             <Icon name="sparkle-filled" className="consult-transfer-summary__sparkle" aria-hidden="true" />

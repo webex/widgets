@@ -116,15 +116,22 @@
   display: block;
   inline-size: 100%;
   min-block-size: 1.5rem;
-  border: 0;
-  padding: 0;
-  margin: 0;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  text-align: start;
-  white-space: normal;
-  cursor: text;
+
+  &::part(button) {
+    display: block;
+    inline-size: 100%;
+    block-size: auto;
+    min-block-size: 1.5rem;
+    border: 0;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: start;
+    white-space: normal;
+    cursor: text;
+  }
 
   > .ai-summary__label {
     font-size: inherit;
@@ -132,7 +139,7 @@
     font-weight: 700;
   }
 
-  &:disabled {
+  &[disabled]::part(button) {
     opacity: 1;
     cursor: default;
   }
@@ -234,15 +241,15 @@
 .ai-summary__feedback-group {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  inline-size: 44px;
-  block-size: 20px;
-  flex: 0 0 44px;
+  gap: 0.25rem;
+  inline-size: 2.75rem;
+  block-size: 1.25rem;
+  flex: 0 0 2.75rem;
 }
 
 .ai-summary__feedback-action {
-  inline-size: 20px;
-  block-size: 20px;
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
 }
 
 .ai-summary__feedback-button {
@@ -250,14 +257,14 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  inline-size: 20px;
-  block-size: 20px;
-  min-inline-size: 20px;
-  min-block-size: 20px;
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  min-inline-size: 1.25rem;
+  min-block-size: 1.25rem;
   border: 0;
   border-radius: 50%;
   background: transparent;
-  padding: 2px;
+  padding: 0.125rem;
 }
 
 .ai-summary__actions mdc-icon {
@@ -306,7 +313,7 @@
 }
 
 .ai-summary__button:focus-visible,
-.ai-summary__section-preview:focus-visible,
+.ai-summary__section-preview::part(button):focus-visible,
 .ai-summary__textarea:focus-visible {
   outline: 2px solid var(--mds-color-theme-outline-accent-normal, #0b5cad);
   outline-offset: 2px;
