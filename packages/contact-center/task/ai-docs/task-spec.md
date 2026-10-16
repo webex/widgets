@@ -306,6 +306,11 @@ sequenceDiagram
   alt manual wrap-up
     A->>C: select wrap-up code
     C->>H: wrapupCall(reason, auxCodeId)
+    opt post-call summary enabled
+      H->>S: sendPostCallSummaryResponse(auxCodeId, currentTask)
+      S->>SDK: sendPostCallSummaryResponse(response with wrapUpCode)
+      SDK-->>S: submitted or response-failed
+    end
     H->>SDK: currentTask.wrapup({wrapUpReason, auxCodeId})
     SDK-->>H: resolved
     H->>S: setCurrentTask(firstRemaining); setState(ENGAGED)
@@ -430,7 +435,7 @@ The six widget shells are siblings that each bind to exactly one hook and one pr
 - **UC-5 Mute / unmute (CallControl):** Agent clicks mute → `toggleMute()` (gated by `controlVisibility.muteUnmute`) → `currentTask.toggleMute()` → `store.setIsMuted`, `onToggleMute`. Evidence: `src/helper.ts`, `tests/helper.ts` ("should successfully toggle mute…", "rapid toggleMute"). UI flow: shows error-safe revert on failure.
 - **UC-6 Consult an agent/queue/EP-DN then transfer or conference (CallControl):** Agent opens consult modal → component reads the matching ordered category array from `currentTask.uiControls.consultTransferDestinations` → `consultCall(dest,type,allow)` → on completion `consultTransfer()` (or `transferConference` in conference) or `endConsultCall()`. Evidence: `src/helper.ts`, `src/CallControl/index.tsx`, `packages/contact-center/cc-components/src/components/task/CallControl/call-control.tsx`.
 - **UC-7 Blind transfer (CallControl):** Agent picks destination → `transferCall(to,type)` → `currentTask.transfer(...)`; failure re-thrown to the modal. Evidence: `src/helper.ts`, `tests/helper.ts` ("should call transferCall successfully").
-- **UC-8 Wrap up a call (CallControl):** Call ends → wrap-up codes shown → Agent selects code → `wrapupCall(reason, auxCodeId)` → `currentTask.wrapup` → next task promoted to `currentTask`, agent → ENGAGED. Evidence: `src/helper.ts`, `tests/helper.ts` ("should call wrapupCall"). Auto-wrap-up: countdown shown with Cancel. UI flow: wrap-up dropdown + optional auto-wrap-up countdown.
+- **UC-8 Wrap up a call (CallControl):** Call ends → wrap-up codes shown → Agent selects code → when enabled, await `store.sendPostCallSummaryResponse(auxCodeId, currentTask)` with that exact task and selected code → `currentTask.wrapup({wrapUpReason, auxCodeId})` → next task promoted to `currentTask`, agent → ENGAGED. The disabled capability skips summary submission; both `response-failed` and unexpected summary submission rejections allow wrap-up to continue. Evidence: `src/helper.ts`, `tests/helper.ts` ("should call wrapupCall" and "post-call summary submission during wrap-up", including deferred success ordering, both failure paths, and disabled capability). Auto-wrap-up: countdown shown with Cancel. UI flow: wrap-up dropdown + optional auto-wrap-up countdown.
 - **UC-9 Place an outbound call (OutdialCall):** Agent enters number, selects ANI → dial → `startOutdial(destination, origin)`; empty number alerts and aborts; disabled while a telephony task is active. Evidence: `src/helper.ts` (`useOutdialCall`), `tests/OutdialCall/index.tsx`. UI flow: dialpad with validation, ANI dropdown, address book toggled by `isAddressBookEnabled`.
 - **UC-10 Manage concurrent tasks (TaskList):** Agent sees all tasks → accept/decline per task or click to select → selection sets `currentTask` so CallControl follows. Evidence: `src/helper.ts` (`useTaskList`), `tests/helper.ts` (task-list cases), `tests/TaskList/index.tsx`.
 - **UC-11 View live transcript (RealTimeTranscript):** As `store.realtimeTranscriptionData` updates for `currentTask`, lines are mapped to entries with normalized speaker/time. Evidence: `src/helper.ts` (`useRealTimeTranscript`), `tests/RealtimeTranscript/index.tsx`.
@@ -567,11 +572,12 @@ summary or response model.
 
 Opening consult/transfer requests the corresponding mid-call summary. `consultCall`
 and `transferCall` send the initiator response through the store as the existing SDK
-operation starts; they do not wait for summary submission. `wrapupCall` freezes the
-post-call response, awaits the existing Task `wrapup` call, promotes the next task,
-then sends the summary response without waiting. The response's `wrapUpCode` is the
-selected reason name. Submission uses the captured Task and SDK response record;
-an unedited structured summary has an empty `summary` object. `wrapupCall` resolves a
+operation starts; they do not wait for summary submission. When post-call summary
+capability is enabled, `wrapupCall` awaits
+`store.sendPostCallSummaryResponse(auxCodeId, currentTask)` before the existing Task
+`wrapup` call, then promotes the next task. The response's `wrapUpCode` is the selected
+code ID. Failed summary submission does not prevent wrap-up; disabled capability skips
+submission. An unedited structured summary has an empty `summary` object. `wrapupCall` resolves a
 boolean so the summary UI can retain its draft after failure and disable completion
 while wrap-up is pending. Concurrent wrap-up calls for the same active task share one
 in-flight completion promise, so rapid repeated activation cannot submit the same task twice.

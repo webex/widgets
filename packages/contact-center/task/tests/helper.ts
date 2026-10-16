@@ -3184,95 +3184,7 @@ describe('useCallControl', () => {
     expect(mockCurrentTask.wrapup).toHaveBeenCalledWith({wrapUpReason: 'Wrap reason', auxCodeId: '123'});
   });
 
-  it('should send the post-call summary with the reason name after wrap-up succeeds, without waiting for it', async () => {
-    resetAISummaryStoreState();
-    const successTask = createAISummaryTask();
-    const wrapupDeferred = (() => {
-      let resolve!: () => void;
-      const promise = new Promise<void>((promiseResolve) => {
-        resolve = promiseResolve;
-      });
-      return {promise, resolve};
-    })();
-
-    await act(async () => {
-      await store.requestPostCallSummary(successTask);
-    });
-    (successTask.wrapup as jest.Mock).mockReturnValueOnce(wrapupDeferred.promise);
-
-    const successHook = renderHook(() =>
-      useCallControl({
-        currentTask: successTask,
-        onHoldResume: mockOnHoldResume,
-        onEnd: mockOnEnd,
-        onWrapUp: mockOnWrapUp,
-        logger: mockLogger,
-        isMuted: false,
-        conferenceEnabled: true,
-        agentId: 'agent1',
-      })
-    );
-
-    let completion!: Promise<boolean>;
-    await act(async () => {
-      completion = successHook.result.current.wrapupCall('Customer Issue', 'wrap1');
-      await Promise.resolve();
-    });
-
-    expect(successTask.wrapup).toHaveBeenCalledWith({wrapUpReason: 'Customer Issue', auxCodeId: 'wrap1'});
-    expect(successTask.sendPostCallSummaryResponse).not.toHaveBeenCalled();
-
-    await act(async () => {
-      wrapupDeferred.resolve();
-      await Promise.resolve();
-    });
-
-    await waitFor(() => expect(successTask.sendPostCallSummaryResponse).toHaveBeenCalledTimes(1));
-    expect(successTask.sendPostCallSummaryResponse).toHaveBeenCalledWith(
-      expect.objectContaining({
-        feedback: 'none',
-        state: 'DEFAULT',
-        wrapUpCode: 'Customer Issue',
-        summary: {},
-      })
-    );
-    await expect(completion).resolves.toBe(true);
-    successHook.unmount();
-
-    resetAISummaryStoreState();
-    const failedResponseTask = createAISummaryTask({
-      sendPostCallSummaryResponse: jest.fn(() => new Promise<void>(() => undefined)),
-    });
-
-    await act(async () => {
-      await store.requestPostCallSummary(failedResponseTask);
-    });
-
-    const failedResponseHook = renderHook(() =>
-      useCallControl({
-        currentTask: failedResponseTask,
-        onHoldResume: mockOnHoldResume,
-        onEnd: mockOnEnd,
-        onWrapUp: mockOnWrapUp,
-        logger: mockLogger,
-        isMuted: false,
-        conferenceEnabled: true,
-        agentId: 'agent1',
-      })
-    );
-
-    let failedResponseResult;
-    await act(async () => {
-      failedResponseResult = await failedResponseHook.result.current.wrapupCall('Customer Issue', 'wrap1');
-    });
-
-    expect(failedResponseResult).toBe(true);
-    expect(failedResponseTask.wrapup).toHaveBeenCalledWith({wrapUpReason: 'Customer Issue', auxCodeId: 'wrap1'});
-    expect(failedResponseTask.sendPostCallSummaryResponse).toHaveBeenCalledTimes(1);
-    expect(mockLogger.error).not.toHaveBeenCalled();
-  });
-
-  it('should keep the post-call summary and send nothing when wrap-up fails', async () => {
+  it('should keep the post-call summary and return false when wrap-up fails', async () => {
     resetAISummaryStoreState();
     const task = createAISummaryTask({wrapup: jest.fn().mockRejectedValue(new Error('wrap-up failed'))});
     await act(async () => {
@@ -3297,8 +3209,129 @@ describe('useCallControl', () => {
     });
 
     expect(wrapupResult).toBe(false);
-    expect(task.sendPostCallSummaryResponse).not.toHaveBeenCalled();
+    expect(task.sendPostCallSummaryResponse).toHaveBeenCalledTimes(1);
     expect(store.aiSummaries[AI_SUMMARY_INTERACTION_ID]?.['post-call']?.content).toBeDefined();
+  });
+
+  describe('post-call summary submission during wrap-up', () => {
+    const createPostCallTask = () => ({
+      ...mockCurrentTask,
+      aiSummaryCapabilities: {midCallEnabled: false, postCallEnabled: true},
+      wrapup: jest.fn().mockResolvedValue(undefined),
+    });
+
+    it('should await post-call summary submission with the selected code and task before wrapping up', async () => {
+      const task = createPostCallTask();
+      let resolveSubmission!: (result: 'submitted') => void;
+      const submissionPromise = new Promise<'submitted'>((resolve) => {
+        resolveSubmission = resolve;
+      });
+      const sendSummaryResponse = jest.spyOn(store, 'sendPostCallSummaryResponse').mockReturnValue(submissionPromise);
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: task,
+          logger: mockLogger,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'test-agent-id',
+        })
+      );
+
+      let wrapupPromise!: Promise<boolean>;
+      let repeatedWrapupPromise!: Promise<boolean>;
+      act(() => {
+        wrapupPromise = result.current.wrapupCall('Wrap reason', '123');
+        repeatedWrapupPromise = result.current.wrapupCall('Wrap reason', '123');
+      });
+
+      expect(repeatedWrapupPromise).toBe(wrapupPromise);
+      expect(sendSummaryResponse).toHaveBeenCalledTimes(1);
+      expect(sendSummaryResponse).toHaveBeenCalledWith('123', task);
+      expect(task.wrapup).not.toHaveBeenCalled();
+
+      await act(async () => {
+        resolveSubmission('submitted');
+        await expect(wrapupPromise).resolves.toBe(true);
+      });
+
+      expect(task.wrapup).toHaveBeenCalledTimes(1);
+      expect(task.wrapup).toHaveBeenCalledWith({wrapUpReason: 'Wrap reason', auxCodeId: '123'});
+    });
+
+    it('should continue wrapping up when post-call summary submission returns response-failed', async () => {
+      const task = createPostCallTask();
+      const sendSummaryResponse = jest.spyOn(store, 'sendPostCallSummaryResponse').mockResolvedValue('response-failed');
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: task,
+          logger: mockLogger,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'test-agent-id',
+        })
+      );
+
+      await act(async () => {
+        await expect(result.current.wrapupCall('Wrap reason', '123')).resolves.toBe(true);
+      });
+
+      expect(sendSummaryResponse).toHaveBeenCalledWith('123', task);
+      expect(task.wrapup).toHaveBeenCalledTimes(1);
+      expect(task.wrapup).toHaveBeenCalledWith({wrapUpReason: 'Wrap reason', auxCodeId: '123'});
+    });
+
+    it('should log unexpected post-call summary rejection and continue wrapping up', async () => {
+      const task = createPostCallTask();
+      const sendSummaryResponse = jest
+        .spyOn(store, 'sendPostCallSummaryResponse')
+        .mockRejectedValue(new Error('Unexpected summary submission error'));
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: task,
+          logger: mockLogger,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'test-agent-id',
+        })
+      );
+
+      await act(async () => {
+        await expect(result.current.wrapupCall('Wrap reason', '123')).resolves.toBe(true);
+      });
+
+      expect(sendSummaryResponse).toHaveBeenCalledWith('123', task);
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'CC-Widgets: AI summary response failed: Error: Unexpected summary submission error',
+        {module: 'useCallControl', method: 'wrapupCall'}
+      );
+      expect(task.wrapup).toHaveBeenCalledTimes(1);
+      expect(task.wrapup).toHaveBeenCalledWith({wrapUpReason: 'Wrap reason', auxCodeId: '123'});
+    });
+
+    it('should skip post-call summary submission when the capability is disabled', async () => {
+      const task = {
+        ...createPostCallTask(),
+        aiSummaryCapabilities: {midCallEnabled: false, postCallEnabled: false},
+      };
+      const sendSummaryResponse = jest.spyOn(store, 'sendPostCallSummaryResponse');
+      const {result} = renderHook(() =>
+        useCallControl({
+          currentTask: task,
+          logger: mockLogger,
+          isMuted: false,
+          conferenceEnabled: true,
+          agentId: 'test-agent-id',
+        })
+      );
+
+      await act(async () => {
+        await expect(result.current.wrapupCall('Wrap reason', '123')).resolves.toBe(true);
+      });
+
+      expect(sendSummaryResponse).not.toHaveBeenCalled();
+      expect(task.wrapup).toHaveBeenCalledTimes(1);
+      expect(task.wrapup).toHaveBeenCalledWith({wrapUpReason: 'Wrap reason', auxCodeId: '123'});
+    });
   });
 
   it('should log an error if wrapup fails', async () => {

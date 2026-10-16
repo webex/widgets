@@ -6,7 +6,6 @@ const baseConfig = require('../../../webpack.config');
 
 const wellnessAssets = [
   'media.cjs',
-  'emit-wellness-asset.cjs',
   'WellnessBreakSound.mp3',
   'WellnessBreakAnimationDark.json',
   'WellnessBreakAnimationLight.json',
@@ -23,12 +22,21 @@ class EmitWellnessAssetsPlugin {
         () => {
           for (const filename of wellnessAssets) {
             const sourcePath = path.resolve(__dirname, 'src/wellness/assets', filename);
-            compilation.emitAsset(
-              `assets/wellness/${filename}`,
-              new compiler.webpack.sources.RawSource(fs.readFileSync(sourcePath)),
-              // A consuming Webpack build must still recognize require.ensure's require callback.
-              {minimized: filename.endsWith('.cjs')}
-            );
+            compilation.fileDependencies.add(sourcePath);
+            const source = fs.readFileSync(sourcePath);
+            compilation.emitAsset(`assets/wellness/${filename}`, new compiler.webpack.sources.RawSource(source), {
+              minimized: filename.endsWith('.cjs'),
+            });
+            if (filename.endsWith('.mp3') || filename.endsWith('.json')) {
+              const data = filename.endsWith('.mp3')
+                ? `data:audio/mpeg;base64,${source.toString('base64')}`
+                : JSON.parse(source.toString('utf8'));
+              compilation.emitAsset(
+                `assets/wellness/${filename.replace(/\.(mp3|json)$/, '.mjs')}`,
+                new compiler.webpack.sources.RawSource(`export default ${JSON.stringify(data)};\n`),
+                {minimized: true}
+              );
+            }
           }
         }
       );

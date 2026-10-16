@@ -1,4 +1,6 @@
-import type {AISummary} from '@webex/contact-center';
+import type {AISummaryEntry} from '@webex/cc-store';
+
+type AISummary = NonNullable<AISummaryEntry['content']>;
 
 const MAIN_INTERACTION_ID = 'interaction-main-1';
 

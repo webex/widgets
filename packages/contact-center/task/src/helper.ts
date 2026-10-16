@@ -1295,8 +1295,16 @@ export const useCallControl = (props: useCallControlProps) => {
       try {
         // Store auxCodeId for use in wrapupCallCallback
         lastWrapupAuxCodeIdRef.current = auxCodeId;
-        // Taken before wrap-up: the task and its summary are removed once wrap-up completes.
-        const summaryResponse = store.getPostCallSummaryResponse(wrapUpReason, currentTask);
+        if (currentTask.aiSummaryCapabilities?.postCallEnabled) {
+          try {
+            await store.sendPostCallSummaryResponse(auxCodeId, currentTask);
+          } catch (error) {
+            logger?.error(`CC-Widgets: AI summary response failed: ${error}`, {
+              module: 'useCallControl',
+              method: 'wrapupCall',
+            });
+          }
+        }
 
         await currentTask.wrapup({wrapUpReason, auxCodeId});
         const taskKeys = Object.keys(store.taskList);
@@ -1306,10 +1314,6 @@ export const useCallControl = (props: useCallControlProps) => {
             developerName: ENGAGED_LABEL,
             name: ENGAGED_USERNAME,
           });
-        }
-        // Like Agent Desktop, the summary response carries the wrap-up reason name and is not awaited.
-        if (summaryResponse) {
-          void store.sendPostCallSummaryResponse(summaryResponse, currentTask);
         }
         return true;
       } catch (error) {
