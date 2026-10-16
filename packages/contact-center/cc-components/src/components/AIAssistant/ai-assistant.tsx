@@ -1,7 +1,8 @@
-import React, {useState} from 'react';
+import React, {useEffect, useLayoutEffect, useRef, useState} from 'react';
 import {Button, Text, Tooltip} from '@momentum-design/components/dist/react';
 import {withMetrics} from '@webex/cc-ui-logging';
 import RealTimeAssist from './RealTimeAssist/real-time-assist';
+import AISummary, {AI_ASSISTANT_SUMMARY_MESSAGES} from './AISummary';
 import AIAssistantLanding from './ai-assistant-landing';
 import CiscoAIAssistantColorIcon from './CiscoAIAssistantColorIcon';
 import WellnessBreakError from './WellnessBreak/wellness-break-error';
@@ -11,6 +12,8 @@ import WellnessBreakOfferCard from './WellnessBreak/wellness-break-offer-card';
 import WellnessBreakOfferToast from './WellnessBreak/wellness-break-offer-toast';
 import WellnessBreakRequestCard from './WellnessBreak/wellness-break-request-card';
 import {AIAssistantComponentProps, WellnessBreakModalProps, WellnessBreakViewModel} from './ai-assistant.types';
+import {extractCardText} from './AdaptiveCardRenderer/adaptive-card-renderer.utils';
+import AdaptiveCardRenderer from './AdaptiveCardRenderer/adaptive-card-renderer';
 import {AI_ASSISTANT_TITLE, DISCLAIMER_TEXT} from './constants';
 import './ai-assistant.styles.scss';
 import './WellnessBreak/wellness-break.styles.scss';
@@ -19,6 +22,14 @@ const isWellnessOverlayPhase = (phase: WellnessBreakViewModel['phase']): phase i
   phase === 'starting' || phase === 'playing' || phase === 'ending';
 
 let assistantHeaderSequence = 0;
+
+const FOCUSABLE_SELECTOR = 'button, [href], input, textarea, select, [tabindex], [role="button"], mdc-button';
+
+const getEnabledFocusTargets = (root: HTMLElement): HTMLElement[] =>
+  Array.from(root.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
+    (element) =>
+      !element.hasAttribute('disabled') && element.getAttribute('aria-disabled') !== 'true' && element.tabIndex >= 0
+  );
 
 const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
   chrome,
@@ -43,6 +54,7 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
   setContextDraft,
   submitContext,
   onRealTimeAssistAction,
+  receiverSummary,
   logger,
   className,
   wellnessBreakOverlayTarget,
@@ -53,6 +65,15 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
     assistantHeaderSequence += 1;
     return `ai-assistant-header-${assistantHeaderSequence}`;
   });
+  // The receiver summary branch the agent opened; real-time assist shows otherwise.
+  const [viewingReceiverKey, setViewingReceiverKey] = useState<string | null>(null);
+  const [receiverCardReady, setReceiverCardReady] = useState(false);
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const panelRef = useRef<HTMLDivElement | null>(null);
+  const receiverBranchRef = useRef<HTMLDivElement | null>(null);
+  const lastFocusedElementRef = useRef<HTMLElement | null>(null);
+  const lastFocusSuccessorRef = useRef<HTMLElement | null>(null);
+  const pendingReceiverActivationFocusRef = useRef(false);
   // Fullscreen is consumer-owned: we emit onFullScreenToggle; the host owns layout.
   const wellnessOverlayPhase = wellness && isWellnessOverlayPhase(wellness.phase) ? wellness.phase : undefined;
   const rootClass = [
@@ -65,7 +86,15 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
   const panelClass = ['ai-assistant__panel', isFullScreen ? 'ai-assistant__panel--full-screen' : '']
     .filter(Boolean)
     .join(' ');
-  const showLanding = !hasActiveInteraction || !isFeatureEnabled;
+  const canViewReceiverSummary = Boolean(receiverSummary && hasActiveInteraction);
+  const showReceiverSummary = Boolean(
+    receiverSummary && hasActiveInteraction && viewingReceiverKey === receiverSummary.branchKey
+  );
+  const showLanding = !showReceiverSummary && (!hasActiveInteraction || !isFeatureEnabled);
+  const receiverBranchKey = receiverSummary?.branchKey;
+  const receiverCardAvailable = Boolean(receiverSummary?.surface === 'content' && receiverSummary.content.adaptiveCard);
+  const receiverActionsVisible = Boolean(showReceiverSummary && receiverCardAvailable && receiverCardReady);
+
   const wellnessHistory = wellness?.history ?? [];
   const hasWellnessHistory = Boolean(wellness?.enabled && !wellness.contentCleared && wellnessHistory.length > 0);
   // Desktop treats the suggested CTA as an empty-state action. It is only
@@ -81,9 +110,14 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
   );
   // Keep prior messages in the view model, but let a newly eligible Desktop-style
   // suggestion temporarily own the complete assistant body.
-  const showWellnessHistory = hasWellnessHistory && !showWellnessSuggestion;
+  // An explicitly opened summary takes precedence over a completed/dismissed
+  // wellness transcript, while in-progress wellness flows keep their priority.
+  const showRetainedWellness = !showReceiverSummary || wellness?.phase !== 'idle';
+  const showWellnessHistory = hasWellnessHistory && !showWellnessSuggestion && showRetainedWellness;
   const showWellnessRequestState = Boolean(
-    wellness?.enabled && !wellness.contentCleared && (wellness.phase === 'request-pending' || wellness.notice)
+    wellness?.enabled &&
+      !wellness.contentCleared &&
+      (wellness.phase === 'request-pending' || (wellness.notice && showRetainedWellness))
   );
   const showWellnessOffer = Boolean(
     wellness?.enabled && !wellness.contentCleared && wellness.phase === 'offer-pending'
@@ -108,20 +142,242 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
     ? Boolean(!showWellnessSuggestion && !showWellnessOverlay && isFeatureEnabled)
     : !showLanding;
 
+  useEffect(() => {
+    if (viewingReceiverKey !== receiverBranchKey) {
+      setViewingReceiverKey(null);
+      pendingReceiverActivationFocusRef.current = false;
+    }
+  }, [viewingReceiverKey, receiverBranchKey]);
+
+  useEffect(() => {
+    if (chrome === 'closed') {
+      setViewingReceiverKey(null);
+      pendingReceiverActivationFocusRef.current = false;
+    }
+  }, [chrome]);
+
+  const focusTarget = (target: HTMLElement | null | undefined): boolean => {
+    if (
+      !target ||
+      !target.isConnected ||
+      target.hasAttribute('disabled') ||
+      target.getAttribute('aria-disabled') === 'true'
+    ) {
+      return false;
+    }
+    // Momentum reflects its default tab stop asynchronously after connection.
+    // A newly rendered launcher must already be focusable during layout repair.
+    if (target.tagName === 'MDC-BUTTON' && !target.hasAttribute('tabindex')) {
+      target.setAttribute('tabindex', '0');
+    }
+    target.focus();
+    HTMLElement.prototype.focus.call(target);
+    return document.activeElement === target;
+  };
+
+  const clearReceiverFocusSnapshot = () => {
+    lastFocusedElementRef.current = null;
+    lastFocusSuccessorRef.current = null;
+  };
+
+  const recoverReceiverFocus = (preferHeader: boolean) => {
+    const activeElement = document.activeElement;
+    if (activeElement instanceof HTMLElement && activeElement !== document.body && activeElement.isConnected) {
+      clearReceiverFocusSnapshot();
+      return;
+    }
+    const lastFocusedElement = lastFocusedElementRef.current;
+    if (lastFocusedElement?.isConnected && lastFocusedElement !== document.body) {
+      clearReceiverFocusSnapshot();
+      return;
+    }
+
+    if (focusTarget(lastFocusSuccessorRef.current)) {
+      clearReceiverFocusSnapshot();
+      return;
+    }
+
+    if (preferHeader) {
+      const headerMinimize = panelRef.current?.querySelector<HTMLElement>(
+        '[data-testid="ai-assistant:header-minimize"]'
+      );
+      if (focusTarget(headerMinimize)) {
+        clearReceiverFocusSnapshot();
+        return;
+      }
+    }
+
+    focusTarget(panelRef.current);
+    clearReceiverFocusSnapshot();
+  };
+
+  // Recover only when a focused summary control was removed. Ordinary assistant
+  // controls and connected focus outside the summary keep their existing behavior.
+  useLayoutEffect(() => {
+    if (pendingReceiverActivationFocusRef.current && chrome === 'open' && showReceiverSummary) {
+      pendingReceiverActivationFocusRef.current = false;
+      recoverReceiverFocus(true);
+      return;
+    }
+    const focused = lastFocusedElementRef.current;
+    if (!focused || focused.isConnected) {
+      return;
+    }
+    if (chrome === 'open') {
+      recoverReceiverFocus(false);
+      return;
+    }
+    const activeElement = document.activeElement;
+    if (activeElement instanceof HTMLElement && activeElement !== document.body && activeElement.isConnected) {
+      clearReceiverFocusSnapshot();
+      return;
+    }
+    const fallbackSelector =
+      chrome === 'closed' ? '[data-testid="ai-assistant:launcher"]' : '[data-testid="ai-assistant:minimized-restore"]';
+    if (!focusTarget(lastFocusSuccessorRef.current)) {
+      focusTarget(rootRef.current?.querySelector<HTMLElement>(fallbackSelector));
+    }
+    clearReceiverFocusSnapshot();
+  });
+
+  const handleReceiverFocusCapture = (event: React.FocusEvent<HTMLElement>) => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) {
+      return;
+    }
+    const controls = rootRef.current ? getEnabledFocusTargets(rootRef.current) : [];
+    const index = controls.indexOf(target);
+    lastFocusedElementRef.current = target;
+    lastFocusSuccessorRef.current = index >= 0 ? (controls[index + 1] ?? null) : null;
+  };
+
+  const handleReceiverBlurCapture = (event: React.FocusEvent<HTMLElement>) => {
+    const next = event.relatedTarget;
+    if (next instanceof HTMLElement && next !== document.body && next.isConnected) {
+      clearReceiverFocusSnapshot();
+    }
+  };
+
+  const closeAssistant = () => {
+    setViewingReceiverKey(null);
+    pendingReceiverActivationFocusRef.current = false;
+    close();
+  };
+
+  const openRealTimeAssist = () => {
+    setViewingReceiverKey(null);
+    open();
+  };
+
+  const restoreRealTimeAssist = () => {
+    setViewingReceiverKey(null);
+    restore();
+  };
+
+  const openReceiverSummary = () => {
+    if (!receiverSummary) {
+      return;
+    }
+    setViewingReceiverKey(receiverSummary.branchKey);
+    pendingReceiverActivationFocusRef.current = true;
+    if (chrome === 'minimized') {
+      restore();
+      return;
+    }
+    if (chrome === 'closed') {
+      open();
+    }
+  };
+
+  const renderReceiverSummary = (summary: NonNullable<typeof receiverSummary>) => {
+    return (
+      <div
+        ref={receiverBranchRef}
+        onFocusCapture={handleReceiverFocusCapture}
+        onBlurCapture={handleReceiverBlurCapture}
+        className="ai-assistant__receiver-summary"
+        data-testid="ai-assistant:receiver-summary"
+        dir="ltr"
+      >
+        {summary.surface === 'content' && summary.content.adaptiveCard ? (
+          <div dir="auto">
+            <AdaptiveCardRenderer
+              card={summary.content.adaptiveCard}
+              displayOnly
+              onRender={setReceiverCardReady}
+              fallbackText={AI_ASSISTANT_SUMMARY_MESSAGES.unavailable}
+              logger={logger}
+            />
+          </div>
+        ) : null}
+        {summary.surface === 'content' && receiverActionsVisible ? (
+          <AISummary
+            mode="mid-call-receiver"
+            containingPanelFocusTarget={panelRef}
+            state="content"
+            requestPending={summary.feedbackPending}
+            selectedFeedback={summary.selectedFeedback}
+            content={summary.content}
+            getReceiverCopyText={() =>
+              receiverBranchRef.current ? extractCardText(receiverBranchRef.current, {visibleOnly: true}) : ''
+            }
+            onCopy={summary.recordReceiverSummaryCopied}
+            onFeedback={summary.setReceiverSummaryFeedback}
+          />
+        ) : null}
+        {summary.surface === 'unavailable' || summary.surface === 'generic-error' ? (
+          <AISummary mode="mid-call-receiver" containingPanelFocusTarget={panelRef} state={summary.surface} />
+        ) : null}
+        {summary.surface === 'content' && !summary.content.adaptiveCard ? (
+          <AISummary mode="mid-call-receiver" containingPanelFocusTarget={panelRef} state="unavailable" />
+        ) : null}
+      </div>
+    );
+  };
+
+  const renderReceiverSummaryTrigger = (classNameSuffix = '') =>
+    canViewReceiverSummary ? (
+      <Button
+        type="button"
+        variant="tertiary"
+        size={28}
+        onClick={openReceiverSummary}
+        onFocusCapture={handleReceiverFocusCapture}
+        onBlurCapture={handleReceiverBlurCapture}
+        className={`ai-assistant__summary-trigger${classNameSuffix}`}
+        data-testid="ai-assistant:view-summary"
+        aria-label={AI_ASSISTANT_SUMMARY_MESSAGES.viewSummary}
+        title={AI_ASSISTANT_SUMMARY_MESSAGES.viewSummary}
+      >
+        {AI_ASSISTANT_SUMMARY_MESSAGES.viewSummary}
+      </Button>
+    ) : null;
+
+  const renderLauncherButton = () => (
+    <Button
+      type="button"
+      variant="tertiary"
+      size={52}
+      onClick={openRealTimeAssist}
+      className="ai-assistant__launcher"
+      data-testid="ai-assistant:launcher"
+      aria-label="Open AI Assistant"
+    >
+      <CiscoAIAssistantColorIcon size={22} />
+    </Button>
+  );
+
   return (
-    <div className={rootClass} data-testid="ai-assistant:root">
+    <div className={rootClass} data-testid="ai-assistant:root" ref={rootRef}>
       {chrome === 'closed' ? (
-        <Button
-          type="button"
-          variant="tertiary"
-          size={52}
-          onClick={open}
-          className="ai-assistant__launcher"
-          data-testid="ai-assistant:launcher"
-          aria-label="Open AI Assistant"
-        >
-          <CiscoAIAssistantColorIcon size={22} />
-        </Button>
+        canViewReceiverSummary ? (
+          <div className="ai-assistant__closed-chrome" data-testid="ai-assistant:closed-chrome">
+            {renderReceiverSummaryTrigger()}
+            {renderLauncherButton()}
+          </div>
+        ) : (
+          renderLauncherButton()
+        )
       ) : chrome === 'minimized' ? (
         <div className="ai-assistant__panel ai-assistant__panel--minimized" data-testid="ai-assistant:panel-minimized">
           <div className="ai-assistant__minimized-bar" data-testid="ai-assistant:minimized-bar">
@@ -129,6 +385,7 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
               {AI_ASSISTANT_TITLE}
             </Text>
             <div className="ai-assistant__header-actions">
+              {renderReceiverSummaryTrigger(' ai-assistant__summary-trigger--minimized')}
               <Button
                 id={`${headerActionId}-restore`}
                 type="button"
@@ -137,7 +394,7 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
                 prefix-icon="arrow-up-bold"
                 aria-label="Restore"
                 data-testid="ai-assistant:minimized-restore"
-                onClick={restore}
+                onClick={restoreRealTimeAssist}
               />
               <Tooltip triggerID={`${headerActionId}-restore`} placement="bottom" tooltipType="label">
                 Restore
@@ -150,7 +407,7 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
                 prefix-icon="cancel-bold"
                 aria-label="Close"
                 data-testid="ai-assistant:minimized-close"
-                onClick={close}
+                onClick={closeAssistant}
               />
               <Tooltip triggerID={`${headerActionId}-minimized-close`} placement="bottom" tooltipType="label">
                 Close
@@ -159,7 +416,14 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
           </div>
         </div>
       ) : (
-        <div className={panelClass} data-testid="ai-assistant:panel" role="dialog" aria-label={AI_ASSISTANT_TITLE}>
+        <div
+          ref={panelRef}
+          className={panelClass}
+          data-testid="ai-assistant:panel"
+          role="dialog"
+          aria-label={AI_ASSISTANT_TITLE}
+          tabIndex={-1}
+        >
           <header className="ai-assistant__header" data-testid="ai-assistant:header">
             <Text tagname="h2" type="body-large-bold" className="ai-assistant__title">
               {AI_ASSISTANT_TITLE}
@@ -218,7 +482,7 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
                 prefix-icon="cancel-bold"
                 aria-label="Close"
                 data-testid="ai-assistant:header-close"
-                onClick={close}
+                onClick={closeAssistant}
               />
               <Tooltip triggerID={`${headerActionId}-close`} placement="bottom" tooltipType="label">
                 Close
@@ -270,7 +534,9 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
             ) : null}
             {showWellnessError && wellness ? <WellnessBreakError error={wellness.error} /> : null}
             {!showWellnessContent ? (
-              showLanding ? (
+              showReceiverSummary ? (
+                renderReceiverSummary(receiverSummary!)
+              ) : showLanding ? (
                 <AIAssistantLanding agentName={agentName} showRealTimeAssist={isFeatureEnabled} />
               ) : (
                 <RealTimeAssist

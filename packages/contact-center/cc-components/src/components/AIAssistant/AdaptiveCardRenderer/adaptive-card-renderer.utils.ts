@@ -203,11 +203,23 @@ export const preloadIcons = () => {
   });
 };
 
-/** Concatenate TextBlocks in the rendered card as a clipboard fallback. */
-export const extractCardText = (container: HTMLElement): string => {
+/** Concatenate rendered TextBlocks, optionally limiting summary copies to visible content. */
+export const extractCardText = (
+  container: HTMLElement,
+  {visibleOnly = false}: {visibleOnly?: boolean} = {}
+): string => {
   const blocks = container.querySelectorAll('.ac-textBlock, .ac-richTextBlock');
   const lines: string[] = [];
   blocks.forEach((el) => {
+    if (visibleOnly) {
+      const {visibility} = window.getComputedStyle(el);
+      if (visibility === 'hidden' || visibility === 'collapse') return;
+      // Adaptive Cards keeps isVisible:false elements in the DOM with display:none.
+      // Check containers too, since their child TextBlocks retain their own display.
+      for (let ancestor: Element | null = el; ancestor; ancestor = ancestor.parentElement) {
+        if (ancestor.hasAttribute('hidden') || window.getComputedStyle(ancestor).display === 'none') return;
+      }
+    }
     const text = (el.textContent || '').trim();
     if (text && text !== 'Source') lines.push(text);
   });
