@@ -31,6 +31,13 @@ import {
   WellnessBreakEvent,
   RespondToWellnessBreakParams,
 } from '@webex/contact-center';
+import type {
+  AISummary,
+  AISummaryAction,
+  AISummaryFeedback,
+  AISummaryResponse,
+  AISummarySections,
+} from '@webex/contact-center';
 import type {RealTimeAssistanceParams} from 'node_modules/@webex/contact-center/dist/types/types';
 import {
   OutdialAniEntriesResponse,
@@ -52,6 +59,8 @@ import {
 
 //  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
 interface IContactCenter {
+  /** Widget-owned AI summary state associated with this SDK contact-center instance. */
+  aiSummaries: Record<string, Partial<Record<AISummaryRole, AISummaryEntry>>>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   on: (event: string, callback: (data: any) => void) => void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -319,6 +328,7 @@ interface IStore {
   wellnessEventSequence: number;
   legacyAgentState: string;
   legacyAuxCodeId: string;
+
   init(params: InitParams, callback: (ccSDK: IContactCenter) => void): Promise<void>;
   registerCC(webex?: WithWebex['webex']): Promise<void>;
   loadWellbeingBreakIdleCode(): Promise<void>;
@@ -371,6 +381,16 @@ interface IStoreWrapper extends IStore {
   setWellnessBreakState(state: WellnessBreakState): void;
   submitBehavioralMetric(metric: WidgetsBehavioralMetric): void;
   resetWellnessSession(): void;
+
+  requestMidCallSummary(action: AISummaryAction, task?: ITask): Promise<AISummary | undefined>;
+  requestPostCallSummary(task?: ITask): Promise<AISummary | undefined>;
+  setReceiverSummaryFeedback(
+    feedback: Exclude<AISummaryFeedback, 'none'>,
+    expectedSummary: AISummary,
+    task?: ITask
+  ): Promise<void>;
+  sendMidCallSummaryResponse(action: AISummaryAction, task?: ITask): Promise<AISummaryResponseSubmissionResult>;
+  sendPostCallSummaryResponse(wrapUpCode: string, task: ITask): Promise<AISummaryResponseSubmissionResult>;
 }
 
 interface IWrapupCode {
@@ -524,6 +544,10 @@ export type {
   WidgetsBehavioralMetric,
   WidgetsBehavioralMetricAgent,
   WidgetsBehavioralMetricVerb,
+  AISummaryAction,
+  AISummaryFeedback,
+  AISummaryResponse,
+  AISummarySections,
 };
 
 export {
@@ -649,3 +673,27 @@ export const CAMPAIGN_PREVIEW_OUTBOUND_TYPES = ['STANDARD_PREVIEW_CAMPAIGN', 'DI
 
 /** Campaign type values (from callProcessingDetails) that identify a campaign preview task. */
 export const CAMPAIGN_PREVIEW_CAMPAIGN_TYPES = ['preview_standard', 'preview_direct'];
+
+/** The consult/transfer initiator's summary, the receiving agent's summary, or the wrap-up summary. */
+export type AISummaryRole = 'initiator' | 'receiver' | 'post-call';
+
+/** One summary of an interaction, stored at `cc.aiSummaries[interactionId][role]`. */
+export type AISummaryEntry = {
+  /** Lifecycle of the latest request, or of the pushed receiver summary. */
+  status: 'loading' | 'ready' | 'error';
+  /**
+   * The unchanged SDK summary, retained while a newer request loads or after it fails.
+   */
+  content?: AISummary;
+  /** SDK submission record; widget helpers own local edits, copy counts and deferred feedback. */
+  response: AISummaryResponse;
+  /** Orders local request promise settlements; SDK transport correlation remains SDK-owned. */
+  requestGeneration?: number;
+  /** The receiving agent's feedback response is being sent. */
+  feedbackPending?: boolean;
+  /** The consult or transfer a mid-call summary was generated for. */
+  action?: AISummaryAction;
+};
+
+/** Outcome of sending a mid-call or post-call summary response through the SDK. */
+export type AISummaryResponseSubmissionResult = 'submitted' | 'response-failed' | 'not-applicable';

@@ -97,6 +97,7 @@ class Store implements IStore {
   registerCC(webex?: WithWebex['webex']): Promise<void> {
     if (webex) {
       this.cc = webex.cc;
+      this.cc.aiSummaries ??= {};
     }
 
     if (typeof webex === 'undefined' && typeof this.cc === 'undefined') {
