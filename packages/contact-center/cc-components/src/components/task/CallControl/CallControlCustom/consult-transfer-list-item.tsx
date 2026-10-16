@@ -6,7 +6,7 @@ import {ConsultTransferListComponentProps} from '../../task.types';
 import {createInitials, handleListItemPress} from './call-control-custom.utils';
 
 const ConsultTransferListComponent: React.FC<ConsultTransferListComponentProps> = (props) => {
-  const {title, subtitle, presence, buttonIcon, onButtonPress, className, logger} = props;
+  const {title, subtitle, presence, buttonIcon, buttonAriaLabel, onButtonPress, className, logger} = props;
 
   const initials = createInitials(title);
 
@@ -31,7 +31,7 @@ const ConsultTransferListComponent: React.FC<ConsultTransferListComponentProps> 
       </ListItemBaseSection>
       <ListItemBaseSection position="end" className="call-control-list-item-end">
         <div className="hover-button">
-          <ButtonCircle onPress={handleButtonPress} size={32} color="join">
+          <ButtonCircle onPress={handleButtonPress} size={32} color="join" aria-label={buttonAriaLabel}>
             <Icon name={buttonIcon} />
           </ButtonCircle>
         </div>

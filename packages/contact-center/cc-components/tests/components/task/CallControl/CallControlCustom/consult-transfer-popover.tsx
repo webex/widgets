@@ -2,8 +2,9 @@ import React from 'react';
 import {render, fireEvent, waitFor, act} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import ConsultTransferPopoverComponent from '../../../../../src/components/task/CallControl/CallControlCustom/consult-transfer-popover';
-import {AddressBookEntry, ContactServiceQueue, EntryPointRecord, TaskUIControls} from '@webex/cc-store';
-import {DEFAULT_PAGE_SIZE} from '../../../../../src/components/task/constants';
+import {AddressBookEntry, AISummaryEntry, ContactServiceQueue, EntryPointRecord, TaskUIControls} from '@webex/cc-store';
+import {DEFAULT_PAGE_SIZE, SEARCH_PLACEHOLDER} from '../../../../../src/components/task/constants';
+import {AI_ASSISTANT_SUMMARY_MESSAGES as AI_SUMMARY_MESSAGES} from '../../../../../src/components/AIAssistant/AISummary';
 
 type AvailableDestinations = TaskUIControls['consultTransferDestinations']['consult'];
 
@@ -27,6 +28,16 @@ afterAll(() => {
 
 // This test suite was previously skipped but is now enabled for 100% coverage
 describe('ConsultTransferPopoverComponent', () => {
+  const createSummary = (overrides = {}) => ({
+    state: 'content' as const,
+    content: {conversationId: 'interaction-main-1', summaryText: 'Customer needs billing support.'},
+    selectedFeedback: 'none' as const,
+    onEdit: jest.fn().mockReturnValue(true),
+    onCopy: jest.fn().mockReturnValue(true),
+    onFeedback: jest.fn(),
+    ...overrides,
+  });
+
   const mockOnAgentSelect = jest.fn();
   const mockOnQueueSelect = jest.fn();
   const baseProps = {
@@ -69,6 +80,49 @@ describe('ConsultTransferPopoverComponent', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('uses capability-filtered voice radios before search and keeps nonvoice pills', async () => {
+    const view = render(
+      <ConsultTransferPopoverComponent {...baseProps} isTelephony summary={createSummary({state: 'omitted'})} />
+    );
+    const radios = view.getAllByRole('radio');
+    expect(radios).toHaveLength(4);
+    expect(view.getByRole('radio', {name: 'Agent'})).toBeChecked();
+    expect(view.getByRole('radio', {name: 'Dial number'})).toBeInTheDocument();
+    expect(view.getByRole('radio', {name: 'Entry point'})).toBeInTheDocument();
+    expect(view.container.querySelectorAll('ul.agent-list > li')).toHaveLength(2);
+    expect(view.container.querySelector('ul.agent-list > div')).not.toBeInTheDocument();
+    expect(view.container.querySelector('.consult-list-container')).toHaveAttribute('tabindex', '0');
+    const group = view.getByRole('radiogroup', {name: AI_SUMMARY_MESSAGES.midCall.destinationCategory});
+    expect(
+      group.compareDocumentPosition(view.getByPlaceholderText(/Search by name/)) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+    expect(view.getByRole('textbox', {name: AI_SUMMARY_MESSAGES.midCall.searchDestinations})).toBeInTheDocument();
+    expect(view.getByPlaceholderText(AI_SUMMARY_MESSAGES.midCall.searchPlaceholder)).toBeInTheDocument();
+    expect(view.queryByTestId('consult-reload-button')).not.toBeInTheDocument();
+    expect(view.getByText('1001')).toBeInTheDocument();
+    fireEvent.click(view.getByRole('radio', {name: 'Queues'}));
+    await waitFor(() => expect(view.getByText('Queue One')).toBeInTheDocument());
+    expect(view.getByRole('radio', {name: 'Queues'})).toBeChecked();
+    view.rerender(
+      <ConsultTransferPopoverComponent
+        {...baseProps}
+        isTelephony
+        summary={createSummary({state: 'omitted'})}
+        availableDestinations={['agent']}
+      />
+    );
+    expect(view.getAllByRole('radio')).toHaveLength(1);
+    expect(view.queryByText('Organization')).not.toBeInTheDocument();
+    view.unmount();
+
+    const nonVoice = render(<ConsultTransferPopoverComponent {...baseProps} isTelephony={false} />);
+    expect(nonVoice.queryByRole('radiogroup')).not.toBeInTheDocument();
+    expect(nonVoice.getByRole('button', {name: 'Agents'})).toBeInTheDocument();
+    expect(nonVoice.getByPlaceholderText(SEARCH_PLACEHOLDER)).toBeInTheDocument();
+    expect(nonVoice.getByTestId('consult-reload-button')).toBeInTheDocument();
+    expect(nonVoice.queryByText('1001')).not.toBeInTheDocument();
   });
 
   it('renders heading and tabs when showTabs is true', async () => {
@@ -346,7 +400,7 @@ describe('ConsultTransferPopoverComponent', () => {
       // Switch to Queues category
       fireEvent.click(screen.getByText('Queues'));
 
-      const input = screen.getByPlaceholderText('Search...') as HTMLInputElement;
+      const input = screen.getByPlaceholderText(SEARCH_PLACEHOLDER) as HTMLInputElement;
 
       fireEvent.change(input, {target: {value: 'q'}});
       await act(async () => {
@@ -377,7 +431,7 @@ describe('ConsultTransferPopoverComponent', () => {
       const screen = await render(<ConsultTransferPopoverComponent {...baseProps} getQueues={getQueuesMock} />);
 
       // Default category is Agents
-      const input = screen.getByPlaceholderText('Search...') as HTMLInputElement;
+      const input = screen.getByPlaceholderText(SEARCH_PLACEHOLDER) as HTMLInputElement;
       fireEvent.change(input, {target: {value: 'ab'}});
       await act(async () => {
         jest.advanceTimersByTime(500);
@@ -607,7 +661,7 @@ describe('ConsultTransferPopoverComponent', () => {
       });
 
       // Enter search query
-      const input = screen.getByPlaceholderText('Search...') as HTMLInputElement;
+      const input = screen.getByPlaceholderText(SEARCH_PLACEHOLDER) as HTMLInputElement;
       fireEvent.change(input, {target: {value: 'test query'}});
 
       await act(async () => {
@@ -636,6 +690,320 @@ describe('ConsultTransferPopoverComponent', () => {
           })
         );
       });
+    });
+  });
+
+  describe('AI summary subtree', () => {
+    it('renders the summary after the destination results without replacing the single search/results tree', async () => {
+      const screen = render(
+        <ConsultTransferPopoverComponent
+          {...baseProps}
+          heading="Consult"
+          summary={{
+            state: 'content',
+            content: {conversationId: 'interaction-main-1', summaryText: 'Customer needs billing support.'},
+            selectedFeedback: 'none',
+            onEdit: jest.fn().mockReturnValue(true),
+            onCopy: jest.fn().mockReturnValue(true),
+            onFeedback: jest.fn(),
+          }}
+        />
+      );
+
+      expect(screen.getByPlaceholderText(SEARCH_PLACEHOLDER)).toBeInTheDocument();
+      expect(screen.container.querySelectorAll('.consult-list-container')).toHaveLength(1);
+      expect(screen.container.querySelectorAll('.agent-list')).toHaveLength(1);
+      expect(screen.getByTestId('consult-transfer:summary')).toHaveTextContent(AI_SUMMARY_MESSAGES.plainSummary);
+      expect(screen.getByDisplayValue('Customer needs billing support.')).toBeInTheDocument();
+    });
+
+    it('preserves the open destination tree, query, selected category and focus when the summary arrives and is revoked', async () => {
+      const view = render(
+        <ConsultTransferPopoverComponent
+          {...baseProps}
+          heading="Consult"
+          isTelephony
+          summary={createSummary({state: 'omitted'})}
+        />
+      );
+      const queueRadio = view.getByRole('radio', {name: 'Queues'});
+      fireEvent.click(queueRadio);
+      await waitFor(() => expect(view.getByText('Queue One')).toBeInTheDocument());
+
+      const search = view.getByRole('textbox', {
+        name: AI_SUMMARY_MESSAGES.midCall.searchDestinations,
+      }) as HTMLInputElement;
+      fireEvent.change(search, {target: {value: 'qu'}});
+      const results = view.container.querySelector('.consult-list-container') as HTMLElement;
+      const queueAction = view.getByRole('button', {name: 'Select Queue One'});
+      act(() => {
+        queueAction.focus();
+      });
+
+      expect(queueRadio).toBeChecked();
+      expect(search).toHaveValue('qu');
+      expect(queueAction).toHaveFocus();
+
+      const summary = createSummary();
+      view.rerender(<ConsultTransferPopoverComponent {...baseProps} heading="Consult" isTelephony summary={summary} />);
+
+      expect(view.getByTestId('consult-transfer:summary')).toBeInTheDocument();
+      expect(view.getByRole('radio', {name: 'Queues'})).toBe(queueRadio);
+      expect(view.getByRole('textbox', {name: AI_SUMMARY_MESSAGES.midCall.searchDestinations})).toBe(search);
+      expect(view.container.querySelector('.consult-list-container')).toBe(results);
+      expect(view.getByRole('button', {name: 'Select Queue One'})).toBe(queueAction);
+      expect(search).toHaveValue('qu');
+      expect(queueRadio).toBeChecked();
+      expect(queueAction).toHaveFocus();
+
+      view.rerender(<ConsultTransferPopoverComponent {...baseProps} heading="Consult" isTelephony />);
+
+      expect(view.queryByTestId('consult-transfer:summary')).not.toBeInTheDocument();
+      expect(view.getByRole('radio', {name: 'Queues'})).toBe(queueRadio);
+      expect(view.getByRole('textbox', {name: AI_SUMMARY_MESSAGES.midCall.searchDestinations})).toBe(search);
+      expect(view.container.querySelector('.consult-list-container')).toBe(results);
+      expect(view.getByRole('button', {name: 'Select Queue One'})).toBe(queueAction);
+      expect(search).toHaveValue('qu');
+      expect(queueRadio).toBeChecked();
+      expect(queueAction).toHaveFocus();
+    });
+
+    it('renders filtered voice-radio and non-voice-pill destinations with the same selected results', async () => {
+      const filterToAgentsAndQueues = {showDialNumberTab: false, showEntryPointTab: false};
+      const renderTitles = (container: HTMLElement) =>
+        Array.from(container.querySelectorAll('.call-control-list-item-title')).map((node) => node.textContent);
+
+      const voice = render(
+        <ConsultTransferPopoverComponent
+          {...baseProps}
+          heading="Consult"
+          isTelephony
+          summary={createSummary({state: 'omitted'})}
+          consultTransferOptions={filterToAgentsAndQueues}
+        />
+      );
+      fireEvent.click(voice.getByRole('radio', {name: 'Queues'}));
+      await waitFor(() => expect(voice.getByText('Queue One')).toBeInTheDocument());
+      const voiceTitles = renderTitles(voice.container);
+
+      expect(voice.queryByRole('radio', {name: 'Dial number'})).not.toBeInTheDocument();
+      expect(voice.queryByRole('radio', {name: 'Entry point'})).not.toBeInTheDocument();
+      expect(voiceTitles).toEqual(['Queue One', 'Queue Two']);
+      voice.unmount();
+
+      const nonVoice = render(
+        <ConsultTransferPopoverComponent
+          {...baseProps}
+          heading="Consult"
+          isTelephony={false}
+          consultTransferOptions={filterToAgentsAndQueues}
+        />
+      );
+      fireEvent.click(nonVoice.getByRole('button', {name: 'Queues'}));
+      await waitFor(() => expect(nonVoice.getByText('Queue One')).toBeInTheDocument());
+
+      expect(nonVoice.queryByRole('button', {name: 'Dial Number'})).not.toBeInTheDocument();
+      expect(nonVoice.queryByRole('button', {name: 'Entry Point'})).not.toBeInTheDocument();
+      expect(renderTitles(nonVoice.container)).toEqual(voiceTitles);
+    });
+
+    it('should let the agent pick a destination or quick action while a refreshed summary is generating', async () => {
+      const summary = createSummary({requestPending: true});
+      const view = render(
+        <ConsultTransferPopoverComponent {...baseProps} heading="Consult" isTelephony summary={summary} />
+      );
+      const firstAgentButton = view.container.querySelector(
+        'button[aria-label="Select Agent One"]'
+      ) as HTMLButtonElement;
+
+      expect(firstAgentButton).not.toHaveAttribute('aria-disabled', 'true');
+      fireEvent.click(firstAgentButton);
+      expect(mockOnAgentSelect).toHaveBeenCalledWith('agent1', 'Agent One', false);
+
+      fireEvent.click(view.getByRole('radio', {name: 'Dial number'}));
+      const input = view.getByRole('textbox', {
+        name: AI_SUMMARY_MESSAGES.midCall.searchDestinations,
+      }) as HTMLInputElement;
+      fireEvent.change(input, {target: {value: '1234'}});
+
+      const quickAction = await view.findByTestId('consult-quick-action:consult');
+      expect(quickAction).not.toHaveAttribute('aria-disabled', 'true');
+      fireEvent.click(quickAction);
+
+      expect(baseProps.onDialNumberSelect).toHaveBeenCalled();
+    });
+
+    it('uses the provisional transfer heading only for transfer preparations', () => {
+      const screen = render(
+        <ConsultTransferPopoverComponent
+          {...baseProps}
+          heading="Transfer"
+          action="Transfer"
+          summary={{
+            state: 'unavailable',
+            content: {conversationId: 'interaction-main-1', summaryText: ''},
+            selectedFeedback: 'none',
+            onEdit: jest.fn().mockReturnValue(true),
+            onCopy: jest.fn().mockReturnValue(false),
+            onFeedback: jest.fn(),
+          }}
+        />
+      );
+
+      expect(screen.getByText(AI_SUMMARY_MESSAGES.midCall.transferHeading)).toBeInTheDocument();
+      expect(screen.getByText(AI_SUMMARY_MESSAGES.unavailable)).toBeInTheDocument();
+    });
+
+    it('restores focus to the labelled popover root when the summary subtree is removed', async () => {
+      const summary = {
+        state: 'content' as const,
+        content: {conversationId: 'interaction-main-1', summaryText: 'Customer needs billing support.'},
+        selectedFeedback: 'none' as const,
+        onEdit: jest.fn().mockReturnValue(true),
+        onCopy: jest.fn().mockReturnValue(true),
+        onFeedback: jest.fn(),
+      };
+      const view = render(<ConsultTransferPopoverComponent {...baseProps} heading="Consult" summary={summary} />);
+      const popover = view.container.querySelector('.agent-popover-content') as HTMLElement;
+      const heading = view.container.querySelector('.agent-popover-title') as HTMLElement;
+
+      expect(popover).toHaveAttribute('tabindex', '-1');
+      expect(heading.id).not.toBe('');
+      expect(popover).toHaveAttribute('aria-labelledby', heading.id);
+
+      const copy = view.getByRole('button', {name: AI_SUMMARY_MESSAGES.copySummary});
+      act(() => {
+        copy.focus();
+      });
+      expect(copy).toHaveFocus();
+
+      view.rerender(<ConsultTransferPopoverComponent {...baseProps} heading="Consult" />);
+
+      await waitFor(() => expect(popover).toHaveFocus());
+      expect(view.queryByTestId('consult-transfer:summary')).not.toBeInTheDocument();
+    });
+
+    it('moves focus to the next summary control on content replacement and the popover root when controls disappear', async () => {
+      const firstContent: NonNullable<AISummaryEntry['content']> = {
+        conversationId: 'interaction-main-1',
+        sections: {
+          initialContactReason: 'Summary value',
+          nextSteps: 'Follow-up value',
+        },
+      };
+      const followUpOnlyContent: NonNullable<AISummaryEntry['content']> = {
+        conversationId: 'interaction-main-1',
+        sections: {nextSteps: 'Follow-up value'},
+      };
+      const view = render(
+        <ConsultTransferPopoverComponent
+          {...baseProps}
+          heading="Consult"
+          summary={createSummary({content: firstContent})}
+        />
+      );
+      const popover = view.container.querySelector('.agent-popover-content') as HTMLElement;
+      const summaryPreview = await view.findByRole('button', {
+        name: AI_SUMMARY_MESSAGES.editSectionLabel(AI_SUMMARY_MESSAGES.sectionLabels.initialContactReason),
+      });
+      act(() => {
+        summaryPreview.focus();
+      });
+      expect(summaryPreview).toHaveFocus();
+
+      view.rerender(
+        <ConsultTransferPopoverComponent
+          {...baseProps}
+          heading="Consult"
+          summary={createSummary({content: followUpOnlyContent})}
+        />
+      );
+
+      await waitFor(() =>
+        expect(
+          view.getByRole('button', {
+            name: AI_SUMMARY_MESSAGES.editSectionLabel(AI_SUMMARY_MESSAGES.sectionLabels.nextSteps),
+          })
+        ).toHaveFocus()
+      );
+
+      const copy = view.getByRole('button', {name: AI_SUMMARY_MESSAGES.copySummary});
+      act(() => {
+        copy.focus();
+      });
+      expect(copy).toHaveFocus();
+
+      view.rerender(
+        <ConsultTransferPopoverComponent
+          {...baseProps}
+          heading="Consult"
+          summary={createSummary({
+            state: 'unavailable' as const,
+            content: {conversationId: 'interaction-main-1', summaryText: ''},
+          })}
+        />
+      );
+
+      await waitFor(() => expect(popover).toHaveFocus());
+    });
+
+    it('does not recover summary focus after the user moves to a destination control that is removed', async () => {
+      const view = render(
+        <ConsultTransferPopoverComponent {...baseProps} heading="Consult" isTelephony summary={createSummary()} />
+      );
+      const popover = view.container.querySelector('.agent-popover-content') as HTMLElement;
+      const copy = await view.findByRole('button', {name: AI_SUMMARY_MESSAGES.copySummary});
+      const destination = view.getByRole('button', {name: 'Select Agent One'});
+      act(() => {
+        copy.focus();
+      });
+      expect(copy).toHaveFocus();
+      act(() => {
+        destination.focus();
+      });
+      expect(destination).toHaveFocus();
+
+      view.rerender(<ConsultTransferPopoverComponent {...baseProps} heading="Consult" isTelephony buddyAgents={[]} />);
+
+      expect(popover).not.toHaveFocus();
+      expect(document.body).toHaveFocus();
+    });
+
+    it('returns focus to the opening trigger when the latched voice popover is closed', async () => {
+      const Harness = () => {
+        const openerRef = React.useRef<HTMLButtonElement>(null);
+        const [isOpen, setIsOpen] = React.useState(true);
+
+        return (
+          <>
+            <button type="button" ref={openerRef} onClick={() => setIsOpen(true)}>
+              Open Consult
+            </button>
+            {isOpen && (
+              <ConsultTransferPopoverComponent
+                {...baseProps}
+                heading="Consult"
+                isTelephony
+                summary={createSummary({state: 'omitted'})}
+                onClose={() => {
+                  setIsOpen(false);
+                  openerRef.current?.focus();
+                }}
+              />
+            )}
+          </>
+        );
+      };
+
+      const view = render(<Harness />);
+      const opener = view.getByRole('button', {name: 'Open Consult'});
+      act(() => {
+        opener.focus();
+      });
+      fireEvent.click(view.getByRole('button', {name: 'Close popover'}));
+
+      await waitFor(() => expect(opener).toHaveFocus());
+      expect(view.queryByText('Agent One')).not.toBeInTheDocument();
     });
   });
 });

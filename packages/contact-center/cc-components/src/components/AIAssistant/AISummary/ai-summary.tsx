@@ -119,6 +119,7 @@ const SummarySectionEditor: React.FC<AISummarySectionEditorProps> = ({section, d
 const AISummary = (props: AISummaryProps): React.ReactElement => {
   const {
     rootRef,
+    displayContent,
     copied,
     setCopied,
     hoveredTooltip,
@@ -183,10 +184,10 @@ const AISummary = (props: AISummaryProps): React.ReactElement => {
   };
 
   const renderContent = () => {
-    if (props.state !== 'content' || props.mode === 'mid-call-receiver' || !props.content) {
+    if (props.state !== 'content' || props.mode === 'mid-call-receiver' || !displayContent) {
       return null;
     }
-    if (!props.content.sections) {
+    if (!displayContent.sections) {
       return (
         <div className="ai-summary__content" data-testid="ai-summary:content">
           <label className="ai-summary__section">
@@ -194,7 +195,7 @@ const AISummary = (props: AISummaryProps): React.ReactElement => {
             <SummaryEditor
               className="ai-summary__textarea"
               dir="auto"
-              value={props.content.summaryText ?? ''}
+              value={displayContent.summaryText ?? ''}
               disabled={disabled}
               onChange={(event) => props.onEdit('summaryText', event.currentTarget.value)}
             />
@@ -204,7 +205,7 @@ const AISummary = (props: AISummaryProps): React.ReactElement => {
     }
     return (
       <div className="ai-summary__content" data-testid="ai-summary:content">
-        {getDisplaySections(props.content).map((section) => {
+        {getDisplaySections(displayContent).map((section) => {
           const {key} = section;
           return key !== 'resolution' ? (
             <SummarySectionEditor
