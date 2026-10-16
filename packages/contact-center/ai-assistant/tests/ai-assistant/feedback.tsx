@@ -61,6 +61,7 @@ jest.mock('@webex/cc-store', () => ({
   __esModule: true,
   default: {
     cc: {
+      aiSummaries: {},
       apiAIAssistant: {
         getRealTimeAssistance: jest.fn(),
         sendRealTimeAssistanceUserAction: jest.fn(),

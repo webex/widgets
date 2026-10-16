@@ -1,10 +1,12 @@
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {runInAction} from 'mobx';
 import store from '@webex/cc-store';
-import type {RealTimeAssistPayload} from '@webex/cc-store';
+import type {ITask, RealTimeAssistPayload} from '@webex/cc-store';
 import type {
   AIAssistantActionEvent,
   AIAssistantChatEntry,
   AIAssistantChromeState,
+  AIAssistantReceiverSummary,
   AIAssistantRequestStatus,
 } from '@webex/cc-components';
 import {
@@ -296,6 +298,58 @@ export const useAiAssistant = (input: UseAiAssistantInput) => {
   const realTimeAssist = useRealTimeAssist(input);
 
   return useMemo(() => ({...chrome, ...realTimeAssist}), [chrome, realTimeAssist]);
+};
+
+/** The receiving agent's consult/transfer summary, pushed by the backend for the task's interaction. */
+export const getReceiverSummary = (task?: ITask): AIAssistantReceiverSummary | undefined => {
+  const interactionId = task?.data.interactionId;
+  const entry = interactionId ? store.cc.aiSummaries[interactionId]?.receiver : undefined;
+  if (!task || !interactionId || !entry) {
+    return undefined;
+  }
+  const branchKey = `mid-call:receiver:${interactionId}`;
+  const content = entry.content;
+  if (content?.areTranscriptsAvailable === false) {
+    return {surface: 'unavailable', branchKey};
+  }
+  if (content) {
+    const getDisplayedEntry = () => {
+      const current = store.cc.aiSummaries[interactionId]?.receiver;
+      return store.currentTask === task && current?.content === content ? current : undefined;
+    };
+    return {
+      surface: 'content',
+      branchKey,
+      content,
+      selectedFeedback: entry.response.feedback,
+      feedbackPending: Boolean(entry.feedbackPending),
+      recordReceiverSummaryCopied: () => {
+        const current = getDisplayedEntry();
+        if (!current || current.feedbackPending) {
+          return false;
+        }
+        runInAction(() => {
+          store.cc.aiSummaries = {
+            ...store.cc.aiSummaries,
+            [interactionId]: {
+              ...store.cc.aiSummaries[interactionId],
+              receiver: {
+                ...current,
+                response: {...current.response, numberOfTimesCopied: current.response.numberOfTimesCopied + 1},
+              },
+            },
+          };
+        });
+        return true;
+      },
+      setReceiverSummaryFeedback: (feedback) => {
+        if (getDisplayedEntry()) {
+          void store.setReceiverSummaryFeedback(feedback, content, task);
+        }
+      },
+    };
+  }
+  return entry.status === 'error' ? {surface: 'generic-error', branchKey} : undefined;
 };
 
 export {REAL_TIME_ASSIST_FLAG};

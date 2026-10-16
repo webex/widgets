@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {observer} from 'mobx-react-lite';
 import {ErrorBoundary} from 'react-error-boundary';
 
@@ -74,6 +74,14 @@ const CallControlInternal: React.FunctionComponent<CallControlProps> = observer(
 );
 
 const CallControl: React.FunctionComponent<CallControlProps> = (props) => {
+  const {onAISummaryStatusChange} = props;
+  useEffect(() => {
+    if (!onAISummaryStatusChange) {
+      return undefined;
+    }
+    return store.onAISummaryStatusChange(onAISummaryStatusChange);
+  }, [onAISummaryStatusChange]);
+
   return (
     <ErrorBoundary
       fallbackRender={() => <></>}

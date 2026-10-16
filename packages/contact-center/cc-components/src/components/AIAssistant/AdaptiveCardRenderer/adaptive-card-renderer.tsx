@@ -34,6 +34,8 @@ const AdaptiveCardFallback: React.FC<Pick<AdaptiveCardRendererProps, 'fallbackTe
 
 const AdaptiveCardRendererBody: React.FC<AdaptiveCardRendererProps> = ({
   card,
+  displayOnly = false,
+  onRender,
   assistantTitle,
   publishTimestamp,
   suggestionText,
@@ -51,17 +53,23 @@ const AdaptiveCardRendererBody: React.FC<AdaptiveCardRendererProps> = ({
   const onActionRef = useRef(onAction);
   const suggestionTextRef = useRef(suggestionText);
   const loggerRef = useRef(logger);
+  const onRenderRef = useRef(onRender);
   useEffect(() => {
     onUserActionRef.current = onUserAction;
     onActionRef.current = onAction;
     suggestionTextRef.current = suggestionText;
     loggerRef.current = logger;
+    onRenderRef.current = onRender;
   });
 
   useEffect(() => {
     preloadIcons();
     const container = containerRef.current;
-    if (!container || !card) return undefined;
+    if (!container) return undefined;
+    if (!card) {
+      onRenderRef.current?.(false);
+      return undefined;
+    }
 
     resetBoundary();
     container.innerHTML = '';
@@ -71,7 +79,10 @@ const AdaptiveCardRendererBody: React.FC<AdaptiveCardRendererProps> = ({
       const getControl = (kind: AIAssistantActionKind): Element | undefined =>
         Array.from(controls.entries()).find(([, controlKind]) => controlKind === kind)?.[0];
       const adaptiveCard = new AdaptiveCards.AdaptiveCard();
-      adaptiveCard.hostConfig = new AdaptiveCards.HostConfig(buildHostConfig());
+      adaptiveCard.hostConfig = new AdaptiveCards.HostConfig({
+        ...buildHostConfig(),
+        supportsInteractivity: !displayOnly,
+      });
       // `onSent` runs once the host confirms the action reached the backend, so
       // the control never shows a selection the SDK didn't record.  Hosts that
       // return nothing are treated as immediate success.
@@ -106,6 +117,7 @@ const AdaptiveCardRendererBody: React.FC<AdaptiveCardRendererProps> = ({
       if (rendered) {
         container.appendChild(rendered);
         addImageFallbacks(container);
+        onRenderRef.current?.(true);
 
         // Visual-state wiring for the like/dislike/copy controls.  Adaptive
         // Cards owns the rendered buttons, so ask it which element belongs to
@@ -123,9 +135,10 @@ const AdaptiveCardRendererBody: React.FC<AdaptiveCardRendererProps> = ({
           }
         });
       } else {
-        showBoundary(new Error('Adaptive card render returned no DOM output.'));
+        throw new Error('Adaptive card render returned no DOM output.');
       }
     } catch (error) {
+      onRenderRef.current?.(false);
       showBoundary(error instanceof Error ? error : new Error('Adaptive card rendering failed.'));
     }
 
@@ -134,13 +147,15 @@ const AdaptiveCardRendererBody: React.FC<AdaptiveCardRendererProps> = ({
         container.innerHTML = '';
       }
     };
-  }, [assistantTitle, card, publishTimestamp, resetBoundary, showBoundary]);
+  }, [assistantTitle, card, displayOnly, publishTimestamp, resetBoundary, showBoundary]);
 
   return <div ref={containerRef} className="ai-assistant__card-host" />;
 };
 
 const AdaptiveCardRenderer: React.FC<AdaptiveCardRendererProps> = ({
   card,
+  displayOnly = false,
+  onRender,
   assistantTitle,
   fallbackText,
   publishTimestamp,
@@ -156,9 +171,14 @@ const AdaptiveCardRenderer: React.FC<AdaptiveCardRendererProps> = ({
       className={`ai-assistant__card${isCustomerStatement ? ' ai-assistant__card--customer-statement' : ''}`}
       data-testid="ai-assistant:adaptive-card"
     >
-      <ErrorBoundary fallbackRender={() => <AdaptiveCardFallback fallbackText={fallbackText} />}>
+      <ErrorBoundary
+        fallbackRender={() => <AdaptiveCardFallback fallbackText={fallbackText} />}
+        resetKeys={displayOnly ? [card] : undefined}
+      >
         <AdaptiveCardRendererBody
           card={card}
+          displayOnly={displayOnly}
+          onRender={onRender}
           assistantTitle={assistantTitle}
           fallbackText={fallbackText}
           publishTimestamp={publishTimestamp}
