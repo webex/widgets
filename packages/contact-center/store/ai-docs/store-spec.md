@@ -402,10 +402,10 @@ Unit tests are split by source file. `tests/store.ts` covers the singleton defau
 `StoreWrapper` is the SDK boundary for summaries. `cc.aiSummaries[interactionId][role]`
 keeps the SDK summary, SDK response record and request state for `initiator`, `receiver`,
 and `post-call`. Store requests and receiver events update these records inside
-`runInAction`; `src/aiAssistantHelper.ts` holds local copy and initiator/post-call
-feedback updates for those records, with its argument types in `src/store.types.ts`.
-A new result snapshots original sections and resets the response's edits, copy count
-and feedback. Refreshing or failing a request retains
+`runInAction`. Widget helpers own editing, copy tracking and deferred initiator/post-call
+feedback through the SDK response fields; the store exposes no local UI action helpers.
+A new SDK result replaces the unchanged `content` and initializes a fresh response.
+Refreshing or failing a request retains
 content already displayed and its response record; task removal and logout clear them.
 
 The store observes `cc` by reference. `registerCC` initializes the widget-owned
@@ -424,9 +424,10 @@ interaction ID lets task cleanup remove them together; entries are created as ne
   corresponding Task SDK method directly when `task.aiSummaryCapabilities` enables that
   summary kind, and return the SDK `AISummary` or `undefined`. Like suggested responses,
   summary requests and responses check the SDK flags directly, with no additional media-type
-  restriction. The SDK owns transport and request correlation; the store keeps a request
-  generation on the existing entry so an older settlement cannot overwrite a newer
-  request, even when the displayed content is edited during a refresh.
+  restriction. Disabled requests are quiet UI no-ops rather than SDK validation errors.
+  The SDK owns validation, transport correlation and timeouts. The store keeps a request
+  generation only to stop an older local Promise settlement, including a delayed SDK
+  publish failure, from overwriting a newer UI request. It does not correlate backend replies.
 - `TASK_FEATURE_ENABLEMENT` (`task:featureEnablement`) refreshes the task view after the
   SDK updates `task.aiSummaryCapabilities`. The current task is refreshed so observers
   read the latest flags, including enablement arriving after the task and later disabling
@@ -437,37 +438,24 @@ interaction ID lets task cleanup remove them together; entries are created as ne
 - Every role stores the complete SDK `AISummary` in `content`, including sections,
   summary text, cards and SDK metadata. The store does not filter sections, trim text,
   choose a display format or reject a received payload because of its format. Components
-  choose what they display and edit from the SDK fields; edits preserve the other fields.
+  choose what they display from the SDK fields. Widget helpers keep edits in
+  `response.summary` and retain the original SDK content as their comparison baseline.
   Consumers use the request status and SDK `areTranscriptsAvailable` flag to select a
   display state. A failed refresh keeps previously received content visible. Invalid
   transport payloads belong to the SDK boundary.
-- Edits, copies and feedback carry the displayed revision. Initiator/post-call feedback
-  remains local until the response is sent; receiver feedback is sent immediately and
-  displayed as selected after the SDK confirms it. Each entry stores an SDK
-  `AISummaryResponse` in `response`. Copy and feedback actions update
-  `response.numberOfTimesCopied` and `response.feedback`; consumers read these SDK fields
-  directly. Received summaries start with `DEFAULT` and one view. A shared empty
-  response supplies the required SDK fields when no content has arrived; the SDK does
-  not supply runtime defaults.
-  Requests without received content start with `IGNORED`, including retries; a failed
-  request without content changes the response state to `NOT_RECEIVED`.
-- `editAISummary` updates the SDK content and `response.summary` in the store entry,
-  preserving the other SDK fields and received-section snapshot. It sets
-  `response.numberOfTimesEdited` to one; an unchanged value is a no-op. Each edit, copy
-  and feedback action checks the displayed content and revision before updating its
-  record. Each request method handles its own SDK path; actions and receiver events
-  update the same records.
-- Structured responses contain only sections whose values differ from the received
-  snapshot, matching Agent Desktop. Each section edit updates that difference in the
-  stored response; reverting it removes that section while preserving other edits.
-  An unchanged summary sends `{}`; a cleared section sends its key with `''`.
-  Plain-text responses use the current SDK summary text. Receiver responses always use
-  SDK `summaryText`, even when the same payload also contains sections or an adaptive
-  card. Senders forward the SDK response record; receiver feedback sends the selected
-  feedback and commits it to the record after confirmation.
-  Local copy and initiator/post-call feedback updates are exported from
-  `src/aiAssistantHelper.ts` through the store package entry;
-  request, response, and receiver event handling remain in `StoreWrapper`.
+- Each entry stores an SDK `AISummaryResponse` in `response`. Widget helpers update its
+  copy, edit and deferred-feedback fields; senders forward that record to the SDK.
+  The SDK sends these fields verbatim and supplies no runtime defaults. Received
+  summaries start with `DEFAULT` and one view. Requests without content start with
+  `IGNORED`, including retries; failure without content changes the state to `NOT_RECEIVED`.
+  Structured responses start with `{}` and plain-text responses start with SDK summary text.
+- `setReceiverSummaryFeedback(feedback, expectedSummary, task)` submits receiver feedback
+  immediately. It accepts the displayed SDK payload itself, with no revision counter.
+  The store blocks overlapping sends and applies the acknowledgement only while that
+  same SDK payload remains current. Replacement events and task removal invalidate it.
+  A successful send selects the feedback; a failed send preserves the previous selection.
+  Receiver responses use SDK `summaryText`, including when the payload also has sections
+  or an adaptive card; absent text is sent as `''`.
 - `sendMidCallSummaryResponse(action, task)` and `sendPostCallSummaryResponse(wrapUpCode, task)`
   return `AISummaryResponseSubmissionResult`: `submitted` after SDK acknowledgement,
   `response-failed` after a failed send, or `not-applicable` when the required task or
@@ -491,8 +479,8 @@ resolutions once the referenced versions are published. No local SDK archive is 
 The React sample uses the SDK-supported `User requested logout` reason for page-unload logout.
 `AISummary` is the common incoming payload type; `AISummaryResponse` is the distinct
 feedback payload sent back to the SDK. The store retains both types directly. The UI
-entry adds lifecycle, revision, request generation, original sections, the pending
-receiver-feedback flag and the consult/transfer action. Copy counts, edits and feedback
+entry adds request lifecycle, local request generation, the pending receiver-feedback
+flag and the consult/transfer action. Copy counts, edits and feedback
 use SDK response fields rather than duplicate widget fields.
 
 Evidence: `src/storeEventsWrapper.ts`, `src/store.types.ts`, `src/task-utils.ts`;

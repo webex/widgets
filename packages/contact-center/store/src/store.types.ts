@@ -384,16 +384,9 @@ interface IStoreWrapper extends IStore {
 
   requestMidCallSummary(action: AISummaryAction, task?: ITask): Promise<AISummary | undefined>;
   requestPostCallSummary(task?: ITask): Promise<AISummary | undefined>;
-  editAISummary(
-    role: AISummaryRole,
-    key: keyof AISummarySections | 'summaryText',
-    value: string,
-    expectedRevision: number,
-    task?: ITask
-  ): boolean;
   setReceiverSummaryFeedback(
     feedback: Exclude<AISummaryFeedback, 'none'>,
-    expectedRevision: number,
+    expectedSummary: AISummary,
     task?: ITask
   ): Promise<void>;
   sendMidCallSummaryResponse(action: AISummaryAction, task?: ITask): Promise<AISummaryResponseSubmissionResult>;
@@ -684,27 +677,17 @@ export const CAMPAIGN_PREVIEW_CAMPAIGN_TYPES = ['preview_standard', 'preview_dir
 /** The consult/transfer initiator's summary, the receiving agent's summary, or the wrap-up summary. */
 export type AISummaryRole = 'initiator' | 'receiver' | 'post-call';
 
-/** Store-owned summary map used by local copy and feedback updates. */
-export type AISummaryCC = Pick<IContactCenter, 'aiSummaries'>;
-
-/** Task identity needed by local copy and feedback updates. */
-export type AISummaryTask = {data?: {interactionId?: string}};
-
 /** One summary of an interaction, stored at `cc.aiSummaries[interactionId][role]`. */
 export type AISummaryEntry = {
   /** Lifecycle of the latest request, or of the pushed receiver summary. */
   status: 'loading' | 'ready' | 'error';
   /**
-   * The full SDK summary with current edits, retained while a newer request loads or after it fails.
+   * The unchanged SDK summary, retained while a newer request loads or after it fails.
    */
   content?: AISummary;
-  /** SDK submission record, updated by store actions and passed to the SDK when sending. */
+  /** SDK submission record; widget helpers own local edits, copy counts and deferred feedback. */
   response: AISummaryResponse;
-  /** Received sections, used to remove reverted edits from the SDK response. */
-  originalSections?: AISummarySections;
-  /** Bumped when a new summary arrives, so edits, copies and feedback apply to the summary that was shown. */
-  revision: number;
-  /** Identifies the latest request independently of edits to the displayed content. */
+  /** Orders local request promise settlements; SDK transport correlation remains SDK-owned. */
   requestGeneration?: number;
   /** The receiving agent's feedback response is being sent. */
   feedbackPending?: boolean;

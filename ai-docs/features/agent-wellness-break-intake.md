@@ -110,23 +110,54 @@ and `✍🏻 Smart summaries`, with their approved Desktop descriptions.
 | Dark Lottie  | `5e9a5eec6f7e370e6c386a79c0bc12b43d4b397e9a9ac94dedbe58f1a93c2f46` | `193052c64943fd94d993916936ef6cb2a2c9fc642c9856892c6ddda983ec92ac` | Removed the missing `audio_0` asset and its type-6 layer. |
 | Desktop MP3  | `19e4474587759c98638ade310b8873ad957e03686c5a8af04c9a5d272c81699b` | same                                                               | Unmodified 65.097-second source.                          |
 
-The renderer, theme JSON, and audio URL module are dynamic imports. The MP3 is emitted as
-`assets/wellness/WellnessBreakSound.mp3`; `wellnessAudioUrl` overrides it for CDN/subpath deployments.
+The package build generates `.mjs` exports for the audio data URL and both animation objects.
+The renderer, theme module, and audio URL module use standard dynamic imports. The media loader
+contains no inline loader requests, `require.ensure()`, or Webpack public-path globals. Default media
+does not require consumer MP3/JSON loaders or raw asset copying. JavaScript chunk paths and development
+dependency prebundling remain the consumer's responsibility.
 
-A production build followed by `npm pack --dry-run --json` shows the media boundary:
+The original MP3 and theme JSON remain under `assets/wellness` with the checksums above.
+`wellnessAudioUrl` overrides the data URL and bypasses the packaged audio import. CSP must permit
+`data:` in `media-src` for default playback; hosts with a stricter policy can use an allowed hosted URL.
+The 2,603,884-byte MP3 produces about 3.5 MB of encoded JavaScript before compression.
 
-| Package | Lottie renderer chunk | Wellness MP3 |
-| --- | --- | --- |
-| `@webex/cc-components` | absent | absent |
-| `@webex/cc-ai-assistant` | present (305,431 B) | present (2,603,884 B) |
-| `@webex/cc-widgets` | present for its WC entry (305,431 B) | present for its WC entry (2,603,884 B) |
+Both React import paths retain AI Assistant. The React and WC entries of `@webex/cc-widgets`
+externalize `@webex/cc-ai-assistant`, which owns these media files. `@webex/cc-components` receives
+an injected animation loader and includes no wellness media. Verify packed packages locally with
+Webpack, Vite, Rollup, esbuild, and Parcel, with wellness unused and active, both themes, audio
+decoding, and a URL subpath. Also verify the custom audio override under a hosted-media CSP.
+The React sample compiles widgets from source and routes only the wellness media import to the
+assistant's built loader. Build packages before starting that sample. The assistant watch build
+tracks its raw media files and regenerates the JavaScript modules after a change.
 
-The React entry of `@webex/cc-widgets` does not import AI Assistant or reference its wellness media.
-The WC entry preserves the existing AI Assistant registration and copies its lazy media into the
-aggregate package. The assistant loads the renderer and audio for imminent playback. Hosts that consume
-the prebuilt WC entry must serve its lazy chunks and MP3 from the expected public path; the React sample
-builds the assistant from source and emits those files itself. The Web Component sample does not copy
-the aggregate package's media into its output automatically.
+### Local media compatibility checks
+
+The packed release packages passed the following checks on 2026-10-12. A fresh
+production build and package archive comparison on 2026-10-13 reproduced the same
+SHA-256 hashes for all nine Contact Center packages.
+
+| Consumer | Version | Production imports and playback | Development |
+| --- | --- | --- | --- |
+| Webpack | 5.111.1 | Passed | Passed |
+| Vite | 8.3.4 | Passed | Passed |
+| Rollup | 4.64.5 | Passed | Passed |
+| esbuild | 0.28.2 | Passed | Passed |
+| Parcel | 2.16.4 | Passed | Passed |
+
+The checks covered React imports, Web Component registration, both animation
+themes, MP3 decoding and playback, delayed sound loading, and deployment below
+`/app/nested/`. Consumers used the required UI peers and normal CSS/SCSS support;
+Parcel package exports were enabled. They used no MP3 loader, wellness JSON
+loader, or raw media copy step. Browser checks used Chromium 156.0.8078.4 through
+Playwright 1.64.0 and the existing host globals without an authenticated SDK session.
+
+`media-src 'self'` blocked the default data audio and permitted the original MP3
+served from the same origin. Hosts with this policy must supply an allowed
+`wellnessAudioUrl`. The sound module contains about 3.5 MB before compression.
+`tooling/tests/wellness-media.js` checks emission, raw bytes, import requests,
+watch dependencies, and regeneration. The AI Assistant unit test also checks that
+the host URL bypasses the default sound import. A live agent session and Amplify
+validation remain release checks.
 
 ## Release gates
 
