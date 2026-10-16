@@ -1,0 +1,142 @@
+{
+  "@webex/widgets": {
+    "1.28.2-v1.28": {
+      "published_date": 1763442161146,
+      "commits": {
+        "2a99b703b914e81d5f89f580a1e8e767a65f6aaa": "chore(tooling): cache built distributables for deploy",
+        "0ffe5b41c849df32773ef03521fe0ad03f0c9881": "chore(tooling): dummy change to trigger a publish",
+        "6818129a2b00e0c2a10c7ee7721327a52c9b3ed2": "chore(tooling): remove yarn ws:tools from publish-tag",
+        "a5657fed2c3155fcc823d586642f093bd9a551c4": "chore(tooling): publish-tag on commit to ccwidgets branch",
+        "52f482ac00582a77b7d1e3f914210c05bb5cb33b": "chore(tooling): dummy commit to trigger a publish",
+        "c10ac1175a639c89f30b66839e77cd387cf3e71f": "fix(tooling): deploy action yarn dry run with -W flag",
+        "714cf19e76c56e4161d6e161532476155087964e": "Revert \"chore(tooling): dummy changes to trigger publish\"",
+        "3ced1090cf679b65e842a6ea2b15f72b231ce410": "fix(tooling): remove exec vulnerability in deploy.yml",
+        "2e0f5a79a9593b254add8f7d0494c1c7a9408c47": "chore(tooling): dummy changes to trigger publish",
+        "055166779b6b95d49a38c36f0ade5e5f3857a120": "fix(tooling): optimize build pipeline for deploy",
+        "21b81142cb518ad813ad0370b6321f06309d40d5": "fix(tooling): dont deploy if no changed packages"
+      },
+      "alongWith": {
+        "@webex/cc-components": "1.28.0-ccconnectors.1",
+        "@webex/cc-widgets": "1.28.0-ccwidgets.4",
+        "@webex/cc-station-login": "1.28.0-alpha.11"
+      }
+    },
+    "1.28.2-next.2": {
+      "published_date": 1764078505188,
+      "commits": {
+        "7670b723846c332813209d248e741f07016af943": "chore(docs): update comment in station login (#557)"
+      },
+      "alongWith": {
+        "@webex/cc-components": "1.28.0-next.2",
+        "@webex/cc-widgets": "1.28.0-next.2",
+        "@webex/cc-station-login": "1.28.0-next.2",
+        "@webex/cc-task": "1.28.0-next.2",
+        "@webex/cc-user-state": "1.28.0-next.2",
+        "samples-cc-react-app": "0.0.0-next.0",
+        "samples-cc-wc-app": "0.0.0-next.0",
+        "samples-meeting-app": "0.0.0-next.0"
+      }
+    },
+    "1.28.2-next.3": {
+      "published_date": 1764079113521,
+      "commits": {
+        "8bb5fbbdb6bac91bd0f67a32352d883dc90681c4": "chore(tooling): trigger PR build (#558)"
+      },
+      "alongWith": {
+        "@webex/cc-components": "1.28.0-next.3",
+        "@webex/cc-widgets": "1.28.0-next.3",
+        "@webex/cc-station-login": "1.28.0-next.3",
+        "@webex/cc-task": "1.28.0-next.3",
+        "@webex/cc-user-state": "1.28.0-next.3",
+        "samples-cc-react-app": "0.0.0-next.0",
+        "samples-cc-wc-app": "0.0.0-next.0",
+        "samples-meeting-app": "0.0.0-next.0"
+      }
+    },
+    "1.28.2-next.4": {
+      "published_date": 1771389258072,
+      "commits": {
+        "a12f2395e1cbc42790f72a81dc9e199d734ebbc4": "fix(tooling): replace Rollup with Webpack for bundling of meetings widget (#617)"
+      },
+      "alongWith": {
+        "samples-meeting-app": "0.0.0-next.0"
+      }
+    },
+    "1.28.2-next.5": {
+      "published_date": 1774237008362,
+      "commits": {
+        "b4fae1806f9008600395cd2703e652bba9de7b1b": "feat(tooling): add unit tests (#643)"
+      },
+      "alongWith": {
+        "samples-meeting-app": "0.0.0-next.0"
+      }
+    },
+    "1.28.2-next.6": {
+      "published_date": 1774929801267,
+      "commits": {
+        "354e58e50c80530f89d9427c32c80c66581ffda8": "docs(ai-docs): add docs for meetings widget (#642)"
+      },
+      "alongWith": {
+        "samples-meeting-app": "0.0.0-next.0"
+      }
+    },
+    "1.28.2-next.7": {
+      "published_date": 1775644115858,
+      "commits": {
+        "bb3bea7f90be652b3c163da9aa19e34fd346244f": "fix(meetings): address version resolution (#664)"
+      },
+      "alongWith": {
+        "samples-meeting-app": "0.0.0-next.0"
+      }
+    },
+    "1.28.2-next.8": {
+      "published_date": 1783488812186,
+      "commits": {
+        "0a1d20a862d393c7db2cd281c7be67058f23ea7e": "docs(ai-docs): migrate to SDLC-Templates component-repo standard (#707)"
+      },
+      "alongWith": {
+        "@webex/cc-components": "1.28.0-next.36",
+        "@webex/cc-digital-channels": "0.0.0-next.17",
+        "@webex/cc-widgets": "1.28.0-next.46",
+        "@webex/cc-station-login": "1.28.0-next.36",
+        "@webex/cc-store": "1.28.0-next.21",
+        "@webex/cc-task": "1.28.0-next.39",
+        "@webex/test-fixtures": "0.0.0-next.0",
+        "@webex/cc-ui-logging": "1.28.0-next.22",
+        "@webex/cc-user-state": "1.28.0-next.37",
+        "samples-cc-react-app": "0.0.0-next.0",
+        "samples-cc-wc-app": "0.0.0-next.0",
+        "samples-meeting-app": "0.0.0-next.0"
+      }
+    },
+    "1.28.2-next.9": {
+      "published_date": 1784721212955,
+      "commits": {
+        "d29c8ecbaf859bbb93177d21d037085ee0b488fc": "fix(tooling): pin NODE_ENV=test on jest invocations (#724)"
+      },
+      "alongWith": {
+        "@webex/cc-components": "1.28.0-next.38",
+        "@webex/cc-digital-channels": "0.0.0-next.19",
+        "@webex/cc-widgets": "1.28.0-next.48",
+        "@webex/cc-station-login": "1.28.0-next.38",
+        "@webex/cc-store": "1.28.0-next.23",
+        "@webex/cc-task": "1.28.0-next.41",
+        "@webex/test-fixtures": "0.0.0-next.0",
+        "@webex/cc-ui-logging": "1.28.0-next.24",
+        "@webex/cc-user-state": "1.28.0-next.39",
+        "samples-cc-react-app": "0.0.0-next.0",
+        "samples-cc-wc-app": "0.0.0-next.0",
+        "samples-meeting-app": "0.0.0-next.0"
+      }
+    },
+    "1.28.2-next.10": {
+      "published_date": 1785920163187,
+      "commits": {
+        "2d8094c3402f5d5be0f84f9455e816309f698159": "fix(widgets): bump sdk-component-adapter to 1.113.3 and components to 1.277.1 (#730)"
+      },
+      "alongWith": {
+        "samples-meeting-app": "0.0.0-next.0"
+      }
+    }
+  }
+}
