@@ -1,0 +1,93 @@
+name: Consumer Bundler Builds
+
+on:
+  pull_request:
+    branches: [next]
+  workflow_call:
+    inputs:
+      candidate-artifact:
+        description: Package archives prepared by the release job
+        required: true
+        type: string
+      bundlers:
+        description: Enabled bundlers from tooling/consumer-builds/config.json
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  prepare:
+    name: Prepare PR Consumer Packages
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      bundlers: ${{ steps.config.outputs.bundlers }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          cache: yarn
+      - name: Read Enabled Bundlers
+        id: config
+        run: echo "bundlers=$(node tooling/consumer-builds/config.cjs)" >> "$GITHUB_OUTPUT"
+      - name: Install and Build Packages
+        run: |
+          yarn install --immutable
+          yarn workspace webex-widgets build:prod
+      - name: Pack Consumer Candidates
+        run: yarn workspace webex-widgets consumer-builds:pack
+      - uses: actions/upload-artifact@v7
+        with:
+          name: consumer-candidates-pr
+          path: .generated/consumer-builds/candidates
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 7
+
+  build:
+    name: Consumer Build (${{ matrix.bundler }})
+    needs: prepare
+    if: >-
+      always() && !cancelled() &&
+      (needs.prepare.result == 'success' ||
+       (github.event_name != 'pull_request' && inputs.candidate-artifact != ''))
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        bundler: ${{ fromJSON(inputs.bundlers || needs.prepare.outputs.bundlers || '["webpack"]') }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: tooling/consumer-builds/fixture/package-lock.json
+      - uses: actions/download-artifact@v8
+        with:
+          name: ${{ inputs.candidate-artifact || 'consumer-candidates-pr' }}
+          path: .generated/consumer-builds/candidates
+      - name: Install Workspace Runner
+        run: yarn install --immutable
+      - name: Build and Check Consumer Startup
+        env:
+          BUNDLER: ${{ matrix.bundler }}
+        run: yarn workspace webex-widgets test:consumer-builds "$BUNDLER"
+      - name: Save Consumer Reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: consumer-report-${{ matrix.bundler }}
+          path: .generated/consumer-builds/reports
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 7
