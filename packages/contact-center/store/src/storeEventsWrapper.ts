@@ -33,15 +33,9 @@ import {
   WidgetsBehavioralMetric,
   WELLNESS_BREAK_NOTIFICATION_ACTIONS,
 } from './store.types';
-import type {AISummaryEntry, AISummaryResponseSubmissionResult, AISummaryRole} from './store.types';
+import type {AISummaryEntry, AISummaryResponseSubmissionResult} from './store.types';
 import Store from './store';
-import type {
-  AISummary,
-  AISummaryAction,
-  AISummaryFeedback,
-  AISummaryResponse,
-  AISummarySections,
-} from '@webex/contact-center';
+import type {AISummary, AISummaryAction, AISummaryFeedback, AISummaryResponse} from '@webex/contact-center';
 import {
   DEVICE_TYPE_BROWSER,
   MEDIA_TYPE_TELEPHONY_LOWER,
@@ -480,13 +474,14 @@ class StoreWrapper implements IStoreWrapper {
     });
   };
 
-  // The SDK correlates replies; the store also guards settlements so an older request
-  // cannot replace a newer request's state, including when the older request fails.
+  // The SDK owns validation, transport correlation and timeouts. This generation only
+  // prevents an older local promise settlement from overwriting the latest UI request.
 
   requestMidCallSummary = async (
     action: AISummaryAction,
     task: ITask = this.currentTask
   ): Promise<AISummary | undefined> => {
+    // Disabled summaries are a quiet UI no-op; the SDK validates enabled requests.
     if (!task?.aiSummaryCapabilities?.midCallEnabled) {
       return undefined;
     }
@@ -499,7 +494,6 @@ class StoreWrapper implements IStoreWrapper {
         [interactionId]: {
           ...this.store.cc.aiSummaries[interactionId],
           initiator: {
-            revision: 0,
             ...entry,
             response: entry?.content ? entry.response : {...EMPTY_AI_SUMMARY_RESPONSE},
             status: 'loading',
@@ -528,8 +522,6 @@ class StoreWrapper implements IStoreWrapper {
       ? {
           status: 'ready',
           content: result,
-          originalSections: result.sections ? {...result.sections} : undefined,
-          revision: current.revision + 1,
           response: {
             ...EMPTY_AI_SUMMARY_RESPONSE,
             summary: result.sections ? {} : (result.summaryText ?? ''),
@@ -566,7 +558,6 @@ class StoreWrapper implements IStoreWrapper {
         [interactionId]: {
           ...this.store.cc.aiSummaries[interactionId],
           'post-call': {
-            revision: 0,
             ...entry,
             response: entry?.content ? entry.response : {...EMPTY_AI_SUMMARY_RESPONSE},
             status: 'loading',
@@ -595,8 +586,6 @@ class StoreWrapper implements IStoreWrapper {
       ? {
           status: 'ready',
           content: result,
-          originalSections: result.sections ? {...result.sections} : undefined,
-          revision: current.revision + 1,
           response: {
             ...EMPTY_AI_SUMMARY_RESPONSE,
             summary: result.sections ? {} : (result.summaryText ?? ''),
@@ -618,66 +607,14 @@ class StoreWrapper implements IStoreWrapper {
     return result;
   };
 
-  editAISummary = (
-    role: AISummaryRole,
-    key: keyof AISummarySections | 'summaryText',
-    value: string,
-    expectedRevision: number,
-    task: ITask = this.currentTask
-  ): boolean => {
-    const entry = task && this.store.cc.aiSummaries[task.data.interactionId]?.[role];
-    if (!entry?.content || entry.revision !== expectedRevision) {
-      return false;
-    }
-    const {content} = entry;
-    const currentValue = key === 'summaryText' ? content.summaryText : content.sections?.[key];
-    if (currentValue === undefined) {
-      return false;
-    }
-    if (currentValue === value) {
-      return true;
-    }
-    const updatedContent =
-      key === 'summaryText'
-        ? {...content, summaryText: value}
-        : {...content, sections: {...content.sections, [key]: value}};
-    let summary = entry.response.summary;
-    if (role === 'receiver' || !updatedContent.sections) {
-      summary = updatedContent.summaryText ?? '';
-    } else if (key !== 'summaryText') {
-      const modified: AISummarySections = {...(typeof summary === 'string' ? {} : summary)};
-      if (value === entry.originalSections?.[key]) {
-        delete modified[key];
-      } else {
-        modified[key] = value;
-      }
-      summary = modified;
-    }
-    const interactionId = task.data.interactionId;
-    runInAction(() => {
-      this.store.cc.aiSummaries = {
-        ...this.store.cc.aiSummaries,
-        [interactionId]: {
-          ...this.store.cc.aiSummaries[interactionId],
-          [role]: {
-            ...entry,
-            content: updatedContent,
-            response: {...entry.response, summary, numberOfTimesEdited: 1},
-          },
-        },
-      };
-    });
-    return true;
-  };
-
   /** The receiving agent's feedback is sent right away; the selection is kept once the SDK confirms it. */
   setReceiverSummaryFeedback = async (
     feedback: Exclude<AISummaryFeedback, 'none'>,
-    expectedRevision: number,
+    expectedSummary: AISummary,
     task: ITask = this.currentTask
   ): Promise<void> => {
     const entry = task && this.store.cc.aiSummaries[task.data.interactionId]?.receiver;
-    if (!entry?.content || !entry.action || entry.revision !== expectedRevision || entry.feedbackPending) {
+    if (!entry?.content || !entry.action || entry.content !== expectedSummary || entry.feedbackPending) {
       return;
     }
     const interactionId = task.data.interactionId;
@@ -704,7 +641,7 @@ class StoreWrapper implements IStoreWrapper {
 
     const current = this.store.cc.aiSummaries[interactionId]?.receiver;
     // A new summary replaced this one, or the task was removed, while the response was in flight.
-    if (current?.revision === expectedRevision) {
+    if (current?.content === expectedSummary && current.feedbackPending) {
       runInAction(() => {
         this.store.cc.aiSummaries = {
           ...this.store.cc.aiSummaries,
@@ -1714,7 +1651,6 @@ class StoreWrapper implements IStoreWrapper {
         // Receiver summaries are pushed regardless of this agent's feature enablement.
         const listener = (payload: AISummary) => {
           const interactionId = task.data.interactionId;
-          const entry = this.store.cc.aiSummaries[interactionId]?.receiver;
           runInAction(() => {
             this.store.cc.aiSummaries = {
               ...this.store.cc.aiSummaries,
@@ -1723,8 +1659,6 @@ class StoreWrapper implements IStoreWrapper {
                 receiver: {
                   status: 'ready',
                   content: payload,
-                  originalSections: payload.sections ? {...payload.sections} : undefined,
-                  revision: (entry?.revision ?? 0) + 1,
                   response: {
                     ...EMPTY_AI_SUMMARY_RESPONSE,
                     summary: payload.summaryText ?? '',
