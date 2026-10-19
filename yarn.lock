@@ -31448,7 +31448,7 @@ __metadata:
     "@momentum-ui/web-components": "npm:^2.26.20"
     "@webex/cc-ai-assistant": "workspace:*"
     "@webex/cc-widgets": "workspace:*"
-    "@webex/contact-center": "npm:3.12.0-next.133"
+    "@webex/contact-center": "npm:3.12.0-next.148"
     babel-loader: "npm:^9.2.1"
     eslint: "npm:^9.20.1"
     eslint-config-prettier: "npm:^10.0.1"

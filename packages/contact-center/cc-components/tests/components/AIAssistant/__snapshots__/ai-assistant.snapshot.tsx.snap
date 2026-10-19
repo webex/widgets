@@ -11,6 +11,7 @@ exports[`AIAssistantComponent snapshots matches a full-screen RealTimeAssist con
       class="ai-assistant__panel ai-assistant__panel--full-screen"
       data-testid="ai-assistant:panel"
       role="dialog"
+      tabindex="-1"
     >
       <header
         class="ai-assistant__header"
@@ -406,6 +407,7 @@ exports[`AIAssistantComponent snapshots matches the AI features landing state 1`
       class="ai-assistant__panel"
       data-testid="ai-assistant:panel"
       role="dialog"
+      tabindex="-1"
     >
       <header
         class="ai-assistant__header"
@@ -845,6 +847,7 @@ exports[`AIAssistantComponent snapshots matches the open RealTimeAssist empty st
       class="ai-assistant__panel"
       data-testid="ai-assistant:panel"
       role="dialog"
+      tabindex="-1"
     >
       <header
         class="ai-assistant__header"
