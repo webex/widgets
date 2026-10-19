@@ -94,7 +94,7 @@ triggers MobX strict-mode warnings and batches inconsistently, so observers may 
 not at all.
 
 **Where it appears**
-- `packages/contact-center/store/src/storeEventsWrapper.ts` (dozens of setters and event handlers wrap writes in `runInAction`) , `packages/contact-center/task/src/helper.ts` , `packages/contact-center/user-state/src/helper.ts`
+- `packages/contact-center/store/src/storeEventsWrapper.ts` (setters, summary response actions and event handlers wrap writes in `runInAction`)
 
 **Edge cases / exceptions**
 - Reads never need `runInAction`; only writes to observables do.

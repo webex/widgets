@@ -241,6 +241,31 @@ describe('AISummary', () => {
     expect(screen.getByText(AI_ASSISTANT_SUMMARY_MESSAGES.generationErrorDescription)).toBeInTheDocument();
   });
 
+  it.each(['mid-call-initiator', 'post-call'] as const)(
+    'renders unavailable without actions when %s content is missing',
+    (mode) => {
+      const summaryProps = {
+        state: 'content' as const,
+        content: undefined,
+        onEdit: jest.fn(),
+        onCopy: jest.fn(),
+        onFeedback: jest.fn(),
+      };
+      render(
+        mode === 'post-call' ? (
+          <AISummary {...summaryProps} mode={mode} onRetry={jest.fn()} />
+        ) : (
+          <AISummary {...summaryProps} mode={mode} />
+        )
+      );
+
+      expect(screen.getByTestId('ai-summary:unavailable')).toHaveTextContent(LITERAL_SUMMARY_COPY.unavailable);
+      expect(screen.queryByTestId('ai-summary:content')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('ai-summary:actions')).not.toBeInTheDocument();
+      expect(screen.queryByText(AI_ASSISTANT_SUMMARY_MESSAGES.postCall.summaryHeading)).not.toBeInTheDocument();
+    }
+  );
+
   it('renders literal en-US labels and state copy without importing expected strings from the component constants', async () => {
     const {rerender} = render(
       <AISummary

@@ -36,6 +36,10 @@ The load-bearing contract of this module is structural: each exported mock is ty
 
 `mockTask` and `makeMockTask` use the store's exported `ITask` contract. They provide disabled AI summary capabilities and stub request/response methods, so store consumers see the same task shape in tests.
 
+`mockProfile.teams` follows the SDK `TeamList` shape: `id`, `name`, and the required
+team, site, membership and queue-ranking metadata. The fixture uses the SDK's
+current profile contract rather than the older `teamId`/`teamName` fields.
+
 ## Purpose / Responsibility
 Provides shared, type-checked mock SDK instances, mock profile/task/queue/agent data, and component-prop fixtures consumed by other packages' Jest tests; it does NOT provide runtime behavior, test runners, or shared test-render helpers.
 

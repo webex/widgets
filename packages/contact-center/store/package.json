@@ -16,14 +16,15 @@
     "clean": "rm -rf dist && rm -rf node_modules",
     "clean:dist": "rm -rf dist",
     "build": "yarn run -T tsc",
-    "build:src": "yarn run clean:dist && webpack",
+    "build:src": "yarn run clean:dist && webpack && yarn run build:types",
+    "build:types": "yarn run -T tsc --emitDeclarationOnly",
     "build:watch": "webpack --watch",
     "test:unit": "tsc --project tsconfig.test.json && NODE_ENV=test jest --coverage",
     "test:styles": "eslint",
     "deploy:npm": "yarn npm publish"
   },
   "dependencies": {
-    "@webex/contact-center": "3.12.0-next.148",
+    "@webex/contact-center": "3.12.0-next.158",
     "mobx": "6.13.5",
     "typescript": "5.6.3"
   },

@@ -1,7 +1,7 @@
 .consult-transfer-summary {
   min-inline-size: 0;
   max-block-size: none;
-  border-block-start: 1px solid var(--mds-color-theme-outline-secondary-normal, #d7d7d8);
+  border-block-start: 0.0625rem solid var(--mds-color-theme-outline-secondary-normal, #d7d7d8);
   margin-block-start: 0.75rem;
   padding-block-start: 0.75rem;
   white-space: normal;
@@ -134,7 +134,7 @@
     block-size: 1.75rem;
     background: transparent;
     color: var(--mds-color-theme-text-primary-normal);
-    border: 1px solid var(--mds-color-theme-outline-primary-normal);
+    border: 0.0625rem solid var(--mds-color-theme-outline-primary-normal);
   }
 
   .call-control-list-item .hover-button mdc-icon {
@@ -149,6 +149,28 @@
     min-block-size: 8rem;
   }
 
+  .consult-transfer-summary > .ai-summary,
+  .consult-transfer-summary .ai-summary__content {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .consult-transfer-summary > .ai-summary,
+  .consult-transfer-summary .ai-summary__editor-surface,
+  .consult-transfer-summary .ai-summary__content {
+    flex: 1 1 auto;
+    min-block-size: 0;
+  }
+
+  .consult-transfer-summary .ai-summary__content {
+    gap: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .consult-transfer-summary .ai-summary__content > *,
+  .consult-transfer-summary .ai-summary__actions,
   .consult-transfer-summary__heading {
     flex-shrink: 0;
   }

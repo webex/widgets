@@ -570,10 +570,12 @@ the generating state. Unavailable transcripts take priority over content; retain
 content remains visible during a refresh or after a failed refresh. The adapter imports
 the view prop type from `@webex/cc-components` and passes the SDK content unchanged,
 with `entry.response.summary` supplied separately as the editable display values.
-Edits, copy counts and deferred feedback update that existing SDK response record in
-`runInAction`; they never mutate the SDK summary. Each callback captures the selected
-task and raw SDK content identity, so a task switch, replacement summary or pending
-refresh rejects stale controls. Only displayed SDK fields can be edited; unchanged
+Edits, copy counts and deferred feedback call the store's `editAISummary`,
+`recordAISummaryCopied` and `setAISummaryFeedback` methods. The store updates that
+existing SDK response record inside `runInAction`; the task helper does not import MobX
+or mutate the SDK summary. Each callback captures the selected task and raw SDK
+content identity, so the store rejects stale controls after a task switch, replacement
+summary or pending refresh. Only displayed SDK fields can be edited; unchanged
 values leave the response untouched, and reverting a structured field removes that
 field's response override. The edit count is the existing zero-or-one edited flag.
 Requests and response submission remain store/SDK
@@ -588,18 +590,18 @@ capability is enabled, `wrapupCall` awaits
 code ID. Failed summary submission does not prevent wrap-up; disabled capability skips
 submission. An unedited structured summary has an empty `summary` object. `wrapupCall` resolves a
 boolean so the summary UI can retain its draft after failure and disable completion
-while wrap-up is pending. Concurrent wrap-up calls for the same active task share one
-in-flight completion promise, so rapid repeated activation cannot submit the same task twice.
+while wrap-up is pending. The summary presentation owns repeat-click protection and
+completion state across task switches.
 
 Widgets access summary APIs through `@webex/cc-store`.
 
-### Integration blockers
+### Reactive summary updates
 
-The merged store marks `cc` as `observable.ref` but adds `cc.aiSummaries` as an ordinary
-property. Replacing that nested property does not notify summary observers. The store
-needs a separate observability fix before live summary arrival, request completion and
-local response changes can reliably update these views. This change leaves the store
-untouched.
+The store observes the widget-owned `cc.aiSummaries` map by reference. CallControl's
+observer reads that property through `getAISummaryProps`, so request completion,
+failure and local response updates refresh an open summary view without another task
+event or reopening the consult/transfer popover. SDK objects and summary payloads
+retain their original identities.
 
 Evidence: `src/helper.ts`, `src/CallControl/index.tsx`, `src/task.types.ts`;
 tests: AI summary cases in `tests/helper.ts` and `tests/CallControl/index.tsx`.

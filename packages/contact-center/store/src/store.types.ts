@@ -384,6 +384,24 @@ interface IStoreWrapper extends IStore {
 
   requestMidCallSummary(action: AISummaryAction, task?: ITask): Promise<AISummary | undefined>;
   requestPostCallSummary(task?: ITask): Promise<AISummary | undefined>;
+  editAISummary(
+    role: Exclude<AISummaryRole, 'receiver'>,
+    key: keyof AISummarySections | 'summaryText',
+    value: string,
+    expectedSummary: AISummary | undefined,
+    task?: ITask
+  ): boolean;
+  recordAISummaryCopied(
+    role: Exclude<AISummaryRole, 'receiver'>,
+    expectedSummary: AISummary | undefined,
+    task?: ITask
+  ): boolean;
+  setAISummaryFeedback(
+    role: Exclude<AISummaryRole, 'receiver'>,
+    feedback: Exclude<AISummaryFeedback, 'none'>,
+    expectedSummary: AISummary | undefined,
+    task?: ITask
+  ): boolean;
   setReceiverSummaryFeedback(
     feedback: Exclude<AISummaryFeedback, 'none'>,
     expectedSummary: AISummary,
@@ -685,7 +703,7 @@ export type AISummaryEntry = {
    * The unchanged SDK summary, retained while a newer request loads or after it fails.
    */
   content?: AISummary;
-  /** SDK submission record; widget helpers own local edits, copy counts and deferred feedback. */
+  /** SDK submission record; editable-summary changes use store actions, receiver copies use the widget helper. */
   response: AISummaryResponse;
   /** Orders local request promise settlements; SDK transport correlation remains SDK-owned. */
   requestGeneration?: number;

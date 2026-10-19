@@ -3,7 +3,12 @@ import type {FocusEvent} from 'react';
 import type {AISummaryEntry, AISummaryFeedback} from '@webex/cc-store';
 import {AI_ASSISTANT_SUMMARY_MESSAGES, AI_ASSISTANT_SUMMARY_SECTION_ORDER} from './ai-summary.constants';
 import {COPIED_FEEDBACK_MS} from '../constants';
-import type {AISummaryDisplaySection, AISummaryProps, AISummaryTooltipControl} from './ai-summary.types';
+import type {
+  AISummaryDisplaySection,
+  AISummaryFocusTarget,
+  AISummaryProps,
+  AISummaryTooltipControl,
+} from './ai-summary.types';
 
 const useReactId = (React as typeof React & {useId: () => string}).useId;
 
@@ -52,39 +57,24 @@ const getDisplayContent = (props: AISummaryProps): AISummaryEntry['content'] => 
 export const useAISummaryInteractions = (props: AISummaryProps) => {
   const rootRef = useRef<HTMLDivElement>(null);
   const displayContent = getDisplayContent(props);
-  // Compare visible values, so response bookkeeping does not reset copy feedback.
-  const displayValue =
-    props.mode === 'mid-call-receiver' || !displayContent
-      ? undefined
-      : JSON.stringify(
-          displayContent.sections ? getDisplaySections(displayContent) : (displayContent.summaryText ?? '')
-        );
-  const latestPropsRef = useRef({props, displayValue});
+  // Compare the copied text, so response bookkeeping does not reset copy feedback.
+  const copyText =
+    props.mode === 'mid-call-receiver' || !displayContent ? undefined : flattenContentForCopy(displayContent);
+  const latestPropsRef = useRef({props, copyText});
   useLayoutEffect(() => {
-    latestPropsRef.current = {props, displayValue};
+    latestPropsRef.current = {props, copyText};
   });
-  const focusedControlRef = useRef<HTMLElement | null>(null);
-  const successorRef = useRef<HTMLElement | null>(null);
+  const focusTargetRef = useRef<AISummaryFocusTarget | null>(null);
   const [copied, setCopied] = useState(false);
   const [hoveredTooltip, setHoveredTooltip] = useState<AISummaryTooltipControl | null>(null);
-  const [, scheduleFocusRestoration] = useState(0);
   const summaryId = useReactId();
   const feedbackDescriptionId = `ai-summary-feedback-${summaryId}`;
   const disabled = Boolean(props.controlsDisabled || props.requestPending);
   const selectedFeedback = props.selectedFeedback ?? 'none';
 
-  const clearFocusSnapshot = () => {
-    focusedControlRef.current = null;
-    successorRef.current = null;
-  };
-
-  const handleLocalControlRemoval = () => {
-    scheduleFocusRestoration((revision) => revision + 1);
-  };
-
   useEffect(() => {
     setCopied(false);
-  }, [props.content, props.mode, props.state, displayValue]);
+  }, [props.content, props.mode, props.state, copyText]);
 
   useEffect(() => {
     if (!copied) {
@@ -109,55 +99,52 @@ export const useAISummaryInteractions = (props: AISummaryProps) => {
     return () => document.removeEventListener('keydown', dismissTooltip, true);
   }, [hoveredTooltip]);
 
-  useLayoutEffect(() => {
-    const focused = focusedControlRef.current;
-    if (!focused || focused.isConnected) {
+  const restoreFocus = () => {
+    const focusTarget = focusTargetRef.current;
+    if (!focusTarget || focusTarget.control.isConnected) {
       return;
     }
-    const successor = successorRef.current;
+    focusTargetRef.current = null;
+    const {successor} = focusTarget;
     const activeElement = document.activeElement;
     if (
       activeElement instanceof HTMLElement &&
       activeElement !== document.body &&
       activeElement.isConnected &&
-      !(successor !== null && activeElement === successor && !isEnabledFocusTarget(successor))
+      (activeElement !== successor || isEnabledFocusTarget(activeElement))
     ) {
-      clearFocusSnapshot();
       return;
     }
     if (successor && isEnabledFocusTarget(successor)) {
       successor.focus();
       if (document.activeElement === successor && isEnabledFocusTarget(successor)) {
-        clearFocusSnapshot();
         return;
       }
     }
     props.containingPanelFocusTarget.current?.focus();
-    clearFocusSnapshot();
-  });
+  };
+
+  useLayoutEffect(restoreFocus);
 
   const handleFocusCapture = (event: FocusEvent<HTMLDivElement>) => {
     const target = event.target;
     if (!(target instanceof HTMLElement)) {
       return;
     }
-    const controls = rootRef.current ? getEnabledControls(rootRef.current) : [];
+    const controls = getEnabledControls(event.currentTarget);
     const index = controls.indexOf(target);
-    focusedControlRef.current = target;
-    successorRef.current = index >= 0 ? (controls[index + 1] ?? null) : null;
+    focusTargetRef.current = {control: target, successor: index >= 0 ? (controls[index + 1] ?? null) : null};
   };
 
   const handleBlurCapture = (event: FocusEvent<HTMLDivElement>) => {
     const relatedTarget = event.relatedTarget;
-    const root = rootRef.current;
     if (
       relatedTarget instanceof HTMLElement &&
       relatedTarget !== document.body &&
       relatedTarget.isConnected &&
-      root &&
-      !root.contains(relatedTarget)
+      !event.currentTarget.contains(relatedTarget)
     ) {
-      clearFocusSnapshot();
+      focusTargetRef.current = null;
     }
   };
 
@@ -168,12 +155,7 @@ export const useAISummaryInteractions = (props: AISummaryProps) => {
     setHoveredTooltip(null);
     setCopied(false);
     try {
-      const text =
-        props.mode === 'mid-call-receiver'
-          ? props.getReceiverCopyText()
-          : displayContent
-            ? flattenContentForCopy(displayContent)
-            : '';
+      const text = props.mode === 'mid-call-receiver' ? props.getReceiverCopyText() : (copyText ?? '');
       if (text.trim().length === 0) {
         return;
       }
@@ -183,13 +165,13 @@ export const useAISummaryInteractions = (props: AISummaryProps) => {
     }
     // Clipboard writes can finish after another summary or local edit is displayed.
     // Keep completion local to the content and visible values that initiated the copy.
-    const {props: current, displayValue: currentDisplayValue} = latestPropsRef.current;
+    const {props: current, copyText: currentCopyText} = latestPropsRef.current;
     if (
       !rootRef.current ||
       current.state !== 'content' ||
       current.mode !== props.mode ||
       current.content !== props.content ||
-      currentDisplayValue !== displayValue
+      currentCopyText !== copyText
     ) {
       return;
     }
@@ -225,7 +207,7 @@ export const useAISummaryInteractions = (props: AISummaryProps) => {
     feedbackDescriptionId,
     disabled,
     selectedFeedback,
-    handleLocalControlRemoval,
+    restoreFocus,
     handleFocusCapture,
     handleBlurCapture,
     handleCopy,

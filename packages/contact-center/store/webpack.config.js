@@ -13,8 +13,12 @@ module.exports = mergeWithCustomize({
       {
         test: /\.(ts|tsx)$/,
         exclude: /node_modules/,
-        // Emit the declarations required by downstream workspace type imports.
-        use: 'ts-loader',
+        use: {
+          loader: 'ts-loader',
+          options: {
+            transpileOnly: true,
+          },
+        },
       },
     ],
   },

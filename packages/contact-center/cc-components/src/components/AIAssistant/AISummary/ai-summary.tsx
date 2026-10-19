@@ -74,8 +74,11 @@ const SummaryEditor: React.FC<AISummaryEditorProps> = ({value, ...props}) => {
 
 // Display the structured document compactly; activate the original keyed native
 // editor on click/keyboard activation. SDK values remain plain text and unchanged.
-const SummarySectionEditor: React.FC<AISummarySectionEditorProps> = ({section, disabled, onChange, onEditorBlur}) => {
+const SummarySectionEditor: React.FC<AISummarySectionEditorProps> = ({section, disabled, onChange, onEditorClosed}) => {
   const [editing, setEditing] = useState(false);
+  useLayoutEffect(() => {
+    if (!editing) onEditorClosed();
+  }, [editing, onEditorClosed]);
   const label = AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels[section.key];
   if (editing && !disabled) {
     return (
@@ -89,13 +92,14 @@ const SummarySectionEditor: React.FC<AISummarySectionEditorProps> = ({section, d
           value={section.value}
           autoFocus
           onChange={(event) => onChange(event.currentTarget.value)}
-          onBlur={() => {
-            setEditing(false);
-            onEditorBlur();
-          }}
+          onBlur={() => setEditing(false)}
         />
       </label>
     );
+  }
+  // Keep a cleared editor mounted until blur, then omit the empty preview row.
+  if (!section.value.trim()) {
+    return null;
   }
   return (
     <Button
@@ -128,7 +132,7 @@ const AISummary = (props: AISummaryProps): React.ReactElement => {
     feedbackDescriptionId,
     disabled,
     selectedFeedback,
-    handleLocalControlRemoval,
+    restoreFocus,
     handleFocusCapture,
     handleBlurCapture,
     handleCopy,
@@ -149,7 +153,7 @@ const AISummary = (props: AISummaryProps): React.ReactElement => {
         </div>
       );
     }
-    if (props.state === 'unavailable') {
+    if (props.state === 'unavailable' || (props.state === 'content' && !displayContent)) {
       return (
         <div className="ai-summary__status" data-testid="ai-summary:unavailable">
           <p className="ai-summary__description">{AI_ASSISTANT_SUMMARY_MESSAGES.unavailable}</p>
@@ -213,7 +217,7 @@ const AISummary = (props: AISummaryProps): React.ReactElement => {
               section={section}
               disabled={disabled}
               onChange={(value) => props.onEdit(key, value)}
-              onEditorBlur={handleLocalControlRemoval}
+              onEditorClosed={restoreFocus}
             />
           ) : (
             <div className="ai-summary__section ai-summary__section--structured" key={section.key}>
@@ -236,8 +240,8 @@ const AISummary = (props: AISummaryProps): React.ReactElement => {
       ? AI_ASSISTANT_SUMMARY_MESSAGES.feedback.pendingSubmission
       : undefined;
 
-  const showActions = props.state === 'content';
-  const showSummaryHeading = props.mode === 'post-call' && props.state === 'content';
+  const showActions = props.state === 'content' && Boolean(displayContent);
+  const showSummaryHeading = props.mode === 'post-call' && showActions;
   const copyLabel = copied ? AI_ASSISTANT_SUMMARY_MESSAGES.copiedSummary : AI_ASSISTANT_SUMMARY_MESSAGES.copySummary;
   // Keep visibility controlled so Escape dismisses the tooltip before the panel.
   // Existing button labels and the pending-feedback description remain authoritative.

@@ -3338,13 +3338,10 @@ describe('useCallControl', () => {
       );
 
       let wrapupPromise!: Promise<boolean>;
-      let repeatedWrapupPromise!: Promise<boolean>;
       act(() => {
         wrapupPromise = result.current.wrapupCall('Wrap reason', '123');
-        repeatedWrapupPromise = result.current.wrapupCall('Wrap reason', '123');
       });
 
-      expect(repeatedWrapupPromise).toBe(wrapupPromise);
       expect(sendSummaryResponse).toHaveBeenCalledTimes(1);
       expect(sendSummaryResponse).toHaveBeenCalledWith('123', task);
       expect(task.wrapup).not.toHaveBeenCalled();

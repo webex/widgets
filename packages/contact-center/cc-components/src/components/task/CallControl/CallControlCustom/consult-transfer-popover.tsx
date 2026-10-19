@@ -114,14 +114,14 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
     logger,
   });
   const [allowParticipantsToInteract, setAllowParticipantsToInteract] = useState<boolean>(false);
-  const [hasSummaryFocusFallback, setHasSummaryFocusFallback] = useState(summaryVisible);
+  const [hasShownSummary, setHasShownSummary] = useState(summaryVisible);
   // Keep the summary layout stable until this popover closes after summary eligibility is revoked.
-  const isVoiceDestinationLayout = isTelephony && (Boolean(summary) || hasSummaryFocusFallback);
-  const panelFocusEnabled = isVoiceDestinationLayout || hasSummaryFocusFallback;
+  const isVoiceDestinationLayout = isTelephony && (Boolean(summary) || hasShownSummary);
+  const panelFocusEnabled = isVoiceDestinationLayout || hasShownSummary;
 
   useLayoutEffect(() => {
-    if (summaryVisible && !hasSummaryFocusFallback) {
-      setHasSummaryFocusFallback(true);
+    if (summaryVisible && !hasShownSummary) {
+      setHasShownSummary(true);
     }
     const focusedSummaryControl = summaryFocusedControlRef.current;
     if (!focusedSummaryControl || focusedSummaryControl.isConnected) return;

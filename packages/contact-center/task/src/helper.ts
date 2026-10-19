@@ -1,5 +1,4 @@
 import {useEffect, useCallback, useState, useMemo, useRef} from 'react';
-import {runInAction} from 'mobx';
 import {
   AddressBookEntriesResponse,
   AddressBookEntrySearchParams,
@@ -31,7 +30,7 @@ import store, {
   MEDIA_TYPE_TELEPHONY_LOWER,
   RealTimeTranscriptionData,
 } from '@webex/cc-store';
-import type {AISummaryEntry, AISummaryResponse, AISummaryRole} from '@webex/cc-store';
+import type {AISummaryRole} from '@webex/cc-store';
 import {shouldShowWxAppTelephonyControls} from '@webex/cc-components';
 import type {CallControlAISummaryProps} from '@webex/cc-components';
 import {
@@ -514,32 +513,6 @@ export const getAISummaryProps = (currentTask?: ITask): CallControlAISummaryProp
   const viewOf = (role: Exclude<AISummaryRole, 'receiver'>): NonNullable<CallControlAISummaryProps['midCall']> => {
     const entry = entries?.[role];
     const content = entry?.content;
-    const getDisplayedEntry = (): AISummaryEntry | undefined => {
-      const current = store.cc.aiSummaries[interactionId]?.[role];
-      return store.currentTask === currentTask &&
-        content &&
-        content.areTranscriptsAvailable !== false &&
-        current?.content === content &&
-        current.status !== 'loading'
-        ? current
-        : undefined;
-    };
-    const updateResponse = (update: (response: AISummaryResponse) => AISummaryResponse): boolean => {
-      const current = getDisplayedEntry();
-      if (!current) {
-        return false;
-      }
-      runInAction(() => {
-        store.cc.aiSummaries = {
-          ...store.cc.aiSummaries,
-          [interactionId]: {
-            ...store.cc.aiSummaries[interactionId],
-            [role]: {...current, response: update(current.response)},
-          },
-        };
-      });
-      return true;
-    };
     return {
       state:
         content?.areTranscriptsAvailable === false
@@ -553,43 +526,9 @@ export const getAISummaryProps = (currentTask?: ITask): CallControlAISummaryProp
       editedSummary: entry?.response.summary,
       selectedFeedback: entry?.response.feedback ?? 'none',
       requestPending: entry?.status === 'loading',
-      onEdit: (key, value) => {
-        const current = getDisplayedEntry();
-        const originalValue =
-          key === 'summaryText' ? (content?.sections ? undefined : content?.summaryText) : content?.sections?.[key];
-        if (!current || typeof originalValue !== 'string') {
-          return false;
-        }
-        const displayedValue =
-          key === 'summaryText'
-            ? typeof current.response.summary === 'string'
-              ? current.response.summary
-              : originalValue
-            : typeof current.response.summary === 'object'
-              ? (current.response.summary[key] ?? originalValue)
-              : originalValue;
-        if (displayedValue === value) {
-          return true;
-        }
-        return updateResponse((response) => {
-          let summary: AISummaryResponse['summary'] = value;
-          if (key !== 'summaryText') {
-            const modified = {...(typeof response.summary === 'object' ? response.summary : {})};
-            if (value === originalValue) {
-              delete modified[key];
-            } else {
-              modified[key] = value;
-            }
-            summary = modified;
-          }
-          return {...response, summary, numberOfTimesEdited: 1};
-        });
-      },
-      onCopy: () =>
-        updateResponse((response) => ({...response, numberOfTimesCopied: response.numberOfTimesCopied + 1})),
-      onFeedback: (feedback) => {
-        updateResponse((response) => ({...response, feedback}));
-      },
+      onEdit: (key, value) => store.editAISummary(role, key, value, content, currentTask),
+      onCopy: () => store.recordAISummaryCopied(role, content, currentTask),
+      onFeedback: (feedback) => store.setAISummaryFeedback(role, feedback, content, currentTask),
     };
   };
   return {
@@ -1359,51 +1298,35 @@ export const useCallControl = (props: useCallControlProps) => {
     }
   };
 
-  const wrapupCompletionRef = useRef<{task: ITask; promise: Promise<boolean>} | null>(null);
-  const wrapupCall = (wrapUpReason: string, auxCodeId: string): Promise<boolean> => {
-    const pendingCompletion = wrapupCompletionRef.current;
-    if (pendingCompletion?.task === currentTask) {
-      return pendingCompletion.promise;
-    }
-
-    const completion = (async () => {
-      try {
-        // Store auxCodeId for use in wrapupCallCallback
-        lastWrapupAuxCodeIdRef.current = auxCodeId;
-        if (currentTask.aiSummaryCapabilities?.postCallEnabled) {
-          try {
-            await store.sendPostCallSummaryResponse(auxCodeId, currentTask);
-          } catch (error) {
-            logger?.error(`CC-Widgets: AI summary response failed: ${error}`, {
-              module: 'useCallControl',
-              method: 'wrapupCall',
-            });
-          }
-        }
-
-        await currentTask.wrapup({wrapUpReason, auxCodeId});
-        const taskKeys = Object.keys(store.taskList);
-        if (taskKeys.length > 0) {
-          store.setCurrentTask(store.taskList[taskKeys[0]]);
-          store.setState({
-            developerName: ENGAGED_LABEL,
-            name: ENGAGED_USERNAME,
+  const wrapupCall = async (wrapUpReason: string, auxCodeId: string): Promise<boolean> => {
+    try {
+      // Store auxCodeId for use in wrapupCallCallback
+      lastWrapupAuxCodeIdRef.current = auxCodeId;
+      if (currentTask.aiSummaryCapabilities?.postCallEnabled) {
+        try {
+          await store.sendPostCallSummaryResponse(auxCodeId, currentTask);
+        } catch (error) {
+          logger?.error(`CC-Widgets: AI summary response failed: ${error}`, {
+            module: 'useCallControl',
+            method: 'wrapupCall',
           });
         }
-        return true;
-      } catch (error) {
-        logError(`Error wrapping up call: ${error}`, 'wrapupCall');
-        return false;
       }
-    })();
 
-    wrapupCompletionRef.current = {task: currentTask, promise: completion};
-    void completion.then(() => {
-      if (wrapupCompletionRef.current?.promise === completion) {
-        wrapupCompletionRef.current = null;
+      await currentTask.wrapup({wrapUpReason, auxCodeId});
+      const taskKeys = Object.keys(store.taskList);
+      if (taskKeys.length > 0) {
+        store.setCurrentTask(store.taskList[taskKeys[0]]);
+        store.setState({
+          developerName: ENGAGED_LABEL,
+          name: ENGAGED_USERNAME,
+        });
       }
-    });
-    return completion;
+      return true;
+    } catch (error) {
+      logError(`Error wrapping up call: ${error}`, 'wrapupCall');
+      return false;
+    }
   };
 
   const transferCall = async (to: string, type: DestinationType) => {

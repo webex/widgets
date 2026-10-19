@@ -33,9 +33,15 @@ import {
   WidgetsBehavioralMetric,
   WELLNESS_BREAK_NOTIFICATION_ACTIONS,
 } from './store.types';
-import type {AISummaryEntry, AISummaryResponseSubmissionResult} from './store.types';
+import type {AISummaryEntry, AISummaryResponseSubmissionResult, AISummaryRole} from './store.types';
 import Store from './store';
-import type {AISummary, AISummaryAction, AISummaryFeedback, AISummaryResponse} from '@webex/contact-center';
+import type {
+  AISummary,
+  AISummaryAction,
+  AISummaryFeedback,
+  AISummaryResponse,
+  AISummarySections,
+} from '@webex/contact-center';
 import {
   DEVICE_TYPE_BROWSER,
   MEDIA_TYPE_TELEPHONY_LOWER,
@@ -606,6 +612,107 @@ class StoreWrapper implements IStoreWrapper {
     });
     return result;
   };
+
+  private updateAISummaryResponse(
+    role: Exclude<AISummaryRole, 'receiver'>,
+    expectedSummary: AISummary | undefined,
+    update: (response: AISummaryResponse) => AISummaryResponse,
+    task: ITask
+  ): boolean {
+    const entry = task && this.store.cc.aiSummaries[task.data.interactionId]?.[role];
+    if (
+      this.currentTask !== task ||
+      !expectedSummary ||
+      expectedSummary.areTranscriptsAvailable === false ||
+      entry?.content !== expectedSummary ||
+      entry.status === 'loading'
+    ) {
+      return false;
+    }
+    const response = update(entry.response);
+    if (response === entry.response) {
+      return true;
+    }
+    const interactionId = task.data.interactionId;
+    runInAction(() => {
+      this.store.cc.aiSummaries = {
+        ...this.store.cc.aiSummaries,
+        [interactionId]: {
+          ...this.store.cc.aiSummaries[interactionId],
+          [role]: {...entry, response},
+        },
+      };
+    });
+    return true;
+  }
+
+  /** Keeps local edits in the response while retaining the displayed SDK summary as the baseline. */
+  editAISummary = (
+    role: Exclude<AISummaryRole, 'receiver'>,
+    key: keyof AISummarySections | 'summaryText',
+    value: string,
+    expectedSummary: AISummary | undefined,
+    task: ITask = this.currentTask
+  ): boolean => {
+    const originalValue =
+      key === 'summaryText'
+        ? expectedSummary?.sections
+          ? undefined
+          : expectedSummary?.summaryText
+        : expectedSummary?.sections?.[key];
+    if (typeof originalValue !== 'string') {
+      return false;
+    }
+    return this.updateAISummaryResponse(
+      role,
+      expectedSummary,
+      (response) => {
+        const displayedValue =
+          key === 'summaryText'
+            ? typeof response.summary === 'string'
+              ? response.summary
+              : originalValue
+            : typeof response.summary === 'object'
+              ? (response.summary[key] ?? originalValue)
+              : originalValue;
+        if (displayedValue === value) {
+          return response;
+        }
+        let summary: AISummaryResponse['summary'] = value;
+        if (key !== 'summaryText') {
+          const modified = {...(typeof response.summary === 'object' ? response.summary : {})};
+          if (value === originalValue) {
+            delete modified[key];
+          } else {
+            modified[key] = value;
+          }
+          summary = modified;
+        }
+        return {...response, summary, numberOfTimesEdited: 1};
+      },
+      task
+    );
+  };
+
+  recordAISummaryCopied = (
+    role: Exclude<AISummaryRole, 'receiver'>,
+    expectedSummary: AISummary | undefined,
+    task: ITask = this.currentTask
+  ): boolean =>
+    this.updateAISummaryResponse(
+      role,
+      expectedSummary,
+      (response) => ({...response, numberOfTimesCopied: response.numberOfTimesCopied + 1}),
+      task
+    );
+
+  /** Initiator and post-call feedback is kept locally until the owning call action submits it. */
+  setAISummaryFeedback = (
+    role: Exclude<AISummaryRole, 'receiver'>,
+    feedback: Exclude<AISummaryFeedback, 'none'>,
+    expectedSummary: AISummary | undefined,
+    task: ITask = this.currentTask
+  ): boolean => this.updateAISummaryResponse(role, expectedSummary, (response) => ({...response, feedback}), task);
 
   /** The receiving agent's feedback is sent right away; the selection is kept once the SDK confirms it. */
   setReceiverSummaryFeedback = async (

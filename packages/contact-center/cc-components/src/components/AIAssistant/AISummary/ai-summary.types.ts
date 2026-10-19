@@ -7,6 +7,8 @@ export type AISummaryDisplaySection = {key: AISummarySectionKey; value: string};
 
 export type AISummaryTooltipControl = 'copy' | Exclude<AISummaryFeedback, 'none'>;
 
+export type AISummaryFocusTarget = {control: HTMLElement; successor: HTMLElement | null};
+
 export type AISummaryPresentationState = 'generating' | 'unavailable' | 'generic-error' | 'content';
 
 export type AISummaryEditorProps = Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, 'value'> & {
@@ -17,7 +19,7 @@ export type AISummarySectionEditorProps = {
   section: AISummaryDisplaySection;
   disabled: boolean;
   onChange: (value: string) => void;
-  onEditorBlur: () => void;
+  onEditorClosed: () => void;
 };
 
 export type AISummaryFeedbackButton = {
@@ -42,7 +44,7 @@ type AISummaryActions = {
 type AISummaryEditableActions = AISummaryActions & {
   content?: AISummaryEntry['content'];
   editedSummary?: AISummaryResponse['summary'];
-  onEdit: (key: keyof AISummarySections | 'summaryText', value: string) => boolean;
+  onEdit: (key: keyof AISummarySections | 'summaryText', value: string) => void;
 };
 
 export type AISummaryMidCallInitiatorProps = AISummaryBaseProps &
