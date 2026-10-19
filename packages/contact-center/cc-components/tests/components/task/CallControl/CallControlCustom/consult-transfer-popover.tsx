@@ -4,7 +4,7 @@ import '@testing-library/jest-dom';
 import ConsultTransferPopoverComponent from '../../../../../src/components/task/CallControl/CallControlCustom/consult-transfer-popover';
 import {AddressBookEntry, AISummaryEntry, ContactServiceQueue, EntryPointRecord, TaskUIControls} from '@webex/cc-store';
 import {DEFAULT_PAGE_SIZE, SEARCH_PLACEHOLDER} from '../../../../../src/components/task/constants';
-import {AI_SUMMARY_MESSAGES} from '../../../../../src/components/AISummary';
+import {AI_ASSISTANT_SUMMARY_MESSAGES as AI_SUMMARY_MESSAGES} from '../../../../../src/components/AIAssistant/AISummary';
 
 type AvailableDestinations = TaskUIControls['consultTransferDestinations']['consult'];
 
@@ -31,11 +31,10 @@ describe('ConsultTransferPopoverComponent', () => {
   const createSummary = (overrides = {}) => ({
     state: 'content' as const,
     content: {conversationId: 'interaction-main-1', summaryText: 'Customer needs billing support.'},
-    contentRevision: 18,
     selectedFeedback: 'none' as const,
-    onEdit: jest.fn(),
+    onEdit: jest.fn().mockReturnValue(true),
     onCopy: jest.fn().mockReturnValue(true),
-    onFeedback: jest.fn().mockResolvedValue({outcome: 'confirmed'}),
+    onFeedback: jest.fn(),
     ...overrides,
   });
 
@@ -703,11 +702,10 @@ describe('ConsultTransferPopoverComponent', () => {
           summary={{
             state: 'content',
             content: {conversationId: 'interaction-main-1', summaryText: 'Customer needs billing support.'},
-            contentRevision: 11,
             selectedFeedback: 'none',
-            onEdit: jest.fn(),
+            onEdit: jest.fn().mockReturnValue(true),
             onCopy: jest.fn().mockReturnValue(true),
-            onFeedback: jest.fn().mockResolvedValue({outcome: 'confirmed'}),
+            onFeedback: jest.fn(),
           }}
         />
       );
@@ -746,7 +744,7 @@ describe('ConsultTransferPopoverComponent', () => {
       expect(search).toHaveValue('qu');
       expect(queueAction).toHaveFocus();
 
-      const summary = createSummary({contentRevision: 41});
+      const summary = createSummary();
       view.rerender(<ConsultTransferPopoverComponent {...baseProps} heading="Consult" isTelephony summary={summary} />);
 
       expect(view.getByTestId('consult-transfer:summary')).toBeInTheDocument();
@@ -844,11 +842,10 @@ describe('ConsultTransferPopoverComponent', () => {
           summary={{
             state: 'unavailable',
             content: {conversationId: 'interaction-main-1', summaryText: ''},
-            contentRevision: 0,
             selectedFeedback: 'none',
-            onEdit: jest.fn(),
+            onEdit: jest.fn().mockReturnValue(true),
             onCopy: jest.fn().mockReturnValue(false),
-            onFeedback: jest.fn().mockResolvedValue({outcome: 'blocked'}),
+            onFeedback: jest.fn(),
           }}
         />
       );
@@ -861,11 +858,10 @@ describe('ConsultTransferPopoverComponent', () => {
       const summary = {
         state: 'content' as const,
         content: {conversationId: 'interaction-main-1', summaryText: 'Customer needs billing support.'},
-        contentRevision: 12,
         selectedFeedback: 'none' as const,
-        onEdit: jest.fn(),
+        onEdit: jest.fn().mockReturnValue(true),
         onCopy: jest.fn().mockReturnValue(true),
-        onFeedback: jest.fn().mockResolvedValue({outcome: 'confirmed'}),
+        onFeedback: jest.fn(),
       };
       const view = render(<ConsultTransferPopoverComponent {...baseProps} heading="Consult" summary={summary} />);
       const popover = view.container.querySelector('.agent-popover-content') as HTMLElement;
@@ -903,11 +899,11 @@ describe('ConsultTransferPopoverComponent', () => {
         <ConsultTransferPopoverComponent
           {...baseProps}
           heading="Consult"
-          summary={createSummary({content: firstContent, contentRevision: 61})}
+          summary={createSummary({content: firstContent})}
         />
       );
       const popover = view.container.querySelector('.agent-popover-content') as HTMLElement;
-      const summaryPreview = view.getByRole('button', {
+      const summaryPreview = await view.findByRole('button', {
         name: AI_SUMMARY_MESSAGES.editSectionLabel(AI_SUMMARY_MESSAGES.sectionLabels.initialContactReason),
       });
       act(() => {
@@ -919,7 +915,7 @@ describe('ConsultTransferPopoverComponent', () => {
         <ConsultTransferPopoverComponent
           {...baseProps}
           heading="Consult"
-          summary={createSummary({content: followUpOnlyContent, contentRevision: 62})}
+          summary={createSummary({content: followUpOnlyContent})}
         />
       );
 
@@ -944,12 +940,33 @@ describe('ConsultTransferPopoverComponent', () => {
           summary={createSummary({
             state: 'unavailable' as const,
             content: {conversationId: 'interaction-main-1', summaryText: ''},
-            contentRevision: 63,
           })}
         />
       );
 
       await waitFor(() => expect(popover).toHaveFocus());
+    });
+
+    it('does not recover summary focus after the user moves to a destination control that is removed', async () => {
+      const view = render(
+        <ConsultTransferPopoverComponent {...baseProps} heading="Consult" isTelephony summary={createSummary()} />
+      );
+      const popover = view.container.querySelector('.agent-popover-content') as HTMLElement;
+      const copy = await view.findByRole('button', {name: AI_SUMMARY_MESSAGES.copySummary});
+      const destination = view.getByRole('button', {name: 'Select Agent One'});
+      act(() => {
+        copy.focus();
+      });
+      expect(copy).toHaveFocus();
+      act(() => {
+        destination.focus();
+      });
+      expect(destination).toHaveFocus();
+
+      view.rerender(<ConsultTransferPopoverComponent {...baseProps} heading="Consult" isTelephony buddyAgents={[]} />);
+
+      expect(popover).not.toHaveFocus();
+      expect(document.body).toHaveFocus();
     });
 
     it('returns focus to the opening trigger when the latched voice popover is closed', async () => {

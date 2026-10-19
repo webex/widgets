@@ -6,7 +6,7 @@ import type {
   RealTimeTranscriptEntry,
   ParticipantDropAnnouncement,
 } from '@webex/cc-components';
-import type {AISummaryStatusDetail, RealTimeTranscriptionData} from '@webex/cc-store';
+import type {RealTimeTranscriptionData} from '@webex/cc-store';
 
 export type UseTaskProps = Pick<TaskProps, 'incomingTask' | 'logger'> &
   Partial<Pick<TaskProps, 'onAccepted' | 'onRejected'>>;
@@ -52,9 +52,7 @@ export type CallControlProps = Partial<
     | 'conferenceEnabled'
     | 'consultTransferOptions'
   >
-> & {
-  onAISummaryStatusChange?: (detail: AISummaryStatusDetail) => void;
-};
+>;
 
 export type useCallControlProps = Pick<
   ControlProps,
@@ -74,7 +72,7 @@ export type useOutdialCallProps = Pick<OutdialCallProps, 'cc' | 'logger'>;
 // Re-exported from store — single source of truth.
 export {CAMPAIGN_PREVIEW_OUTBOUND_TYPES, CAMPAIGN_PREVIEW_CAMPAIGN_TYPES} from '@webex/cc-store';
 
-export type {RealTimeTranscriptEntry, ParticipantDropAnnouncement, AISummaryStatusDetail};
+export type {RealTimeTranscriptEntry, ParticipantDropAnnouncement};
 export interface OutdialProps {
   /**
    * Flag to determine if the address book is enabled.

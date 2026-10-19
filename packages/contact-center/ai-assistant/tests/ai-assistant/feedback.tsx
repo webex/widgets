@@ -59,9 +59,9 @@ jest.mock('@webex/cc-components', () => {
 
 jest.mock('@webex/cc-store', () => ({
   __esModule: true,
-  getAISummarySurface: jest.requireActual('@webex/cc-store').getAISummarySurface,
   default: {
     cc: {
+      aiSummaries: {},
       apiAIAssistant: {
         getRealTimeAssistance: jest.fn(),
         sendRealTimeAssistanceUserAction: jest.fn(),
@@ -71,7 +71,6 @@ jest.mock('@webex/cc-store', () => ({
     agentId: 'agent-1',
     featureFlags: {isSuggestedResponsesEnabled: true},
     realTimeAssist: {'interaction-1': []},
-    aiSummaries: {},
     clearRealTimeAssist: jest.fn(),
     logger: {error: jest.fn(), warn: jest.fn()},
   },

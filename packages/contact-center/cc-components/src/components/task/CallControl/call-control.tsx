@@ -42,6 +42,7 @@ function CallControlComponent(props: CallControlComponentProps) {
   const agentPopovers = useRef<Record<string, PopoverInstance | undefined>>({});
   const wrapUpSurfaceRef = useRef<HTMLDivElement | null>(null);
   const focusedWrapUpControlRef = useRef<HTMLElement | null>(null);
+  const wrapupCompletionRef = useRef<object | null>(null);
 
   const {
     currentTask,
@@ -93,6 +94,20 @@ function CallControlComponent(props: CallControlComponentProps) {
     if (previous && !previous.isConnected) focusedWrapUpControlRef.current = null;
   }, [aiSummary?.postCall]);
 
+  useLayoutEffect(() => {
+    wrapupCompletionRef.current = null;
+    setIsWrapupCompletionPending(false);
+    return () => {
+      wrapupCompletionRef.current = null;
+    };
+  }, [currentTask?.data?.interactionId]);
+
+  useLayoutEffect(() => {
+    if (showAgentMenu && aiSummary?.midCall && aiSummary.midCall.state !== 'omitted') {
+      setIsSummaryPopoverLayout(true);
+    }
+  }, [showAgentMenu, aiSummary?.midCall]);
+
   useEffect(() => {
     updateCallStateFromTask(currentTask, setIsRecording, logger);
   }, [currentTask, logger]);
@@ -100,7 +115,6 @@ function CallControlComponent(props: CallControlComponentProps) {
   useEffect(() => {
     setShowAgentMenu(false);
     setAgentMenuType(null);
-    setIsWrapupCompletionPending(false);
   }, [currentTask?.data?.interactionId]);
 
   const handletoggleHold = () => {
@@ -113,13 +127,15 @@ function CallControlComponent(props: CallControlComponentProps) {
 
   // Freeze summary edits and prevent a second completion while its wrap-up is pending.
   const runWrapupCompletion = async (wrapupReason: string | null, wrapupId: string | null) => {
-    if (isWrapupCompletionPending || !wrapupReason || !wrapupId) {
+    if (wrapupCompletionRef.current || !wrapupReason || !wrapupId) {
       return;
     }
+    const completion = {};
+    wrapupCompletionRef.current = completion;
     setIsWrapupCompletionPending(true);
     try {
       const succeeded = await wrapupCall(wrapupReason, wrapupId);
-      if (succeeded !== false) {
+      if (succeeded !== false && wrapupCompletionRef.current === completion) {
         setSelectedWrapupReason(null);
         setSelectedWrapupId(null);
       }
@@ -129,7 +145,10 @@ function CallControlComponent(props: CallControlComponentProps) {
         method: 'runWrapupCompletion',
       });
     } finally {
-      setIsWrapupCompletionPending(false);
+      if (wrapupCompletionRef.current === completion) {
+        wrapupCompletionRef.current = null;
+        setIsWrapupCompletionPending(false);
+      }
     }
   };
 
@@ -236,7 +255,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                   <PopoverNext
                     key={index}
                     onShow={() => {
-                      setIsSummaryPopoverLayout(Boolean(aiSummary?.midCall));
+                      setIsSummaryPopoverLayout(Boolean(aiSummary?.midCall && aiSummary.midCall.state !== 'omitted'));
                       logger.info(`CC-Widgets: CallControl: showing ${button.menuType} popover`, {
                         module: 'call-control.tsx',
                         method: 'onShowPopover',
@@ -268,7 +287,11 @@ function CallControlComponent(props: CallControlComponentProps) {
                         typeof instance === 'function' ? instance(agentPopovers.current[button.menuType]) : instance;
                     }}
                     closeButtonPlacement={
-                      isTelephony && isSummaryPopoverLayout && button.menuType !== 'Keypad' ? 'none' : 'top-right'
+                      isTelephony &&
+                      (isSummaryPopoverLayout || Boolean(aiSummary?.midCall)) &&
+                      button.menuType !== 'Keypad'
+                        ? 'none'
+                        : 'top-right'
                     }
                     closeButtonProps={{
                       'aria-label': 'Close popover',
@@ -405,7 +428,13 @@ function CallControlComponent(props: CallControlComponentProps) {
                 tabIndex={-1}
                 data-testid="call-control:wrapup-panel"
                 onFocusCapture={(event) => {
-                  focusedWrapUpControlRef.current = event.target as HTMLElement;
+                  focusedWrapUpControlRef.current = aiSummary?.postCall ? (event.target as HTMLElement) : null;
+                }}
+                onBlurCapture={(event) => {
+                  const nextTarget = event.relatedTarget;
+                  if (nextTarget instanceof HTMLElement && nextTarget !== document.body && nextTarget.isConnected) {
+                    focusedWrapUpControlRef.current = null;
+                  }
                 }}
               >
                 {currentTask.autoWrapup && (

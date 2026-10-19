@@ -53,7 +53,7 @@ state, or SDK access — those live upstream in the widget packages and `@webex/
 
 ## Stack
 TypeScript 5.6.3, React 18 (peer `>=18.3.1`), `@r2wc/react-to-web-component` 2.0.3. Test stack: Jest
-29.7.0 + jsdom + React Testing Library (configured in `package.json`; AI summary callback coverage is in `tests/wc.ai-summary.ts`).
+29.7.0 + jsdom + React Testing Library (configured in `package.json`; Web Component integration coverage is in `tests/wc.ai-summary.ts`).
 Build: `tsc` for type declarations and webpack 5 for the two bundles (`dist/index.js`, `dist/wc.js`).
 No datastore or messaging.
 
@@ -351,7 +351,7 @@ This module is the host-mount surface for the widget suite.
 ## Test-Case Strategy (module)
 `tests/wc.ai-summary.ts` covers the custom-element distribution contract: registered tags,
 CallControl and AI Assistant observed attributes, legacy CallControl prop forwarding, and
-the AI summary callback property's upgrade and connection lifecycle. Jest requires tests
+removal of the r2wc container prop. Jest requires tests
 to be present. Widget rendering and behavior are tested by the upstream widget packages.
 
 | Behavior / Requirement | Existing test evidence | Gap |
@@ -364,19 +364,12 @@ to be present. Widget rendering and behavior are tested by the upstream widget p
 | `cc-widgets-R-006` (React/ReactDOM peers) | None found | Enforced by package manager only; no automated check here. |
 | `cc-widgets-R-007` (CallControlCAD inherits Drop without a new WC surface) | Covered by upstream task/component tests | No package-local test; the wrapper and prop map are unchanged. |
 
-## AI summary status callback
+## CallControl Web Component integration
 
-The React barrel exports `AISummaryStatusDetail`. The `widget-cc-call-control` element
-accepts `onAISummaryStatusChange` as a JavaScript function property, including assignment
-before element definition, replacement, removal and reconnect. Callback attributes
-remain inert and the property is not reflected into an attribute.
-
-The CallControl adapter strips r2wc's container prop. The wrapper uses r2wc's property
-accessors to forward callback changes through React, with no attribute transform or
-separate subscription state. A small subclass validates the function property and
-recovers assignments made before element definition. Existing tag names, observed
-attributes and callback mappings are unchanged. The status detail is `{kind, state}` with mid-call availability states and
-post-call availability/submission states; it contains no summary content.
+The CallControl adapter strips r2wc's container prop before forwarding the existing
+CallControl props to React. Registered tag names, observed attributes and existing
+callback mappings remain unchanged. Summary UI behavior is supplied by the task
+widget.
 
 Evidence: `src/index.ts`, `src/wc.ts`; tests: `tests/wc.ai-summary.ts`.
 

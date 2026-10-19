@@ -11,7 +11,6 @@ import {
   RealTimeTranscript,
 } from '@webex/cc-widgets';
 import {AIAssistant, type WellnessBreakOverlayTarget} from '@webex/cc-ai-assistant';
-import type {AISummaryStatusDetail} from '@webex/cc-widgets';
 import {StationLogoutResponse} from '@webex/contact-center';
 import {ERROR_TRIGGERING_IDLE_CODES} from '@webex/cc-store';
 import Webex from 'webex';
@@ -244,10 +243,6 @@ function App() {
 
   const onToggleMute = ({isMuted, task}) => {
     console.log('onToggleMute invoked', {isMuted, task});
-  };
-
-  const onAISummaryStatusChange = (detail: AISummaryStatusDetail) => {
-    console.log('onAISummaryStatusChange invoked', detail);
   };
 
   const enableDisableMultiLogin = () => {
@@ -1108,7 +1103,6 @@ function App() {
                               onWrapUp={onWrapUp}
                               onRecordingToggle={onRecordingToggle}
                               onToggleMute={onToggleMute}
-                              onAISummaryStatusChange={onAISummaryStatusChange}
                               conferenceEnabled={conferenceEnabled}
                             />
                           </fieldset>

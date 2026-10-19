@@ -1,4 +1,5 @@
 import {useEffect, useCallback, useState, useMemo, useRef} from 'react';
+import {runInAction} from 'mobx';
 import {
   AddressBookEntriesResponse,
   AddressBookEntrySearchParams,
@@ -29,9 +30,8 @@ import store, {
   findMediaResourceId,
   MEDIA_TYPE_TELEPHONY_LOWER,
   RealTimeTranscriptionData,
-  getAISummarySurface,
 } from '@webex/cc-store';
-import type {AISummaryRole} from '@webex/cc-store';
+import type {AISummaryEntry, AISummaryResponse, AISummaryRole} from '@webex/cc-store';
 import {shouldShowWxAppTelephonyControls} from '@webex/cc-components';
 import type {CallControlAISummaryProps} from '@webex/cc-components';
 import {
@@ -499,7 +499,7 @@ export const useIncomingTask = (props: UseTaskProps) => {
 };
 
 /**
- * The initiating agent's consult/transfer summary and the wrap-up summary of a task, with their store actions.
+ * The initiating agent's consult/transfer summary and the wrap-up summary of a task.
  * Undefined when the SDK reports both as disabled for the task.
  */
 export const getAISummaryProps = (currentTask?: ITask): CallControlAISummaryProps | undefined => {
@@ -509,33 +509,108 @@ export const getAISummaryProps = (currentTask?: ITask): CallControlAISummaryProp
     return undefined;
   }
 
-  const entries = store.aiSummaries[currentTask.data.interactionId];
+  const interactionId = currentTask.data.interactionId;
+  const entries = store.cc.aiSummaries[interactionId];
   const viewOf = (role: Exclude<AISummaryRole, 'receiver'>): NonNullable<CallControlAISummaryProps['midCall']> => {
     const entry = entries?.[role];
+    const content = entry?.content;
+    const getDisplayedEntry = (): AISummaryEntry | undefined => {
+      const current = store.cc.aiSummaries[interactionId]?.[role];
+      return store.currentTask === currentTask &&
+        content &&
+        content.areTranscriptsAvailable !== false &&
+        current?.content === content &&
+        current.status !== 'loading'
+        ? current
+        : undefined;
+    };
+    const updateResponse = (update: (response: AISummaryResponse) => AISummaryResponse): boolean => {
+      const current = getDisplayedEntry();
+      if (!current) {
+        return false;
+      }
+      runInAction(() => {
+        store.cc.aiSummaries = {
+          ...store.cc.aiSummaries,
+          [interactionId]: {
+            ...store.cc.aiSummaries[interactionId],
+            [role]: {...current, response: update(current.response)},
+          },
+        };
+      });
+      return true;
+    };
     return {
-      state: getAISummarySurface(entry),
-      content: entry?.content,
-      contentRevision: entry?.revision ?? 0,
+      state:
+        content?.areTranscriptsAvailable === false
+          ? 'unavailable'
+          : content
+            ? 'content'
+            : !entry || entry.status === 'loading'
+              ? 'generating'
+              : 'generic-error',
+      content,
+      editedSummary: entry?.response.summary,
       selectedFeedback: entry?.response.feedback ?? 'none',
       requestPending: entry?.status === 'loading',
-      onEdit: (key, value, expectedRevision) => store.editAISummary(role, key, value, expectedRevision, currentTask),
-      onCopy: (expectedRevision) => store.recordAISummaryCopied(role, expectedRevision, currentTask),
-      onFeedback: (feedback, expectedRevision) =>
-        store.setAISummaryFeedback(role, feedback, expectedRevision, currentTask),
+      onEdit: (key, value) => {
+        const current = getDisplayedEntry();
+        const originalValue =
+          key === 'summaryText' ? (content?.sections ? undefined : content?.summaryText) : content?.sections?.[key];
+        if (!current || typeof originalValue !== 'string') {
+          return false;
+        }
+        const displayedValue =
+          key === 'summaryText'
+            ? typeof current.response.summary === 'string'
+              ? current.response.summary
+              : originalValue
+            : typeof current.response.summary === 'object'
+              ? (current.response.summary[key] ?? originalValue)
+              : originalValue;
+        if (displayedValue === value) {
+          return true;
+        }
+        return updateResponse((response) => {
+          let summary: AISummaryResponse['summary'] = value;
+          if (key !== 'summaryText') {
+            const modified = {...(typeof response.summary === 'object' ? response.summary : {})};
+            if (value === originalValue) {
+              delete modified[key];
+            } else {
+              modified[key] = value;
+            }
+            summary = modified;
+          }
+          return {...response, summary, numberOfTimesEdited: 1};
+        });
+      },
+      onCopy: () =>
+        updateResponse((response) => ({...response, numberOfTimesCopied: response.numberOfTimesCopied + 1})),
+      onFeedback: (feedback) => {
+        updateResponse((response) => ({...response, feedback}));
+      },
     };
   };
   return {
     midCall: midCallEnabled ? viewOf('initiator') : undefined,
     postCall: postCallEnabled
-      ? {...viewOf('post-call'), onRetry: () => store.requestPostCallSummary(currentTask)}
+      ? {
+          ...viewOf('post-call'),
+          onRetry: async () => {
+            await store.requestPostCallSummary(currentTask);
+          },
+        }
       : undefined,
     // Like Agent Desktop, a wrap-up requests its summary once; Retry asks again.
     requestPostCallSummary: () => {
-      if (!store.aiSummaries[currentTask.data.interactionId]?.['post-call']) {
+      if (!store.cc.aiSummaries[interactionId]?.['post-call']) {
         void store.requestPostCallSummary(currentTask);
       }
     },
-    requestMidCallSummary: (action) => store.requestMidCallSummary(action, currentTask),
+    requestMidCallSummary: async (action) => {
+      await store.requestMidCallSummary(action, currentTask);
+    },
   };
 };
 

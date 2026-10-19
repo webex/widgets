@@ -1,5 +1,4 @@
 import {
-  AISummaryAction,
   ILogger,
   ITask,
   IContactCenter,
@@ -16,10 +15,14 @@ import {
   AddressBookEntrySearchParams,
   AddressBookEntriesResponse,
   TaskUIControls,
-  type getAISummarySurface,
 } from '@webex/cc-store';
+import type {AISummaryAction} from '@webex/cc-store';
 import {CampaignErrorType} from './CampaignErrorDialog/campaign-error-dialog.types';
-import type {AISummaryMidCallInitiatorProps, AISummaryPostCallProps} from '../AISummary/ai-summary.types';
+import type {
+  AISummaryMidCallInitiatorProps,
+  AISummaryPostCallProps,
+  AISummaryPresentationState,
+} from '../AIAssistant/AISummary/ai-summary.types';
 
 type Enum<T extends Record<string, unknown>> = T[keyof T];
 
@@ -65,7 +68,7 @@ export type ParticipantDropAnnouncement = {
 
 type AISummaryViewProps =
   | 'content'
-  | 'contentRevision'
+  | 'editedSummary'
   | 'selectedFeedback'
   | 'requestPending'
   | 'onEdit'
@@ -74,12 +77,12 @@ type AISummaryViewProps =
 
 /** The initiating agent's consult/transfer summary shown in the popover. */
 export type ConsultTransferSummaryView = Pick<AISummaryMidCallInitiatorProps, AISummaryViewProps> & {
-  state: ReturnType<typeof getAISummarySurface>;
+  state: AISummaryPresentationState | 'omitted';
 };
 
 /** The summary shown in the wrap-up panel. */
 export type WrapUpSummaryView = Pick<AISummaryPostCallProps, AISummaryViewProps | 'onRetry'> & {
-  state: ReturnType<typeof getAISummarySurface>;
+  state: AISummaryPresentationState | 'omitted';
 };
 
 export type WrapUpSummaryReason = Pick<IWrapupCode, 'id' | 'name'>;

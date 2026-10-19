@@ -1,9 +1,9 @@
 import React from 'react';
-import {act, render} from '@testing-library/react';
+import {render} from '@testing-library/react';
 import {runInAction} from 'mobx';
 import * as helper from '../../src/helper';
 import {CallControl} from '../../src';
-import store, {type ITask} from '@webex/cc-store';
+import store from '@webex/cc-store';
 import {createEnabledMainTaskUIControls, mockTask} from '@webex/test-fixtures';
 import {TARGET_TYPE} from '../../src/task.types';
 import '@testing-library/jest-dom';
@@ -70,7 +70,7 @@ const createUseCallControlReturn = (
   ...overrides,
 });
 
-const resetStatusTestState = (): void => {
+const resetTestState = (): void => {
   runInAction(() => {
     store.store.currentTask = null;
     store.store.acceptedCampaignIds = new Set();
@@ -78,24 +78,10 @@ const resetStatusTestState = (): void => {
   store.onErrorCallback = undefined;
 };
 
-// Sending a post-call summary response is one of the store actions that reports a summary status.
-const submitPostCallSummary = (sendPostCallSummaryResponse: jest.Mock) =>
-  store.sendPostCallSummaryResponse(
-    {
-      summary: 'Summary',
-      feedback: 'none',
-      state: 'DEFAULT',
-      numberOfTimesViewed: 0,
-      numberOfTimesEdited: 0,
-      numberOfTimesCopied: 0,
-    },
-    {data: {interactionId: 'status-interaction'}, sendPostCallSummaryResponse} as unknown as ITask
-  );
-
 describe('CallControl Component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    resetStatusTestState();
+    resetTestState();
     // Suppress console.error for error boundary tests
     jest.spyOn(console, 'error').mockImplementation(() => {});
   });
@@ -131,50 +117,6 @@ describe('CallControl Component', () => {
       enableWxBetterTogether: false,
       widgetName: 'CallControl',
     });
-  });
-
-  it('should forward summary status changes to the host callback while mounted', async () => {
-    jest.spyOn(helper, 'useCallControl').mockReturnValue(createUseCallControlReturn());
-    const onAISummaryStatusChange = jest.fn();
-
-    const {unmount} = render(<CallControl onAISummaryStatusChange={onAISummaryStatusChange} />);
-    await act(async () => {
-      await submitPostCallSummary(jest.fn().mockResolvedValue(undefined));
-      await submitPostCallSummary(jest.fn().mockRejectedValue(new Error('503')));
-    });
-
-    expect(onAISummaryStatusChange).toHaveBeenNthCalledWith(1, {kind: 'post-call', state: 'submitted'});
-    expect(onAISummaryStatusChange).toHaveBeenNthCalledWith(2, {kind: 'post-call', state: 'response-failed'});
-
-    unmount();
-    await act(async () => {
-      await submitPostCallSummary(jest.fn().mockResolvedValue(undefined));
-    });
-    expect(onAISummaryStatusChange).toHaveBeenCalledTimes(2);
-  });
-
-  it('should not subscribe to summary status changes without a host callback', () => {
-    jest.spyOn(helper, 'useCallControl').mockReturnValue(createUseCallControlReturn());
-    const subscribeSpy = jest.spyOn(store, 'onAISummaryStatusChange');
-
-    render(<CallControl />);
-
-    expect(subscribeSpy).not.toHaveBeenCalled();
-  });
-
-  it('should deliver later statuses only to the replacement callback', async () => {
-    jest.spyOn(helper, 'useCallControl').mockReturnValue(createUseCallControlReturn());
-    const firstCallback = jest.fn();
-    const secondCallback = jest.fn();
-
-    const {rerender} = render(<CallControl onAISummaryStatusChange={firstCallback} />);
-    rerender(<CallControl onAISummaryStatusChange={secondCallback} />);
-    await act(async () => {
-      await submitPostCallSummary(jest.fn().mockResolvedValue(undefined));
-    });
-
-    expect(firstCallback).not.toHaveBeenCalled();
-    expect(secondCallback).toHaveBeenCalledWith({kind: 'post-call', state: 'submitted'});
   });
 
   describe('ErrorBoundary Tests', () => {

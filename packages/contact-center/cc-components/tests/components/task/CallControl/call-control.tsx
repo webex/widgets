@@ -1,5 +1,5 @@
 import React from 'react';
-import {render, fireEvent, waitFor} from '@testing-library/react';
+import {act, render, fireEvent, waitFor} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import CallControlComponent from '../../../../src/components/task/CallControl/call-control';
 import {CallControlComponentProps, CallControlMenuType, TARGET_TYPE} from '../../../../src/components/task/task.types';
@@ -74,10 +74,9 @@ describe('CallControlComponent', () => {
     return {promise, resolve, reject};
   };
 
-  const createMidCallSummary = (revision = 4) => ({
+  const createMidCallSummary = () => ({
     state: 'content' as const,
     content: {conversationId: 'interaction-main-1', summaryText: 'Customer needs billing support.'},
-    contentRevision: revision,
     selectedFeedback: 'none' as const,
     onEdit: jest.fn(),
     onCopy: jest.fn().mockReturnValue(true),
@@ -87,7 +86,6 @@ describe('CallControlComponent', () => {
   const createPostCallSummary = (overrides = {}) => ({
     state: 'generating' as const,
     content: {conversationId: 'interaction-main-1', summaryText: ''},
-    contentRevision: 0,
     selectedFeedback: 'none' as const,
     requestPending: true,
     onEdit: jest.fn().mockReturnValue(false),
@@ -263,7 +261,6 @@ describe('CallControlComponent', () => {
             postCall: createPostCallSummary({
               state: 'content',
               content: {conversationId: 'interaction-main-1', summaryText: 'Customer issue was resolved.'},
-              contentRevision: 5,
               requestPending: false,
             }),
           }}
@@ -335,7 +332,6 @@ describe('CallControlComponent', () => {
       const retainedPostCallSummary = createPostCallSummary({
         state: 'content',
         content: {conversationId: 'interaction-main-1', summaryText: 'Edited draft kept by store.'},
-        contentRevision: 8,
         requestPending: false,
       });
       const screen = render(
@@ -403,7 +399,6 @@ describe('CallControlComponent', () => {
             postCall: createPostCallSummary({
               state: 'content',
               content: {conversationId: 'interaction-main-1', summaryText: 'Customer issue was resolved.'},
-              contentRevision: 5,
               requestPending: false,
             }),
           }}
@@ -422,6 +417,33 @@ describe('CallControlComponent', () => {
 
       completion.resolve(true);
       await waitFor(() => expect(wrapupCall).toHaveBeenCalledTimes(1));
+    });
+
+    it('does not clear a new task reason when a previous task completion settles', async () => {
+      const completion = deferred<boolean>();
+      const wrapupCall = jest.fn().mockReturnValue(completion.promise);
+      const postCall = createPostCallSummary();
+      const renderControl = (interactionId: string) => (
+        <CallControlComponent
+          {...defaultProps}
+          currentTask={{...mockCurrentTask, data: {...mockCurrentTask.data, interactionId}}}
+          wrapupCall={wrapupCall}
+          controls={createEnabledMainTaskUIControls({wrapup: enabledControl})}
+          aiSummary={{postCall}}
+        />
+      );
+      const screen = render(renderControl('first-task'));
+      fireEvent.click(screen.getByTestId('call-control:wrapup-button'));
+      fireEvent.click(await screen.findByRole('radio', {name: 'Customer Issue'}));
+      fireEvent.click(await screen.findByRole('button', {name: 'Complete Wrap-Up'}));
+      await waitFor(() => expect(wrapupCall).toHaveBeenCalledTimes(1));
+
+      screen.rerender(renderControl('second-task'));
+      fireEvent.click(await screen.findByRole('radio', {name: 'Technical Support'}));
+      await act(async () => completion.resolve(true));
+
+      expect(screen.getByRole('radio', {name: 'Technical Support'})).toBeChecked();
+      expect(await screen.findByRole('button', {name: 'Complete Wrap-Up'})).not.toBeDisabled();
     });
 
     it('renders all call control elements with proper attributes and accessibility features', async () => {
@@ -778,7 +800,6 @@ describe('CallControlComponent', () => {
             midCall: {
               state: 'omitted',
               content: {conversationId: 'interaction-main-1', summaryText: ''},
-              contentRevision: 0,
               selectedFeedback: 'none',
               onEdit: jest.fn(),
               onCopy: jest.fn().mockReturnValue(false),
@@ -825,9 +846,43 @@ describe('CallControlComponent', () => {
         );
       };
 
+      it('keeps one close control through summary activation and revocation in an open legacy popover', async () => {
+        const screen = renderVoiceConsult(undefined);
+        fireEvent.click(screen.getByLabelText('Consult'));
+        expect(await screen.findByLabelText('Close popover')).toBeInTheDocument();
+
+        screen.rerender(
+          <CallControlComponent
+            {...defaultProps}
+            controls={{
+              ...createEnabledMainTaskUIControls({transfer: disabledControl}),
+              consultTransferDestinations: {consult: ['agent'], transfer: []},
+            }}
+            aiSummary={{midCall: createMidCallSummary()}}
+          />
+        );
+
+        expect(await screen.findByTestId('consult-transfer:summary')).toBeInTheDocument();
+        expect(screen.getAllByLabelText('Close popover')).toHaveLength(1);
+
+        screen.rerender(
+          <CallControlComponent
+            {...defaultProps}
+            controls={{
+              ...createEnabledMainTaskUIControls({transfer: disabledControl}),
+              consultTransferDestinations: {consult: ['agent'], transfer: []},
+            }}
+          />
+        );
+        expect(screen.queryByTestId('consult-transfer:summary')).not.toBeInTheDocument();
+        expect(screen.getAllByLabelText('Close popover')).toHaveLength(1);
+        fireEvent.click(screen.getByLabelText('Close popover'));
+        await waitFor(() => expect(screen.queryByLabelText('Close popover')).not.toBeInTheDocument());
+      });
+
       it('should request a fresh summary every time the popover opens', async () => {
         const requestMidCallSummary = jest.fn().mockResolvedValue({outcome: 'accepted'});
-        const screen = renderVoiceConsult({midCall: createMidCallSummary(3), requestMidCallSummary});
+        const screen = renderVoiceConsult({midCall: createMidCallSummary(), requestMidCallSummary});
         const consultButton = screen.getByLabelText('Consult');
 
         fireEvent.click(consultButton);
@@ -870,7 +925,7 @@ describe('CallControlComponent', () => {
             consultTransfer={telephony}
             consultConference={telephony}
             aiSummary={{
-              ...(withSummary ? {midCall: createMidCallSummary(25)} : {}),
+              ...(withSummary ? {midCall: createMidCallSummary()} : {}),
               requestMidCallSummary,
             }}
           />

@@ -156,7 +156,6 @@ const AdaptiveCardRenderer: React.FC<AdaptiveCardRendererProps> = ({
   card,
   displayOnly = false,
   onRender,
-  contentRevision,
   assistantTitle,
   fallbackText,
   publishTimestamp,
@@ -174,7 +173,7 @@ const AdaptiveCardRenderer: React.FC<AdaptiveCardRendererProps> = ({
     >
       <ErrorBoundary
         fallbackRender={() => <AdaptiveCardFallback fallbackText={fallbackText} />}
-        resetKeys={contentRevision === undefined ? undefined : [contentRevision]}
+        resetKeys={displayOnly ? [card] : undefined}
       >
         <AdaptiveCardRendererBody
           card={card}

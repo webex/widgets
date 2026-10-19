@@ -397,6 +397,18 @@ Unit tests are split by source file. `tests/store.ts` covers the singleton defau
 | `STORE-R-030`          | `tests/store.ts` (`enableWxBetterTogether` init paths and default)                                                                          | none                                                                                                                        |
 | `STORE-R-031`          | `tests/storeEventsWrapper.ts` ("should remove task callback even when task is absent from store.taskList", legacy string-id fallback cases) | none                                                                                                                        |
 
+## Build declarations
+
+`build:src` cleans `dist` and runs Webpack with type-checking `ts-loader`, which
+emits the declarations under `dist/types` declared by `package.json`. Downstream
+workspaces must resolve the store's exported types from those declarations after a
+clean build. Transpile-only mode omits them and makes SDK-derived types such as
+`AISummarySections` resolve through the JavaScript bundle instead, causing the
+summary section key type to widen to `string | number | symbol`.
+
+Evidence: `webpack.config.js`, `tsconfig.json`, `package.json`.
+Verification: `yarn run build` from the repository root.
+
 ## AI summaries
 
 `StoreWrapper` is the SDK boundary for summaries. `cc.aiSummaries[interactionId][role]`
@@ -471,11 +483,9 @@ interaction ID lets task cleanup remove them together; entries are created as ne
 The integration consumes `AISummary`, `AISummarySections`, `AISummaryResponse`,
 `AISummaryAction`, and `AISummaryFeedback` from `@webex/contact-center`.
 These APIs come from published SDK `3.12.0-next.148`. The store and React sample pin
-that version; the root resolution also selects it for the sample's transitive Webex
-SDK dependency. Three scoped resolutions replace unavailable transitive versions:
-Device `3.12.0-next.55` uses published `next.54`, and Metrics `3.12.0-next.56` uses
-published `next.55`; Mercury `3.12.0-next.62` uses published `next.61`. Remove these
-resolutions once the referenced versions are published. No local SDK archive is used.
+that same version so downstream workspace imports resolve compatible SDK types
+rather than conflicting private class identities from different SDK releases.
+No local SDK archive is used.
 The React sample uses the SDK-supported `User requested logout` reason for page-unload logout.
 `AISummary` is the common incoming payload type; `AISummaryResponse` is the distinct
 feedback payload sent back to the SDK. The store retains both types directly. The UI

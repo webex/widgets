@@ -4,11 +4,9 @@ import {StationLogin} from '@webex/cc-station-login';
 import {UserState} from '@webex/cc-user-state';
 import store from '@webex/cc-store';
 import {TaskList, IncomingTask, CallControl, CallControlCAD, OutdialCall, RealTimeTranscript} from '@webex/cc-task';
-import type {AISummaryStatusDetail, CallControlProps} from '@webex/cc-task';
+import type {CallControlProps} from '@webex/cc-task';
 import {DigitalChannels} from '@webex/cc-digital-channels';
 import {AIAssistant} from '@webex/cc-ai-assistant';
-
-type AISummaryStatusCallback = NonNullable<CallControlProps['onAISummaryStatusChange']>;
 
 const CallControlWebComponentAdapter: React.FC<CallControlProps & {container?: HTMLElement}> = (props) => {
   const callControlProps = {...props};
@@ -46,53 +44,15 @@ const WebStationLogin = r2wc(StationLogin, {
   },
 });
 
-const WebCallControlBase = r2wc(CallControlWebComponentAdapter, {
+const WebCallControl = r2wc(CallControlWebComponentAdapter, {
   props: {
     onHoldResume: 'function',
     onEnd: 'function',
     onWrapUp: 'function',
     onRecordingToggle: 'function',
     conferenceEnabled: 'boolean',
-    // No transform: r2wc forwards property assignments without attribute conversion or reflection.
-    onAISummaryStatusChange: undefined,
   },
-}) as CustomElementConstructor & {observedAttributes: string[]};
-
-const statusCallbackProperty = Object.getOwnPropertyDescriptor(
-  WebCallControlBase.prototype,
-  'onAISummaryStatusChange'
-)!;
-
-class WebCallControl extends WebCallControlBase {
-  static get observedAttributes(): string[] {
-    return WebCallControlBase.observedAttributes.filter(
-      (attribute) => attribute.toLowerCase() !== 'on-aisummary-status-change'
-    );
-  }
-
-  constructor() {
-    super();
-
-    if (Object.prototype.hasOwnProperty.call(this, 'onAISummaryStatusChange')) {
-      const instance = this as {onAISummaryStatusChange?: AISummaryStatusCallback};
-      const onAISummaryStatusChange = instance.onAISummaryStatusChange;
-      delete instance.onAISummaryStatusChange;
-      this.onAISummaryStatusChange = onAISummaryStatusChange;
-    }
-  }
-
-  get onAISummaryStatusChange(): AISummaryStatusCallback | undefined {
-    return statusCallbackProperty.get!.call(this) as AISummaryStatusCallback | undefined;
-  }
-
-  set onAISummaryStatusChange(value: AISummaryStatusCallback | undefined) {
-    if (value !== undefined && typeof value !== 'function') {
-      throw new TypeError('onAISummaryStatusChange must be a function or undefined');
-    }
-
-    statusCallbackProperty.set!.call(this, value);
-  }
-}
+});
 
 const WebCallControlCAD = r2wc(CallControlCAD, {
   props: {
@@ -155,4 +115,3 @@ components.forEach(({name, component}) => {
 });
 
 export {store};
-export type {AISummaryStatusDetail};

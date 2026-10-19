@@ -1,17 +1,10 @@
 import {act} from '@testing-library/react';
-import type {AISummaryStatusDetail} from '../src';
 import type {CallControlProps} from '@webex/cc-task';
 
-type AISummaryStatusCallback = NonNullable<CallControlProps['onAISummaryStatusChange']>;
 type RecordedCallControlProps = CallControlProps & Record<string, unknown>;
-type WebCallControlElement = HTMLElement & {
-  onAISummaryStatusChange?: AISummaryStatusCallback;
-};
 
 const CALL_CONTROL_TAG = 'widget-cc-call-control';
 const AI_ASSISTANT_TAG = 'widget-cc-ai-assistant';
-const AI_SUMMARY_DASHED_ATTRIBUTE = 'on-aisummary-status-change';
-const AI_SUMMARY_LOWER_ATTRIBUTE = 'onaisummarystatuschange';
 const mockCallControlProps: RecordedCallControlProps[] = [];
 const mockCallControl = jest.fn((props: RecordedCallControlProps) => {
   mockCallControlProps.push(props);
@@ -33,7 +26,6 @@ jest.mock('@webex/cc-task', () => ({
 }));
 
 const callbackGlobalNames = [
-  'aiSummaryGlobalCallback',
   'mockOnHoldResumeGlobal',
   'mockOnEndGlobal',
   'mockOnWrapUpGlobal',
@@ -53,8 +45,6 @@ const allRegisteredTags = [
 ] as const;
 
 const windowGlobals = window as unknown as Partial<Record<(typeof callbackGlobalNames)[number], unknown>>;
-const preUpgradeStatusCallback = jest.fn<void, [AISummaryStatusDetail]>();
-let preUpgradeElement: WebCallControlElement;
 
 (globalThis as unknown as {IS_REACT_ACT_ENVIRONMENT: boolean}).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -78,8 +68,6 @@ const expectObservedAttributes = (tagName: string, expectedAttributes: string[])
   expect(ctor.observedAttributes ?? []).toEqual(expectedAttributes);
 };
 
-const createStatusCallback = () => jest.fn<void, [AISummaryStatusDetail]>();
-
 const installLegacyCallbackGlobals = () => {
   const callbacks = {
     onHoldResume: jest.fn(),
@@ -102,11 +90,6 @@ const invokeRecordedCallback = (callback: unknown) => {
 };
 
 beforeAll(async () => {
-  preUpgradeElement = document.createElement(CALL_CONTROL_TAG) as WebCallControlElement;
-  preUpgradeElement.onAISummaryStatusChange = preUpgradeStatusCallback;
-  expect(Object.prototype.hasOwnProperty.call(preUpgradeElement, 'onAISummaryStatusChange')).toBe(true);
-  document.body.appendChild(preUpgradeElement);
-
   await act(async () => {
     await import('../src/wc');
     await customElements.whenDefined(CALL_CONTROL_TAG);
@@ -125,13 +108,7 @@ afterEach(async () => {
   }
 });
 
-describe('widget-cc-call-control AI summary status property', () => {
-  it('recovers a pre-definition own status callback property during custom element upgrade', () => {
-    expect(Object.prototype.hasOwnProperty.call(preUpgradeElement, 'onAISummaryStatusChange')).toBe(false);
-    expect(preUpgradeElement.onAISummaryStatusChange).toBe(preUpgradeStatusCallback);
-    expect(latestCallControlProps().onAISummaryStatusChange).toBe(preUpgradeStatusCallback);
-  });
-
+describe('CallControl web component', () => {
   it('keeps registered tags and observed attributes on the documented web component surface', () => {
     for (const tagName of allRegisteredTags) {
       expect(customElements.get(tagName)).toBeDefined();
@@ -162,79 +139,11 @@ describe('widget-cc-call-control AI summary status property', () => {
     ]);
   });
 
-  it('forwards pre-connection assignment, replacement, removal, and reconnect through CallControl', async () => {
-    const element = document.createElement(CALL_CONTROL_TAG) as WebCallControlElement;
-    const first = createStatusCallback();
-    const second = createStatusCallback();
-
-    await act(async () => {
-      element.onAISummaryStatusChange = first;
-      document.body.appendChild(element);
-    });
-    expect(latestCallControlProps().onAISummaryStatusChange).toBe(first);
-
-    await act(async () => {
-      element.onAISummaryStatusChange = second;
-    });
-    expect(latestCallControlProps().onAISummaryStatusChange).toBe(second);
-
-    await act(async () => {
-      element.remove();
-      document.body.appendChild(element);
-    });
-    expect(latestCallControlProps().onAISummaryStatusChange).toBe(second);
-
-    await act(async () => {
-      element.onAISummaryStatusChange = undefined;
-    });
-    expect(latestCallControlProps().onAISummaryStatusChange).toBeUndefined();
-  });
-
-  it('leaves callback attributes inert and never reflects the status callback property', async () => {
-    const attributeElement = document.createElement(CALL_CONTROL_TAG) as WebCallControlElement;
-    const propertyElement = document.createElement(CALL_CONTROL_TAG) as WebCallControlElement;
-    const globalCallback = createStatusCallback();
-    const propertyCallback = createStatusCallback();
-    const setAttributeSpy = jest.spyOn(propertyElement, 'setAttribute');
-
-    windowGlobals.aiSummaryGlobalCallback = globalCallback;
-    attributeElement.setAttribute(AI_SUMMARY_DASHED_ATTRIBUTE, 'aiSummaryGlobalCallback');
-    attributeElement.setAttribute(AI_SUMMARY_LOWER_ATTRIBUTE, 'aiSummaryGlobalCallback');
-
-    await act(async () => {
-      document.body.appendChild(attributeElement);
-    });
-    expect(attributeElement.onAISummaryStatusChange).toBeUndefined();
-    expect(latestCallControlProps().onAISummaryStatusChange).toBeUndefined();
-
-    await act(async () => {
-      document.body.appendChild(propertyElement);
-    });
-    mockCallControlProps.length = 0;
-    setAttributeSpy.mockClear();
-
-    await act(async () => {
-      propertyElement.onAISummaryStatusChange = propertyCallback;
-    });
-
-    expect(latestCallControlProps().onAISummaryStatusChange).toBe(propertyCallback);
-    expect(setAttributeSpy).not.toHaveBeenCalledWith(AI_SUMMARY_DASHED_ATTRIBUTE, expect.any(String));
-    expect(setAttributeSpy).not.toHaveBeenCalledWith(AI_SUMMARY_LOWER_ATTRIBUTE, expect.any(String));
-    expect(propertyElement.hasAttribute(AI_SUMMARY_DASHED_ATTRIBUTE)).toBe(false);
-    expect(propertyElement.hasAttribute(AI_SUMMARY_LOWER_ATTRIBUTE)).toBe(false);
-    expect(() => {
-      (propertyElement as unknown as {onAISummaryStatusChange: unknown}).onAISummaryStatusChange =
-        'aiSummaryGlobalCallback';
-    }).toThrow(TypeError);
-  });
-
   it('passes the existing CallControl web component props while stripping the r2wc container prop', async () => {
-    const element = document.createElement(CALL_CONTROL_TAG) as WebCallControlElement;
-    const statusCallback = createStatusCallback();
+    const element = document.createElement(CALL_CONTROL_TAG);
     const callbacks = installLegacyCallbackGlobals();
 
     await act(async () => {
-      element.onAISummaryStatusChange = statusCallback;
       element.setAttribute('on-hold-resume', 'mockOnHoldResumeGlobal');
       element.setAttribute('on-end', 'mockOnEndGlobal');
       element.setAttribute('on-wrap-up', 'mockOnWrapUpGlobal');
@@ -244,7 +153,6 @@ describe('widget-cc-call-control AI summary status property', () => {
     });
 
     const props = latestCallControlProps();
-    expect(props.onAISummaryStatusChange).toBe(statusCallback);
     expect(props.conferenceEnabled).toBe(true);
 
     invokeRecordedCallback(props.onHoldResume);

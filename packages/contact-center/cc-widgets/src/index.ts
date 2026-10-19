@@ -19,4 +19,3 @@ export {
   AIAssistant,
   store,
 };
-export type {AISummaryStatusDetail} from '@webex/cc-task';

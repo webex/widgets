@@ -6,7 +6,7 @@ import {act, fireEvent, render, screen, waitFor} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import WrapUpSummary from '../../../../../src/components/task/CallControl/CallControlCustom/wrap-up-summary';
 import {WrapUpSummaryView} from '../../../../../src/components/task/task.types';
-import {AI_SUMMARY_MESSAGES} from '../../../../../src/components/AISummary';
+import {AI_ASSISTANT_SUMMARY_MESSAGES as AI_SUMMARY_MESSAGES} from '../../../../../src/components/AIAssistant/AISummary';
 import {CLEAR_SEARCH, WRAP_UP_INTERACTION} from '../../../../../src/components/task/constants';
 
 const reasons = [
@@ -28,7 +28,6 @@ const createSummary = (overrides: Partial<WrapUpSummaryView> = {}): WrapUpSummar
     },
     resolution: 'Issue resolved',
   },
-  contentRevision: 6,
   selectedFeedback: 'none',
   requestPending: false,
   onEdit: jest.fn().mockReturnValue(true),
@@ -77,7 +76,7 @@ describe('WrapUpSummary', () => {
 
     expect(screen.getByText(WRAP_UP_INTERACTION)).toBeInTheDocument();
     fireEvent.click(
-      screen.getByRole('button', {
+      await screen.findByRole('button', {
         name: AI_SUMMARY_MESSAGES.editSectionLabel(AI_SUMMARY_MESSAGES.sectionLabels.initialContactReason),
       })
     );
@@ -245,14 +244,14 @@ describe('WrapUpSummary', () => {
       />
     );
     const {rerender} = render(renderPanel(false));
-    const editInitialReason = screen.getByRole('button', {
+    const editInitialReason = await screen.findByRole('button', {
       name: AI_SUMMARY_MESSAGES.editSectionLabel(AI_SUMMARY_MESSAGES.sectionLabels.initialContactReason),
     });
     expect(editInitialReason).not.toBeDisabled();
 
     rerender(renderPanel(true));
 
-    expect(editInitialReason).toBeDisabled();
+    await waitFor(() => expect(editInitialReason).toBeDisabled());
     expect(screen.getByRole('button', {name: AI_SUMMARY_MESSAGES.like})).toBeDisabled();
     const complete = await screen.findByRole('button', {name: COMPLETE_WRAP_UP_LABEL});
     expect(complete).toBeDisabled();
@@ -264,7 +263,7 @@ describe('WrapUpSummary', () => {
     );
 
     rerender(renderPanel(false));
-    expect(editInitialReason).not.toBeDisabled();
+    await waitFor(() => expect(editInitialReason).not.toBeDisabled());
   });
 
   it('restores focus to the wrap-up panel when the summary subtree is removed', async () => {
@@ -272,7 +271,7 @@ describe('WrapUpSummary', () => {
       <WrapUpSummary reasons={reasons} summary={createSummary()} onReasonChange={jest.fn()} onComplete={jest.fn()} />
     );
 
-    const copy = screen.getByRole('button', {name: AI_SUMMARY_MESSAGES.copySummary});
+    const copy = await screen.findByRole('button', {name: AI_SUMMARY_MESSAGES.copySummary});
     act(() => {
       copy.focus();
     });
@@ -282,6 +281,28 @@ describe('WrapUpSummary', () => {
 
     await waitFor(() => expect(screen.getByTestId('wrap-up-summary')).toHaveFocus());
     expect(screen.queryByTestId('wrap-up-summary:body')).not.toBeInTheDocument();
+  });
+
+  it('does not recover summary focus after focus has moved to another control', async () => {
+    const renderPanel = (showSummary: boolean) => (
+      <>
+        <WrapUpSummary
+          reasons={reasons}
+          summary={showSummary ? createSummary() : undefined}
+          onReasonChange={jest.fn()}
+          onComplete={jest.fn()}
+        />
+        {showSummary ? <button type="button">Outside control</button> : null}
+      </>
+    );
+    const {rerender} = render(renderPanel(true));
+    const copy = await screen.findByRole('button', {name: AI_SUMMARY_MESSAGES.copySummary});
+    act(() => copy.focus());
+    act(() => screen.getByRole('button', {name: 'Outside control'}).focus());
+
+    rerender(renderPanel(false));
+
+    expect(screen.getByTestId('wrap-up-summary')).not.toHaveFocus();
   });
 
   it('bounds reason and summary scrolling while keeping panel chrome outside the scroll regions', async () => {

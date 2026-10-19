@@ -1,10 +1,29 @@
 import type {RefObject, TextareaHTMLAttributes} from 'react';
-import type {AISummaryEntry, AISummaryFeedback, AISummarySections, getAISummarySurface} from '@webex/cc-store';
+import type {AISummaryEntry, AISummaryFeedback, AISummaryResponse, AISummarySections} from '@webex/cc-store';
 
-export type AISummaryPresentationState = Exclude<ReturnType<typeof getAISummarySurface>, 'omitted'>;
+export type AISummarySectionKey = keyof AISummarySections | 'resolution';
+
+export type AISummaryDisplaySection = {key: AISummarySectionKey; value: string};
+
+export type AISummaryTooltipControl = 'copy' | Exclude<AISummaryFeedback, 'none'>;
+
+export type AISummaryPresentationState = 'generating' | 'unavailable' | 'generic-error' | 'content';
 
 export type AISummaryEditorProps = Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, 'value'> & {
   value: string;
+};
+
+export type AISummarySectionEditorProps = {
+  section: AISummaryDisplaySection;
+  disabled: boolean;
+  onChange: (value: string) => void;
+  onEditorBlur: () => void;
+};
+
+export type AISummaryFeedbackButton = {
+  feedback: Exclude<AISummaryFeedback, 'none'>;
+  icon: string;
+  label: string;
 };
 
 type AISummaryBaseProps = {
@@ -16,14 +35,14 @@ type AISummaryBaseProps = {
 };
 
 type AISummaryActions = {
-  contentRevision: number;
-  onCopy: (expectedRevision: number) => boolean;
-  onFeedback: (feedback: Exclude<AISummaryFeedback, 'none'>, expectedRevision: number) => void;
+  onCopy: () => boolean;
+  onFeedback: (feedback: Exclude<AISummaryFeedback, 'none'>) => void;
 };
 
 type AISummaryEditableActions = AISummaryActions & {
   content?: AISummaryEntry['content'];
-  onEdit: (key: keyof AISummarySections | 'summaryText', value: string, expectedRevision: number) => boolean;
+  editedSummary?: AISummaryResponse['summary'];
+  onEdit: (key: keyof AISummarySections | 'summaryText', value: string) => boolean;
 };
 
 export type AISummaryMidCallInitiatorProps = AISummaryBaseProps &
@@ -34,17 +53,17 @@ export type AISummaryMidCallInitiatorProps = AISummaryBaseProps &
 
 export type AISummaryMidCallReceiverProps = AISummaryBaseProps & {
   mode: 'mid-call-receiver';
-  content?: never;
   onEdit?: never;
   onRetry?: never;
 } & (
     | (AISummaryActions & {
         state: 'content';
+        content: NonNullable<AISummaryEntry['content']>;
         getReceiverCopyText: () => string;
       })
     | {
         state: Exclude<AISummaryPresentationState, 'content'>;
-        contentRevision?: never;
+        content?: never;
         getReceiverCopyText?: never;
         onCopy?: never;
         onFeedback?: never;
