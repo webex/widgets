@@ -471,11 +471,11 @@ interaction ID lets task cleanup remove them together; entries are created as ne
 The integration consumes `AISummary`, `AISummarySections`, `AISummaryResponse`,
 `AISummaryAction`, and `AISummaryFeedback` from `@webex/contact-center`.
 These APIs come from published SDK `3.12.0-next.159`. The store and React sample pin
-that version; the root resolution also selects it for the sample's transitive Webex
-SDK dependency. Three scoped resolutions replace unavailable transitive versions:
-Device `3.12.0-next.55` uses published `next.54`, and Metrics `3.12.0-next.56` uses
-published `next.55`; Mercury `3.12.0-next.62` uses published `next.61`. Remove these
-resolutions once the referenced versions are published. No local SDK archive is used.
+that version directly; the sample also pins `webex` `3.12.0-next.249`, the umbrella
+release that bundles the same `@webex/contact-center` build, so the dependency tree
+resolves a single copy of the SDK, `@webex/calling`, `@webex/webex-core` and
+`@webex/plugin-authorization`. No scoped Webex resolutions and no local SDK archive
+are used.
 The React sample uses the SDK-supported `User requested logout` reason for page-unload logout.
 `AISummary` is the common incoming payload type; `AISummaryResponse` is the distinct
 feedback payload sent back to the SDK. The store retains both types directly. The UI
