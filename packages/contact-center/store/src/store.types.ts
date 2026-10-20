@@ -24,6 +24,19 @@ import {
   TaskUILeg,
   getDefaultUIControls,
   TaskResponse,
+  WELLNESS_BREAK_NOTIFICATION_ACTIONS,
+  WELLNESS_BREAK_USER_ACTIONS,
+  WellnessBreakNotificationAction,
+  WellnessBreakUserAction,
+  WellnessBreakEvent,
+  RespondToWellnessBreakParams,
+} from '@webex/contact-center';
+import type {
+  AISummary,
+  AISummaryAction,
+  AISummaryFeedback,
+  AISummaryResponse,
+  AISummarySections,
 } from '@webex/contact-center';
 import type {RealTimeAssistanceParams} from 'node_modules/@webex/contact-center/dist/types/types';
 import {
@@ -46,6 +59,8 @@ import {
 
 //  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
 interface IContactCenter {
+  /** Widget-owned AI summary state associated with this SDK contact-center instance. */
+  aiSummaries: Record<string, Partial<Record<AISummaryRole, AISummaryEntry>>>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   on: (event: string, callback: (data: any) => void) => void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -69,6 +84,8 @@ interface IContactCenter {
     outdialANIId: string;
   };
   setAgentState(data: StateChange): Promise<SetStateResponse>;
+  /** Returns the system-owned `WellbeingBreak` idle code for the active registration. */
+  getWellbeingBreakIdleCode(): Promise<IdleCode>;
   getOutdialAniEntries(params: OutdialAniParams): Promise<OutdialAniEntriesResponse>;
   getAccessToken(): Promise<string>;
   startOutdial(destination: string, origin?: string): Promise<TaskResponse>;
@@ -79,7 +96,50 @@ interface IContactCenter {
   apiAIAssistant?: {
     getRealTimeAssistance(params: RealTimeAssistRequestParams & {actionTimeStamp?: number}): Promise<unknown>;
     sendRealTimeAssistanceUserAction(params: RealTimeAssistUserActionParams): Promise<unknown>;
+    requestWellnessBreak(): Promise<void>;
+    respondToWellnessBreak(params: RespondToWellnessBreakParams): Promise<void>;
   };
+  /** SDK-owned transport for widgets behavioral metrics. */
+  webex?: {
+    internal?: {
+      newMetrics?: {
+        submitBehavioralEvent: (event: {
+          product: 'wxcc-widgets';
+          agent: WidgetsBehavioralMetricAgent;
+          target: string;
+          verb: WidgetsBehavioralMetricVerb;
+          payload?: Record<string, string | number | boolean>;
+        }) => void;
+      };
+    };
+  };
+}
+
+type WidgetsBehavioralMetricVerb =
+  | 'accept'
+  | 'display'
+  | 'dismiss'
+  | 'end'
+  | 'error'
+  | 'expire'
+  | 'fail'
+  | 'fire'
+  | 'ignore'
+  | 'load'
+  | 'receive'
+  | 'reject'
+  | 'request'
+  | 'retry'
+  | 'start';
+
+type WidgetsBehavioralMetricAgent = 'browser' | 'service' | 'system' | 'user';
+
+interface WidgetsBehavioralMetric {
+  name: string;
+  agent: WidgetsBehavioralMetricAgent;
+  target: string;
+  verb: WidgetsBehavioralMetricVerb;
+  properties?: Record<string, string | number | boolean>;
 }
 
 type RealTimeAssistRequestParams = RealTimeAssistanceParams;
@@ -112,6 +172,44 @@ type RealTimeAssistPayload = {
   notifType?: string;
   orgId?: string;
 };
+
+/** Public Agent Wellness Break lifecycle exposed by the widget package. */
+type WellnessBreakPhase =
+  | 'idle'
+  | 'offer-pending'
+  | 'request-pending'
+  | 'changing-to-break'
+  | 'waiting-for-safe-state'
+  | 'starting'
+  | 'playing'
+  | 'ending'
+  | 'restoring'
+  | 'error';
+
+/** Stable, non-PII failure categories emitted to widget hosts. */
+type WellnessBreakErrorCode =
+  | 'FEATURE_DISABLED'
+  | 'SESSION_UNAVAILABLE'
+  | 'SYSTEM_CODE_UNAVAILABLE'
+  | 'ACTION_REQUEST_FAILED'
+  | 'STATE_CHANGE_FAILED'
+  | 'RESTORE_FAILED'
+  | 'INVALID_EVENT'
+  | 'MEDIA_UNAVAILABLE';
+
+interface WellnessBreakError {
+  code: WellnessBreakErrorCode;
+  phase: WellnessBreakPhase;
+  recoverable: boolean;
+}
+
+interface WellnessBreakState {
+  phase: WellnessBreakPhase;
+  event?: WellnessBreakEvent;
+  responseDeadline?: number;
+  errorCode?: WellnessBreakErrorCode;
+}
+
 //  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
 type IWebex = {
   cc: IContactCenter;
@@ -222,8 +320,18 @@ interface IStore {
   isEmergencyModalAlreadyDisplayed: boolean;
   realTimeAssist: Record<string, RealTimeAssistPayload[]>;
   offerActionErrors: Record<string, OfferActionErrorDisplay>;
+  isWellnessBreakEnabled: boolean;
+  wellnessAgentSessionId: string;
+  wellbeingBreakIdleCode?: IdleCode;
+  wellnessIdleCodeLookupPending: boolean;
+  wellnessBreakState: WellnessBreakState;
+  wellnessEventSequence: number;
+  legacyAgentState: string;
+  legacyAuxCodeId: string;
+
   init(params: InitParams, callback: (ccSDK: IContactCenter) => void): Promise<void>;
   registerCC(webex?: WithWebex['webex']): Promise<void>;
+  loadWellbeingBreakIdleCode(): Promise<void>;
 }
 
 interface IStoreWrapper extends IStore {
@@ -269,6 +377,20 @@ interface IStoreWrapper extends IStore {
   setOfferActionError(interactionId: string, error: OfferActionErrorDisplay | null): void;
   clearOfferActionError(interactionId: string): void;
   pruneOfferActionErrors(activeInteractionIds: Set<string>): void;
+  loadWellbeingBreakIdleCode(): Promise<void>;
+  setWellnessBreakState(state: WellnessBreakState): void;
+  submitBehavioralMetric(metric: WidgetsBehavioralMetric): void;
+  resetWellnessSession(): void;
+
+  requestMidCallSummary(action: AISummaryAction, task?: ITask): Promise<AISummary | undefined>;
+  requestPostCallSummary(task?: ITask): Promise<AISummary | undefined>;
+  setReceiverSummaryFeedback(
+    feedback: Exclude<AISummaryFeedback, 'none'>,
+    expectedSummary: AISummary,
+    task?: ITask
+  ): Promise<void>;
+  sendMidCallSummaryResponse(action: AISummaryAction, task?: ITask): Promise<AISummaryResponseSubmissionResult>;
+  sendPostCallSummaryResponse(wrapUpCode: string, task: ITask): Promise<AISummaryResponseSubmissionResult>;
 }
 
 interface IWrapupCode {
@@ -289,6 +411,7 @@ enum CC_EVENTS {
   AGENT_RELOGIN_SUCCESS = 'agent:reloginSuccess',
   AGENT_OFFER_CONSULT = 'AgentOfferConsult',
   REAL_TIME_TRANSCRIPTION = 'REAL_TIME_TRANSCRIPTION',
+  WELLNESS_BREAK = 'WellnessBreak',
 }
 
 interface ICustomStateSet {
@@ -322,6 +445,9 @@ type AgentLoginProfile = {
   agentProfileID?: string;
   isTimeoutDesktopInactivityEnabled?: boolean;
   timeoutDesktopInactivityMins?: number;
+  agentSessionId?: string;
+  auxCodeId?: string;
+  subStatus?: string;
 };
 
 // Generic pagination params for list-fetching APIs
@@ -407,6 +533,21 @@ export type {
   RealTimeAssistUserActionId,
   RealTimeAssistUserActionParams,
   OfferActionErrorDisplay,
+  WellnessBreakNotificationAction,
+  WellnessBreakUserAction,
+  WellnessBreakEvent,
+  RespondToWellnessBreakParams,
+  WellnessBreakPhase,
+  WellnessBreakErrorCode,
+  WellnessBreakError,
+  WellnessBreakState,
+  WidgetsBehavioralMetric,
+  WidgetsBehavioralMetricAgent,
+  WidgetsBehavioralMetricVerb,
+  AISummaryAction,
+  AISummaryFeedback,
+  AISummaryResponse,
+  AISummarySections,
 };
 
 export {
@@ -426,6 +567,8 @@ export {
   LoginOptions,
   ERROR_TRIGGERING_IDLE_CODES,
   getDefaultUIControls,
+  WELLNESS_BREAK_NOTIFICATION_ACTIONS,
+  WELLNESS_BREAK_USER_ACTIONS,
 };
 
 // ConsultStatus enum removed — use task.data.consultStatus from SDK instead
@@ -530,3 +673,27 @@ export const CAMPAIGN_PREVIEW_OUTBOUND_TYPES = ['STANDARD_PREVIEW_CAMPAIGN', 'DI
 
 /** Campaign type values (from callProcessingDetails) that identify a campaign preview task. */
 export const CAMPAIGN_PREVIEW_CAMPAIGN_TYPES = ['preview_standard', 'preview_direct'];
+
+/** The consult/transfer initiator's summary, the receiving agent's summary, or the wrap-up summary. */
+export type AISummaryRole = 'initiator' | 'receiver' | 'post-call';
+
+/** One summary of an interaction, stored at `cc.aiSummaries[interactionId][role]`. */
+export type AISummaryEntry = {
+  /** Lifecycle of the latest request, or of the pushed receiver summary. */
+  status: 'loading' | 'ready' | 'error';
+  /**
+   * The unchanged SDK summary, retained while a newer request loads or after it fails.
+   */
+  content?: AISummary;
+  /** SDK submission record; widget helpers own local edits, copy counts and deferred feedback. */
+  response: AISummaryResponse;
+  /** Orders local request promise settlements; SDK transport correlation remains SDK-owned. */
+  requestGeneration?: number;
+  /** The receiving agent's feedback response is being sent. */
+  feedbackPending?: boolean;
+  /** The consult or transfer a mid-call summary was generated for. */
+  action?: AISummaryAction;
+};
+
+/** Outcome of sending a mid-call or post-call summary response through the SDK. */
+export type AISummaryResponseSubmissionResult = 'submitted' | 'response-failed' | 'not-applicable';

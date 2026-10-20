@@ -17,4 +17,9 @@ export default [
   },
   eslintPluginPrettierRecommended,
   eslintConfigPrettier,
+  {
+    files: ['**/src/wellness/assets/*.cjs'],
+    languageOptions: {globals: globals.node},
+    rules: {'@typescript-eslint/no-require-imports': 'off'},
+  },
 ];

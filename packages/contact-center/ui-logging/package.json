@@ -13,7 +13,7 @@
     "package.json"
   ],
   "scripts": {
-    "build:src": "webpack --mode=development",
+    "build:src": "webpack",
     "clean": "rm -rf dist",
     "clean:dist": "rm -rf dist",
     "test:unit": "NODE_ENV=test jest --coverage",

@@ -1,10 +1,85 @@
-import type {ILogger, RealTimeAssistPayload} from '@webex/cc-store';
+import type {
+  ILogger,
+  RealTimeAssistPayload,
+  WellnessBreakError,
+  WellnessBreakEvent,
+  WellnessBreakPhase,
+} from '@webex/cc-store';
 
 /** Visual state of the AI Assistant panel chrome. */
 export type AIAssistantChromeState = 'closed' | 'open' | 'minimized';
 
 /** Lifecycle state of a real-time assist request. */
 export type AIAssistantRequestStatus = 'idle' | 'listening' | 'ready' | 'error';
+
+export type WellnessBreakNotice = 'declined' | 'not-allowed' | 'no-response' | 'completed';
+export type WellnessBreakResponseSource = 'card' | 'notification';
+/** Where the active wellness-break overlay is rendered. */
+export type WellnessBreakOverlayTarget = 'viewport' | 'assistant' | HTMLElement;
+
+export interface WellnessAnimationController {
+  totalFrames: number;
+  goToAndPlay(frame: number, isFrame: boolean): void;
+  goToAndStop(frame: number, isFrame: boolean): void;
+  destroy(): void;
+}
+
+export type WellnessAnimationLoader = (
+  container: HTMLElement,
+  animationData: unknown
+) => Promise<WellnessAnimationController>;
+
+interface WellnessBreakHistoryEntryBase {
+  id: string;
+  createdAt: number;
+}
+
+/** One persisted message in the Desktop-style wellness transcript. */
+export type WellnessBreakHistoryEntry =
+  | (WellnessBreakHistoryEntryBase & {
+      type: 'offer';
+      event: WellnessBreakEvent;
+      actionable: boolean;
+    })
+  | (WellnessBreakHistoryEntryBase & {
+      type: 'user-action';
+      action: 'take-break' | 'later';
+    })
+  | (WellnessBreakHistoryEntryBase & {
+      type: 'acknowledgement';
+      hasBlockingTasks: boolean;
+    })
+  | (WellnessBreakHistoryEntryBase & {
+      type: 'notice';
+      notice: WellnessBreakNotice;
+      actionText?: string;
+    });
+
+/** Presentational contract supplied by the AI Assistant wellness orchestrator. */
+export interface WellnessBreakViewModel {
+  enabled: boolean;
+  phase: WellnessBreakPhase;
+  event?: WellnessBreakEvent;
+  error?: WellnessBreakError;
+  notice?: WellnessBreakNotice;
+  requestAvailable: boolean;
+  /** Chronological wellness messages retained until the agent presses Clear. */
+  history?: WellnessBreakHistoryEntry[];
+  /** Whether current notification content was explicitly cleared from the panel. */
+  contentCleared?: boolean;
+  /** Whether an active task is currently delaying an accepted break. */
+  hasBlockingTasks: boolean;
+  countdown?: number;
+  elapsedSeconds: number;
+  animationData?: unknown;
+  reducedMotion: boolean;
+  onRequest: () => void;
+  onAccept: (source?: WellnessBreakResponseSource) => void;
+  onLater: (source?: WellnessBreakResponseSource) => void;
+  onClearHistory?: () => void;
+  onDismissNotification?: () => void;
+  onMediaError: () => void;
+}
 
 /**
  * A single entry rendered in the chat transcript.  User entries are agent
@@ -54,6 +129,10 @@ export interface AIAssistantComponentProps {
   restore: () => void;
   /** Toggle the fullscreen affordance; layout is host-owned. */
   toggleFullScreen: () => void;
+  /** Clear the displayed assistant and wellness transcript. */
+  clearContent?: () => void;
+  /** Whether the Clear control has displayed content to remove. */
+  hasClearableContent?: boolean;
   /** Fire a no-context `GET_SUGGESTIONS` request. */
   requestRealTimeAssist: () => void;
   /** Update the context input value. */
@@ -66,6 +145,54 @@ export interface AIAssistantComponentProps {
   logger?: ILogger;
   /** Extra class applied to the widget root. */
   className?: string;
+  /** Viewport by default; may be scoped to the assistant or portalled into a host element. */
+  wellnessBreakOverlayTarget?: WellnessBreakOverlayTarget;
+  /** Independent Agent Wellness Break cards and overlay. */
+  wellness?: WellnessBreakViewModel;
+  /** Optional renderer supplied by the AI Assistant widget. */
+  loadWellnessAnimation?: WellnessAnimationLoader;
+}
+
+export interface WellnessBreakRequestCardProps {
+  phase: WellnessBreakPhase;
+  notice?: WellnessBreakNotice;
+  disabled: boolean;
+  actionText?: string;
+  onRequest: () => void;
+}
+
+export interface WellnessBreakOfferCardProps {
+  event?: WellnessBreakEvent;
+  disabled: boolean;
+  showActions?: boolean;
+  onAccept: () => void;
+  onLater: () => void;
+}
+
+export interface WellnessBreakHistoryProps {
+  entries: WellnessBreakHistoryEntry[];
+  onAccept: () => void;
+  onLater: () => void;
+}
+
+export interface WellnessBreakOfferToastProps extends WellnessBreakOfferCardProps {
+  visible: boolean;
+  onDismiss?: () => void;
+}
+
+export interface WellnessBreakModalProps {
+  phase: Extract<WellnessBreakPhase, 'starting' | 'playing' | 'ending'>;
+  countdown?: number;
+  elapsedSeconds: number;
+  animationData?: unknown;
+  reducedMotion: boolean;
+  onMediaError: () => void;
+  overlayTarget?: WellnessBreakOverlayTarget;
+  loadAnimation?: WellnessAnimationLoader;
+}
+
+export interface WellnessBreakErrorProps {
+  error?: WellnessBreakError;
 }
 
 export interface RealTimeAssistProps {

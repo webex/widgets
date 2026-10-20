@@ -1,5 +1,4 @@
 import type {
-  ITask,
   Interaction,
   Profile,
   TaskData,
@@ -9,10 +8,23 @@ import type {
   AddressBookEntriesResponse,
   ContactServiceQueuesResponse,
 } from '@webex/contact-center';
-import {IContactCenter} from '@webex/cc-store';
+import type {IContactCenter, ITask} from '@webex/cc-store';
 
 const mockProfile: Profile = {
-  teams: [{teamId: 'team1', teamName: 'Team 1'}],
+  teams: [
+    {
+      id: 'team1',
+      name: 'Team 1',
+      teamType: 'AGENT_BASED',
+      teamStatus: 'IN_SERVICE',
+      active: true,
+      siteId: 'site123',
+      siteName: 'Site 1',
+      userIds: ['agent1'],
+      rankQueuesForTeam: false,
+      queueRankings: [],
+    },
+  ],
   defaultDn: '12345',
   dn: '12345',
   forceDefaultDn: false,
@@ -69,6 +81,7 @@ const mockProfile: Profile = {
   lostConnectionRecoveryTimeout: 30000,
   maskSensitiveData: false,
   isAgentLoggedIn: true,
+  isWellnessBreakEnabled: false,
   lastStateAuxCodeId: 'auxCodeId',
   lastStateChangeTimestamp: 123456789,
   lastIdleCodeChangeTimestamp: 123456789,
@@ -165,6 +178,11 @@ const mockTask = {
   } as unknown as TaskData,
   webCallMap: {},
   autoWrapup: undefined,
+  aiSummaryCapabilities: {midCallEnabled: false, postCallEnabled: false},
+  requestMidCallSummary: jest.fn().mockResolvedValue({}),
+  requestPostCallSummary: jest.fn().mockResolvedValue({}),
+  sendMidCallSummaryResponse: jest.fn().mockResolvedValue(undefined),
+  sendPostCallSummaryResponse: jest.fn().mockResolvedValue(undefined),
   on: jest.fn(),
   off: jest.fn(),
   emit: jest.fn(),
@@ -221,6 +239,10 @@ const makeMockTask = (overrides?: MakeMockTaskOverrides): ITask => {
         ...interactionOverrides,
       },
     } as unknown as TaskData,
+    requestMidCallSummary: jest.fn().mockResolvedValue({}),
+    requestPostCallSummary: jest.fn().mockResolvedValue({}),
+    sendMidCallSummaryResponse: jest.fn().mockResolvedValue(undefined),
+    sendPostCallSummaryResponse: jest.fn().mockResolvedValue(undefined),
     on: jest.fn(),
     off: jest.fn(),
     once: jest.fn(),
@@ -599,6 +621,7 @@ const mockQueuesResponse: ContactServiceQueuesResponse = {
 };
 
 const mockCC: IContactCenter = {
+  aiSummaries: {},
   on: jest.fn(),
   off: jest.fn(),
   updateAgentProfile: jest.fn(),
@@ -621,6 +644,12 @@ const mockCC: IContactCenter = {
   getEntryPoints: jest.fn().mockResolvedValue(mockEntryPointsResponse),
   addressBook: mockAddressBook,
   setAgentState: jest.fn().mockResolvedValue({}),
+  getWellbeingBreakIdleCode: jest.fn().mockResolvedValue({
+    id: 'wellbeing-break',
+    name: 'WellbeingBreak',
+    isSystem: true,
+    isDefault: false,
+  }),
   getOutdialAniEntries: jest.fn().mockResolvedValue({entries: []}),
   getAccessToken: jest.fn().mockResolvedValue('mock-access-token'),
   startOutdial: jest.fn().mockResolvedValue({}),
@@ -630,6 +659,8 @@ const mockCC: IContactCenter = {
   apiAIAssistant: {
     getRealTimeAssistance: jest.fn().mockResolvedValue({}),
     sendRealTimeAssistanceUserAction: jest.fn().mockResolvedValue({}),
+    requestWellnessBreak: jest.fn().mockResolvedValue(undefined),
+    respondToWellnessBreak: jest.fn().mockResolvedValue(undefined),
   },
 };
 

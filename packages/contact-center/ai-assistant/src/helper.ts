@@ -89,6 +89,7 @@ export const useRealTimeAssist = ({
   // ADD_SUGGESTIONS_EXTRA_CONTEXT only makes sense once a GET_SUGGESTIONS has succeeded.
   const [hasInitialRequestSucceeded, setHasInitialRequestSucceeded] = useState(false);
   const [userMessages, setUserMessages] = useState<UserMessage[]>([]);
+  const [clearBeforeCount, setClearBeforeCount] = useState(0);
 
   const lastSeenCountRef = useRef(0);
   // Stash these in refs so the response effect can read the latest values
@@ -113,12 +114,14 @@ export const useRealTimeAssist = ({
     setPendingRequest(false);
     setHasInitialRequestSucceeded(false);
     setUserMessages([]);
+    setClearBeforeCount(0);
   }, [interactionId]);
 
   useEffect(() => {
     const len = realTimeAssist.length;
     if (len === 0) {
       lastSeenCountRef.current = 0;
+      setClearBeforeCount(0);
       return;
     }
     if (len <= lastSeenCountRef.current) return;
@@ -178,6 +181,19 @@ export const useRealTimeAssist = ({
     setContextDraft('');
   }, [contextDraft, requestRealTimeAssist]);
 
+  const clearTranscript = useCallback(() => {
+    if (interactionId) store.clearRealTimeAssist(interactionId);
+    lastSeenCountRef.current = realTimeAssist.length;
+    setClearBeforeCount(realTimeAssist.length);
+    setRequestStatus('idle');
+    setErrorMessage(undefined);
+    setContextDraft('');
+    setIsRequesting(false);
+    setPendingRequest(false);
+    setHasInitialRequestSucceeded(false);
+    setUserMessages([]);
+  }, [interactionId, realTimeAssist.length]);
+
   // Returns the SDK promise so the card only marks like/dislike as selected
   // once the action has actually reached the backend.
   const handleRealTimeAssistAction = useCallback(
@@ -215,8 +231,9 @@ export const useRealTimeAssist = ({
 
   // Chronological transcript: optional greeting, then interleaved user/assistant entries.
   const chatEntries = useMemo<AIAssistantChatEntry[]>(() => {
-    const assistantEntries: Array<{ts: number; order: number; entry: AIAssistantChatEntry}> = realTimeAssist.map(
-      (suggestion, index) => {
+    const assistantEntries: Array<{ts: number; order: number; entry: AIAssistantChatEntry}> = realTimeAssist
+      .slice(clearBeforeCount)
+      .map((suggestion, index) => {
         const publishTimestamp = suggestion?.data?.publishTimestamp;
         const ts =
           typeof publishTimestamp === 'number'
@@ -226,8 +243,7 @@ export const useRealTimeAssist = ({
               : 0;
         const id = suggestion?.data?.adaptiveCardId ?? suggestion?.data?.trackingId ?? `assistant-${index}`;
         return {ts, order: 2, entry: {type: 'assistant', id, realTimeAssist: suggestion}};
-      }
-    );
+      });
 
     const userEntries: Array<{ts: number; order: number; entry: AIAssistantChatEntry}> = userMessages.map(
       (message) => ({
@@ -244,7 +260,7 @@ export const useRealTimeAssist = ({
     if (!hasInitialRequestSucceeded) return sorted;
 
     return [{type: 'assistant-greeting', id: 'greeting-assistant', text: GREETING_TEXT}, ...sorted];
-  }, [realTimeAssist, userMessages, hasInitialRequestSucceeded]);
+  }, [clearBeforeCount, realTimeAssist, userMessages, hasInitialRequestSucceeded]);
 
   return useMemo(
     () => ({
@@ -257,6 +273,7 @@ export const useRealTimeAssist = ({
       requestRealTimeAssist,
       setContextDraft,
       submitContext,
+      clearTranscript,
       onRealTimeAssistAction: handleRealTimeAssistAction,
     }),
     [
@@ -268,6 +285,7 @@ export const useRealTimeAssist = ({
       chatEntries,
       requestRealTimeAssist,
       submitContext,
+      clearTranscript,
       handleRealTimeAssistAction,
     ]
   );

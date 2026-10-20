@@ -1,4 +1,4 @@
-import {AI_FEATURE_SUGGESTED_RESPONSES_KEY} from './constants';
+import {AI_FEATURE_SUGGESTED_RESPONSES_KEY, AI_FEATURE_WELLNESS_BREAK_KEY} from './constants';
 import {Profile} from './store.types';
 
 const getValueAtPath = (obj: unknown, path: string): unknown => {
@@ -54,6 +54,11 @@ export function getFeatureFlags(agentProfile: Profile) {
       keyValuePairs[AI_FEATURE_SUGGESTED_RESPONSES_KEY] = value;
       break;
     }
+  }
+
+  const wellnessEnabled = getValueAtPath(agentProfile, AI_FEATURE_WELLNESS_BREAK_KEY);
+  if (typeof wellnessEnabled === 'boolean') {
+    keyValuePairs[AI_FEATURE_WELLNESS_BREAK_KEY] = wellnessEnabled;
   }
 
   return keyValuePairs;

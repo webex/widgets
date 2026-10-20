@@ -28,8 +28,14 @@ import {
   DesktopPreference,
   RealTimeAssistPayload,
   OfferActionErrorDisplay,
+  WellnessBreakEvent,
+  WellnessBreakState,
+  WidgetsBehavioralMetric,
+  WELLNESS_BREAK_NOTIFICATION_ACTIONS,
 } from './store.types';
+import type {AISummaryEntry, AISummaryResponseSubmissionResult} from './store.types';
 import Store from './store';
+import type {AISummary, AISummaryAction, AISummaryFeedback, AISummaryResponse} from '@webex/contact-center';
 import {
   DEVICE_TYPE_BROWSER,
   MEDIA_TYPE_TELEPHONY_LOWER,
@@ -38,8 +44,17 @@ import {
   CAMPAIGN_PREVIEW_CAMPAIGN_TYPES,
 } from './store.types';
 import {runInAction} from 'mobx';
-import {isIncomingTask} from './task-utils';
+import {isIncomingTask, isSecondaryAgent} from './task-utils';
 import {SUGGESTED_RESPONSE_EVENT, TASK_MULTI_LOGIN_HYDRATE} from './constants';
+
+const EMPTY_AI_SUMMARY_RESPONSE: AISummaryResponse = {
+  summary: '',
+  feedback: 'none',
+  state: 'IGNORED',
+  numberOfTimesViewed: 0,
+  numberOfTimesEdited: 0,
+  numberOfTimesCopied: 0,
+};
 
 const CONSULT_TRANSFER_CHANNELS = {
   telephony: 'TELEPHONY',
@@ -47,6 +62,8 @@ const CONSULT_TRANSFER_CHANNELS = {
   social: 'SOCIAL_CHANNEL',
   email: 'EMAIL',
 } as const;
+
+const WELLNESS_NOTIFICATION_ACTIONS = new Set(Object.values(WELLNESS_BREAK_NOTIFICATION_ACTIONS));
 
 const getSupportedMediaType = (mediaType?: string): keyof typeof CONSULT_TRANSFER_CHANNELS | undefined => {
   const normalizedMediaType = typeof mediaType === 'string' ? mediaType.toLowerCase() : '';
@@ -81,6 +98,9 @@ class StoreWrapper implements IStoreWrapper {
   private wxAppMuteStateListeners: Record<string, {task: ITask; listener: (payload: {muted: boolean}) => void}> = {};
   private taskEndListeners: Record<string, {task: ITask; listener: () => void}> = {};
   private muteStateByInteractionId: Record<string, boolean> = {};
+  // Keep the task and callback so replacement, removal, and logout can detach the exact listener.
+  private aiSummaryReceivedListeners: Record<string, {task: ITask; listener: (payload: AISummary) => void}> = {};
+  private aiSummaryRequestGeneration = 0;
 
   constructor() {
     this.store = Store.getInstance();
@@ -209,6 +229,38 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.realTimeAssist;
   }
 
+  get isWellnessBreakEnabled() {
+    return this.store.isWellnessBreakEnabled;
+  }
+
+  get wellnessAgentSessionId() {
+    return this.store.wellnessAgentSessionId;
+  }
+
+  get wellbeingBreakIdleCode() {
+    return this.store.wellbeingBreakIdleCode;
+  }
+
+  get wellnessIdleCodeLookupPending() {
+    return this.store.wellnessIdleCodeLookupPending;
+  }
+
+  get wellnessBreakState() {
+    return this.store.wellnessBreakState;
+  }
+
+  get wellnessEventSequence() {
+    return this.store.wellnessEventSequence;
+  }
+
+  get legacyAgentState() {
+    return this.store.legacyAgentState;
+  }
+
+  get legacyAuxCodeId() {
+    return this.store.legacyAuxCodeId;
+  }
+
   setDataCenter = (value: string): void => {
     this.store.dataCenter = value;
   };
@@ -330,6 +382,335 @@ class StoreWrapper implements IStoreWrapper {
         currentEntries.filter(([interactionId]) => activeInteractionIds.has(interactionId))
       );
     });
+  };
+
+  loadWellbeingBreakIdleCode = (): Promise<void> => this.store.loadWellbeingBreakIdleCode();
+
+  setWellnessBreakState = (state: WellnessBreakState): void => {
+    runInAction(() => {
+      this.store.wellnessBreakState = state;
+    });
+  };
+
+  submitBehavioralMetric = ({name, agent, target, verb, properties}: WidgetsBehavioralMetric): void => {
+    const metrics = this.store.cc?.webex?.internal?.newMetrics;
+    if (!metrics) {
+      this.store.logger?.warn('CC-Widgets: behavioral metrics transport unavailable', {
+        module: 'storeEventsWrapper.ts',
+        method: 'submitBehavioralMetric',
+      });
+      return;
+    }
+
+    try {
+      metrics.submitBehavioralEvent({
+        product: 'wxcc-widgets',
+        agent,
+        target,
+        verb,
+        payload: {name, ...properties},
+      });
+    } catch {
+      this.store.logger?.warn('CC-Widgets: behavioral metric submission failed', {
+        module: 'storeEventsWrapper.ts',
+        method: 'submitBehavioralMetric',
+      });
+    }
+  };
+
+  resetWellnessSession = (): void => {
+    runInAction(() => {
+      this.store.wellnessAgentSessionId = '';
+      this.store.wellbeingBreakIdleCode = undefined;
+      this.store.wellnessIdleCodeLookupPending = false;
+      this.store.wellnessBreakState = {phase: 'idle'};
+      this.store.wellnessEventSequence = (this.store.wellnessEventSequence ?? 0) + 1;
+      this.store.legacyAgentState = '';
+      this.store.legacyAuxCodeId = '';
+    });
+  };
+
+  private captureWellnessSession = (payload: AgentLoginProfile): void => {
+    const nextSessionId = payload?.agentSessionId;
+    if (!nextSessionId) return;
+
+    runInAction(() => {
+      const sessionRotated =
+        Boolean(this.store.wellnessAgentSessionId) && this.store.wellnessAgentSessionId !== nextSessionId;
+      if (sessionRotated) {
+        this.store.wellnessBreakState = {phase: 'idle'};
+        this.store.wellnessEventSequence = (this.store.wellnessEventSequence ?? 0) + 1;
+      }
+
+      this.store.wellnessAgentSessionId = nextSessionId;
+      this.store.legacyAgentState = payload.subStatus || this.store.legacyAgentState;
+      this.store.legacyAuxCodeId = payload.auxCodeId?.trim() || this.store.legacyAuxCodeId || '0';
+    });
+
+    void this.loadWellbeingBreakIdleCode();
+  };
+
+  handleWellnessBreak = (payload: WellnessBreakEvent): void => {
+    if (
+      !this.store.isWellnessBreakEnabled ||
+      !this.store.isAgentLoggedIn ||
+      !payload?.agentSessionId ||
+      payload.agentId !== this.store.agentId ||
+      !WELLNESS_NOTIFICATION_ACTIONS.has(payload.actionEvent)
+    ) {
+      this.store.logger?.warn('CC-Widgets: ignored invalid wellness notification', {
+        module: 'storeEventsWrapper.ts',
+        method: 'handleWellnessBreak',
+      });
+      return;
+    }
+
+    runInAction(() => {
+      this.store.wellnessBreakState = {
+        ...(this.store.wellnessBreakState ?? {phase: 'idle'}),
+        event: payload,
+      };
+      this.store.wellnessEventSequence = (this.store.wellnessEventSequence ?? 0) + 1;
+    });
+  };
+
+  // The SDK owns validation, transport correlation and timeouts. This generation only
+  // prevents an older local promise settlement from overwriting the latest UI request.
+
+  requestMidCallSummary = async (
+    action: AISummaryAction,
+    task: ITask = this.currentTask
+  ): Promise<AISummary | undefined> => {
+    // Disabled summaries are a quiet UI no-op; the SDK validates enabled requests.
+    if (!task?.aiSummaryCapabilities?.midCallEnabled) {
+      return undefined;
+    }
+    const interactionId = task.data.interactionId;
+    const requestGeneration = ++this.aiSummaryRequestGeneration;
+    const entry = this.store.cc.aiSummaries[interactionId]?.initiator;
+    runInAction(() => {
+      this.store.cc.aiSummaries = {
+        ...this.store.cc.aiSummaries,
+        [interactionId]: {
+          ...this.store.cc.aiSummaries[interactionId],
+          initiator: {
+            ...entry,
+            response: entry?.content ? entry.response : {...EMPTY_AI_SUMMARY_RESPONSE},
+            status: 'loading',
+            requestGeneration,
+          },
+        },
+      };
+    });
+
+    let result: AISummary | undefined;
+    try {
+      result = await task.requestMidCallSummary(action);
+    } catch (error) {
+      this.store.logger?.error(`CC-Widgets: AI summary request failed: ${error}`, {
+        module: 'storeEventsWrapper.ts',
+        method: 'request',
+      });
+    }
+    const current = this.store.cc.aiSummaries[interactionId]?.initiator;
+    if (current?.requestGeneration !== requestGeneration) {
+      return undefined;
+    }
+
+    // A new result resets edits, copies and feedback; a failed refresh keeps the summary already shown.
+    const updated: AISummaryEntry = result
+      ? {
+          status: 'ready',
+          content: result,
+          response: {
+            ...EMPTY_AI_SUMMARY_RESPONSE,
+            summary: result.sections ? {} : (result.summaryText ?? ''),
+            state: 'DEFAULT',
+            numberOfTimesViewed: 1,
+          },
+          action,
+        }
+      : {
+          ...current,
+          status: 'error',
+          response: current.content ? current.response : {...current.response, state: 'NOT_RECEIVED'},
+          action: current.action ?? action,
+        };
+    runInAction(() => {
+      this.store.cc.aiSummaries = {
+        ...this.store.cc.aiSummaries,
+        [interactionId]: {...this.store.cc.aiSummaries[interactionId], initiator: updated},
+      };
+    });
+    return result;
+  };
+
+  requestPostCallSummary = async (task: ITask = this.currentTask): Promise<AISummary | undefined> => {
+    if (!task?.aiSummaryCapabilities?.postCallEnabled) {
+      return undefined;
+    }
+    const interactionId = task.data.interactionId;
+    const requestGeneration = ++this.aiSummaryRequestGeneration;
+    const entry = this.store.cc.aiSummaries[interactionId]?.['post-call'];
+    runInAction(() => {
+      this.store.cc.aiSummaries = {
+        ...this.store.cc.aiSummaries,
+        [interactionId]: {
+          ...this.store.cc.aiSummaries[interactionId],
+          'post-call': {
+            ...entry,
+            response: entry?.content ? entry.response : {...EMPTY_AI_SUMMARY_RESPONSE},
+            status: 'loading',
+            requestGeneration,
+          },
+        },
+      };
+    });
+
+    let result: AISummary | undefined;
+    try {
+      result = await task.requestPostCallSummary();
+    } catch (error) {
+      this.store.logger?.error(`CC-Widgets: AI summary request failed: ${error}`, {
+        module: 'storeEventsWrapper.ts',
+        method: 'request',
+      });
+    }
+    const current = this.store.cc.aiSummaries[interactionId]?.['post-call'];
+    if (current?.requestGeneration !== requestGeneration) {
+      return undefined;
+    }
+
+    // A new result resets edits, copies and feedback; a failed refresh keeps the summary already shown.
+    const updated: AISummaryEntry = result
+      ? {
+          status: 'ready',
+          content: result,
+          response: {
+            ...EMPTY_AI_SUMMARY_RESPONSE,
+            summary: result.sections ? {} : (result.summaryText ?? ''),
+            state: 'DEFAULT',
+            numberOfTimesViewed: 1,
+          },
+        }
+      : {
+          ...current,
+          status: 'error',
+          response: current.content ? current.response : {...current.response, state: 'NOT_RECEIVED'},
+        };
+    runInAction(() => {
+      this.store.cc.aiSummaries = {
+        ...this.store.cc.aiSummaries,
+        [interactionId]: {...this.store.cc.aiSummaries[interactionId], 'post-call': updated},
+      };
+    });
+    return result;
+  };
+
+  /** The receiving agent's feedback is sent right away; the selection is kept once the SDK confirms it. */
+  setReceiverSummaryFeedback = async (
+    feedback: Exclude<AISummaryFeedback, 'none'>,
+    expectedSummary: AISummary,
+    task: ITask = this.currentTask
+  ): Promise<void> => {
+    const entry = task && this.store.cc.aiSummaries[task.data.interactionId]?.receiver;
+    if (!entry?.content || !entry.action || entry.content !== expectedSummary || entry.feedbackPending) {
+      return;
+    }
+    const interactionId = task.data.interactionId;
+    runInAction(() => {
+      this.store.cc.aiSummaries = {
+        ...this.store.cc.aiSummaries,
+        [interactionId]: {
+          ...this.store.cc.aiSummaries[interactionId],
+          receiver: {...entry, feedbackPending: true},
+        },
+      };
+    });
+
+    let sent = true;
+    try {
+      await task.sendMidCallSummaryResponse({...entry.response, feedback}, entry.action);
+    } catch (error) {
+      sent = false;
+      this.store.logger?.error(`CC-Widgets: AI summary feedback failed: ${error}`, {
+        module: 'storeEventsWrapper.ts',
+        method: 'feedback',
+      });
+    }
+
+    const current = this.store.cc.aiSummaries[interactionId]?.receiver;
+    // A new summary replaced this one, or the task was removed, while the response was in flight.
+    if (current?.content === expectedSummary && current.feedbackPending) {
+      runInAction(() => {
+        this.store.cc.aiSummaries = {
+          ...this.store.cc.aiSummaries,
+          [interactionId]: {
+            ...this.store.cc.aiSummaries[interactionId],
+            receiver: {
+              ...current,
+              response: sent ? {...current.response, feedback} : current.response,
+              feedbackPending: false,
+            },
+          },
+        };
+      });
+    }
+  };
+
+  /**
+   * Reports the initiator's summary for the consult or transfer that is starting and returns the submission outcome.
+   * A failed send is reported without rejecting, so the consult or transfer can continue.
+   */
+  sendMidCallSummaryResponse = async (
+    action: AISummaryAction,
+    task: ITask = this.currentTask
+  ): Promise<AISummaryResponseSubmissionResult> => {
+    if (!task?.aiSummaryCapabilities?.midCallEnabled) {
+      return 'not-applicable';
+    }
+    try {
+      await task.sendMidCallSummaryResponse(
+        this.store.cc.aiSummaries[task.data.interactionId]?.initiator?.response ?? EMPTY_AI_SUMMARY_RESPONSE,
+        action
+      );
+      return 'submitted';
+    } catch (error) {
+      this.store.logger?.error(`CC-Widgets: AI summary response failed: ${error}`, {
+        module: 'storeEventsWrapper.ts',
+        method: 'response',
+      });
+      return 'response-failed';
+    }
+  };
+
+  /** Adds the wrap-up code to the post-call response and sends it before the task is wrapped up. */
+  sendPostCallSummaryResponse = async (wrapUpCode: string, task: ITask): Promise<AISummaryResponseSubmissionResult> => {
+    if (!task.aiSummaryCapabilities?.postCallEnabled) {
+      return 'not-applicable';
+    }
+    const interactionId = task.data.interactionId;
+    const entry = this.store.cc.aiSummaries[interactionId]?.['post-call'];
+    const response = {...(entry?.response ?? EMPTY_AI_SUMMARY_RESPONSE), wrapUpCode};
+    if (entry) {
+      runInAction(() => {
+        this.store.cc.aiSummaries = {
+          ...this.store.cc.aiSummaries,
+          [interactionId]: {...this.store.cc.aiSummaries[interactionId], 'post-call': {...entry, response}},
+        };
+      });
+    }
+    let outcome: 'submitted' | 'response-failed' = 'submitted';
+    try {
+      await task.sendPostCallSummaryResponse(response);
+    } catch (error) {
+      outcome = 'response-failed';
+      this.store.logger?.error(`CC-Widgets: AI summary response failed: ${error}`, {
+        module: 'storeEventsWrapper.ts',
+        method: 'response',
+      });
+    }
+    return outcome;
   };
 
   setCurrentTheme = (theme: string): void => {
@@ -479,7 +860,6 @@ class StoreWrapper implements IStoreWrapper {
 
   setOnError = (callback: (widgetName: string, error: Error) => void) => {
     this.onErrorCallback = (widgetName: string, error: Error) => {
-      // @ts-expect-error - test error boundary
       this.store.cc.webex.internal.newMetrics.submitBehavioralEvent({
         product: 'wxcc-widgets',
         agent: 'browser',
@@ -749,11 +1129,24 @@ class StoreWrapper implements IStoreWrapper {
         (listenerTask ?? taskToRemove).off(SUGGESTED_RESPONSE_EVENT, listener);
         delete this.realTimeAssistListeners[taskId];
       }
+      if (taskId && this.aiSummaryReceivedListeners[taskId]) {
+        const {task: listenerTask, listener} = this.aiSummaryReceivedListeners[taskId];
+        listenerTask.off(TASK_EVENTS.TASK_MID_CALL_SUMMARY_RECEIVED, listener);
+        listenerTask.off(TASK_EVENTS.TASK_FEATURE_ENABLEMENT, this.refreshTaskList);
+        delete this.aiSummaryReceivedListeners[taskId];
+      }
       if (taskId && this.store.realTimeAssist && this.store.realTimeAssist[taskId]) {
         runInAction(() => {
           const next = {...this.store.realTimeAssist};
           delete next[taskId];
           this.store.realTimeAssist = next;
+        });
+      }
+      if (taskId && this.store.cc.aiSummaries[taskId]) {
+        runInAction(() => {
+          const next = {...this.store.cc.aiSummaries};
+          delete next[taskId];
+          this.store.cc.aiSummaries = next;
         });
       }
     }
@@ -1251,6 +1644,38 @@ class StoreWrapper implements IStoreWrapper {
         this.realTimeAssistListeners[taskId] = {task, listener};
         task.on(SUGGESTED_RESPONSE_EVENT, listener);
       }
+      const existingSummary = this.aiSummaryReceivedListeners[taskId];
+      if (existingSummary?.task !== task) {
+        existingSummary?.task.off(TASK_EVENTS.TASK_MID_CALL_SUMMARY_RECEIVED, existingSummary.listener);
+        existingSummary?.task.off(TASK_EVENTS.TASK_FEATURE_ENABLEMENT, this.refreshTaskList);
+        // Receiver summaries are pushed regardless of this agent's feature enablement.
+        const listener = (payload: AISummary) => {
+          const interactionId = task.data.interactionId;
+          runInAction(() => {
+            this.store.cc.aiSummaries = {
+              ...this.store.cc.aiSummaries,
+              [interactionId]: {
+                ...this.store.cc.aiSummaries[interactionId],
+                receiver: {
+                  status: 'ready',
+                  content: payload,
+                  response: {
+                    ...EMPTY_AI_SUMMARY_RESPONSE,
+                    summary: payload.summaryText ?? '',
+                    state: 'DEFAULT',
+                    numberOfTimesViewed: 1,
+                  },
+                  action: isSecondaryAgent(task) ? 'CONSULT' : 'TRANSFER',
+                },
+              },
+            };
+          });
+        };
+        this.aiSummaryReceivedListeners[taskId] = {task, listener};
+        task.on(TASK_EVENTS.TASK_MID_CALL_SUMMARY_RECEIVED, listener);
+        // The SDK updates task.aiSummaryCapabilities before emitting; refresh so widgets read the new flags.
+        task.on(TASK_EVENTS.TASK_FEATURE_ENABLEMENT, this.refreshTaskList);
+      }
     }
   };
 
@@ -1310,11 +1735,26 @@ class StoreWrapper implements IStoreWrapper {
       method: 'handleStateChange',
     });
     if (data && typeof data === 'object' && data.type === 'AgentStateChangeSuccess') {
+      if (
+        data.agentSessionId &&
+        this.store.wellnessAgentSessionId &&
+        data.agentSessionId !== this.store.wellnessAgentSessionId
+      ) {
+        this.store.logger.warn('CC-Widgets: ignored stale legacy agent state update', {
+          module: 'storeEventsWrapper.ts',
+          method: 'handleStateChange',
+        });
+        return;
+      }
       const DEFAULT_CODE = '0'; // Default code when no aux code is present
       this.setCurrentState(data.auxCodeId?.trim() !== '' ? data.auxCodeId : DEFAULT_CODE);
 
       this.setLastStateChangeTimestamp(data.lastStateChangeTimestamp);
       this.setLastIdleCodeChangeTimestamp(data.lastIdleCodeChangeTimestamp);
+      runInAction(() => {
+        this.store.legacyAgentState = data.subStatus || '';
+        this.store.legacyAuxCodeId = data.auxCodeId?.trim() || DEFAULT_CODE;
+      });
     }
   };
 
@@ -1324,6 +1764,9 @@ class StoreWrapper implements IStoreWrapper {
       method: 'handleMultiLoginCloseSession',
     });
     if (data && typeof data === 'object' && data.type === 'AgentMultiLoginCloseSession') {
+      if (data.agentSessionId && data.agentSessionId === this.store.wellnessAgentSessionId) {
+        this.resetWellnessSession();
+      }
       // Don't show the multi-login modal if there's an active task
       // The modal blocks UI interactions and should not interfere with task handling
       if (this.currentTask) {
@@ -1604,6 +2047,14 @@ class StoreWrapper implements IStoreWrapper {
       this.setIsEmergencyModalAlreadyDisplayed(false);
       this.store.realTimeAssist = {};
       this.realTimeAssistListeners = {};
+      this.resetWellnessSession();
+
+      Object.values(this.aiSummaryReceivedListeners).forEach(({task, listener}) => {
+        task.off(TASK_EVENTS.TASK_MID_CALL_SUMMARY_RECEIVED, listener);
+        task.off(TASK_EVENTS.TASK_FEATURE_ENABLEMENT, this.refreshTaskList);
+      });
+      this.aiSummaryReceivedListeners = {};
+      this.store.cc.aiSummaries = {};
     });
   };
 
@@ -1670,6 +2121,7 @@ class StoreWrapper implements IStoreWrapper {
         // @ts-expect-error To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         this.setTeamId(payload.teamId);
       });
+      this.captureWellnessSession(payload as AgentLoginProfile);
     };
 
     ccSDK.on(CC_EVENTS.AGENT_STATION_LOGIN_SUCCESS, handleLogin);
@@ -1684,6 +2136,7 @@ class StoreWrapper implements IStoreWrapper {
           if (event === CC_EVENTS.AGENT_RELOGIN_SUCCESS) {
             this.setAgentProfile(payload);
             this.setTeamId(payload.teamId);
+            this.captureWellnessSession(payload);
           }
         });
         if (!listenersAdded) {
@@ -1692,6 +2145,13 @@ class StoreWrapper implements IStoreWrapper {
         }
       });
     });
+
+    // Registration-level listeners are deliberately independent of task listeners.
+    // Keep these after the established registration order for backwards-compatible
+    // listener sequencing in host integrations, and replace exact callbacks so
+    // repeated init/register flows remain idempotent.
+    ccSDK.off(CC_EVENTS.WELLNESS_BREAK, this.handleWellnessBreak);
+    ccSDK.on(CC_EVENTS.WELLNESS_BREAK, this.handleWellnessBreak);
   };
 }
 

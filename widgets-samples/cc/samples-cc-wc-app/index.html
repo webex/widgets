@@ -25,6 +25,13 @@
         color: var(--mds-color-theme-button-primary-normal);
         background-color: var(--mds-color-theme-inverted-text-primary-normal);
       }
+
+      widget-cc-ai-assistant.ai-assistant-fullscreen-host {
+        background: var(--mds-color-theme-background-primary-normal, white);
+        inset: 0;
+        position: fixed;
+        z-index: 999;
+      }
     </style>
   </head>
   <body>
@@ -68,6 +75,7 @@
             <label> <input type="checkbox" name="callControl" id="callControlCheckbox" /> Call Control </label>
             <label> <input type="checkbox" name="callControlCAD" id="callControlCADCheckbox" /> Call Control CAD</label>
             <label> <input type="checkbox" name="outdialCall" id="outdialCallCheckbox" /> Outdial Call </label>
+            <label> <input type="checkbox" name="aiAssistant" id="aiAssistantCheckbox" /> AI Assistant </label>
           </div>
           <br />
           <div class="warning-note" style="color: var(--mds-color-theme-text-error-normal); margin-bottom: 10px">

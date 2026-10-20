@@ -50,7 +50,7 @@
       "package": "@webex/cc-widgets",
       "path": "packages/contact-center/cc-widgets",
       "spec": "packages/contact-center/cc-widgets/ai-docs/cc-widgets-spec.md",
-      "responsibility": "r2wc Web Component wrappers aggregating widget packages for framework-agnostic consumption.",
+      "responsibility": "React widget aggregate and r2wc Web Component wrappers for framework-agnostic consumption.",
       "coverageState": "DRAFT",
       "tier": 1
     },
@@ -96,7 +96,7 @@
       "package": "@webex/cc-ai-assistant",
       "path": "packages/contact-center/ai-assistant",
       "spec": "packages/contact-center/ai-assistant/ai-docs/ai-assistant-spec.md",
-      "responsibility": "AI Assistant widget: panel chrome, Real-time Assist requests, transcript, feedback actions.",
+      "responsibility": "AI Assistant widget: panel chrome, Real-time Assist, and Agent Wellness Break orchestration.",
       "coverageState": "DRAFT",
       "tier": 1
     },

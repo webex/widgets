@@ -11,6 +11,7 @@ console.log = jest.fn(); // Mock console.log
 jest.mock('mobx', () => ({
   makeAutoObservable: jest.fn(),
   observable: {ref: jest.fn()},
+  runInAction: (action: () => void) => action(),
 }));
 
 jest.mock('@webex/contact-center', () => ({

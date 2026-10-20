@@ -26,6 +26,7 @@ module.exports = merge(baseConfig, {
     path: path.resolve(__dirname, 'dist'),
     filename: '[name].js', // Set the output filename to index.js
     libraryTarget: 'commonjs2',
+    publicPath: 'auto',
   },
   externals: {
     react: 'react',
@@ -33,6 +34,7 @@ module.exports = merge(baseConfig, {
     'react/jsx-runtime': 'react/jsx-runtime',
     'react/jsx-dev-runtime': 'react/jsx-dev-runtime',
     '@webex/cc-store': '@webex/cc-store',
+    '@webex/cc-ai-assistant': 'commonjs @webex/cc-ai-assistant',
     '@momentum-ui/react-collaboration': '@momentum-ui/react-collaboration',
     '@momentum-ui/web-components': '@momentum-ui/web-components',
   },

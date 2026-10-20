@@ -9,8 +9,8 @@ import {
   store,
   OutdialCall,
   RealTimeTranscript,
-  AIAssistant,
 } from '@webex/cc-widgets';
+import {AIAssistant, type WellnessBreakOverlayTarget} from '@webex/cc-ai-assistant';
 import {StationLogoutResponse} from '@webex/contact-center';
 import {ERROR_TRIGGERING_IDLE_CODES} from '@webex/cc-store';
 import Webex from 'webex';
@@ -40,6 +40,14 @@ const defaultWidgets = {
   outdialCall: true,
   realtimeTranscript: true,
   aiAssistant: false,
+};
+
+type WellnessBreakOverlayMode = 'viewport' | 'assistant' | 'custom';
+
+const wellnessBreakOverlayDescriptions: Record<WellnessBreakOverlayMode, string> = {
+  viewport: 'Covers the browser viewport and prevents document scrolling during the break.',
+  assistant: 'Covers only the AI Assistant widget root.',
+  custom: 'Covers the bordered custom host container below.',
 };
 
 function App() {
@@ -108,6 +116,12 @@ function App() {
 
   // AI Assistant fullscreen state — the widget reports toggles, the host decides the layout.
   const [isAIAssistantFullScreen, setIsAIAssistantFullScreen] = useState(false);
+  const [wellnessBreakOverlayMode, setWellnessBreakOverlayMode] = useState<WellnessBreakOverlayMode>('viewport');
+  const [wellnessBreakCustomContainer, setWellnessBreakCustomContainer] = useState<HTMLDivElement | null>(null);
+  const wellnessBreakOverlayTarget: WellnessBreakOverlayTarget =
+    wellnessBreakOverlayMode === 'custom'
+      ? wellnessBreakCustomContainer ?? 'assistant'
+      : wellnessBreakOverlayMode;
 
   const handleSaveStart = () => {
     setShowLoader(true);
@@ -708,6 +722,38 @@ function App() {
                 <br />
                 <section className="section-box">
                   <fieldset className="fieldset">
+                    <legend className="legend-box">&nbsp;AI Assistant Settings&nbsp;</legend>
+                    <div className="wellness-overlay-config">
+                      <Select
+                        data-testid="samples:wellness-overlay-target"
+                        label="Wellness break overlay target"
+                        value={wellnessBreakOverlayMode}
+                        onChange={(event: CustomEvent) => {
+                          const mode = event.detail.value;
+                          if (mode === 'viewport' || mode === 'assistant' || mode === 'custom') {
+                            setWellnessBreakOverlayMode(mode);
+                          }
+                        }}
+                      >
+                        <Option value="viewport" label="Viewport">
+                          Viewport
+                        </Option>
+                        <Option value="assistant" label="Assistant container">
+                          Assistant container
+                        </Option>
+                        <Option value="custom" label="Custom container">
+                          Custom container
+                        </Option>
+                      </Select>
+                      <p className="wellness-overlay-config__description">
+                        {wellnessBreakOverlayDescriptions[wellnessBreakOverlayMode]}
+                      </p>
+                    </div>
+                  </fieldset>
+                </section>
+                <br />
+                <section className="section-box">
+                  <fieldset className="fieldset">
                     <legend className="legend-box">&nbsp;SDK Toggles&nbsp;</legend>
                     <label style={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
                       <input
@@ -1181,21 +1227,39 @@ function App() {
                         <section className="section-box">
                           <fieldset className="fieldset">
                             <legend className="legend-box">AI Assistant</legend>
-                            <AIAssistant
-                              className={isAIAssistantFullScreen ? 'ai-assistant--host-full' : undefined}
-                              onOpen={() => console.log('AIAssistant opened')}
-                              onMinimize={() => console.log('AIAssistant minimized')}
-                              onRestore={() => console.log('AIAssistant restored')}
-                              onClose={() => {
-                                setIsAIAssistantFullScreen(false);
-                                console.log('AIAssistant closed');
-                              }}
-                              onFullScreenToggle={(isFs) => {
-                                setIsAIAssistantFullScreen(isFs);
-                                console.log('AIAssistant fullScreen', isFs);
-                              }}
-                              onRealTimeAssistReceived={(payload) => console.log('AIAssistant suggestion', payload)}
-                            />
+                            <div
+                              ref={setWellnessBreakCustomContainer}
+                              className={
+                                wellnessBreakOverlayMode === 'custom'
+                                  ? 'wellness-overlay-demo-target wellness-overlay-demo-target--active'
+                                  : 'wellness-overlay-demo-target'
+                              }
+                              data-testid="samples:wellness-overlay-custom-container"
+                            >
+                              <AIAssistant
+                                className={isAIAssistantFullScreen ? 'ai-assistant--host-full' : undefined}
+                                wellnessBreakOverlayTarget={wellnessBreakOverlayTarget}
+                                onOpen={() => console.log('AIAssistant opened')}
+                                onMinimize={() => console.log('AIAssistant minimized')}
+                                onRestore={() => console.log('AIAssistant restored')}
+                                onClose={() => {
+                                  setIsAIAssistantFullScreen(false);
+                                  console.log('AIAssistant closed');
+                                }}
+                                onFullScreenToggle={(isFs) => {
+                                  setIsAIAssistantFullScreen(isFs);
+                                  console.log('AIAssistant fullScreen', isFs);
+                                }}
+                                onRealTimeAssistReceived={(payload) => console.log('AIAssistant suggestion', payload)}
+                                onWellnessBreakOffered={() => console.log('AIAssistant wellness offered')}
+                                onWellnessBreakAccepted={() => console.log('AIAssistant wellness accepted')}
+                                onWellnessBreakStarted={() => console.log('AIAssistant wellness started')}
+                                onWellnessBreakEnded={() => console.log('AIAssistant wellness ended')}
+                                onWellnessBreakError={(error) =>
+                                  console.error('AIAssistant wellness error', error.code)
+                                }
+                              />
+                            </div>
                           </fieldset>
                         </section>
                       </div>

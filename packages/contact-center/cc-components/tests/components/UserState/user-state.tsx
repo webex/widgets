@@ -144,6 +144,25 @@ describe('UserStateComponent', () => {
       const elapsedTimeElement = screen.getByTestId('elapsed-time');
       expect(elapsedTimeElement).toHaveClass('elapsedTime elapsedTime-disabled');
     });
+
+    it('renders WellbeingBreak with the running state timer when supplied as the current system code', async () => {
+      let screen;
+      await act(async () => {
+        screen = render(
+          <UserStateComponent
+            {...defaultProps}
+            idleCodes={[
+              ...defaultProps.idleCodes,
+              {id: 'wellness', name: 'WellbeingBreak', isSystem: true, isDefault: false},
+            ]}
+            currentState="wellness"
+          />
+        );
+      });
+
+      expect(screen.getByTestId('state-name')).toHaveTextContent('WellbeingBreak');
+      expect(screen.getByTestId('elapsed-time')).toHaveTextContent('30:00 / 01:01:01');
+    });
   });
 
   describe('Utility Function Calls', () => {
