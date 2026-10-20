@@ -42,9 +42,10 @@ const CampaignTaskPopover: React.FC<CampaignTaskPopoverProps> = ({
     .callAssociatedData;
   const latestGlobalVariables = getAgentViewableGlobalVariables(callAssociatedData);
 
-  // Persist global variables across task updates — some store refreshes
-  // replace the task with a snapshot that omits callAssociatedData,
-  // which causes getAgentViewableGlobalVariables to return [].
+  // Persist and accumulate global variables across task updates.
+  // Each websocket event may only carry a subset of the full
+  // callAssociatedData, so we merge new variables into the ref by name
+  // instead of replacing the whole array.
   // Reset when the interaction changes so stale CAD from a previous
   // contact is never shown on the next preview.
   const interactionId = task.data.interactionId;
@@ -54,7 +55,9 @@ const CampaignTaskPopover: React.FC<CampaignTaskPopoverProps> = ({
     prevInteractionIdRef.current = interactionId;
     globalVariablesRef.current = latestGlobalVariables;
   } else if (latestGlobalVariables.length > 0) {
-    globalVariablesRef.current = latestGlobalVariables;
+    const existingMap = new Map(globalVariablesRef.current.map((v) => [v.name, v]));
+    latestGlobalVariables.forEach((v) => existingMap.set(v.name, v));
+    globalVariablesRef.current = Array.from(existingMap.values());
   }
   const globalVariables = globalVariablesRef.current;
 
