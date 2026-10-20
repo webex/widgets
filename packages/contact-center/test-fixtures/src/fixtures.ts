@@ -11,7 +11,20 @@ import type {
 import type {IContactCenter, ITask} from '@webex/cc-store';
 
 const mockProfile: Profile = {
-  teams: [{teamId: 'team1', teamName: 'Team 1'}],
+  teams: [
+    {
+      id: 'team1',
+      name: 'Team 1',
+      teamType: 'AGENT_BASED',
+      teamStatus: 'IN_SERVICE',
+      active: true,
+      siteId: 'site123',
+      siteName: 'Site 1',
+      userIds: ['agent1'],
+      rankQueuesForTeam: false,
+      queueRankings: [],
+    },
+  ],
   defaultDn: '12345',
   dn: '12345',
   forceDefaultDn: false,
