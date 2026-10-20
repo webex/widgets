@@ -296,7 +296,7 @@ snapshots) is covered in `cc-components/tests/components/AIAssistant/`.
 `getReceiverSummary` in `src/helper.ts` reads the current interaction's receiver entry
 from `store.cc.aiSummaries`, maps its request status and SDK `areTranscriptsAvailable`
 flag to a display surface, and passes the raw SDK content, confirmed feedback from
-`entry.response.feedback` and pending state to the presentation component. Received
+`summaryData.response.feedback` and pending state to the presentation component. Received
 content remains visible during a failed or pending refresh. Copy callbacks increment
 `response.numberOfTimesCopied` in `store.cc.aiSummaries` inside `runInAction`.
 Copy and feedback callbacks retain the displayed SDK content and Task identities;

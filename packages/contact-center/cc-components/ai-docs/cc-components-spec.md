@@ -450,6 +450,14 @@ The wrap-up panel owns reason search and selection. Complete Wrap-Up stays enabl
 while summary generation is pending and disables completion and summary editing
 while wrap-up itself is pending. Failed completion retains the selected reason and
 draft. An absent summary prop preserves the existing CallControl form.
+`call-control.utils.ts` owns completion handling; CallControl supplies the pending
+state and task-bound completion ref so an old request cannot clear a new task's
+selection.
+
+Destination keys map to internal categories through `DESTINATION_TO_CATEGORY`;
+`VOICE_DESTINATION_CATEGORY_LABELS` supplies their picker labels. Both mappings
+live in the shared task `constants.ts`. Empty destination lists share one text
+element while preserving the voice layout's list-item wrapper.
 
 Each CallControl panel stylesheet owns its constrained flex and scroll layout;
 the shared summary stylesheet owns the editor, status, and action presentation.
@@ -459,6 +467,11 @@ no connected control has taken focus. Consult/transfer retains its summary layou
 until the popover closes after capability revocation, preserving its focus target
 and close action. React-generated heading IDs label the panels. Requests, local
 response changes, retry and submission remain in the widget/store layers.
+Heading IDs use React 18's `useId`, supported by the package's `>=18.3.1` runtime
+peers; the local type bridge accommodates the installed React 17 declarations.
+Layout effects perform focus recovery, sizing, or synchronous invalidation of
+task/content callbacks. The CallControl popover-layout latch uses a passive effect
+because the current summary prop already supplies the initial layout.
 
 Evidence: `components/task/CallControl/call-control.tsx` and `CallControlCustom/`;
 tests: `tests/components/task/CallControl/call-control.tsx`,

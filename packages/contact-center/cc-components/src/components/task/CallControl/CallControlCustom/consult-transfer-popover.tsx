@@ -11,14 +11,8 @@ import {
 import {Icon, Checkbox, Spinner} from '@momentum-design/components/dist/react';
 import AISummary, {AI_ASSISTANT_SUMMARY_MESSAGES as AI_SUMMARY_MESSAGES} from '../../../AIAssistant/AISummary';
 import ConsultTransferListComponent from './consult-transfer-list-item';
-import {
-  CategoryType,
-  ConsultTransferPopoverComponentProps,
-  CATEGORY_AGENTS,
-  CATEGORY_DIAL_NUMBER,
-  CATEGORY_ENTRY_POINT,
-  CATEGORY_QUEUES,
-} from '../../task.types';
+import type {CategoryType, ConsultTransferPopoverComponentProps} from '../../task.types';
+import {CATEGORY_AGENTS, CATEGORY_DIAL_NUMBER, CATEGORY_ENTRY_POINT, CATEGORY_QUEUES} from '../../task.types';
 import ConsultTransferEmptyState from './consult-transfer-empty-state';
 import {
   handleAgentSelection,
@@ -32,22 +26,10 @@ import {
   CLEAR_SEARCH,
   SCROLL_TO_LOAD_MORE,
   NO_DATA_AVAILABLE_CONSULT_TRANSFER,
+  DESTINATION_TO_CATEGORY,
+  VOICE_DESTINATION_CATEGORY_LABELS,
 } from '../../constants';
 import './consult-transfer-summary.styles.scss';
-
-const DESTINATION_CATEGORY = {
-  agent: CATEGORY_AGENTS,
-  queue: CATEGORY_QUEUES,
-  dialNumber: CATEGORY_DIAL_NUMBER,
-  entryPoint: CATEGORY_ENTRY_POINT,
-} as const;
-
-const VOICE_DESTINATION_CATEGORY_LABELS: Record<CategoryType, string> = {
-  Agents: 'Agent',
-  Queues: 'Queues',
-  'Dial Number': 'Dial number',
-  'Entry Point': 'Entry point',
-};
 
 const useReactId = (React as typeof React & {useId: () => string}).useId;
 
@@ -83,7 +65,7 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
       availableDestinations
         .filter((destination) => showDialNumberTab || destination !== 'dialNumber')
         .filter((destination) => showEntryPointTab || destination !== 'entryPoint')
-        .map((destination) => DESTINATION_CATEGORY[destination]),
+        .map((destination) => DESTINATION_TO_CATEGORY[destination]),
     [availableDestinations, showDialNumberTab, showEntryPointTab]
   );
   const isAgentsTabVisible = availableCategories.includes(CATEGORY_AGENTS);
@@ -147,6 +129,12 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
     }
   };
 
+  const emptyListMessage = (
+    <Text tagName="small" type="body-secondary">
+      No {selectedCategory.toLowerCase()} found
+    </Text>
+  );
+
   const renderList = <T extends {id?: string; name: string; number?: string; presence?: 'active' | 'away'}>(
     items: T[],
     onButtonPress: (item: T) => void
@@ -175,18 +163,7 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
           </div>
         );
       })}
-      {items.length === 0 &&
-        (isVoiceDestinationLayout ? (
-          <li>
-            <Text tagName="small" type="body-secondary">
-              No {selectedCategory.toLowerCase()} found
-            </Text>
-          </li>
-        ) : (
-          <Text tagName="small" type="body-secondary">
-            No {selectedCategory.toLowerCase()} found
-          </Text>
-        ))}
+      {items.length === 0 && (isVoiceDestinationLayout ? <li>{emptyListMessage}</li> : emptyListMessage)}
     </ListNext>
   );
 

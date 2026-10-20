@@ -303,12 +303,12 @@ export const useAiAssistant = (input: UseAiAssistantInput) => {
 /** The receiving agent's consult/transfer summary, pushed by the backend for the task's interaction. */
 export const getReceiverSummary = (task?: ITask): AIAssistantReceiverSummary | undefined => {
   const interactionId = task?.data.interactionId;
-  const entry = interactionId ? store.cc.aiSummaries[interactionId]?.receiver : undefined;
-  if (!task || !interactionId || !entry) {
+  const summaryData = interactionId ? store.cc.aiSummaries[interactionId]?.receiver : undefined;
+  if (!task || !interactionId || !summaryData) {
     return undefined;
   }
   const branchKey = `mid-call:receiver:${interactionId}`;
-  const content = entry.content;
+  const content = summaryData.content;
   if (content?.areTranscriptsAvailable === false) {
     return {surface: 'unavailable', branchKey};
   }
@@ -321,8 +321,8 @@ export const getReceiverSummary = (task?: ITask): AIAssistantReceiverSummary | u
       surface: 'content',
       branchKey,
       content,
-      selectedFeedback: entry.response.feedback,
-      feedbackPending: Boolean(entry.feedbackPending),
+      selectedFeedback: summaryData.response.feedback,
+      feedbackPending: Boolean(summaryData.feedbackPending),
       recordReceiverSummaryCopied: () => {
         const current = getDisplayedEntry();
         if (!current || current.feedbackPending) {
@@ -349,7 +349,7 @@ export const getReceiverSummary = (task?: ITask): AIAssistantReceiverSummary | u
       },
     };
   }
-  return entry.status === 'error' ? {surface: 'generic-error', branchKey} : undefined;
+  return summaryData.status === 'error' ? {surface: 'generic-error', branchKey} : undefined;
 };
 
 export {REAL_TIME_ASSIST_FLAG};

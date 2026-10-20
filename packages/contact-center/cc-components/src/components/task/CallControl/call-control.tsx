@@ -1,6 +1,6 @@
 import React, {useEffect, useLayoutEffect, useRef, useState} from 'react';
 
-import {CallControlComponentProps, CallControlMenuType} from '../task.types';
+import type {CallControlComponentProps, CallControlMenuType} from '../task.types';
 import './call-control.styles.scss';
 import {PopoverNext, TooltipNext, Text, ButtonCircle} from '@momentum-ui/react-collaboration';
 import type {PopoverInstance} from '@momentum-ui/react-collaboration';
@@ -16,6 +16,7 @@ import {
   handleToggleHold as handleToggleHoldUtil,
   handleMuteToggle as handleMuteToggleUtil,
   handleWrapupCall as handleWrapupCallUtil,
+  handleWrapupCompletion,
   handleWrapupChange as handleWrapupChangeUtil,
   handleTargetSelect as handleTargetSelectUtil,
   handleCloseButtonPress,
@@ -102,7 +103,7 @@ function CallControlComponent(props: CallControlComponentProps) {
     };
   }, [currentTask?.data?.interactionId]);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (showAgentMenu && aiSummary?.midCall && aiSummary.midCall.state !== 'omitted') {
       setIsSummaryPopoverLayout(true);
     }
@@ -126,31 +127,19 @@ function CallControlComponent(props: CallControlComponentProps) {
   };
 
   // Freeze summary edits and prevent a second completion while its wrap-up is pending.
-  const runWrapupCompletion = async (wrapupReason: string | null, wrapupId: string | null) => {
-    if (wrapupCompletionRef.current || !wrapupReason || !wrapupId) {
-      return;
-    }
-    const completion = {};
-    wrapupCompletionRef.current = completion;
-    setIsWrapupCompletionPending(true);
-    try {
-      const succeeded = await wrapupCall(wrapupReason, wrapupId);
-      if (succeeded !== false && wrapupCompletionRef.current === completion) {
+  const runWrapupCompletion = (wrapupReason: string | null, wrapupId: string | null) =>
+    handleWrapupCompletion(
+      wrapupReason,
+      wrapupId,
+      wrapupCall,
+      wrapupCompletionRef,
+      setIsWrapupCompletionPending,
+      () => {
         setSelectedWrapupReason(null);
         setSelectedWrapupId(null);
-      }
-    } catch (error) {
-      logger.error(`CC-Widgets: CallControl: wrap-up failed: ${error}`, {
-        module: 'call-control.tsx',
-        method: 'runWrapupCompletion',
-      });
-    } finally {
-      if (wrapupCompletionRef.current === completion) {
-        wrapupCompletionRef.current = null;
-        setIsWrapupCompletionPending(false);
-      }
-    }
-  };
+      },
+      logger
+    );
 
   const handleWrapupCallLocal = () => {
     handleWrapupCallUtil(
