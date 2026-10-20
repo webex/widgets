@@ -1,5 +1,11 @@
 import {CallControlMenuType} from '../task.types';
-import type {CallControlButton, MEDIA_CHANNEL as MediaChannelType, MediaTypeInfo} from '../task.types';
+import type {MutableRefObject} from 'react';
+import type {
+  CallControlButton,
+  CallControlComponentProps,
+  MEDIA_CHANNEL as MediaChannelType,
+  MediaTypeInfo,
+} from '../task.types';
 import type {TaskUIControls} from '@webex/cc-store';
 import {getMediaTypeInfo} from '../../../utils';
 import {DestinationType, ILogger, ITask} from '@webex/cc-store';
@@ -82,6 +88,40 @@ export const handleWrapupCall = (
       module: 'call-control.tsx',
       method: 'handleWrapupCall',
     });
+  }
+};
+
+/** Prevent duplicate completion and ignore results after the owning task changes. */
+export const handleWrapupCompletion = async (
+  wrapupReason: string | null,
+  wrapupId: string | null,
+  wrapupCall: CallControlComponentProps['wrapupCall'],
+  completionRef: MutableRefObject<object | null>,
+  setPending: (pending: boolean) => void,
+  onSuccess: () => void,
+  logger: ILogger
+): Promise<void> => {
+  if (completionRef.current || !wrapupReason || !wrapupId) {
+    return;
+  }
+  const completion = {};
+  completionRef.current = completion;
+  setPending(true);
+  try {
+    const succeeded = await wrapupCall(wrapupReason, wrapupId);
+    if (succeeded !== false && completionRef.current === completion) {
+      onSuccess();
+    }
+  } catch (error) {
+    logger.error(`CC-Widgets: CallControl: wrap-up failed: ${error}`, {
+      module: 'call-control.utils.ts',
+      method: 'handleWrapupCompletion',
+    });
+  } finally {
+    if (completionRef.current === completion) {
+      completionRef.current = null;
+      setPending(false);
+    }
   }
 };
 

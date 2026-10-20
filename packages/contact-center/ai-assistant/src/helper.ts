@@ -1,10 +1,11 @@
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import store from '@webex/cc-store';
-import type {RealTimeAssistPayload} from '@webex/cc-store';
+import type {ITask, RealTimeAssistPayload} from '@webex/cc-store';
 import type {
   AIAssistantActionEvent,
   AIAssistantChatEntry,
   AIAssistantChromeState,
+  AIAssistantReceiverSummary,
   AIAssistantRequestStatus,
 } from '@webex/cc-components';
 import {
@@ -296,6 +297,35 @@ export const useAiAssistant = (input: UseAiAssistantInput) => {
   const realTimeAssist = useRealTimeAssist(input);
 
   return useMemo(() => ({...chrome, ...realTimeAssist}), [chrome, realTimeAssist]);
+};
+
+/** The receiving agent's consult/transfer summary, pushed by the backend for the task's interaction. */
+export const getReceiverSummary = (task?: ITask): AIAssistantReceiverSummary | undefined => {
+  const interactionId = task?.data.interactionId;
+  const summaryData = interactionId ? store.cc?.apiAIAssistant?.aiSummaries?.[interactionId]?.receiver : undefined;
+  if (!task || !interactionId || !summaryData) {
+    return undefined;
+  }
+  const branchKey = `mid-call:receiver:${interactionId}`;
+  const content = summaryData.content;
+  if (!content) {
+    return summaryData.status === 'error' ? {surface: 'generic-error', branchKey} : undefined;
+  }
+  // The SDK flag is optional; an omitted value must not hide supplied content.
+  if (content.areTranscriptsAvailable === false) {
+    return {surface: 'unavailable', branchKey};
+  }
+  return {
+    surface: 'content',
+    branchKey,
+    content,
+    selectedFeedback: summaryData.response.feedback,
+    feedbackPending: Boolean(summaryData.feedbackPending),
+    recordReceiverSummaryCopied: () => store.recordAISummaryCopied('receiver', content, task),
+    setReceiverSummaryFeedback: (feedback) => {
+      void store.setReceiverSummaryFeedback(feedback, content, task);
+    },
+  };
 };
 
 export {REAL_TIME_ASSIST_FLAG};

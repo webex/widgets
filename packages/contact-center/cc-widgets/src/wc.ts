@@ -1,10 +1,18 @@
+import React from 'react';
 import r2wc from '@r2wc/react-to-web-component';
 import {StationLogin} from '@webex/cc-station-login';
 import {UserState} from '@webex/cc-user-state';
 import store from '@webex/cc-store';
 import {TaskList, IncomingTask, CallControl, CallControlCAD, OutdialCall, RealTimeTranscript} from '@webex/cc-task';
+import type {CallControlProps} from '@webex/cc-task';
 import {DigitalChannels} from '@webex/cc-digital-channels';
 import {AIAssistant} from '@webex/cc-ai-assistant';
+
+const CallControlWebComponentAdapter: React.FC<CallControlProps & {container?: HTMLElement}> = (props) => {
+  const callControlProps = {...props};
+  delete callControlProps.container;
+  return React.createElement(CallControl, callControlProps);
+};
 
 const WebUserState = r2wc(UserState, {
   props: {
@@ -36,7 +44,7 @@ const WebStationLogin = r2wc(StationLogin, {
   },
 });
 
-const WebCallControl = r2wc(CallControl, {
+const WebCallControl = r2wc(CallControlWebComponentAdapter, {
   props: {
     onHoldResume: 'function',
     onEnd: 'function',

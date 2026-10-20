@@ -355,6 +355,137 @@ Each component is tested in isolation with React Testing Library: render from a 
 | `CC-COMPONENTS-R-017`  | `tests/components/task/CallControlCAD/call-control-cad.tsx` (Momentum structure/configuration, sections, immediate/confirmed Drop, pending/consult disabled state, read-only rows, focus fallback, live regions) | Momentum overlay keyboard behavior and visual placement receive final manual coverage |
 | `CC-COMPONENTS-R-018`  | `tests/components/task/CallControl/CallControlCustom/consult-transfer-popover.tsx`, `tests/components/task/CallControl/CallControlCustom/consult-transfer-popover.snapshot.tsx`                                  | None                                                                                  |
 
+## AI Assistant summary presentation
+
+The internal `components/AIAssistant/AISummary` surface renders generating, unavailable, error,
+and content states from props. Initiator and post-call summaries support keyed text
+edits, copy and feedback. Post-call supports Retry and a read-only Outcome from SDK
+`resolution`; the display labels never become SDK section keys. Receiver summaries
+use copy and feedback actions around a display-only Adaptive Card. Receiver content
+without an Adaptive Card renders as unavailable and exposes no summary actions.
+
+Summary content props retain the store's SDK `AISummary` shape, including the required
+`conversationId`; feedback and lifecycle values are supplied by the widget from the
+store entry. Generating and error states accept absent content so widgets can pass
+the store value directly without constructing an empty SDK payload. An editable
+content state without a payload falls back to unavailable and exposes no actions.
+Edit callbacks notify the owner without requiring a return value. Component tests
+use the same SDK shape. Receiver rendering and focus
+handlers live in the assistant component alongside its chrome and summary branch.
+A common props interface declares the mode and shared optional callbacks once. Mode
+values live in summary constants. Missing edit callbacks produce read-only content;
+missing action or Retry callbacks hide those controls. The shared
+action surface uses that SDK payload only as identity; the assistant card branch
+still owns receiver rendering. Callbacks are bound by the widget to the displayed
+SDK summary and accept no numeric revision. Section ordering, labels, plain-text
+clipboard formatting, bullet presentation and auto-sizing Momentum editors belong to
+this component. Widget helpers dispatch local edits, copy counts and deferred feedback
+to store actions for the applicable role. SDK submission stays in the store.
+The presentation-state union is declared locally rather than derived from a store
+selector. Pending clipboard completions cannot update confirmation after the
+displayed SDK payload changes.
+
+Summary loading, Retry, editable section activation and tooltip presentation use the
+same Momentum primitives as Real-time Assist and Wellness Break. Tooltip visibility
+remains controlled to keep hovered content reachable and consume Escape before the
+containing panel handles it; button labels and the pending-feedback description
+remain unchanged. Keyed editing, clipboard formatting, confirmation state and focus
+recovery stay summary-specific. Summary copying reuses `copySuggestion`, whose result
+indicates actual clipboard success. The existing Adaptive Card utility also shares
+feedback selection calculation: Real-time Assist clears repeated feedback clicks;
+summary feedback retains the selection until its owner updates it.
+
+Structured section previews size the Momentum button host to their full wrapped
+content and allow wrapping through its exposed `button-text` part. Each section
+reserves its actual text height, including bullet lists, in consult/transfer and
+post-call views. Disabled previews retain readable text and keyboard focus styling
+targets the host; activating an enabled preview still opens its keyed editor.
+Empty or whitespace-only section values render no preview label or row in either
+editable summary mode. A focused editor stays mounted when its text is cleared;
+the empty row disappears after editing ends. Values and cleared section keys remain
+unchanged in the SDK payload and the owner's local response, and copy omits blank sections.
+
+`AIAssistantComponent.receiverSummary` adds View summary to closed/minimized chrome
+and opens the receiver branch independently of Real-time Assist enablement. Copy uses
+visible rendered card text through an opt-in filter in the shared Adaptive Card
+text extractor. Hidden receiver text blocks and descendants of hidden card
+containers are excluded from summary copying; ordinary Real-time Assist copying
+keeps its existing behavior. Visible nested blocks keep their text and line breaks.
+The renderer uses Adaptive Cards' `supportsInteractivity: false` for receiver content, keeping
+card-provided actions, select actions and inputs inert without rewriting the SDK
+card. Its render callback controls whether the separate copy/feedback controls are
+shown; parsing or rendering failure hides them. Valid replacement cards preserve
+those controls and their focus. Replacing a display-only receiver card resets its
+error boundary; ordinary Real-time Assist cards keep their existing recovery
+behavior. Closing either chrome clears the receiver selection before invoking the
+host callback, so external reopening returns to the ordinary assistant view.
+An explicitly selected receiver summary takes precedence over retained wellness
+history; an active wellness offer, transition, error or overlay retains priority.
+Wellness history remains available when returning to the ordinary assistant view.
+Focus capture is limited to the receiver branch and View summary trigger. It is
+cleared when focus moves to an ordinary assistant or host control. Summary
+components recover focus only when a focused summary control or branch is removed
+and no connected control has taken focus; ordinary Real-time Assist and wellness
+controls retain their existing focus behavior.
+
+Summary presentation constants use the `AI_ASSISTANT_SUMMARY_` prefix. These components
+receive data and callbacks through props and make no SDK calls.
+`ai-summary.tsx` owns the rendered UI; its local `helper.ts` owns summary interaction,
+clipboard, tooltip, and focus behavior.
+Status text, action controls and editors use Momentum `Text`, `Button` and `Textarea`.
+The existing editor measures a hidden text mirror to set public `rows`, retaining
+automatic fitting after edits, font loading and width changes without reading
+Momentum internals. Structured fields use the component label, while plain summaries
+use its accessible-label property. Initial edit focus uses `autoFocusOnMount`;
+focus recovery tracks the textarea host without adding a second tab stop.
+Clipboard confirmation compares the actual copied text along with the SDK payload
+identity. Focus tracking keeps the active control and its successor together;
+section editors restore focus after closing without forcing a parent render.
+`AISummary` remains internal; it is not exported by the package's root React barrel.
+
+Evidence: `components/AIAssistant/AISummary/` and `components/AIAssistant/`; tests:
+`tests/components/AIAssistant/AISummary/ai-summary.tsx`,
+`tests/components/AIAssistant/ai-assistant.tsx`, and
+`tests/components/AIAssistant/adaptive-card-renderer.test.tsx`.
+
+## AI summaries in CallControl
+
+Consult/transfer and wrap-up panels forward their summary view props to the shared
+`AIAssistant/AISummary` component. The widget binds callbacks to the displayed SDK
+content and supplies local response edits separately through `editedSummary`, so
+raw content retains its identity. These components perform no SDK operations.
+
+The wrap-up panel owns reason search and selection. Complete Wrap-Up stays enabled
+while summary generation is pending and disables completion and summary editing
+while wrap-up itself is pending. Failed completion retains the selected reason and
+draft. An absent summary prop preserves the existing CallControl form.
+`call-control.utils.ts` owns completion handling; CallControl supplies the pending
+state and task-bound completion ref so an old request cannot clear a new task's
+selection.
+
+Destination keys map to internal categories through `DESTINATION_TO_CATEGORY`;
+`VOICE_DESTINATION_CATEGORY_LABELS` supplies their picker labels. Both mappings
+live in the shared task `constants.ts`. Empty destination lists share one text
+element while preserving the voice layout's list-item wrapper.
+
+Each CallControl panel stylesheet owns its constrained flex and scroll layout;
+the shared summary stylesheet owns the editor, status, and action presentation.
+
+Summary focus recovery applies only after a focused summary control is removed and
+no connected control has taken focus. Consult/transfer retains its summary layout
+until the popover closes after capability revocation, preserving its focus target
+and close action. React-generated heading IDs label the panels. Requests, local
+response changes, retry and submission remain in the widget/store layers.
+Heading IDs use React 18's `useId`, supported by the package's `>=18.3.1` runtime
+peers; the local type bridge accommodates the installed React 17 declarations.
+Layout effects perform focus recovery, sizing, or synchronous invalidation of
+task/content callbacks. The CallControl popover-layout latch uses a passive effect
+because the current summary prop already supplies the initial layout.
+
+Evidence: `components/task/CallControl/call-control.tsx` and `CallControlCustom/`;
+tests: `tests/components/task/CallControl/call-control.tsx`,
+`CallControlCustom/consult-transfer-popover.tsx`, and `CallControlCustom/wrap-up-summary.tsx`.
+
 ## Traceability
 
 - Repo architecture: [`ARCHITECTURE.md`](../../../../ai-docs/ARCHITECTURE.md) · Registry: [`SPEC_INDEX.md`](../../../../ai-docs/SPEC_INDEX.md) · Contracts: [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md)

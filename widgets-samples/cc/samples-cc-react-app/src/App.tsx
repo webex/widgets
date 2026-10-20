@@ -11,7 +11,6 @@ import {
   RealTimeTranscript,
 } from '@webex/cc-widgets';
 import {AIAssistant, type WellnessBreakOverlayTarget} from '@webex/cc-ai-assistant';
-import {StationLogoutResponse} from '@webex/contact-center';
 import {ERROR_TRIGGERING_IDLE_CODES} from '@webex/cc-store';
 import Webex from 'webex';
 import {
@@ -475,9 +474,7 @@ function App() {
         return;
       }
 
-      void store.cc
-        ?.stationLogout({logoutReason: 'Page unload'})
-        .catch(() => undefined);
+      void store.cc?.stationLogout({logoutReason: 'User requested logout'}).catch(() => undefined);
     };
 
     window.addEventListener('pagehide', handlePageHide);
@@ -530,7 +527,7 @@ function App() {
   const stationLogout = () => {
     store.cc
       .stationLogout({logoutReason: 'User requested logout'})
-      .then((res: StationLogoutResponse) => {
+      .then((res) => {
         if ('data' in res) console.log('Agent logged out successfully', res.data);
       })
       .catch((error: Error) => {

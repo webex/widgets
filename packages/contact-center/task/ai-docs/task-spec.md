@@ -558,6 +558,54 @@ Tests are split between widget-shell render tests (each `tests/<Widget>/index.ts
 | `TASK-R-024` participant Drop orchestration       | `tests/helper.ts` (exact payload, duplicate prevention, success/failure cleanup, sanitized callback/logging, stale completion, roster re-derivation) | Live routing-event behavior is covered by SDK/manual integration tests |
 | `TASK-R-025` SDK destination-control pass-through | `tests/CallControl/index.tsx`, `tests/CallControlCAD/index.tsx`; cc-components focused destination tests                                             | None                                                                   |
 
+## AI summaries in CallControl
+
+`getAISummaryProps` in `src/helper.ts` maps the current task's SDK capabilities and
+`store.cc.apiAIAssistant.aiSummaries` entries into optional mid-call and post-call views.
+It reads `task.aiSummaryCapabilities` directly, with no additional media-type filter,
+and supplies no summary props when both capabilities are disabled. Each view receives
+the entry's raw SDK content, which can be absent during generation or failure, and
+feedback from `entry.response.feedback`. An enabled view without an entry starts in
+the generating state. Unavailable transcripts take priority over content; retained
+content remains visible during a refresh or after a failed refresh. The adapter imports
+the view prop type from `@webex/cc-components` and passes the SDK content unchanged,
+with `entry.response.summary` supplied separately as the editable display values.
+Edits, copy counts and deferred feedback call the store's `editAISummary`,
+`recordAISummaryCopied` and `setAISummaryFeedback` methods. The store updates that
+existing SDK response record inside `runInAction`; the task helper does not import MobX
+or mutate the SDK summary. Each callback captures the selected task and raw SDK
+content identity, so the store rejects stale controls after a task switch, replacement
+summary or pending refresh. Only displayed SDK fields can be edited; unchanged
+values leave the response untouched, and reverting a structured field removes that
+field's response override. The edit count is the existing zero-or-one edited flag.
+Requests and response submission remain store/SDK
+operations, with no widget-owned transport validation or correlation.
+
+Opening consult/transfer requests the corresponding mid-call summary. `consultCall`
+and `transferCall` send the initiator response through the store as the existing SDK
+operation starts; they do not wait for summary submission. When post-call summary
+capability is enabled, `wrapupCall` awaits
+`store.sendPostCallSummaryResponse(auxCodeId, currentTask)` before the existing Task
+`wrapup` call, then promotes the next task. The response's `wrapUpCode` is the selected
+code ID. Failed summary submission does not prevent wrap-up; disabled capability skips
+submission. An unedited structured summary has an empty `summary` object. `wrapupCall` resolves a
+boolean so the summary UI can retain its draft after failure and disable completion
+while wrap-up is pending. The summary presentation owns repeat-click protection and
+completion state across task switches.
+
+Widgets access summary APIs through `@webex/cc-store`.
+
+### Reactive summary updates
+
+The store observes the widget-owned `cc.apiAIAssistant.aiSummaries` map by reference. CallControl's
+observer reads that property through `getAISummaryProps`, so request completion,
+failure and local response updates refresh an open summary view without another task
+event or reopening the consult/transfer popover. SDK objects and summary payloads
+retain their original identities.
+
+Evidence: `src/helper.ts`, `src/CallControl/index.tsx`, `src/task.types.ts`;
+tests: AI summary cases in `tests/helper.ts` and `tests/CallControl/index.tsx`.
+
 ## Traceability
 
 - Repo architecture: [`ARCHITECTURE.md`](../../../../ai-docs/ARCHITECTURE.md) · Registry: [`SPEC_INDEX.md`](../../../../ai-docs/SPEC_INDEX.md) · Contracts: [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md)

@@ -1,4 +1,6 @@
 import type {
+  AISummaryEntry,
+  AISummaryFeedback,
   ILogger,
   RealTimeAssistPayload,
   WellnessBreakError,
@@ -95,6 +97,24 @@ export type AIAssistantChatEntry =
       realTimeAssist?: RealTimeAssistPayload;
     };
 
+export type AIAssistantReceiverSummary =
+  | {
+      surface: 'content';
+      /** Stable identity for this interaction's receiver summary; changes when the active interaction changes. */
+      branchKey: string;
+      content: NonNullable<AISummaryEntry['content']>;
+      selectedFeedback: AISummaryFeedback;
+      feedbackPending: boolean;
+      /** Bound by the widget to the displayed SDK summary. */
+      recordReceiverSummaryCopied: () => boolean;
+      setReceiverSummaryFeedback: (feedback: Exclude<AISummaryFeedback, 'none'>) => void;
+    }
+  | {
+      surface: 'unavailable' | 'generic-error';
+      /** Stable identity for this interaction's receiver summary; changes when the active interaction changes. */
+      branchKey: string;
+    };
+
 /** Props for the top-level AIAssistant presentational component. */
 export interface AIAssistantComponentProps {
   /** Current chrome visibility state. */
@@ -119,6 +139,8 @@ export interface AIAssistantComponentProps {
   agentName?: string;
   /** Whether the first real-time assist request has completed successfully. */
   hasInitialRequestSucceeded: boolean;
+  /** Optional receiving-agent summary branch. */
+  receiverSummary?: AIAssistantReceiverSummary;
   /** Transition the chrome to `open`. */
   open: () => void;
   /** Transition the chrome to `closed`; preserves chat state. */
@@ -222,6 +244,10 @@ export interface AIAssistantActionEvent {
 
 export interface AdaptiveCardRendererProps {
   card: unknown;
+  /** Render summary content without card-provided actions or inputs. */
+  displayOnly?: boolean;
+  /** Reports whether card content rendered, so the container can show its controls. */
+  onRender?: (rendered: boolean) => void;
   /** Title already rendered by RealTimeAssist; removes the matching header embedded in backend cards. */
   assistantTitle?: string;
   /** Plain-text fallback rendered when the Adaptive Card cannot be parsed/rendered. */

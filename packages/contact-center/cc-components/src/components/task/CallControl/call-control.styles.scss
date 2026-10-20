@@ -92,6 +92,11 @@
   margin-top: 1rem;
 }
 
+.call-control-wrapup-panel {
+  display: flex;
+  flex-direction: column;
+}
+
 .wrapup-name {
   color: var(--mds-color-theme-text-primary-normal);
 }

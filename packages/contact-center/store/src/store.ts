@@ -1,4 +1,4 @@
-import {makeAutoObservable, observable, runInAction} from 'mobx';
+import {extendObservable, isObservableProp, makeAutoObservable, observable, runInAction} from 'mobx';
 import Webex, {ITask} from '@webex/contact-center';
 import {
   IContactCenter,
@@ -97,11 +97,16 @@ class Store implements IStore {
   registerCC(webex?: WithWebex['webex']): Promise<void> {
     if (webex) {
       this.cc = webex.cc;
-      this.cc.aiSummaries ??= {};
     }
 
     if (typeof webex === 'undefined' && typeof this.cc === 'undefined') {
       throw new Error('Webex SDK not initialized');
+    }
+
+    // Observe only the widget-owned map; keep SDK objects and summary payloads unchanged.
+    const api = this.cc.apiAIAssistant;
+    if (api && !isObservableProp(api, 'aiSummaries')) {
+      extendObservable(api, {aiSummaries: api.aiSummaries ?? {}}, {aiSummaries: observable.ref});
     }
 
     this.logger = this.cc.LoggerProxy;
@@ -135,7 +140,6 @@ class Store implements IStore {
           this.legacyAuxCodeId = registeredSessionId ? response.lastStateAuxCodeId || '' : '';
           this.legacyAgentState = this.legacyAuxCodeId ? (this.legacyAuxCodeId === '0' ? 'Available' : 'Idle') : '';
         });
-        //@ts-expect-error  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
         this.teams = response.teams;
         this.loginOptions = response.webRtcEnabled
           ? response.loginVoiceOptions

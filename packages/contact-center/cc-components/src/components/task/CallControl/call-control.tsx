@@ -1,10 +1,12 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useLayoutEffect, useRef, useState} from 'react';
 
-import {CallControlComponentProps, CallControlMenuType} from '../task.types';
+import type {CallControlComponentProps, CallControlMenuType} from '../task.types';
 import './call-control.styles.scss';
 import {PopoverNext, TooltipNext, Text, ButtonCircle} from '@momentum-ui/react-collaboration';
+import type {PopoverInstance} from '@momentum-ui/react-collaboration';
 import {Icon, Button, Select, Option} from '@momentum-design/components/dist/react';
 import ConsultTransferPopoverComponent from './CallControlCustom/consult-transfer-popover';
+import WrapUpSummary from './CallControlCustom/wrap-up-summary';
 import CallControlDtmfKeypad from './call-control-dtmf-keypad';
 import AutoWrapupTimer from '../AutoWrapupTimer/AutoWrapupTimer';
 import type {MEDIA_CHANNEL as MediaChannelType} from '../task.types';
@@ -14,6 +16,7 @@ import {
   handleToggleHold as handleToggleHoldUtil,
   handleMuteToggle as handleMuteToggleUtil,
   handleWrapupCall as handleWrapupCallUtil,
+  handleWrapupCompletion,
   handleWrapupChange as handleWrapupChangeUtil,
   handleTargetSelect as handleTargetSelectUtil,
   handleCloseButtonPress,
@@ -35,6 +38,12 @@ function CallControlComponent(props: CallControlComponentProps) {
   const [showAgentMenu, setShowAgentMenu] = useState(false);
   const [agentMenuType, setAgentMenuType] = useState<CallControlMenuType | null>(null);
   const [isMuteButtonDisabled, setIsMuteButtonDisabled] = useState(false);
+  const [isWrapupCompletionPending, setIsWrapupCompletionPending] = useState(false);
+  const [isSummaryPopoverLayout, setIsSummaryPopoverLayout] = useState(false);
+  const agentPopovers = useRef<Record<string, PopoverInstance | undefined>>({});
+  const wrapUpSurfaceRef = useRef<HTMLDivElement | null>(null);
+  const focusedWrapUpControlRef = useRef<HTMLElement | null>(null);
+  const wrapupCompletionRef = useRef<object | null>(null);
 
   const {
     currentTask,
@@ -69,10 +78,36 @@ function CallControlComponent(props: CallControlComponentProps) {
     getEntryPoints,
     getQueuesFetcher,
     consultTransferOptions,
+    aiSummary,
     conferenceEnabled = true,
     enableWxBetterTogether = false,
     agentDeviceType,
   } = props;
+
+  useLayoutEffect(() => {
+    const previous = focusedWrapUpControlRef.current;
+    const active = document.activeElement;
+    // Capability revocation replaces the entire summary with the legacy form.
+    // Its stable parent owns focus recovery when the focused child is removed.
+    if (previous && !previous.isConnected && (!active || active === document.body || !active.isConnected)) {
+      wrapUpSurfaceRef.current?.focus();
+    }
+    if (previous && !previous.isConnected) focusedWrapUpControlRef.current = null;
+  }, [aiSummary?.postCall]);
+
+  useLayoutEffect(() => {
+    wrapupCompletionRef.current = null;
+    setIsWrapupCompletionPending(false);
+    return () => {
+      wrapupCompletionRef.current = null;
+    };
+  }, [currentTask?.data?.interactionId]);
+
+  useEffect(() => {
+    if (showAgentMenu && aiSummary?.midCall && aiSummary.midCall.state !== 'omitted') {
+      setIsSummaryPopoverLayout(true);
+    }
+  }, [showAgentMenu, aiSummary?.midCall]);
 
   useEffect(() => {
     updateCallStateFromTask(currentTask, setIsRecording, logger);
@@ -90,6 +125,21 @@ function CallControlComponent(props: CallControlComponentProps) {
   const handleMuteToggle = () => {
     handleMuteToggleUtil(toggleMute, setIsMuteButtonDisabled, logger);
   };
+
+  // Freeze summary edits and prevent a second completion while its wrap-up is pending.
+  const runWrapupCompletion = (wrapupReason: string | null, wrapupId: string | null) =>
+    handleWrapupCompletion(
+      wrapupReason,
+      wrapupId,
+      wrapupCall,
+      wrapupCompletionRef,
+      setIsWrapupCompletionPending,
+      () => {
+        setSelectedWrapupReason(null);
+        setSelectedWrapupId(null);
+      },
+      logger
+    );
 
   const handleWrapupCallLocal = () => {
     handleWrapupCallUtil(
@@ -194,6 +244,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                   <PopoverNext
                     key={index}
                     onShow={() => {
+                      setIsSummaryPopoverLayout(Boolean(aiSummary?.midCall && aiSummary.midCall.state !== 'omitted'));
                       logger.info(`CC-Widgets: CallControl: showing ${button.menuType} popover`, {
                         module: 'call-control.tsx',
                         method: 'onShowPopover',
@@ -202,6 +253,9 @@ function CallControlComponent(props: CallControlComponentProps) {
                       setAgentMenuType(button.menuType as CallControlMenuType);
                       if (button.menuType !== 'Keypad' && availableDestinations.includes('agent')) {
                         loadBuddyAgents(action);
+                      }
+                      if (button.menuType !== 'Keypad' && isTelephony) {
+                        void aiSummary?.requestMidCallSummary?.(action === 'Transfer' ? 'TRANSFER' : 'CONSULT');
                       }
                     }}
                     onHide={() => {
@@ -217,7 +271,17 @@ function CallControlComponent(props: CallControlComponentProps) {
                     offsetDistance={2}
                     className="agent-popover"
                     trigger="click"
-                    closeButtonPlacement="top-right"
+                    setInstance={(instance) => {
+                      agentPopovers.current[button.menuType] =
+                        typeof instance === 'function' ? instance(agentPopovers.current[button.menuType]) : instance;
+                    }}
+                    closeButtonPlacement={
+                      isTelephony &&
+                      (isSummaryPopoverLayout || Boolean(aiSummary?.midCall)) &&
+                      button.menuType !== 'Keypad'
+                        ? 'none'
+                        : 'top-right'
+                    }
                     closeButtonProps={{
                       'aria-label': 'Close popover',
                       onPress: () => handleCloseButtonPress(setShowAgentMenu, setAgentMenuType, logger),
@@ -256,6 +320,11 @@ function CallControlComponent(props: CallControlComponentProps) {
                       />
                     ) : showAgentMenu && agentMenuType === button.menuType ? (
                       <ConsultTransferPopoverComponent
+                        onClose={() => {
+                          agentPopovers.current[button.menuType]?.hide();
+                          handleCloseButtonPress(setShowAgentMenu, setAgentMenuType, logger);
+                        }}
+                        isTelephony={isTelephony}
                         heading={button.menuType}
                         buttonIcon={button.icon}
                         buddyAgents={buddyAgents}
@@ -279,6 +348,7 @@ function CallControlComponent(props: CallControlComponentProps) {
                         action={action}
                         availableDestinations={availableDestinations}
                         consultTransferOptions={consultTransferOptions}
+                        summary={aiSummary?.midCall}
                         isConferenceInProgress={controls?.main?.exitConference?.isVisible ?? false}
                         logger={logger}
                       />
@@ -316,6 +386,7 @@ function CallControlComponent(props: CallControlComponentProps) {
         {controls?.main?.wrapup?.isVisible && (
           <div className="wrapup-group">
             <PopoverNext
+              onShow={() => aiSummary?.requestPostCallSummary?.()}
               color="primary"
               delay={[0, 0]}
               placement="bottom-start"
@@ -340,53 +411,82 @@ function CallControlComponent(props: CallControlComponentProps) {
               offsetDistance={2}
               className="wrapup-popover"
             >
-              {currentTask.autoWrapup && (
-                <AutoWrapupTimer
-                  secondsUntilAutoWrapup={secondsUntilAutoWrapup}
-                  allowCancelAutoWrapup={false} // TODO: https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6752 change to currentTask.autoWrapup.allowCancelAutoWrapup when its made supported in multi session from SDK side
-                  handleCancelWrapup={cancelAutoWrapup}
-                />
-              )}
+              <div
+                className="call-control-wrapup-panel"
+                ref={wrapUpSurfaceRef}
+                tabIndex={-1}
+                data-testid="call-control:wrapup-panel"
+                onFocusCapture={(event) => {
+                  focusedWrapUpControlRef.current = aiSummary?.postCall ? (event.target as HTMLElement) : null;
+                }}
+                onBlurCapture={(event) => {
+                  const nextTarget = event.relatedTarget;
+                  if (nextTarget instanceof HTMLElement && nextTarget !== document.body && nextTarget.isConnected) {
+                    focusedWrapUpControlRef.current = null;
+                  }
+                }}
+              >
+                {currentTask.autoWrapup && (
+                  <AutoWrapupTimer
+                    secondsUntilAutoWrapup={secondsUntilAutoWrapup}
+                    allowCancelAutoWrapup={false} // TODO: https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6752 change to currentTask.autoWrapup.allowCancelAutoWrapup when its made supported in multi session from SDK side
+                    handleCancelWrapup={cancelAutoWrapup}
+                  />
+                )}
 
-              <Text className="wrapup-header" tagName={'small'} type="body-large-bold">
-                {WRAP_UP_INTERACTION}
-              </Text>
-              <Select
-                label={WRAP_UP_REASON}
-                help-text-type=""
-                data-aria-label="wrapup-reason"
-                toggletip-text=""
-                toggletip-placement=""
-                info-icon-aria-label=""
-                name=""
-                className="wrapup-select"
-                data-testid="call-control:wrapup-select"
-                placeholder={SELECT}
-                onChange={(event: CustomEvent) =>
-                  handleWrapupReasonChange(event, wrapupCodes, handleWrapupChange, logger)
-                }
-              >
-                {wrapupCodes?.map((code) => (
-                  <Option
-                    key={code.id}
-                    value={code.id}
-                    label={code.name}
-                    data-testid={`call-control:wrapup-reason-${code.name.toLowerCase()}`}
-                  >
-                    {code.name}
-                  </Option>
-                ))}
-              </Select>
-              <Button
-                onClick={handleWrapupCallLocal}
-                variant="primary"
-                className="submit-wrapup-button"
-                data-testid="call-control:wrapup-submit"
-                aria-label="Submit wrap-up"
-                disabled={selectedWrapupId && selectedWrapupReason ? false : true}
-              >
-                {SUBMIT_WRAP_UP}
-              </Button>
+                {aiSummary?.postCall ? (
+                  <WrapUpSummary
+                    reasons={wrapupCodes ?? []}
+                    summary={aiSummary.postCall}
+                    selectedReasonId={selectedWrapupId ?? undefined}
+                    completionPending={isWrapupCompletionPending}
+                    onReasonChange={(reason) => handleWrapupChange(reason.name, reason.id)}
+                    onComplete={(reason) => runWrapupCompletion(reason.name, reason.id)}
+                  />
+                ) : (
+                  <>
+                    <Text className="wrapup-header" tagName={'small'} type="body-large-bold">
+                      {WRAP_UP_INTERACTION}
+                    </Text>
+                    <Select
+                      label={WRAP_UP_REASON}
+                      help-text-type=""
+                      data-aria-label="wrapup-reason"
+                      toggletip-text=""
+                      toggletip-placement=""
+                      info-icon-aria-label=""
+                      name=""
+                      className="wrapup-select"
+                      data-testid="call-control:wrapup-select"
+                      placeholder={SELECT}
+                      onChange={(event: CustomEvent) =>
+                        handleWrapupReasonChange(event, wrapupCodes, handleWrapupChange, logger)
+                      }
+                    >
+                      {wrapupCodes?.map((code) => (
+                        <Option
+                          key={code.id}
+                          value={code.id}
+                          label={code.name}
+                          data-testid={`call-control:wrapup-reason-${code.name.toLowerCase()}`}
+                        >
+                          {code.name}
+                        </Option>
+                      ))}
+                    </Select>
+                    <Button
+                      onClick={handleWrapupCallLocal}
+                      variant="primary"
+                      className="submit-wrapup-button"
+                      data-testid="call-control:wrapup-submit"
+                      aria-label="Submit wrap-up"
+                      disabled={selectedWrapupId && selectedWrapupReason ? false : true}
+                    >
+                      {SUBMIT_WRAP_UP}
+                    </Button>
+                  </>
+                )}
+              </div>
             </PopoverNext>
           </div>
         )}

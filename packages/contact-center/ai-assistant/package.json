@@ -57,6 +57,7 @@
     "globals": "^16.0.0",
     "jest": "29.7.0",
     "jest-environment-jsdom": "29.7.0",
+    "mobx": "6.13.5",
     "prettier": "^3.5.1",
     "ts-loader": "9.5.1",
     "typescript-eslint": "^8.24.1",
@@ -65,6 +66,7 @@
     "webpack-merge": "6.0.1"
   },
   "peerDependencies": {
+    "mobx": "^6.9.0",
     "react": ">=18.3.1",
     "react-dom": ">=18.3.1"
   }

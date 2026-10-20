@@ -36,6 +36,10 @@ The load-bearing contract of this module is structural: each exported mock is ty
 
 `mockTask` and `makeMockTask` use the store's exported `ITask` contract. They provide disabled AI summary capabilities and stub request/response methods, so store consumers see the same task shape in tests.
 
+`mockProfile.teams` follows the SDK `TeamList` shape: `id`, `name`, and the required
+team, site, membership and queue-ranking metadata. The fixture uses the SDK's
+current profile contract rather than the older `teamId`/`teamName` fields.
+
 ## Purpose / Responsibility
 Provides shared, type-checked mock SDK instances, mock profile/task/queue/agent data, and component-prop fixtures consumed by other packages' Jest tests; it does NOT provide runtime behavior, test runners, or shared test-render helpers.
 
@@ -124,7 +128,7 @@ Shape fidelity is achieved by importing the real SDK/store types and annotating 
 
 Isolation is offered two ways. Static fixtures (`mockTask`, `mockCC`) are shared singletons — cheap but mutable, so tests that mutate must clone. Factory functions (`makeMockTask`, `makeMockCampaignTask`, `makeMockAddressBook`) return fresh objects with brand-new `jest.fn()`s each call, which is the safe path for tests that mutate or assert call counts.
 
-`mockCC.aiSummaries` starts empty to match the widget-owned state on `IContactCenter`; tests that
+`mockCC.apiAIAssistant.aiSummaries` starts empty to match the widget-owned state on `IContactCenter`; tests that
 populate it must reset or replace it to keep summary state isolated.
 
 Composition keeps the SDK mock single-sourced: outdial fixtures spread `mockCC` rather than redeclaring it, so a change to `mockCC` propagates. The same principle is why `mockQueuesResponse` is derived by mapping `mockQueueDetails` instead of being hand-written twice.

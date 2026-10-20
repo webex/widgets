@@ -11,7 +11,20 @@ import type {
 import type {IContactCenter, ITask} from '@webex/cc-store';
 
 const mockProfile: Profile = {
-  teams: [{teamId: 'team1', teamName: 'Team 1'}],
+  teams: [
+    {
+      id: 'team1',
+      name: 'Team 1',
+      teamType: 'AGENT_BASED',
+      teamStatus: 'ACTIVE',
+      active: true,
+      siteId: 'site123',
+      siteName: 'Site 1',
+      userIds: ['agent1'],
+      rankQueuesForTeam: false,
+      queueRankings: [],
+    },
+  ],
   defaultDn: '12345',
   dn: '12345',
   forceDefaultDn: false,
@@ -608,7 +621,6 @@ const mockQueuesResponse: ContactServiceQueuesResponse = {
 };
 
 const mockCC: IContactCenter = {
-  aiSummaries: {},
   on: jest.fn(),
   off: jest.fn(),
   updateAgentProfile: jest.fn(),
@@ -644,6 +656,7 @@ const mockCC: IContactCenter = {
   skipPreviewContact: jest.fn().mockResolvedValue({}),
   removePreviewContact: jest.fn().mockResolvedValue({}),
   apiAIAssistant: {
+    aiSummaries: {},
     getRealTimeAssistance: jest.fn().mockResolvedValue({}),
     sendRealTimeAssistanceUserAction: jest.fn().mockResolvedValue({}),
     requestWellnessBreak: jest.fn().mockResolvedValue(undefined),
