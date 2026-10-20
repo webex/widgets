@@ -26,7 +26,7 @@ describe('AI summary notifications with the real MobX store', () => {
   beforeEach(async () => {
     cc = {
       ...mockCC,
-      aiSummaries: {},
+      apiAIAssistant: {...mockCC.apiAIAssistant, aiSummaries: {}},
       register: jest.fn().mockResolvedValue(mockProfile),
     };
     webex = {cc, logger: cc.LoggerProxy};
@@ -41,7 +41,7 @@ describe('AI summary notifications with the real MobX store', () => {
   afterEach(() => {
     disposers.splice(0).forEach((dispose) => dispose());
     runInAction(() => {
-      cc.aiSummaries = {};
+      cc.apiAIAssistant.aiSummaries = {};
       store.store.currentTask = null;
     });
   });
@@ -56,7 +56,7 @@ describe('AI summary notifications with the real MobX store', () => {
       const states: string[] = [];
       disposers.push(
         autorun(() => {
-          states.push(store.cc.aiSummaries[INTERACTION_ID]?.[role]?.status ?? 'idle');
+          states.push(store.cc.apiAIAssistant.aiSummaries[INTERACTION_ID]?.[role]?.status ?? 'idle');
         })
       );
 
@@ -67,7 +67,7 @@ describe('AI summary notifications with the real MobX store', () => {
       await pending;
 
       expect(states).toEqual(['idle', 'loading', 'ready']);
-      expect(store.cc.aiSummaries[INTERACTION_ID][role].content).toBe(summary);
+      expect(store.cc.apiAIAssistant.aiSummaries[INTERACTION_ID][role].content).toBe(summary);
       expect(store.cc).toBe(cc);
       expect(isObservable(summary)).toBe(false);
       expect(isObservable(cc.taskManager)).toBe(false);
@@ -79,7 +79,7 @@ describe('AI summary notifications with the real MobX store', () => {
     const states: string[] = [];
     disposers.push(
       autorun(() => {
-        states.push(store.cc.aiSummaries[INTERACTION_ID]?.initiator?.status ?? 'idle');
+        states.push(store.cc.apiAIAssistant.aiSummaries[INTERACTION_ID]?.initiator?.status ?? 'idle');
       })
     );
 
@@ -102,7 +102,7 @@ describe('AI summary notifications with the real MobX store', () => {
       const responses: AISummaryEntry['response'][] = [];
       disposers.push(
         autorun(() => {
-          responses.push(store.cc.aiSummaries[INTERACTION_ID][role].response);
+          responses.push(store.cc.apiAIAssistant.aiSummaries[INTERACTION_ID][role].response);
         })
       );
 
@@ -117,7 +117,7 @@ describe('AI summary notifications with the real MobX store', () => {
         numberOfTimesCopied: 1,
         feedback: 'thumbs_up',
       });
-      expect(store.cc.aiSummaries[INTERACTION_ID][role].content).toBe(summary);
+      expect(store.cc.apiAIAssistant.aiSummaries[INTERACTION_ID][role].content).toBe(summary);
       expect(summary.sections.initialContactReason).toBe('Customer called about an invoice discrepancy.');
       expect(isObservable(summary)).toBe(false);
     }
@@ -131,32 +131,34 @@ describe('AI summary notifications with the real MobX store', () => {
     const summary = aiSummaryFixtures.postCall.structured;
     task.requestPostCallSummary = jest.fn().mockResolvedValue(summary);
     await store.requestPostCallSummary(task);
-    const response = cc.aiSummaries[INTERACTION_ID]['post-call'].response;
+    const response = cc.apiAIAssistant.aiSummaries[INTERACTION_ID]['post-call'].response;
     const differentTask = {...task};
 
     expect(store.editAISummary('post-call', 'initialContactReason', 'Stale edit', summary, differentTask)).toBe(false);
     expect(store.recordAISummaryCopied('post-call', summary, differentTask)).toBe(false);
     expect(store.setAISummaryFeedback('post-call', 'thumbs_up', summary, differentTask)).toBe(false);
-    expect(cc.aiSummaries[INTERACTION_ID]['post-call'].response).toBe(response);
+    expect(cc.apiAIAssistant.aiSummaries[INTERACTION_ID]['post-call'].response).toBe(response);
   });
 
   it('keeps summary notifications and existing content after registering the same SDK instance again', async () => {
     const summary = aiSummaryFixtures.initiatingMidCall.plainText;
     task.requestMidCallSummary = jest.fn().mockResolvedValue(summary);
     await store.requestMidCallSummary('CONSULT', task);
-    const previous = cc.aiSummaries;
+    const api = cc.apiAIAssistant;
+    const previous = api.aiSummaries;
 
     await store.registerCC(webex);
 
-    expect(cc.aiSummaries).toBe(previous);
+    expect(cc.apiAIAssistant).toBe(api);
+    expect(cc.apiAIAssistant.aiSummaries).toBe(previous);
     const contents: Array<Summary | undefined> = [];
     disposers.push(
       autorun(() => {
-        contents.push(store.cc.aiSummaries[INTERACTION_ID]?.initiator?.content);
+        contents.push(store.cc.apiAIAssistant.aiSummaries[INTERACTION_ID]?.initiator?.content);
       })
     );
     runInAction(() => {
-      cc.aiSummaries = {};
+      cc.apiAIAssistant.aiSummaries = {};
     });
 
     expect(contents).toEqual([summary, undefined]);

@@ -509,7 +509,7 @@ export const getAISummaryProps = (currentTask?: ITask): CallControlAISummaryProp
   }
 
   const interactionId = currentTask.data.interactionId;
-  const entries = store.cc.aiSummaries[interactionId];
+  const entries = store.cc?.apiAIAssistant?.aiSummaries?.[interactionId];
   const viewOf = (role: Exclude<AISummaryRole, 'receiver'>): NonNullable<CallControlAISummaryProps['midCall']> => {
     const entry = entries?.[role];
     const content = entry?.content;
@@ -543,7 +543,7 @@ export const getAISummaryProps = (currentTask?: ITask): CallControlAISummaryProp
       : undefined,
     // Like Agent Desktop, a wrap-up requests its summary once; Retry asks again.
     requestPostCallSummary: () => {
-      if (!store.cc.aiSummaries[interactionId]?.['post-call']) {
+      if (!store.cc?.apiAIAssistant?.aiSummaries?.[interactionId]?.['post-call']) {
         void store.requestPostCallSummary(currentTask);
       }
     },

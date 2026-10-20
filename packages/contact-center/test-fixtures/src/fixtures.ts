@@ -621,7 +621,6 @@ const mockQueuesResponse: ContactServiceQueuesResponse = {
 };
 
 const mockCC: IContactCenter = {
-  aiSummaries: {},
   on: jest.fn(),
   off: jest.fn(),
   updateAgentProfile: jest.fn(),
@@ -657,6 +656,7 @@ const mockCC: IContactCenter = {
   skipPreviewContact: jest.fn().mockResolvedValue({}),
   removePreviewContact: jest.fn().mockResolvedValue({}),
   apiAIAssistant: {
+    aiSummaries: {},
     getRealTimeAssistance: jest.fn().mockResolvedValue({}),
     sendRealTimeAssistanceUserAction: jest.fn().mockResolvedValue({}),
     requestWellnessBreak: jest.fn().mockResolvedValue(undefined),

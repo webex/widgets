@@ -1,5 +1,11 @@
 import type {AISummaryFeedbackButton, AISummarySectionKey} from './ai-summary.types';
 
+export const AI_ASSISTANT_SUMMARY_MODES = {
+  MID_CALL_INITIATOR: 'mid-call-initiator',
+  MID_CALL_RECEIVER: 'mid-call-receiver',
+  POST_CALL: 'post-call',
+} as const;
+
 export const AI_ASSISTANT_SUMMARY_MESSAGES = {
   viewSummary: 'View summary',
   generatingTitle: 'Generating summary...',

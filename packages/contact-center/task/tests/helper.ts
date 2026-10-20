@@ -52,7 +52,7 @@ const AI_SUMMARY_INTERACTION_ID = 'interaction-main-1';
 
 const resetAISummaryStoreState = (): void => {
   runInAction(() => {
-    store.cc.aiSummaries = {};
+    store.cc.apiAIAssistant.aiSummaries = {};
     store.store.currentTask = null;
     store.store.isAgentLoggedIn = true;
     store.store.agentId = 'agent1';
@@ -151,7 +151,7 @@ describe('getAISummaryProps', () => {
     expect(sdkTask.requestMidCallSummary).toHaveBeenCalledWith('CONSULT');
     const midCall = getAISummaryProps(task)?.midCall;
     expect(midCall?.state).toBe('content');
-    expect(midCall?.content).toBe(store.cc.aiSummaries[AI_SUMMARY_INTERACTION_ID]?.initiator?.content);
+    expect(midCall?.content).toBe(store.cc.apiAIAssistant.aiSummaries[AI_SUMMARY_INTERACTION_ID]?.initiator?.content);
     midCall?.onFeedback('thumbs_up');
     expect(getAISummaryProps(task)?.midCall?.selectedFeedback).toBe('thumbs_up');
     expect(sdkTask.sendMidCallSummaryResponse).not.toHaveBeenCalled();
@@ -202,9 +202,9 @@ describe('getAISummaryProps', () => {
     const task = activateAISummaryTask();
     await store.requestMidCallSummary('CONSULT', task);
     await store.requestPostCallSummary(task);
-    const entries = store.cc.aiSummaries[AI_SUMMARY_INTERACTION_ID];
+    const entries = store.cc.apiAIAssistant.aiSummaries[AI_SUMMARY_INTERACTION_ID];
     runInAction(() => {
-      store.cc.aiSummaries = {
+      store.cc.apiAIAssistant.aiSummaries = {
         [AI_SUMMARY_INTERACTION_ID]: {
           initiator: {...entries.initiator, status: 'error', content: undefined},
           'post-call': {...entries['post-call'], status: 'error'},
@@ -215,8 +215,8 @@ describe('getAISummaryProps', () => {
     expect(getAISummaryProps(task)?.postCall?.state).toBe('content');
 
     runInAction(() => {
-      const postCall = store.cc.aiSummaries[AI_SUMMARY_INTERACTION_ID]['post-call'];
-      store.cc.aiSummaries[AI_SUMMARY_INTERACTION_ID]['post-call'] = {
+      const postCall = store.cc.apiAIAssistant.aiSummaries[AI_SUMMARY_INTERACTION_ID]['post-call'];
+      store.cc.apiAIAssistant.aiSummaries[AI_SUMMARY_INTERACTION_ID]['post-call'] = {
         ...postCall,
         status: 'loading',
         content: {...postCall.content, areTranscriptsAvailable: false},
@@ -235,20 +235,20 @@ describe('getAISummaryProps', () => {
       summaryText: 'A replacement summary.',
     });
     await store.requestMidCallSummary('TRANSFER', task);
-    const replacement = store.cc.aiSummaries[AI_SUMMARY_INTERACTION_ID].initiator;
+    const replacement = store.cc.apiAIAssistant.aiSummaries[AI_SUMMARY_INTERACTION_ID].initiator;
     const response = replacement.response;
 
     expect(stale?.onEdit('reasonForTransferOrConsult', 'Stale edit')).toBe(false);
     expect(stale?.onCopy()).toBe(false);
     stale?.onFeedback('thumbs_up');
-    expect(store.cc.aiSummaries[AI_SUMMARY_INTERACTION_ID].initiator.response).toBe(response);
+    expect(store.cc.apiAIAssistant.aiSummaries[AI_SUMMARY_INTERACTION_ID].initiator.response).toBe(response);
   });
 
   it('should reject local response changes after the selected task changes or is removed', async () => {
     const task = activateAISummaryTask();
     await store.requestPostCallSummary(task);
     const stale = getAISummaryProps(task)?.postCall;
-    const response = store.cc.aiSummaries[AI_SUMMARY_INTERACTION_ID]['post-call'].response;
+    const response = store.cc.apiAIAssistant.aiSummaries[AI_SUMMARY_INTERACTION_ID]['post-call'].response;
     activateAISummaryTask(createAISummaryTask());
     expect(stale?.onEdit('initialContactReason', 'Stale edit')).toBe(false);
     expect(stale?.onCopy()).toBe(false);
@@ -257,7 +257,7 @@ describe('getAISummaryProps', () => {
       store.store.currentTask = null;
     });
     expect(stale?.onCopy()).toBe(false);
-    expect(store.cc.aiSummaries[AI_SUMMARY_INTERACTION_ID]['post-call'].response).toBe(response);
+    expect(store.cc.apiAIAssistant.aiSummaries[AI_SUMMARY_INTERACTION_ID]['post-call'].response).toBe(response);
   });
 
   it('should disable response changes while a replacement request is pending and retain edits after failure', async () => {
@@ -310,15 +310,15 @@ describe('getAISummaryProps', () => {
     await store.requestPostCallSummary(task);
     const summary = getAISummaryProps(task)?.postCall;
     const original = summary.content.sections.initialContactReason;
-    const initialResponse = store.cc.aiSummaries[AI_SUMMARY_INTERACTION_ID]['post-call'].response;
+    const initialResponse = store.cc.apiAIAssistant.aiSummaries[AI_SUMMARY_INTERACTION_ID]['post-call'].response;
 
     expect(summary.onEdit('initialContactReason', original)).toBe(true);
-    expect(store.cc.aiSummaries[AI_SUMMARY_INTERACTION_ID]['post-call'].response).toBe(initialResponse);
+    expect(store.cc.apiAIAssistant.aiSummaries[AI_SUMMARY_INTERACTION_ID]['post-call'].response).toBe(initialResponse);
     expect(initialResponse.numberOfTimesEdited).toBe(0);
     expect(summary.onEdit('initialContactReason', 'Edited reason')).toBe(true);
-    const editedResponse = store.cc.aiSummaries[AI_SUMMARY_INTERACTION_ID]['post-call'].response;
+    const editedResponse = store.cc.apiAIAssistant.aiSummaries[AI_SUMMARY_INTERACTION_ID]['post-call'].response;
     expect(summary.onEdit('initialContactReason', 'Edited reason')).toBe(true);
-    expect(store.cc.aiSummaries[AI_SUMMARY_INTERACTION_ID]['post-call'].response).toBe(editedResponse);
+    expect(store.cc.apiAIAssistant.aiSummaries[AI_SUMMARY_INTERACTION_ID]['post-call'].response).toBe(editedResponse);
     expect(editedResponse.numberOfTimesEdited).toBe(1);
   });
 
@@ -336,19 +336,19 @@ describe('getAISummaryProps', () => {
     expect(reverted.content).toBe(sdkContent);
     expect(reverted.editedSummary).toEqual({keyActionsTaken: 'Another edit'});
     expect(reverted.content.sections.initialContactReason).toBe(original);
-    expect(store.cc.aiSummaries[AI_SUMMARY_INTERACTION_ID]['post-call'].response.numberOfTimesEdited).toBe(1);
+    expect(store.cc.apiAIAssistant.aiSummaries[AI_SUMMARY_INTERACTION_ID]['post-call'].response.numberOfTimesEdited).toBe(1);
   });
 
   it('should reject edits for keys that are not displayed in the SDK summary', async () => {
     const task = activateAISummaryTask();
     await store.requestMidCallSummary('CONSULT', task);
     const summary = getAISummaryProps(task)?.midCall;
-    const response = store.cc.aiSummaries[AI_SUMMARY_INTERACTION_ID].initiator.response;
+    const response = store.cc.apiAIAssistant.aiSummaries[AI_SUMMARY_INTERACTION_ID].initiator.response;
 
     expect(summary.onEdit('initialContactReason', 'Not present')).toBe(false);
     expect(summary.onEdit('summaryText', 'Structured summary text is not displayed')).toBe(false);
     expect(summary.onEdit('unknownField' as 'initialContactReason', 'Unknown key')).toBe(false);
-    expect(store.cc.aiSummaries[AI_SUMMARY_INTERACTION_ID].initiator.response).toBe(response);
+    expect(store.cc.apiAIAssistant.aiSummaries[AI_SUMMARY_INTERACTION_ID].initiator.response).toBe(response);
   });
 
   it('should call the store for every mid-call summary request', async () => {
@@ -3310,7 +3310,7 @@ describe('useCallControl', () => {
 
     expect(wrapupResult).toBe(false);
     expect(task.sendPostCallSummaryResponse).toHaveBeenCalledTimes(1);
-    expect(store.cc.aiSummaries[AI_SUMMARY_INTERACTION_ID]?.['post-call']?.content).toBeDefined();
+    expect(store.cc.apiAIAssistant.aiSummaries[AI_SUMMARY_INTERACTION_ID]?.['post-call']?.content).toBeDefined();
   });
 
   describe('post-call summary submission during wrap-up', () => {

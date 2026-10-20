@@ -104,8 +104,9 @@ class Store implements IStore {
     }
 
     // Observe only the widget-owned map; keep SDK objects and summary payloads unchanged.
-    if (!isObservableProp(this.cc, 'aiSummaries')) {
-      extendObservable(this.cc, {aiSummaries: this.cc.aiSummaries ?? {}}, {aiSummaries: observable.ref});
+    const api = this.cc.apiAIAssistant;
+    if (api && !isObservableProp(api, 'aiSummaries')) {
+      extendObservable(api, {aiSummaries: api.aiSummaries ?? {}}, {aiSummaries: observable.ref});
     }
 
     this.logger = this.cc.LoggerProxy;

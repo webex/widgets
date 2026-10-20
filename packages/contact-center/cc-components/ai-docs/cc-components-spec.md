@@ -372,15 +372,15 @@ content state without a payload falls back to unavailable and exposes no actions
 Edit callbacks notify the owner without requiring a return value. Component tests
 use the same SDK shape. Receiver rendering and focus
 handlers live in the assistant component alongside its chrome and summary branch.
-The mode-specific prop union separates editable summaries from receiver actions and
-requires content and callbacks only when receiver content is available. The shared
+A common props interface declares the mode and shared optional callbacks once. Mode
+values live in summary constants. Missing edit callbacks produce read-only content;
+missing action or Retry callbacks hide those controls. The shared
 action surface uses that SDK payload only as identity; the assistant card branch
 still owns receiver rendering. Callbacks are bound by the widget to the displayed
 SDK summary and accept no numeric revision. Section ordering, labels, plain-text
-clipboard formatting, bullet presentation and auto-sizing native editors belong to
-this component. Task widget helpers dispatch local edits, copy counts and deferred
-feedback to store actions; receiver copy bookkeeping remains in the receiver widget
-helper. SDK submission stays in the store.
+clipboard formatting, bullet presentation and auto-sizing Momentum editors belong to
+this component. Widget helpers dispatch local edits, copy counts and deferred feedback
+to store actions for the applicable role. SDK submission stays in the store.
 The presentation-state union is declared locally rather than derived from a store
 selector. Pending clipboard completions cannot update confirmation after the
 displayed SDK payload changes.
@@ -390,7 +390,10 @@ same Momentum primitives as Real-time Assist and Wellness Break. Tooltip visibil
 remains controlled to keep hovered content reachable and consume Escape before the
 containing panel handles it; button labels and the pending-feedback description
 remain unchanged. Keyed editing, clipboard formatting, confirmation state and focus
-recovery stay summary-specific.
+recovery stay summary-specific. Summary copying reuses `copySuggestion`, whose result
+indicates actual clipboard success. The existing Adaptive Card utility also shares
+feedback selection calculation: Real-time Assist clears repeated feedback clicks;
+summary feedback retains the selection until its owner updates it.
 
 Structured section previews size the Momentum button host to their full wrapped
 content and allow wrapping through its exposed `button-text` part. Each section
@@ -429,9 +432,12 @@ Summary presentation constants use the `AI_ASSISTANT_SUMMARY_` prefix. These com
 receive data and callbacks through props and make no SDK calls.
 `ai-summary.tsx` owns the rendered UI; its local `helper.ts` owns summary interaction,
 clipboard, tooltip, and focus behavior.
-Status text and action controls use Momentum `Text` and `Button`. The native editor
-retains automatic height measurement and focus tracking; the installed Momentum
-textarea does not expose equivalent automatic sizing.
+Status text, action controls and editors use Momentum `Text`, `Button` and `Textarea`.
+The existing editor measures a hidden text mirror to set public `rows`, retaining
+automatic fitting after edits, font loading and width changes without reading
+Momentum internals. Structured fields use the component label, while plain summaries
+use its accessible-label property. Initial edit focus uses `autoFocusOnMount`;
+focus recovery tracks the textarea host without adding a second tab stop.
 Clipboard confirmation compares the actual copied text along with the SDK payload
 identity. Focus tracking keeps the active control and its successor together;
 section editors restore focus after closing without forcing a parent render.

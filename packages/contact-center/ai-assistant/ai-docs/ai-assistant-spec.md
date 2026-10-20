@@ -294,11 +294,12 @@ snapshots) is covered in `cc-components/tests/components/AIAssistant/`.
 ## Receiving-agent AI summaries
 
 `getReceiverSummary` in `src/helper.ts` reads the current interaction's receiver entry
-from `store.cc.aiSummaries`, maps its request status and SDK `areTranscriptsAvailable`
+from `store.cc.apiAIAssistant.aiSummaries`, maps its request status and SDK `areTranscriptsAvailable`
 flag to a display surface, and passes the raw SDK content, confirmed feedback from
 `summaryData.response.feedback` and pending state to the presentation component. Received
-content remains visible during a failed or pending refresh. Copy callbacks increment
-`response.numberOfTimesCopied` in `store.cc.aiSummaries` inside `runInAction`.
+content remains visible during a failed or pending refresh. Copy callbacks delegate to
+`store.recordAISummaryCopied` for the receiver role; the store owns the response update
+and MobX action. The widget helper does not import MobX or mutate summary entries.
 Copy and feedback callbacks retain the displayed SDK content and Task identities;
 replacement content or a different active Task invalidates those callbacks. Feedback
 passes that SDK payload and Task to `store.setReceiverSummaryFeedback`, which owns

@@ -95,7 +95,7 @@ not at all.
 
 **Where it appears**
 - `packages/contact-center/store/src/storeEventsWrapper.ts` (setters, summary response actions and event handlers wrap writes in `runInAction`)
-- `packages/contact-center/ai-assistant/src/helper.ts` (copy bookkeeping replaces `cc.aiSummaries`, made `observable.ref` during registration)
+- `packages/contact-center/store/src/store.ts` (registration annotates only `cc.apiAIAssistant.aiSummaries` as `observable.ref`; widgets call store methods for response bookkeeping)
 
 **Edge cases / exceptions**
 - Reads never need `runInAction`; only writes to observables do.

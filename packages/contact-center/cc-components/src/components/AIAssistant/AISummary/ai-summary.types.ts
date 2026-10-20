@@ -1,5 +1,7 @@
-import type {RefObject, TextareaHTMLAttributes} from 'react';
+import type {ComponentProps, RefObject} from 'react';
+import type {Textarea} from '@momentum-design/components/dist/react';
 import type {AISummaryEntry, AISummaryFeedback, AISummaryResponse, AISummarySections} from '@webex/cc-store';
+import type {AI_ASSISTANT_SUMMARY_MODES} from './ai-summary.constants';
 
 export type AISummarySectionKey = keyof AISummarySections | 'resolution';
 
@@ -11,8 +13,14 @@ export type AISummaryFocusTarget = {control: HTMLElement; successor: HTMLElement
 
 export type AISummaryPresentationState = 'generating' | 'unavailable' | 'generic-error' | 'content';
 
-export type AISummaryEditorProps = Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, 'value'> & {
+export type AISummaryMode = (typeof AI_ASSISTANT_SUMMARY_MODES)[keyof typeof AI_ASSISTANT_SUMMARY_MODES];
+
+export type AISummaryEditorProps = Pick<
+  ComponentProps<typeof Textarea>,
+  'className' | 'dir' | 'disabled' | 'label' | 'dataAriaLabel' | 'autoFocusOnMount' | 'onBlur'
+> & {
   value: string;
+  onChange: (value: string) => void;
 };
 
 export type AISummarySectionEditorProps = {
@@ -28,55 +36,18 @@ export type AISummaryFeedbackButton = {
   label: string;
 };
 
-type AISummaryBaseProps = {
+export interface AISummaryProps {
+  mode: AISummaryMode;
   state: AISummaryPresentationState;
   requestPending?: boolean;
   controlsDisabled?: boolean;
   selectedFeedback?: AISummaryFeedback;
   containingPanelFocusTarget: RefObject<HTMLElement | null>;
-};
-
-type AISummaryActions = {
-  onCopy: () => boolean;
-  onFeedback: (feedback: Exclude<AISummaryFeedback, 'none'>) => void;
-};
-
-type AISummaryEditableActions = AISummaryActions & {
   content?: AISummaryEntry['content'];
   editedSummary?: AISummaryResponse['summary'];
-  onEdit: (key: keyof AISummarySections | 'summaryText', value: string) => void;
-};
-
-export type AISummaryMidCallInitiatorProps = AISummaryBaseProps &
-  AISummaryEditableActions & {
-    mode: 'mid-call-initiator';
-    onRetry?: never;
-  };
-
-export type AISummaryMidCallReceiverProps = AISummaryBaseProps & {
-  mode: 'mid-call-receiver';
-  onEdit?: never;
-  onRetry?: never;
-} & (
-    | (AISummaryActions & {
-        state: 'content';
-        content: NonNullable<AISummaryEntry['content']>;
-        getReceiverCopyText: () => string;
-      })
-    | {
-        state: Exclude<AISummaryPresentationState, 'content'>;
-        content?: never;
-        getReceiverCopyText?: never;
-        onCopy?: never;
-        onFeedback?: never;
-      }
-  );
-
-export type AISummaryPostCallProps = AISummaryBaseProps &
-  AISummaryEditableActions & {
-    mode: 'post-call';
-    onRetry: () => Promise<void>;
-    getReceiverCopyText?: never;
-  };
-
-export type AISummaryProps = AISummaryMidCallInitiatorProps | AISummaryMidCallReceiverProps | AISummaryPostCallProps;
+  onCopy?: () => boolean;
+  onFeedback?: (feedback: Exclude<AISummaryFeedback, 'none'>) => void;
+  onEdit?: (key: keyof AISummarySections | 'summaryText', value: string) => void;
+  onRetry?: () => Promise<void>;
+  getReceiverCopyText?: () => string;
+}

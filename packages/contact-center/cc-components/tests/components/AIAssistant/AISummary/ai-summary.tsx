@@ -88,6 +88,19 @@ const getActionWrapper = (button: HTMLElement): HTMLElement => {
   return wrapper as HTMLElement;
 };
 
+const getSummaryEditor = async (label: string): Promise<HTMLTextAreaElement> =>
+  waitFor(() => {
+    const host = Array.from(document.querySelectorAll('mdc-textarea')).find(
+      (element) => element.getAttribute('label') === label || element.getAttribute('data-aria-label') === label
+    );
+    const editor = host?.shadowRoot?.querySelector('textarea');
+    expect(editor).toBeInstanceOf(HTMLTextAreaElement);
+    return editor as HTMLTextAreaElement;
+  });
+
+const expectEditorFocus = async (editor: HTMLTextAreaElement) =>
+  waitFor(() => expect((editor.getRootNode() as ShadowRoot).activeElement).toBe(editor));
+
 type WithOptionalFocusTarget<Props> = Props extends {
   containingPanelFocusTarget: React.RefObject<HTMLElement | null>;
 }
@@ -117,22 +130,6 @@ const omittedStateIsRejected: React.ComponentProps<typeof AISummaryComponent> = 
   state: 'omitted',
   containingPanelFocusTarget: typeOnlyPanelRef,
 };
-// @ts-expect-error A receiver content surface needs the displayed SDK payload for asynchronous copy ownership.
-const receiverWithoutContentIsRejected: React.ComponentProps<typeof AISummaryComponent> = {
-  mode: 'mid-call-receiver',
-  state: 'content',
-  getReceiverCopyText: () => 'Receiver text',
-  onCopy: () => true,
-  onFeedback: jest.fn(),
-  containingPanelFocusTarget: typeOnlyPanelRef,
-};
-// @ts-expect-error A receiver status surface exposes no content or actions.
-const receiverStatusContentIsRejected: React.ComponentProps<typeof AISummaryComponent> = {
-  mode: 'mid-call-receiver',
-  state: 'unavailable',
-  content: textContent,
-  containingPanelFocusTarget: typeOnlyPanelRef,
-};
 const receiverChildrenAreRejected: React.ComponentProps<typeof AISummaryComponent> = {
   mode: 'mid-call-receiver',
   state: 'content',
@@ -156,24 +153,10 @@ const postCallActionTypeIsRejected: React.ComponentProps<typeof AISummaryCompone
   onRetry: jest.fn(),
   containingPanelFocusTarget: typeOnlyPanelRef,
 };
-const initiatorReceiverCopyIsRejected: React.ComponentProps<typeof AISummaryComponent> = {
-  mode: 'mid-call-initiator',
-  state: 'content',
-  content: textContent,
-  onEdit: jest.fn(),
-  onCopy: jest.fn(),
-  onFeedback: jest.fn(),
-  containingPanelFocusTarget: typeOnlyPanelRef,
-  // @ts-expect-error Receiver-only copy extraction is not an initiator prop.
-  getReceiverCopyText: () => 'Receiver text',
-};
 
 void omittedStateIsRejected;
-void receiverWithoutContentIsRejected;
-void receiverStatusContentIsRejected;
 void receiverChildrenAreRejected;
 void postCallActionTypeIsRejected;
-void initiatorReceiverCopyIsRejected;
 
 describe('AISummary', () => {
   beforeEach(() => {
@@ -529,14 +512,11 @@ describe('AISummary', () => {
         ),
       })
     );
-    expect(
-      screen.getByRole('textbox', {name: AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason})
-    ).toHaveFocus();
-    fireEvent.change(screen.getByDisplayValue('Customer asked for invoice help.'), {target: {value: ''}});
+    const editor = await getSummaryEditor(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason);
+    await expectEditorFocus(editor);
+    fireEvent.input(editor, {target: {value: ''}, composed: true});
     expect(onEdit).toHaveBeenCalledWith('initialContactReason', '');
-    fireEvent.blur(
-      screen.getByRole('textbox', {name: AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason})
-    );
+    fireEvent.blur(editor, {composed: true});
     expect(
       await screen.findByRole('button', {
         name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(
@@ -568,7 +548,7 @@ describe('AISummary', () => {
         ),
       })
     ).toBeDisabled();
-    expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+    expect(document.querySelector('mdc-textarea')).not.toBeInTheDocument();
     expect(screen.getByText('Customer asked for invoice help.')).toBeInTheDocument();
     expect(
       screen.queryByRole('button', {
@@ -733,10 +713,10 @@ describe('AISummary', () => {
       };
       render(<ControlledSummary />);
 
-      const editor = screen.getByRole('textbox', {name: AI_ASSISTANT_SUMMARY_MESSAGES.plainSummary});
+      const editor = await getSummaryEditor(AI_ASSISTANT_SUMMARY_MESSAGES.plainSummary);
       expect(editor).toHaveValue('Agent correction');
-      fireEvent.change(editor, {target: {value: 'Final agent correction'}});
-      expect(editor).toHaveValue('Final agent correction');
+      fireEvent.input(editor, {target: {value: 'Final agent correction'}, composed: true});
+      await waitFor(() => expect(editor).toHaveValue('Final agent correction'));
       fireEvent.click(await screen.findByRole('button', {name: LITERAL_SUMMARY_COPY.copySummary}));
 
       await waitFor(() => expect(onCopy).toHaveBeenCalledTimes(1));
@@ -1481,7 +1461,7 @@ describe('AISummary', () => {
     fireEvent.click(await screen.findByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary}));
     await waitFor(() => expect(onCopy).toHaveBeenCalledWith());
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith('Visible card text');
-    expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+    expect(document.querySelector('mdc-textarea')).not.toBeInTheDocument();
   });
 
   it.each(['generating', 'unavailable', 'generic-error'] as const)('omits receiver actions for %s state', (state) => {
@@ -1672,15 +1652,13 @@ describe('AISummary', () => {
         ),
       })
     );
-    const editor = screen.getByRole('textbox', {
-      name: AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason,
-    });
+    const editor = await getSummaryEditor(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason);
     act(() => {
       editor.focus();
     });
-    expect(editor).toHaveFocus();
+    await expectEditorFocus(editor);
 
-    fireEvent.blur(editor, {relatedTarget: null});
+    fireEvent.blur(editor, {relatedTarget: null, composed: true});
 
     await waitFor(async () =>
       expect(
@@ -1714,15 +1692,13 @@ describe('AISummary', () => {
         ),
       })
     );
-    const editor = screen.getByRole('textbox', {
-      name: AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason,
-    });
+    const editor = await getSummaryEditor(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason);
     const external = screen.getByRole('button', {name: 'External destination'});
     act(() => {
       editor.focus();
     });
 
-    fireEvent.blur(editor, {relatedTarget: external});
+    fireEvent.blur(editor, {relatedTarget: external, composed: true});
     act(() => {
       external.focus();
     });

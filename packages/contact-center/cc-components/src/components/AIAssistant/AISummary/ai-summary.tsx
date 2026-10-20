@@ -1,9 +1,10 @@
 import React, {useLayoutEffect, useRef, useState} from 'react';
-import {Button, Icon, Spinner, Text, Tooltip} from '@momentum-design/components/dist/react';
+import {Button, Icon, Spinner, Text, Textarea, Tooltip} from '@momentum-design/components/dist/react';
 import {
   AI_ASSISTANT_SUMMARY_BULLETED_SECTION_KEYS,
   AI_ASSISTANT_SUMMARY_FEEDBACK_BUTTONS,
   AI_ASSISTANT_SUMMARY_MESSAGES,
+  AI_ASSISTANT_SUMMARY_MODES,
 } from './ai-summary.constants';
 import {getDisplaySections, useAISummaryInteractions} from './helper';
 import type {
@@ -40,39 +41,50 @@ const renderReadonlyValue = (section: AISummaryDisplaySection, inline = false) =
 
 // Keep keyed, controlled edits inside one visual surface. Never parse edited labels
 // back into SDK keys or introduce a second scrollbar inside the containing panel.
-const SummaryEditor: React.FC<AISummaryEditorProps> = ({value, ...props}) => {
-  const ref = useRef<HTMLTextAreaElement>(null);
+const SummaryEditor: React.FC<AISummaryEditorProps> = ({value, onChange, ...props}) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const [rows, setRows] = useState(1);
   useLayoutEffect(() => {
-    const editor = ref.current;
-    if (!editor) return;
+    const measurement = ref.current;
+    if (!measurement) return;
     const resize = () => {
-      if (!editor.isConnected) return;
-      editor.style.height = 'auto';
-      editor.style.height = `${editor.scrollHeight}px`;
+      if (!measurement.isConnected) return;
+      const lineHeight = Number.parseFloat(getComputedStyle(measurement).lineHeight);
+      if (lineHeight > 0) {
+        setRows(Math.max(1, Math.round(measurement.getBoundingClientRect().height / lineHeight)));
+      }
     };
     resize();
     void document.fonts?.ready.then(resize, () => undefined);
     document.fonts?.addEventListener('loadingdone', resize);
-    let width = editor.clientWidth;
+    let width = measurement.clientWidth;
     const observer =
       typeof ResizeObserver === 'undefined'
         ? undefined
         : new ResizeObserver(() => {
-            if (editor.clientWidth !== width) {
-              width = editor.clientWidth;
+            if (measurement.clientWidth !== width) {
+              width = measurement.clientWidth;
               resize();
             }
           });
-    observer?.observe(editor);
+    observer?.observe(measurement);
     return () => {
       observer?.disconnect();
       document.fonts?.removeEventListener('loadingdone', resize);
     };
   }, [value]);
-  return <textarea {...props} ref={ref} rows={1} value={value} />;
+  return (
+    <div className="ai-summary__editor">
+      <Textarea {...props} rows={rows} value={value} onInput={(event) => onChange(event.target.value)} />
+      <div className="ai-summary__editor-measurement" dir="auto" aria-hidden="true" ref={ref}>
+        {value}
+        {'\u200b'}
+      </div>
+    </div>
+  );
 };
 
-// Display the structured document compactly; activate the original keyed native
+// Display the structured document compactly; activate the original keyed
 // editor on click/keyboard activation. SDK values remain plain text and unchanged.
 const SummarySectionEditor: React.FC<AISummarySectionEditorProps> = ({section, disabled, onChange, onEditorClosed}) => {
   const [editing, setEditing] = useState(false);
@@ -82,19 +94,17 @@ const SummarySectionEditor: React.FC<AISummarySectionEditorProps> = ({section, d
   const label = AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels[section.key];
   if (editing && !disabled) {
     return (
-      <label className="ai-summary__section ai-summary__section--structured">
-        <Text tagname="span" className="ai-summary__label" dir="auto">
-          {label}
-        </Text>
+      <div className="ai-summary__section ai-summary__section--structured">
         <SummaryEditor
           className="ai-summary__textarea"
           dir="auto"
+          label={label}
           value={section.value}
-          autoFocus
-          onChange={(event) => onChange(event.currentTarget.value)}
+          autoFocusOnMount
+          onChange={onChange}
           onBlur={() => setEditing(false)}
         />
-      </label>
+      </div>
     );
   }
   // Keep a cleared editor mounted until blur, then omit the empty preview row.
@@ -174,7 +184,7 @@ const AISummary = (props: AISummaryProps): React.ReactElement => {
           <Text tagname="p" className="ai-summary__description">
             {AI_ASSISTANT_SUMMARY_MESSAGES.generationErrorDescription}
           </Text>
-          {props.mode === 'post-call' ? (
+          {props.mode === AI_ASSISTANT_SUMMARY_MODES.POST_CALL && props.onRetry ? (
             <Button
               className="ai-summary__retry-button"
               type="button"
@@ -182,7 +192,7 @@ const AISummary = (props: AISummaryProps): React.ReactElement => {
               size={28}
               prefix-icon="refresh-regular"
               disabled={disabled}
-              onClick={disabled ? undefined : () => void props.onRetry()}
+              onClick={disabled ? undefined : () => void props.onRetry?.()}
             >
               {AI_ASSISTANT_SUMMARY_MESSAGES.retry}
             </Button>
@@ -194,24 +204,28 @@ const AISummary = (props: AISummaryProps): React.ReactElement => {
   };
 
   const renderContent = () => {
-    if (props.state !== 'content' || props.mode === 'mid-call-receiver' || !displayContent) {
+    if (props.state !== 'content' || props.mode === AI_ASSISTANT_SUMMARY_MODES.MID_CALL_RECEIVER || !displayContent) {
       return null;
     }
     if (!displayContent.sections) {
       return (
         <div className="ai-summary__content" data-testid="ai-summary:content">
-          <label className="ai-summary__section">
-            <Text tagname="span" className="ai-summary__sr-only">
-              {AI_ASSISTANT_SUMMARY_MESSAGES.plainSummary}
-            </Text>
-            <SummaryEditor
-              className="ai-summary__textarea"
-              dir="auto"
-              value={displayContent.summaryText ?? ''}
-              disabled={disabled}
-              onChange={(event) => props.onEdit('summaryText', event.currentTarget.value)}
-            />
-          </label>
+          <div className="ai-summary__section">
+            {props.onEdit ? (
+              <SummaryEditor
+                className="ai-summary__textarea"
+                dir="auto"
+                dataAriaLabel={AI_ASSISTANT_SUMMARY_MESSAGES.plainSummary}
+                value={displayContent.summaryText ?? ''}
+                disabled={disabled}
+                onChange={(value) => props.onEdit?.('summaryText', value)}
+              />
+            ) : (
+              <Text tagname="span" className="ai-summary__readonly-value" dir="auto">
+                {displayContent.summaryText}
+              </Text>
+            )}
+          </div>
         </div>
       );
     }
@@ -219,12 +233,13 @@ const AISummary = (props: AISummaryProps): React.ReactElement => {
       <div className="ai-summary__content" data-testid="ai-summary:content">
         {getDisplaySections(displayContent).map((section) => {
           const {key} = section;
-          return key !== 'resolution' ? (
+          if (!props.onEdit && !section.value.trim()) return null;
+          return key !== 'resolution' && props.onEdit ? (
             <SummarySectionEditor
               key={key}
               section={section}
               disabled={disabled}
-              onChange={(value) => props.onEdit(key, value)}
+              onChange={(value) => props.onEdit?.(key, value)}
               onEditorClosed={restoreFocus}
             />
           ) : (
@@ -244,12 +259,17 @@ const AISummary = (props: AISummaryProps): React.ReactElement => {
 
   // Post-call feedback is only submitted with the final response after wrap-up.
   const feedbackDescription =
-    props.mode === 'post-call' && selectedFeedback !== 'none'
+    props.mode === AI_ASSISTANT_SUMMARY_MODES.POST_CALL && selectedFeedback !== 'none'
       ? AI_ASSISTANT_SUMMARY_MESSAGES.feedback.pendingSubmission
       : undefined;
 
-  const showActions = props.state === 'content' && Boolean(displayContent);
-  const showSummaryHeading = props.mode === 'post-call' && showActions;
+  const hasContent = props.state === 'content' && Boolean(displayContent);
+  const showCopy = Boolean(
+    props.onCopy && (props.mode !== AI_ASSISTANT_SUMMARY_MODES.MID_CALL_RECEIVER || props.getReceiverCopyText)
+  );
+  const showFeedback = Boolean(props.onFeedback);
+  const showActions = hasContent && (showCopy || showFeedback);
+  const showSummaryHeading = props.mode === AI_ASSISTANT_SUMMARY_MODES.POST_CALL && hasContent;
   const copyLabel = copied ? AI_ASSISTANT_SUMMARY_MESSAGES.copiedSummary : AI_ASSISTANT_SUMMARY_MESSAGES.copySummary;
   // Keep visibility controlled so Escape dismisses the tooltip before the panel.
   // Existing button labels and the pending-feedback description remain authoritative.
@@ -282,39 +302,41 @@ const AISummary = (props: AISummaryProps): React.ReactElement => {
           <Icon name="info-circle-filled" className="ai-summary__summary-info" aria-hidden="true" />
         </div>
       ) : null}
-      <div className={showActions ? 'ai-summary__editor-surface' : undefined} data-testid="ai-summary:editor-surface">
+      <div className={hasContent ? 'ai-summary__editor-surface' : undefined} data-testid="ai-summary:editor-surface">
         {renderContent()}
         {showActions ? (
           <div className="ai-summary__actions" data-testid="ai-summary:actions">
-            <span
-              className="ai-summary__action"
-              onMouseEnter={() => handleActionMouseEnter('copy')}
-              onMouseLeave={() => handleActionMouseLeave('copy')}
-            >
-              <Button
-                id={`ai-summary-${summaryId}-copy`}
-                variant="tertiary"
-                size={24}
-                prefix-icon={copied ? 'check-bold' : 'copy-regular'}
-                className={`ai-summary__button ai-summary__copy-button${
-                  copied ? ' ai-summary__copy-button--confirmed' : ''
-                }`}
-                type="button"
-                disabled={disabled}
-                onFocus={() => setHoveredTooltip('copy')}
-                onBlur={() => {
-                  setHoveredTooltip(null);
-                  setCopied(false);
-                }}
-                onClick={() => void handleCopy()}
-                aria-label={AI_ASSISTANT_SUMMARY_MESSAGES.copySummary}
-              />
-              <Text tagname="span" className="ai-summary__sr-only">
-                {copyLabel}
-              </Text>
-              {renderTooltip('copy', AI_ASSISTANT_SUMMARY_MESSAGES.copySummary)}
-            </span>
-            {props.mode !== 'mid-call-receiver' ? (
+            {showCopy ? (
+              <span
+                className="ai-summary__action"
+                onMouseEnter={() => handleActionMouseEnter('copy')}
+                onMouseLeave={() => handleActionMouseLeave('copy')}
+              >
+                <Button
+                  id={`ai-summary-${summaryId}-copy`}
+                  variant="tertiary"
+                  size={24}
+                  prefix-icon={copied ? 'check-bold' : 'copy-regular'}
+                  className={`ai-summary__button ai-summary__copy-button${
+                    copied ? ' ai-summary__copy-button--confirmed' : ''
+                  }`}
+                  type="button"
+                  disabled={disabled}
+                  onFocus={() => setHoveredTooltip('copy')}
+                  onBlur={() => {
+                    setHoveredTooltip(null);
+                    setCopied(false);
+                  }}
+                  onClick={() => void handleCopy()}
+                  aria-label={AI_ASSISTANT_SUMMARY_MESSAGES.copySummary}
+                />
+                <Text tagname="span" className="ai-summary__sr-only">
+                  {copyLabel}
+                </Text>
+                {renderTooltip('copy', AI_ASSISTANT_SUMMARY_MESSAGES.copySummary)}
+              </span>
+            ) : null}
+            {props.mode !== AI_ASSISTANT_SUMMARY_MODES.MID_CALL_RECEIVER ? (
               <>
                 <span className="ai-summary__actions-spacer" />
                 <Text tagname="span" className="ai-summary__attribution">
@@ -323,40 +345,42 @@ const AISummary = (props: AISummaryProps): React.ReactElement => {
                 <span className="ai-summary__action-separator" aria-hidden="true" />
               </>
             ) : null}
-            <span className="ai-summary__feedback-group">
-              {AI_ASSISTANT_SUMMARY_FEEDBACK_BUTTONS.map(({feedback, icon, label: feedbackLabel}) => {
-                const selected = selectedFeedback === feedback;
+            {showFeedback ? (
+              <span className="ai-summary__feedback-group">
+                {AI_ASSISTANT_SUMMARY_FEEDBACK_BUTTONS.map(({feedback, icon, label: feedbackLabel}) => {
+                  const selected = selectedFeedback === feedback;
 
-                return (
-                  <span
-                    className="ai-summary__action ai-summary__feedback-action"
-                    key={feedback}
-                    onMouseEnter={() => handleActionMouseEnter(feedback)}
-                    onMouseLeave={() => handleActionMouseLeave(feedback)}
-                  >
-                    <Button
-                      id={`ai-summary-${summaryId}-${feedback}`}
-                      variant="tertiary"
-                      size={20}
-                      prefix-icon={`${icon}-${selected ? 'filled' : 'regular'}`}
-                      active={selected}
-                      className={`ai-summary__button ai-summary__feedback-button${
-                        selected ? ' ai-summary__feedback-button--selected' : ''
-                      }`}
-                      type="button"
-                      disabled={disabled}
-                      onFocus={() => setHoveredTooltip(feedback)}
-                      onBlur={() => setHoveredTooltip(null)}
-                      onClick={() => handleFeedback(feedback)}
-                      aria-label={feedbackLabel}
-                      aria-pressed={selected}
-                      aria-describedby={feedbackDescription ? feedbackDescriptionId : undefined}
-                    />
-                    {renderTooltip(feedback, feedbackLabel)}
-                  </span>
-                );
-              })}
-            </span>
+                  return (
+                    <span
+                      className="ai-summary__action ai-summary__feedback-action"
+                      key={feedback}
+                      onMouseEnter={() => handleActionMouseEnter(feedback)}
+                      onMouseLeave={() => handleActionMouseLeave(feedback)}
+                    >
+                      <Button
+                        id={`ai-summary-${summaryId}-${feedback}`}
+                        variant="tertiary"
+                        size={20}
+                        prefix-icon={`${icon}-${selected ? 'filled' : 'regular'}`}
+                        active={selected}
+                        className={`ai-summary__button ai-summary__feedback-button${
+                          selected ? ' ai-summary__feedback-button--selected' : ''
+                        }`}
+                        type="button"
+                        disabled={disabled}
+                        onFocus={() => setHoveredTooltip(feedback)}
+                        onBlur={() => setHoveredTooltip(null)}
+                        onClick={() => handleFeedback(feedback)}
+                        aria-label={feedbackLabel}
+                        aria-pressed={selected}
+                        aria-describedby={feedbackDescription ? feedbackDescriptionId : undefined}
+                      />
+                      {renderTooltip(feedback, feedbackLabel)}
+                    </span>
+                  );
+                })}
+              </span>
+            ) : null}
           </div>
         ) : null}
       </div>

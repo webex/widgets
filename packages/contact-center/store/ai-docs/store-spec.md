@@ -410,7 +410,7 @@ Verification: `yarn run build` from the repository root.
 
 ## AI summaries
 
-`StoreWrapper` is the SDK boundary for summaries. `cc.aiSummaries[interactionId][role]`
+`StoreWrapper` is the SDK boundary for summaries. `cc.apiAIAssistant.aiSummaries[interactionId][role]`
 keeps the SDK summary, SDK response record and request state for `initiator`, `receiver`,
 and `post-call`. Store requests, receiver events and editable-summary response
 actions update these records inside `runInAction`. Widget helpers bind editing,
@@ -421,7 +421,8 @@ Refreshing or failing a request retains
 content already displayed and its response record; task removal and logout clear them.
 
 The store observes `cc` by reference. `registerCC` makes only the widget-owned
-`cc.aiSummaries` property `observable.ref`, preserving the SDK instance and unchanged
+`aiSummaries` property on the existing SDK `apiAIAssistant` instance `observable.ref`,
+preserving both SDK instances and unchanged
 summary payload identities. SDK events, request results and local response edits
 replace the map inside actions, notifying widgets without waiting for another task
 event. Re-registering the same SDK instance preserves the map and its annotation.
@@ -457,21 +458,24 @@ interaction ID lets task cleanup remove them together; entries are created as ne
   display state. A failed refresh keeps previously received content visible. Invalid
   transport payloads belong to the SDK boundary.
 - Each entry stores an SDK `AISummaryResponse` in `response`. The store's
-  `editAISummary`, `recordAISummaryCopied` and `setAISummaryFeedback` methods update
-  initiator/post-call response fields without changing SDK content or submitting a
-  response. Each method accepts the displayed SDK payload and Task, rejecting task
+  `editAISummary` and `setAISummaryFeedback` methods update initiator/post-call response
+  fields; `recordAISummaryCopied` tracks copies for all three roles. These methods do
+  not change SDK content or submit a response. Each method accepts the displayed SDK payload and Task, rejecting task
   switches, replaced content, unavailable transcripts and pending refreshes. Edits
   accept only fields present in the displayed summary; unchanged values preserve the
   response identity and reverting a structured field removes its override. Receiver
-  copy counts remain in the receiver widget helper. Senders forward the record to the SDK.
+  copy updates are also rejected while feedback submission is pending. Senders forward
+  the record to the SDK.
   The SDK sends these fields verbatim and supplies no runtime defaults. Received
   summaries start with `DEFAULT` and one view. Requests without content start with
   `IGNORED`, including retries; failure without content changes the state to `NOT_RECEIVED`.
   Structured responses start with `{}` and plain-text responses start with SDK summary text.
 - `setReceiverSummaryFeedback(feedback, expectedSummary, task)` submits receiver feedback
   immediately. It accepts the displayed SDK payload itself, with no revision counter.
-  The store blocks overlapping sends and applies the acknowledgement only while that
-  same SDK payload remains current. Replacement events and task removal invalidate it.
+  The store rejects callbacks from a different active Task, blocks overlapping sends
+  and applies the acknowledgement only while that same SDK payload remains current.
+  A task switch during submission still allows the matching entry to settle;
+  replacement events and task removal invalidate it.
   A successful send selects the feedback; a failed send preserves the previous selection.
   Receiver responses use SDK `summaryText`, including when the payload also has sections
   or an adaptive card; absent text is sent as `''`.

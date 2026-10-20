@@ -242,14 +242,19 @@ export const addImageFallbacks = (container: HTMLElement) => {
   });
 };
 
+/** Select the clicked feedback, optionally clearing it when it is selected again. */
+export const getNextFeedback = <T extends string>(current: T | 'none', clicked: T, clearOnRepeat = true): T | 'none' =>
+  clearOnRepeat && current === clicked ? 'none' : clicked;
+
 /** Paint `kind` as the only selected control; re-clicking it clears the selection. */
 export const toggleActionControls = (kind: 'like' | 'dislike', controls: Map<Element, AIAssistantActionKind>) => {
+  const selected = Array.from(controls).find(
+    ([el, thisKind]) => (thisKind === 'like' || thisKind === 'dislike') && el.getAttribute('data-active') === 'true'
+  )?.[1];
+  const next = getNextFeedback(selected === 'like' || selected === 'dislike' ? selected : 'none', kind);
   controls.forEach((thisKind, el) => {
     if (thisKind !== 'like' && thisKind !== 'dislike') return;
-    const active = el.getAttribute('data-active') === 'true';
-    const isThis = thisKind === kind;
-    // Mutually exclusive: clicking the active one clears it; clicking the other flips.
-    const nextActive = isThis ? !active : false;
+    const nextActive = thisKind === next;
     const img = el.querySelector('img');
     if (img) {
       const nextIconUrl = resolveMomentumIconUrl(`${thisKind}-${nextActive ? 'filled' : 'regular'}.svg`);
@@ -268,9 +273,10 @@ export const toggleActionControls = (kind: 'like' | 'dislike', controls: Map<Ele
 /**
  * Copies `text` and briefly flashes the copy control as confirmation.  Falls
  * back to a hidden textarea for non-secure contexts without the async API.
+ * Returns whether the clipboard write succeeded.
  */
-export const copySuggestion = async (text: string, sourceEl?: Element, logger?: ILogger): Promise<void> => {
-  if (!text) return;
+export const copySuggestion = async (text: string, sourceEl?: Element, logger?: ILogger): Promise<boolean> => {
+  if (!text) return false;
   try {
     if (navigator.clipboard?.writeText) {
       await navigator.clipboard.writeText(text);
@@ -279,10 +285,15 @@ export const copySuggestion = async (text: string, sourceEl?: Element, logger?: 
       ta.value = text;
       ta.style.position = 'fixed';
       ta.style.opacity = '0';
+      const previousFocus = document.activeElement;
       document.body.appendChild(ta);
-      ta.select();
-      document.execCommand('copy');
-      document.body.removeChild(ta);
+      try {
+        ta.select();
+        if (!document.execCommand('copy')) return false;
+      } finally {
+        ta.remove();
+        if (previousFocus instanceof HTMLElement && previousFocus.isConnected) previousFocus.focus();
+      }
     }
     const img = sourceEl?.querySelector('img');
     if (sourceEl && img) {
@@ -297,11 +308,13 @@ export const copySuggestion = async (text: string, sourceEl?: Element, logger?: 
         if (previousSrc) img.setAttribute('src', previousSrc);
       }, COPIED_FEEDBACK_MS);
     }
+    return true;
   } catch (err) {
     logger?.error(`CC-Components: copy to clipboard failed - ${err}`, {
       module: ADAPTIVE_CARD_MODULE,
       method: 'copySuggestion',
     });
+    return false;
   }
 };
 

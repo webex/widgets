@@ -1,7 +1,12 @@
 import React, {useEffect, useLayoutEffect, useRef, useState} from 'react';
 import type {FocusEvent} from 'react';
 import type {AISummaryEntry, AISummaryFeedback} from '@webex/cc-store';
-import {AI_ASSISTANT_SUMMARY_MESSAGES, AI_ASSISTANT_SUMMARY_SECTION_ORDER} from './ai-summary.constants';
+import {
+  AI_ASSISTANT_SUMMARY_MESSAGES,
+  AI_ASSISTANT_SUMMARY_MODES,
+  AI_ASSISTANT_SUMMARY_SECTION_ORDER,
+} from './ai-summary.constants';
+import {copySuggestion, getNextFeedback} from '../AdaptiveCardRenderer/adaptive-card-renderer.utils';
 import {COPIED_FEEDBACK_MS} from '../constants';
 import type {
   AISummaryDisplaySection,
@@ -19,8 +24,15 @@ const isEnabledFocusTarget = (element: HTMLElement): boolean =>
   element.tabIndex >= 0;
 
 const getEnabledControls = (root: HTMLElement): HTMLElement[] =>
-  Array.from(root.querySelectorAll<HTMLElement>('button, [href], input, textarea, select, [tabindex]')).filter(
-    isEnabledFocusTarget
+  Array.from(
+    root.querySelectorAll<HTMLElement>('button, [href], input, textarea, mdc-textarea, select, [tabindex]')
+  ).filter(
+    (element) =>
+      isEnabledFocusTarget(element) ||
+      (element.localName === 'mdc-textarea' &&
+        element.isConnected &&
+        !element.hasAttribute('disabled') &&
+        element.getAttribute('aria-disabled') !== 'true')
   );
 
 /** The summary's sections in display order, with the read-only post-call resolution among them. */
@@ -46,7 +58,7 @@ const flattenContentForCopy = (content: NonNullable<AISummaryEntry['content']>):
 // Local edits are a presentation overlay; retain the SDK payload as the action identity.
 const getDisplayContent = (props: AISummaryProps): AISummaryEntry['content'] => {
   const {content} = props;
-  if (!content || props.mode === 'mid-call-receiver' || props.editedSummary === undefined) {
+  if (!content || props.mode === AI_ASSISTANT_SUMMARY_MODES.MID_CALL_RECEIVER || props.editedSummary === undefined) {
     return content;
   }
   return typeof props.editedSummary === 'string'
@@ -59,7 +71,9 @@ export const useAISummaryInteractions = (props: AISummaryProps) => {
   const displayContent = getDisplayContent(props);
   // Compare the copied text, so response bookkeeping does not reset copy feedback.
   const copyText =
-    props.mode === 'mid-call-receiver' || !displayContent ? undefined : flattenContentForCopy(displayContent);
+    props.mode === AI_ASSISTANT_SUMMARY_MODES.MID_CALL_RECEIVER || !displayContent
+      ? undefined
+      : flattenContentForCopy(displayContent);
   const latestPropsRef = useRef({props, copyText});
   useLayoutEffect(() => {
     latestPropsRef.current = {props, copyText};
@@ -149,17 +163,17 @@ export const useAISummaryInteractions = (props: AISummaryProps) => {
   };
 
   const handleCopy = async () => {
-    if (disabled || props.state !== 'content') {
+    if (disabled || props.state !== 'content' || !props.onCopy) {
       return;
     }
     setHoveredTooltip(null);
     setCopied(false);
     try {
-      const text = props.mode === 'mid-call-receiver' ? props.getReceiverCopyText() : (copyText ?? '');
-      if (text.trim().length === 0) {
+      const text =
+        props.mode === AI_ASSISTANT_SUMMARY_MODES.MID_CALL_RECEIVER ? props.getReceiverCopyText?.() : copyText;
+      if (!text?.trim() || !(await copySuggestion(text))) {
         return;
       }
-      await navigator.clipboard.writeText(text);
     } catch {
       return;
     }
@@ -171,7 +185,9 @@ export const useAISummaryInteractions = (props: AISummaryProps) => {
       current.state !== 'content' ||
       current.mode !== props.mode ||
       current.content !== props.content ||
-      currentCopyText !== copyText
+      currentCopyText !== copyText ||
+      !current.onCopy ||
+      (current.mode === AI_ASSISTANT_SUMMARY_MODES.MID_CALL_RECEIVER && !current.getReceiverCopyText)
     ) {
       return;
     }
@@ -180,7 +196,8 @@ export const useAISummaryInteractions = (props: AISummaryProps) => {
 
   const handleFeedback = (feedback: Exclude<AISummaryFeedback, 'none'>) => {
     if (!disabled && props.state === 'content') {
-      props.onFeedback(feedback);
+      const next = getNextFeedback(selectedFeedback, feedback, false);
+      if (next !== 'none') props.onFeedback?.(next);
     }
   };
 

@@ -1,5 +1,4 @@
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import {runInAction} from 'mobx';
 import store from '@webex/cc-store';
 import type {ITask, RealTimeAssistPayload} from '@webex/cc-store';
 import type {
@@ -303,7 +302,7 @@ export const useAiAssistant = (input: UseAiAssistantInput) => {
 /** The receiving agent's consult/transfer summary, pushed by the backend for the task's interaction. */
 export const getReceiverSummary = (task?: ITask): AIAssistantReceiverSummary | undefined => {
   const interactionId = task?.data.interactionId;
-  const summaryData = interactionId ? store.cc.aiSummaries[interactionId]?.receiver : undefined;
+  const summaryData = interactionId ? store.cc?.apiAIAssistant?.aiSummaries?.[interactionId]?.receiver : undefined;
   if (!task || !interactionId || !summaryData) {
     return undefined;
   }
@@ -316,40 +315,15 @@ export const getReceiverSummary = (task?: ITask): AIAssistantReceiverSummary | u
   if (content.areTranscriptsAvailable === false) {
     return {surface: 'unavailable', branchKey};
   }
-  const getDisplayedEntry = () => {
-    const current = store.cc.aiSummaries[interactionId]?.receiver;
-    return store.currentTask === task && current?.content === content ? current : undefined;
-  };
   return {
     surface: 'content',
     branchKey,
     content,
     selectedFeedback: summaryData.response.feedback,
     feedbackPending: Boolean(summaryData.feedbackPending),
-    recordReceiverSummaryCopied: () => {
-      const current = getDisplayedEntry();
-      if (!current || current.feedbackPending) {
-        return false;
-      }
-      // registerCC observes this map by reference, so replace it inside an action.
-      runInAction(() => {
-        store.cc.aiSummaries = {
-          ...store.cc.aiSummaries,
-          [interactionId]: {
-            ...store.cc.aiSummaries[interactionId],
-            receiver: {
-              ...current,
-              response: {...current.response, numberOfTimesCopied: current.response.numberOfTimesCopied + 1},
-            },
-          },
-        };
-      });
-      return true;
-    },
+    recordReceiverSummaryCopied: () => store.recordAISummaryCopied('receiver', content, task),
     setReceiverSummaryFeedback: (feedback) => {
-      if (getDisplayedEntry()) {
-        void store.setReceiverSummaryFeedback(feedback, content, task);
-      }
+      void store.setReceiverSummaryFeedback(feedback, content, task);
     },
   };
 };

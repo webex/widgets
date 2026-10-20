@@ -80,9 +80,13 @@ describe('WrapUpSummary', () => {
         name: AI_SUMMARY_MESSAGES.editSectionLabel(AI_SUMMARY_MESSAGES.sectionLabels.initialContactReason),
       })
     );
-    expect(
-      screen.getByRole('textbox', {name: AI_SUMMARY_MESSAGES.sectionLabels.initialContactReason})
-    ).not.toBeDisabled();
+    await waitFor(() => {
+      const editor = document
+        .querySelector(`mdc-textarea[label="${AI_SUMMARY_MESSAGES.sectionLabels.initialContactReason}"]`)
+        ?.shadowRoot?.querySelector('textarea');
+      expect(editor).toBeInstanceOf(HTMLTextAreaElement);
+      expect(editor).not.toBeDisabled();
+    });
     expect(screen.getByRole('textbox', {name: AI_SUMMARY_MESSAGES.postCall.reasonSearchLabel})).toHaveAttribute(
       'placeholder',
       AI_SUMMARY_MESSAGES.postCall.searchPlaceholder

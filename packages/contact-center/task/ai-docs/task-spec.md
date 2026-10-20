@@ -561,7 +561,7 @@ Tests are split between widget-shell render tests (each `tests/<Widget>/index.ts
 ## AI summaries in CallControl
 
 `getAISummaryProps` in `src/helper.ts` maps the current task's SDK capabilities and
-`store.cc.aiSummaries` entries into optional mid-call and post-call views.
+`store.cc.apiAIAssistant.aiSummaries` entries into optional mid-call and post-call views.
 It reads `task.aiSummaryCapabilities` directly, with no additional media-type filter,
 and supplies no summary props when both capabilities are disabled. Each view receives
 the entry's raw SDK content, which can be absent during generation or failure, and
@@ -597,7 +597,7 @@ Widgets access summary APIs through `@webex/cc-store`.
 
 ### Reactive summary updates
 
-The store observes the widget-owned `cc.aiSummaries` map by reference. CallControl's
+The store observes the widget-owned `cc.apiAIAssistant.aiSummaries` map by reference. CallControl's
 observer reads that property through `getAISummaryProps`, so request completion,
 failure and local response updates refresh an open summary view without another task
 event or reopening the consult/transfer popover. SDK objects and summary payloads

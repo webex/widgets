@@ -488,17 +488,17 @@ class StoreWrapper implements IStoreWrapper {
     task: ITask = this.currentTask
   ): Promise<AISummary | undefined> => {
     // Disabled summaries are a quiet UI no-op; the SDK validates enabled requests.
-    if (!task?.aiSummaryCapabilities?.midCallEnabled) {
+    if (!task?.aiSummaryCapabilities?.midCallEnabled || !this.store.cc?.apiAIAssistant?.aiSummaries) {
       return undefined;
     }
     const interactionId = task.data.interactionId;
     const requestGeneration = ++this.aiSummaryRequestGeneration;
-    const entry = this.store.cc.aiSummaries[interactionId]?.initiator;
+    const entry = this.store.cc.apiAIAssistant.aiSummaries[interactionId]?.initiator;
     runInAction(() => {
-      this.store.cc.aiSummaries = {
-        ...this.store.cc.aiSummaries,
+      this.store.cc.apiAIAssistant.aiSummaries = {
+        ...this.store.cc.apiAIAssistant.aiSummaries,
         [interactionId]: {
-          ...this.store.cc.aiSummaries[interactionId],
+          ...this.store.cc.apiAIAssistant.aiSummaries[interactionId],
           initiator: {
             ...entry,
             response: entry?.content ? entry.response : {...EMPTY_AI_SUMMARY_RESPONSE},
@@ -518,7 +518,7 @@ class StoreWrapper implements IStoreWrapper {
         method: 'request',
       });
     }
-    const current = this.store.cc.aiSummaries[interactionId]?.initiator;
+    const current = this.store.cc.apiAIAssistant.aiSummaries[interactionId]?.initiator;
     if (current?.requestGeneration !== requestGeneration) {
       return undefined;
     }
@@ -543,26 +543,26 @@ class StoreWrapper implements IStoreWrapper {
           action: current.action ?? action,
         };
     runInAction(() => {
-      this.store.cc.aiSummaries = {
-        ...this.store.cc.aiSummaries,
-        [interactionId]: {...this.store.cc.aiSummaries[interactionId], initiator: updated},
+      this.store.cc.apiAIAssistant.aiSummaries = {
+        ...this.store.cc.apiAIAssistant.aiSummaries,
+        [interactionId]: {...this.store.cc.apiAIAssistant.aiSummaries[interactionId], initiator: updated},
       };
     });
     return result;
   };
 
   requestPostCallSummary = async (task: ITask = this.currentTask): Promise<AISummary | undefined> => {
-    if (!task?.aiSummaryCapabilities?.postCallEnabled) {
+    if (!task?.aiSummaryCapabilities?.postCallEnabled || !this.store.cc?.apiAIAssistant?.aiSummaries) {
       return undefined;
     }
     const interactionId = task.data.interactionId;
     const requestGeneration = ++this.aiSummaryRequestGeneration;
-    const entry = this.store.cc.aiSummaries[interactionId]?.['post-call'];
+    const entry = this.store.cc.apiAIAssistant.aiSummaries[interactionId]?.['post-call'];
     runInAction(() => {
-      this.store.cc.aiSummaries = {
-        ...this.store.cc.aiSummaries,
+      this.store.cc.apiAIAssistant.aiSummaries = {
+        ...this.store.cc.apiAIAssistant.aiSummaries,
         [interactionId]: {
-          ...this.store.cc.aiSummaries[interactionId],
+          ...this.store.cc.apiAIAssistant.aiSummaries[interactionId],
           'post-call': {
             ...entry,
             response: entry?.content ? entry.response : {...EMPTY_AI_SUMMARY_RESPONSE},
@@ -582,7 +582,7 @@ class StoreWrapper implements IStoreWrapper {
         method: 'request',
       });
     }
-    const current = this.store.cc.aiSummaries[interactionId]?.['post-call'];
+    const current = this.store.cc.apiAIAssistant.aiSummaries[interactionId]?.['post-call'];
     if (current?.requestGeneration !== requestGeneration) {
       return undefined;
     }
@@ -605,27 +605,28 @@ class StoreWrapper implements IStoreWrapper {
           response: current.content ? current.response : {...current.response, state: 'NOT_RECEIVED'},
         };
     runInAction(() => {
-      this.store.cc.aiSummaries = {
-        ...this.store.cc.aiSummaries,
-        [interactionId]: {...this.store.cc.aiSummaries[interactionId], 'post-call': updated},
+      this.store.cc.apiAIAssistant.aiSummaries = {
+        ...this.store.cc.apiAIAssistant.aiSummaries,
+        [interactionId]: {...this.store.cc.apiAIAssistant.aiSummaries[interactionId], 'post-call': updated},
       };
     });
     return result;
   };
 
   private updateAISummaryResponse(
-    role: Exclude<AISummaryRole, 'receiver'>,
+    role: AISummaryRole,
     expectedSummary: AISummary | undefined,
     update: (response: AISummaryResponse) => AISummaryResponse,
     task: ITask
   ): boolean {
-    const entry = task && this.store.cc.aiSummaries[task.data.interactionId]?.[role];
+    const entry = task && this.store.cc?.apiAIAssistant?.aiSummaries?.[task.data.interactionId]?.[role];
     if (
       this.currentTask !== task ||
       !expectedSummary ||
       expectedSummary.areTranscriptsAvailable === false ||
       entry?.content !== expectedSummary ||
-      entry.status === 'loading'
+      entry.status === 'loading' ||
+      (role === 'receiver' && entry.feedbackPending)
     ) {
       return false;
     }
@@ -635,10 +636,10 @@ class StoreWrapper implements IStoreWrapper {
     }
     const interactionId = task.data.interactionId;
     runInAction(() => {
-      this.store.cc.aiSummaries = {
-        ...this.store.cc.aiSummaries,
+      this.store.cc.apiAIAssistant.aiSummaries = {
+        ...this.store.cc.apiAIAssistant.aiSummaries,
         [interactionId]: {
-          ...this.store.cc.aiSummaries[interactionId],
+          ...this.store.cc.apiAIAssistant.aiSummaries[interactionId],
           [role]: {...entry, response},
         },
       };
@@ -695,7 +696,7 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   recordAISummaryCopied = (
-    role: Exclude<AISummaryRole, 'receiver'>,
+    role: AISummaryRole,
     expectedSummary: AISummary | undefined,
     task: ITask = this.currentTask
   ): boolean =>
@@ -720,16 +721,22 @@ class StoreWrapper implements IStoreWrapper {
     expectedSummary: AISummary,
     task: ITask = this.currentTask
   ): Promise<void> => {
-    const entry = task && this.store.cc.aiSummaries[task.data.interactionId]?.receiver;
-    if (!entry?.content || !entry.action || entry.content !== expectedSummary || entry.feedbackPending) {
+    const entry = task && this.store.cc?.apiAIAssistant?.aiSummaries?.[task.data.interactionId]?.receiver;
+    if (
+      this.currentTask !== task ||
+      !entry?.content ||
+      !entry.action ||
+      entry.content !== expectedSummary ||
+      entry.feedbackPending
+    ) {
       return;
     }
     const interactionId = task.data.interactionId;
     runInAction(() => {
-      this.store.cc.aiSummaries = {
-        ...this.store.cc.aiSummaries,
+      this.store.cc.apiAIAssistant.aiSummaries = {
+        ...this.store.cc.apiAIAssistant.aiSummaries,
         [interactionId]: {
-          ...this.store.cc.aiSummaries[interactionId],
+          ...this.store.cc.apiAIAssistant.aiSummaries[interactionId],
           receiver: {...entry, feedbackPending: true},
         },
       };
@@ -746,14 +753,14 @@ class StoreWrapper implements IStoreWrapper {
       });
     }
 
-    const current = this.store.cc.aiSummaries[interactionId]?.receiver;
+    const current = this.store.cc?.apiAIAssistant?.aiSummaries?.[interactionId]?.receiver;
     // A new summary replaced this one, or the task was removed, while the response was in flight.
     if (current?.content === expectedSummary && current.feedbackPending) {
       runInAction(() => {
-        this.store.cc.aiSummaries = {
-          ...this.store.cc.aiSummaries,
+        this.store.cc.apiAIAssistant.aiSummaries = {
+          ...this.store.cc.apiAIAssistant.aiSummaries,
           [interactionId]: {
-            ...this.store.cc.aiSummaries[interactionId],
+            ...this.store.cc.apiAIAssistant.aiSummaries[interactionId],
             receiver: {
               ...current,
               response: sent ? {...current.response, feedback} : current.response,
@@ -773,12 +780,13 @@ class StoreWrapper implements IStoreWrapper {
     action: AISummaryAction,
     task: ITask = this.currentTask
   ): Promise<AISummaryResponseSubmissionResult> => {
-    if (!task?.aiSummaryCapabilities?.midCallEnabled) {
+    if (!task?.aiSummaryCapabilities?.midCallEnabled || !this.store.cc?.apiAIAssistant?.aiSummaries) {
       return 'not-applicable';
     }
     try {
       await task.sendMidCallSummaryResponse(
-        this.store.cc.aiSummaries[task.data.interactionId]?.initiator?.response ?? EMPTY_AI_SUMMARY_RESPONSE,
+        this.store.cc.apiAIAssistant.aiSummaries[task.data.interactionId]?.initiator?.response ??
+          EMPTY_AI_SUMMARY_RESPONSE,
         action
       );
       return 'submitted';
@@ -793,17 +801,20 @@ class StoreWrapper implements IStoreWrapper {
 
   /** Adds the wrap-up code to the post-call response and sends it before the task is wrapped up. */
   sendPostCallSummaryResponse = async (wrapUpCode: string, task: ITask): Promise<AISummaryResponseSubmissionResult> => {
-    if (!task.aiSummaryCapabilities?.postCallEnabled) {
+    if (!task.aiSummaryCapabilities?.postCallEnabled || !this.store.cc?.apiAIAssistant?.aiSummaries) {
       return 'not-applicable';
     }
     const interactionId = task.data.interactionId;
-    const entry = this.store.cc.aiSummaries[interactionId]?.['post-call'];
+    const entry = this.store.cc.apiAIAssistant.aiSummaries[interactionId]?.['post-call'];
     const response = {...(entry?.response ?? EMPTY_AI_SUMMARY_RESPONSE), wrapUpCode};
     if (entry) {
       runInAction(() => {
-        this.store.cc.aiSummaries = {
-          ...this.store.cc.aiSummaries,
-          [interactionId]: {...this.store.cc.aiSummaries[interactionId], 'post-call': {...entry, response}},
+        this.store.cc.apiAIAssistant.aiSummaries = {
+          ...this.store.cc.apiAIAssistant.aiSummaries,
+          [interactionId]: {
+            ...this.store.cc.apiAIAssistant.aiSummaries[interactionId],
+            'post-call': {...entry, response},
+          },
         };
       });
     }
@@ -1249,11 +1260,11 @@ class StoreWrapper implements IStoreWrapper {
           this.store.realTimeAssist = next;
         });
       }
-      if (taskId && this.store.cc.aiSummaries[taskId]) {
+      if (taskId && this.store.cc.apiAIAssistant?.aiSummaries?.[taskId]) {
         runInAction(() => {
-          const next = {...this.store.cc.aiSummaries};
+          const next = {...this.store.cc.apiAIAssistant.aiSummaries};
           delete next[taskId];
-          this.store.cc.aiSummaries = next;
+          this.store.cc.apiAIAssistant.aiSummaries = next;
         });
       }
     }
@@ -1757,12 +1768,15 @@ class StoreWrapper implements IStoreWrapper {
         existingSummary?.task.off(TASK_EVENTS.TASK_FEATURE_ENABLEMENT, this.refreshTaskList);
         // Receiver summaries are pushed regardless of this agent's feature enablement.
         const listener = (payload: AISummary) => {
+          if (!this.store.cc?.apiAIAssistant?.aiSummaries) {
+            return;
+          }
           const interactionId = task.data.interactionId;
           runInAction(() => {
-            this.store.cc.aiSummaries = {
-              ...this.store.cc.aiSummaries,
+            this.store.cc.apiAIAssistant.aiSummaries = {
+              ...this.store.cc.apiAIAssistant.aiSummaries,
               [interactionId]: {
-                ...this.store.cc.aiSummaries[interactionId],
+                ...this.store.cc.apiAIAssistant.aiSummaries[interactionId],
                 receiver: {
                   status: 'ready',
                   content: payload,
@@ -2161,7 +2175,9 @@ class StoreWrapper implements IStoreWrapper {
         task.off(TASK_EVENTS.TASK_FEATURE_ENABLEMENT, this.refreshTaskList);
       });
       this.aiSummaryReceivedListeners = {};
-      this.store.cc.aiSummaries = {};
+      if (this.store.cc.apiAIAssistant) {
+        this.store.cc.apiAIAssistant.aiSummaries = {};
+      }
     });
   };
 

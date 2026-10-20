@@ -59,8 +59,6 @@ import {
 
 //  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
 interface IContactCenter {
-  /** Widget-owned AI summary state associated with this SDK contact-center instance. */
-  aiSummaries: Record<string, Partial<Record<AISummaryRole, AISummaryEntry>>>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   on: (event: string, callback: (data: any) => void) => void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -94,6 +92,8 @@ interface IContactCenter {
   removePreviewContact(payload: PreviewContactPayload): Promise<TaskResponse>;
   userPreference?: IUserPreferenceService;
   apiAIAssistant?: {
+    /** Widget-owned summaries observed by reference on the SDK AI Assistant API. */
+    aiSummaries: Record<string, Partial<Record<AISummaryRole, AISummaryEntry>>>;
     getRealTimeAssistance(params: RealTimeAssistRequestParams & {actionTimeStamp?: number}): Promise<unknown>;
     sendRealTimeAssistanceUserAction(params: RealTimeAssistUserActionParams): Promise<unknown>;
     requestWellnessBreak(): Promise<void>;
@@ -391,11 +391,7 @@ interface IStoreWrapper extends IStore {
     expectedSummary: AISummary | undefined,
     task?: ITask
   ): boolean;
-  recordAISummaryCopied(
-    role: Exclude<AISummaryRole, 'receiver'>,
-    expectedSummary: AISummary | undefined,
-    task?: ITask
-  ): boolean;
+  recordAISummaryCopied(role: AISummaryRole, expectedSummary: AISummary | undefined, task?: ITask): boolean;
   setAISummaryFeedback(
     role: Exclude<AISummaryRole, 'receiver'>,
     feedback: Exclude<AISummaryFeedback, 'none'>,
@@ -695,7 +691,7 @@ export const CAMPAIGN_PREVIEW_CAMPAIGN_TYPES = ['preview_standard', 'preview_dir
 /** The consult/transfer initiator's summary, the receiving agent's summary, or the wrap-up summary. */
 export type AISummaryRole = 'initiator' | 'receiver' | 'post-call';
 
-/** One summary of an interaction, stored at `cc.aiSummaries[interactionId][role]`. */
+/** One summary of an interaction, stored at `cc.apiAIAssistant.aiSummaries[interactionId][role]`. */
 export type AISummaryEntry = {
   /** Lifecycle of the latest request, or of the pushed receiver summary. */
   status: 'loading' | 'ready' | 'error';
