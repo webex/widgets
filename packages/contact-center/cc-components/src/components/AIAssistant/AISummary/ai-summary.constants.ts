@@ -8,6 +8,8 @@ export const AI_ASSISTANT_SUMMARY_MODES = {
 
 export const AI_ASSISTANT_SUMMARY_MESSAGES = {
   viewSummary: 'View summary',
+  editSummary: 'Edit summary',
+  editing: 'Editing',
   generatingTitle: 'Generating summary...',
   generatingDescription: 'Just a sec—the details are coming together.',
   unavailable: 'The summary is not available',
@@ -21,7 +23,6 @@ export const AI_ASSISTANT_SUMMARY_MESSAGES = {
   like: 'This is helpful',
   dislike: "This isn't helpful",
   retry: 'Retry',
-  editSectionLabel: (label: string) => `Edit ${label}`,
   sectionLabels: {
     initialContactReason: 'Initial contact reason',
     additionalContactReasons: 'Additional contact reason(s)',
@@ -34,21 +35,18 @@ export const AI_ASSISTANT_SUMMARY_MESSAGES = {
   midCall: {
     consultHeading: 'Here’s a consult summary—they’ll get a copy',
     transferHeading: 'Here’s a transfer summary—they’ll get a copy.',
-    searchPlaceholder: 'Search by name, queue, entry point or phone number',
     destinationCategory: 'Destination category',
     searchDestinations: 'Search destinations',
   },
   postCall: {
+    heading: 'Wrap Up Reasons',
     summaryHeading: 'Summary of your conversation',
     searchPlaceholder: 'Search topic',
-    completeAction: 'Complete Wrap-Up',
-    instructions: 'Choose a code, and click the summary to edit it if needed.',
+    completeAction: 'Submit Wrap Up',
+    suggested: 'AI-suggested:',
+    instructions: 'Choose a code, and select Edit summary to make changes if needed.',
     chooseReason: 'Choose a reason to wrap up',
-    reasonSearchLabel: 'Search wrap-up reasons',
     noReasonMatches: 'No wrap-up reasons match your search.',
-  },
-  feedback: {
-    pendingSubmission: 'Pending submission',
   },
 } as const;
 
@@ -73,3 +71,10 @@ export const AI_ASSISTANT_SUMMARY_BULLETED_SECTION_KEYS: ReadonlySet<AISummarySe
   'keyActionsTaken',
   'nextSteps',
 ]);
+
+/** Context labels for the shared suggestion/summary card action renderer. */
+export const AI_ASSISTANT_SUMMARY_ACTION_LABELS = {
+  copy: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary,
+  like: AI_ASSISTANT_SUMMARY_MESSAGES.like,
+  dislike: AI_ASSISTANT_SUMMARY_MESSAGES.dislike,
+} as const;

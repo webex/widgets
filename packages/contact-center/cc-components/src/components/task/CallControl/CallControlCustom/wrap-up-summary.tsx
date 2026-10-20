@@ -1,140 +1,124 @@
-import React, {useLayoutEffect, useRef, useState} from 'react';
-import {RadioGroupNext as RadioGroup, TextInput} from '@momentum-ui/react-collaboration';
-import {Button, Icon, Text} from '@momentum-design/components/dist/react';
+import React, {useState} from 'react';
+import {Button, Combobox, FilterChip, Icon, Option, Selectlistbox, Text} from '@momentum-design/components/dist/react';
 import AISummary, {AI_ASSISTANT_SUMMARY_MESSAGES as AI_SUMMARY_MESSAGES} from '../../../AIAssistant/AISummary';
-import {CLEAR_SEARCH, WRAP_UP_INTERACTION} from '../../constants';
-import type {WrapUpSummaryProps} from '../../task.types';
+import type {WrapUpSummaryProps, WrapUpSummaryReason} from '../../task.types';
 import './wrap-up-summary.styles.scss';
-
-const useReactId = (React as typeof React & {useId: () => string}).useId;
 
 const WrapUpSummary: React.FC<WrapUpSummaryProps> = ({
   reasons,
   summary,
   selectedReasonId,
-  completionPending = false,
   onReasonChange,
   onComplete,
 }) => {
-  const headingId = useReactId();
-  const [query, setQuery] = useState('');
-  const wrapUpPanelRef = useRef<HTMLElement | null>(null);
-  const summaryFocusedControlRef = useRef<HTMLElement | null>(null);
   const selectedReason = reasons.find((reason) => reason.id === selectedReasonId);
-  const normalizedQuery = query.trim().toLocaleLowerCase();
-  const filteredReasons = reasons.filter((reason) => reason.name.toLocaleLowerCase().includes(normalizedQuery));
-
-  useLayoutEffect(() => {
-    const focusedSummaryControl = summaryFocusedControlRef.current;
-    if (!focusedSummaryControl || focusedSummaryControl.isConnected) return;
-
-    const activeElement = document.activeElement;
-    if (!(activeElement instanceof HTMLElement) || activeElement === document.body || !activeElement.isConnected) {
-      wrapUpPanelRef.current?.focus();
-    }
-    summaryFocusedControlRef.current = null;
-  });
-
-  const handleSummaryFocusCapture = (event: React.FocusEvent<HTMLDivElement>) => {
-    const target = event.target;
-    if (target instanceof HTMLElement) {
-      summaryFocusedControlRef.current = target;
-    }
+  // Retain the committed picker value only while searching. Clearing the eligible
+  // reason must not reset Momentum's typed filter or erase its first character.
+  const [searchingValue, setSearchingValue] = useState<string>();
+  const isSearching = searchingValue !== undefined;
+  const pickerValue = searchingValue ?? selectedReason?.id ?? '';
+  const selectReason = (reason?: WrapUpSummaryReason) => {
+    setSearchingValue(undefined);
+    onReasonChange(reason ?? {id: '', name: ''});
   };
+  const suggestedReasons = (summary?.content?.suggestedWrapUpCodes ?? []).reduce<WrapUpSummaryReason[]>(
+    (suggestions, suggestion) => {
+      const matches = reasons.filter((reason) =>
+        typeof suggestion.id === 'string' ? reason.id === suggestion.id : reason.name === suggestion.name
+      );
+      const reason = matches.length === 1 ? matches[0] : undefined;
+      if (reason && !suggestions.some((existing) => existing.id === reason.id)) suggestions.push(reason);
+      return suggestions;
+    },
+    []
+  );
+  const showSuggestions =
+    suggestedReasons.length > 0 && !suggestedReasons.some((reason) => reason.id === selectedReasonId);
 
   return (
-    <section
-      className="wrap-up-summary agent-popover-content"
-      data-testid="wrap-up-summary"
-      ref={wrapUpPanelRef}
-      tabIndex={-1}
-    >
+    <section className="wrap-up-summary agent-popover-content" data-testid="wrap-up-summary">
       <div className="wrap-up-summary__scroll-content" data-testid="wrap-up-summary:scroll-content">
         <header className="wrap-up-summary__header">
-          <Text tagname="h2" className="wrap-up-summary__eyebrow">
-            {WRAP_UP_INTERACTION}
+          <Text tagname="h2" type="body-large-bold" className="wrap-up-summary__eyebrow">
+            {AI_SUMMARY_MESSAGES.postCall.heading}
           </Text>
-          <Text tagname="p" className="wrap-up-summary__intro">
+          <Text tagname="p" type="body-midsize-regular" className="wrap-up-summary__intro">
             {AI_SUMMARY_MESSAGES.postCall.instructions}
           </Text>
         </header>
-        <Text tagname="h3" className="wrap-up-summary__title" id={headingId}>
-          {AI_SUMMARY_MESSAGES.postCall.chooseReason}
-        </Text>
-        <div className="wrap-up-summary__search-field">
-          <Icon name="search-regular" className="wrap-up-summary__search-field-icon" aria-hidden="true" />
-          <TextInput
-            aria-label={AI_SUMMARY_MESSAGES.postCall.reasonSearchLabel}
-            className="wrap-up-summary__search-control"
-            inputClassName="wrap-up-summary__search"
-            placeholder={AI_SUMMARY_MESSAGES.postCall.searchPlaceholder}
-            value={query}
-            isDisabled={completionPending}
-            clearAriaLabel={CLEAR_SEARCH}
-            onChange={setQuery}
-          />
-        </div>
-        <div className="wrap-up-summary__reason-group" aria-disabled={completionPending ? 'true' : undefined}>
-          <RadioGroup
-            aria-labelledby={headingId}
-            className="wrap-up-summary__reasons"
-            isDisabled={completionPending}
-            onChange={(reasonId) => {
-              const reason = reasons.find((candidate) => candidate.id === reasonId);
-              if (reason) {
-                onReasonChange(reason);
-              }
-            }}
-            options={filteredReasons.map((reason) => ({
-              className: 'wrap-up-summary__reason',
-              label: reason.name,
-              value: reason.id,
-            }))}
-            value={selectedReason?.id ?? ''}
-          />
-          {filteredReasons.length === 0 ? (
-            <Text tagname="p" className="wrap-up-summary__empty">
-              {AI_SUMMARY_MESSAGES.postCall.noReasonMatches}
+        <Combobox
+          className="wrap-up-summary__reason-picker"
+          data-testid="wrap-up-summary:reason-picker"
+          data-aria-label={AI_SUMMARY_MESSAGES.postCall.chooseReason}
+          label={AI_SUMMARY_MESSAGES.postCall.chooseReason}
+          placeholder={AI_SUMMARY_MESSAGES.postCall.searchPlaceholder}
+          noResultText={AI_SUMMARY_MESSAGES.postCall.noReasonMatches}
+          controlType="controlled"
+          value={pickerValue}
+          strategy="fixed"
+          boundary="body"
+          onInput={(event) => {
+            // Momentum also emits input before a selected-option change; only typing clears the selection.
+            if (event.detail?.label === undefined) {
+              setSearchingValue(pickerValue);
+              onReasonChange({id: '', name: ''});
+            }
+          }}
+          onChange={(event) => {
+            const reason = reasons.find((candidate) => candidate.id === event.detail?.value);
+            selectReason(reason);
+          }}
+        >
+          <Selectlistbox>
+            {reasons.map((reason) => (
+              <Option key={reason.id} value={reason.id} label={reason.name}>
+                {reason.name}
+              </Option>
+            ))}
+          </Selectlistbox>
+        </Combobox>
+        {showSuggestions && (
+          <div className="wrap-up-summary__suggestions" data-testid="wrap-up-summary:suggestions">
+            <Text tagname="span" type="body-midsize-regular" className="wrap-up-summary__suggestions-label">
+              <Icon
+                name="sparkle-filled"
+                size={1.25}
+                lengthUnit="rem"
+                className="wrap-up-summary__suggestions-icon"
+                aria-hidden="true"
+              />
+              {AI_SUMMARY_MESSAGES.postCall.suggested}
             </Text>
-          ) : null}
-        </div>
+            <div className="wrap-up-summary__suggestion-chips">
+              {suggestedReasons.map((reason) => (
+                <FilterChip key={reason.id} label={reason.name} onClick={() => selectReason(reason)} />
+              ))}
+            </div>
+          </div>
+        )}
+        {!suggestedReasons.length && summary?.content?.suggestedWrapUpCodesMessage && (
+          <Text tagname="p" type="body-midsize-regular" className="wrap-up-summary__suggestion-message">
+            {summary.content.suggestedWrapUpCodesMessage}
+          </Text>
+        )}
         {summary && summary.state !== 'omitted' ? (
-          <div
-            className={`wrap-up-summary__body${summary.state === 'content' ? ' wrap-up-summary__body--content' : ''}`}
-            data-testid="wrap-up-summary:body"
-            onFocusCapture={handleSummaryFocusCapture}
-            onBlurCapture={(event) => {
-              const nextTarget = event.relatedTarget;
-              if (nextTarget instanceof HTMLElement && nextTarget !== document.body && nextTarget.isConnected) {
-                summaryFocusedControlRef.current = null;
-              }
-            }}
-          >
-            <AISummary
-              {...summary}
-              mode="post-call"
-              state={summary.state}
-              // The final response is taken when completion starts, so later edits would not be submitted.
-              controlsDisabled={completionPending}
-              containingPanelFocusTarget={wrapUpPanelRef}
-            />
+          <div className="wrap-up-summary__body" data-testid="wrap-up-summary:body">
+            <AISummary {...summary} mode="post-call" state={summary.state} />
           </div>
         ) : null}
       </div>
-      <div className="wrap-up-summary__actions">
-        {/* As in Agent Desktop, a summary that is still generating does not hold back wrap-up. */}
-        <Button
-          type="button"
-          variant="primary"
-          size={32}
-          disabled={!selectedReason || completionPending}
-          aria-label={AI_SUMMARY_MESSAGES.postCall.completeAction}
-          title={AI_SUMMARY_MESSAGES.postCall.completeAction}
-          onClick={selectedReason && !completionPending ? () => onComplete(selectedReason) : undefined}
-        >
-          {AI_SUMMARY_MESSAGES.postCall.completeAction}
-        </Button>
-      </div>
+      {/* As in Agent Desktop, a summary that is still generating does not hold back wrap-up. */}
+      <Button
+        className="wrap-up-summary__actions"
+        type="button"
+        variant="primary"
+        size={32}
+        disabled={!selectedReason || isSearching}
+        aria-label={AI_SUMMARY_MESSAGES.postCall.completeAction}
+        onClick={selectedReason && !isSearching ? () => onComplete(selectedReason) : undefined}
+      >
+        {AI_SUMMARY_MESSAGES.postCall.completeAction}
+      </Button>
     </section>
   );
 };

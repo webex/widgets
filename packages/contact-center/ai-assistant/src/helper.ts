@@ -302,7 +302,7 @@ export const useAiAssistant = (input: UseAiAssistantInput) => {
 /** The receiving agent's consult/transfer summary, pushed by the backend for the task's interaction. */
 export const getReceiverSummary = (task?: ITask): AIAssistantReceiverSummary | undefined => {
   const interactionId = task?.data.interactionId;
-  const summaryData = interactionId ? store.cc?.apiAIAssistant?.aiSummaries?.[interactionId]?.receiver : undefined;
+  const summaryData = interactionId ? store.aiSummaries[interactionId]?.receiver : undefined;
   if (!task || !interactionId || !summaryData) {
     return undefined;
   }

@@ -347,6 +347,148 @@
   border: 0.0625rem solid var(--mds-color-theme-outline-secondary-normal, #c7c7c7);
 }
 
+// The SDK summary template provides its own frame and scrollable body. Keep
+// these rules separate from real-time suggestion cards, which have a surface.
+.ai-assistant__card--summary {
+  background: transparent;
+  padding: 0;
+
+  // Adaptive Cards owns these native inputs; theme them with Momentum tokens.
+  .ac-textInput {
+    box-sizing: border-box;
+    border: 0.0625rem solid var(--mds-color-theme-outline-primary-normal, #7f8285);
+    border-radius: 0.5rem;
+    padding: 0.375rem 0.5rem;
+    background: transparent;
+    color: var(--mds-color-theme-text-primary-normal, #1b1c1d);
+    font: inherit;
+
+    &:focus-visible {
+      outline: 0.125rem solid var(--mds-color-theme-outline-focus-default, #0087ea);
+      outline-offset: 0.125rem;
+    }
+  }
+
+  // External SVG images cannot inherit the theme color. Reuse the bundled
+  // Momentum shape as a mask on its image wrapper to keep the accent themed.
+  div:has(> img.ac-image[src*='sparkle-filled']) {
+    background-color: var(--mds-color-theme-text-accent-normal, #0353a8);
+    mask: url('~@momentum-design/icons/dist/svg/sparkle-filled.svg') center / contain no-repeat;
+
+    > img {
+      opacity: 0;
+    }
+  }
+
+  .ac-adaptiveCard {
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden;
+    border-radius: 0.5rem;
+  }
+
+  [id='response-body-input-container'],
+  [id='response-body-edit-container'] {
+    border: 0.0625rem solid var(--mds-color-theme-outline-primary-normal, #7f8285);
+    border-radius: 0.5rem;
+    padding: 0.125rem !important;
+
+    &:focus-within {
+      outline: 0.125rem solid var(--mds-color-theme-outline-focus-default, #0087ea);
+      outline-offset: -0.125rem;
+    }
+  }
+
+  [id='response-body-edit-container'] {
+    background: transparent !important;
+    border: none;
+
+    .ac-textInput:focus-visible {
+      outline: none;
+    }
+  }
+
+  [id='conversation-summary-text-block'] {
+    overflow-y: auto;
+    max-block-size: 11.375rem;
+    padding: 0.5rem !important;
+  }
+
+  [id='conversationSummaryTextInput'] {
+    block-size: 10.25rem;
+
+    textarea {
+      border: none;
+      background: transparent;
+
+      &:focus-visible {
+        outline: none;
+      }
+    }
+  }
+
+  [id='response-body-summary-sections-container'] {
+    overflow-y: auto;
+    max-block-size: 11.375rem;
+    padding: 0.125rem 0.5rem 0.125rem 0.125rem !important;
+
+    .ac-input.ac-textInput.ac-multiline {
+      min-block-size: 1rem;
+      max-block-size: none;
+      block-size: auto;
+      box-sizing: border-box;
+      overflow: hidden;
+      resize: none;
+      font-size: 0.875rem;
+      padding-block: 0.5rem;
+      // Match Desktop's content-sized fields without measuring the DOM.
+      // stylelint-disable-next-line property-no-unknown
+      field-sizing: content;
+    }
+  }
+
+  .ac-container.style-attention {
+    border: 0.0625rem solid var(--mds-color-theme-outline-secondary-normal, #c7c7c7);
+    border-radius: 0.5rem;
+    background: transparent;
+    padding: 0.75rem;
+
+    .ac-textInput {
+      border: none;
+      background: transparent;
+      padding: 0;
+      box-shadow: none;
+
+      &:focus-visible {
+        outline: none;
+      }
+    }
+  }
+
+  .ac-pushButton {
+    font-size: 0.75rem;
+    min-inline-size: 1.75rem;
+    min-block-size: 1.75rem;
+    border-radius: 9999px;
+
+    > div:empty {
+      display: none;
+    }
+
+    &:has(> img):has(> div:empty):not(:has(> :not(img, div))),
+    &:has(> img):not(:has(> :not(img))) {
+      padding: 0;
+      min-inline-size: 1.5rem;
+      min-block-size: 1.5rem;
+    }
+  }
+
+  [id='ai-generated'],
+  [id='editing'] {
+    color: var(--mds-color-theme-text-secondary-normal);
+  }
+}
+
 // Scoped overrides for elements emitted by the adaptivecards renderer.
 .ai-assistant__card-host {
   font-size: 0.875rem;
@@ -523,39 +665,10 @@
 }
 
 .ai-assistant__summary-trigger {
-  align-items: center;
-  background: transparent;
-  border: 0.0625rem solid var(--mds-color-theme-outline-primary-normal, rgba(0, 0, 0, 0.55));
-  border-radius: 6.25rem;
-  box-sizing: border-box;
-  color: var(--mds-color-theme-text-primary-normal);
-  cursor: pointer;
-  display: inline-flex;
-  font: inherit;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  min-height: 1.75rem;
-  padding: 0.25rem 0.75rem;
-
-  &:hover {
-    background: var(--mds-color-theme-background-secondary-hover, rgba(0, 0, 0, 0.04));
-  }
-
-  &:focus-visible {
-    outline: 0.125rem solid var(--mds-color-theme-outline-focus-default, #0087ea);
-    outline-offset: 0.125rem;
-  }
-}
-
-.ai-assistant__summary-trigger--minimized {
-  min-height: 1.5rem;
-  padding-block: 0.125rem;
+  align-self: flex-start;
 }
 
 .ai-assistant__receiver-summary {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
   min-inline-size: 0;
   overflow: visible;
 }

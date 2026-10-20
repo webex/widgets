@@ -32,6 +32,7 @@ import {
   WellnessBreakState,
   WidgetsBehavioralMetric,
   WELLNESS_BREAK_NOTIFICATION_ACTIONS,
+  AI_SUMMARY_EDITABLE_SECTION_KEYS,
 } from './store.types';
 import type {AISummaryEntry, AISummaryResponseSubmissionResult, AISummaryRole} from './store.types';
 import Store from './store';
@@ -233,6 +234,10 @@ class StoreWrapper implements IStoreWrapper {
 
   get realTimeAssist() {
     return this.store.realTimeAssist;
+  }
+
+  get aiSummaries() {
+    return this.store.aiSummaries;
   }
 
   get isWellnessBreakEnabled() {
@@ -480,28 +485,36 @@ class StoreWrapper implements IStoreWrapper {
     });
   };
 
-  // The SDK owns validation, transport correlation and timeouts. This generation only
-  // prevents an older local promise settlement from overwriting the latest UI request.
+  requestMidCallSummary = (action: AISummaryAction, task: ITask = this.currentTask): Promise<AISummary | undefined> =>
+    this.requestAISummary(action, task);
 
-  requestMidCallSummary = async (
-    action: AISummaryAction,
-    task: ITask = this.currentTask
-  ): Promise<AISummary | undefined> => {
-    // Disabled summaries are a quiet UI no-op; the SDK validates enabled requests.
-    if (!task?.aiSummaryCapabilities?.midCallEnabled || !this.store.cc?.apiAIAssistant?.aiSummaries) {
+  requestPostCallSummary = (task: ITask = this.currentTask): Promise<AISummary | undefined> =>
+    this.requestAISummary('post-call', task);
+
+  // Both requests share the same lifecycle; the SDK owns transport correlation and timeouts.
+  private async requestAISummary(action: AISummaryAction | 'post-call', task: ITask): Promise<AISummary | undefined> {
+    const enabled =
+      action === 'post-call'
+        ? task?.aiSummaryCapabilities?.postCallEnabled
+        : task?.aiSummaryCapabilities?.midCallEnabled;
+    if (!enabled) {
       return undefined;
     }
+    const role = action === 'post-call' ? 'post-call' : 'initiator';
+    const midCallAction = action === 'post-call' ? undefined : action;
     const interactionId = task.data.interactionId;
     const requestGeneration = ++this.aiSummaryRequestGeneration;
-    const entry = this.store.cc.apiAIAssistant.aiSummaries[interactionId]?.initiator;
+    const entry = this.store.aiSummaries[interactionId]?.[role];
     runInAction(() => {
-      this.store.cc.apiAIAssistant.aiSummaries = {
-        ...this.store.cc.apiAIAssistant.aiSummaries,
+      this.store.aiSummaries = {
+        ...this.store.aiSummaries,
         [interactionId]: {
-          ...this.store.cc.apiAIAssistant.aiSummaries[interactionId],
-          initiator: {
+          ...this.store.aiSummaries[interactionId],
+          [role]: {
             ...entry,
-            response: entry?.content ? entry.response : {...EMPTY_AI_SUMMARY_RESPONSE},
+            response: entry?.content
+              ? entry.response
+              : {...EMPTY_AI_SUMMARY_RESPONSE, state: midCallAction && entry?.excluded ? 'EXCLUDED' : 'IGNORED'},
             status: 'loading',
             requestGeneration,
           },
@@ -511,14 +524,15 @@ class StoreWrapper implements IStoreWrapper {
 
     let result: AISummary | undefined;
     try {
-      result = await task.requestMidCallSummary(action);
+      result = action === 'post-call' ? await task.requestPostCallSummary() : await task.requestMidCallSummary(action);
     } catch (error) {
       this.store.logger?.error(`CC-Widgets: AI summary request failed: ${error}`, {
         module: 'storeEventsWrapper.ts',
         method: 'request',
       });
     }
-    const current = this.store.cc.apiAIAssistant.aiSummaries[interactionId]?.initiator;
+    const current = this.store.aiSummaries[interactionId]?.[role];
+    // Ignore a superseded request, or one whose task was removed while it loaded.
     if (current?.requestGeneration !== requestGeneration) {
       return undefined;
     }
@@ -528,74 +542,11 @@ class StoreWrapper implements IStoreWrapper {
       ? {
           status: 'ready',
           content: result,
+          ...(midCallAction ? {excluded: current.excluded, action: midCallAction} : {}),
           response: {
             ...EMPTY_AI_SUMMARY_RESPONSE,
             summary: result.sections ? {} : (result.summaryText ?? ''),
-            state: 'DEFAULT',
-            numberOfTimesViewed: 1,
-          },
-          action,
-        }
-      : {
-          ...current,
-          status: 'error',
-          response: current.content ? current.response : {...current.response, state: 'NOT_RECEIVED'},
-          action: current.action ?? action,
-        };
-    runInAction(() => {
-      this.store.cc.apiAIAssistant.aiSummaries = {
-        ...this.store.cc.apiAIAssistant.aiSummaries,
-        [interactionId]: {...this.store.cc.apiAIAssistant.aiSummaries[interactionId], initiator: updated},
-      };
-    });
-    return result;
-  };
-
-  requestPostCallSummary = async (task: ITask = this.currentTask): Promise<AISummary | undefined> => {
-    if (!task?.aiSummaryCapabilities?.postCallEnabled || !this.store.cc?.apiAIAssistant?.aiSummaries) {
-      return undefined;
-    }
-    const interactionId = task.data.interactionId;
-    const requestGeneration = ++this.aiSummaryRequestGeneration;
-    const entry = this.store.cc.apiAIAssistant.aiSummaries[interactionId]?.['post-call'];
-    runInAction(() => {
-      this.store.cc.apiAIAssistant.aiSummaries = {
-        ...this.store.cc.apiAIAssistant.aiSummaries,
-        [interactionId]: {
-          ...this.store.cc.apiAIAssistant.aiSummaries[interactionId],
-          'post-call': {
-            ...entry,
-            response: entry?.content ? entry.response : {...EMPTY_AI_SUMMARY_RESPONSE},
-            status: 'loading',
-            requestGeneration,
-          },
-        },
-      };
-    });
-
-    let result: AISummary | undefined;
-    try {
-      result = await task.requestPostCallSummary();
-    } catch (error) {
-      this.store.logger?.error(`CC-Widgets: AI summary request failed: ${error}`, {
-        module: 'storeEventsWrapper.ts',
-        method: 'request',
-      });
-    }
-    const current = this.store.cc.apiAIAssistant.aiSummaries[interactionId]?.['post-call'];
-    if (current?.requestGeneration !== requestGeneration) {
-      return undefined;
-    }
-
-    // A new result resets edits, copies and feedback; a failed refresh keeps the summary already shown.
-    const updated: AISummaryEntry = result
-      ? {
-          status: 'ready',
-          content: result,
-          response: {
-            ...EMPTY_AI_SUMMARY_RESPONSE,
-            summary: result.sections ? {} : (result.summaryText ?? ''),
-            state: 'DEFAULT',
+            state: midCallAction && current.excluded ? 'EXCLUDED' : 'DEFAULT',
             numberOfTimesViewed: 1,
           },
         }
@@ -603,15 +554,16 @@ class StoreWrapper implements IStoreWrapper {
           ...current,
           status: 'error',
           response: current.content ? current.response : {...current.response, state: 'NOT_RECEIVED'},
+          ...(midCallAction ? {action: current.action ?? midCallAction} : {}),
         };
     runInAction(() => {
-      this.store.cc.apiAIAssistant.aiSummaries = {
-        ...this.store.cc.apiAIAssistant.aiSummaries,
-        [interactionId]: {...this.store.cc.apiAIAssistant.aiSummaries[interactionId], 'post-call': updated},
+      this.store.aiSummaries = {
+        ...this.store.aiSummaries,
+        [interactionId]: {...this.store.aiSummaries[interactionId], [role]: updated},
       };
     });
     return result;
-  };
+  }
 
   private updateAISummaryResponse(
     role: AISummaryRole,
@@ -619,13 +571,14 @@ class StoreWrapper implements IStoreWrapper {
     update: (response: AISummaryResponse) => AISummaryResponse,
     task: ITask
   ): boolean {
-    const entry = task && this.store.cc?.apiAIAssistant?.aiSummaries?.[task.data.interactionId]?.[role];
+    const entry = task && this.store.aiSummaries[task.data.interactionId]?.[role];
     if (
       this.currentTask !== task ||
       !expectedSummary ||
       expectedSummary.areTranscriptsAvailable === false ||
       entry?.content !== expectedSummary ||
       entry.status === 'loading' ||
+      entry.excluded ||
       (role === 'receiver' && entry.feedbackPending)
     ) {
       return false;
@@ -636,10 +589,10 @@ class StoreWrapper implements IStoreWrapper {
     }
     const interactionId = task.data.interactionId;
     runInAction(() => {
-      this.store.cc.apiAIAssistant.aiSummaries = {
-        ...this.store.cc.apiAIAssistant.aiSummaries,
+      this.store.aiSummaries = {
+        ...this.store.aiSummaries,
         [interactionId]: {
-          ...this.store.cc.apiAIAssistant.aiSummaries[interactionId],
+          ...this.store.aiSummaries[interactionId],
           [role]: {...entry, response},
         },
       };
@@ -657,10 +610,12 @@ class StoreWrapper implements IStoreWrapper {
   ): boolean => {
     const originalValue =
       key === 'summaryText'
-        ? expectedSummary?.sections
-          ? undefined
-          : expectedSummary?.summaryText
-        : expectedSummary?.sections?.[key];
+        ? expectedSummary && !expectedSummary.sections
+          ? (expectedSummary.summaryText ?? '')
+          : undefined
+        : AI_SUMMARY_EDITABLE_SECTION_KEYS.some((section) => section === key) && expectedSummary?.sections
+          ? (expectedSummary.sections[key] ?? '')
+          : undefined;
     if (typeof originalValue !== 'string') {
       return false;
     }
@@ -710,18 +665,55 @@ class StoreWrapper implements IStoreWrapper {
   /** Initiator and post-call feedback is kept locally until the owning call action submits it. */
   setAISummaryFeedback = (
     role: Exclude<AISummaryRole, 'receiver'>,
-    feedback: Exclude<AISummaryFeedback, 'none'>,
+    feedback: AISummaryFeedback,
     expectedSummary: AISummary | undefined,
     task: ITask = this.currentTask
   ): boolean => this.updateAISummaryResponse(role, expectedSummary, (response) => ({...response, feedback}), task);
 
+  /** Excluding a summary changes only the next action's local response; the SDK payload stays intact. */
+  setAISummaryExcluded = (
+    excluded: boolean,
+    expectedSummary: AISummary | undefined,
+    task: ITask = this.currentTask
+  ): boolean => {
+    const interactionId = task?.data.interactionId;
+    const entry = interactionId && this.store.aiSummaries[interactionId]?.initiator;
+    if (
+      this.currentTask !== task ||
+      (!task?.aiSummaryCapabilities?.midCallEnabled && excluded) ||
+      !entry ||
+      entry.content !== expectedSummary
+    ) {
+      return false;
+    }
+    // Desktop's failed/empty request takes precedence over Exclude; a new request can still retain the choice.
+    const state =
+      entry.status === 'error' && !entry.content
+        ? 'NOT_RECEIVED'
+        : excluded
+          ? 'EXCLUDED'
+          : entry.content
+            ? 'DEFAULT'
+            : 'IGNORED';
+    runInAction(() => {
+      this.store.aiSummaries = {
+        ...this.store.aiSummaries,
+        [interactionId]: {
+          ...this.store.aiSummaries[interactionId],
+          initiator: {...entry, excluded, response: {...entry.response, state}},
+        },
+      };
+    });
+    return true;
+  };
+
   /** The receiving agent's feedback is sent right away; the selection is kept once the SDK confirms it. */
   setReceiverSummaryFeedback = async (
-    feedback: Exclude<AISummaryFeedback, 'none'>,
+    feedback: AISummaryFeedback,
     expectedSummary: AISummary,
     task: ITask = this.currentTask
   ): Promise<void> => {
-    const entry = task && this.store.cc?.apiAIAssistant?.aiSummaries?.[task.data.interactionId]?.receiver;
+    const entry = task && this.store.aiSummaries[task.data.interactionId]?.receiver;
     if (
       this.currentTask !== task ||
       !entry?.content ||
@@ -733,10 +725,10 @@ class StoreWrapper implements IStoreWrapper {
     }
     const interactionId = task.data.interactionId;
     runInAction(() => {
-      this.store.cc.apiAIAssistant.aiSummaries = {
-        ...this.store.cc.apiAIAssistant.aiSummaries,
+      this.store.aiSummaries = {
+        ...this.store.aiSummaries,
         [interactionId]: {
-          ...this.store.cc.apiAIAssistant.aiSummaries[interactionId],
+          ...this.store.aiSummaries[interactionId],
           receiver: {...entry, feedbackPending: true},
         },
       };
@@ -753,14 +745,14 @@ class StoreWrapper implements IStoreWrapper {
       });
     }
 
-    const current = this.store.cc?.apiAIAssistant?.aiSummaries?.[interactionId]?.receiver;
+    const current = this.store.aiSummaries[interactionId]?.receiver;
     // A new summary replaced this one, or the task was removed, while the response was in flight.
     if (current?.content === expectedSummary && current.feedbackPending) {
       runInAction(() => {
-        this.store.cc.apiAIAssistant.aiSummaries = {
-          ...this.store.cc.apiAIAssistant.aiSummaries,
+        this.store.aiSummaries = {
+          ...this.store.aiSummaries,
           [interactionId]: {
-            ...this.store.cc.apiAIAssistant.aiSummaries[interactionId],
+            ...this.store.aiSummaries[interactionId],
             receiver: {
               ...current,
               response: sent ? {...current.response, feedback} : current.response,
@@ -778,17 +770,16 @@ class StoreWrapper implements IStoreWrapper {
    */
   sendMidCallSummaryResponse = async (
     action: AISummaryAction,
-    task: ITask = this.currentTask
+    task: ITask = this.currentTask,
+    state?: AISummaryResponse['state']
   ): Promise<AISummaryResponseSubmissionResult> => {
-    if (!task?.aiSummaryCapabilities?.midCallEnabled || !this.store.cc?.apiAIAssistant?.aiSummaries) {
+    if (!task?.aiSummaryCapabilities?.midCallEnabled) {
       return 'not-applicable';
     }
     try {
-      await task.sendMidCallSummaryResponse(
-        this.store.cc.apiAIAssistant.aiSummaries[task.data.interactionId]?.initiator?.response ??
-          EMPTY_AI_SUMMARY_RESPONSE,
-        action
-      );
+      const response =
+        this.store.aiSummaries[task.data.interactionId]?.initiator?.response ?? EMPTY_AI_SUMMARY_RESPONSE;
+      await task.sendMidCallSummaryResponse(state ? {...response, state} : response, action);
       return 'submitted';
     } catch (error) {
       this.store.logger?.error(`CC-Widgets: AI summary response failed: ${error}`, {
@@ -801,34 +792,21 @@ class StoreWrapper implements IStoreWrapper {
 
   /** Adds the wrap-up code to the post-call response and sends it before the task is wrapped up. */
   sendPostCallSummaryResponse = async (wrapUpCode: string, task: ITask): Promise<AISummaryResponseSubmissionResult> => {
-    if (!task.aiSummaryCapabilities?.postCallEnabled || !this.store.cc?.apiAIAssistant?.aiSummaries) {
+    if (!task.aiSummaryCapabilities?.postCallEnabled) {
       return 'not-applicable';
     }
-    const interactionId = task.data.interactionId;
-    const entry = this.store.cc.apiAIAssistant.aiSummaries[interactionId]?.['post-call'];
+    const entry = this.store.aiSummaries[task.data.interactionId]?.['post-call'];
     const response = {...(entry?.response ?? EMPTY_AI_SUMMARY_RESPONSE), wrapUpCode};
-    if (entry) {
-      runInAction(() => {
-        this.store.cc.apiAIAssistant.aiSummaries = {
-          ...this.store.cc.apiAIAssistant.aiSummaries,
-          [interactionId]: {
-            ...this.store.cc.apiAIAssistant.aiSummaries[interactionId],
-            'post-call': {...entry, response},
-          },
-        };
-      });
-    }
-    let outcome: 'submitted' | 'response-failed' = 'submitted';
     try {
       await task.sendPostCallSummaryResponse(response);
+      return 'submitted';
     } catch (error) {
-      outcome = 'response-failed';
       this.store.logger?.error(`CC-Widgets: AI summary response failed: ${error}`, {
         module: 'storeEventsWrapper.ts',
         method: 'response',
       });
+      return 'response-failed';
     }
-    return outcome;
   };
 
   setCurrentTheme = (theme: string): void => {
@@ -1260,11 +1238,11 @@ class StoreWrapper implements IStoreWrapper {
           this.store.realTimeAssist = next;
         });
       }
-      if (taskId && this.store.cc.apiAIAssistant?.aiSummaries?.[taskId]) {
+      if (taskId && this.store.aiSummaries[taskId]) {
         runInAction(() => {
-          const next = {...this.store.cc.apiAIAssistant.aiSummaries};
+          const next = {...this.store.aiSummaries};
           delete next[taskId];
-          this.store.cc.apiAIAssistant.aiSummaries = next;
+          this.store.aiSummaries = next;
         });
       }
     }
@@ -1768,15 +1746,12 @@ class StoreWrapper implements IStoreWrapper {
         existingSummary?.task.off(TASK_EVENTS.TASK_FEATURE_ENABLEMENT, this.refreshTaskList);
         // Receiver summaries are pushed regardless of this agent's feature enablement.
         const listener = (payload: AISummary) => {
-          if (!this.store.cc?.apiAIAssistant?.aiSummaries) {
-            return;
-          }
           const interactionId = task.data.interactionId;
           runInAction(() => {
-            this.store.cc.apiAIAssistant.aiSummaries = {
-              ...this.store.cc.apiAIAssistant.aiSummaries,
+            this.store.aiSummaries = {
+              ...this.store.aiSummaries,
               [interactionId]: {
-                ...this.store.cc.apiAIAssistant.aiSummaries[interactionId],
+                ...this.store.aiSummaries[interactionId],
                 receiver: {
                   status: 'ready',
                   content: payload,
@@ -2175,9 +2150,7 @@ class StoreWrapper implements IStoreWrapper {
         task.off(TASK_EVENTS.TASK_FEATURE_ENABLEMENT, this.refreshTaskList);
       });
       this.aiSummaryReceivedListeners = {};
-      if (this.store.cc.apiAIAssistant) {
-        this.store.cc.apiAIAssistant.aiSummaries = {};
-      }
+      this.store.aiSummaries = {};
     });
   };
 

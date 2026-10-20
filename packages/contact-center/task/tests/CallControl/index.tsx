@@ -1,6 +1,5 @@
 import React from 'react';
 import {render} from '@testing-library/react';
-import {runInAction} from 'mobx';
 import * as helper from '../../src/helper';
 import {CallControl} from '../../src';
 import store from '@webex/cc-store';
@@ -13,75 +12,9 @@ const onEndCb = jest.fn();
 const onWrapUpCb = jest.fn();
 const onRecordingToggleCb = jest.fn();
 
-const createUseCallControlReturn = (
-  overrides: Partial<ReturnType<typeof helper.useCallControl>> = {}
-): ReturnType<typeof helper.useCallControl> => ({
-  currentTask: mockTask,
-  endCall: jest.fn(),
-  toggleHold: jest.fn(),
-  toggleRecording: jest.fn(),
-  wrapupCall: jest.fn(),
-  isRecording: false,
-  setIsRecording: jest.fn(),
-  buddyAgents: [],
-  loadBuddyAgents: jest.fn(),
-  loadingBuddyAgents: false,
-  transferCall: jest.fn(),
-  consultCall: jest.fn(),
-  endConsultCall: jest.fn(),
-  consultTransfer: jest.fn(),
-  consultAgentName: 'Consult Agent',
-  setConsultAgentName: jest.fn(),
-  holdTime: 0,
-  startTimestamp: 0,
-  lastTargetType: TARGET_TYPE.AGENT,
-  setLastTargetType: jest.fn(),
-  controls: createEnabledMainTaskUIControls(),
-  isHeld: false,
-  conferenceEnabled: true,
-  switchToMainCall: jest.fn(),
-  switchToConsult: jest.fn(),
-  secondsUntilAutoWrapup: 0,
-  cancelAutoWrapup: jest.fn(),
-  toggleMute: jest.fn(),
-  sendDtmf: jest.fn(),
-  isMuted: false,
-  consultConference: jest.fn(),
-  exitConference: jest.fn(),
-  conferenceParticipants: [],
-  conferenceParticipantDropRoster: null,
-  pendingParticipantDropId: null,
-  participantDropAnnouncement: null,
-  participantDropConfirmationTarget: null,
-  participantDropConfirmationDisabled: true,
-  requestParticipantDrop: jest.fn(),
-  confirmParticipantDrop: jest.fn(),
-  cancelParticipantDropConfirmation: jest.fn(),
-  getAddressBookEntries: jest.fn().mockResolvedValue({data: [], meta: {page: 0, totalPages: 0}}),
-  getEntryPoints: jest.fn().mockResolvedValue({data: [], meta: {page: 0, totalPages: 0}}),
-  getQueuesFetcher: jest.fn().mockResolvedValue({data: [], meta: {page: 0, totalPages: 0}}),
-  stateTimerLabel: null,
-  stateTimerTimestamp: 0,
-  consultTimerLabel: 'Consulting',
-  consultTimerTimestamp: 0,
-  isCampaignCall: false,
-  telephonyToast: null,
-  dismissTelephonyToast: jest.fn(),
-  ...overrides,
-});
-
-const resetTestState = (): void => {
-  runInAction(() => {
-    store.store.currentTask = null;
-    store.store.acceptedCampaignIds = new Set();
-  });
-  store.onErrorCallback = undefined;
-};
-
 describe('CallControl Component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    resetTestState();
     // Suppress console.error for error boundary tests
     jest.spyOn(console, 'error').mockImplementation(() => {});
   });
@@ -91,7 +24,59 @@ describe('CallControl Component', () => {
   });
 
   it('renders CallControlPresentational with correct props', () => {
-    const useCallControlSpy = jest.spyOn(helper, 'useCallControl').mockReturnValue(createUseCallControlReturn());
+    const useCallControlSpy = jest.spyOn(helper, 'useCallControl').mockReturnValue({
+      currentTask: mockTask,
+      endCall: jest.fn(),
+      toggleHold: jest.fn(),
+      toggleRecording: jest.fn(),
+      wrapupCall: jest.fn(),
+      isRecording: false,
+      setIsRecording: jest.fn(),
+      buddyAgents: [],
+      loadBuddyAgents: jest.fn(),
+      loadingBuddyAgents: false,
+      transferCall: jest.fn(),
+      consultCall: jest.fn(),
+      endConsultCall: jest.fn(),
+      consultTransfer: jest.fn(),
+      consultAgentName: 'Consult Agent',
+      setConsultAgentName: jest.fn(),
+      holdTime: 0,
+      startTimestamp: 0,
+      lastTargetType: TARGET_TYPE.AGENT,
+      setLastTargetType: jest.fn(),
+      controls: createEnabledMainTaskUIControls(),
+      isHeld: false,
+      conferenceEnabled: true,
+      switchToMainCall: jest.fn(),
+      switchToConsult: jest.fn(),
+      secondsUntilAutoWrapup: 0,
+      cancelAutoWrapup: jest.fn(),
+      toggleMute: jest.fn(),
+      sendDtmf: jest.fn(),
+      isMuted: false,
+      consultConference: jest.fn(),
+      exitConference: jest.fn(),
+      conferenceParticipants: [],
+      conferenceParticipantDropRoster: null,
+      pendingParticipantDropId: null,
+      participantDropAnnouncement: null,
+      participantDropConfirmationTarget: null,
+      participantDropConfirmationDisabled: true,
+      requestParticipantDrop: jest.fn(),
+      confirmParticipantDrop: jest.fn(),
+      cancelParticipantDropConfirmation: jest.fn(),
+      getAddressBookEntries: jest.fn().mockResolvedValue({data: [], meta: {page: 0, totalPages: 0}}),
+      getEntryPoints: jest.fn().mockResolvedValue({data: [], meta: {page: 0, totalPages: 0}}),
+      getQueuesFetcher: jest.fn().mockResolvedValue({data: [], meta: {page: 0, totalPages: 0}}),
+      stateTimerLabel: null,
+      stateTimerTimestamp: 0,
+      consultTimerLabel: 'Consulting',
+      consultTimerTimestamp: 0,
+      isCampaignCall: false,
+      telephonyToast: null,
+      dismissTelephonyToast: jest.fn(),
+    });
 
     render(
       <CallControl

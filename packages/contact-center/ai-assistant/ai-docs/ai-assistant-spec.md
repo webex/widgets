@@ -294,9 +294,9 @@ snapshots) is covered in `cc-components/tests/components/AIAssistant/`.
 ## Receiving-agent AI summaries
 
 `getReceiverSummary` in `src/helper.ts` reads the current interaction's receiver entry
-from `store.cc.apiAIAssistant.aiSummaries`, maps its request status and SDK `areTranscriptsAvailable`
+from `store.aiSummaries`, maps its request status and SDK `areTranscriptsAvailable`
 flag to a display surface, and passes the raw SDK content, confirmed feedback from
-`summaryData.response.feedback` and pending state to the presentation component. Received
+`summaryData.response.feedback` and pending state to the presentation component. Receiver feedback accepts `none` to withdraw a confirmed selection, using the same displayed-payload and pending-request guards. Received
 content remains visible during a failed or pending refresh. Copy callbacks delegate to
 `store.recordAISummaryCopied` for the receiver role; the store owns the response update
 and MobX action. The widget helper does not import MobX or mutate summary entries.
@@ -312,6 +312,10 @@ surface; other statuses supply no branch.
 Raw content without an adaptive card still supplies a branch; card rendering and
 unsupported-card fallback belong to the presentation component.
 Summary changes are observed by `AIAssistantInternal`.
+Widget tests use plain store mocks to verify summary projections. Real MobX
+notification coverage lives in `store/tests/ai-summary-observability.ts`; this
+package retains its existing `mobx-react-lite` observer without adding direct MobX
+development or peer dependencies.
 
 Evidence: `src/helper.ts`, `src/ai-assistant/index.tsx`;
 tests: receiver summary cases in `tests/ai-assistant/index.tsx`.

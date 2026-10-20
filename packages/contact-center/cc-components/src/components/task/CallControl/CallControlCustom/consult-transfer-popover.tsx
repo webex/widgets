@@ -1,4 +1,4 @@
-import React, {useLayoutEffect, useMemo, useRef, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {
   Text,
   ListNext,
@@ -8,7 +8,7 @@ import {
   TooltipNext,
   RadioGroupNext as RadioGroup,
 } from '@momentum-ui/react-collaboration';
-import {Icon, Checkbox, Spinner} from '@momentum-design/components/dist/react';
+import {Button as MomentumButton, Icon, Checkbox, Searchfield, Spinner} from '@momentum-design/components/dist/react';
 import AISummary, {AI_ASSISTANT_SUMMARY_MESSAGES as AI_SUMMARY_MESSAGES} from '../../../AIAssistant/AISummary';
 import ConsultTransferListComponent from './consult-transfer-list-item';
 import type {CategoryType, ConsultTransferPopoverComponentProps} from '../../task.types';
@@ -26,12 +26,18 @@ import {
   CLEAR_SEARCH,
   SCROLL_TO_LOAD_MORE,
   NO_DATA_AVAILABLE_CONSULT_TRANSFER,
-  DESTINATION_TO_CATEGORY,
   VOICE_DESTINATION_CATEGORY_LABELS,
+  VOICE_DESTINATION_SEARCH_PLACEHOLDERS,
+  CANCEL,
 } from '../../constants';
 import './consult-transfer-summary.styles.scss';
 
-const useReactId = (React as typeof React & {useId: () => string}).useId;
+const DESTINATION_CATEGORY = {
+  agent: CATEGORY_AGENTS,
+  queue: CATEGORY_QUEUES,
+  dialNumber: CATEGORY_DIAL_NUMBER,
+  entryPoint: CATEGORY_ENTRY_POINT,
+} as const;
 
 const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentProps> = ({
   heading,
@@ -52,12 +58,12 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
   isConferenceInProgress,
   summary,
   isTelephony = false,
+  inDialog = false,
   onClose,
+  onCancel,
+  onSummaryRequest,
   logger,
 }) => {
-  const headingId = useReactId();
-  const consultTransferPanelRef = useRef<HTMLDivElement | null>(null);
-  const summaryFocusedControlRef = useRef<HTMLElement | null>(null);
   const summaryVisible = Boolean(summary && summary.state !== 'omitted');
   const {showDialNumberTab = true, showEntryPointTab = true} = consultTransferOptions || {};
   const availableCategories = useMemo(
@@ -65,7 +71,7 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
       availableDestinations
         .filter((destination) => showDialNumberTab || destination !== 'dialNumber')
         .filter((destination) => showEntryPointTab || destination !== 'entryPoint')
-        .map((destination) => DESTINATION_TO_CATEGORY[destination]),
+        .map((destination) => DESTINATION_CATEGORY[destination]),
     [availableDestinations, showDialNumberTab, showEntryPointTab]
   );
   const isAgentsTabVisible = availableCategories.includes(CATEGORY_AGENTS);
@@ -96,62 +102,52 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
     logger,
   });
   const [allowParticipantsToInteract, setAllowParticipantsToInteract] = useState<boolean>(false);
-  const [hasShownSummary, setHasShownSummary] = useState(summaryVisible);
+  const [destinationSubmitted, setDestinationSubmitted] = useState(false);
+  const [selectedDestinations, setSelectedDestinations] = useState<
+    Partial<Record<CategoryType, {id?: string; name: string; number?: string}>>
+  >({});
+  const summaryLayoutActive = isTelephony ? Boolean(summary) : summaryVisible;
+  const [hasShownSummary, setHasShownSummary] = useState(summaryLayoutActive);
   // Keep the summary layout stable until this popover closes after summary eligibility is revoked.
   const isVoiceDestinationLayout = isTelephony && (Boolean(summary) || hasShownSummary);
-  const panelFocusEnabled = isVoiceDestinationLayout || hasShownSummary;
 
-  useLayoutEffect(() => {
-    if (summaryVisible && !hasShownSummary) {
+  useEffect(() => {
+    if (summaryLayoutActive && !hasShownSummary) {
       setHasShownSummary(true);
     }
-    const focusedSummaryControl = summaryFocusedControlRef.current;
-    if (!focusedSummaryControl || focusedSummaryControl.isConnected) return;
-
-    const activeElement = document.activeElement;
-    if (!(activeElement instanceof HTMLElement) || activeElement === document.body || !activeElement.isConnected) {
-      consultTransferPanelRef.current?.focus();
-    }
-    summaryFocusedControlRef.current = null;
-  });
-
-  const handleSummaryFocusCapture = (event: React.FocusEvent<HTMLElement>) => {
-    const target = event.target;
-    if (target instanceof HTMLElement) {
-      summaryFocusedControlRef.current = target;
-    }
-  };
-
-  const handleSummaryBlurCapture = (event: React.FocusEvent<HTMLElement>) => {
-    const relatedTarget = event.relatedTarget;
-    if (relatedTarget instanceof HTMLElement && relatedTarget !== document.body && relatedTarget.isConnected) {
-      summaryFocusedControlRef.current = null;
-    }
-  };
-
-  const emptyListMessage = (
-    <Text tagName="small" type="body-secondary">
-      No {selectedCategory.toLowerCase()} found
-    </Text>
-  );
+  }, [summaryLayoutActive, hasShownSummary]);
 
   const renderList = <T extends {id?: string; name: string; number?: string; presence?: 'active' | 'away'}>(
     items: T[],
     onButtonPress: (item: T) => void
   ) => (
     <ListNext listSize={items.length} className="agent-list">
-      {items.map((item) => {
+      {items.map((item, index) => {
         const key = `${item.id ?? item.name}-${item.number ?? ''}`;
         const listItem = (
           <ConsultTransferListComponent
             key={key}
             className={isVoiceDestinationLayout ? 'consult-list-item-wrapper' : undefined}
+            itemIndex={isVoiceDestinationLayout ? index : undefined}
             title={item.name}
-            subtitle={item.number}
+            subtitle={isVoiceDestinationLayout && selectedCategory === CATEGORY_AGENTS ? undefined : item.number}
             presence={item.presence}
             buttonIcon={isVoiceDestinationLayout ? 'next-regular' : buttonIcon}
             buttonAriaLabel={isVoiceDestinationLayout ? `Select ${item.name}` : undefined}
-            onButtonPress={() => onButtonPress(item)}
+            isSelected={
+              isVoiceDestinationLayout
+                ? selectedDestinations[selectedCategory]?.id === item.id &&
+                  selectedDestinations[selectedCategory]?.name === item.name &&
+                  selectedDestinations[selectedCategory]?.number === item.number
+                : undefined
+            }
+            onButtonPress={() => {
+              if (isVoiceDestinationLayout) {
+                setSelectedDestinations((selected) => ({...selected, [selectedCategory]: item}));
+              } else {
+                onButtonPress(item);
+              }
+            }}
             logger={logger}
           />
         );
@@ -163,7 +159,11 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
           </div>
         );
       })}
-      {items.length === 0 && (isVoiceDestinationLayout ? <li>{emptyListMessage}</li> : emptyListMessage)}
+      {items.length === 0 && (
+        <Text tagName="small" type="body-secondary">
+          No {selectedCategory.toLowerCase()} found
+        </Text>
+      )}
     </ListNext>
   );
 
@@ -181,10 +181,71 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
     onEntryPointSelect
   );
 
+  // Preserve a choice per category, but never submit a destination that the current list no longer exposes.
+  const selectedDestination = selectedDestinations[selectedCategory];
+  const selectedDestinationAvailable =
+    availableCategories.includes(selectedCategory) &&
+    selectedDestination &&
+    (selectedCategory === CATEGORY_AGENTS
+      ? buddyAgents.some((agent) => agent.agentId === selectedDestination.id)
+      : selectedCategory === CATEGORY_QUEUES
+        ? queuesData.some((queue) => queue.id === selectedDestination.id)
+        : selectedCategory === CATEGORY_DIAL_NUMBER
+          ? dialNumbers.some((number) => number.number === selectedDestination.number)
+          : entryPoints.some((entryPoint) => entryPoint.id === selectedDestination.id));
+
+  const clearCurrentSelection = () => {
+    setSelectedDestinations((selected) => ({...selected, [selectedCategory]: undefined}));
+  };
+
+  const manualDestinationAvailable =
+    availableCategories.includes(selectedCategory) && consultTransferManualAction.visible;
+
+  const submitVoiceDestination = () => {
+    if (destinationSubmitted || (!selectedDestinationAvailable && !manualDestinationAvailable)) return;
+    setDestinationSubmitted(true);
+    try {
+      if (!selectedDestinationAvailable) {
+        consultTransferManualAction.onClick?.();
+      } else {
+        switch (selectedCategory) {
+          case CATEGORY_AGENTS:
+            if (selectedDestination.id) {
+              onAgentSelect(selectedDestination.id, selectedDestination.name, allowParticipantsToInteract);
+            }
+            break;
+          case CATEGORY_QUEUES:
+            if (selectedDestination.id) {
+              onQueueSelect(selectedDestination.id, selectedDestination.name, allowParticipantsToInteract);
+            }
+            break;
+          case CATEGORY_DIAL_NUMBER:
+            if (selectedDestination.number) {
+              onDialNumberSelect(selectedDestination.number, allowParticipantsToInteract);
+            }
+            break;
+          case CATEGORY_ENTRY_POINT:
+            if (selectedDestination.id) {
+              onEntryPointSelect(selectedDestination.id, selectedDestination.name, allowParticipantsToInteract);
+            }
+            break;
+        }
+      }
+    } catch {
+      setDestinationSubmitted(false);
+      logger.error('CC-Components: Failed to submit consult/transfer destination', {
+        module: 'consult-transfer-popover.tsx',
+        method: 'submitVoiceDestination',
+      });
+      return;
+    }
+    onClose?.();
+  };
+
   const summaryHeading =
     action === 'Transfer' ? AI_SUMMARY_MESSAGES.midCall.transferHeading : AI_SUMMARY_MESSAGES.midCall.consultHeading;
   const searchPlaceholder = isVoiceDestinationLayout
-    ? AI_SUMMARY_MESSAGES.midCall.searchPlaceholder
+    ? VOICE_DESTINATION_SEARCH_PLACEHOLDERS[selectedCategory]
     : SEARCH_PLACEHOLDER;
   const voiceCategoryOptions = useMemo(
     () =>
@@ -198,22 +259,17 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
   return (
     <div
       className={`agent-popover-content${isVoiceDestinationLayout ? ' agent-popover-content--voice' : ''}`}
-      tabIndex={panelFocusEnabled ? -1 : undefined}
-      ref={consultTransferPanelRef}
-      aria-labelledby={panelFocusEnabled ? headingId : undefined}
+      aria-label={inDialog || summaryLayoutActive || hasShownSummary ? heading : undefined}
     >
-      <Text
-        tagName="h3"
-        className="agent-popover-title"
-        type="body-large-bold"
-        id={panelFocusEnabled ? headingId : undefined}
-      >
-        {heading}
-      </Text>
+      {!inDialog && (
+        <Text tagName="h3" className="agent-popover-title" type="body-large-bold">
+          {heading}
+        </Text>
+      )}
 
-      {isVoiceDestinationLayout && onClose && (
+      {!inDialog && isVoiceDestinationLayout && onClose && (
         <ButtonCircle className="consult-close-button" aria-label="Close popover" ghost size={20} onPress={onClose}>
-          <Icon name="cancel-regular" aria-hidden="true" />
+          <Icon name="cancel-regular" size={1} lengthUnit="rem" aria-hidden="true" />
         </ButtonCircle>
       )}
 
@@ -231,51 +287,67 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
       ) : null}
 
       <div className="consult-search-row">
-        {isVoiceDestinationLayout && <Icon name="search-regular" className="consult-search-icon" aria-hidden="true" />}
-        <TextInput
-          id="consult-search"
-          placeholder={searchPlaceholder}
-          value={searchQuery}
-          onChange={(value: string) => handleSearchChange(value)}
-          clearAriaLabel={CLEAR_SEARCH}
-          aria-label={isVoiceDestinationLayout ? AI_SUMMARY_MESSAGES.midCall.searchDestinations : undefined}
-          aria-labelledby={isVoiceDestinationLayout ? undefined : 'consult-search-label'}
-          className="consult-search-input"
-        />
-        {!isVoiceDestinationLayout && (
-          <div className="consult-action-buttons">
-            <TooltipNext
-              key={`reload-button-${selectedCategory}`}
-              triggerComponent={
-                <ButtonCircle
-                  className="consult-reload-button call-control-button"
-                  aria-label={`Reload ${selectedCategory}`}
-                  size={32}
-                  data-testid="consult-reload-button"
-                  onPress={() => {
-                    if (selectedCategory === CATEGORY_AGENTS && loadBuddyAgents) {
-                      loadBuddyAgents(action);
-                    } else {
-                      handleReload();
-                    }
-                  }}
-                  disabled={loadingBuddyAgents || loadingDialNumbers || loadingEntryPoints || loadingQueues}
-                >
-                  <Icon name="refresh-bold" />
-                </ButtonCircle>
-              }
-              color="secondary"
-              delay={[0, 0]}
-              placement="bottom-start"
-              type="description"
-              variant="small"
-              className="tooltip"
-            >
-              <Text tagName="p">{`Reload ${selectedCategory}`}</Text>
-            </TooltipNext>
-          </div>
+        {isVoiceDestinationLayout ? (
+          <Searchfield
+            id="consult-search"
+            placeholder={searchPlaceholder}
+            value={searchQuery}
+            dataAriaLabel={AI_SUMMARY_MESSAGES.midCall.searchDestinations}
+            clearAriaLabel={CLEAR_SEARCH}
+            className="consult-search-input"
+            onInput={(event) => {
+              clearCurrentSelection();
+              handleSearchChange(event.target.value);
+            }}
+            onClear={() => {
+              clearCurrentSelection();
+              handleSearchChange('');
+            }}
+          />
+        ) : (
+          <TextInput
+            id="consult-search"
+            placeholder={searchPlaceholder}
+            value={searchQuery}
+            onChange={handleSearchChange}
+            clearAriaLabel={CLEAR_SEARCH}
+            aria-labelledby="consult-search-label"
+            className="consult-search-input"
+          />
         )}
-        {consultTransferManualAction.visible && (
+        <div className="consult-action-buttons">
+          <TooltipNext
+            key={`reload-button-${selectedCategory}`}
+            triggerComponent={
+              <ButtonCircle
+                className="consult-reload-button call-control-button"
+                aria-label={`Reload ${selectedCategory}`}
+                size={32}
+                data-testid="consult-reload-button"
+                onPress={() => {
+                  if (isVoiceDestinationLayout) clearCurrentSelection();
+                  if (selectedCategory === CATEGORY_AGENTS && loadBuddyAgents) {
+                    loadBuddyAgents(action);
+                  } else {
+                    handleReload();
+                  }
+                }}
+                disabled={loadingBuddyAgents || loadingDialNumbers || loadingEntryPoints || loadingQueues}
+              >
+                <Icon name="refresh-bold" />
+              </ButtonCircle>
+            }
+            color="secondary"
+            delay={[0, 0]}
+            placement="bottom-start"
+            type="description"
+            variant="small"
+            className="tooltip"
+          >
+            <Text tagName="p">{`Reload ${selectedCategory}`}</Text>
+          </TooltipNext>
+        </div>
+        {!isVoiceDestinationLayout && consultTransferManualAction.visible && (
           <TooltipNext
             triggerComponent={
               <ButtonCircle
@@ -323,11 +395,7 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
         </div>
       ) : null}
 
-      <div
-        className="consult-list-container"
-        tabIndex={isVoiceDestinationLayout ? 0 : undefined}
-        onMouseDown={isVoiceDestinationLayout ? (event) => event.stopPropagation() : undefined}
-      >
+      <div className="consult-list-container">
         {isAgentsTabVisible &&
           selectedCategory === CATEGORY_AGENTS &&
           (loadingBuddyAgents ? (
@@ -442,20 +510,32 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
       </div>
       {summary && summary.state !== 'omitted' && (
         <section
-          className="consult-transfer-summary"
+          className={`consult-transfer-summary${summary.excluded ? ' consult-transfer-summary--excluded' : ''}`}
+          aria-disabled={summary.excluded || undefined}
           data-testid="consult-transfer:summary"
-          onFocusCapture={handleSummaryFocusCapture}
-          onBlurCapture={handleSummaryBlurCapture}
         >
-          <Text tagName="h4" className="consult-transfer-summary__heading" type="body-midsize-regular">
-            <Icon name="sparkle-filled" className="consult-transfer-summary__sparkle" aria-hidden="true" />
-            {summaryHeading}
-          </Text>
+          {!summary.content?.adaptiveCard && !summary.content?.editAdaptiveCard && (
+            <Text tagName="h4" className="consult-transfer-summary__heading" type="body-midsize-regular">
+              <Icon
+                name="sparkle-filled"
+                size={1}
+                lengthUnit="rem"
+                className="consult-transfer-summary__sparkle"
+                aria-hidden="true"
+              />
+              {summaryHeading}
+            </Text>
+          )}
           <AISummary
             {...summary}
             mode="mid-call-initiator"
             state={summary.state}
-            containingPanelFocusTarget={consultTransferPanelRef}
+            controlsDisabled={summary.excluded || summary.controlsDisabled}
+            onRetry={
+              onSummaryRequest
+                ? () => onSummaryRequest(action === 'Transfer' ? 'TRANSFER' : 'CONSULT')
+                : summary.onRetry
+            }
           />
         </section>
       )}
@@ -471,6 +551,31 @@ const ConsultTransferPopoverComponent: React.FC<ConsultTransferPopoverComponentP
               setAllowParticipantsToInteract(!allowParticipantsToInteract);
             }}
           />
+        </div>
+      )}
+      {isVoiceDestinationLayout && (
+        <div className="consult-transfer-actions">
+          {summary && summary.state !== 'omitted' && summary.onExcludeChange && (
+            <Checkbox
+              className="consult-transfer-actions__exclude"
+              label="Exclude summary"
+              checked={summary.excluded ?? false}
+              disabled={destinationSubmitted}
+              onChange={() => summary.onExcludeChange?.(!summary.excluded)}
+            />
+          )}
+          <MomentumButton type="button" variant="secondary" size={32} onClick={onCancel ?? onClose}>
+            {CANCEL}
+          </MomentumButton>
+          <MomentumButton
+            type="button"
+            variant="primary"
+            size={32}
+            disabled={destinationSubmitted || (!selectedDestinationAvailable && !manualDestinationAvailable)}
+            onClick={submitVoiceDestination}
+          >
+            {action}
+          </MomentumButton>
         </div>
       )}
     </div>

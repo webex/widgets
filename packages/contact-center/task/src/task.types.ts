@@ -1,4 +1,4 @@
-import type {
+import {
   TaskProps,
   ControlProps,
   OutdialCallProps,
@@ -6,7 +6,7 @@ import type {
   RealTimeTranscriptEntry,
   ParticipantDropAnnouncement,
 } from '@webex/cc-components';
-import type {RealTimeTranscriptionData} from '@webex/cc-store';
+import {RealTimeTranscriptionData} from '@webex/cc-store';
 
 export type UseTaskProps = Pick<TaskProps, 'incomingTask' | 'logger'> &
   Partial<Pick<TaskProps, 'onAccepted' | 'onRejected'>>;

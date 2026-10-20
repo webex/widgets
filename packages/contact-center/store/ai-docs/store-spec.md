@@ -410,7 +410,7 @@ Verification: `yarn run build` from the repository root.
 
 ## AI summaries
 
-`StoreWrapper` is the SDK boundary for summaries. `cc.apiAIAssistant.aiSummaries[interactionId][role]`
+`StoreWrapper` is the SDK boundary for summaries. `Store.aiSummaries[interactionId][role]`
 keeps the SDK summary, SDK response record and request state for `initiator`, `receiver`,
 and `post-call`. Store requests, receiver events and editable-summary response
 actions update these records inside `runInAction`. Widget helpers bind editing,
@@ -420,13 +420,12 @@ A new SDK result replaces the unchanged `content` and initializes a fresh respon
 Refreshing or failing a request retains
 content already displayed and its response record; task removal and logout clear them.
 
-The store observes `cc` by reference. `registerCC` makes only the widget-owned
-`aiSummaries` property on the existing SDK `apiAIAssistant` instance `observable.ref`,
-preserving both SDK instances and unchanged
-summary payload identities. SDK events, request results and local response edits
-replace the map inside actions, notifying widgets without waiting for another task
-event. Re-registering the same SDK instance preserves the map and its annotation.
-SDK internals and summary contents are not deeply observed.
+`Store.aiSummaries` starts empty and uses `observable.ref`, preserving SDK summary
+payload identities. `StoreWrapper.aiSummaries` exposes the map through a getter.
+SDK events, request results and local response edits replace it inside actions,
+notifying widgets without another task event. Re-registering the same SDK instance
+preserves the map; registering a different instance clears it. The SDK instance
+retains its own `observable.ref` boundary and receives no widget-owned properties.
 
 An agent can receive a transferred call and then consult or transfer it again. The
 received card remains in AI Assistant while the initiator summary is used in the
@@ -439,6 +438,9 @@ interaction ID lets task cleanup remove them together; entries are created as ne
   summary kind, and return the SDK `AISummary` or `undefined`. Like suggested responses,
   summary requests and responses check the SDK flags directly, with no additional media-type
   restriction. Disabled requests are quiet UI no-ops rather than SDK validation errors.
+  Both entry points share one request lifecycle for loading, replacement, retained
+  content after failure and stale-result rejection; only the SDK request and
+  initiator action/exclusion metadata differ.
   The SDK owns validation, transport correlation and timeouts. The store keeps a request
   generation only to stop an older local Promise settlement, including a delayed SDK
   publish failure, from overwriting a newer UI request. It does not correlate backend replies.
@@ -446,6 +448,10 @@ interaction ID lets task cleanup remove them together; entries are created as ne
   SDK updates `task.aiSummaryCapabilities`. The current task is refreshed so observers
   read the latest flags, including enablement arriving after the task and later disabling
   the feature. The SDK owns the flags; the store adds no capability map or enablement helper.
+  On refresh, recovered SDK Tasks start with both flags disabled until a feature-enablement
+  frame is received. The widget does not infer enablement from organization settings or
+  another application's session storage; live summary checks therefore need a replayed
+  frame or a fresh call after initialization.
   `TASK_MID_CALL_SUMMARY_RECEIVED` supplies the receiver summary. Listeners are rebound
   together when a task object is replaced, registered once per task object, and detached
   on task removal and logout.
@@ -459,34 +465,52 @@ interaction ID lets task cleanup remove them together; entries are created as ne
   transport payloads belong to the SDK boundary.
 - Each entry stores an SDK `AISummaryResponse` in `response`. The store's
   `editAISummary` and `setAISummaryFeedback` methods update initiator/post-call response
-  fields; `recordAISummaryCopied` tracks copies for all three roles. These methods do
+  fields, including `feedback: none` to withdraw a selection; `recordAISummaryCopied` tracks copies for all three roles. These methods do
   not change SDK content or submit a response. Each method accepts the displayed SDK payload and Task, rejecting task
-  switches, replaced content, unavailable transcripts and pending refreshes. Edits
-  accept only fields present in the displayed summary; unchanged values preserve the
+  switches, replaced content, unavailable transcripts, excluded summaries and pending refreshes. Edits
+  accept only SDK-defined editable section keys or plain summary text. The shared
+  `AI_SUMMARY_EDITABLE_SECTION_KEYS` constant is typed against SDK `AISummarySections`;
+  an omitted optional section has an empty-string baseline so the SDK edit card can fill it.
+  Unknown fields and the separate read-only resolution are rejected. Unchanged values preserve the
   response identity and reverting a structured field removes its override. Receiver
   copy updates are also rejected while feedback submission is pending. Senders forward
   the record to the SDK.
   The SDK sends these fields verbatim and supplies no runtime defaults. Received
   summaries start with `DEFAULT` and one view. Requests without content start with
-  `IGNORED`, including retries; failure without content changes the state to `NOT_RECEIVED`.
+  `IGNORED`, including retries, unless the initiator excluded the summary; failure without content changes the state to `NOT_RECEIVED`.
   Structured responses start with `{}` and plain-text responses start with SDK summary text.
+- `setAISummaryExcluded(excluded, expectedSummary, task)` keeps the initiator's picker choice
+  in the entry's optional `excluded` field and updates the local response state. It rejects
+  a different active task, replaced content or a missing entry; it neither changes SDK
+  content nor sends a network request. The checkbox remains available during generation
+  and on unavailable/error states. Selected exclusion uses `EXCLUDED`; clearing it restores
+  `DEFAULT` with content or `IGNORED` while waiting without content. A failed request without
+  content always uses `NOT_RECEIVED`, ahead of exclusion, matching Desktop submission precedence.
+  Request completion and Retry retain the current picker choice; closing the picker clears it.
 - `setReceiverSummaryFeedback(feedback, expectedSummary, task)` submits receiver feedback
   immediately. It accepts the displayed SDK payload itself, with no revision counter.
   The store rejects callbacks from a different active Task, blocks overlapping sends
   and applies the acknowledgement only while that same SDK payload remains current.
   A task switch during submission still allows the matching entry to settle;
   replacement events and task removal invalidate it.
-  A successful send selects the feedback; a failed send preserves the previous selection.
+  A successful send confirms the feedback, including `none` to clear it; a failed send preserves the previous selection. Selection remains unchanged while acknowledgement is pending.
   Receiver responses use SDK `summaryText`, including when the payload also has sections
   or an adaptive card; absent text is sent as `''`.
-- `sendMidCallSummaryResponse(action, task)` and `sendPostCallSummaryResponse(wrapUpCode, task)`
+- `sendMidCallSummaryResponse(action, task, state?)` and `sendPostCallSummaryResponse(wrapUpCode, task)`
   return `AISummaryResponseSubmissionResult`: `submitted` after SDK acknowledgement,
   `response-failed` after a failed send, or `not-applicable` when the required task or
   summary capability is absent. Failed sends are logged and resolve with an outcome so
   the initiating consult, transfer or wrap-up action can continue.
-- `sendPostCallSummaryResponse(wrapUpCode, task)` adds the wrap-up code to the SDK response
-  record and sends it on that task before `task.wrapup()` runs. This keeps the exact task
-  context available and removes the need for callers to capture and later submit a response.
+  The optional mid-call state creates a submission snapshot without changing the stored
+  response, so Cancel can send `MID_CALL_CANCELLED` before clearing the picker choice.
+  A successful Consult/Transfer sends the existing response once; closing after submission
+  does not send a cancellation.
+- `sendPostCallSummaryResponse(wrapUpCode, task)` snapshots the SDK response and wrap-up
+  code synchronously without writing the submission payload back to summary state,
+  then dispatches it on that task. CallControl starts `task.wrapup()`
+  without waiting for summary acknowledgement; subsequent task cleanup cannot erase
+  the dispatched payload. SDK `3.12.0-next.158` snapshots the task IDs and response fields
+  before awaiting its independent HTTP request. Failed sends are logged.
   If no summary entry exists, it sends an ignored response without creating an entry. It
   resolves to `submitted` or `response-failed`; disabled post-call summaries return
   `not-applicable`.
@@ -502,7 +526,7 @@ The React sample uses the SDK-supported `User requested logout` reason for page-
 `AISummary` is the common incoming payload type; `AISummaryResponse` is the distinct
 feedback payload sent back to the SDK. The store retains both types directly. The UI
 entry adds request lifecycle, local request generation, the pending receiver-feedback
-flag and the consult/transfer action. Copy counts, edits and feedback
+flag, optional initiator exclusion choice and the consult/transfer action. Copy counts, edits and feedback
 use SDK response fields rather than duplicate widget fields.
 
 Evidence: `src/store.ts`, `src/storeEventsWrapper.ts`, `src/store.types.ts`, `src/task-utils.ts`;

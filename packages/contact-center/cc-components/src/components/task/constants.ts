@@ -1,20 +1,18 @@
-import {CATEGORY_AGENTS, CATEGORY_DIAL_NUMBER, CATEGORY_ENTRY_POINT, CATEGORY_QUEUES} from './task.types';
 import type {CategoryType} from './task.types';
-
-// SDK destination keys mapped to the categories used by consult/transfer controls.
-export const DESTINATION_TO_CATEGORY = {
-  agent: CATEGORY_AGENTS,
-  queue: CATEGORY_QUEUES,
-  dialNumber: CATEGORY_DIAL_NUMBER,
-  entryPoint: CATEGORY_ENTRY_POINT,
-} as const;
 
 // Display labels for those categories in the voice destination picker.
 export const VOICE_DESTINATION_CATEGORY_LABELS: Record<CategoryType, string> = {
   Agents: 'Agent',
-  Queues: 'Queues',
-  'Dial Number': 'Dial number',
-  'Entry Point': 'Entry point',
+  Queues: 'Queue',
+  'Dial Number': 'Dial Number',
+  'Entry Point': 'Entry Point',
+};
+
+export const VOICE_DESTINATION_SEARCH_PLACEHOLDERS: Record<CategoryType, string> = {
+  Agents: 'Search agents',
+  Queues: 'Search queues',
+  'Dial Number': 'Search by Name or Number',
+  'Entry Point': 'Search Entry Points',
 };
 
 // Shared text constants for task components

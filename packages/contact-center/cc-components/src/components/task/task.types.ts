@@ -62,12 +62,14 @@ export type ParticipantDropAnnouncement = {
   message: string;
 };
 
-type AISummaryViewProps = 'content' | 'editedSummary' | 'selectedFeedback' | 'requestPending';
+type AISummaryViewProps = 'content' | 'editedSummary' | 'selectedFeedback' | 'controlsDisabled' | 'onRetry';
 
 /** The initiating agent's consult/transfer summary shown in the popover. */
 export type ConsultTransferSummaryView = Pick<AISummaryProps, AISummaryViewProps> &
   Required<Pick<AISummaryProps, 'onEdit' | 'onCopy' | 'onFeedback'>> & {
     state: AISummaryPresentationState | 'omitted';
+    excluded?: boolean;
+    onExcludeChange?: (excluded: boolean) => boolean;
   };
 
 /** The summary shown in the wrap-up panel. */
@@ -79,7 +81,6 @@ export type WrapUpSummaryProps = {
   reasons: readonly WrapUpSummaryReason[];
   summary?: WrapUpSummaryView;
   selectedReasonId?: string;
-  completionPending?: boolean;
   onReasonChange: (reason: WrapUpSummaryReason) => void;
   onComplete: (reason: WrapUpSummaryReason) => void;
 };
@@ -88,6 +89,8 @@ export type CallControlAISummaryProps = {
   midCall?: ConsultTransferSummaryView;
   postCall?: WrapUpSummaryView;
   requestMidCallSummary?: (action: AISummaryAction) => Promise<void>;
+  cancelMidCallSummary?: (action: AISummaryAction) => void;
+  resetMidCallSummaryExclusion?: () => void;
   requestPostCallSummary?: () => void;
 };
 
@@ -352,7 +355,7 @@ export interface ControlProps {
    * @param wrapupReason - The reason for wrapping up the call.
    * @param wrapupId - The ID associated with the wrap-up reason.
    */
-  wrapupCall: (wrapupReason: string, wrapupId: string) => void | Promise<boolean>;
+  wrapupCall: (wrapupReason: string, wrapupId: string) => void;
 
   /**
    * Flag to determine if the task is held
@@ -770,6 +773,8 @@ export interface ConsultTransferListComponentProps {
   presence?: 'active' | 'away';
   buttonIcon: string;
   buttonAriaLabel?: string;
+  isSelected?: boolean;
+  itemIndex?: number;
   onButtonPress: () => void;
   className?: string;
   logger: ILogger;
@@ -807,8 +812,12 @@ export interface ConsultTransferPopoverComponentProps {
   availableDestinations: TaskUIControls['consultTransferDestinations']['consult'];
   /** Eligible telephony tasks use the summary layout with destination radios and a close button. */
   isTelephony?: boolean;
+  /** The parent renders the native dialog title and close control. */
+  inDialog?: boolean;
   summary?: ConsultTransferSummaryView;
+  onSummaryRequest?: (action: AISummaryAction) => Promise<void>;
   onClose?: () => void;
+  onCancel?: () => void;
   /** Options governing popover visibility/behavior */
   consultTransferOptions?: ConsultTransferOptions;
   isConferenceInProgress?: boolean;

@@ -1,39 +1,17 @@
-import React, {useEffect, useLayoutEffect, useRef, useState} from 'react';
-import type {FocusEvent} from 'react';
+import {useEffect, useLayoutEffect, useRef, useState} from 'react';
 import type {AISummaryEntry, AISummaryFeedback} from '@webex/cc-store';
+import {AI_SUMMARY_EDITABLE_SECTION_KEYS} from '@webex/cc-store';
+import type {AIAssistantActionEvent} from '../ai-assistant.types';
 import {
   AI_ASSISTANT_SUMMARY_MESSAGES,
   AI_ASSISTANT_SUMMARY_MODES,
   AI_ASSISTANT_SUMMARY_SECTION_ORDER,
 } from './ai-summary.constants';
-import {copySuggestion, getNextFeedback} from '../AdaptiveCardRenderer/adaptive-card-renderer.utils';
+import {copyToClipboard, extractCardText, getNextFeedback} from '../AdaptiveCardRenderer/adaptive-card-renderer.utils';
 import {COPIED_FEEDBACK_MS} from '../constants';
-import type {
-  AISummaryDisplaySection,
-  AISummaryFocusTarget,
-  AISummaryProps,
-  AISummaryTooltipControl,
-} from './ai-summary.types';
+import type {AISummaryDisplaySection, AISummaryProps} from './ai-summary.types';
 
-const useReactId = (React as typeof React & {useId: () => string}).useId;
-
-const isEnabledFocusTarget = (element: HTMLElement): boolean =>
-  element.isConnected &&
-  !element.hasAttribute('disabled') &&
-  element.getAttribute('aria-disabled') !== 'true' &&
-  element.tabIndex >= 0;
-
-const getEnabledControls = (root: HTMLElement): HTMLElement[] =>
-  Array.from(
-    root.querySelectorAll<HTMLElement>('button, [href], input, textarea, mdc-textarea, select, [tabindex]')
-  ).filter(
-    (element) =>
-      isEnabledFocusTarget(element) ||
-      (element.localName === 'mdc-textarea' &&
-        element.isConnected &&
-        !element.hasAttribute('disabled') &&
-        element.getAttribute('aria-disabled') !== 'true')
-  );
+let summarySequence = 0;
 
 /** The summary's sections in display order, with the read-only post-call resolution among them. */
 export const getDisplaySections = (content: NonNullable<AISummaryEntry['content']>): AISummaryDisplaySection[] =>
@@ -69,6 +47,17 @@ const getDisplayContent = (props: AISummaryProps): AISummaryEntry['content'] => 
 export const useAISummaryInteractions = (props: AISummaryProps) => {
   const rootRef = useRef<HTMLDivElement>(null);
   const displayContent = getDisplayContent(props);
+  const [editingContent, setEditingContent] = useState<AISummaryEntry['content']>();
+  const hasEdits =
+    typeof props.editedSummary === 'string'
+      ? props.editedSummary !== (props.content?.summaryText ?? '')
+      : Boolean(props.editedSummary && Object.keys(props.editedSummary).length);
+  const isEditing = Boolean(props.onEdit && props.content && (editingContent === props.content || hasEdits));
+  const startEditing = () => {
+    if (props.state === 'content' && props.onEdit && !props.controlsDisabled) {
+      setEditingContent(props.content);
+    }
+  };
   // Compare the copied text, so response bookkeeping does not reset copy feedback.
   const copyText =
     props.mode === AI_ASSISTANT_SUMMARY_MODES.MID_CALL_RECEIVER || !displayContent
@@ -78,12 +67,12 @@ export const useAISummaryInteractions = (props: AISummaryProps) => {
   useLayoutEffect(() => {
     latestPropsRef.current = {props, copyText};
   });
-  const focusTargetRef = useRef<AISummaryFocusTarget | null>(null);
   const [copied, setCopied] = useState(false);
-  const [hoveredTooltip, setHoveredTooltip] = useState<AISummaryTooltipControl | null>(null);
-  const summaryId = useReactId();
-  const feedbackDescriptionId = `ai-summary-feedback-${summaryId}`;
-  const disabled = Boolean(props.controlsDisabled || props.requestPending);
+  const [summaryId] = useState(() => {
+    summarySequence += 1;
+    return summarySequence;
+  });
+  const disabled = Boolean(props.controlsDisabled);
   const selectedFeedback = props.selectedFeedback ?? 'none';
 
   useEffect(() => {
@@ -98,83 +87,16 @@ export const useAISummaryInteractions = (props: AISummaryProps) => {
     return () => clearTimeout(timer);
   }, [copied]);
 
-  useEffect(() => {
-    if (hoveredTooltip === null) {
-      return undefined;
-    }
-    const dismissTooltip = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        event.preventDefault();
-        event.stopPropagation();
-        setHoveredTooltip(null);
-      }
-    };
-    document.addEventListener('keydown', dismissTooltip, true);
-    return () => document.removeEventListener('keydown', dismissTooltip, true);
-  }, [hoveredTooltip]);
-
-  const restoreFocus = () => {
-    const focusTarget = focusTargetRef.current;
-    if (!focusTarget || focusTarget.control.isConnected) {
-      return;
-    }
-    focusTargetRef.current = null;
-    const {successor} = focusTarget;
-    const activeElement = document.activeElement;
-    if (
-      activeElement instanceof HTMLElement &&
-      activeElement !== document.body &&
-      activeElement.isConnected &&
-      (activeElement !== successor || isEnabledFocusTarget(activeElement))
-    ) {
-      return;
-    }
-    if (successor && isEnabledFocusTarget(successor)) {
-      successor.focus();
-      if (document.activeElement === successor && isEnabledFocusTarget(successor)) {
-        return;
-      }
-    }
-    props.containingPanelFocusTarget.current?.focus();
-  };
-
-  useLayoutEffect(restoreFocus);
-
-  const handleFocusCapture = (event: FocusEvent<HTMLDivElement>) => {
-    const target = event.target;
-    if (!(target instanceof HTMLElement)) {
-      return;
-    }
-    const controls = getEnabledControls(event.currentTarget);
-    const index = controls.indexOf(target);
-    focusTargetRef.current = {control: target, successor: index >= 0 ? (controls[index + 1] ?? null) : null};
-  };
-
-  const handleBlurCapture = (event: FocusEvent<HTMLDivElement>) => {
-    const relatedTarget = event.relatedTarget;
-    if (
-      relatedTarget instanceof HTMLElement &&
-      relatedTarget !== document.body &&
-      relatedTarget.isConnected &&
-      !event.currentTarget.contains(relatedTarget)
-    ) {
-      focusTargetRef.current = null;
-    }
-  };
-
   const handleCopy = async () => {
     if (disabled || props.state !== 'content' || !props.onCopy) {
       return;
     }
-    setHoveredTooltip(null);
     setCopied(false);
-    try {
-      const text =
-        props.mode === AI_ASSISTANT_SUMMARY_MODES.MID_CALL_RECEIVER ? props.getReceiverCopyText?.() : copyText;
-      if (!text?.trim() || !(await copySuggestion(text))) {
-        return;
-      }
-    } catch {
+    const text =
+      props.mode === AI_ASSISTANT_SUMMARY_MODES.MID_CALL_RECEIVER && rootRef.current
+        ? extractCardText(rootRef.current, {summaryOnly: true})
+        : copyText;
+    if (!text?.trim() || !(await copyToClipboard(text))) {
       return;
     }
     // Clipboard writes can finish after another summary or local edit is displayed.
@@ -186,8 +108,7 @@ export const useAISummaryInteractions = (props: AISummaryProps) => {
       current.mode !== props.mode ||
       current.content !== props.content ||
       currentCopyText !== copyText ||
-      !current.onCopy ||
-      (current.mode === AI_ASSISTANT_SUMMARY_MODES.MID_CALL_RECEIVER && !current.getReceiverCopyText)
+      !current.onCopy
     ) {
       return;
     }
@@ -196,40 +117,68 @@ export const useAISummaryInteractions = (props: AISummaryProps) => {
 
   const handleFeedback = (feedback: Exclude<AISummaryFeedback, 'none'>) => {
     if (!disabled && props.state === 'content') {
-      const next = getNextFeedback(selectedFeedback, feedback, false);
-      if (next !== 'none') props.onFeedback?.(next);
+      props.onFeedback?.(getNextFeedback(selectedFeedback, feedback));
     }
   };
 
-  const handleActionMouseEnter = (control: AISummaryTooltipControl) => {
-    if (!disabled && !(control === 'copy' && copied)) {
-      setHoveredTooltip(control);
+  const hiddenActionIds = [
+    ...(!props.onEdit ? ['editButton'] : []),
+    ...(!props.onCopy ? ['copyButton'] : []),
+    ...(!props.onFeedback ? ['likeButton', 'dislikeButton'] : []),
+    ...(!props.onRetry ? ['retryButton'] : []),
+  ];
+
+  const handleRetry = () => {
+    if (!disabled && props.onRetry) void props.onRetry().catch(() => undefined);
+  };
+
+  const handleCardAction = (action: unknown) => {
+    if (!action || typeof action !== 'object' || !('id' in action)) return;
+    if (action.id === 'editButton') startEditing();
+    if (action.id === 'retryButton') handleRetry();
+  };
+
+  const handleInput = (key: string, value: string) => {
+    if (disabled || !isEditing || !props.onEdit) return;
+    const section = props.content?.sections
+      ? AI_SUMMARY_EDITABLE_SECTION_KEYS.find((section) => section === key)
+      : 'summaryText';
+    if (section) props.onEdit(section, value);
+  };
+
+  const handleCardRendered = (ready: boolean) => {
+    if (ready && isEditing && !disabled) {
+      rootRef.current?.querySelector<HTMLInputElement | HTMLTextAreaElement>('input, textarea')?.focus();
     }
   };
 
-  const handleActionMouseLeave = (control: AISummaryTooltipControl) => {
-    if (hoveredTooltip === control) {
-      setHoveredTooltip(null);
+  const handleCardUserAction = (event: AIAssistantActionEvent) => {
+    if (disabled) return;
+    if (event.type === 'copy') {
+      props.onCopy?.();
+      return;
     }
+    props.onFeedback?.(event.feedback === 'none' ? 'none' : event.type === 'like' ? 'thumbs_up' : 'thumbs_down');
   };
 
   return {
     rootRef,
     displayContent,
+    copyText,
+    isEditing,
+    startEditing,
+    hiddenActionIds,
+    handleRetry,
+    handleCardAction,
+    handleInput,
+    handleCardUserAction,
+    handleCardRendered,
     copied,
     setCopied,
-    hoveredTooltip,
-    setHoveredTooltip,
     summaryId,
-    feedbackDescriptionId,
     disabled,
     selectedFeedback,
-    restoreFocus,
-    handleFocusCapture,
-    handleBlurCapture,
     handleCopy,
     handleFeedback,
-    handleActionMouseEnter,
-    handleActionMouseLeave,
   };
 };

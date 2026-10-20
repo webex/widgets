@@ -1,4 +1,4 @@
-import {extendObservable, isObservableProp, makeAutoObservable, observable, runInAction} from 'mobx';
+import {makeAutoObservable, observable, runInAction} from 'mobx';
 import Webex, {ITask} from '@webex/contact-center';
 import {
   IContactCenter,
@@ -67,6 +67,7 @@ class Store implements IStore {
   showE911Modal: boolean = false;
   isEmergencyModalAlreadyDisplayed: boolean = false;
   realTimeAssist: Record<string, RealTimeAssistPayload[]> = {};
+  aiSummaries: IStore['aiSummaries'] = {};
   offerActionErrors: Record<string, OfferActionErrorDisplay> = {};
   isWellnessBreakEnabled = false;
   wellnessAgentSessionId = '';
@@ -81,6 +82,7 @@ class Store implements IStore {
   constructor() {
     makeAutoObservable(this, {
       cc: observable.ref,
+      aiSummaries: observable.ref,
     });
   }
 
@@ -96,17 +98,12 @@ class Store implements IStore {
 
   registerCC(webex?: WithWebex['webex']): Promise<void> {
     if (webex) {
+      if (this.cc !== webex.cc) this.aiSummaries = {};
       this.cc = webex.cc;
     }
 
     if (typeof webex === 'undefined' && typeof this.cc === 'undefined') {
       throw new Error('Webex SDK not initialized');
-    }
-
-    // Observe only the widget-owned map; keep SDK objects and summary payloads unchanged.
-    const api = this.cc.apiAIAssistant;
-    if (api && !isObservableProp(api, 'aiSummaries')) {
-      extendObservable(api, {aiSummaries: api.aiSummaries ?? {}}, {aiSummaries: observable.ref});
     }
 
     this.logger = this.cc.LoggerProxy;

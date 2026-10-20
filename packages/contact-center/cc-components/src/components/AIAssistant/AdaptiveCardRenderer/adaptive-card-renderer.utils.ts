@@ -1,5 +1,5 @@
 import type {ILogger} from '@webex/cc-store';
-import type {AIAssistantActionKind} from '../ai-assistant.types';
+import type {AIAssistantActionKind, AdaptiveCardRendererProps} from '../ai-assistant.types';
 import {ADAPTIVE_CARD_MODULE, COPIED_FEEDBACK_MS, LINE_SEPARATOR_ID, SOURCE_TIMESTAMP_PLACEHOLDER} from '../constants';
 import arrowDownRegularIcon from '@momentum-design/icons/dist/svg/arrow-down-regular.svg';
 import arrowRightRegularIcon from '@momentum-design/icons/dist/svg/arrow-right-regular.svg';
@@ -7,9 +7,11 @@ import checkCircleFilledIcon from '@momentum-design/icons/dist/svg/check-circle-
 import copyRegularIcon from '@momentum-design/icons/dist/svg/copy-regular.svg';
 import dislikeFilledIcon from '@momentum-design/icons/dist/svg/dislike-filled.svg';
 import dislikeRegularIcon from '@momentum-design/icons/dist/svg/dislike-regular.svg';
+import editRegularIcon from '@momentum-design/icons/dist/svg/edit-regular.svg';
 import linkRegularIcon from '@momentum-design/icons/dist/svg/link-regular.svg';
 import likeFilledIcon from '@momentum-design/icons/dist/svg/like-filled.svg';
 import likeRegularIcon from '@momentum-design/icons/dist/svg/like-regular.svg';
+import sparkleFilledIcon from '@momentum-design/icons/dist/svg/sparkle-filled.svg';
 
 const CISCO_AI_ASSISTANT_COLOR_SVG =
   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">' +
@@ -30,9 +32,11 @@ const MOMENTUM_ICON_URLS: Record<string, string> = {
   'copy-regular.svg': copyRegularIcon,
   'dislike-filled.svg': dislikeFilledIcon,
   'dislike-regular.svg': dislikeRegularIcon,
+  'edit-regular.svg': editRegularIcon,
   'link-regular.svg': linkRegularIcon,
   'like-filled.svg': likeFilledIcon,
   'like-regular.svg': likeRegularIcon,
+  'sparkle-filled.svg': sparkleFilledIcon,
 };
 
 /** Format an epoch (ms) into "HH:MM"; empty string on bad input. */
@@ -203,15 +207,22 @@ export const preloadIcons = () => {
   });
 };
 
-/** Concatenate rendered TextBlocks, optionally limiting summary copies to visible content. */
+/** Summary copies include edited inputs and omit hidden content, source metadata and action labels. */
 export const extractCardText = (
   container: HTMLElement,
-  {visibleOnly = false}: {visibleOnly?: boolean} = {}
+  {summaryOnly = false}: {summaryOnly?: boolean} = {}
 ): string => {
-  const blocks = container.querySelectorAll('.ac-textBlock, .ac-richTextBlock');
+  const blocks = container.querySelectorAll(`.ac-textBlock, .ac-richTextBlock${summaryOnly ? ', .ac-textInput' : ''}`);
   const lines: string[] = [];
   blocks.forEach((el) => {
-    if (visibleOnly) {
+    if (summaryOnly) {
+      if (
+        ['source-timestamp-richTextBlock', 'source-subtitle-richTextBlock', 'source-link-richTextBlock'].includes(
+          el.id
+        ) ||
+        el.closest('.ac-columnSet')?.querySelector('.ac-pushButton')
+      )
+        return;
       const {visibility} = window.getComputedStyle(el);
       if (visibility === 'hidden' || visibility === 'collapse') return;
       // Adaptive Cards keeps isVisible:false elements in the DOM with display:none.
@@ -220,7 +231,9 @@ export const extractCardText = (
         if (ancestor.hasAttribute('hidden') || window.getComputedStyle(ancestor).display === 'none') return;
       }
     }
-    const text = (el.textContent || '').trim();
+    const text = (
+      el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement ? el.value : el.textContent || ''
+    ).trim();
     if (text && text !== 'Source') lines.push(text);
   });
   return lines.join('\n');
@@ -242,19 +255,19 @@ export const addImageFallbacks = (container: HTMLElement) => {
   });
 };
 
-/** Select the clicked feedback, optionally clearing it when it is selected again. */
-export const getNextFeedback = <T extends string>(current: T | 'none', clicked: T, clearOnRepeat = true): T | 'none' =>
-  clearOnRepeat && current === clicked ? 'none' : clicked;
+/** Select the clicked feedback, clearing it when it is selected again. */
+export const getNextFeedback = <T extends string>(current: T | 'none', clicked: T): T | 'none' =>
+  current === clicked ? 'none' : clicked;
 
-/** Paint `kind` as the only selected control; re-clicking it clears the selection. */
-export const toggleActionControls = (kind: 'like' | 'dislike', controls: Map<Element, AIAssistantActionKind>) => {
-  const selected = Array.from(controls).find(
-    ([el, thisKind]) => (thisKind === 'like' || thisKind === 'dislike') && el.getAttribute('data-active') === 'true'
-  )?.[1];
-  const next = getNextFeedback(selected === 'like' || selected === 'dislike' ? selected : 'none', kind);
+/** Paint the host-confirmed feedback without changing the card DOM. */
+export const setActionControls = (
+  feedback: NonNullable<AdaptiveCardRendererProps['feedback']>,
+  controls: Map<Element, AIAssistantActionKind>
+) => {
   controls.forEach((thisKind, el) => {
     if (thisKind !== 'like' && thisKind !== 'dislike') return;
-    const nextActive = thisKind === next;
+    const nextActive = thisKind === feedback;
+    el.setAttribute('aria-pressed', String(nextActive));
     const img = el.querySelector('img');
     if (img) {
       const nextIconUrl = resolveMomentumIconUrl(`${thisKind}-${nextActive ? 'filled' : 'regular'}.svg`);
@@ -275,7 +288,12 @@ export const toggleActionControls = (kind: 'like' | 'dislike', controls: Map<Ele
  * back to a hidden textarea for non-secure contexts without the async API.
  * Returns whether the clipboard write succeeded.
  */
-export const copySuggestion = async (text: string, sourceEl?: Element, logger?: ILogger): Promise<boolean> => {
+export const copyToClipboard = async (
+  text: string,
+  sourceEl?: Element,
+  logger?: ILogger,
+  isCurrent: () => boolean = () => true
+): Promise<boolean> => {
   if (!text) return false;
   try {
     if (navigator.clipboard?.writeText) {
@@ -285,18 +303,16 @@ export const copySuggestion = async (text: string, sourceEl?: Element, logger?: 
       ta.value = text;
       ta.style.position = 'fixed';
       ta.style.opacity = '0';
-      const previousFocus = document.activeElement;
       document.body.appendChild(ta);
       try {
         ta.select();
         if (!document.execCommand('copy')) return false;
       } finally {
         ta.remove();
-        if (previousFocus instanceof HTMLElement && previousFocus.isConnected) previousFocus.focus();
       }
     }
     const img = sourceEl?.querySelector('img');
-    if (sourceEl && img) {
+    if (sourceEl?.isConnected && img && isCurrent()) {
       const previousSrc = img.getAttribute('src');
       const copiedIconUrl = resolveMomentumIconUrl('check-circle-filled.svg');
       if (copiedIconUrl) {
@@ -304,6 +320,7 @@ export const copySuggestion = async (text: string, sourceEl?: Element, logger?: 
       }
       sourceEl.setAttribute('data-copied', 'true');
       setTimeout(() => {
+        if (!sourceEl.isConnected || !isCurrent()) return;
         sourceEl.removeAttribute('data-copied');
         if (previousSrc) img.setAttribute('src', previousSrc);
       }, COPIED_FEEDBACK_MS);
@@ -312,34 +329,22 @@ export const copySuggestion = async (text: string, sourceEl?: Element, logger?: 
   } catch (err) {
     logger?.error(`CC-Components: copy to clipboard failed - ${err}`, {
       module: ADAPTIVE_CARD_MODULE,
-      method: 'copySuggestion',
+      method: 'copyToClipboard',
     });
     return false;
   }
 };
 
 /** HostConfig wired to Momentum CSS tokens so cards inherit the active theme. */
-export const buildHostConfig = () => ({
-  fontFamily: 'inherit',
-  spacing: {
-    small: 4,
-    default: 8,
-    medium: 12,
-    large: 16,
-    extraLarge: 24,
-    padding: 0,
-  },
-  separator: {
-    lineThickness: 1,
-    lineColor: 'var(--mds-color-theme-outline-secondary-normal)',
-  },
-  containerStyles: (() => {
-    // Force every semantic foreground to the primary text color so card
-    // labels (e.g. "Source") don't read as alerts/links.
-    const primary = 'var(--mds-color-theme-text-primary-normal)';
-    const subtle = 'var(--mds-color-theme-text-secondary-normal)';
-    const flat = {default: primary, subtle: primary};
-    const foregroundColors = {
+export const buildHostConfig = (presentation: AdaptiveCardRendererProps['presentation'] = 'suggestion') => {
+  const isSummary = presentation === 'summary';
+  const primary = 'var(--mds-color-theme-text-primary-normal)';
+  const subtle = 'var(--mds-color-theme-text-secondary-normal)';
+  // Semantic card colors inherit the same text color instead of appearing as alerts or links.
+  const flat = {default: primary, subtle: primary};
+  const containerStyle = {
+    backgroundColor: 'transparent',
+    foregroundColors: {
       default: {default: primary, subtle},
       accent: flat,
       attention: flat,
@@ -347,23 +352,36 @@ export const buildHostConfig = () => ({
       warning: flat,
       dark: flat,
       light: flat,
-    };
-    return {
-      default: {
-        backgroundColor: 'transparent',
-        foregroundColors,
-      },
-      emphasis: {
-        backgroundColor: 'transparent',
-        foregroundColors,
-      },
-    };
-  })(),
-  actions: {
-    maxActions: 5,
-    spacing: 'default',
-    buttonSpacing: 8,
-    actionsOrientation: 'horizontal',
-    actionAlignment: 'left',
-  },
-});
+    },
+  };
+
+  return {
+    fontFamily: 'inherit',
+    ...(isSummary
+      ? {
+          fontSizes: {small: 10, default: 12, medium: 14, large: 17, extraLarge: 20},
+          fontWeights: {lighter: 300, default: 400, bolder: 600},
+        }
+      : {}),
+    spacing: isSummary
+      ? {small: 8, default: 16, medium: 20, large: 24, extraLarge: 32, padding: 0}
+      : {small: 4, default: 8, medium: 12, large: 16, extraLarge: 24, padding: 0},
+    separator: {
+      lineThickness: 1,
+      lineColor: 'var(--mds-color-theme-outline-secondary-normal)',
+    },
+    containerStyles: {
+      default: containerStyle,
+      emphasis: containerStyle,
+      ...(isSummary ? {accent: containerStyle, attention: containerStyle} : {}),
+    },
+    actions: {
+      maxActions: 5,
+      spacing: 'default',
+      buttonSpacing: isSummary ? 4 : 8,
+      actionsOrientation: 'horizontal',
+      actionAlignment: isSummary ? 'stretch' : 'left',
+      ...(isSummary ? {iconSize: 24} : {}),
+    },
+  };
+};

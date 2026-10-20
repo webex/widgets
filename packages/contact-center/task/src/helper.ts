@@ -509,7 +509,7 @@ export const getAISummaryProps = (currentTask?: ITask): CallControlAISummaryProp
   }
 
   const interactionId = currentTask.data.interactionId;
-  const entries = store.cc?.apiAIAssistant?.aiSummaries?.[interactionId];
+  const entries = store.aiSummaries[interactionId];
   const viewOf = (role: Exclude<AISummaryRole, 'receiver'>): NonNullable<CallControlAISummaryProps['midCall']> => {
     const entry = entries?.[role];
     const content = entry?.content;
@@ -525,7 +525,13 @@ export const getAISummaryProps = (currentTask?: ITask): CallControlAISummaryProp
       content,
       editedSummary: entry?.response.summary,
       selectedFeedback: entry?.response.feedback ?? 'none',
-      requestPending: entry?.status === 'loading',
+      controlsDisabled: entry?.status === 'loading',
+      ...(role === 'initiator'
+        ? {
+            excluded: entry?.excluded ?? false,
+            onExcludeChange: (excluded: boolean) => store.setAISummaryExcluded(excluded, content, currentTask),
+          }
+        : {}),
       onEdit: (key, value) => store.editAISummary(role, key, value, content, currentTask),
       onCopy: () => store.recordAISummaryCopied(role, content, currentTask),
       onFeedback: (feedback) => store.setAISummaryFeedback(role, feedback, content, currentTask),
@@ -543,12 +549,21 @@ export const getAISummaryProps = (currentTask?: ITask): CallControlAISummaryProp
       : undefined,
     // Like Agent Desktop, a wrap-up requests its summary once; Retry asks again.
     requestPostCallSummary: () => {
-      if (!store.cc?.apiAIAssistant?.aiSummaries?.[interactionId]?.['post-call']) {
+      if (!store.aiSummaries[interactionId]?.['post-call']) {
         void store.requestPostCallSummary(currentTask);
       }
     },
     requestMidCallSummary: async (action) => {
       await store.requestMidCallSummary(action, currentTask);
+    },
+    cancelMidCallSummary: (action) => {
+      if (store.currentTask === currentTask) {
+        void store.sendMidCallSummaryResponse(action, currentTask, 'MID_CALL_CANCELLED');
+      }
+    },
+    resetMidCallSummaryExclusion: () => {
+      const current = store.aiSummaries[interactionId]?.initiator;
+      store.setAISummaryExcluded(false, current?.content, currentTask);
     },
   };
 };
@@ -1298,34 +1313,32 @@ export const useCallControl = (props: useCallControlProps) => {
     }
   };
 
-  const wrapupCall = async (wrapUpReason: string, auxCodeId: string): Promise<boolean> => {
+  const wrapupCall = async (wrapUpReason: string, auxCodeId: string): Promise<void> => {
     try {
       // Store auxCodeId for use in wrapupCallCallback
       lastWrapupAuxCodeIdRef.current = auxCodeId;
       if (currentTask.aiSummaryCapabilities?.postCallEnabled) {
-        try {
-          await store.sendPostCallSummaryResponse(auxCodeId, currentTask);
-        } catch (error) {
-          logger?.error(`CC-Widgets: AI summary response failed: ${error}`, {
-            module: 'useCallControl',
-            method: 'wrapupCall',
-          });
-        }
+        void store.sendPostCallSummaryResponse(auxCodeId, currentTask);
       }
 
-      await currentTask.wrapup({wrapUpReason, auxCodeId});
-      const taskKeys = Object.keys(store.taskList);
-      if (taskKeys.length > 0) {
-        store.setCurrentTask(store.taskList[taskKeys[0]]);
-        store.setState({
-          developerName: ENGAGED_LABEL,
-          name: ENGAGED_USERNAME,
-        });
+      try {
+        await currentTask.wrapup({wrapUpReason, auxCodeId});
+        const taskKeys = Object.keys(store.taskList);
+        if (taskKeys.length > 0) {
+          store.setCurrentTask(store.taskList[taskKeys[0]]);
+          store.setState({
+            developerName: ENGAGED_LABEL,
+            name: ENGAGED_USERNAME,
+          });
+        }
+      } catch (error) {
+        logError(`Error wrapping up call: ${error}`, 'wrapupCall');
       }
-      return true;
     } catch (error) {
-      logError(`Error wrapping up call: ${error}`, 'wrapupCall');
-      return false;
+      logger?.error(`CC-Widgets: Task: Error in wrapupCall - ${error.message}`, {
+        module: 'useCallControl',
+        method: 'wrapupCall',
+      });
     }
   };
 

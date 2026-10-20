@@ -1,5 +1,9 @@
+import '@testing-library/jest-dom';
+import editRegularIcon from '@momentum-design/icons/dist/svg/edit-regular.svg';
+import sparkleFilledIcon from '@momentum-design/icons/dist/svg/sparkle-filled.svg';
 import {
   buildHostConfig,
+  copyToClipboard,
   extractCardText,
   extractCustomerStatementTitle,
   prepareCardForRender,
@@ -7,12 +11,42 @@ import {
 } from '../../../src/components/AIAssistant/AdaptiveCardRenderer/adaptive-card-renderer.utils';
 
 describe('AdaptiveCardRenderer utilities', () => {
+  it('uses Desktop typography for summary cards while retaining suggestion spacing', () => {
+    const suggestion = buildHostConfig();
+    expect(buildHostConfig('summary')).toMatchObject({
+      fontSizes: {small: 10, default: 12, medium: 14, large: 17, extraLarge: 20},
+      fontWeights: {lighter: 300, default: 400, bolder: 600},
+      spacing: {small: 8, default: 16, medium: 20, large: 24, extraLarge: 32, padding: 0},
+      containerStyles: {accent: {backgroundColor: 'transparent'}, attention: {backgroundColor: 'transparent'}},
+      actions: {buttonSpacing: 4, actionAlignment: 'stretch', iconSize: 24},
+    });
+    expect(suggestion).toMatchObject({
+      spacing: {small: 4, default: 8},
+      actions: {buttonSpacing: 8, actionAlignment: 'left'},
+    });
+    expect(suggestion).not.toHaveProperty('fontSizes');
+    expect(suggestion).not.toHaveProperty('fontWeights');
+    expect(suggestion.actions).not.toHaveProperty('iconSize');
+    expect(suggestion.containerStyles).not.toHaveProperty('accent');
+    expect(suggestion.containerStyles).not.toHaveProperty('attention');
+  });
   it('resolves all icons emitted by real-time assist cards', () => {
     expect(resolveMomentumIconUrl(' LIKE-REGULAR.SVG ')).toBeTruthy();
     expect(resolveMomentumIconUrl('cisco-ai-assistant-color.svg')).toBeTruthy();
     expect(resolveMomentumIconUrl('arrow-right-regular.svg')).toBeTruthy();
     expect(resolveMomentumIconUrl('arrow-down-regular.svg')).toBeTruthy();
     expect(resolveMomentumIconUrl('unknown-icon.svg')).toBeNull();
+  });
+
+  it('resolves summary Edit and AI sparkle icons to their bundled Momentum assets', () => {
+    expect(resolveMomentumIconUrl('edit-regular.svg')).toBe(editRegularIcon);
+    expect(resolveMomentumIconUrl('sparkle-filled.svg')).toBe(sparkleFilledIcon);
+    expect(
+      prepareCardForRender({actions: [{iconUrl: '/edit-regular.svg'}], body: [{url: '/sparkle-filled.svg'}]})
+    ).toEqual({
+      actions: [{iconUrl: editRegularIcon}],
+      body: [{url: sparkleFilledIcon}],
+    });
   });
 
   it('rewrites nested icon URLs and source timestamp placeholders without mutating the card', () => {
@@ -157,7 +191,54 @@ describe('AdaptiveCardRenderer utilities', () => {
       <div><div class="ac-richTextBlock">Visible next steps</div></div>
     `;
 
-    expect(extractCardText(container, {visibleOnly: true})).toBe('Visible summary\nVisible next steps');
+    expect(extractCardText(container, {summaryOnly: true})).toBe('Visible summary\nVisible next steps');
+  });
+
+  it('copies visible summary inputs and excludes Desktop source metadata and action chrome on request', () => {
+    const container = document.createElement('div');
+    container.innerHTML = `
+      <div class="ac-textBlock">Summary heading</div>
+      <div class="ac-richTextBlock" id="source-timestamp-richTextBlock">12:30</div>
+      <div class="ac-richTextBlock" id="source-subtitle-richTextBlock">Source label</div>
+      <div class="ac-richTextBlock" id="source-link-richTextBlock">https://source.example</div>
+      <div class="ac-columnSet"><div class="ac-textBlock">AI generated</div><button class="ac-pushButton">Copy</button></div>
+      <textarea class="ac-textInput">Edited summary</textarea>
+      <div hidden><div class="ac-textBlock">Hidden summary</div></div>
+    `;
+    expect(extractCardText(container, {summaryOnly: true})).toBe('Summary heading\nEdited summary');
+    expect(extractCardText(container)).toContain('12:30');
+    expect(extractCardText(container)).not.toContain('Edited summary');
+  });
+
+  it('reports clipboard failure without showing success feedback', async () => {
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: {writeText: jest.fn().mockRejectedValue(new Error('Clipboard unavailable'))},
+    });
+    const button = document.createElement('button');
+    button.innerHTML = '<img src="copy.svg" />';
+    document.body.appendChild(button);
+    try {
+      expect(await copyToClipboard('Summary', button)).toBe(false);
+      expect(button).not.toHaveAttribute('data-copied');
+    } finally {
+      button.remove();
+    }
+  });
+
+  it('reports actual clipboard fallback success and removes its temporary textarea', async () => {
+    Object.defineProperty(navigator, 'clipboard', {configurable: true, value: undefined});
+    const previousExecCommand = document.execCommand;
+    document.execCommand = jest.fn().mockReturnValue(false);
+    try {
+      expect(await copyToClipboard('Summary')).toBe(false);
+      expect(document.querySelector('textarea')).toBeNull();
+      document.execCommand = jest.fn().mockReturnValue(true);
+      expect(await copyToClipboard('Summary')).toBe(true);
+      expect(document.querySelector('textarea')).toBeNull();
+    } finally {
+      document.execCommand = previousExecCommand;
+    }
   });
 
   it('uses transparent card containers and the compact action layout', () => {

@@ -53,7 +53,7 @@ state, or SDK access — those live upstream in the widget packages and `@webex/
 
 ## Stack
 TypeScript 5.6.3, React 18 (peer `>=18.3.1`), `@r2wc/react-to-web-component` 2.0.3. Test stack: Jest
-29.7.0 + jsdom + React Testing Library (configured in `package.json`; Web Component integration coverage is in `tests/wc.ai-summary.ts`).
+29.7.0 + jsdom + React Testing Library (configured in `package.json`, but no tests currently exist).
 Build: `tsc` for type declarations and webpack 5 for the two bundles (`dist/index.js`, `dist/wc.js`).
 No datastore or messaging.
 
@@ -349,29 +349,23 @@ This module is the host-mount surface for the widget suite.
   floors.
 
 ## Test-Case Strategy (module)
-`tests/wc.ai-summary.ts` covers the custom-element distribution contract: registered tags,
-CallControl and AI Assistant observed attributes, legacy CallControl prop forwarding, and
-removal of the r2wc container prop. Jest requires tests
-to be present. Widget rendering and behavior are tested by the upstream widget packages.
+No tests exist for this package today (`tests/` is absent and `package.json` sets `passWithNoTests: true`).
+Because the module is pure aggregation, the highest-value tests would assert the distribution contract
+rather than widget behavior: (positive) importing `./wc` defines every expected `widget-cc-*` tag via
+`customElements.get`; (negative) importing `./wc` twice does not throw and does not redefine an element
+(idempotent guard). Secondary coverage: assert `index.ts` re-exports each expected symbol and `store`, and
+that each r2wc wrapper is created with the documented prop-type map. Widget rendering/behavior is owned and
+tested by the upstream widget packages, not here.
 
 | Behavior / Requirement | Existing test evidence | Gap |
 |---|---|---|
 | `cc-widgets-R-001` (React re-exports present) | None found | No test asserts the export barrel surface. |
-| `cc-widgets-R-002` (custom elements registered) | `tests/wc.ai-summary.ts` checks every registered tag after `./wc` import | None. |
+| `cc-widgets-R-002` (custom elements registered) | None found | No test asserts each `widget-cc-*` tag is defined after `./wc` import. |
 | `cc-widgets-R-003` (idempotent registration) | None found | No test for double-import / `customElements.get` guard. |
-| `cc-widgets-R-004` (r2wc prop-type map) | `tests/wc.ai-summary.ts` checks CallControl prop forwarding and CallControl/AI Assistant observed attributes | Other wrappers and prop transforms are not asserted. |
+| `cc-widgets-R-004` (r2wc prop-type map) | None found | No test asserts function/json/boolean/string prop mapping. |
 | `cc-widgets-R-005` (Momentum CSS imported) | None found | No test for the CSS side-effect import. |
 | `cc-widgets-R-006` (React/ReactDOM peers) | None found | Enforced by package manager only; no automated check here. |
 | `cc-widgets-R-007` (CallControlCAD inherits Drop without a new WC surface) | Covered by upstream task/component tests | No package-local test; the wrapper and prop map are unchanged. |
-
-## CallControl Web Component integration
-
-The CallControl adapter strips r2wc's container prop before forwarding the existing
-CallControl props to React. Registered tag names, observed attributes and existing
-callback mappings remain unchanged. Summary UI behavior is supplied by the task
-widget.
-
-Evidence: `src/index.ts`, `src/wc.ts`; tests: `tests/wc.ai-summary.ts`.
 
 ## Traceability
 - Repo architecture: [`ARCHITECTURE.md`](../../../../ai-docs/ARCHITECTURE.md) · Registry: [`SPEC_INDEX.md`](../../../../ai-docs/SPEC_INDEX.md) · Contracts: [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md)

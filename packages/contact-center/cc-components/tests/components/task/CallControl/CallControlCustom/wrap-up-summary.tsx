@@ -7,7 +7,6 @@ import '@testing-library/jest-dom';
 import WrapUpSummary from '../../../../../src/components/task/CallControl/CallControlCustom/wrap-up-summary';
 import {WrapUpSummaryView} from '../../../../../src/components/task/task.types';
 import {AI_ASSISTANT_SUMMARY_MESSAGES as AI_SUMMARY_MESSAGES} from '../../../../../src/components/AIAssistant/AISummary';
-import {CLEAR_SEARCH, WRAP_UP_INTERACTION} from '../../../../../src/components/task/constants';
 
 const reasons = [
   {id: 'aux-1', name: 'Resolved'},
@@ -15,7 +14,7 @@ const reasons = [
   {id: 'aux-3', name: 'Billing question'},
 ];
 
-const COMPLETE_WRAP_UP_LABEL = 'Complete Wrap-Up';
+const COMPLETE_WRAP_UP_LABEL = 'Submit Wrap Up';
 const REASON_GROUP_NAME = AI_SUMMARY_MESSAGES.postCall.chooseReason;
 
 const createSummary = (overrides: Partial<WrapUpSummaryView> = {}): WrapUpSummaryView => ({
@@ -29,7 +28,7 @@ const createSummary = (overrides: Partial<WrapUpSummaryView> = {}): WrapUpSummar
     resolution: 'Issue resolved',
   },
   selectedFeedback: 'none',
-  requestPending: false,
+  controlsDisabled: false,
   onEdit: jest.fn().mockReturnValue(true),
   onCopy: jest.fn().mockReturnValue(true),
   onFeedback: jest.fn().mockReturnValue(true),
@@ -37,12 +36,9 @@ const createSummary = (overrides: Partial<WrapUpSummaryView> = {}): WrapUpSummar
   ...overrides,
 });
 
-const pressFocusedReasonKey = (key: string) => {
-  const activeElement = document.activeElement;
-  if (!(activeElement instanceof HTMLElement)) {
-    throw new Error('Expected a focused reason radio');
-  }
-  fireEvent.keyDown(activeElement, {key});
+const changeReason = (value: string, label?: string) => {
+  const picker = screen.getByTestId('wrap-up-summary:reason-picker');
+  fireEvent(picker, new CustomEvent('change', {detail: {value, label}, bubbles: true, composed: true}));
 };
 
 const installWrapUpSummaryStyles = (): (() => void) => {
@@ -69,109 +65,202 @@ describe('WrapUpSummary', () => {
     });
   });
 
-  it('renders named reason search and radio group with the stable complete action', async () => {
+  it('uses the native searchable picker with compact wrap-up copy and no radio list', async () => {
     render(
       <WrapUpSummary reasons={reasons} summary={createSummary()} onReasonChange={jest.fn()} onComplete={jest.fn()} />
     );
-
-    expect(screen.getByText(WRAP_UP_INTERACTION)).toBeInTheDocument();
-    fireEvent.click(
-      await screen.findByRole('button', {
-        name: AI_SUMMARY_MESSAGES.editSectionLabel(AI_SUMMARY_MESSAGES.sectionLabels.initialContactReason),
-      })
-    );
+    expect(screen.getByText('Wrap Up Reasons')).toBeInTheDocument();
+    const picker = screen.getByTestId('wrap-up-summary:reason-picker');
+    expect(picker.tagName.toLowerCase()).toBe('mdc-combobox');
+    expect((picker as HTMLElement & {placeholder: string}).placeholder).toBe('Search topic');
+    expect(picker).toHaveAttribute('data-aria-label', REASON_GROUP_NAME);
     await waitFor(() => {
-      const editor = document
-        .querySelector(`mdc-textarea[label="${AI_SUMMARY_MESSAGES.sectionLabels.initialContactReason}"]`)
-        ?.shadowRoot?.querySelector('textarea');
-      expect(editor).toBeInstanceOf(HTMLTextAreaElement);
-      expect(editor).not.toBeDisabled();
+      const label = picker.shadowRoot?.querySelector('label');
+      const input = picker.shadowRoot?.querySelector('input[role="combobox"]');
+      expect(label).toHaveTextContent(REASON_GROUP_NAME);
+      expect(input).toHaveAttribute('aria-labelledby', label?.id);
+      expect(picker.shadowRoot?.getElementById(label?.htmlFor ?? '')).toBeInstanceOf(HTMLInputElement);
     });
-    expect(screen.getByRole('textbox', {name: AI_SUMMARY_MESSAGES.postCall.reasonSearchLabel})).toHaveAttribute(
-      'placeholder',
-      AI_SUMMARY_MESSAGES.postCall.searchPlaceholder
-    );
-    expect(screen.getByRole('radiogroup', {name: REASON_GROUP_NAME})).toBeInTheDocument();
-    expect(AI_SUMMARY_MESSAGES.postCall.completeAction).toBe(COMPLETE_WRAP_UP_LABEL);
+    expect(picker.querySelectorAll('mdc-selectlistbox > mdc-option')).toHaveLength(3);
+    expect(screen.queryByRole('radiogroup')).not.toBeInTheDocument();
+    expect(await screen.findByRole('button', {name: COMPLETE_WRAP_UP_LABEL})).toBeDisabled();
+    expect(screen.getByText(AI_SUMMARY_MESSAGES.postCall.instructions)).toBeInTheDocument();
+  });
+
+  it('clears selection when typing and accepts only configured IDs from picker events', async () => {
+    const onComplete = jest.fn();
+    const onReasonChange = jest.fn();
+    const Harness = () => {
+      const [selectedReasonId, setSelectedReasonId] = React.useState('aux-1');
+      return (
+        <WrapUpSummary
+          reasons={reasons}
+          selectedReasonId={selectedReasonId}
+          onReasonChange={(reason) => {
+            onReasonChange(reason);
+            setSelectedReasonId(reason.id);
+          }}
+          onComplete={onComplete}
+        />
+      );
+    };
+    render(<Harness />);
     const complete = await screen.findByRole('button', {name: COMPLETE_WRAP_UP_LABEL});
+    await waitFor(() => expect(complete).not.toBeDisabled());
+    fireEvent(
+      screen.getByTestId('wrap-up-summary:reason-picker'),
+      new CustomEvent('input', {detail: {value: 'Billing'}, bubbles: true, composed: true})
+    );
+    expect(onReasonChange).toHaveBeenLastCalledWith({id: '', name: ''});
+    await waitFor(() => expect(complete).toBeDisabled());
+    changeReason('not-configured', 'Resolved');
     expect(complete).toBeDisabled();
-    expect(complete).toHaveTextContent(COMPLETE_WRAP_UP_LABEL);
-    expect(complete).toHaveAttribute('title', COMPLETE_WRAP_UP_LABEL);
-    expect(screen.getByText(AI_SUMMARY_MESSAGES.sectionLabels.resolution)).toBeInTheDocument();
-    expect(screen.getByText('Issue resolved')).toBeInTheDocument();
+    changeReason('aux-3', 'Untrusted event label');
+    expect(onReasonChange).toHaveBeenLastCalledWith(reasons[2]);
+    await waitFor(() => expect(complete).not.toBeDisabled());
+    fireEvent.click(complete);
+    expect(onComplete).toHaveBeenCalledWith(reasons[2]);
   });
 
-  it('renders zero-match copy as ordinary visible text without live semantics', () => {
-    render(<WrapUpSummary reasons={reasons} onReasonChange={jest.fn()} onComplete={jest.fn()} />);
-
-    fireEvent.change(screen.getByRole('textbox', {name: AI_SUMMARY_MESSAGES.postCall.reasonSearchLabel}), {
-      target: {value: 'not a reason'},
+  it('selects SDK suggested chips by known code, hides them after selection, and does not submit immediately', async () => {
+    const onComplete = jest.fn();
+    const onReasonChange = jest.fn();
+    const suggestionSummary = createSummary({
+      content: {
+        ...createSummary().content,
+        suggestedWrapUpCodes: [{name: 'Billing question'}, {name: 'Unknown reason'}, {name: 'Billing question'}],
+      },
     });
-
-    const empty = screen.getByText(AI_SUMMARY_MESSAGES.postCall.noReasonMatches);
-    expect(empty).toBeInTheDocument();
-    expect(empty).not.toHaveAttribute('role', 'status');
-    expect(empty).not.toHaveAttribute('aria-live');
+    const Harness = () => {
+      const [selectedReasonId, setSelectedReasonId] = React.useState<string>();
+      return (
+        <WrapUpSummary
+          reasons={reasons}
+          summary={suggestionSummary}
+          selectedReasonId={selectedReasonId}
+          onReasonChange={(reason) => {
+            onReasonChange(reason);
+            setSelectedReasonId(reason.id);
+          }}
+          onComplete={onComplete}
+        />
+      );
+    };
+    render(<Harness />);
+    const chips = await screen.findByTestId('wrap-up-summary:suggestions');
+    expect(chips.querySelectorAll('mdc-filterchip')).toHaveLength(1);
+    const chip = chips.querySelector('mdc-filterchip') as HTMLElement;
+    fireEvent.click(chip);
+    expect(onReasonChange).toHaveBeenCalledWith(reasons[2]);
+    expect(onComplete).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('wrap-up-summary:suggestions')).not.toBeInTheDocument();
+    const complete = await screen.findByRole('button', {name: COMPLETE_WRAP_UP_LABEL});
+    await waitFor(() => expect(complete).not.toBeDisabled());
+    fireEvent.click(complete);
+    expect(onComplete).toHaveBeenCalledWith(reasons[2]);
   });
 
-  it('uses the shared clear-search label and clears the reason filter', () => {
-    render(<WrapUpSummary reasons={reasons} onReasonChange={jest.fn()} onComplete={jest.fn()} />);
-    const search = screen.getByRole('textbox', {name: AI_SUMMARY_MESSAGES.postCall.reasonSearchLabel});
-    fireEvent.change(search, {target: {value: 'Billing'}});
-    expect(screen.queryByRole('radio', {name: 'Resolved'})).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', {name: CLEAR_SEARCH}));
-    expect(search).toHaveValue('');
-    expect(screen.getByRole('radio', {name: 'Resolved'})).toBeInTheDocument();
+  it('does not offer unknown IDs or ambiguous names as suggested actions', () => {
+    render(
+      <WrapUpSummary
+        reasons={[...reasons, {id: 'aux-4', name: 'Resolved'}]}
+        summary={createSummary({
+          content: {
+            ...createSummary().content,
+            suggestedWrapUpCodes: [{name: 'Resolved'}, {id: 'unknown', name: 'Billing question'}],
+            suggestedWrapUpCodesMessage: 'No suitable suggestion is available.',
+          },
+        })}
+        onReasonChange={jest.fn()}
+        onComplete={jest.fn()}
+      />
+    );
+    expect(screen.queryByTestId('wrap-up-summary:suggestions')).not.toBeInTheDocument();
+    expect(screen.getByText('No suitable suggestion is available.')).toBeInTheDocument();
   });
 
-  it('reports each reason the agent moves to with the arrow keys', () => {
+  it('does not clear a picker selection when Momentum emits its preceding input event', () => {
     const onReasonChange = jest.fn();
     render(<WrapUpSummary reasons={reasons} onReasonChange={onReasonChange} onComplete={jest.fn()} />);
-
-    const firstReason = screen.getByRole('radio', {name: 'Resolved'});
-    act(() => {
-      firstReason.focus();
-    });
-    expect(firstReason).toHaveFocus();
-
-    pressFocusedReasonKey('ArrowDown');
-    expect(screen.getByRole('radio', {name: 'Follow up needed'})).toHaveFocus();
-    pressFocusedReasonKey('ArrowDown');
-    expect(screen.getByRole('radio', {name: 'Billing question'})).toHaveFocus();
-    pressFocusedReasonKey('ArrowUp');
-    expect(screen.getByRole('radio', {name: 'Follow up needed'})).toHaveFocus();
-
-    expect(onReasonChange).toHaveBeenCalledTimes(3);
-    expect(onReasonChange).toHaveBeenLastCalledWith({id: 'aux-2', name: 'Follow up needed'});
+    fireEvent(
+      screen.getByTestId('wrap-up-summary:reason-picker'),
+      new CustomEvent('input', {detail: {value: 'aux-2', label: 'Follow up needed'}, bubbles: true, composed: true})
+    );
+    expect(onReasonChange).not.toHaveBeenCalled();
+    changeReason('aux-2', 'Follow up needed');
+    expect(onReasonChange).toHaveBeenCalledWith(reasons[1]);
   });
 
-  it('should let the agent select a reason while the summary is still generating', () => {
+  it('retains the first typed search character after a selected reason and blocks stale submission', async () => {
+    const onComplete = jest.fn();
+    const Harness = () => {
+      const [selectedReasonId, setSelectedReasonId] = React.useState('aux-1');
+      return (
+        <WrapUpSummary
+          reasons={reasons}
+          selectedReasonId={selectedReasonId}
+          onReasonChange={(reason) => setSelectedReasonId(reason.id)}
+          onComplete={onComplete}
+        />
+      );
+    };
+    render(<Harness />);
+    const picker = screen.getByTestId('wrap-up-summary:reason-picker');
+    const input = await waitFor(() => {
+      const nativeInput = picker.shadowRoot?.querySelector<HTMLInputElement>('input[role="combobox"]');
+      expect(nativeInput).toHaveValue('Resolved');
+      return nativeInput as HTMLInputElement;
+    });
+    fireEvent.input(input, {target: {value: 'B'}, composed: true});
+    await waitFor(() => expect(input).toHaveValue('B'));
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(input).toHaveValue('B');
+    const complete = await screen.findByRole('button', {name: COMPLETE_WRAP_UP_LABEL});
+    expect(complete).toBeDisabled();
+    fireEvent.click(complete);
+    expect(onComplete).not.toHaveBeenCalled();
+  });
+
+  it('projects controlled reason changes into the native picker outside a search', async () => {
+    const renderPanel = (selectedReasonId?: string) => (
+      <WrapUpSummary
+        reasons={reasons}
+        selectedReasonId={selectedReasonId}
+        onReasonChange={jest.fn()}
+        onComplete={jest.fn()}
+      />
+    );
+    const {rerender} = render(renderPanel('aux-1'));
+    const picker = screen.getByTestId('wrap-up-summary:reason-picker');
+    const input = await waitFor(() => {
+      const nativeInput = picker.shadowRoot?.querySelector<HTMLInputElement>('input[role="combobox"]');
+      expect(nativeInput).toHaveValue('Resolved');
+      return nativeInput as HTMLInputElement;
+    });
+
+    rerender(renderPanel('aux-2'));
+    await waitFor(() => expect(input).toHaveValue('Follow up needed'));
+
+    rerender(renderPanel());
+    await waitFor(() => expect(input).toHaveValue(''));
+    expect(await screen.findByRole('button', {name: COMPLETE_WRAP_UP_LABEL})).toBeDisabled();
+  });
+
+  it('lets Momentum handle keyboard reason selection using the configured option ID', async () => {
     const onReasonChange = jest.fn();
-    const {rerender} = render(
-      <WrapUpSummary
-        reasons={reasons}
-        summary={createSummary({state: 'generating', requestPending: true})}
-        onReasonChange={onReasonChange}
-        onComplete={jest.fn()}
-      />
-    );
-
-    const reasonGroup = screen.getByRole('radiogroup', {name: REASON_GROUP_NAME});
-    expect(reasonGroup.parentElement).not.toHaveAttribute('aria-disabled');
-
-    fireEvent.click(screen.getByRole('radio', {name: 'Follow up needed'}));
-    expect(onReasonChange).toHaveBeenCalledWith({id: 'aux-2', name: 'Follow up needed'});
-
-    rerender(
-      <WrapUpSummary
-        reasons={reasons}
-        summary={createSummary({state: 'generating', requestPending: true})}
-        selectedReasonId="aux-2"
-        onReasonChange={onReasonChange}
-        onComplete={jest.fn()}
-      />
-    );
-    expect(screen.getByRole('radio', {name: 'Follow up needed'})).toBeChecked();
+    render(<WrapUpSummary reasons={reasons} onReasonChange={onReasonChange} onComplete={jest.fn()} />);
+    const picker = screen.getByTestId('wrap-up-summary:reason-picker');
+    const input = await waitFor(() => {
+      const nativeInput = picker.shadowRoot?.querySelector<HTMLInputElement>('input[role="combobox"]');
+      expect(nativeInput).toBeInstanceOf(HTMLInputElement);
+      expect(picker.querySelector('mdc-option')).toHaveAttribute('aria-selected', 'false');
+      return nativeInput as HTMLInputElement;
+    });
+    fireEvent.keyDown(input, {key: 'ArrowDown', code: 'ArrowDown'});
+    fireEvent.keyDown(input, {key: 'Enter', code: 'Enter'});
+    await waitFor(() => expect(onReasonChange).toHaveBeenCalledWith(reasons[0]));
   });
 
   it('should not hold back Complete Wrap-Up while the summary is generating', async () => {
@@ -179,7 +268,7 @@ describe('WrapUpSummary', () => {
     render(
       <WrapUpSummary
         reasons={reasons}
-        summary={createSummary({state: 'generating', requestPending: true})}
+        summary={createSummary({state: 'generating', controlsDisabled: true})}
         selectedReasonId="aux-1"
         onReasonChange={jest.fn()}
         onComplete={onComplete}
@@ -193,7 +282,7 @@ describe('WrapUpSummary', () => {
   it('keeps a retained draft completable during regeneration without rendering an absent Outcome', async () => {
     const onComplete = jest.fn();
     const retainedDraft = createSummary({
-      requestPending: true,
+      controlsDisabled: true,
       content: {
         conversationId: 'interaction-main-1',
         sections: {
@@ -222,7 +311,7 @@ describe('WrapUpSummary', () => {
     expect(onComplete).toHaveBeenCalledWith({id: 'aux-1', name: 'Resolved'});
   });
 
-  it('projects the pending feedback description from the shared summary component', () => {
+  it('projects the selected native feedback control from the shared summary component', async () => {
     render(
       <WrapUpSummary
         reasons={reasons}
@@ -232,84 +321,59 @@ describe('WrapUpSummary', () => {
       />
     );
 
-    expect(screen.getByText(AI_SUMMARY_MESSAGES.feedback.pendingSubmission)).toBeInTheDocument();
+    expect(await screen.findByRole('button', {name: AI_SUMMARY_MESSAGES.like})).toHaveAttribute('aria-pressed', 'true');
   });
 
-  it('should keep the reasons and summary read-only while wrap-up completion is in progress', async () => {
+  it('keeps reason selection and wrap-up available when summary controls are disabled', async () => {
+    const onReasonChange = jest.fn();
     const onComplete = jest.fn();
-    const renderPanel = (completionPending: boolean) => (
+    render(
       <WrapUpSummary
         reasons={reasons}
-        summary={createSummary()}
+        summary={createSummary({controlsDisabled: true})}
         selectedReasonId="aux-1"
-        completionPending={completionPending}
-        onReasonChange={jest.fn()}
+        onReasonChange={onReasonChange}
         onComplete={onComplete}
       />
     );
-    const {rerender} = render(renderPanel(false));
-    const editInitialReason = await screen.findByRole('button', {
-      name: AI_SUMMARY_MESSAGES.editSectionLabel(AI_SUMMARY_MESSAGES.sectionLabels.initialContactReason),
-    });
-    expect(editInitialReason).not.toBeDisabled();
 
-    rerender(renderPanel(true));
-
-    await waitFor(() => expect(editInitialReason).toBeDisabled());
-    expect(screen.getByRole('button', {name: AI_SUMMARY_MESSAGES.like})).toBeDisabled();
+    expect(await screen.findByRole('button', {name: AI_SUMMARY_MESSAGES.editSummary})).toBeDisabled();
+    expect(screen.getByTestId('wrap-up-summary:reason-picker')).not.toHaveAttribute('disabled');
     const complete = await screen.findByRole('button', {name: COMPLETE_WRAP_UP_LABEL});
-    expect(complete).toBeDisabled();
+    expect(complete).not.toBeDisabled();
     fireEvent.click(complete);
-    expect(onComplete).not.toHaveBeenCalled();
-    expect(screen.getByRole('radiogroup', {name: REASON_GROUP_NAME}).parentElement).toHaveAttribute(
-      'aria-disabled',
-      'true'
-    );
-
-    rerender(renderPanel(false));
-    await waitFor(() => expect(editInitialReason).not.toBeDisabled());
+    expect(onComplete).toHaveBeenCalledWith(reasons[0]);
+    changeReason('aux-2');
+    expect(onReasonChange).toHaveBeenCalledWith(reasons[1]);
   });
 
-  it('restores focus to the wrap-up panel when the summary subtree is removed', async () => {
-    const {rerender} = render(
-      <WrapUpSummary reasons={reasons} summary={createSummary()} onReasonChange={jest.fn()} onComplete={jest.fn()} />
+  it('preserves the native reason picker and selected reason when the summary is removed', async () => {
+    const renderPanel = (showSummary: boolean) => (
+      <WrapUpSummary
+        reasons={reasons}
+        summary={showSummary ? createSummary() : undefined}
+        selectedReasonId="aux-1"
+        onReasonChange={jest.fn()}
+        onComplete={jest.fn()}
+      />
     );
-
-    const copy = await screen.findByRole('button', {name: AI_SUMMARY_MESSAGES.copySummary});
-    act(() => {
-      copy.focus();
+    const {rerender} = render(renderPanel(true));
+    const picker = screen.getByTestId('wrap-up-summary:reason-picker');
+    const input = await waitFor(() => {
+      const nativeInput = picker.shadowRoot?.querySelector<HTMLInputElement>('input[role="combobox"]');
+      expect(nativeInput).toHaveValue('Resolved');
+      return nativeInput as HTMLInputElement;
     });
-    expect(copy).toHaveFocus();
 
-    rerender(<WrapUpSummary reasons={reasons} onReasonChange={jest.fn()} onComplete={jest.fn()} />);
+    rerender(renderPanel(false));
 
-    await waitFor(() => expect(screen.getByTestId('wrap-up-summary')).toHaveFocus());
+    expect(screen.getByTestId('wrap-up-summary:reason-picker')).toBe(picker);
+    expect(input).toHaveValue('Resolved');
+    expect(await screen.findByRole('button', {name: COMPLETE_WRAP_UP_LABEL})).not.toBeDisabled();
     expect(screen.queryByTestId('wrap-up-summary:body')).not.toBeInTheDocument();
   });
 
-  it('does not recover summary focus after focus has moved to another control', async () => {
-    const renderPanel = (showSummary: boolean) => (
-      <>
-        <WrapUpSummary
-          reasons={reasons}
-          summary={showSummary ? createSummary() : undefined}
-          onReasonChange={jest.fn()}
-          onComplete={jest.fn()}
-        />
-        {showSummary ? <button type="button">Outside control</button> : null}
-      </>
-    );
-    const {rerender} = render(renderPanel(true));
-    const copy = await screen.findByRole('button', {name: AI_SUMMARY_MESSAGES.copySummary});
-    act(() => copy.focus());
-    act(() => screen.getByRole('button', {name: 'Outside control'}).focus());
-
-    rerender(renderPanel(false));
-
-    expect(screen.getByTestId('wrap-up-summary')).not.toHaveFocus();
-  });
-
-  it('bounds reason and summary scrolling while keeping panel chrome outside the scroll regions', async () => {
+  it('bounds panel and summary scrolling while keeping Submit Wrap Up outside both scroll regions', async () => {
     const removeStyles = installWrapUpSummaryStyles();
     try {
       const manyReasons = Array.from({length: 12}, (_, index) => ({
@@ -344,14 +408,16 @@ describe('WrapUpSummary', () => {
         return overflowY === 'auto' || overflowY === 'scroll';
       });
 
-      expect(panelStyle.blockSize).toBe('80vh');
       expect(panelStyle.maxBlockSize).toBe('80vh');
-      expect(panelStyle.overflow).toBe('visible');
       expect(scrollOwners).toEqual([
-        panel.querySelector('.wrap-up-summary__reason-group'),
+        screen.getByTestId('wrap-up-summary:scroll-content'),
         screen.getByTestId('ai-summary:content'),
       ]);
-      expect(await screen.findByRole('button', {name: COMPLETE_WRAP_UP_LABEL})).toBeInTheDocument();
+      const submit = await screen.findByRole('button', {name: COMPLETE_WRAP_UP_LABEL});
+      expect(panel).toContainElement(submit);
+      expect(getComputedStyle(submit).alignSelf).toBe('flex-end');
+      expect(getComputedStyle(submit).flexShrink).toBe('0');
+      scrollOwners.forEach((scrollOwner) => expect(scrollOwner).not.toContainElement(submit));
     } finally {
       removeStyles();
     }

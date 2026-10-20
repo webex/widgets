@@ -1,5 +1,6 @@
 import React from 'react';
-import {act, render, fireEvent, waitFor} from '@testing-library/react';
+import {act, render, fireEvent, waitFor, within} from '@testing-library/react';
+import type {RenderResult} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import CallControlComponent from '../../../../src/components/task/CallControl/call-control';
 import {CallControlComponentProps, CallControlMenuType, TARGET_TYPE} from '../../../../src/components/task/task.types';
@@ -40,6 +41,24 @@ describe('CallControlComponent', () => {
     {id: 'wrap1', name: 'Customer Issue', isSystem: false},
     {id: 'wrap2', name: 'Technical Support', isSystem: false},
   ];
+
+  const selectSummaryWrapupReason = async (view: RenderResult, name: string) => {
+    const reason = mockWrapupCodes.find((candidate) => candidate.name === name);
+    if (!reason) throw new Error(`Missing test wrap-up reason: ${name}`);
+    const panel = await view.findByTestId('wrap-up-summary');
+    const picker = panel.querySelector<HTMLElement & {value: string}>('mdc-combobox');
+    if (!picker) throw new Error('Missing Momentum wrap-up reason picker');
+    fireEvent(
+      picker,
+      new CustomEvent('change', {
+        detail: {value: reason.id, label: reason.name},
+        bubbles: true,
+        composed: true,
+      })
+    );
+    await waitFor(() => expect(picker.value).toBe(reason.id));
+    return picker;
+  };
 
   const mockBuddyAgents = [
     {
@@ -87,7 +106,7 @@ describe('CallControlComponent', () => {
     state: 'generating' as const,
     content: {conversationId: 'interaction-main-1', summaryText: ''},
     selectedFeedback: 'none' as const,
-    requestPending: true,
+    controlsDisabled: true,
     onEdit: jest.fn().mockReturnValue(false),
     onCopy: jest.fn().mockReturnValue(false),
     onFeedback: jest.fn().mockReturnValue(false),
@@ -250,7 +269,29 @@ describe('CallControlComponent', () => {
       expect(wrapupButton).toHaveTextContent('Wrap up');
     });
 
-    it('keeps Complete Wrap-Up available while the post-call summary is generating', async () => {
+    it('uses an anchored Momentum popover for summary wrap-up', async () => {
+      const requestPostCallSummary = jest.fn();
+      const screen = render(
+        <CallControlComponent
+          {...defaultProps}
+          controls={createEnabledMainTaskUIControls({wrapup: enabledControl})}
+          aiSummary={{postCall: createPostCallSummary(), requestPostCallSummary}}
+        />
+      );
+
+      const trigger = screen.getByTestId('call-control:wrapup-button');
+      fireEvent.click(trigger);
+      const panel = await screen.findByTestId('wrap-up-summary');
+      expect(panel.closest('.wrapup-popover')).toHaveAttribute('role', 'dialog');
+      expect(screen.queryByTestId('call-control:wrapup-dialog')).not.toBeInTheDocument();
+      expect(trigger).toHaveAttribute('aria-expanded', 'true');
+      expect(requestPostCallSummary).toHaveBeenCalledTimes(1);
+      fireEvent.click(trigger);
+      await waitFor(() => expect(trigger).toHaveAttribute('aria-expanded', 'false'));
+      expect(requestPostCallSummary).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps Submit Wrap Up available while the post-call summary is generating', async () => {
       const wrapupCall = jest.fn().mockResolvedValue(true);
       const screen = render(
         <CallControlComponent
@@ -261,14 +302,14 @@ describe('CallControlComponent', () => {
             postCall: createPostCallSummary({
               state: 'content',
               content: {conversationId: 'interaction-main-1', summaryText: 'Customer issue was resolved.'},
-              requestPending: false,
+              controlsDisabled: false,
             }),
           }}
         />
       );
 
       fireEvent.click(screen.getByTestId('call-control:wrapup-button'));
-      fireEvent.click(await screen.findByRole('radio', {name: 'Customer Issue'}));
+      await selectSummaryWrapupReason(screen, 'Customer Issue');
 
       screen.rerender(
         <CallControlComponent
@@ -280,7 +321,7 @@ describe('CallControlComponent', () => {
           }}
         />
       );
-      fireEvent.click(await screen.findByRole('button', {name: 'Complete Wrap-Up'}));
+      fireEvent.click(await screen.findByRole('button', {name: 'Submit Wrap Up'}));
 
       await waitFor(() => expect(wrapupCall).toHaveBeenCalledWith('Customer Issue', 'wrap1'));
     });
@@ -293,7 +334,7 @@ describe('CallControlComponent', () => {
           aiSummary={{
             postCall: createPostCallSummary({
               state: 'omitted',
-              requestPending: false,
+              controlsDisabled: false,
             }),
           }}
         />
@@ -312,7 +353,7 @@ describe('CallControlComponent', () => {
           {...defaultProps}
           controls={createEnabledMainTaskUIControls({wrapup: enabledControl})}
           aiSummary={{
-            postCall: createPostCallSummary({state: 'omitted', requestPending: false}),
+            postCall: createPostCallSummary({state: 'omitted', controlsDisabled: false}),
             requestPostCallSummary,
           }}
         />
@@ -323,7 +364,7 @@ describe('CallControlComponent', () => {
       await screen.findByTestId('wrap-up-summary');
       expect(requestPostCallSummary).toHaveBeenCalledTimes(1);
 
-      fireEvent.click(await screen.findByRole('radio', {name: 'Customer Issue'}));
+      await selectSummaryWrapupReason(screen, 'Customer Issue');
       expect(requestPostCallSummary).toHaveBeenCalledTimes(1);
     });
 
@@ -332,7 +373,7 @@ describe('CallControlComponent', () => {
       const retainedPostCallSummary = createPostCallSummary({
         state: 'content',
         content: {conversationId: 'interaction-main-1', summaryText: 'Edited draft kept by store.'},
-        requestPending: false,
+        controlsDisabled: false,
       });
       const screen = render(
         <CallControlComponent
@@ -357,7 +398,7 @@ describe('CallControlComponent', () => {
       );
       expect(await screen.findByTestId('wrap-up-summary')).toBeInTheDocument();
       expect(screen.getByText('Edited draft kept by store.')).toBeInTheDocument();
-      fireEvent.click(await screen.findByRole('radio', {name: 'Customer Issue'}));
+      await selectSummaryWrapupReason(screen, 'Customer Issue');
 
       screen.rerender(
         <CallControlComponent
@@ -379,7 +420,7 @@ describe('CallControlComponent', () => {
           }}
         />
       );
-      const complete = await screen.findByRole('button', {name: 'Complete Wrap-Up'});
+      const complete = await screen.findByRole('button', {name: 'Submit Wrap Up'});
       expect(complete).not.toBeDisabled();
       expect(screen.getByText('Edited draft kept by store.')).toBeInTheDocument();
 
@@ -387,7 +428,7 @@ describe('CallControlComponent', () => {
       await waitFor(() => expect(wrapupCall).toHaveBeenCalledWith('Customer Issue', 'wrap1'));
     });
 
-    it('keeps post-call Complete Wrap-Up once-only while wrap-up is pending', async () => {
+    it('clears the submitted reason immediately through the existing wrap-up flow', async () => {
       const completion = deferred<boolean>();
       const wrapupCall = jest.fn().mockReturnValue(completion.promise);
       const screen = render(
@@ -399,24 +440,27 @@ describe('CallControlComponent', () => {
             postCall: createPostCallSummary({
               state: 'content',
               content: {conversationId: 'interaction-main-1', summaryText: 'Customer issue was resolved.'},
-              requestPending: false,
+              controlsDisabled: false,
             }),
           }}
         />
       );
 
       fireEvent.click(screen.getByTestId('call-control:wrapup-button'));
-      fireEvent.click(await screen.findByRole('radio', {name: 'Customer Issue'}));
-      const complete = await screen.findByRole('button', {name: 'Complete Wrap-Up'});
-      fireEvent.click(complete);
+      const picker = await selectSummaryWrapupReason(screen, 'Customer Issue');
+      const complete = await screen.findByRole('button', {name: 'Submit Wrap Up'});
       fireEvent.click(complete);
 
-      await waitFor(() => expect(wrapupCall).toHaveBeenCalledTimes(1));
+      expect(wrapupCall).toHaveBeenCalledTimes(1);
       expect(wrapupCall).toHaveBeenCalledWith('Customer Issue', 'wrap1');
+      await waitFor(() => expect(picker.value).toBe(''));
       await waitFor(() => expect(complete).toBeDisabled());
+      fireEvent.click(complete);
+      expect(wrapupCall).toHaveBeenCalledTimes(1);
 
-      completion.resolve(true);
-      await waitFor(() => expect(wrapupCall).toHaveBeenCalledTimes(1));
+      await act(async () => completion.resolve(true));
+      expect(wrapupCall).toHaveBeenCalledTimes(1);
+      expect(complete).toBeDisabled();
     });
 
     it('does not clear a new task reason when a previous task completion settles', async () => {
@@ -434,16 +478,16 @@ describe('CallControlComponent', () => {
       );
       const screen = render(renderControl('first-task'));
       fireEvent.click(screen.getByTestId('call-control:wrapup-button'));
-      fireEvent.click(await screen.findByRole('radio', {name: 'Customer Issue'}));
-      fireEvent.click(await screen.findByRole('button', {name: 'Complete Wrap-Up'}));
+      await selectSummaryWrapupReason(screen, 'Customer Issue');
+      fireEvent.click(await screen.findByRole('button', {name: 'Submit Wrap Up'}));
       await waitFor(() => expect(wrapupCall).toHaveBeenCalledTimes(1));
 
       screen.rerender(renderControl('second-task'));
-      fireEvent.click(await screen.findByRole('radio', {name: 'Technical Support'}));
+      const picker = await selectSummaryWrapupReason(screen, 'Technical Support');
       await act(async () => completion.resolve(true));
 
-      expect(screen.getByRole('radio', {name: 'Technical Support'})).toBeChecked();
-      expect(await screen.findByRole('button', {name: 'Complete Wrap-Up'})).not.toBeDisabled();
+      expect(picker.value).toBe('wrap2');
+      expect(await screen.findByRole('button', {name: 'Submit Wrap Up'})).not.toBeDisabled();
     });
 
     it('renders all call control elements with proper attributes and accessibility features', async () => {
@@ -662,11 +706,6 @@ describe('CallControlComponent', () => {
 
       jest.spyOn(callControlUtils, 'filterButtonsForConsultation').mockReturnValue([consultButton]);
 
-      // Mock popover event handlers
-      const mockHandleCloseButtonPress = jest.fn();
-
-      jest.spyOn(callControlUtils, 'handleCloseButtonPress').mockImplementation(mockHandleCloseButtonPress);
-
       const modifiedProps = {
         ...defaultProps,
         buddyAgents: mockBuddyAgents,
@@ -846,6 +885,87 @@ describe('CallControlComponent', () => {
         );
       };
 
+      it('uses a controlled Momentum dialog for summary consult and closes without another request', async () => {
+        const requestMidCallSummary = jest.fn().mockResolvedValue({outcome: 'accepted'});
+        const cancelMidCallSummary = jest.fn();
+        const resetMidCallSummaryExclusion = jest.fn();
+        const screen = renderVoiceConsult({
+          midCall: createMidCallSummary(),
+          requestMidCallSummary,
+          cancelMidCallSummary,
+          resetMidCallSummaryExclusion,
+        });
+
+        fireEvent.click(screen.getByLabelText('Consult'));
+
+        const dialog = await screen.findByTestId('call-control:consult-dialog');
+        expect(dialog.tagName).toBe('MDC-DIALOG');
+        expect(dialog).toHaveAttribute('visible');
+        expect(dialog).toHaveAttribute('header-text', 'Consult Request');
+        expect(screen.container.querySelector('.agent-popover.md-modal-container-wrapper')).not.toBeInTheDocument();
+        expect(requestMidCallSummary).toHaveBeenCalledTimes(1);
+        fireEvent(dialog, new CustomEvent('close'));
+        await waitFor(() => expect(dialog).not.toHaveAttribute('visible'));
+        expect(screen.queryByTestId('consult-transfer:summary')).not.toBeInTheDocument();
+        expect(requestMidCallSummary).toHaveBeenCalledTimes(1);
+        expect(cancelMidCallSummary).not.toHaveBeenCalled();
+        expect(resetMidCallSummaryExclusion).toHaveBeenCalledTimes(1);
+      });
+
+      it('cancels once per opening when footer Cancel is followed by a native close', async () => {
+        const cancelMidCallSummary = jest.fn();
+        const resetMidCallSummaryExclusion = jest.fn();
+        const screen = renderVoiceConsult({
+          midCall: createMidCallSummary(),
+          cancelMidCallSummary,
+          resetMidCallSummaryExclusion,
+        });
+        const trigger = screen.getByLabelText('Consult');
+        fireEvent.click(trigger);
+        const dialog = await screen.findByTestId('call-control:consult-dialog');
+        const cancel = within(dialog).getByRole('button', {name: 'Cancel'});
+
+        fireEvent.click(cancel);
+        await waitFor(() => expect(dialog).not.toHaveAttribute('visible'));
+        fireEvent(dialog, new CustomEvent('close'));
+
+        expect(cancelMidCallSummary).toHaveBeenCalledTimes(1);
+        expect(cancelMidCallSummary).toHaveBeenCalledWith('CONSULT');
+        expect(cancelMidCallSummary.mock.invocationCallOrder[0]).toBeLessThan(
+          resetMidCallSummaryExclusion.mock.invocationCallOrder[0]
+        );
+        expect(resetMidCallSummaryExclusion).toHaveBeenCalledTimes(1);
+        fireEvent.click(trigger);
+        fireEvent.click(await within(dialog).findByRole('button', {name: 'Cancel'}));
+        expect(cancelMidCallSummary).toHaveBeenCalledTimes(2);
+        expect(resetMidCallSummaryExclusion).toHaveBeenCalledTimes(2);
+      });
+
+      it('dispatches a confirmed destination without cancelling its summary', async () => {
+        const cancelMidCallSummary = jest.fn();
+        const resetMidCallSummaryExclusion = jest.fn();
+        const screen = renderVoiceConsult({
+          midCall: createMidCallSummary(),
+          cancelMidCallSummary,
+          resetMidCallSummaryExclusion,
+        });
+        fireEvent.click(screen.getByLabelText('Consult'));
+        fireEvent.click(await screen.findByRole('button', {name: 'Select John Doe'}));
+        expect(defaultProps.consultCall).not.toHaveBeenCalled();
+        const confirm = within(screen.getByTestId('call-control:consult-dialog')).getByRole('button', {
+          name: 'Consult',
+        });
+        await waitFor(() => expect(confirm).not.toBeDisabled());
+        const dialog = screen.getByTestId('call-control:consult-dialog');
+        fireEvent.click(confirm);
+        await waitFor(() => expect(dialog).not.toHaveAttribute('visible'));
+        fireEvent(dialog, new CustomEvent('close'));
+        expect(defaultProps.consultCall).toHaveBeenCalledTimes(1);
+        expect(cancelMidCallSummary).not.toHaveBeenCalled();
+        expect(resetMidCallSummaryExclusion).toHaveBeenCalledTimes(1);
+        await waitFor(() => expect(screen.getByTestId('call-control:consult-dialog')).not.toHaveAttribute('visible'));
+      });
+
       it('keeps one close control through summary activation and revocation in an open legacy popover', async () => {
         const screen = renderVoiceConsult(undefined);
         fireEvent.click(screen.getByLabelText('Consult'));
@@ -888,8 +1008,8 @@ describe('CallControlComponent', () => {
         fireEvent.click(consultButton);
         await waitFor(() => expect(requestMidCallSummary).toHaveBeenCalledTimes(1));
 
-        fireEvent.click(await screen.findByLabelText('Close popover'));
-        await waitFor(() => expect(screen.queryByLabelText('Close popover')).not.toBeInTheDocument());
+        fireEvent(await screen.findByTestId('call-control:consult-dialog'), new CustomEvent('close'));
+        await waitFor(() => expect(screen.getByTestId('call-control:consult-dialog')).not.toHaveAttribute('visible'));
         fireEvent.click(consultButton);
 
         await waitFor(() => expect(requestMidCallSummary).toHaveBeenCalledTimes(2));

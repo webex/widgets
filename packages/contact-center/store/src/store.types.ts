@@ -92,8 +92,6 @@ interface IContactCenter {
   removePreviewContact(payload: PreviewContactPayload): Promise<TaskResponse>;
   userPreference?: IUserPreferenceService;
   apiAIAssistant?: {
-    /** Widget-owned summaries observed by reference on the SDK AI Assistant API. */
-    aiSummaries: Record<string, Partial<Record<AISummaryRole, AISummaryEntry>>>;
     getRealTimeAssistance(params: RealTimeAssistRequestParams & {actionTimeStamp?: number}): Promise<unknown>;
     sendRealTimeAssistanceUserAction(params: RealTimeAssistUserActionParams): Promise<unknown>;
     requestWellnessBreak(): Promise<void>;
@@ -319,6 +317,8 @@ interface IStore {
   showE911Modal: boolean;
   isEmergencyModalAlreadyDisplayed: boolean;
   realTimeAssist: Record<string, RealTimeAssistPayload[]>;
+  /** Widget-owned AI summary state; SDK payloads retain their original identity. */
+  aiSummaries: Record<string, Partial<Record<AISummaryRole, AISummaryEntry>>>;
   offerActionErrors: Record<string, OfferActionErrorDisplay>;
   isWellnessBreakEnabled: boolean;
   wellnessAgentSessionId: string;
@@ -394,16 +394,17 @@ interface IStoreWrapper extends IStore {
   recordAISummaryCopied(role: AISummaryRole, expectedSummary: AISummary | undefined, task?: ITask): boolean;
   setAISummaryFeedback(
     role: Exclude<AISummaryRole, 'receiver'>,
-    feedback: Exclude<AISummaryFeedback, 'none'>,
+    feedback: AISummaryFeedback,
     expectedSummary: AISummary | undefined,
     task?: ITask
   ): boolean;
-  setReceiverSummaryFeedback(
-    feedback: Exclude<AISummaryFeedback, 'none'>,
-    expectedSummary: AISummary,
-    task?: ITask
-  ): Promise<void>;
-  sendMidCallSummaryResponse(action: AISummaryAction, task?: ITask): Promise<AISummaryResponseSubmissionResult>;
+  setReceiverSummaryFeedback(feedback: AISummaryFeedback, expectedSummary: AISummary, task?: ITask): Promise<void>;
+  setAISummaryExcluded(excluded: boolean, expectedSummary: AISummary | undefined, task?: ITask): boolean;
+  sendMidCallSummaryResponse(
+    action: AISummaryAction,
+    task?: ITask,
+    state?: AISummaryResponse['state']
+  ): Promise<AISummaryResponseSubmissionResult>;
   sendPostCallSummaryResponse(wrapUpCode: string, task: ITask): Promise<AISummaryResponseSubmissionResult>;
 }
 
@@ -691,7 +692,17 @@ export const CAMPAIGN_PREVIEW_CAMPAIGN_TYPES = ['preview_standard', 'preview_dir
 /** The consult/transfer initiator's summary, the receiving agent's summary, or the wrap-up summary. */
 export type AISummaryRole = 'initiator' | 'receiver' | 'post-call';
 
-/** One summary of an interaction, stored at `cc.apiAIAssistant.aiSummaries[interactionId][role]`. */
+/** Editable structured fields declared by the SDK; the separate resolution is read-only. */
+export const AI_SUMMARY_EDITABLE_SECTION_KEYS = [
+  'initialContactReason',
+  'additionalContactReasons',
+  'additionalContext',
+  'keyActionsTaken',
+  'nextSteps',
+  'reasonForTransferOrConsult',
+] as const satisfies readonly (keyof AISummarySections)[];
+
+/** One summary of an interaction, stored at `Store.aiSummaries[interactionId][role]`. */
 export type AISummaryEntry = {
   /** Lifecycle of the latest request, or of the pushed receiver summary. */
   status: 'loading' | 'ready' | 'error';
@@ -699,12 +710,14 @@ export type AISummaryEntry = {
    * The unchanged SDK summary, retained while a newer request loads or after it fails.
    */
   content?: AISummary;
-  /** SDK submission record; editable-summary changes use store actions, receiver copies use the widget helper. */
+  /** SDK submission record; edits, copy counts and feedback are updated through store actions. */
   response: AISummaryResponse;
   /** Orders local request promise settlements; SDK transport correlation remains SDK-owned. */
   requestGeneration?: number;
   /** The receiving agent's feedback response is being sent. */
   feedbackPending?: boolean;
+  /** The initiator opted out of sending this summary in the current consult/transfer picker. */
+  excluded?: boolean;
   /** The consult or transfer a mid-call summary was generated for. */
   action?: AISummaryAction;
 };

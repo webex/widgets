@@ -10,8 +10,6 @@ console.log = jest.fn(); // Mock console.log
 
 jest.mock('mobx', () => ({
   makeAutoObservable: jest.fn(),
-  extendObservable: jest.fn((target, properties) => Object.assign(target, properties)),
-  isObservableProp: jest.fn().mockReturnValue(false),
   observable: {ref: jest.fn()},
   runInAction: (action: () => void) => action(),
 }));
@@ -75,6 +73,7 @@ describe('Store', () => {
 
     expect(makeAutoObservable).toHaveBeenCalledWith(storeInstance, {
       cc: expect.any(Function),
+      aiSummaries: expect.any(Function),
     });
   });
 

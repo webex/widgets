@@ -2,7 +2,7 @@ import React from 'react';
 import {act, fireEvent, render, screen, waitFor, within} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import type {AISummaryEntry, AISummaryResponse} from '@webex/cc-store';
-import AISummaryComponent, {
+import AISummary, {
   AI_ASSISTANT_SUMMARY_MESSAGES,
   AI_ASSISTANT_SUMMARY_SECTION_ORDER,
   getDisplaySections,
@@ -25,7 +25,16 @@ const textContent: AISummaryContent = {
   summaryText: 'Customer asked for invoice help.',
 };
 
-const COMPLETE_WRAP_UP_LABEL = 'Complete Wrap-Up';
+const receiverContent: AISummaryContent = {
+  ...textContent,
+  adaptiveCard: {
+    type: 'AdaptiveCard',
+    version: '1.3',
+    body: [{type: 'TextBlock', text: 'Visible receiver copy'}],
+  },
+};
+
+const COMPLETE_WRAP_UP_LABEL = 'Submit Wrap Up';
 const SECTION_DISPLAY_KEYS = [
   'reasonForTransferOrConsult',
   'initialContactReason',
@@ -49,8 +58,7 @@ const LITERAL_SUMMARY_COPY = {
   like: 'This is helpful',
   dislike: "This isn't helpful",
   retry: 'Retry',
-  pendingSubmission: 'Pending submission',
-  completeWrapUp: 'Complete Wrap-Up',
+  completeWrapUp: 'Submit Wrap Up',
 } as const;
 
 const clipboardWrite = (impl: (value: string) => Promise<void>) => {
@@ -82,10 +90,10 @@ const flushUnhandledRejectionQueues = async () => {
   });
 };
 
-const getActionWrapper = (button: HTMLElement): HTMLElement => {
-  const wrapper = button.closest('.ai-summary__action');
-  expect(wrapper).not.toBeNull();
-  return wrapper as HTMLElement;
+const getCopyFeedback = (button: HTMLElement): HTMLElement => {
+  const feedback = button.closest('.ai-summary__action')?.querySelector('.ai-summary__sr-only');
+  expect(feedback).not.toBeNull();
+  return feedback as HTMLElement;
 };
 
 const getSummaryEditor = async (label: string): Promise<HTMLTextAreaElement> =>
@@ -101,47 +109,21 @@ const getSummaryEditor = async (label: string): Promise<HTMLTextAreaElement> =>
 const expectEditorFocus = async (editor: HTMLTextAreaElement) =>
   waitFor(() => expect((editor.getRootNode() as ShadowRoot).activeElement).toBe(editor));
 
-type WithOptionalFocusTarget<Props> = Props extends {
-  containingPanelFocusTarget: React.RefObject<HTMLElement | null>;
-}
-  ? Omit<Props, 'containingPanelFocusTarget'> & {
-      containingPanelFocusTarget?: React.RefObject<HTMLElement | null>;
-    }
-  : never;
-
-type AISummaryTestProps = WithOptionalFocusTarget<React.ComponentProps<typeof AISummaryComponent>>;
-
-const AISummary: React.FC<AISummaryTestProps> = ({containingPanelFocusTarget, ...props}) => {
-  const panelRef = React.useRef<HTMLDivElement | null>(null);
-  const fallbackRef = containingPanelFocusTarget ?? panelRef;
-
-  return (
-    <>
-      {containingPanelFocusTarget ? null : <div data-testid="ai-summary:test-panel" ref={panelRef} tabIndex={-1} />}
-      <AISummaryComponent {...props} containingPanelFocusTarget={fallbackRef} />
-    </>
-  );
-};
-
-const typeOnlyPanelRef: React.RefObject<HTMLElement | null> = {current: null};
-const omittedStateIsRejected: React.ComponentProps<typeof AISummaryComponent> = {
+const omittedStateIsRejected: React.ComponentProps<typeof AISummary> = {
   mode: 'mid-call-receiver',
   // @ts-expect-error Omission is container-owned and must be narrowed before AISummary is mounted.
   state: 'omitted',
-  containingPanelFocusTarget: typeOnlyPanelRef,
 };
-const receiverChildrenAreRejected: React.ComponentProps<typeof AISummaryComponent> = {
+const receiverChildrenAreRejected: React.ComponentProps<typeof AISummary> = {
   mode: 'mid-call-receiver',
   state: 'content',
-  content: textContent,
-  getReceiverCopyText: () => 'Receiver text',
+  content: receiverContent,
   onCopy: () => true,
   onFeedback: async () => ({outcome: 'confirmed'}),
-  containingPanelFocusTarget: typeOnlyPanelRef,
   // @ts-expect-error AISummary intentionally exposes no children surface.
   children: 'Receiver child',
 };
-const postCallActionTypeIsRejected: React.ComponentProps<typeof AISummaryComponent> = {
+const postCallActionTypeIsRejected: React.ComponentProps<typeof AISummary> = {
   mode: 'post-call',
   state: 'content',
   content: textContent,
@@ -151,7 +133,6 @@ const postCallActionTypeIsRejected: React.ComponentProps<typeof AISummaryCompone
   onCopy: jest.fn(),
   onFeedback: jest.fn(),
   onRetry: jest.fn(),
-  containingPanelFocusTarget: typeOnlyPanelRef,
 };
 
 void omittedStateIsRejected;
@@ -159,6 +140,23 @@ void receiverChildrenAreRejected;
 void postCallActionTypeIsRejected;
 
 describe('AISummary', () => {
+  const innerText = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'innerText');
+  beforeAll(() => {
+    // Adaptive Cards uses innerText; jsdom only implements textContent.
+    Object.defineProperty(HTMLElement.prototype, 'innerText', {
+      configurable: true,
+      get() {
+        return this.textContent;
+      },
+      set(value: string) {
+        this.textContent = value;
+      },
+    });
+  });
+  afterAll(() => {
+    if (innerText) Object.defineProperty(HTMLElement.prototype, 'innerText', innerText);
+    else Reflect.deleteProperty(HTMLElement.prototype, 'innerText');
+  });
   beforeEach(() => {
     jest.useRealTimers();
     clipboardWrite(() => Promise.resolve());
@@ -182,46 +180,6 @@ describe('AISummary', () => {
       'initialContactReason',
       'nextSteps',
     ]);
-  });
-
-  it('renders exact generating and error copy without underscore or percent artifacts', () => {
-    render(
-      <AISummary
-        mode="post-call"
-        state="generating"
-        onEdit={jest.fn()}
-        onCopy={jest.fn()}
-        onFeedback={jest.fn()}
-        onRetry={jest.fn().mockResolvedValue({outcome: 'blocked'})}
-      />
-    );
-
-    const spinner = screen.getByTestId('ai-summary:generating').querySelector('mdc-spinner');
-    expect(spinner).toHaveAttribute('aria-hidden', 'true');
-    expect(screen.getByText(AI_ASSISTANT_SUMMARY_MESSAGES.generatingDescription)).toBeInTheDocument();
-    expect(screen.getByText(AI_ASSISTANT_SUMMARY_MESSAGES.generatingTitle)).toHaveClass(
-      'ai-summary__status-title--generating'
-    );
-    expect(AI_ASSISTANT_SUMMARY_MESSAGES.generatingDescription).toContain('—');
-    expect(AI_ASSISTANT_SUMMARY_MESSAGES.generatingDescription).not.toContain('_');
-    expect(document.body).not.toHaveTextContent(/%[^%]+%/);
-
-    render(
-      <AISummary
-        mode="post-call"
-        state="generic-error"
-        onEdit={jest.fn()}
-        onCopy={jest.fn()}
-        onFeedback={jest.fn()}
-        onRetry={jest.fn().mockResolvedValue({outcome: 'blocked'})}
-      />
-    );
-
-    expect(screen.getByText(AI_ASSISTANT_SUMMARY_MESSAGES.generationError)).toBeInTheDocument();
-    expect(screen.getByText(AI_ASSISTANT_SUMMARY_MESSAGES.generationError)).toHaveClass(
-      'ai-summary__status-title--error'
-    );
-    expect(screen.getByText(AI_ASSISTANT_SUMMARY_MESSAGES.generationErrorDescription)).toBeInTheDocument();
   });
 
   it.each(['mid-call-initiator', 'post-call'] as const)(
@@ -266,6 +224,11 @@ describe('AISummary', () => {
       expect(screen.getByText(LITERAL_SUMMARY_COPY.generatingTitle).shadowRoot?.querySelector('h3')).toBeInTheDocument()
     );
     expect(screen.getByText(LITERAL_SUMMARY_COPY.generatingDescription)).toBeInTheDocument();
+    expect(screen.getByTestId('ai-summary:generating').querySelector('mdc-spinner')).toHaveAttribute(
+      'aria-hidden',
+      'true'
+    );
+    expect(screen.getByText(LITERAL_SUMMARY_COPY.generatingTitle)).toHaveProperty('type', 'body-large-bold');
 
     rerender(
       <AISummary
@@ -295,6 +258,7 @@ describe('AISummary', () => {
       expect(screen.getByText(LITERAL_SUMMARY_COPY.generationError).shadowRoot?.querySelector('h3')).toBeInTheDocument()
     );
     expect(screen.getByText(LITERAL_SUMMARY_COPY.generationErrorDescription)).toBeInTheDocument();
+    expect(screen.getByText(LITERAL_SUMMARY_COPY.generationError)).toHaveProperty('type', 'body-midsize-bold');
     expect(await screen.findByRole('button', {name: LITERAL_SUMMARY_COPY.retry})).toBeInTheDocument();
 
     rerender(
@@ -312,60 +276,6 @@ describe('AISummary', () => {
     expect(screen.getByRole('button', {name: LITERAL_SUMMARY_COPY.like})).toBeInTheDocument();
     expect(screen.getByRole('button', {name: LITERAL_SUMMARY_COPY.dislike})).toBeInTheDocument();
     expect(screen.getByText(LITERAL_SUMMARY_COPY.attribution)).toBeInTheDocument();
-  });
-
-  it('renders visible output for every public presentation state', () => {
-    const {rerender} = render(
-      <AISummary
-        mode="post-call"
-        state="content"
-        content={textContent}
-        onEdit={jest.fn()}
-        onCopy={jest.fn()}
-        onFeedback={jest.fn()}
-        onRetry={jest.fn().mockResolvedValue({outcome: 'blocked'})}
-      />
-    );
-    expect(screen.getByTestId('ai-summary:content')).toBeInTheDocument();
-
-    rerender(
-      <AISummary
-        mode="post-call"
-        state="generating"
-        content={textContent}
-        onEdit={jest.fn()}
-        onCopy={jest.fn()}
-        onFeedback={jest.fn()}
-        onRetry={jest.fn().mockResolvedValue({outcome: 'blocked'})}
-      />
-    );
-    expect(screen.getByTestId('ai-summary:generating')).toBeInTheDocument();
-
-    rerender(
-      <AISummary
-        mode="post-call"
-        state="unavailable"
-        content={textContent}
-        onEdit={jest.fn()}
-        onCopy={jest.fn()}
-        onFeedback={jest.fn()}
-        onRetry={jest.fn().mockResolvedValue({outcome: 'blocked'})}
-      />
-    );
-    expect(screen.getByText(AI_ASSISTANT_SUMMARY_MESSAGES.unavailable)).toBeInTheDocument();
-
-    rerender(
-      <AISummary
-        mode="post-call"
-        state="generic-error"
-        content={textContent}
-        onEdit={jest.fn()}
-        onCopy={jest.fn()}
-        onFeedback={jest.fn()}
-        onRetry={jest.fn().mockResolvedValue({outcome: 'blocked'})}
-      />
-    );
-    expect(screen.getByTestId('ai-summary:error')).toBeInTheDocument();
   });
 
   it.each([
@@ -396,8 +306,7 @@ describe('AISummary', () => {
         <AISummary
           mode={mode}
           state={state}
-          content={textContent}
-          getReceiverCopyText={() => 'Visible receiver copy'}
+          content={receiverContent}
           onCopy={jest.fn().mockReturnValue(true)}
           onFeedback={jest.fn().mockResolvedValue({outcome: 'confirmed'})}
         />
@@ -466,38 +375,29 @@ describe('AISummary', () => {
     }
   );
 
-  it('edits exact section keys and keeps cleared keys present', async () => {
+  it('edits exact section keys and keeps cleared fields mounted after blur', async () => {
     const onEdit = jest.fn().mockReturnValue(true);
-    render(
+    const renderSummary = (editedSummary?: AISummaryResponse['summary']) => (
       <AISummary
         mode="post-call"
         state="content"
         content={sectionContent}
+        editedSummary={editedSummary}
         onEdit={onEdit}
         onCopy={jest.fn()}
         onFeedback={jest.fn()}
         onRetry={jest.fn().mockResolvedValue({outcome: 'blocked'})}
       />
     );
+    const {rerender} = render(renderSummary());
 
     const surface = screen.getByTestId('ai-summary:editor-surface');
-    expect(surface).toContainElement(
-      await screen.findByRole('button', {
-        name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(
-          AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason
-        ),
-      })
-    );
-    expect(surface).toContainElement(
-      await screen.findByRole('button', {
-        name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.nextSteps),
-      })
-    );
+    expect(surface).toHaveTextContent(sectionContent.sections?.initialContactReason ?? '');
+    expect(surface).toHaveTextContent(sectionContent.sections?.nextSteps ?? '');
     expect(surface).toContainElement(screen.getByTestId('ai-summary:actions'));
-    expect(
-      screen.queryByRole('textbox', {name: AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.resolution})
-    ).not.toBeInTheDocument();
-    expect(screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary})).toHaveAttribute(
+    expect(document.querySelector('mdc-textarea')).not.toBeInTheDocument();
+    expect(screen.getByText(AI_ASSISTANT_SUMMARY_MESSAGES.attribution)).toBeInTheDocument();
+    expect(await screen.findByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary})).toHaveAttribute(
       'prefix-icon',
       'copy-regular'
     );
@@ -505,59 +405,50 @@ describe('AISummary', () => {
       'prefix-icon',
       'like-regular'
     );
-    fireEvent.click(
-      await screen.findByRole('button', {
-        name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(
-          AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason
-        ),
-      })
-    );
+    fireEvent.click(await screen.findByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.editSummary}));
     const editor = await getSummaryEditor(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason);
+    const nextSteps = await getSummaryEditor(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.nextSteps);
     await expectEditorFocus(editor);
+    expect(nextSteps).toHaveValue(sectionContent.sections?.nextSteps);
+    expect(document.querySelector('mdc-textarea[label="Outcome"]')).not.toBeInTheDocument();
+
     fireEvent.input(editor, {target: {value: ''}, composed: true});
     expect(onEdit).toHaveBeenCalledWith('initialContactReason', '');
+    rerender(renderSummary({initialContactReason: ''}));
     fireEvent.blur(editor, {composed: true});
-    expect(
-      await screen.findByRole('button', {
-        name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(
-          AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason
-        ),
-      })
-    ).toBeInTheDocument();
+
+    expect(await getSummaryEditor(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason)).toBe(editor);
+    expect(editor).toHaveValue('');
+    expect(await getSummaryEditor(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.nextSteps)).toBe(nextSteps);
+    fireEvent.input(editor, {target: {value: 'Restored reason'}, composed: true});
+    expect(onEdit).toHaveBeenLastCalledWith('initialContactReason', 'Restored reason');
     expect(screen.getByText(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.resolution)).toBeInTheDocument();
-    expect(screen.getByText(AI_ASSISTANT_SUMMARY_MESSAGES.attribution)).toBeInTheDocument();
+    expect(screen.getByText(AI_ASSISTANT_SUMMARY_MESSAGES.editing)).toBeInTheDocument();
   });
 
-  it('keeps structured previews compact, text-only and read-only while controls are disabled', async () => {
+  it('keeps structured previews read-only while controls are disabled', async () => {
+    const onEdit = jest.fn();
     render(
       <AISummary
         mode="post-call"
         state="content"
         content={sectionContent}
         controlsDisabled
-        onEdit={jest.fn()}
+        onEdit={onEdit}
         onCopy={jest.fn()}
         onFeedback={jest.fn()}
         onRetry={jest.fn()}
       />
     );
-    expect(
-      await screen.findByRole('button', {
-        name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(
-          AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason
-        ),
-      })
-    ).toBeDisabled();
+    const edit = await screen.findByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.editSummary});
+    expect(edit).toBeDisabled();
+    fireEvent.click(edit);
     expect(document.querySelector('mdc-textarea')).not.toBeInTheDocument();
     expect(screen.getByText('Customer asked for invoice help.')).toBeInTheDocument();
-    expect(
-      screen.queryByRole('button', {
-        name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.resolution),
-      })
-    ).not.toBeInTheDocument();
+    expect(onEdit).not.toHaveBeenCalled();
   });
 
-  it('applies automatic direction to mixed-direction structured summary text boundaries', async () => {
+  it('applies automatic direction to mixed-direction structured summary text boundaries', () => {
     const bidiContent: AISummaryContent = {
       conversationId: 'interaction-main-1',
       sections: {
@@ -578,36 +469,26 @@ describe('AISummary', () => {
       />
     );
 
-    const summaryPreview = await screen.findByRole('button', {
-      name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(
-        AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason
-      ),
-    });
-    expect(
-      within(summaryPreview).getByText(`${AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason}:`)
-    ).toHaveAttribute('dir', 'auto');
-    expect(within(summaryPreview).getByText('שלום ticket 42')).toHaveAttribute('dir', 'auto');
-
-    const actionPreview = await screen.findByRole('button', {
-      name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.keyActionsTaken),
-    });
-    expect(
-      within(actionPreview).getByText(`${AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.keyActionsTaken}:`)
-    ).toHaveAttribute('dir', 'auto');
-    const inlineList = within(actionPreview).getByRole('list');
-    expect(inlineList).toHaveAttribute('dir', 'auto');
-    within(inlineList)
+    expect(screen.getByText(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason)).toHaveAttribute(
+      'dir',
+      'auto'
+    );
+    expect(screen.getByText('שלום ticket 42')).toHaveAttribute('dir', 'auto');
+    expect(screen.getByText(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.keyActionsTaken)).toHaveAttribute(
+      'dir',
+      'auto'
+    );
+    const [actionList, nextStepsList] = screen.getAllByRole('list');
+    expect(actionList).toHaveAttribute('dir', 'auto');
+    within(actionList)
       .getAllByRole('listitem')
       .forEach((item) => expect(item).toHaveAttribute('dir', 'auto'));
-    expect(within(inlineList).getByText('اتصل بالعميل')).toBeInTheDocument();
-    expect(within(inlineList).getByText('Send invoice INV-42')).toBeInTheDocument();
-
-    const nextStepsPreview = await screen.findByRole('button', {
-      name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.nextSteps),
-    });
-    expect(
-      within(nextStepsPreview).getByText(`${AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.nextSteps}:`)
-    ).toHaveAttribute('dir', 'auto');
+    expect(within(actionList).getByText('اتصل بالعميل')).toBeInTheDocument();
+    expect(within(actionList).getByText('Send invoice INV-42')).toBeInTheDocument();
+    expect(screen.getByText(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.nextSteps)).toHaveAttribute('dir', 'auto');
+    expect(nextStepsList).toHaveAttribute('dir', 'auto');
+    expect(within(nextStepsList).getByText('שלח טופס')).toBeInTheDocument();
+    expect(within(nextStepsList).getByText('Schedule follow-up')).toBeInTheDocument();
   });
 
   it('projects every post-call display section in canonical order and appends Outcome when needed', () => {
@@ -676,15 +557,31 @@ describe('AISummary', () => {
     );
 
     expect(screen.queryByText('<img src=x onerror=alert(1)>:')).not.toBeInTheDocument();
-    expect(
-      screen.getByText(`${AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason}:`)
-    ).toBeInTheDocument();
+    expect(screen.getByText(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason)).toBeInTheDocument();
     expect(screen.getByText('<script>alert("summary")</script>')).toBeInTheDocument();
     expect(screen.getByText('<b onclick=alert(2)>Follow up</b>')).toBeInTheDocument();
     expect(container.querySelector('img')).toBeNull();
     expect(container.querySelector('script')).toBeNull();
     expect(container.querySelector('[aria-live], [role="status"], [role="alert"]')).toBeNull();
   });
+
+  it.each(['mid-call-initiator', 'post-call'] as const)(
+    'opens a fresh plain summary editor only through Edit summary in %s',
+    async (mode) => {
+      const onEdit = jest.fn();
+      render(<AISummary mode={mode} state="content" content={textContent} onEdit={onEdit} />);
+
+      expect(screen.getByText(textContent.summaryText ?? '')).toBeInTheDocument();
+      expect(document.querySelector('mdc-textarea')).not.toBeInTheDocument();
+      fireEvent.click(await screen.findByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.editSummary}));
+
+      const editor = await getSummaryEditor(AI_ASSISTANT_SUMMARY_MESSAGES.plainSummary);
+      expect(editor).toHaveValue(textContent.summaryText);
+      await expectEditorFocus(editor);
+      fireEvent.input(editor, {target: {value: 'Updated summary'}, composed: true});
+      expect(onEdit).toHaveBeenCalledWith('summaryText', 'Updated summary');
+    }
+  );
 
   it.each(['mid-call-initiator', 'post-call'] as const)(
     'renders and copies controlled plain edits in %s without replacing the SDK payload',
@@ -741,14 +638,14 @@ describe('AISummary', () => {
       />
     );
 
-    expect(screen.getByText('Agent corrected the contact reason.')).toBeInTheDocument();
-    expect(screen.getByText(sectionContent.sections?.nextSteps ?? '')).toBeInTheDocument();
+    expect(await getSummaryEditor(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason)).toHaveValue(
+      'Agent corrected the contact reason.'
+    );
+    expect(await getSummaryEditor(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.nextSteps)).toHaveValue(
+      sectionContent.sections?.nextSteps
+    );
     expect(screen.getByText(sectionContent.resolution ?? '')).toBeInTheDocument();
-    expect(
-      screen.queryByRole('button', {
-        name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.resolution),
-      })
-    ).not.toBeInTheDocument();
+    expect(document.querySelector('mdc-textarea[label="Outcome"]')).not.toBeInTheDocument();
     fireEvent.click(await screen.findByRole('button', {name: LITERAL_SUMMARY_COPY.copySummary}));
 
     await waitFor(() => expect(onCopy).toHaveBeenCalledTimes(1));
@@ -798,7 +695,7 @@ describe('AISummary', () => {
       await act(async () => finishCopy());
 
       expect(onCopy).not.toHaveBeenCalled();
-      expect(getActionWrapper(screen.getByRole('button', {name: LITERAL_SUMMARY_COPY.copySummary}))).toHaveTextContent(
+      expect(getCopyFeedback(screen.getByRole('button', {name: LITERAL_SUMMARY_COPY.copySummary}))).toHaveTextContent(
         LITERAL_SUMMARY_COPY.copySummary
       );
     }
@@ -822,14 +719,14 @@ describe('AISummary', () => {
     const {rerender} = render(renderSummary('Agent correction'));
     fireEvent.click(await screen.findByRole('button', {name: LITERAL_SUMMARY_COPY.copySummary}));
     const copy = await screen.findByRole('button', {name: LITERAL_SUMMARY_COPY.copySummary});
-    await waitFor(() => expect(getActionWrapper(copy)).toHaveTextContent(LITERAL_SUMMARY_COPY.copied));
+    await waitFor(() => expect(getCopyFeedback(copy)).toHaveTextContent(LITERAL_SUMMARY_COPY.copied));
 
     rerender(renderSummary('Agent correction', 'thumbs_up'));
-    expect(getActionWrapper(copy)).toHaveTextContent(LITERAL_SUMMARY_COPY.copied);
+    expect(getCopyFeedback(copy)).toHaveTextContent(LITERAL_SUMMARY_COPY.copied);
     expect(onCopy).toHaveBeenCalledTimes(1);
 
     rerender(renderSummary('', 'thumbs_up'));
-    expect(getActionWrapper(copy)).toHaveTextContent(LITERAL_SUMMARY_COPY.copySummary);
+    expect(getCopyFeedback(copy)).toHaveTextContent(LITERAL_SUMMARY_COPY.copySummary);
     expect(screen.queryByText('Agent correction')).not.toBeInTheDocument();
     expect(screen.queryByText(sectionContent.sections?.initialContactReason ?? '')).not.toBeInTheDocument();
   });
@@ -859,20 +756,20 @@ describe('AISummary', () => {
     fireEvent.mouseLeave(screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary}));
     expect(navigator.clipboard.writeText).toHaveBeenCalledTimes(1);
     expect(
-      getActionWrapper(screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary}))
+      getCopyFeedback(screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary}))
     ).toHaveTextContent(AI_ASSISTANT_SUMMARY_MESSAGES.copiedSummary);
 
     act(() => {
       jest.advanceTimersByTime(COPIED_FEEDBACK_MS - 1);
     });
     expect(
-      getActionWrapper(screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary}))
+      getCopyFeedback(screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary}))
     ).toHaveTextContent(AI_ASSISTANT_SUMMARY_MESSAGES.copiedSummary);
     act(() => {
       jest.advanceTimersByTime(1);
     });
     expect(
-      getActionWrapper(screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary}))
+      getCopyFeedback(screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary}))
     ).toHaveTextContent(AI_ASSISTANT_SUMMARY_MESSAGES.copySummary);
     expect(navigator.clipboard.writeText).toHaveBeenCalledTimes(1);
   });
@@ -893,12 +790,12 @@ describe('AISummary', () => {
 
     const copy = await screen.findByRole('button', {name: LITERAL_SUMMARY_COPY.copySummary});
     fireEvent.click(copy);
-    await waitFor(() => expect(getActionWrapper(copy)).toHaveTextContent(LITERAL_SUMMARY_COPY.copied));
+    await waitFor(() => expect(getCopyFeedback(copy)).toHaveTextContent(LITERAL_SUMMARY_COPY.copied));
     expect(jest.getTimerCount()).toBe(1);
 
     fireEvent.blur(copy, {relatedTarget: null});
 
-    expect(getActionWrapper(copy)).toHaveTextContent(LITERAL_SUMMARY_COPY.copySummary);
+    expect(getCopyFeedback(copy)).toHaveTextContent(LITERAL_SUMMARY_COPY.copySummary);
     expect(jest.getTimerCount()).toBe(0);
   });
 
@@ -918,46 +815,24 @@ describe('AISummary', () => {
 
     fireEvent.click(await screen.findByRole('button', {name: LITERAL_SUMMARY_COPY.copySummary}));
     await waitFor(() => expect(falseRecorder).toHaveBeenCalledWith());
-    expect(getActionWrapper(screen.getByRole('button', {name: LITERAL_SUMMARY_COPY.copySummary}))).toHaveTextContent(
+    expect(getCopyFeedback(screen.getByRole('button', {name: LITERAL_SUMMARY_COPY.copySummary}))).toHaveTextContent(
       LITERAL_SUMMARY_COPY.copySummary
     );
   });
 
-  it('contains synchronous receiver getter and clipboard writer failures without state changes', async () => {
+  it('contains synchronous clipboard getter and writer failures without state changes', async () => {
     const onCopy = jest.fn().mockReturnValue(true);
-    const {rerender} = render(
-      <AISummary
-        mode="mid-call-receiver"
-        state="content"
-        content={textContent}
-        getReceiverCopyText={() => {
-          throw new Error('no rendered receiver text');
-        }}
-        onCopy={onCopy}
-        onFeedback={jest.fn().mockResolvedValue({outcome: 'confirmed'})}
-      />
-    );
-
-    await screen.findByRole('button', {name: LITERAL_SUMMARY_COPY.copySummary});
-    expect(() => fireEvent.click(screen.getByRole('button', {name: LITERAL_SUMMARY_COPY.copySummary}))).not.toThrow();
-    expect(onCopy).not.toHaveBeenCalled();
-    expect(navigator.clipboard.writeText).not.toHaveBeenCalled();
-    expect(getActionWrapper(screen.getByRole('button', {name: LITERAL_SUMMARY_COPY.copySummary}))).toHaveTextContent(
-      LITERAL_SUMMARY_COPY.copySummary
-    );
-
     Object.defineProperty(navigator, 'clipboard', {
       configurable: true,
       get: () => {
         throw new Error('clipboard getter failed');
       },
     });
-    rerender(
+    const {rerender} = render(
       <AISummary
         mode="mid-call-receiver"
         state="content"
-        content={textContent}
-        getReceiverCopyText={() => 'Visible receiver copy'}
+        content={receiverContent}
         onCopy={onCopy}
         onFeedback={jest.fn().mockResolvedValue({outcome: 'confirmed'})}
       />
@@ -978,8 +853,7 @@ describe('AISummary', () => {
       <AISummary
         mode="mid-call-receiver"
         state="content"
-        content={textContent}
-        getReceiverCopyText={() => 'Visible receiver copy'}
+        content={receiverContent}
         onCopy={onCopy}
         onFeedback={jest.fn().mockResolvedValue({outcome: 'confirmed'})}
       />
@@ -987,7 +861,7 @@ describe('AISummary', () => {
     await screen.findByRole('button', {name: LITERAL_SUMMARY_COPY.copySummary});
     expect(() => fireEvent.click(screen.getByRole('button', {name: LITERAL_SUMMARY_COPY.copySummary}))).not.toThrow();
     expect(onCopy).not.toHaveBeenCalled();
-    expect(getActionWrapper(screen.getByRole('button', {name: LITERAL_SUMMARY_COPY.copySummary}))).toHaveTextContent(
+    expect(getCopyFeedback(screen.getByRole('button', {name: LITERAL_SUMMARY_COPY.copySummary}))).toHaveTextContent(
       LITERAL_SUMMARY_COPY.copySummary
     );
   });
@@ -1053,7 +927,7 @@ describe('AISummary', () => {
     expect(navigator.clipboard.writeText).not.toHaveBeenCalled();
     expect(onCopy).not.toHaveBeenCalled();
     expect(
-      getActionWrapper(screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary}))
+      getCopyFeedback(screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary}))
     ).toHaveTextContent(AI_ASSISTANT_SUMMARY_MESSAGES.copySummary);
 
     rerender(
@@ -1080,8 +954,10 @@ describe('AISummary', () => {
       <AISummary
         mode="mid-call-receiver"
         state="content"
-        content={textContent}
-        getReceiverCopyText={jest.fn().mockReturnValue('')}
+        content={{
+          ...receiverContent,
+          adaptiveCard: {type: 'AdaptiveCard', version: '1.3', body: [{type: 'TextBlock', text: ' '}]},
+        }}
         onCopy={onCopy}
         onFeedback={jest.fn().mockResolvedValue({outcome: 'confirmed'})}
       />
@@ -1110,7 +986,7 @@ describe('AISummary', () => {
     fireEvent.click(await screen.findByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary}));
     await waitFor(() =>
       expect(
-        getActionWrapper(screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary}))
+        getCopyFeedback(screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary}))
       ).toHaveTextContent(AI_ASSISTANT_SUMMARY_MESSAGES.copiedSummary)
     );
 
@@ -1127,7 +1003,7 @@ describe('AISummary', () => {
     );
 
     expect(
-      getActionWrapper(screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary}))
+      getCopyFeedback(screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary}))
     ).toHaveTextContent(AI_ASSISTANT_SUMMARY_MESSAGES.copySummary);
     expect(jest.getTimerCount()).toBe(0);
   });
@@ -1160,7 +1036,7 @@ describe('AISummary', () => {
     await act(async () => finishCopy());
 
     expect(onCopy).not.toHaveBeenCalled();
-    expect(getActionWrapper(screen.getByRole('button', {name: LITERAL_SUMMARY_COPY.copySummary}))).toHaveTextContent(
+    expect(getCopyFeedback(screen.getByRole('button', {name: LITERAL_SUMMARY_COPY.copySummary}))).toHaveTextContent(
       LITERAL_SUMMARY_COPY.copySummary
     );
   });
@@ -1184,11 +1060,11 @@ describe('AISummary', () => {
     await flushUnhandledRejectionQueues();
     expect(onCopy).not.toHaveBeenCalled();
     expect(
-      getActionWrapper(screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary}))
+      getCopyFeedback(screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary}))
     ).toHaveTextContent(AI_ASSISTANT_SUMMARY_MESSAGES.copySummary);
   });
 
-  it('shows the selected post-call feedback with the pending description', async () => {
+  it('shows the selected post-call feedback through native button state', async () => {
     render(
       <AISummary
         mode="post-call"
@@ -1204,19 +1080,17 @@ describe('AISummary', () => {
 
     const like = await screen.findByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.like});
     const dislike = screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.dislike});
-    const pendingDescription = screen.getByText(AI_ASSISTANT_SUMMARY_MESSAGES.feedback.pendingSubmission);
-    const pendingDescriptionId = pendingDescription.id;
-    expect(like).toHaveClass('ai-summary__feedback-button--selected');
-    expect(pendingDescriptionId).toMatch(/^ai-summary-feedback-/);
-    expect(like).toHaveAttribute('aria-describedby', pendingDescriptionId);
-    expect(dislike).toHaveAttribute('aria-describedby', pendingDescriptionId);
-    expect(like).toHaveAccessibleDescription(LITERAL_SUMMARY_COPY.pendingSubmission);
-    expect(dislike).toHaveAccessibleDescription(LITERAL_SUMMARY_COPY.pendingSubmission);
+    await waitFor(() => {
+      expect(like).toHaveAttribute('aria-pressed', 'true');
+      expect(like.shadowRoot?.querySelector('mdc-icon')).toHaveAttribute('name', 'like-filled');
+      expect(dislike).toHaveAttribute('aria-pressed', 'false');
+      expect(dislike.shadowRoot?.querySelector('mdc-icon')).toHaveAttribute('name', 'dislike-regular');
+    });
   });
 
   it('reports feedback clicks and paints only the selection provided by its container', async () => {
     const onFeedback = jest.fn().mockReturnValue(true);
-    const renderSummary = (selectedFeedback?: 'thumbs_up' | 'thumbs_down') => (
+    const renderSummary = (selectedFeedback?: 'thumbs_up' | 'thumbs_down' | 'none') => (
       <AISummary
         mode="post-call"
         state="content"
@@ -1237,137 +1111,106 @@ describe('AISummary', () => {
     expect(like).toHaveAttribute('aria-pressed', 'false');
 
     rerender(renderSummary('thumbs_down'));
-    expect(like).toHaveAttribute('aria-pressed', 'false');
+    await waitFor(() => {
+      expect(like).toHaveAttribute('aria-pressed', 'false');
+      expect(dislike).toHaveAttribute('aria-pressed', 'true');
+      expect(like.shadowRoot?.querySelector('mdc-icon')).toHaveAttribute('name', 'like-regular');
+      expect(dislike.shadowRoot?.querySelector('mdc-icon')).toHaveAttribute('name', 'dislike-filled');
+    });
+    fireEvent.click(dislike);
+    expect(onFeedback).toHaveBeenLastCalledWith('none');
     expect(dislike).toHaveAttribute('aria-pressed', 'true');
+
+    rerender(renderSummary('none'));
+    await waitFor(() => {
+      expect(like).toHaveAttribute('aria-pressed', 'false');
+      expect(dislike).toHaveAttribute('aria-pressed', 'false');
+      expect(dislike.shadowRoot?.querySelector('mdc-icon')).toHaveAttribute('name', 'dislike-regular');
+    });
   });
 
-  it('exposes exact accessible feedback labels and visible hover tooltips', async () => {
+  it('uses native Momentum tooltips with accessible action labels', async () => {
     render(
       <AISummary
         mode="post-call"
         state="content"
         content={textContent}
         selectedFeedback="thumbs_up"
-        onEdit={jest.fn()}
         onCopy={jest.fn()}
-        onFeedback={jest.fn().mockReturnValue(true)}
-        onRetry={jest.fn().mockResolvedValue({outcome: 'blocked'})}
+        onFeedback={jest.fn()}
       />
     );
 
     const like = await screen.findByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.like});
     expect(like).toHaveAttribute('aria-pressed', 'true');
     expect(like).not.toHaveAttribute('title');
-    fireEvent.mouseEnter(getActionWrapper(like));
-    await waitFor(() => expect(screen.getByRole('tooltip', {hidden: true})).toHaveAttribute('visible'));
-    const feedbackTooltip = screen.getByRole('tooltip', {hidden: true});
+    expect(like).toHaveAccessibleName(AI_ASSISTANT_SUMMARY_MESSAGES.like);
+    const feedbackTooltip = screen
+      .getAllByRole('tooltip', {hidden: true})
+      .find((tooltip) => tooltip.getAttribute('triggerid') === like.id)!;
     expect(feedbackTooltip.tagName).toBe('MDC-TOOLTIP');
     expect(feedbackTooltip).toHaveTextContent(AI_ASSISTANT_SUMMARY_MESSAGES.like);
-    expect(feedbackTooltip).toHaveAttribute('trigger', 'manual');
-    expect(feedbackTooltip).toHaveAttribute('triggerid', like.id);
-    expect(feedbackTooltip).toHaveAttribute('offset', '0');
+    await waitFor(() => expect(feedbackTooltip).toHaveAttribute('trigger', 'mouseenter focusin'));
     expect(feedbackTooltip).toHaveAttribute('tooltip-type', 'none');
-    expect(like).toHaveAccessibleDescription(AI_ASSISTANT_SUMMARY_MESSAGES.feedback.pendingSubmission);
-    fireEvent.mouseLeave(getActionWrapper(like));
-    expect(screen.queryByRole('tooltip', {hidden: true})).not.toBeInTheDocument();
 
-    const copy = await screen.findByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary});
-    const dislike = screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.dislike});
-    expect(copy).not.toHaveAttribute('title');
-    expect(dislike).not.toHaveAttribute('title');
-    fireEvent.mouseEnter(getActionWrapper(copy));
-    await waitFor(() => expect(screen.getByRole('tooltip', {hidden: true})).toHaveAttribute('visible'));
-    expect(screen.getAllByRole('tooltip', {hidden: true})).toHaveLength(1);
-    expect(screen.getByRole('tooltip', {hidden: true})).toHaveTextContent(AI_ASSISTANT_SUMMARY_MESSAGES.copySummary);
-    expect(screen.getByRole('tooltip', {hidden: true})).toHaveAttribute('triggerid', copy.id);
+    fireEvent.mouseEnter(like);
+    await waitFor(() => expect(feedbackTooltip).toHaveAttribute('visible'));
+    fireEvent.mouseLeave(like);
+    await waitFor(() => expect(feedbackTooltip).not.toHaveAttribute('visible'));
+
+    const copy = screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary});
+    const copyTooltip = screen
+      .getAllByRole('tooltip', {hidden: true})
+      .find((tooltip) => tooltip.getAttribute('triggerid') === copy.id)!;
+    expect(copyTooltip).toHaveTextContent(AI_ASSISTANT_SUMMARY_MESSAGES.copySummary);
+    fireEvent.mouseEnter(copy);
+    await waitFor(() => expect(copyTooltip).toHaveAttribute('visible'));
+    fireEvent.mouseLeave(copy);
+    await waitFor(() => expect(copyTooltip).not.toHaveAttribute('visible'));
   });
 
-  it('keeps action tooltips open while moving from trigger to tooltip wrapper', async () => {
-    render(
-      <AISummary
-        mode="post-call"
-        state="content"
-        content={textContent}
-        selectedFeedback="thumbs_up"
-        onEdit={jest.fn()}
-        onCopy={jest.fn()}
-        onFeedback={jest.fn().mockReturnValue(true)}
-        onRetry={jest.fn().mockResolvedValue({outcome: 'blocked'})}
-      />
+  it('keeps tooltip triggers unique and stable across summary instances', async () => {
+    const renderSummaries = (content: AISummaryContent) => (
+      <>
+        <AISummary mode="post-call" state="content" content={content} onFeedback={jest.fn()} />
+        <AISummary mode="post-call" state="content" content={textContent} onFeedback={jest.fn()} />
+      </>
     );
+    const {rerender} = render(renderSummaries(textContent));
+    await screen.findAllByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.like});
+    const buttons = screen.getAllByRole('button');
+    const ids = buttons.map((button) => button.id);
+    expect(ids.every(Boolean)).toBe(true);
+    expect(new Set(ids).size).toBe(ids.length);
+    const tooltipTriggers = screen
+      .getAllByRole('tooltip', {hidden: true})
+      .map((tooltip) => tooltip.getAttribute('triggerid'));
+    expect(tooltipTriggers).toEqual(ids);
 
-    const like = await screen.findByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.like});
-    const action = getActionWrapper(like);
-    fireEvent.mouseEnter(action);
-    const tooltip = await screen.findByRole('tooltip', {hidden: true});
-    fireEvent.mouseLeave(like, {relatedTarget: tooltip});
-    await waitFor(() => expect(tooltip).toHaveAttribute('visible'));
-    fireEvent.mouseEnter(tooltip);
-    await waitFor(() => expect(screen.getByRole('tooltip', {hidden: true})).toHaveAttribute('visible'));
-    fireEvent.mouseLeave(action);
-    expect(screen.queryByRole('tooltip', {hidden: true})).not.toBeInTheDocument();
+    rerender(renderSummaries({...textContent, summaryText: 'Updated summary'}));
+
+    expect(screen.getAllByRole('button').map((button) => button.id)).toEqual(ids);
   });
 
-  it('dismisses action tooltips with Escape without moving focus', async () => {
-    const parentEscape = jest.fn();
+  it('lets Momentum dismiss the tooltip with Escape without changing focus', async () => {
     render(
-      <div onKeyDown={parentEscape}>
-        <AISummary
-          mode="post-call"
-          state="content"
-          content={textContent}
-          selectedFeedback="thumbs_up"
-          onEdit={jest.fn()}
-          onCopy={jest.fn()}
-          onFeedback={jest.fn().mockReturnValue(true)}
-          onRetry={jest.fn().mockResolvedValue({outcome: 'blocked'})}
-        />
-      </div>
-    );
-
-    const like = await screen.findByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.like});
-    act(() => {
-      like.focus();
-    });
-    expect(like).toHaveFocus();
-    await waitFor(() => expect(screen.getByRole('tooltip', {hidden: true})).toHaveAttribute('visible'));
-
-    fireEvent.keyDown(like, {key: 'Escape'});
-    expect(screen.queryByRole('tooltip', {hidden: true})).not.toBeInTheDocument();
-    expect(like).toHaveFocus();
-    expect(parentEscape).not.toHaveBeenCalled();
-  });
-
-  it('dismisses hover tooltips with Escape while focus remains outside the summary', async () => {
-    const parentEscape = jest.fn();
-    const {unmount} = render(
-      <div onKeyDown={parentEscape}>
+      <div>
         <button type="button">External control</button>
-        <AISummary
-          mode="post-call"
-          state="content"
-          content={textContent}
-          onEdit={jest.fn()}
-          onCopy={jest.fn()}
-          onFeedback={jest.fn()}
-          onRetry={jest.fn()}
-        />
+        <AISummary mode="post-call" state="content" content={textContent} onFeedback={jest.fn()} />
       </div>
     );
     const external = screen.getByRole('button', {name: 'External control'});
     act(() => external.focus());
-    fireEvent.mouseEnter(await screen.findByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.like}));
-    await waitFor(() => expect(screen.getByRole('tooltip', {hidden: true})).toHaveAttribute('visible'));
+    const like = await screen.findByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.like});
+    const tooltip = screen
+      .getAllByRole('tooltip', {hidden: true})
+      .find((element) => element.getAttribute('triggerid') === like.id)!;
+    await waitFor(() => expect(tooltip).toHaveAttribute('trigger', 'mouseenter focusin'));
+    fireEvent.mouseEnter(like);
+    await waitFor(() => expect(tooltip).toHaveAttribute('visible'));
     fireEvent.keyDown(external, {key: 'Escape'});
-    expect(screen.queryByRole('tooltip', {hidden: true})).not.toBeInTheDocument();
+    await waitFor(() => expect(tooltip).not.toHaveAttribute('visible'));
     expect(external).toHaveFocus();
-    expect(parentEscape).not.toHaveBeenCalled();
-
-    fireEvent.keyDown(external, {key: 'Escape'});
-    expect(parentEscape).toHaveBeenCalledTimes(1);
-    fireEvent.mouseEnter(await screen.findByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.like}));
-    unmount();
-    expect(fireEvent.keyDown(document.body, {key: 'Escape'})).toBe(true);
   });
 
   it('routes Retry only from the generic-error surface and never renders it with retained content', async () => {
@@ -1412,7 +1255,7 @@ describe('AISummary', () => {
       <AISummary
         mode="post-call"
         state="generic-error"
-        requestPending
+        controlsDisabled
         onEdit={jest.fn()}
         onCopy={jest.fn()}
         onFeedback={jest.fn()}
@@ -1427,39 +1270,44 @@ describe('AISummary', () => {
     expect(onRetry).not.toHaveBeenCalled();
   });
 
-  it('recovers panel focus when the shared Retry button is removed', async () => {
-    const props = {
-      mode: 'post-call',
-      onEdit: jest.fn(),
-      onCopy: jest.fn(),
-      onFeedback: jest.fn(),
-      onRetry: jest.fn().mockResolvedValue({outcome: 'blocked'}),
-    } as const;
-    const {rerender} = render(<AISummary {...props} state="generic-error" />);
-    const retry = await screen.findByRole('button', {name: LITERAL_SUMMARY_COPY.retry});
-    act(() => retry.focus());
-    expect(retry).toHaveFocus();
-
-    rerender(<AISummary {...props} state="generating" />);
-    expect(screen.getByTestId('ai-summary:test-panel')).toHaveFocus();
-  });
-
-  it('copies rendered receiver text without rendering its SDK payload as an editor', async () => {
-    const getReceiverCopyText = jest.fn().mockReturnValue('Visible card text');
+  it('renders a display-only receiver card and copies its visible text instead of the SDK text', async () => {
     const onCopy = jest.fn().mockReturnValue(true);
     render(
       <AISummary
         mode="mid-call-receiver"
         state="content"
-        content={textContent}
-        getReceiverCopyText={getReceiverCopyText}
+        content={{
+          ...receiverContent,
+          summaryText: 'SDK text that is not displayed',
+          adaptiveCard: {
+            type: 'AdaptiveCard',
+            version: '1.3',
+            body: [
+              {type: 'TextBlock', text: 'Visible card text'},
+              {type: 'TextBlock', text: 'Hidden card text', isVisible: false},
+              {
+                type: 'RichTextBlock',
+                id: 'source-subtitle-richTextBlock',
+                inlines: [{type: 'TextRun', text: 'Source metadata'}],
+              },
+              {type: 'Input.Text', id: 'editor', value: 'Card-provided editor'},
+            ],
+            actions: [{type: 'Action.Submit', id: 'copyButton', title: 'Card-provided Copy'}],
+          },
+        }}
         onCopy={onCopy}
-        onFeedback={jest.fn().mockResolvedValue({outcome: 'confirmed'})}
+        onFeedback={jest.fn()}
       />
     );
 
-    fireEvent.click(await screen.findByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary}));
-    await waitFor(() => expect(onCopy).toHaveBeenCalledWith());
+    expect(await screen.findByText('Visible card text')).toBeInTheDocument();
+    expect(screen.queryByText('SDK text that is not displayed')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', {name: 'Card-provided Copy'})).not.toBeInTheDocument();
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+    const copyButton = await screen.findByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary});
+    expect(screen.getByTestId('ai-assistant:adaptive-card')).not.toContainElement(copyButton);
+    fireEvent.click(copyButton);
+    await waitFor(() => expect(onCopy).toHaveBeenCalledTimes(1));
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith('Visible card text');
     expect(document.querySelector('mdc-textarea')).not.toBeInTheDocument();
   });
@@ -1471,130 +1319,6 @@ describe('AISummary', () => {
     expect(screen.queryByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary})).not.toBeInTheDocument();
     expect(screen.queryByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.like})).not.toBeInTheDocument();
     expect(screen.queryByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.dislike})).not.toBeInTheDocument();
-  });
-
-  it('recovers focus to the containing panel when receiver actions are removed', async () => {
-    const panelRef = React.createRef<HTMLDivElement>();
-    const {rerender} = render(
-      <div>
-        <div ref={panelRef} data-testid="receiver-panel" tabIndex={-1} />
-        <AISummary
-          mode="mid-call-receiver"
-          state="content"
-          content={textContent}
-          containingPanelFocusTarget={panelRef}
-          getReceiverCopyText={() => 'Visible card text'}
-          onCopy={jest.fn().mockReturnValue(true)}
-          onFeedback={jest.fn().mockResolvedValue({outcome: 'confirmed'})}
-        />
-      </div>
-    );
-
-    const copy = await screen.findByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary});
-    act(() => {
-      copy.focus();
-    });
-    expect(screen.getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary})).toHaveFocus();
-
-    rerender(
-      <div>
-        <div ref={panelRef} data-testid="receiver-panel" tabIndex={-1} />
-        <AISummary mode="mid-call-receiver" state="unavailable" containingPanelFocusTarget={panelRef} />
-      </div>
-    );
-
-    await waitFor(() => expect(screen.getByTestId('receiver-panel')).toHaveFocus());
-    expect(screen.queryByTestId('ai-summary:actions')).not.toBeInTheDocument();
-  });
-
-  it('moves focus to a successor when one focused control is removed, then falls back to the panel', async () => {
-    const panelRef = React.createRef<HTMLDivElement>();
-    const firstContent: AISummaryContent = {
-      conversationId: 'interaction-main-1',
-      sections: {
-        initialContactReason: 'Summary value',
-        nextSteps: 'Follow-up value',
-      },
-    };
-    const {rerender} = render(
-      <div>
-        <div ref={panelRef} data-testid="post-call-panel" tabIndex={-1} />
-        <AISummary
-          mode="post-call"
-          state="content"
-          content={firstContent}
-          containingPanelFocusTarget={panelRef}
-          onEdit={jest.fn()}
-          onCopy={jest.fn()}
-          onFeedback={jest.fn().mockReturnValue(true)}
-          onRetry={jest.fn().mockResolvedValue({outcome: 'blocked'})}
-        />
-      </div>
-    );
-
-    const summaryPreview = await screen.findByRole('button', {
-      name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(
-        AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason
-      ),
-    });
-    act(() => {
-      summaryPreview.focus();
-    });
-    expect(summaryPreview).toHaveFocus();
-
-    rerender(
-      <div>
-        <div ref={panelRef} data-testid="post-call-panel" tabIndex={-1} />
-        <AISummary
-          mode="post-call"
-          state="content"
-          content={{
-            conversationId: 'interaction-main-1',
-            sections: {nextSteps: 'Follow-up value'},
-          }}
-          containingPanelFocusTarget={panelRef}
-          onEdit={jest.fn()}
-          onCopy={jest.fn()}
-          onFeedback={jest.fn().mockReturnValue(true)}
-          onRetry={jest.fn().mockResolvedValue({outcome: 'blocked'})}
-        />
-      </div>
-    );
-
-    await waitFor(async () =>
-      expect(
-        await screen.findByRole('button', {
-          name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.nextSteps),
-        })
-      ).toHaveFocus()
-    );
-
-    const copy = await screen.findByRole('button', {name: LITERAL_SUMMARY_COPY.copySummary});
-    act(() => {
-      copy.focus();
-    });
-    expect(copy).toHaveFocus();
-
-    rerender(
-      <div>
-        <div ref={panelRef} data-testid="post-call-panel" tabIndex={-1} />
-        <AISummary
-          mode="post-call"
-          state="unavailable"
-          content={{
-            conversationId: 'interaction-main-1',
-            sections: {nextSteps: 'Follow-up value'},
-          }}
-          containingPanelFocusTarget={panelRef}
-          onEdit={jest.fn()}
-          onCopy={jest.fn()}
-          onFeedback={jest.fn().mockReturnValue(true)}
-          onRetry={jest.fn().mockResolvedValue({outcome: 'blocked'})}
-        />
-      </div>
-    );
-
-    await waitFor(() => expect(screen.getByTestId('post-call-panel')).toHaveFocus());
   });
 
   it('retains focus on the active summary control across ordinary content updates', async () => {
@@ -1632,43 +1356,6 @@ describe('AISummary', () => {
     expect(screen.getByRole('button', {name: LITERAL_SUMMARY_COPY.like})).toHaveFocus();
   });
 
-  it('moves focus to the next summary control when a focused editor is removed', async () => {
-    render(
-      <AISummary
-        mode="post-call"
-        state="content"
-        content={sectionContent}
-        onEdit={jest.fn()}
-        onCopy={jest.fn()}
-        onFeedback={jest.fn().mockReturnValue(true)}
-        onRetry={jest.fn().mockResolvedValue({outcome: 'blocked'})}
-      />
-    );
-
-    fireEvent.click(
-      await screen.findByRole('button', {
-        name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(
-          AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason
-        ),
-      })
-    );
-    const editor = await getSummaryEditor(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason);
-    act(() => {
-      editor.focus();
-    });
-    await expectEditorFocus(editor);
-
-    fireEvent.blur(editor, {relatedTarget: null, composed: true});
-
-    await waitFor(async () =>
-      expect(
-        await screen.findByRole('button', {
-          name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.nextSteps),
-        })
-      ).toHaveFocus()
-    );
-  });
-
   it('keeps external focus after a normal blur out of the summary', async () => {
     render(
       <div>
@@ -1685,13 +1372,7 @@ describe('AISummary', () => {
       </div>
     );
 
-    fireEvent.click(
-      await screen.findByRole('button', {
-        name: AI_ASSISTANT_SUMMARY_MESSAGES.editSectionLabel(
-          AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason
-        ),
-      })
-    );
+    fireEvent.click(await screen.findByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.editSummary}));
     const editor = await getSummaryEditor(AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels.initialContactReason);
     const external = screen.getByRole('button', {name: 'External destination'});
     act(() => {
@@ -1704,57 +1385,5 @@ describe('AISummary', () => {
     });
 
     await waitFor(() => expect(external).toHaveFocus());
-  });
-
-  it('consumes a panel fallback once and does not steal focus on later renders', async () => {
-    let setState: React.Dispatch<React.SetStateAction<'content' | 'unavailable'>> = () => undefined;
-    let forceRender = () => undefined;
-    const Harness = () => {
-      const panelRef = React.useRef<HTMLDivElement | null>(null);
-      const [state, setHarnessState] = React.useState<'content' | 'unavailable'>('content');
-      const [, setRenderCount] = React.useState(0);
-      setState = setHarnessState;
-      forceRender = () => setRenderCount((count) => count + 1);
-
-      return (
-        <div>
-          <button type="button">External destination</button>
-          <div ref={panelRef} data-testid="receiver-panel" tabIndex={-1} />
-          {state === 'content' ? (
-            <AISummary
-              mode="mid-call-receiver"
-              state="content"
-              content={textContent}
-              containingPanelFocusTarget={panelRef}
-              getReceiverCopyText={() => 'Visible card text'}
-              onCopy={jest.fn().mockReturnValue(true)}
-              onFeedback={jest.fn().mockResolvedValue({outcome: 'confirmed'})}
-            />
-          ) : (
-            <AISummary mode="mid-call-receiver" state="unavailable" containingPanelFocusTarget={panelRef} />
-          )}
-        </div>
-      );
-    };
-    render(<Harness />);
-
-    const copy = await screen.findByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary});
-    act(() => {
-      copy.focus();
-    });
-    act(() => {
-      setState('unavailable');
-    });
-    await waitFor(() => expect(screen.getByTestId('receiver-panel')).toHaveFocus());
-
-    const external = screen.getByRole('button', {name: 'External destination'});
-    act(() => {
-      external.focus();
-    });
-    act(() => {
-      forceRender();
-    });
-
-    expect(external).toHaveFocus();
   });
 });
