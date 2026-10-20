@@ -399,13 +399,11 @@ Unit tests are split by source file. `tests/store.ts` covers the singleton defau
 
 ## Build declarations
 
-`build:src` cleans `dist`, bundles JavaScript with Webpack's transpile-only
-`ts-loader`, then runs `build:types` (`tsc --emitDeclarationOnly`). This separate
-TypeScript step type-checks the store and emits the declarations under `dist/types`
-declared by `package.json` before downstream workspaces build. Source exports alone
-do not produce those files; without them, SDK-derived types such as
-`AISummarySections` cannot be resolved correctly by consumers. When developing
-store types, run `build:types --watch` alongside `build:watch` to refresh declarations.
+`build:src` cleans `dist`, then uses Webpack's full `ts-loader` to type-check and emit
+JavaScript and the declarations under `dist/types` declared by `package.json` before
+downstream workspaces build. Source interfaces such as `IStore` and `IStoreWrapper`
+do not produce declarations when the loader uses `transpileOnly`. `build:watch`
+refreshes both JavaScript and declarations when store source changes.
 
 Evidence: `webpack.config.js`, `tsconfig.json`, `package.json`.
 Verification: `yarn run build` from the repository root.

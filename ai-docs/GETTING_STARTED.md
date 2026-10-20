@@ -18,10 +18,8 @@ yarn build:dev         # build all packages — required before cross-package ts
 ```
 A fresh clone (or a new git worktree) has no `node_modules`; `yarn install` followed by `yarn build:dev` must complete before any per-package test or cross-package import will resolve.
 
-The store's `build:src` bundles JavaScript, then runs `build:types` to type-check and
-emit the declarations consumed by downstream packages. For store type changes during
-watch development, run `yarn workspace @webex/cc-store build:types --watch` alongside
-`yarn workspace @webex/cc-store build:watch`.
+The store's Webpack build emits JavaScript and TypeScript declarations together.
+`yarn workspace @webex/cc-store build:watch` refreshes both when store source changes.
 
 ## Build / Run / Test
 | Task | Command |

@@ -38,7 +38,6 @@ corepack enable                                 # If yarn is unavailable
 - Always use `yarn workspace` commands for tests — never `npx jest` directly.
 - Pre-commit hooks run the full test suite — commits can take a while.
 - Worktrees need `yarn install` + `yarn build:dev` before anything works (no node_modules by default).
-- The store emits declarations in a separate `build:types` step; see [build/watch guidance](ai-docs/GETTING_STARTED.md).
 
 ## Git & PR Conventions
 

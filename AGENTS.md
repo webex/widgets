@@ -83,7 +83,6 @@ Always use `yarn workspace` commands for tests — never `npx jest` directly. Wo
 ## Common Gotchas
 1. Cross-package TypeScript imports require `yarn build:dev` first — a fresh clone/worktree fails type-check
    until packages are built.
-   The store emits declarations in a separate `build:types` step; see [build/watch guidance](ai-docs/GETTING_STARTED.md).
 2. Pre-commit hooks run the full test suite, so commits can take a while — don't assume a hang.
 3. The store is a singleton (`Store.getInstance()`); tests that mutate it must reset state or they leak
    across cases.
