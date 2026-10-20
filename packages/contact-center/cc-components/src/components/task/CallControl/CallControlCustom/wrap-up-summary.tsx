@@ -1,6 +1,6 @@
 import React, {useLayoutEffect, useRef, useState} from 'react';
 import {RadioGroupNext as RadioGroup, TextInput} from '@momentum-ui/react-collaboration';
-import {Button, Icon} from '@momentum-design/components/dist/react';
+import {Button, Icon, Text} from '@momentum-design/components/dist/react';
 import AISummary, {AI_ASSISTANT_SUMMARY_MESSAGES as AI_SUMMARY_MESSAGES} from '../../../AIAssistant/AISummary';
 import {CLEAR_SEARCH, WRAP_UP_INTERACTION} from '../../constants';
 import type {WrapUpSummaryProps} from '../../task.types';
@@ -51,12 +51,16 @@ const WrapUpSummary: React.FC<WrapUpSummaryProps> = ({
     >
       <div className="wrap-up-summary__scroll-content" data-testid="wrap-up-summary:scroll-content">
         <header className="wrap-up-summary__header">
-          <h2 className="wrap-up-summary__eyebrow">{WRAP_UP_INTERACTION}</h2>
-          <p className="wrap-up-summary__intro">{AI_SUMMARY_MESSAGES.postCall.instructions}</p>
+          <Text tagname="h2" className="wrap-up-summary__eyebrow">
+            {WRAP_UP_INTERACTION}
+          </Text>
+          <Text tagname="p" className="wrap-up-summary__intro">
+            {AI_SUMMARY_MESSAGES.postCall.instructions}
+          </Text>
         </header>
-        <h3 className="wrap-up-summary__title" id={headingId}>
+        <Text tagname="h3" className="wrap-up-summary__title" id={headingId}>
           {AI_SUMMARY_MESSAGES.postCall.chooseReason}
-        </h3>
+        </Text>
         <div className="wrap-up-summary__search-field">
           <Icon name="search-regular" className="wrap-up-summary__search-field-icon" aria-hidden="true" />
           <TextInput
@@ -89,7 +93,9 @@ const WrapUpSummary: React.FC<WrapUpSummaryProps> = ({
             value={selectedReason?.id ?? ''}
           />
           {filteredReasons.length === 0 ? (
-            <p className="wrap-up-summary__empty">{AI_SUMMARY_MESSAGES.postCall.noReasonMatches}</p>
+            <Text tagname="p" className="wrap-up-summary__empty">
+              {AI_SUMMARY_MESSAGES.postCall.noReasonMatches}
+            </Text>
           ) : null}
         </div>
         {summary && summary.state !== 'omitted' ? (

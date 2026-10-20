@@ -1,11 +1,11 @@
 import React, {useLayoutEffect, useRef, useState} from 'react';
-import {Button, Icon, Spinner, Tooltip} from '@momentum-design/components/dist/react';
+import {Button, Icon, Spinner, Text, Tooltip} from '@momentum-design/components/dist/react';
 import {
   AI_ASSISTANT_SUMMARY_BULLETED_SECTION_KEYS,
   AI_ASSISTANT_SUMMARY_FEEDBACK_BUTTONS,
   AI_ASSISTANT_SUMMARY_MESSAGES,
 } from './ai-summary.constants';
-import {getDisplaySections, useAISummaryInteractions} from './ai-summary.hooks';
+import {getDisplaySections, useAISummaryInteractions} from './helper';
 import type {
   AISummaryDisplaySection,
   AISummaryEditorProps,
@@ -32,9 +32,9 @@ const renderReadonlyValue = (section: AISummaryDisplaySection, inline = false) =
   }
 
   return (
-    <span className="ai-summary__readonly-value" dir="auto">
+    <Text tagname="span" className="ai-summary__readonly-value" dir="auto">
       {section.value}
-    </span>
+    </Text>
   );
 };
 
@@ -83,9 +83,9 @@ const SummarySectionEditor: React.FC<AISummarySectionEditorProps> = ({section, d
   if (editing && !disabled) {
     return (
       <label className="ai-summary__section ai-summary__section--structured">
-        <span className="ai-summary__label" dir="auto">
+        <Text tagname="span" className="ai-summary__label" dir="auto">
           {label}
-        </span>
+        </Text>
         <SummaryEditor
           className="ai-summary__textarea"
           dir="auto"
@@ -112,9 +112,9 @@ const SummarySectionEditor: React.FC<AISummarySectionEditorProps> = ({section, d
       disabled={disabled}
       onClick={() => setEditing(true)}
     >
-      <span className="ai-summary__label" dir="auto">
+      <Text tagname="span" className="ai-summary__label" dir="auto">
         {label}:
-      </span>{' '}
+      </Text>{' '}
       {renderReadonlyValue(section, true)}
     </Button>
   );
@@ -145,10 +145,12 @@ const AISummary = (props: AISummaryProps): React.ReactElement => {
     if (props.state === 'generating') {
       return (
         <div className="ai-summary__status" data-testid="ai-summary:generating">
-          <h3 className="ai-summary__status-title ai-summary__status-title--generating">
+          <Text tagname="h3" className="ai-summary__status-title ai-summary__status-title--generating">
             {AI_ASSISTANT_SUMMARY_MESSAGES.generatingTitle}
-          </h3>
-          <p className="ai-summary__description">{AI_ASSISTANT_SUMMARY_MESSAGES.generatingDescription}</p>
+          </Text>
+          <Text tagname="p" className="ai-summary__description">
+            {AI_ASSISTANT_SUMMARY_MESSAGES.generatingDescription}
+          </Text>
           <Spinner className="ai-summary__spinner" size="small" aria-hidden="true" />
         </div>
       );
@@ -156,7 +158,9 @@ const AISummary = (props: AISummaryProps): React.ReactElement => {
     if (props.state === 'unavailable' || (props.state === 'content' && !displayContent)) {
       return (
         <div className="ai-summary__status" data-testid="ai-summary:unavailable">
-          <p className="ai-summary__description">{AI_ASSISTANT_SUMMARY_MESSAGES.unavailable}</p>
+          <Text tagname="p" className="ai-summary__description">
+            {AI_ASSISTANT_SUMMARY_MESSAGES.unavailable}
+          </Text>
         </div>
       );
     }
@@ -164,10 +168,12 @@ const AISummary = (props: AISummaryProps): React.ReactElement => {
       return (
         <div className="ai-summary__status" data-testid="ai-summary:error">
           <Icon name="error-legacy-regular" className="ai-summary__error-icon" aria-hidden="true" />
-          <h3 className="ai-summary__status-title ai-summary__status-title--error">
+          <Text tagname="h3" className="ai-summary__status-title ai-summary__status-title--error">
             {AI_ASSISTANT_SUMMARY_MESSAGES.generationError}
-          </h3>
-          <p className="ai-summary__description">{AI_ASSISTANT_SUMMARY_MESSAGES.generationErrorDescription}</p>
+          </Text>
+          <Text tagname="p" className="ai-summary__description">
+            {AI_ASSISTANT_SUMMARY_MESSAGES.generationErrorDescription}
+          </Text>
           {props.mode === 'post-call' ? (
             <Button
               className="ai-summary__retry-button"
@@ -195,7 +201,9 @@ const AISummary = (props: AISummaryProps): React.ReactElement => {
       return (
         <div className="ai-summary__content" data-testid="ai-summary:content">
           <label className="ai-summary__section">
-            <span className="ai-summary__sr-only">{AI_ASSISTANT_SUMMARY_MESSAGES.plainSummary}</span>
+            <Text tagname="span" className="ai-summary__sr-only">
+              {AI_ASSISTANT_SUMMARY_MESSAGES.plainSummary}
+            </Text>
             <SummaryEditor
               className="ai-summary__textarea"
               dir="auto"
@@ -222,9 +230,9 @@ const AISummary = (props: AISummaryProps): React.ReactElement => {
           ) : (
             <div className="ai-summary__section ai-summary__section--structured" key={section.key}>
               <div className="ai-summary__readonly">
-                <span className="ai-summary__label" dir="auto">
+                <Text tagname="span" className="ai-summary__label" dir="auto">
                   {AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels[section.key]}
-                </span>
+                </Text>
                 {renderReadonlyValue(section)}
               </div>
             </div>
@@ -270,7 +278,7 @@ const AISummary = (props: AISummaryProps): React.ReactElement => {
       {showSummaryHeading ? (
         <div className="ai-summary__summary-heading">
           <Icon name="sparkle-filled" className="ai-summary__summary-sparkle" aria-hidden="true" />
-          <span>{AI_ASSISTANT_SUMMARY_MESSAGES.postCall.summaryHeading}</span>
+          <Text tagname="span">{AI_ASSISTANT_SUMMARY_MESSAGES.postCall.summaryHeading}</Text>
           <Icon name="info-circle-filled" className="ai-summary__summary-info" aria-hidden="true" />
         </div>
       ) : null}
@@ -283,8 +291,11 @@ const AISummary = (props: AISummaryProps): React.ReactElement => {
               onMouseEnter={() => handleActionMouseEnter('copy')}
               onMouseLeave={() => handleActionMouseLeave('copy')}
             >
-              <button
+              <Button
                 id={`ai-summary-${summaryId}-copy`}
+                variant="tertiary"
+                size={24}
+                prefix-icon={copied ? 'check-bold' : 'copy-regular'}
                 className={`ai-summary__button ai-summary__copy-button${
                   copied ? ' ai-summary__copy-button--confirmed' : ''
                 }`}
@@ -297,16 +308,18 @@ const AISummary = (props: AISummaryProps): React.ReactElement => {
                 }}
                 onClick={() => void handleCopy()}
                 aria-label={AI_ASSISTANT_SUMMARY_MESSAGES.copySummary}
-              >
-                <Icon name={copied ? 'check-bold' : 'copy-regular'} aria-hidden="true" />
-                <span className="ai-summary__sr-only">{copyLabel}</span>
-              </button>
+              />
+              <Text tagname="span" className="ai-summary__sr-only">
+                {copyLabel}
+              </Text>
               {renderTooltip('copy', AI_ASSISTANT_SUMMARY_MESSAGES.copySummary)}
             </span>
             {props.mode !== 'mid-call-receiver' ? (
               <>
                 <span className="ai-summary__actions-spacer" />
-                <span className="ai-summary__attribution">{AI_ASSISTANT_SUMMARY_MESSAGES.attribution}</span>
+                <Text tagname="span" className="ai-summary__attribution">
+                  {AI_ASSISTANT_SUMMARY_MESSAGES.attribution}
+                </Text>
                 <span className="ai-summary__action-separator" aria-hidden="true" />
               </>
             ) : null}
@@ -321,8 +334,12 @@ const AISummary = (props: AISummaryProps): React.ReactElement => {
                     onMouseEnter={() => handleActionMouseEnter(feedback)}
                     onMouseLeave={() => handleActionMouseLeave(feedback)}
                   >
-                    <button
+                    <Button
                       id={`ai-summary-${summaryId}-${feedback}`}
+                      variant="tertiary"
+                      size={20}
+                      prefix-icon={`${icon}-${selected ? 'filled' : 'regular'}`}
+                      active={selected}
                       className={`ai-summary__button ai-summary__feedback-button${
                         selected ? ' ai-summary__feedback-button--selected' : ''
                       }`}
@@ -334,9 +351,7 @@ const AISummary = (props: AISummaryProps): React.ReactElement => {
                       aria-label={feedbackLabel}
                       aria-pressed={selected}
                       aria-describedby={feedbackDescription ? feedbackDescriptionId : undefined}
-                    >
-                      <Icon name={`${icon}-${selected ? 'filled' : 'regular'}`} aria-hidden="true" />
-                    </button>
+                    />
                     {renderTooltip(feedback, feedbackLabel)}
                   </span>
                 );
@@ -346,9 +361,9 @@ const AISummary = (props: AISummaryProps): React.ReactElement => {
         ) : null}
       </div>
       {feedbackDescription ? (
-        <p className="ai-summary__feedback-status" id={feedbackDescriptionId}>
+        <Text tagname="p" className="ai-summary__feedback-status" id={feedbackDescriptionId}>
           {feedbackDescription}
-        </p>
+        </Text>
       ) : null}
     </section>
   );

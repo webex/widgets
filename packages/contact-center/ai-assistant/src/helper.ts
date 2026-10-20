@@ -309,47 +309,49 @@ export const getReceiverSummary = (task?: ITask): AIAssistantReceiverSummary | u
   }
   const branchKey = `mid-call:receiver:${interactionId}`;
   const content = summaryData.content;
-  if (content?.areTranscriptsAvailable === false) {
+  if (!content) {
+    return summaryData.status === 'error' ? {surface: 'generic-error', branchKey} : undefined;
+  }
+  // The SDK flag is optional; an omitted value must not hide supplied content.
+  if (content.areTranscriptsAvailable === false) {
     return {surface: 'unavailable', branchKey};
   }
-  if (content) {
-    const getDisplayedEntry = () => {
-      const current = store.cc.aiSummaries[interactionId]?.receiver;
-      return store.currentTask === task && current?.content === content ? current : undefined;
-    };
-    return {
-      surface: 'content',
-      branchKey,
-      content,
-      selectedFeedback: summaryData.response.feedback,
-      feedbackPending: Boolean(summaryData.feedbackPending),
-      recordReceiverSummaryCopied: () => {
-        const current = getDisplayedEntry();
-        if (!current || current.feedbackPending) {
-          return false;
-        }
-        runInAction(() => {
-          store.cc.aiSummaries = {
-            ...store.cc.aiSummaries,
-            [interactionId]: {
-              ...store.cc.aiSummaries[interactionId],
-              receiver: {
-                ...current,
-                response: {...current.response, numberOfTimesCopied: current.response.numberOfTimesCopied + 1},
-              },
+  const getDisplayedEntry = () => {
+    const current = store.cc.aiSummaries[interactionId]?.receiver;
+    return store.currentTask === task && current?.content === content ? current : undefined;
+  };
+  return {
+    surface: 'content',
+    branchKey,
+    content,
+    selectedFeedback: summaryData.response.feedback,
+    feedbackPending: Boolean(summaryData.feedbackPending),
+    recordReceiverSummaryCopied: () => {
+      const current = getDisplayedEntry();
+      if (!current || current.feedbackPending) {
+        return false;
+      }
+      // registerCC observes this map by reference, so replace it inside an action.
+      runInAction(() => {
+        store.cc.aiSummaries = {
+          ...store.cc.aiSummaries,
+          [interactionId]: {
+            ...store.cc.aiSummaries[interactionId],
+            receiver: {
+              ...current,
+              response: {...current.response, numberOfTimesCopied: current.response.numberOfTimesCopied + 1},
             },
-          };
-        });
-        return true;
-      },
-      setReceiverSummaryFeedback: (feedback) => {
-        if (getDisplayedEntry()) {
-          void store.setReceiverSummaryFeedback(feedback, content, task);
-        }
-      },
-    };
-  }
-  return summaryData.status === 'error' ? {surface: 'generic-error', branchKey} : undefined;
+          },
+        };
+      });
+      return true;
+    },
+    setReceiverSummaryFeedback: (feedback) => {
+      if (getDisplayedEntry()) {
+        void store.setReceiverSummaryFeedback(feedback, content, task);
+      }
+    },
+  };
 };
 
 export {REAL_TIME_ASSIST_FLAG};

@@ -1,4 +1,4 @@
 export {default} from './ai-summary';
-export {getDisplaySections} from './ai-summary.hooks';
+export {getDisplaySections} from './helper';
 export * from './ai-summary.constants';
 export * from './ai-summary.types';

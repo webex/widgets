@@ -871,7 +871,7 @@ describe('ConsultTransferPopoverComponent', () => {
       expect(heading.id).not.toBe('');
       expect(popover).toHaveAttribute('aria-labelledby', heading.id);
 
-      const copy = view.getByRole('button', {name: AI_SUMMARY_MESSAGES.copySummary});
+      const copy = await view.findByRole('button', {name: AI_SUMMARY_MESSAGES.copySummary});
       act(() => {
         copy.focus();
       });
@@ -927,7 +927,7 @@ describe('ConsultTransferPopoverComponent', () => {
         ).toHaveFocus()
       );
 
-      const copy = view.getByRole('button', {name: AI_SUMMARY_MESSAGES.copySummary});
+      const copy = await view.findByRole('button', {name: AI_SUMMARY_MESSAGES.copySummary});
       act(() => {
         copy.focus();
       });

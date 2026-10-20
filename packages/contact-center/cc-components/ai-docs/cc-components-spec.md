@@ -427,8 +427,11 @@ controls retain their existing focus behavior.
 
 Summary presentation constants use the `AI_ASSISTANT_SUMMARY_` prefix. These components
 receive data and callbacks through props and make no SDK calls.
-`ai-summary.tsx` owns the rendered UI; `ai-summary.hooks.ts` owns summary interaction,
+`ai-summary.tsx` owns the rendered UI; its local `helper.ts` owns summary interaction,
 clipboard, tooltip, and focus behavior.
+Status text and action controls use Momentum `Text` and `Button`. The native editor
+retains automatic height measurement and focus tracking; the installed Momentum
+textarea does not expose equivalent automatic sizing.
 Clipboard confirmation compares the actual copied text along with the SDK payload
 identity. Focus tracking keeps the active control and its successor together;
 section editors restore focus after closing without forcing a parent render.

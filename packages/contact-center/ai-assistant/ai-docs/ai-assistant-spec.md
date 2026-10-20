@@ -306,7 +306,8 @@ submission and acknowledgement. The widget makes no summary SDK calls.
 
 The receiver branch is independent of Real-time Assist enablement. A missing receiver
 entry supplies no branch. SDK content with `areTranscriptsAvailable: false` supplies
-the unavailable surface, and a rejected request supplies the generic error surface.
+the unavailable surface. Without content, an error status supplies the generic error
+surface; other statuses supply no branch.
 Raw content without an adaptive card still supplies a branch; card rendering and
 unsupported-card fallback belong to the presentation component.
 Summary changes are observed by `AIAssistantInternal`.
