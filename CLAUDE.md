@@ -54,9 +54,9 @@ corepack enable                                 # If yarn is unavailable
 
 | Command | Stage | Agent | Model | Purpose |
 |---------|-------|-------|-------|---------|
-| `/scrub` | 1 | scrubber | haiku | Classify bugs: `prioritize` / `followup` / `dolater` |
-| `/triage` | 2 | triager | sonnet | Root-cause analysis, produce fix suggestion |
-| `/fix` | 3 | fixer | sonnet | Implement fix in worktree, TDD, create PR |
+| `/cypher:scrub` | 1 | cypher:scrubber | haiku | Classify bugs: `prioritize` / `followup` / `dolater` |
+| `/cypher:triage` | 2 | cypher:triager | sonnet | Root-cause analysis, produce fix suggestion |
+| `/cypher:fix` | 3 | cypher:fixer | sonnet | Implement fix in worktree, TDD, create PR |
 
 Inter-stage state passes via **Jira comments** (durable, human-visible). Each stage reads previous stage's comments.
 Jira labels track progress: `scrubbed` → `prioritize`/`followup`/`dolater` → `triaged` → `fixing` → `fixed`.
@@ -65,9 +65,11 @@ Jira labels track progress: `scrubbed` → `prioritize`/`followup`/`dolater` →
 
 | Command | Purpose |
 |---------|---------|
-| `/fix-tickets` | Full lifecycle: fetch Jira tickets → worktree → implement → PR (uses superpowers skills) |
-| `/submit-pr` | Commit + push + create PR for a worktree. Runs in main conversation (no subagents) |
-| `/cleanup-worktrees` | List, inspect, and remove worktrees in `/tmp/claude-widgets/` |
+| `/cypher:fix-tickets` | Full lifecycle: fetch Jira tickets → worktree → implement → PR (uses superpowers skills) |
+| `/cypher:submit-pr` | Commit + push + create PR for a worktree. Runs in main conversation (no subagents) |
+| `/cypher:cleanup-worktrees` | List, inspect, and remove worktrees in `/tmp/claude-widgets/` |
+| `/cypher:spec-drift` | Full SDD ai-docs validation across 7 drift categories |
+| `/cypher:spec-drift-changed` | Validate ai-docs for staged/unstaged changes (pre-commit) |
 
 ## Subagent Constraints
 
