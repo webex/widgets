@@ -1,0 +1,59 @@
+name: Update Contact Center SDK
+
+on:
+  schedule:
+    - cron: "30 12 * * 3"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-sdk:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          registry-url: https://registry.npmjs.org
+          cache: yarn
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Update SDK
+        id: sdk
+        run: |
+          version="$(npm view @webex/contact-center@next version)"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          yarn workspace @webex/cc-store add "@webex/contact-center@$version"
+          yarn workspace samples-cc-react-app add "@webex/contact-center@$version"
+
+      - name: Validate SDK update
+        run: |
+          yarn workspace @webex/cc-store test:unit
+          yarn workspace @webex/cc-store build
+          yarn workspace samples-cc-react-app build
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: automation/update-contact-center-sdk
+          delete-branch: true
+          title: "chore(cc): update contact center SDK to ${{ steps.sdk.outputs.version }}"
+          commit-message: "chore(cc): update contact center SDK to ${{ steps.sdk.outputs.version }}"
+          body: |
+            Automated weekly update of `@webex/contact-center` from the npm `next` dist-tag.
+
+            SDK version: `${{ steps.sdk.outputs.version }}`
+          labels: dependencies,contact-center
