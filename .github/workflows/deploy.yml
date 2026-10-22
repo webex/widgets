@@ -162,11 +162,12 @@ jobs:
 
       - name: Pack Release Candidates
         if: steps.check-changes.outputs.has_changes == 'true'
-        env:
-          CHANGED_PACKAGE_NAMES: ${{ needs.analyze-changes.outputs.node-recursive }}
+        run: yarn workspace webex-widgets consumer-builds:pack
+
+      - name: Save Prepared Package Versions
+        if: steps.check-changes.outputs.has_changes == 'true'
         run: |
-          export CHANGED_PACKAGES="$(node -e 'console.log(JSON.stringify(process.env.CHANGED_PACKAGE_NAMES.trim().split(/\s+/).filter(Boolean)))')"
-          yarn workspace webex-widgets consumer-builds:pack
+          git diff --binary -- '**/package.json' > .generated/consumer-builds/candidates/release-manifests.patch
 
       - name: Save Release Candidates
         if: steps.check-changes.outputs.has_changes == 'true'
@@ -190,8 +191,8 @@ jobs:
       bundlers: ${{ needs.prepare-release.outputs.bundlers }}
 
   publish-npm:
-    name: Publish Tested Packages to NPM
-    needs: [prepare-release, consumer-builds]
+    name: Publish to NPM
+    needs: [analyze-changes, prepare-release, consumer-builds]
     if: >-
       always() && !cancelled() && needs.prepare-release.result == 'success' &&
       (needs.prepare-release.outputs.has_changes != 'true' || needs.consumer-builds.result == 'success')
@@ -210,17 +211,41 @@ jobs:
         with:
           node-version-file: .nvmrc
           registry-url: https://registry.npmjs.org
+          cache: yarn
+      - name: Restore Dependencies Cache
+        if: needs.prepare-release.outputs.has_changes == 'true'
+        uses: actions/cache/restore@v5
+        with:
+          path: '**/node_modules'
+          key: node-modules-${{ hashFiles('./yarn.lock') }}
+      - name: Install Dependencies
+        if: needs.prepare-release.outputs.has_changes == 'true'
+        run: yarn install --immutable
+      - name: Restore Distributables Cache
+        if: needs.prepare-release.outputs.has_changes == 'true'
+        uses: actions/cache/restore@v5
+        with:
+          path: '**/dist'
+          key: dist-${{ env.rid }}
+          fail-on-cache-miss: true
       - name: Download Tested Release Candidates
         if: needs.prepare-release.outputs.has_changes == 'true'
         uses: actions/download-artifact@v8
         with:
           name: consumer-candidates-release
           path: .generated/consumer-builds/candidates
-      - name: Publish Verified Archives
+      - name: Restore Prepared Package Versions
+        if: needs.prepare-release.outputs.has_changes == 'true'
+        run: git apply --allow-empty .generated/consumer-builds/candidates/release-manifests.patch
+      - name: Verify Consumer Candidates
+        if: needs.prepare-release.outputs.has_changes == 'true'
+        run: yarn workspace webex-widgets consumer-builds:verify
+      - name: Deploy Packages
         if: needs.prepare-release.outputs.has_changes == 'true'
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: node tooling/consumer-builds/candidates.cjs publish "$GITHUB_REF_NAME"
+          PACKAGES: ${{ needs.analyze-changes.outputs.yarn-recursive }}
+          YARN_NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: yarn workspaces foreach -W --from "$PACKAGES" --verbose run deploy:npm --access public --tag "$GITHUB_REF_NAME"
 
   publish-documentation:
     name: Publish - Documentation

@@ -5,33 +5,26 @@ const {execFileSync} = require('node:child_process');
 
 const ROOT = path.resolve(__dirname, '../..');
 const CANDIDATES = path.join(ROOT, '.generated/consumer-builds/candidates');
-const NAME = /^@webex\/(?:cc-[a-z-]+|widgets)$/;
+const NAME = /^@webex\/cc-[a-z-]+$/;
 const hash = (filename) => createHash('sha256').update(fs.readFileSync(filename)).digest('hex');
 
-function selectPackages(workspaces, changed) {
-  if (!Array.isArray(changed) || changed.some((name) => !workspaces.some((entry) => entry.name === name))) {
-    throw new Error('Changed packages must name existing workspaces.');
-  }
-  return workspaces
-    .filter((entry) => NAME.test(entry.name) && (entry.name.startsWith('@webex/cc-') || changed.includes(entry.name)))
-    .map((entry) => ({...entry, publish: changed.includes(entry.name)}));
-}
-
-function packCandidates(directory = CANDIDATES, changed = []) {
+function packCandidates(directory = CANDIDATES) {
   const workspaces = execFileSync('yarn', ['workspaces', 'list', '--json'], {cwd: ROOT, encoding: 'utf8'})
     .trim()
     .split('\n')
     .map((line) => JSON.parse(line));
   fs.mkdirSync(directory, {recursive: true});
-  const manifest = selectPackages(workspaces, changed).map(({name, location, publish}) => {
-    const file = `${name.slice(1).replace('/', '-')}.tgz`;
-    execFileSync('yarn', ['workspace', name, 'pack', '--out', path.join(directory, file)], {
-      cwd: ROOT,
-      stdio: 'inherit',
+  const manifest = workspaces
+    .filter(({name}) => NAME.test(name))
+    .map(({name, location}) => {
+      const file = `${name.slice(1).replace('/', '-')}.tgz`;
+      execFileSync('yarn', ['workspace', name, 'pack', '--out', path.join(directory, file)], {
+        cwd: ROOT,
+        stdio: 'inherit',
+      });
+      const {version} = JSON.parse(fs.readFileSync(path.join(ROOT, location, 'package.json'), 'utf8'));
+      return {name, version, file, sha256: hash(path.join(directory, file))};
     });
-    const {version} = JSON.parse(fs.readFileSync(path.join(ROOT, location, 'package.json'), 'utf8'));
-    return {name, version, file, sha256: hash(path.join(directory, file)), publish};
-  });
   fs.writeFileSync(path.join(directory, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
   readCandidates(directory);
 }
@@ -48,7 +41,6 @@ function readCandidates(directory) {
       !entry.version ||
       !/^[a-z-]+\.tgz$/.test(entry.file) ||
       !/^[a-f0-9]{64}$/.test(entry.sha256) ||
-      typeof entry.publish !== 'boolean' ||
       names.has(entry.name) ||
       files.has(entry.file)
     ) {
@@ -66,37 +58,14 @@ function readCandidates(directory) {
   return manifest;
 }
 
-function publishCandidates(directory, tag, dryRun = false) {
-  if (!/^[a-z][a-z0-9-]*$/.test(tag)) throw new Error('Invalid npm dist tag.');
-  const manifest = readCandidates(directory);
-  for (const entry of manifest.filter((item) => item.publish)) {
-    execFileSync(
-      'npm',
-      [
-        'publish',
-        path.join(directory, entry.file),
-        '--access',
-        'public',
-        '--tag',
-        tag,
-        '--registry',
-        'https://registry.npmjs.org',
-        '--ignore-scripts',
-        ...(dryRun ? ['--dry-run'] : []),
-      ],
-      {cwd: ROOT, stdio: 'inherit'}
-    );
-  }
-}
-
-module.exports = {CANDIDATES, selectPackages, packCandidates, readCandidates, publishCandidates};
+module.exports = {CANDIDATES, packCandidates, readCandidates};
 
 if (require.main === module) {
   try {
-    const [command, tag, flag] = process.argv.slice(2);
-    if (command === 'pack') packCandidates(CANDIDATES, JSON.parse(process.env.CHANGED_PACKAGES || '[]'));
-    else if (command === 'publish') publishCandidates(CANDIDATES, tag, flag === '--dry-run');
-    else throw new Error('Use pack or publish <tag> [--dry-run].');
+    const [command] = process.argv.slice(2);
+    if (command === 'pack') packCandidates();
+    else if (command === 'verify') readCandidates(CANDIDATES);
+    else throw new Error('Use pack or verify.');
   } catch (error) {
     console.error(error.message);
     process.exitCode = 1;

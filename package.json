@@ -60,7 +60,7 @@
     "test:consumer-builds": "node tooling/consumer-builds/run.cjs",
     "consumer-builds:matrix": "node tooling/consumer-builds/config.cjs",
     "consumer-builds:pack": "node tooling/consumer-builds/candidates.cjs pack",
-    "consumer-builds:publish": "node tooling/consumer-builds/candidates.cjs publish",
+    "consumer-builds:verify": "node tooling/consumer-builds/candidates.cjs verify",
     "test:cc-widgets": "yarn workspaces foreach --all --exclude webex-widgets --exclude samples-cc-wc-app --exclude samples-cc-react-app run test:unit",
     "test:meetings-widget": "yarn workspaces foreach --all --verbose --include @webex/widgets run test:unit",
     "build:dev": "NODE_ENV=development yarn build",
