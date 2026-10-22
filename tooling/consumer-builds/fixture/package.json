@@ -1,0 +1,56 @@
+{
+  "name": "cc-widget-consumer-build-fixture",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@momentum-ui/core": "19.16.0",
+    "@momentum-ui/icons": "8.28.5",
+    "@momentum-ui/react-collaboration": "26.197.0",
+    "@momentum-ui/utils": "6.2.15",
+    "@momentum-ui/web-components": "2.26.27",
+    "lit-element": "2.3.1",
+    "lit-html": "1.4.1",
+    "mobx": "6.13.5",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "@parcel/transformer-sass": "2.16.4",
+    "@playwright/test": "1.64.0",
+    "@rollup/plugin-commonjs": "29.0.3",
+    "@rollup/plugin-json": "6.1.0",
+    "@rollup/plugin-node-resolve": "16.0.3",
+    "@rollup/plugin-replace": "6.0.3",
+    "@rollup/plugin-url": "8.0.2",
+    "css-loader": "7.1.2",
+    "esbuild": "0.28.2",
+    "esbuild-sass-plugin": "3.7.0",
+    "parcel": "2.16.4",
+    "rollup": "4.64.5",
+    "rollup-plugin-postcss": "4.0.2",
+    "sass": "1.83.1",
+    "sass-loader": "16.0.4",
+    "style-loader": "4.0.0",
+    "vite": "8.3.4",
+    "webpack": "5.111.1",
+    "webpack-cli": "7.2.3"
+  },
+  "targets": {
+    "default": {
+      "context": "browser",
+      "publicUrl": "./"
+    }
+  },
+  "@parcel/resolver-default": {
+    "packageExports": true
+  },
+  "overrides": {
+    "@momentum-design/components": {
+      ".": "0.133.23",
+      "@momentum-design/animations": "0.4.3",
+      "@momentum-design/brand-visuals": "0.5.1"
+    },
+    "@momentum-design/icons": "0.17.0"
+  }
+}

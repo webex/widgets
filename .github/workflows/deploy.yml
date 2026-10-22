@@ -8,8 +8,6 @@ on:
 
 env:
   rid: ${{ github.run_id }}-${{ github.run_number }}
-  token: ${{ secrets.NPM_TOKEN }}
-  GH_TOKEN: ${{ secrets.GH_TOKEN }}
   GIT_AUTHOR_NAME: ${{ github.actor }}
   GIT_AUTHOR_EMAIL: ${{ github.actor }}@users.noreply.github.com
   HUSKY: 0
@@ -79,18 +77,24 @@ jobs:
           echo "Changed packages (yarn): ${{ steps.generate-package-matrix-yarn-changed.outputs.yarn-changed }}"
           echo "Changed packages + dependents (yarn): ${{ steps.generate-package-matrix-yarn-recursive.outputs.yarn-recursive }}"
 
-  publish-npm:
-    name: Publish to NPM
+  prepare-release:
+    name: Prepare Release Packages
     needs: analyze-changes
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
 
     outputs:
-      published: ${{ steps.check-changes.outputs.has_changes }}
+      has_changes: ${{ steps.check-changes.outputs.has_changes }}
       package_versions: ${{ steps.increment.outputs.package_versions }}
+      bundlers: ${{ steps.config.outputs.bundlers }}
 
     steps:
       - name: Checkout Project
         uses: actions/checkout@v6
+        with:
+          persist-credentials: false
 
       - name: Setup Node
         uses: actions/setup-node@v6
@@ -127,10 +131,13 @@ jobs:
           echo "Compared against: ${{ github.event.before }}"
           echo "=========================================="
 
-      - name: Add NPM token to .yarnrc.yml file
+      - name: Read Enabled Bundlers
+        id: config
         if: steps.check-changes.outputs.has_changes == 'true'
-        run: |
-          echo "npmAuthToken: ${{ env.token }}" >> ~/.yarnrc.yml
+        run: echo "bundlers=$(node tooling/consumer-builds/config.cjs)" >> "$GITHUB_OUTPUT"
+
+      - name: Install Dependencies
+        run: yarn install --immutable
 
       - name: Sync and Increment Package Versions
         id: increment
@@ -153,11 +160,92 @@ jobs:
           path: '**/dist'
           key: dist-${{ env.rid }}
 
-      - name: Deploy Packages
+      - name: Pack Release Candidates
         if: steps.check-changes.outputs.has_changes == 'true'
-        run: yarn workspaces foreach -W --from '${{ needs.analyze-changes.outputs.yarn-recursive }}' --verbose run deploy:npm --access public --tag ${GITHUB_REF##*/}
+        run: yarn workspace webex-widgets consumer-builds:pack
+
+      - name: Save Prepared Package Versions
+        if: steps.check-changes.outputs.has_changes == 'true'
+        run: |
+          git diff --binary -- '**/package.json' > .generated/consumer-builds/candidates/release-manifests.patch
+
+      - name: Save Release Candidates
+        if: steps.check-changes.outputs.has_changes == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: consumer-candidates-release
+          path: .generated/consumer-builds/candidates
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 7
+
+  consumer-builds:
+    name: Check Release Consumers
+    needs: prepare-release
+    if: needs.prepare-release.outputs.has_changes == 'true'
+    permissions:
+      contents: read
+    uses: ./.github/workflows/consumer-builds.yml
+    with:
+      candidate-artifact: consumer-candidates-release
+      bundlers: ${{ needs.prepare-release.outputs.bundlers }}
+
+  publish-npm:
+    name: Publish to NPM
+    needs: [analyze-changes, prepare-release, consumer-builds]
+    if: >-
+      always() && !cancelled() && needs.prepare-release.result == 'success' &&
+      (needs.prepare-release.outputs.has_changes != 'true' || needs.consumer-builds.result == 'success')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    outputs:
+      published: ${{ needs.prepare-release.outputs.has_changes }}
+      package_versions: ${{ needs.prepare-release.outputs.package_versions }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          registry-url: https://registry.npmjs.org
+          cache: yarn
+      - name: Restore Dependencies Cache
+        if: needs.prepare-release.outputs.has_changes == 'true'
+        uses: actions/cache/restore@v5
+        with:
+          path: '**/node_modules'
+          key: node-modules-${{ hashFiles('./yarn.lock') }}
+      - name: Install Dependencies
+        if: needs.prepare-release.outputs.has_changes == 'true'
+        run: yarn install --immutable
+      - name: Restore Distributables Cache
+        if: needs.prepare-release.outputs.has_changes == 'true'
+        uses: actions/cache/restore@v5
+        with:
+          path: '**/dist'
+          key: dist-${{ env.rid }}
+          fail-on-cache-miss: true
+      - name: Download Tested Release Candidates
+        if: needs.prepare-release.outputs.has_changes == 'true'
+        uses: actions/download-artifact@v8
+        with:
+          name: consumer-candidates-release
+          path: .generated/consumer-builds/candidates
+      - name: Restore Prepared Package Versions
+        if: needs.prepare-release.outputs.has_changes == 'true'
+        run: git apply --allow-empty .generated/consumer-builds/candidates/release-manifests.patch
+      - name: Verify Consumer Candidates
+        if: needs.prepare-release.outputs.has_changes == 'true'
+        run: yarn workspace webex-widgets consumer-builds:verify
+      - name: Deploy Packages
+        if: needs.prepare-release.outputs.has_changes == 'true'
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          PACKAGES: ${{ needs.analyze-changes.outputs.yarn-recursive }}
+          YARN_NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: yarn workspaces foreach -W --from "$PACKAGES" --verbose run deploy:npm --access public --tag "$GITHUB_REF_NAME"
 
   publish-documentation:
     name: Publish - Documentation
