@@ -9,6 +9,7 @@ import {
 } from './ai-summary.constants';
 import {getDisplaySections, useAISummaryInteractions} from './helper';
 import AdaptiveCardRenderer from '../AdaptiveCardRenderer/adaptive-card-renderer';
+import {formatSourceTimestamp} from '../AdaptiveCardRenderer/adaptive-card-renderer.utils';
 import type {AISummaryProps} from './ai-summary.types';
 import './ai-summary.styles.scss';
 
@@ -114,6 +115,7 @@ const AISummary = (props: AISummaryProps): React.ReactElement => {
           <AdaptiveCardRenderer
             key={isEditing ? 'edit' : 'view'}
             card={card}
+            publishTimestamp={props.content?.timestamp}
             presentation="summary"
             contentIdentity={props.content}
             disabled={disabled}
@@ -137,32 +139,107 @@ const AISummary = (props: AISummaryProps): React.ReactElement => {
       </section>
     );
   }
+  const showCopy = Boolean(props.onCopy);
+  const showFeedback = Boolean(props.onFeedback);
+  const copyLabel = copied ? AI_ASSISTANT_SUMMARY_MESSAGES.copiedSummary : AI_ASSISTANT_SUMMARY_MESSAGES.copySummary;
+  const renderCopyControl = () =>
+    showCopy ? (
+      <span className="ai-summary__action">
+        <Button
+          id={`ai-summary-${summaryId}-copy`}
+          variant="tertiary"
+          size={24}
+          prefix-icon={copied ? 'check-bold' : 'copy-regular'}
+          type="button"
+          disabled={disabled}
+          onBlur={() => setCopied(false)}
+          onClick={() => void handleCopy()}
+          aria-label={AI_ASSISTANT_SUMMARY_MESSAGES.copySummary}
+        />
+        <Text tagname="span" type="body-midsize-regular" className="ai-summary__sr-only">
+          {copyLabel}
+        </Text>
+        <Tooltip triggerID={`ai-summary-${summaryId}-copy`} placement="top" tooltipType="none">
+          {AI_ASSISTANT_SUMMARY_MESSAGES.copySummary}
+        </Tooltip>
+      </span>
+    ) : null;
+  const renderFeedbackControls = () =>
+    showFeedback ? (
+      <span className="ai-summary__feedback-group">
+        {AI_ASSISTANT_SUMMARY_FEEDBACK_BUTTONS.map(({feedback, icon, label: feedbackLabel}) => (
+          <span className="ai-summary__action" key={feedback}>
+            <Button
+              id={`ai-summary-${summaryId}-${feedback}`}
+              variant="tertiary"
+              size={isReceiver ? 24 : 20}
+              prefix-icon={`${icon}-regular`}
+              active={selectedFeedback === feedback}
+              type="button"
+              disabled={disabled}
+              onClick={() => handleFeedback(feedback)}
+              aria-label={feedbackLabel}
+            />
+            <Tooltip triggerID={`ai-summary-${summaryId}-${feedback}`} placement="top" tooltipType="none">
+              {feedbackLabel}
+            </Tooltip>
+          </span>
+        ))}
+      </span>
+    ) : null;
+  if (isReceiver && props.content?.adaptiveCard) {
+    const timestamp = formatSourceTimestamp(props.content.timestamp);
+    const footer =
+      timestamp || showCopy || showFeedback ? (
+        <div
+          className="ai-summary__actions ai-summary__receiver-footer"
+          data-testid="ai-summary:receiver-footer"
+          dir="ltr"
+        >
+          {timestamp ? (
+            <>
+              <time className="ai-summary__receiver-timestamp">{timestamp}</time>
+              {showCopy || showFeedback ? <span className="ai-summary__action-separator" aria-hidden="true" /> : null}
+            </>
+          ) : null}
+          {showCopy || showFeedback ? (
+            <div className="ai-summary__receiver-controls" data-testid="ai-summary:actions">
+              {renderFeedbackControls()}
+              {renderCopyControl()}
+            </div>
+          ) : null}
+        </div>
+      ) : undefined;
+    return (
+      <section
+        className="ai-summary ai-summary--receiver"
+        dir="ltr"
+        data-testid={`ai-summary:${props.mode}`}
+        ref={rootRef}
+      >
+        <div dir="auto">
+          <AdaptiveCardRenderer
+            card={props.content.adaptiveCard}
+            publishTimestamp={props.content.timestamp}
+            displayOnly
+            omitSourceTimestamp
+            onRender={setReceiverCardReady}
+            footer={receiverCardReady ? footer : undefined}
+            fallbackText={AI_ASSISTANT_SUMMARY_MESSAGES.unavailable}
+          />
+        </div>
+      </section>
+    );
+  }
   const fields = displayContent?.sections
     ? getDisplaySections(displayContent)
     : [{key: 'summaryText' as const, value: displayContent?.summaryText ?? ''}];
   const firstEditableKey = fields.find((field) => field.key !== 'resolution')?.key;
-  const showCopy = Boolean(props.onCopy);
-  const showFeedback = Boolean(props.onFeedback);
-  const showEdit = Boolean(props.onEdit && !isEditing && !isReceiver);
+  const showEdit = Boolean(props.onEdit && !isEditing);
   const showActions = showCopy || showFeedback || showEdit;
   const showSummaryHeading = props.mode === AI_ASSISTANT_SUMMARY_MODES.POST_CALL;
-  const copyLabel = copied ? AI_ASSISTANT_SUMMARY_MESSAGES.copiedSummary : AI_ASSISTANT_SUMMARY_MESSAGES.copySummary;
   return (
-    <section
-      className={`ai-summary${isReceiver ? ' ai-summary--receiver' : ''}`}
-      data-testid={`ai-summary:${props.mode}`}
-      ref={rootRef}
-    >
-      {isReceiver && props.content?.adaptiveCard ? (
-        <div dir="auto">
-          <AdaptiveCardRenderer
-            card={props.content.adaptiveCard}
-            displayOnly
-            onRender={setReceiverCardReady}
-            fallbackText={AI_ASSISTANT_SUMMARY_MESSAGES.unavailable}
-          />
-        </div>
-      ) : null}
+    <section className="ai-summary" data-testid={`ai-summary:${props.mode}`} ref={rootRef}>
       {showSummaryHeading ? (
         <div className="ai-summary__summary-heading">
           <Icon
@@ -184,118 +261,69 @@ const AISummary = (props: AISummaryProps): React.ReactElement => {
           />
         </div>
       ) : null}
-      {!isReceiver || receiverCardReady ? (
-        <div className="ai-summary__editor-surface" data-testid="ai-summary:editor-surface">
-          {!isReceiver && (
-            <div className="ai-summary__content" data-testid="ai-summary:content">
-              {fields.map(({key, value}) => {
-                const label = key === 'summaryText' ? undefined : AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels[key];
-                const editable = isEditing && key !== 'resolution';
-                if (key !== 'summaryText' && !value.trim() && !editable) return null;
-                if (editable) {
-                  return (
-                    <Textarea
-                      key={key}
-                      className="ai-summary__textarea"
-                      dir="auto"
-                      label={label}
-                      dataAriaLabel={label ? undefined : AI_ASSISTANT_SUMMARY_MESSAGES.plainSummary}
-                      value={value}
-                      rows={3}
-                      autoFocusOnMount={key === firstEditableKey}
-                      disabled={disabled}
-                      onInput={(event) => handleInput(key, event.target.value)}
-                    />
-                  );
-                }
-                const readonlyValue = renderReadonlyValue(
-                  value,
-                  key !== 'summaryText' && AI_ASSISTANT_SUMMARY_BULLETED_SECTION_KEYS.has(key)
-                );
-                return label ? (
-                  <div className="ai-summary__readonly" key={key}>
-                    <Text tagname="span" type="body-midsize-bold" className="ai-summary__label" dir="auto">
-                      {label}
-                    </Text>
-                    {readonlyValue}
-                  </div>
-                ) : (
-                  <React.Fragment key={key}>{readonlyValue}</React.Fragment>
-                );
-              })}
-            </div>
-          )}
-          {showActions ? (
-            <div className="ai-summary__actions" data-testid="ai-summary:actions">
-              {showEdit ? (
-                <Button
-                  type="button"
-                  variant="tertiary"
-                  size={28}
-                  prefix-icon="edit-regular"
+      <div className="ai-summary__editor-surface" data-testid="ai-summary:editor-surface">
+        <div className="ai-summary__content" data-testid="ai-summary:content">
+          {fields.map(({key, value}) => {
+            const label = key === 'summaryText' ? undefined : AI_ASSISTANT_SUMMARY_MESSAGES.sectionLabels[key];
+            const editable = isEditing && key !== 'resolution';
+            if (key !== 'summaryText' && !value.trim() && !editable) return null;
+            if (editable) {
+              return (
+                <Textarea
+                  key={key}
+                  className="ai-summary__textarea"
+                  dir="auto"
+                  label={label}
+                  dataAriaLabel={label ? undefined : AI_ASSISTANT_SUMMARY_MESSAGES.plainSummary}
+                  value={value}
+                  rows={3}
+                  autoFocusOnMount={key === firstEditableKey}
                   disabled={disabled}
-                  onClick={startEditing}
-                  aria-label={AI_ASSISTANT_SUMMARY_MESSAGES.editSummary}
-                >
-                  {AI_ASSISTANT_SUMMARY_MESSAGES.editSummary}
-                </Button>
-              ) : null}
-              {showCopy ? (
-                <span className="ai-summary__action">
-                  <Button
-                    id={`ai-summary-${summaryId}-copy`}
-                    variant="tertiary"
-                    size={24}
-                    prefix-icon={copied ? 'check-bold' : 'copy-regular'}
-                    type="button"
-                    disabled={disabled}
-                    onBlur={() => setCopied(false)}
-                    onClick={() => void handleCopy()}
-                    aria-label={AI_ASSISTANT_SUMMARY_MESSAGES.copySummary}
-                  />
-                  <Text tagname="span" type="body-midsize-regular" className="ai-summary__sr-only">
-                    {copyLabel}
-                  </Text>
-                  <Tooltip triggerID={`ai-summary-${summaryId}-copy`} placement="top" tooltipType="none">
-                    {AI_ASSISTANT_SUMMARY_MESSAGES.copySummary}
-                  </Tooltip>
-                </span>
-              ) : null}
-              {!isReceiver ? (
-                <>
-                  <span className="ai-summary__actions-spacer" />
-                  <Text tagname="span" type="body-midsize-regular" className="ai-summary__attribution">
-                    {isEditing ? AI_ASSISTANT_SUMMARY_MESSAGES.editing : AI_ASSISTANT_SUMMARY_MESSAGES.attribution}
-                  </Text>
-                  <span className="ai-summary__action-separator" aria-hidden="true" />
-                </>
-              ) : null}
-              {showFeedback ? (
-                <span className="ai-summary__feedback-group">
-                  {AI_ASSISTANT_SUMMARY_FEEDBACK_BUTTONS.map(({feedback, icon, label: feedbackLabel}) => (
-                    <span className="ai-summary__action" key={feedback}>
-                      <Button
-                        id={`ai-summary-${summaryId}-${feedback}`}
-                        variant="tertiary"
-                        size={20}
-                        prefix-icon={`${icon}-regular`}
-                        active={selectedFeedback === feedback}
-                        type="button"
-                        disabled={disabled}
-                        onClick={() => handleFeedback(feedback)}
-                        aria-label={feedbackLabel}
-                      />
-                      <Tooltip triggerID={`ai-summary-${summaryId}-${feedback}`} placement="top" tooltipType="none">
-                        {feedbackLabel}
-                      </Tooltip>
-                    </span>
-                  ))}
-                </span>
-              ) : null}
-            </div>
-          ) : null}
+                  onInput={(event) => handleInput(key, event.target.value)}
+                />
+              );
+            }
+            const readonlyValue = renderReadonlyValue(
+              value,
+              key !== 'summaryText' && AI_ASSISTANT_SUMMARY_BULLETED_SECTION_KEYS.has(key)
+            );
+            return label ? (
+              <div className="ai-summary__readonly" key={key}>
+                <Text tagname="span" type="body-midsize-bold" className="ai-summary__label" dir="auto">
+                  {label}
+                </Text>
+                {readonlyValue}
+              </div>
+            ) : (
+              <React.Fragment key={key}>{readonlyValue}</React.Fragment>
+            );
+          })}
         </div>
-      ) : null}
+        {showActions ? (
+          <div className="ai-summary__actions" data-testid="ai-summary:actions">
+            {showEdit ? (
+              <Button
+                type="button"
+                variant="tertiary"
+                size={28}
+                prefix-icon="edit-regular"
+                disabled={disabled}
+                onClick={startEditing}
+                aria-label={AI_ASSISTANT_SUMMARY_MESSAGES.editSummary}
+              >
+                {AI_ASSISTANT_SUMMARY_MESSAGES.editSummary}
+              </Button>
+            ) : null}
+            {renderCopyControl()}
+            <span className="ai-summary__actions-spacer" />
+            <Text tagname="span" type="body-midsize-regular" className="ai-summary__attribution">
+              {isEditing ? AI_ASSISTANT_SUMMARY_MESSAGES.editing : AI_ASSISTANT_SUMMARY_MESSAGES.attribution}
+            </Text>
+            <span className="ai-summary__action-separator" aria-hidden="true" />
+            {renderFeedbackControls()}
+          </div>
+        ) : null}
+      </div>
     </section>
   );
 };

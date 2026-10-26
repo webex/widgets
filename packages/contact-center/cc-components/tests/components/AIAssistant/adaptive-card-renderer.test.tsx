@@ -56,6 +56,39 @@ describe('AdaptiveCardRenderer', () => {
     });
   });
 
+  it('keeps native receiver footer content inside the card without rebuilding it on footer updates', async () => {
+    const card = {type: 'AdaptiveCard'};
+    const renderCard = (disabled: boolean) => (
+      <AdaptiveCardRenderer
+        card={card}
+        displayOnly
+        footer={
+          <button type="button" disabled={disabled}>
+            Native receiver action
+          </button>
+        }
+      />
+    );
+    const {rerender} = render(renderCard(false));
+    const action = await screen.findByRole('button', {name: 'Native receiver action'});
+    const surface = screen.getByTestId('ai-assistant:adaptive-card');
+    expect(surface).toContainElement(action);
+    expect(surface.querySelector('.ai-assistant__card-footer')).toContainElement(action);
+    const constructionCount = jest.requireMock('adaptivecards').AdaptiveCard.mock.calls.length;
+    act(() => action.focus());
+    expect(action).toHaveFocus();
+
+    rerender(renderCard(false));
+    expect(screen.getByRole('button', {name: 'Native receiver action'})).toBe(action);
+    expect(action).toHaveFocus();
+    expect(jest.requireMock('adaptivecards').AdaptiveCard.mock.calls).toHaveLength(constructionCount);
+
+    rerender(renderCard(true));
+    expect(action).toBeDisabled();
+    expect(action.isConnected).toBe(true);
+    expect(jest.requireMock('adaptivecards').AdaptiveCard.mock.calls).toHaveLength(constructionCount);
+  });
+
   it.each([
     ['like', 'likeButton'],
     ['dislike', 'dislikeButton'],

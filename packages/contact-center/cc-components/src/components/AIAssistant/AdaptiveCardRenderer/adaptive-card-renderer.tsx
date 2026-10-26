@@ -39,6 +39,7 @@ const AdaptiveCardRendererBody: React.FC<AdaptiveCardRendererProps> = (props) =>
     presentation = 'suggestion',
     contentIdentity,
     displayOnly = false,
+    omitSourceTimestamp = false,
     assistantTitle,
     publishTimestamp,
   } = props;
@@ -129,7 +130,7 @@ const AdaptiveCardRendererBody: React.FC<AdaptiveCardRendererProps> = (props) =>
           propsRef.current.onInputChange?.(input.id, input.value);
         }
       };
-      adaptiveCard.parse(prepareCardForRender(card, publishTimestamp, assistantTitle));
+      adaptiveCard.parse(prepareCardForRender(card, publishTimestamp, assistantTitle, omitSourceTimestamp));
       const rendered = adaptiveCard.render();
       if (rendered) {
         container.appendChild(rendered);
@@ -214,13 +215,31 @@ const AdaptiveCardRendererBody: React.FC<AdaptiveCardRendererProps> = (props) =>
       updateCardRef.current = undefined;
       container.innerHTML = '';
     };
-  }, [assistantTitle, card, contentIdentity, displayOnly, presentation, publishTimestamp, resetBoundary, showBoundary]);
+  }, [
+    assistantTitle,
+    card,
+    contentIdentity,
+    displayOnly,
+    omitSourceTimestamp,
+    presentation,
+    publishTimestamp,
+    resetBoundary,
+    showBoundary,
+  ]);
 
   return <div ref={containerRef} className="ai-assistant__card-host" />;
 };
 
 const AdaptiveCardRenderer: React.FC<AdaptiveCardRendererProps> = (props) => {
-  const {card, presentation = 'suggestion', contentIdentity, displayOnly = false, fallbackText, assistantTitle} = props;
+  const {
+    card,
+    presentation = 'suggestion',
+    contentIdentity,
+    displayOnly = false,
+    fallbackText,
+    assistantTitle,
+    footer,
+  } = props;
   const isCustomerStatement = /^the customer said:?$/i.test(assistantTitle?.trim() ?? '');
 
   return (
@@ -236,6 +255,7 @@ const AdaptiveCardRenderer: React.FC<AdaptiveCardRendererProps> = (props) => {
       >
         <AdaptiveCardRendererBody {...props} />
       </ErrorBoundary>
+      {footer ? <div className="ai-assistant__card-footer">{footer}</div> : null}
     </div>
   );
 };

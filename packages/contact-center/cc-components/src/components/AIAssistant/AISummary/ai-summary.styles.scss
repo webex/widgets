@@ -162,3 +162,27 @@
   background: var(--mds-color-theme-text-secondary-normal, #54585c);
   opacity: 0.46;
 }
+
+.ai-summary__receiver-footer {
+  justify-content: flex-end;
+  gap: 0.25rem;
+  min-inline-size: 0;
+  margin-block-start: 0;
+  padding-block-start: 0;
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+.ai-summary__receiver-timestamp {
+  color: var(--mds-color-theme-text-secondary-normal, #54585c);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.ai-summary__receiver-controls {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 0.25rem;
+}

@@ -1,3 +1,4 @@
+import type {ReactNode} from 'react';
 import type {
   AISummaryEntry,
   AISummaryFeedback,
@@ -246,6 +247,10 @@ export interface AIAssistantActionEvent {
 
 export interface AdaptiveCardRendererProps {
   card: unknown;
+  /** Host-owned summary controls, rendered inside the card surface after its content. */
+  footer?: ReactNode;
+  /** Omit backend timestamp-only metadata from the render clone when the host supplies its footer. */
+  omitSourceTimestamp?: boolean;
   /** Summary cards use Desktop's compact typography and their own content frame. */
   presentation?: 'suggestion' | 'summary';
   /** Host response identity: replacing it invalidates old actions and recovers card render errors. */

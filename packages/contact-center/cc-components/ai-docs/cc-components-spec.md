@@ -443,9 +443,43 @@ Clipboard confirmation retains payload identity checks.
 Empty read-only sections and clipboard blocks are omitted; empty fields remain
 available throughout editing.
 
-`AIAssistantComponent.receiverSummary` adds View summary to closed/minimized chrome
-and opens the receiver branch independently of Real-time Assist enablement. Each
-chrome branch checks eligibility before rendering the shared trigger button. Copy uses
+`AIAssistantComponent.receiverSummary` automatically selects a newly received summary
+when the panel is already open and an interaction is active, including a replacement
+SDK content object for the same interaction. Feedback and copy updates that retain
+the SDK content object do not count as arrivals. Passive selection does not invoke
+chrome callbacks or explicitly move focus. Closed and minimized panels remain in
+their current state and expose View summary; arrivals observed in those states or
+without an active interaction are not replayed by an ordinary Open/Restore action.
+View summary is also available in a separate row below the open panel's header
+when the agent has returned to ordinary assistance. Selecting it hides the action
+row and opens the receiver branch independently of Real-time Assist enablement.
+Each chrome branch checks eligibility before rendering the shared trigger button.
+No summary or trigger is shown without an active interaction.
+Summary view, edit, and receiver cards receive the SDK summary's epoch-millisecond
+`timestamp` and render it in browser-local `HH:mm`. Shared card preparation supports
+both the legacy `SOURCE_TIMESTAMP_PLACEHOLDER` token and the summary
+`${sourceTimestamp}` binding. Receiver cards omit dedicated backend timestamp-only
+metadata in the render clone and show one native `HH:mm` timestamp in the shared
+card footer, followed by helpful, unhelpful, and Copy controls. These 24-pixel
+controls form a compact row aligned to the end, wrapping at narrow widths; the
+footer remains left-to-right while card content keeps automatic text direction.
+The receiver footer has no detached editor border. `AdaptiveCardRenderer.footer`
+places host controls inside the same card surface without reparsing the Adaptive
+Card when feedback, pending, or copy state changes. `omitSourceTimestamp` defaults
+to false; ordinary suggestions, initiator view/edit cards, and post-call cards
+retain their existing metadata and layout. Clone preparation removes only known
+or strictly timestamp-only TextBlock/RichTextBlock metadata and newly emptied
+metadata containers; timestamp runs within substantive rich text remain intact.
+When a timestamp child is actually removed from a Container/Column/ColumnSet
+sibling group and only bullet/pipe-only metadata remains, clone preparation removes
+that decoration group and its now-orphaned trailing divider. Substantive siblings
+and unrelated bullet content are retained; ordinary cards keep the original layout.
+Scoped metadata cleanup also recognizes empty layout spacers with omitted or empty
+children and ActionSets containing only known likeButton/dislikeButton/copyButton
+Submit actions. Unknown actions and non-layout content are preserved. Substitution changes a render clone only; the SDK
+content and card remain intact. Missing or invalid timestamps render blank rather
+than a fabricated current time.
+Copy uses
 visible rendered card text through the shared Adaptive Card text extractor's
 `summaryOnly` option. Summary presentation enables that same filter for card-provided
 copy actions. Hidden text blocks, descendants of hidden card containers, source
@@ -458,12 +492,25 @@ card. Within `AISummary`, its render callback controls whether the copy/feedback
 shown; parsing or rendering failure hides them. Valid replacement cards preserve
 those controls and their focus. Replacing a display-only receiver card resets its
 error boundary; ordinary Real-time Assist cards keep their existing recovery
-behavior. One reset effect clears receiver selection on interaction replacement or
-closed chrome. Closing either chrome clears the receiver selection before invoking the
+behavior. Receiver selection clears when the interaction becomes inactive, its
+summary is removed, or chrome closes. A new eligible branch is selected while the
+panel remains open. Closing either chrome clears the receiver selection before invoking the
 host callback, so external reopening returns to the ordinary assistant view.
-An explicitly selected receiver summary takes precedence over retained wellness
+A selected receiver summary takes precedence over retained wellness
 history; an active wellness offer, transition, error or overlay retains priority.
 Wellness history remains available when returning to the ordinary assistant view.
+When Real-time Assist is enabled during an active interaction, the receiver view
+also exposes Get Assistance in a separate padded row below the card with a vertical
+gap, matching Desktop's access to that existing feature. In the compact panel, receiver content scrolls within the available body height so the footer and Get Assistance remain reachable for long summaries. It returns to ordinary assistance and invokes the existing
+request callback once, retaining assistance history and context. Pending requests
+disable the action; inactive interactions and active wellness content do not offer
+it. The summary remains reachable through View summary after returning to assistance.
+Selecting assistance temporarily takes priority over idle retained wellness history
+without clearing its records. Active wellness flows retain priority; when they
+return to idle, the explicitly selected assistance remains visible. Closing the
+assistant, ordinary Open/Restore, View summary, a new selected receiver arrival,
+or an inactive interaction clears this selection. Removing a receiver entry alone
+does not interrupt already selected assistance while the interaction stays active.
 Opening the receiver branch uses Momentum Button's `autoFocusOnMount` on its newly
 mounted header control. The assistant remains a non-modal panel; it does not scan
 controls for focus successors, force Momentum tab indexes, or repair focus after

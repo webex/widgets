@@ -1270,6 +1270,50 @@ describe('AISummary', () => {
     expect(onRetry).not.toHaveBeenCalled();
   });
 
+  it('renders one timestamp and compact feedback then copy inside the receiver card footer', async () => {
+    const sdkContent = {
+      ...receiverContent,
+      timestamp: new Date(2026, 9, 26, 14, 7).getTime(),
+      adaptiveCard: {
+        type: 'AdaptiveCard',
+        version: '1.3',
+        body: [
+          {type: 'TextBlock', text: 'סיכום Receiver details'},
+          {
+            type: 'RichTextBlock',
+            id: 'source-timestamp-richTextBlock',
+            inlines: [{type: 'TextRun', text: '${sourceTimestamp}'}],
+          },
+        ],
+      },
+    };
+    const original = JSON.stringify(sdkContent);
+    const callbacks = {onCopy: jest.fn(() => true), onFeedback: jest.fn()};
+    const {rerender} = render(
+      <AISummary mode="mid-call-receiver" state="content" content={sdkContent} {...callbacks} />
+    );
+    const footer = await screen.findByTestId('ai-summary:receiver-footer');
+    const card = screen.getByTestId('ai-assistant:adaptive-card');
+    expect(card).toContainElement(footer);
+    expect(screen.queryByTestId('ai-summary:editor-surface')).not.toBeInTheDocument();
+    expect(screen.getAllByText('14:07')).toHaveLength(1);
+    expect(footer).toHaveAttribute('dir', 'ltr');
+    const buttons = within(footer).getAllByRole('button');
+    expect(buttons.map((button) => button.getAttribute('aria-label'))).toEqual([
+      LITERAL_SUMMARY_COPY.like,
+      LITERAL_SUMMARY_COPY.dislike,
+      LITERAL_SUMMARY_COPY.copySummary,
+    ]);
+    buttons.forEach((button) => expect(button).toHaveAttribute('size', '24'));
+
+    rerender(
+      <AISummary mode="mid-call-receiver" state="content" content={sdkContent} controlsDisabled {...callbacks} />
+    );
+    await waitFor(() => buttons.forEach((button) => expect(button).toBeDisabled()));
+    buttons.forEach((button) => expect(button.isConnected).toBe(true));
+    expect(JSON.stringify(sdkContent)).toBe(original);
+  });
+
   it('renders a display-only receiver card and copies its visible text instead of the SDK text', async () => {
     const onCopy = jest.fn().mockReturnValue(true);
     render(
@@ -1305,7 +1349,7 @@ describe('AISummary', () => {
     expect(screen.queryByRole('button', {name: 'Card-provided Copy'})).not.toBeInTheDocument();
     expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
     const copyButton = await screen.findByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary});
-    expect(screen.getByTestId('ai-assistant:adaptive-card')).not.toContainElement(copyButton);
+    expect(screen.getByTestId('ai-assistant:adaptive-card')).toContainElement(copyButton);
     fireEvent.click(copyButton);
     await waitFor(() => expect(onCopy).toHaveBeenCalledTimes(1));
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith('Visible card text');

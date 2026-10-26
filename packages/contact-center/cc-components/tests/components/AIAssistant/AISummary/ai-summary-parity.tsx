@@ -53,6 +53,59 @@ describe('Desktop summary interactions', () => {
     expect(onRetry).toHaveBeenCalledTimes(1);
   });
 
+  it.each(['mid-call-initiator', 'mid-call-receiver', 'post-call'] as const)(
+    'binds the SDK source timestamp in %s summary cards without mutating the payload',
+    async (mode) => {
+      const cardContent = {
+        ...content,
+        timestamp: new Date(2026, 9, 26, 14, 7).getTime(),
+        adaptiveCard: {
+          type: 'AdaptiveCard',
+          version: '1.3',
+          body: [
+            {type: 'TextBlock', text: 'Summary details'},
+            {
+              type: 'RichTextBlock',
+              id: 'source-timestamp-richTextBlock',
+              inlines: [{type: 'TextRun', text: '${sourceTimestamp}'}],
+            },
+          ],
+        },
+      };
+      const original = JSON.stringify(cardContent);
+      renderSummary({mode, content: cardContent});
+
+      expect(await screen.findByText('14:07')).toBeInTheDocument();
+      expect(screen.queryByText('${sourceTimestamp}')).not.toBeInTheDocument();
+      expect(JSON.stringify(cardContent)).toBe(original);
+    }
+  );
+
+  it('retains the SDK source timestamp when switching from view to edit summary cards', async () => {
+    const cardContent = {
+      ...content,
+      timestamp: new Date(2026, 9, 26, 8, 3).getTime(),
+      adaptiveCard: {
+        type: 'AdaptiveCard',
+        version: '1.3',
+        body: [{type: 'TextBlock', text: 'View time: ${sourceTimestamp}'}],
+        actions: [{type: 'Action.Submit', id: 'editButton', title: 'Edit summary'}],
+      },
+      editAdaptiveCard: {
+        type: 'AdaptiveCard',
+        version: '1.3',
+        body: [{type: 'TextBlock', text: 'Edit time: ${sourceTimestamp}'}],
+      },
+    };
+    const original = JSON.stringify(cardContent);
+    renderSummary({content: cardContent});
+
+    expect(await screen.findByText('View time: 08:03')).toBeInTheDocument();
+    fireEvent.click(await screen.findByRole('button', {name: 'Edit summary'}));
+    expect(await screen.findByText('Edit time: 08:03')).toBeInTheDocument();
+    expect(JSON.stringify(cardContent)).toBe(original);
+  });
+
   it('uses the SDK view and edit cards without rewriting the payload', async () => {
     const cardContent = {
       ...content,

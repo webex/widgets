@@ -106,6 +106,12 @@
   gap: 0.25rem;
 }
 
+.ai-assistant__summary-actions {
+  display: flex;
+  flex-shrink: 0;
+  padding: 0.5rem 1.125rem;
+}
+
 .ai-assistant__body {
   display: flex;
   flex: 1;
@@ -340,6 +346,12 @@
   background: var(--mds-color-theme-background-secondary-normal, #f1f3f5);
   border-radius: 0.5rem;
   padding: 0.75rem;
+}
+
+.ai-assistant__card-footer {
+  border-block-start: 0.0625rem solid var(--mds-color-theme-outline-secondary-normal, #c7c7c7);
+  margin-block-start: 0.5rem;
+  padding-block-start: 0.5rem;
 }
 
 .ai-assistant__card--customer-statement {
@@ -669,6 +681,16 @@
 }
 
 .ai-assistant__receiver-summary {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-block-size: 0;
   min-inline-size: 0;
-  overflow: visible;
+  overflow-y: auto;
+}
+
+.ai-assistant__receiver-assistance {
+  display: flex;
+  padding: 0.5rem 0.75rem;
 }

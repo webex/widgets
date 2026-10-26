@@ -16,7 +16,7 @@ const mockProfile: Profile = {
       id: 'team1',
       name: 'Team 1',
       teamType: 'AGENT_BASED',
-      teamStatus: 'ACTIVE',
+      teamStatus: 'IN_SERVICE',
       active: true,
       siteId: 'site123',
       siteName: 'Site 1',

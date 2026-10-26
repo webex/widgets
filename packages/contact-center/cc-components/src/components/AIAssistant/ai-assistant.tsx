@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {Button, Text, Tooltip} from '@momentum-design/components/dist/react';
 import {withMetrics} from '@webex/cc-ui-logging';
 import RealTimeAssist from './RealTimeAssist/real-time-assist';
@@ -12,7 +12,7 @@ import WellnessBreakOfferCard from './WellnessBreak/wellness-break-offer-card';
 import WellnessBreakOfferToast from './WellnessBreak/wellness-break-offer-toast';
 import WellnessBreakRequestCard from './WellnessBreak/wellness-break-request-card';
 import {AIAssistantComponentProps, WellnessBreakModalProps, WellnessBreakViewModel} from './ai-assistant.types';
-import {AI_ASSISTANT_TITLE, DISCLAIMER_TEXT} from './constants';
+import {AI_ASSISTANT_TITLE, DISCLAIMER_TEXT, GET_ASSISTANCE_LABEL} from './constants';
 import './ai-assistant.styles.scss';
 import './WellnessBreak/wellness-break.styles.scss';
 
@@ -55,8 +55,10 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
     assistantHeaderSequence += 1;
     return `ai-assistant-header-${assistantHeaderSequence}`;
   });
-  // The receiver summary branch the agent opened; real-time assist shows otherwise.
+  // Select incoming summaries in an open panel; ordinary Open/Restore can return to assistance.
   const [viewingReceiverKey, setViewingReceiverKey] = useState<string | null>(null);
+  const [isAssistanceSelected, setIsAssistanceSelected] = useState(false);
+  const receiverActivatedByAgentRef = useRef(false);
   // Fullscreen is consumer-owned: we emit onFullScreenToggle; the host owns layout.
   const wellnessOverlayPhase = wellness && isWellnessOverlayPhase(wellness.phase) ? wellness.phase : undefined;
   const rootClass = [
@@ -76,6 +78,13 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
       : undefined;
   const showLanding = !summary && (!hasActiveInteraction || !isFeatureEnabled);
   const receiverBranchKey = receiverSummary?.branchKey;
+  const receiverSurface = receiverSummary?.surface;
+  const receiverContent = receiverSummary?.surface === 'content' ? receiverSummary.content : undefined;
+  const observedReceiverRef = useRef<{
+    branchKey: typeof receiverBranchKey;
+    surface: typeof receiverSurface;
+    content: typeof receiverContent;
+  }>({branchKey: undefined, surface: undefined, content: undefined});
 
   const wellnessHistory = wellness?.history ?? [];
   const hasWellnessHistory = Boolean(wellness?.enabled && !wellness.contentCleared && wellnessHistory.length > 0);
@@ -92,9 +101,10 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
   );
   // Keep prior messages in the view model, but let a newly eligible Desktop-style
   // suggestion temporarily own the complete assistant body.
-  // An explicitly opened summary takes precedence over a completed/dismissed
+  // A selected summary takes precedence over a completed/dismissed
   // wellness transcript, while in-progress wellness flows keep their priority.
-  const showRetainedWellness = !summary || wellness?.phase !== 'idle';
+  const showSelectedAssistance = isAssistanceSelected && hasActiveInteraction && isFeatureEnabled;
+  const showRetainedWellness = wellness?.phase !== 'idle' || (!summary && !showSelectedAssistance);
   const showWellnessHistory = hasWellnessHistory && !showWellnessSuggestion && showRetainedWellness;
   const showWellnessRequestState = Boolean(
     wellness?.enabled &&
@@ -125,29 +135,69 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
     : !showLanding;
 
   useEffect(() => {
-    setViewingReceiverKey((key) => (chrome === 'closed' || key !== receiverBranchKey ? null : key));
-  }, [chrome, receiverBranchKey]);
+    const previous = observedReceiverRef.current;
+    const incomingSummaryChanged =
+      previous.branchKey !== receiverBranchKey ||
+      previous.surface !== receiverSurface ||
+      previous.content !== receiverContent;
+    // Observe arrivals while collapsed/inactive too, so ordinary Open/Restore
+    // does not replay an older summary. Feedback retains the SDK content object.
+    observedReceiverRef.current = {branchKey: receiverBranchKey, surface: receiverSurface, content: receiverContent};
+
+    if (!hasActiveInteraction || !receiverBranchKey || chrome === 'closed') {
+      receiverActivatedByAgentRef.current = false;
+      setViewingReceiverKey(null);
+      if (!hasActiveInteraction || chrome === 'closed') {
+        setIsAssistanceSelected(false);
+      }
+    } else if (incomingSummaryChanged && chrome === 'open') {
+      receiverActivatedByAgentRef.current = false;
+      setViewingReceiverKey(receiverBranchKey);
+      setIsAssistanceSelected(false);
+      // Passive arrival changes content without moving focus or changing chrome.
+    } else {
+      setViewingReceiverKey((key) => (key === receiverBranchKey ? key : null));
+    }
+  }, [chrome, receiverBranchKey, receiverSurface, receiverContent, hasActiveInteraction]);
 
   const closeAssistant = () => {
+    setIsAssistanceSelected(false);
+    receiverActivatedByAgentRef.current = false;
     setViewingReceiverKey(null);
     close();
   };
 
   const openRealTimeAssist = () => {
+    setIsAssistanceSelected(false);
+    receiverActivatedByAgentRef.current = false;
     setViewingReceiverKey(null);
     open();
   };
 
   const restoreRealTimeAssist = () => {
+    setIsAssistanceSelected(false);
+    receiverActivatedByAgentRef.current = false;
     setViewingReceiverKey(null);
     restore();
+  };
+
+  const requestAssistanceFromSummary = () => {
+    if (!hasActiveInteraction || !isFeatureEnabled || isRequesting) {
+      return;
+    }
+    setViewingReceiverKey(null);
+    setIsAssistanceSelected(true);
+    receiverActivatedByAgentRef.current = false;
+    requestRealTimeAssist();
   };
 
   const openReceiverSummary = () => {
     if (!receiverSummary) {
       return;
     }
+    receiverActivatedByAgentRef.current = true;
     setViewingReceiverKey(receiverSummary.branchKey);
+    setIsAssistanceSelected(false);
     if (chrome === 'minimized') {
       restore();
       return;
@@ -267,7 +317,7 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
                 prefix-icon="minimize-bold"
                 aria-label="Minimize"
                 data-testid="ai-assistant:header-minimize"
-                autoFocusOnMount={Boolean(summary)}
+                autoFocusOnMount={Boolean(summary) && receiverActivatedByAgentRef.current}
                 onClick={minimize}
               />
               <Tooltip triggerID={`${headerActionId}-minimize`} placement="bottom" tooltipType="label">
@@ -301,6 +351,11 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
               </Tooltip>
             </div>
           </header>
+          {canViewReceiverSummary && !summary ? (
+            <div className="ai-assistant__summary-actions" data-testid="ai-assistant:summary-actions">
+              {renderReceiverSummaryTrigger()}
+            </div>
+          ) : null}
           <div
             className={`ai-assistant__body${
               (showLanding && !showWellnessContent) || showWellnessSuggestion ? ' ai-assistant__body--landing' : ''
@@ -361,6 +416,20 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
                         }
                       : {})}
                   />
+                  {hasActiveInteraction && isFeatureEnabled ? (
+                    <div className="ai-assistant__receiver-assistance" data-testid="ai-assistant:receiver-assistance">
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        className="ai-assistant__pill-button"
+                        disabled={isRequesting}
+                        onClick={requestAssistanceFromSummary}
+                        data-testid="ai-assistant:summary-get-assistance"
+                      >
+                        {GET_ASSISTANCE_LABEL}
+                      </Button>
+                    </div>
+                  ) : null}
                 </div>
               ) : showLanding ? (
                 <AIAssistantLanding agentName={agentName} showRealTimeAssist={isFeatureEnabled} />
