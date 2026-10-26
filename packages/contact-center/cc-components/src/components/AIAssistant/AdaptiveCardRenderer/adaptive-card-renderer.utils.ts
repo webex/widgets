@@ -1,6 +1,12 @@
 import type {ILogger} from '@webex/cc-store';
 import type {AIAssistantActionKind} from '../ai-assistant.types';
-import {ADAPTIVE_CARD_MODULE, COPIED_FEEDBACK_MS, LINE_SEPARATOR_ID, SOURCE_TIMESTAMP_PLACEHOLDER} from '../constants';
+import {
+  ADAPTIVE_CARD_MODULE,
+  COPIED_FEEDBACK_MS,
+  LINE_SEPARATOR_ID,
+  SOURCE_TIMESTAMP_PLACEHOLDER,
+  SOURCE_TIMESTAMP_TEMPLATE_PLACEHOLDER,
+} from '../constants';
 import arrowDownRegularIcon from '@momentum-design/icons/dist/svg/arrow-down-regular.svg';
 import arrowRightRegularIcon from '@momentum-design/icons/dist/svg/arrow-right-regular.svg';
 import checkCircleFilledIcon from '@momentum-design/icons/dist/svg/check-circle-filled.svg';
@@ -34,9 +40,23 @@ const MOMENTUM_ICON_URLS: Record<string, string> = {
   'like-filled.svg': likeFilledIcon,
   'like-regular.svg': likeRegularIcon,
 };
+const EMPTY_LAYOUT_KEYS = new Set([
+  'type',
+  'id',
+  'width',
+  'height',
+  'minHeight',
+  'spacing',
+  'separator',
+  'style',
+  'bleed',
+  'isVisible',
+  'verticalContentAlignment',
+  'rtl',
+]);
 
 /** Format an epoch (ms) into "HH:MM"; empty string on bad input. */
-const formatSourceTimestamp = (raw: number | string | undefined): string => {
+export const formatSourceTimestamp = (raw: number | string | undefined): string => {
   if (raw === undefined || raw === null || raw === '') return '';
   const ms = typeof raw === 'number' ? raw : Number.parseInt(`${raw}`, 10);
   if (Number.isNaN(ms)) return '';
@@ -122,14 +142,93 @@ const removeDuplicateAssistantHeader = (
   return card;
 };
 
-export const prepareCardForRender = <T>(card: T, publishTimestamp?: number | string, assistantTitle?: string): T => {
+export const prepareCardForRender = <T>(
+  card: T,
+  publishTimestamp?: number | string,
+  assistantTitle?: string,
+  omitSourceTimestamp = false
+): T => {
   if (card === null || typeof card !== 'object') return card;
 
   const formattedTimestamp = formatSourceTimestamp(publishTimestamp);
+  const timestampPlaceholders = [SOURCE_TIMESTAMP_PLACEHOLDER, SOURCE_TIMESTAMP_TEMPLATE_PLACEHOLDER];
   const cardWithoutDuplicateHeader = removeDuplicateAssistantHeader(card as Record<string, unknown>, assistantTitle);
+  const readCardText = (node: Record<string, unknown>): unknown => {
+    if (node.type === 'TextBlock') return node.text;
+    if (node.type !== 'RichTextBlock' || !Array.isArray(node.inlines)) return undefined;
+    return node.inlines
+      .map((inline) => (typeof inline === 'string' ? inline : ((inline as Record<string, unknown> | null)?.text ?? '')))
+      .join('');
+  };
+  const isTimestampText = (text: unknown): boolean =>
+    typeof text === 'string' &&
+    timestampPlaceholders.some((placeholder) => text.includes(placeholder)) &&
+    timestampPlaceholders
+      .reduce((value, placeholder) => value.split(placeholder).join(''), text)
+      .replace(/[\s•·|]/g, '') === '';
+  const isTimestampNode = (node: unknown): boolean => {
+    if (!node || typeof node !== 'object' || Array.isArray(node)) return false;
+    const value = node as Record<string, unknown>;
+    return value.id === 'source-timestamp-richTextBlock' || isTimestampText(readCardText(value));
+  };
+  const containsTimestampNode = (node: unknown): boolean => {
+    if (isTimestampNode(node)) return true;
+    if (Array.isArray(node)) return node.some(containsTimestampNode);
+    return Boolean(node && typeof node === 'object' && Object.values(node).some(containsTimestampNode));
+  };
+  const isTimestampDecoration = (node: unknown): boolean => {
+    if (!node || typeof node !== 'object' || Array.isArray(node)) return false;
+    const value = node as Record<string, unknown>;
+    const isDecorationText = (text: unknown): boolean =>
+      typeof text === 'string' && /[•·|]/.test(text) && /^[\s•·|]+$/.test(text);
+    if (isDecorationText(readCardText(value))) return true;
+    if (value.type === 'ActionSet' && Array.isArray(value.actions)) {
+      return value.actions.every((action) => {
+        if (!action || typeof action !== 'object') return false;
+        const metadataAction = action as {type?: string; id?: string};
+        return (
+          metadataAction.type === 'Action.Submit' &&
+          ['likebutton', 'dislikebutton', 'copybutton'].includes(metadataAction.id?.toLowerCase() ?? '')
+        );
+      });
+    }
+    if (['Container', 'Column', 'ColumnSet'].includes(`${value.type}`)) {
+      const childrenKey = value.type === 'ColumnSet' ? 'columns' : 'items';
+      const children = value[childrenKey];
+      if (children === undefined || (Array.isArray(children) && children.length === 0)) {
+        return Object.keys(value).every((key) => key === childrenKey || EMPTY_LAYOUT_KEYS.has(key));
+      }
+      return Array.isArray(children) && children.every(isTimestampDecoration);
+    }
+    return false;
+  };
 
-  const visit = (node: unknown): unknown => {
-    if (Array.isArray(node)) return node.map(visit);
+  const visit = (node: unknown, pruneTimestampDecorations = false): unknown => {
+    if (omitSourceTimestamp && isTimestampNode(node)) return undefined;
+    if (Array.isArray(node)) {
+      if (!omitSourceTimestamp) return node.map((child) => visit(child));
+      const children = node.map((child) => visit(child));
+      const removedTimestamp = node.some(
+        (child, index) => children[index] === undefined && containsTimestampNode(child)
+      );
+      if (
+        pruneTimestampDecorations &&
+        removedTimestamp &&
+        children.every((child) => child === undefined || isTimestampDecoration(child))
+      ) {
+        return [];
+      }
+      const retained = children.filter((child) => child !== undefined);
+      const last = retained[retained.length - 1];
+      if (
+        children[children.length - 1] === undefined &&
+        last &&
+        typeof last === 'object' &&
+        (last as Record<string, unknown>).id === LINE_SEPARATOR_ID
+      )
+        retained.pop();
+      return retained;
+    }
     if (node && typeof node === 'object') {
       const out: Record<string, unknown> = {};
       for (const [key, value] of Object.entries(node as Record<string, unknown>)) {
@@ -142,8 +241,11 @@ export const prepareCardForRender = <T>(card: T, publishTimestamp?: number | str
               continue;
             }
           }
-          if (value.includes(SOURCE_TIMESTAMP_PLACEHOLDER)) {
-            out[key] = value.split(SOURCE_TIMESTAMP_PLACEHOLDER).join(formattedTimestamp);
+          if (timestampPlaceholders.some((placeholder) => value.includes(placeholder))) {
+            out[key] = timestampPlaceholders.reduce(
+              (text, placeholder) => text.split(placeholder).join(formattedTimestamp),
+              value
+            );
             continue;
           }
           if (key === 'text' && /(^|\n)\s*-\s+/.test(value)) {
@@ -151,10 +253,25 @@ export const prepareCardForRender = <T>(card: T, publishTimestamp?: number | str
             continue;
           }
         }
-        out[key] = visit(value);
+        out[key] = visit(
+          value,
+          ['Container', 'Column', 'ColumnSet'].includes(`${(node as Record<string, unknown>).type}`) &&
+            (key === 'items' || key === 'columns')
+        );
       }
       if (out.id === LINE_SEPARATOR_ID) {
         out.separator = true;
+      }
+      if (omitSourceTimestamp && ['Container', 'Column', 'ColumnSet'].includes(`${out.type}`)) {
+        const childrenKey = out.type === 'ColumnSet' ? 'columns' : 'items';
+        const originalChildren = (node as Record<string, unknown>)[childrenKey];
+        if (
+          Array.isArray(originalChildren) &&
+          originalChildren.length > 0 &&
+          Array.isArray(out[childrenKey]) &&
+          out[childrenKey].length === 0
+        )
+          return undefined;
       }
       return out;
     }

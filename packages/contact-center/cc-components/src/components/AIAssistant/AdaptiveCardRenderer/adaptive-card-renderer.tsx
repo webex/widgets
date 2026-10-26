@@ -35,6 +35,7 @@ const AdaptiveCardFallback: React.FC<Pick<AdaptiveCardRendererProps, 'fallbackTe
 const AdaptiveCardRendererBody: React.FC<AdaptiveCardRendererProps> = ({
   card,
   displayOnly = false,
+  omitSourceTimestamp = false,
   onRender,
   assistantTitle,
   publishTimestamp,
@@ -112,7 +113,7 @@ const AdaptiveCardRendererBody: React.FC<AdaptiveCardRendererProps> = ({
         }
         onActionRef.current?.(action);
       };
-      adaptiveCard.parse(prepareCardForRender(card, publishTimestamp, assistantTitle));
+      adaptiveCard.parse(prepareCardForRender(card, publishTimestamp, assistantTitle, omitSourceTimestamp));
       const rendered = adaptiveCard.render();
       if (rendered) {
         container.appendChild(rendered);
@@ -147,7 +148,7 @@ const AdaptiveCardRendererBody: React.FC<AdaptiveCardRendererProps> = ({
         container.innerHTML = '';
       }
     };
-  }, [assistantTitle, card, displayOnly, publishTimestamp, resetBoundary, showBoundary]);
+  }, [assistantTitle, card, displayOnly, omitSourceTimestamp, publishTimestamp, resetBoundary, showBoundary]);
 
   return <div ref={containerRef} className="ai-assistant__card-host" />;
 };
@@ -155,6 +156,8 @@ const AdaptiveCardRendererBody: React.FC<AdaptiveCardRendererProps> = ({
 const AdaptiveCardRenderer: React.FC<AdaptiveCardRendererProps> = ({
   card,
   displayOnly = false,
+  footer,
+  omitSourceTimestamp = false,
   onRender,
   assistantTitle,
   fallbackText,
@@ -178,6 +181,7 @@ const AdaptiveCardRenderer: React.FC<AdaptiveCardRendererProps> = ({
         <AdaptiveCardRendererBody
           card={card}
           displayOnly={displayOnly}
+          omitSourceTimestamp={omitSourceTimestamp}
           onRender={onRender}
           assistantTitle={assistantTitle}
           fallbackText={fallbackText}
@@ -188,6 +192,7 @@ const AdaptiveCardRenderer: React.FC<AdaptiveCardRendererProps> = ({
           logger={logger}
         />
       </ErrorBoundary>
+      {footer ? <div className="ai-assistant__card-footer">{footer}</div> : null}
     </div>
   );
 };

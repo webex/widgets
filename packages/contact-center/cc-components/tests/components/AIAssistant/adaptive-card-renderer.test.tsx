@@ -135,6 +135,29 @@ describe('AdaptiveCardRenderer', () => {
     expect(sourceImage).not.toHaveAttribute('hidden');
   });
 
+  it('keeps a host footer inside the card while omitting backend timestamp metadata only from its render clone', async () => {
+    const card = {
+      type: 'AdaptiveCard',
+      body: [
+        {type: 'TextBlock', text: 'Received summary'},
+        {
+          type: 'RichTextBlock',
+          id: 'source-timestamp-richTextBlock',
+          inlines: [{type: 'TextRun', text: '${sourceTimestamp}'}],
+        },
+      ],
+    };
+    const original = JSON.stringify(card);
+    render(<AdaptiveCardRenderer card={card} displayOnly omitSourceTimestamp footer={<button>Host copy</button>} />);
+
+    const footerControl = await screen.findByRole('button', {name: 'Host copy'});
+    expect(footerControl.parentElement).toHaveClass('ai-assistant__card-footer');
+    expect(screen.getByTestId('ai-assistant:adaptive-card')).toContainElement(footerControl);
+    const parser = jest.requireMock('adaptivecards').AdaptiveCard.mock.results.at(-1).value.parse;
+    expect(parser).toHaveBeenCalledWith({type: 'AdaptiveCard', body: [{type: 'TextBlock', text: 'Received summary'}]});
+    expect(JSON.stringify(card)).toBe(original);
+  });
+
   it('resets a receiver summary error when its card is replaced', async () => {
     jest.requireMock('adaptivecards').AdaptiveCard.mockImplementationOnce(() => ({
       parse: jest.fn(() => {

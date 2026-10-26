@@ -6,6 +6,7 @@ import {
   AI_ASSISTANT_SUMMARY_MESSAGES,
 } from './ai-summary.constants';
 import {getDisplaySections, useAISummaryInteractions} from './ai-summary.hooks';
+import {formatSourceTimestamp} from '../AdaptiveCardRenderer/adaptive-card-renderer.utils';
 import type {
   AISummaryDisplaySection,
   AISummaryEditorProps,
@@ -242,6 +243,9 @@ const AISummary = (props: AISummaryProps): React.ReactElement => {
 
   const showActions = props.state === 'content' && Boolean(displayContent);
   const showSummaryHeading = props.mode === 'post-call' && showActions;
+  const isReceiver = props.mode === 'mid-call-receiver';
+  const receiverTimestamp =
+    isReceiver && props.state === 'content' ? formatSourceTimestamp(props.content.timestamp) : '';
   const copyLabel = copied ? AI_ASSISTANT_SUMMARY_MESSAGES.copiedSummary : AI_ASSISTANT_SUMMARY_MESSAGES.copySummary;
   // Keep visibility controlled so Escape dismisses the tooltip before the panel.
   // Existing button labels and the pending-feedback description remain authoritative.
@@ -258,9 +262,35 @@ const AISummary = (props: AISummaryProps): React.ReactElement => {
         {label}
       </Tooltip>
     ) : null;
+  const copyAction = (
+    <span
+      className="ai-summary__action"
+      onMouseEnter={() => handleActionMouseEnter('copy')}
+      onMouseLeave={() => handleActionMouseLeave('copy')}
+    >
+      <button
+        id={`ai-summary-${summaryId}-copy`}
+        className={`ai-summary__button ai-summary__copy-button${copied ? ' ai-summary__copy-button--confirmed' : ''}`}
+        type="button"
+        disabled={disabled}
+        onFocus={() => setHoveredTooltip('copy')}
+        onBlur={() => {
+          setHoveredTooltip(null);
+          setCopied(false);
+        }}
+        onClick={() => void handleCopy()}
+        aria-label={AI_ASSISTANT_SUMMARY_MESSAGES.copySummary}
+      >
+        <Icon name={copied ? 'check-bold' : 'copy-regular'} aria-hidden="true" />
+        <span className="ai-summary__sr-only">{copyLabel}</span>
+      </button>
+      {renderTooltip('copy', AI_ASSISTANT_SUMMARY_MESSAGES.copySummary)}
+    </span>
+  );
   return (
     <section
-      className="ai-summary"
+      className={`ai-summary${isReceiver ? ' ai-summary--receiver' : ''}`}
+      dir={isReceiver ? 'ltr' : undefined}
       data-testid={`ai-summary:${props.mode}`}
       onFocusCapture={handleFocusCapture}
       onBlurCapture={handleBlurCapture}
@@ -274,36 +304,24 @@ const AISummary = (props: AISummaryProps): React.ReactElement => {
           <Icon name="info-circle-filled" className="ai-summary__summary-info" aria-hidden="true" />
         </div>
       ) : null}
-      <div className={showActions ? 'ai-summary__editor-surface' : undefined} data-testid="ai-summary:editor-surface">
+      <div
+        className={showActions && !isReceiver ? 'ai-summary__editor-surface' : undefined}
+        data-testid="ai-summary:editor-surface"
+      >
         {renderContent()}
         {showActions ? (
-          <div className="ai-summary__actions" data-testid="ai-summary:actions">
-            <span
-              className="ai-summary__action"
-              onMouseEnter={() => handleActionMouseEnter('copy')}
-              onMouseLeave={() => handleActionMouseLeave('copy')}
-            >
-              <button
-                id={`ai-summary-${summaryId}-copy`}
-                className={`ai-summary__button ai-summary__copy-button${
-                  copied ? ' ai-summary__copy-button--confirmed' : ''
-                }`}
-                type="button"
-                disabled={disabled}
-                onFocus={() => setHoveredTooltip('copy')}
-                onBlur={() => {
-                  setHoveredTooltip(null);
-                  setCopied(false);
-                }}
-                onClick={() => void handleCopy()}
-                aria-label={AI_ASSISTANT_SUMMARY_MESSAGES.copySummary}
-              >
-                <Icon name={copied ? 'check-bold' : 'copy-regular'} aria-hidden="true" />
-                <span className="ai-summary__sr-only">{copyLabel}</span>
-              </button>
-              {renderTooltip('copy', AI_ASSISTANT_SUMMARY_MESSAGES.copySummary)}
-            </span>
-            {props.mode !== 'mid-call-receiver' ? (
+          <div
+            className={`ai-summary__actions${isReceiver ? ' ai-summary__receiver-footer' : ''}`}
+            data-testid="ai-summary:actions"
+          >
+            {isReceiver && receiverTimestamp ? (
+              <>
+                <time className="ai-summary__receiver-timestamp">{receiverTimestamp}</time>
+                <span className="ai-summary__action-separator" aria-hidden="true" />
+              </>
+            ) : null}
+            {!isReceiver ? copyAction : null}
+            {!isReceiver ? (
               <>
                 <span className="ai-summary__actions-spacer" />
                 <span className="ai-summary__attribution">{AI_ASSISTANT_SUMMARY_MESSAGES.attribution}</span>
@@ -342,6 +360,7 @@ const AISummary = (props: AISummaryProps): React.ReactElement => {
                 );
               })}
             </span>
+            {isReceiver ? copyAction : null}
           </div>
         ) : null}
       </div>

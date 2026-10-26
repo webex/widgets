@@ -6,6 +6,23 @@ import {
   resolveMomentumIconUrl,
 } from '../../../src/components/AIAssistant/AdaptiveCardRenderer/adaptive-card-renderer.utils';
 
+const createTimestampMetadata = (text = '${sourceTimestamp}') => ({
+  type: 'RichTextBlock',
+  id: 'source-timestamp-richTextBlock',
+  inlines: [{type: 'TextRun', text}],
+});
+
+const createTimestampColumn = (properties: Record<string, unknown> = {}) => ({
+  type: 'Column',
+  items: [createTimestampMetadata()],
+  ...properties,
+});
+
+const createFooterCard = (columns: Record<string, unknown>[]) => ({
+  type: 'AdaptiveCard',
+  body: [{type: 'ColumnSet', columns: [createTimestampColumn(), ...columns]}],
+});
+
 describe('AdaptiveCardRenderer utilities', () => {
   it('resolves all icons emitted by real-time assist cards', () => {
     expect(resolveMomentumIconUrl(' LIKE-REGULAR.SVG ')).toBeTruthy();
@@ -43,6 +60,237 @@ describe('AdaptiveCardRenderer utilities', () => {
 
     expect(prepareCardForRender(card).body[0].text).toBe('• Acknowledge concern\n• Assure investigation');
     expect(card.body[0].text).toMatch(/^-/);
+  });
+
+  it('resolves summary sourceTimestamp bindings alongside legacy tokens without mutating the payload', () => {
+    const timestamp = new Date(2026, 9, 26, 10, 9).getTime();
+    const card = {
+      type: 'AdaptiveCard',
+      body: [
+        {
+          type: 'Container',
+          items: [
+            {type: 'TextBlock', text: '${sourceTimestamp} / SOURCE_TIMESTAMP_PLACEHOLDER / ${sourceTimestamp}'},
+            {type: 'RichTextBlock', inlines: [{type: 'TextRun', text: '${sourceTimestamp}'}]},
+          ],
+        },
+      ],
+    };
+    const original = JSON.stringify(card);
+
+    const prepared = prepareCardForRender(card, timestamp);
+
+    expect(JSON.stringify(prepared)).toContain('10:09 / 10:09 / 10:09');
+    expect(JSON.stringify(prepared)).not.toContain('${sourceTimestamp}');
+    expect(JSON.stringify(prepared)).not.toContain('SOURCE_TIMESTAMP_PLACEHOLDER');
+    expect(JSON.stringify(card)).toBe(original);
+    expect(prepared.body[0]).not.toBe(card.body[0]);
+  });
+
+  it.each([undefined, '', 'invalid', Number.NaN, Number.POSITIVE_INFINITY])(
+    'removes unresolved summary timestamp bindings for invalid input %s',
+    (timestamp) => {
+      const card = {type: 'AdaptiveCard', body: [{type: 'TextBlock', text: '${sourceTimestamp}'}]};
+
+      expect(prepareCardForRender(card, timestamp).body[0].text).toBe('');
+      expect(card.body[0].text).toBe('${sourceTimestamp}');
+    }
+  );
+
+  it('omits only receiver timestamp metadata and its trailing separator from a render clone', () => {
+    const card = {
+      type: 'AdaptiveCard',
+      body: [
+        {type: 'TextBlock', text: 'The caller requested an update.'},
+        {type: 'TextBlock', text: 'An update was requested at ${sourceTimestamp}.'},
+        {type: 'TextBlock', id: 'line-separator-textBlock', text: ' '},
+        {
+          type: 'Container',
+          items: [createTimestampMetadata('${sourceTimestamp} •')],
+        },
+      ],
+    };
+    const original = JSON.stringify(card);
+    const timestamp = new Date(2026, 9, 26, 11, 9).getTime();
+
+    const receiverCard = prepareCardForRender(card, timestamp, undefined, true);
+
+    expect(receiverCard.body).toEqual([
+      {type: 'TextBlock', text: 'The caller requested an update.'},
+      {type: 'TextBlock', text: 'An update was requested at 11:09.'},
+    ]);
+    expect(prepareCardForRender(card, timestamp).body).toHaveLength(4);
+    expect(JSON.stringify(card)).toBe(original);
+  });
+
+  it('recognizes timestamp-only inline metadata without removing unrelated empty layout containers', () => {
+    const card = {
+      type: 'AdaptiveCard',
+      body: [
+        {type: 'Container', items: []},
+        {
+          type: 'RichTextBlock',
+          inlines: [
+            {type: 'TextRun', text: '${sourceTimestamp}'},
+            {type: 'TextRun', text: ' •'},
+          ],
+        },
+        {type: 'TextBlock', text: 'Keep the summary text.'},
+      ],
+    };
+
+    expect(prepareCardForRender(card, undefined, undefined, true).body).toEqual([
+      {type: 'Container', items: []},
+      {type: 'TextBlock', text: 'Keep the summary text.'},
+    ]);
+    expect(card.body).toHaveLength(3);
+  });
+
+  it('keeps substituted timestamp runs inside substantive rich text when omitting a dedicated footer', () => {
+    const card = {
+      type: 'AdaptiveCard',
+      body: [
+        {
+          type: 'RichTextBlock',
+          inlines: [
+            {type: 'TextRun', text: 'Called at '},
+            {type: 'TextRun', text: '${sourceTimestamp}'},
+            {type: 'TextRun', text: ' yesterday'},
+          ],
+        },
+        createTimestampMetadata(),
+      ],
+    };
+    const original = JSON.stringify(card);
+
+    const prepared = prepareCardForRender(card, new Date(2026, 9, 26, 11, 9).getTime(), undefined, true);
+
+    expect(prepared.body).toHaveLength(1);
+    expect(prepared.body[0].inlines.map((inline) => inline.text).join('')).toBe('Called at 11:09 yesterday');
+    expect(JSON.stringify(card)).toBe(original);
+  });
+
+  it('removes a bullet-only timestamp column and old divider after its timestamp sibling is omitted', () => {
+    const card = {
+      type: 'AdaptiveCard',
+      body: [
+        {type: 'TextBlock', text: 'Keep this summary.'},
+        {type: 'TextBlock', id: 'line-separator-textBlock', text: ' '},
+        {
+          type: 'ColumnSet',
+          columns: [
+            createTimestampColumn(),
+            {type: 'Column', items: [{type: 'RichTextBlock', inlines: [{type: 'TextRun', text: ' • '}]}]},
+          ],
+        },
+      ],
+    };
+    const original = JSON.stringify(card);
+
+    expect(prepareCardForRender(card, 1792990040000, undefined, true).body).toEqual([
+      {type: 'TextBlock', text: 'Keep this summary.'},
+    ]);
+    expect(JSON.stringify(card)).toBe(original);
+  });
+
+  it('keeps substantive and unrelated bullet content when removing timestamp decorations', () => {
+    const card = {
+      type: 'AdaptiveCard',
+      body: [
+        {
+          type: 'ColumnSet',
+          columns: [{type: 'Column', items: [{type: 'RichTextBlock', inlines: [{type: 'TextRun', text: '•'}]}]}],
+        },
+        {
+          type: 'ColumnSet',
+          columns: [
+            createTimestampColumn(),
+            {
+              type: 'Column',
+              items: [{type: 'RichTextBlock', inlines: [{type: 'TextRun', text: '• Customer requested a callback.'}]}],
+            },
+          ],
+        },
+      ],
+    };
+
+    const prepared = prepareCardForRender(card, undefined, undefined, true);
+
+    expect(prepared.body).toHaveLength(2);
+    expect(prepared.body[0]).toEqual(card.body[0]);
+    expect(JSON.stringify(prepared)).toContain('• Customer requested a callback.');
+    expect(JSON.stringify(prepared)).not.toContain('source-timestamp-richTextBlock');
+  });
+
+  it('collapses the real timestamp footer with stretch columns and suppressed feedback ActionSets', () => {
+    const card = {
+      type: 'AdaptiveCard',
+      body: [
+        {type: 'TextBlock', text: 'Keep the customer summary.'},
+        {type: 'TextBlock', id: 'line-separator-textBlock', text: ' '},
+        {
+          type: 'ColumnSet',
+          columns: [
+            {type: 'Column', width: 'stretch'},
+            createTimestampColumn({width: 'auto'}),
+            {type: 'Column', items: [{type: 'RichTextBlock', inlines: [{type: 'TextRun', text: '•'}]}]},
+            ...['likeButton', 'dislikeButton', 'copyButton'].map((id) => ({
+              type: 'Column',
+              items: [{type: 'ActionSet', actions: [{type: 'Action.Submit', id, title: ''}]}],
+            })),
+            {type: 'Column', items: []},
+          ],
+        },
+      ],
+    };
+    const original = JSON.stringify(card);
+
+    expect(prepareCardForRender(card, undefined, undefined, true).body).toEqual([
+      {type: 'TextBlock', text: 'Keep the customer summary.'},
+    ]);
+    expect(JSON.stringify(card)).toBe(original);
+  });
+
+  it('preserves unknown ActionSets beside an omitted timestamp', () => {
+    const card = createFooterCard([
+      {type: 'Column', items: [{type: 'RichTextBlock', inlines: [{type: 'TextRun', text: '•'}]}]},
+      {
+        type: 'Column',
+        items: [{type: 'ActionSet', actions: [{type: 'Action.OpenUrl', id: 'openCase', title: 'Open case'}]}],
+      },
+    ]);
+
+    const prepared = prepareCardForRender(card, undefined, undefined, true);
+
+    expect(prepared.body).toHaveLength(1);
+    expect(JSON.stringify(prepared)).toContain('openCase');
+    expect(JSON.stringify(prepared)).not.toContain('source-timestamp-richTextBlock');
+  });
+
+  it.each([
+    {type: 'Action.OpenUrl', id: 'copyButton', title: 'Copy details', url: 'https://example.invalid/case'},
+    {type: 'Action.Submit', id: 'copyDetails', title: 'Copy details'},
+  ])('preserves unknown actions whose names resemble metadata controls %s', (action) => {
+    const card = createFooterCard([{type: 'Column', items: [{type: 'ActionSet', actions: [action]}]}]);
+
+    const prepared = prepareCardForRender(card, undefined, undefined, true);
+
+    expect(prepared.body).toHaveLength(1);
+    expect(prepared.body[0].columns).toEqual([{type: 'Column', items: [{type: 'ActionSet', actions: [action]}]}]);
+  });
+
+  it.each([
+    {backgroundImage: 'https://example.invalid/summary.png'},
+    {backgroundImage: 'https://example.invalid/summary.png', items: []},
+    {selectAction: {type: 'Action.OpenUrl', url: 'https://example.invalid/case'}},
+    {selectAction: {type: 'Action.OpenUrl', url: 'https://example.invalid/case'}, items: []},
+  ])('preserves empty-looking columns with unsupported content %s', (content) => {
+    const card = createFooterCard([{type: 'Column', width: 'stretch', ...content}]);
+
+    const prepared = prepareCardForRender(card, undefined, undefined, true);
+
+    expect(prepared.body).toHaveLength(1);
+    expect(prepared.body[0].columns).toEqual([{type: 'Column', width: 'stretch', ...content}]);
   });
 
   it('turns the backend separator placeholder into a horizontal rule', () => {

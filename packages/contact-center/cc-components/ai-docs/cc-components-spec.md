@@ -401,23 +401,42 @@ editable summary mode. A focused editor stays mounted when its text is cleared;
 the empty row disappears after editing ends. Values and cleared section keys remain
 unchanged in the SDK payload and the owner's local response, and copy omits blank sections.
 
-`AIAssistantComponent.receiverSummary` adds View summary to closed/minimized chrome
-and opens the receiver branch independently of Real-time Assist enablement. Copy uses
-visible rendered card text through an opt-in filter in the shared Adaptive Card
-text extractor. Hidden receiver text blocks and descendants of hidden card
-containers are excluded from summary copying; ordinary Real-time Assist copying
-keeps its existing behavior. Visible nested blocks keep their text and line breaks.
-The renderer uses Adaptive Cards' `supportsInteractivity: false` for receiver content, keeping
-card-provided actions, select actions and inputs inert without rewriting the SDK
-card. Its render callback controls whether the separate copy/feedback controls are
-shown; parsing or rendering failure hides them. Valid replacement cards preserve
-those controls and their focus. Replacing a display-only receiver card resets its
-error boundary; ordinary Real-time Assist cards keep their existing recovery
-behavior. Closing either chrome clears the receiver selection before invoking the
-host callback, so external reopening returns to the ordinary assistant view.
-An explicitly selected receiver summary takes precedence over retained wellness
-history; an active wellness offer, transition, error or overlay retains priority.
-Wellness history remains available when returning to the ordinary assistant view.
+`AIAssistantComponent.receiverSummary` selects a new SDK summary content object when
+an interaction is active and the panel is open, including replacements on the same
+branch. Feedback/copy updates retaining that object are not arrivals. Passive
+selection changes neither chrome nor connected focus. Closed/minimized arrivals
+and arrivals without an active interaction are not replayed by ordinary Open/Restore.
+View summary remains available in collapsed chrome and below the open header while
+ordinary assistance is selected. It opens the receiver branch regardless of
+Real-time Assist enablement and recovers panel focus when its trigger disappears.
+No receiver summary or trigger is shown without an active interaction.
+
+Source `timestamp` is epoch milliseconds rendered in browser-local `HH:mm`; invalid
+or missing values render blank. Card preparation replaces both
+`SOURCE_TIMESTAMP_PLACEHOLDER` and `${sourceTimestamp}` only in a render clone.
+The receiver has one right-aligned, wrapping LTR footer inside the card: valid time
+and separator, then equally sized helpful, unhelpful and copy controls. It omits
+SDK timestamp metadata and empty footer decorations from that clone, preserving
+substantive text containing timestamp bindings and native footers in other modes.
+Receiver actions have no bordered editor surface. The receiver scrolls within the
+panel, keeping its footer and separate padded Get Assistance row reachable.
+
+Receiver copy includes visible nested card text and line breaks, excluding hidden
+blocks/ancestors; ordinary Real-time Assist copy is unchanged. Adaptive Cards'
+`supportsInteractivity: false` keeps receiver actions, select actions and inputs
+inert without rewriting the payload. The render callback hides the host footer on
+parse/render failure. Valid replacements retain controls and focus; a replacement
+resets only the display-only card's error boundary, preserving ordinary recovery.
+Closing chrome clears receiver selection before its callback, so external reopening
+shows ordinary assistance.
+
+During an active interaction with Real-time Assist enabled, Get Assistance invokes
+the existing request callback once and returns to assistance, retaining history and
+context. Pending requests disable it. View summary preserves access to the card.
+Selected summaries and explicit assistance outrank retained idle wellness history
+and notices without clearing them; active wellness offers, transitions, errors and
+overlays retain priority and hide the summary CTA. Ordinary Open/Restore and View
+summary reset explicit assistance selection; wellness history remains available.
 Focus capture is limited to the receiver branch and View summary trigger. It is
 cleared when focus moves to an ordinary assistant or host control. Summary
 components recover focus only when a focused summary control or branch is removed

@@ -14,7 +14,7 @@ import WellnessBreakRequestCard from './WellnessBreak/wellness-break-request-car
 import {AIAssistantComponentProps, WellnessBreakModalProps, WellnessBreakViewModel} from './ai-assistant.types';
 import {extractCardText} from './AdaptiveCardRenderer/adaptive-card-renderer.utils';
 import AdaptiveCardRenderer from './AdaptiveCardRenderer/adaptive-card-renderer';
-import {AI_ASSISTANT_TITLE, DISCLAIMER_TEXT} from './constants';
+import {AI_ASSISTANT_TITLE, DISCLAIMER_TEXT, GET_ASSISTANCE_LABEL} from './constants';
 import './ai-assistant.styles.scss';
 import './WellnessBreak/wellness-break.styles.scss';
 
@@ -65,8 +65,9 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
     assistantHeaderSequence += 1;
     return `ai-assistant-header-${assistantHeaderSequence}`;
   });
-  // The receiver summary branch the agent opened; real-time assist shows otherwise.
+  // Select incoming summaries in an open panel; ordinary Open/Restore can return to assistance.
   const [viewingReceiverKey, setViewingReceiverKey] = useState<string | null>(null);
+  const [isAssistanceSelected, setIsAssistanceSelected] = useState(false);
   const [receiverCardReady, setReceiverCardReady] = useState(false);
   const rootRef = useRef<HTMLDivElement | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
@@ -92,6 +93,13 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
   );
   const showLanding = !showReceiverSummary && (!hasActiveInteraction || !isFeatureEnabled);
   const receiverBranchKey = receiverSummary?.branchKey;
+  const receiverSurface = receiverSummary?.surface;
+  const receiverContent = receiverSummary?.surface === 'content' ? receiverSummary.content : undefined;
+  const observedReceiverRef = useRef<{
+    branchKey: typeof receiverBranchKey;
+    surface: typeof receiverSurface;
+    content: typeof receiverContent;
+  }>({branchKey: undefined, surface: undefined, content: undefined});
   const receiverCardAvailable = Boolean(receiverSummary?.surface === 'content' && receiverSummary.content.adaptiveCard);
   const receiverActionsVisible = Boolean(showReceiverSummary && receiverCardAvailable && receiverCardReady);
 
@@ -110,9 +118,10 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
   );
   // Keep prior messages in the view model, but let a newly eligible Desktop-style
   // suggestion temporarily own the complete assistant body.
-  // An explicitly opened summary takes precedence over a completed/dismissed
+  // A selected summary takes precedence over a completed/dismissed
   // wellness transcript, while in-progress wellness flows keep their priority.
-  const showRetainedWellness = !showReceiverSummary || wellness?.phase !== 'idle';
+  const showSelectedAssistance = isAssistanceSelected && hasActiveInteraction && isFeatureEnabled;
+  const showRetainedWellness = wellness?.phase !== 'idle' || (!showReceiverSummary && !showSelectedAssistance);
   const showWellnessHistory = hasWellnessHistory && !showWellnessSuggestion && showRetainedWellness;
   const showWellnessRequestState = Boolean(
     wellness?.enabled &&
@@ -143,18 +152,30 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
     : !showLanding;
 
   useEffect(() => {
-    if (viewingReceiverKey !== receiverBranchKey) {
-      setViewingReceiverKey(null);
-      pendingReceiverActivationFocusRef.current = false;
-    }
-  }, [viewingReceiverKey, receiverBranchKey]);
+    const previous = observedReceiverRef.current;
+    const incomingSummaryChanged =
+      previous.branchKey !== receiverBranchKey ||
+      previous.surface !== receiverSurface ||
+      previous.content !== receiverContent;
+    // Observe arrivals while collapsed/inactive too, so ordinary Open/Restore
+    // does not replay an older summary. Feedback retains the SDK content object.
+    observedReceiverRef.current = {branchKey: receiverBranchKey, surface: receiverSurface, content: receiverContent};
 
-  useEffect(() => {
-    if (chrome === 'closed') {
+    if (!hasActiveInteraction || !receiverBranchKey || chrome === 'closed') {
       setViewingReceiverKey(null);
       pendingReceiverActivationFocusRef.current = false;
+      if (!hasActiveInteraction || chrome === 'closed') {
+        setIsAssistanceSelected(false);
+      }
+    } else if (incomingSummaryChanged && chrome === 'open') {
+      setViewingReceiverKey(receiverBranchKey);
+      setIsAssistanceSelected(false);
+      // Passive arrival changes content without moving focus or changing chrome.
+      pendingReceiverActivationFocusRef.current = false;
+    } else {
+      setViewingReceiverKey((key) => (key === receiverBranchKey ? key : null));
     }
-  }, [chrome]);
+  }, [chrome, receiverBranchKey, receiverSurface, receiverContent, hasActiveInteraction]);
 
   const focusTarget = (target: HTMLElement | null | undefined): boolean => {
     if (
@@ -260,18 +281,31 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
 
   const closeAssistant = () => {
     setViewingReceiverKey(null);
+    setIsAssistanceSelected(false);
     pendingReceiverActivationFocusRef.current = false;
     close();
   };
 
   const openRealTimeAssist = () => {
     setViewingReceiverKey(null);
+    setIsAssistanceSelected(false);
     open();
   };
 
   const restoreRealTimeAssist = () => {
     setViewingReceiverKey(null);
+    setIsAssistanceSelected(false);
     restore();
+  };
+
+  const requestAssistanceFromSummary = () => {
+    if (!hasActiveInteraction || !isFeatureEnabled || isRequesting) {
+      return;
+    }
+    setViewingReceiverKey(null);
+    setIsAssistanceSelected(true);
+    pendingReceiverActivationFocusRef.current = false;
+    requestRealTimeAssist();
   };
 
   const openReceiverSummary = () => {
@@ -279,6 +313,7 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
       return;
     }
     setViewingReceiverKey(receiverSummary.branchKey);
+    setIsAssistanceSelected(false);
     pendingReceiverActivationFocusRef.current = true;
     if (chrome === 'minimized') {
       restore();
@@ -303,33 +338,51 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
           <div dir="auto">
             <AdaptiveCardRenderer
               card={summary.content.adaptiveCard}
+              publishTimestamp={summary.content.timestamp}
               displayOnly
+              omitSourceTimestamp
               onRender={setReceiverCardReady}
               fallbackText={AI_ASSISTANT_SUMMARY_MESSAGES.unavailable}
               logger={logger}
+              footer={
+                receiverActionsVisible ? (
+                  <AISummary
+                    mode="mid-call-receiver"
+                    containingPanelFocusTarget={panelRef}
+                    state="content"
+                    requestPending={summary.feedbackPending}
+                    selectedFeedback={summary.selectedFeedback}
+                    content={summary.content}
+                    getReceiverCopyText={() =>
+                      receiverBranchRef.current ? extractCardText(receiverBranchRef.current, {visibleOnly: true}) : ''
+                    }
+                    onCopy={summary.recordReceiverSummaryCopied}
+                    onFeedback={summary.setReceiverSummaryFeedback}
+                  />
+                ) : undefined
+              }
             />
           </div>
-        ) : null}
-        {summary.surface === 'content' && receiverActionsVisible ? (
-          <AISummary
-            mode="mid-call-receiver"
-            containingPanelFocusTarget={panelRef}
-            state="content"
-            requestPending={summary.feedbackPending}
-            selectedFeedback={summary.selectedFeedback}
-            content={summary.content}
-            getReceiverCopyText={() =>
-              receiverBranchRef.current ? extractCardText(receiverBranchRef.current, {visibleOnly: true}) : ''
-            }
-            onCopy={summary.recordReceiverSummaryCopied}
-            onFeedback={summary.setReceiverSummaryFeedback}
-          />
         ) : null}
         {summary.surface === 'unavailable' || summary.surface === 'generic-error' ? (
           <AISummary mode="mid-call-receiver" containingPanelFocusTarget={panelRef} state={summary.surface} />
         ) : null}
         {summary.surface === 'content' && !summary.content.adaptiveCard ? (
           <AISummary mode="mid-call-receiver" containingPanelFocusTarget={panelRef} state="unavailable" />
+        ) : null}
+        {hasActiveInteraction && isFeatureEnabled ? (
+          <div className="ai-assistant__receiver-assistance">
+            <Button
+              type="button"
+              variant="secondary"
+              className="ai-assistant__pill-button"
+              disabled={isRequesting}
+              onClick={requestAssistanceFromSummary}
+              data-testid="ai-assistant:summary-get-assistance"
+            >
+              {GET_ASSISTANCE_LABEL}
+            </Button>
+          </div>
         ) : null}
       </div>
     );
@@ -489,6 +542,11 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
               </Tooltip>
             </div>
           </header>
+          {canViewReceiverSummary && !showReceiverSummary ? (
+            <div className="ai-assistant__summary-actions" data-testid="ai-assistant:summary-actions">
+              {renderReceiverSummaryTrigger()}
+            </div>
+          ) : null}
           <div
             className={`ai-assistant__body${
               (showLanding && !showWellnessContent) || showWellnessSuggestion ? ' ai-assistant__body--landing' : ''

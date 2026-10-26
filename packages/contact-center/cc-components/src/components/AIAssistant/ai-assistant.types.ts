@@ -1,3 +1,4 @@
+import type {ReactNode} from 'react';
 import type {
   AISummaryEntry,
   AISummaryFeedback,
@@ -244,6 +245,10 @@ export interface AIAssistantActionEvent {
 
 export interface AdaptiveCardRendererProps {
   card: unknown;
+  /** Host-owned summary controls, rendered inside the card surface after its content. */
+  footer?: ReactNode;
+  /** Omit backend timestamp-only metadata from the render clone when the host supplies its footer. */
+  omitSourceTimestamp?: boolean;
   /** Render summary content without card-provided actions or inputs. */
   displayOnly?: boolean;
   /** Reports whether card content rendered, so the container can show its controls. */
