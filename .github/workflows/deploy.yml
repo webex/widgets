@@ -237,7 +237,7 @@ jobs:
       - name: Restore Prepared Package Versions
         if: needs.prepare-release.outputs.has_changes == 'true'
         run: git apply --allow-empty .generated/consumer-builds/candidates/release-manifests.patch
-      - name: Verify Consumer Candidates
+      - name: Verify Restored Workspace Contents
         if: needs.prepare-release.outputs.has_changes == 'true'
         run: yarn workspace webex-widgets consumer-builds:verify
       - name: Deploy Packages

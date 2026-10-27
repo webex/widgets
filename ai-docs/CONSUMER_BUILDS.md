@@ -10,6 +10,8 @@ custom element registration. The consumer does not start an SDK session.
 The fixture has normal CSS, Sass, font, and image support. It does not have a wellness media loader
 or a workaround for Webpack loader syntax. Tool versions and UI peers are fixed in
 [`tooling/consumer-builds/fixture/package-lock.json`](../tooling/consumer-builds/fixture/package-lock.json).
+The fixture pins `@momentum-ui/react-collaboration` to `26.201.9`, which satisfies the Contact Center
+packages' declared minimum versions, including `@webex/cc-station-login`.
 These checks cover this fixture and these tool versions. They do not confirm all consumer settings,
 development servers, media playback, or CSP policies.
 
@@ -37,7 +39,10 @@ list of required bundlers. Disabled tools remain in the fixture lockfile.
    Each bundler runs in a separate job. A failure does not cancel the other bundler jobs.
 4. `publish-npm` runs only after all enabled checks pass. It installs the checkout's dependencies,
    restores the production distributable cache, applies the prepared manifest patch, and verifies
-   the candidate archives again. A missing build cache or a patch conflict stops publishing.
+   the candidate archives again. It repacks the restored workspaces into a separate temporary
+   directory and compares package names, versions, file paths, executable flags, and SHA-256 file
+   hashes with the tested archives. Archive order, timestamps, owners, and compression metadata
+   do not affect this comparison. A content mismatch, missing build cache, or patch conflict stops publishing.
 5. The existing `yarn workspaces foreach ... run deploy:npm` command publishes the changed workspaces
    with the branch dist tag. Each workspace keeps its own `deploy:npm` script, including the exclusion
    for `@webex/test-fixtures`. The publish job does not repeat version selection or rebuild packages.
@@ -75,6 +80,9 @@ package hashes as `consumer-report-<bundler>` artifacts, including when a check 
 Rebuild with `yarn build:dev` before the full unit suite or a commit. The repo unit tests use development
 distributables. The release tests use a temporary Git repository to check the manifest patch and a
 stub Yarn executable to check `deploy:npm` arguments and failures. They do not publish packages.
+Archive comparison tests cover modified build output, added and removed files, changed manifests,
+executable flags, package sets and versions, timestamp differences, and temporary directory cleanup.
+Archive links and paths outside `package/` are rejected before extraction.
 
 ## Known regression
 

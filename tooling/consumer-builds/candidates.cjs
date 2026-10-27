@@ -1,4 +1,5 @@
 const fs = require('node:fs');
+const os = require('node:os');
 const path = require('node:path');
 const {createHash} = require('node:crypto');
 const {execFileSync} = require('node:child_process');
@@ -58,13 +59,74 @@ function readCandidates(directory) {
   return manifest;
 }
 
-module.exports = {CANDIDATES, packCandidates, readCandidates};
+function archiveContents(filename) {
+  const options = {encoding: 'utf8', maxBuffer: 16 * 1024 * 1024};
+  const files = execFileSync('tar', ['-tzf', filename], options).trim().split('\n');
+  const details = execFileSync('tar', ['-tvzf', filename], options).trim().split('\n');
+  // Only regular files and directories below package/ can be extracted into the temporary directory.
+  if (
+    details.length !== files.length ||
+    new Set(files).size !== files.length ||
+    files.some(
+      (file, index) =>
+        !file.startsWith('package/') ||
+        path.posix.normalize(file) !== file ||
+        !/^[-d]/.test(details[index]) ||
+        (details[index][0] === 'd') !== file.endsWith('/')
+    )
+  ) {
+    throw new Error(`Unsafe package archive: ${filename}`);
+  }
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'widget-archive-contents-'));
+  try {
+    execFileSync('tar', ['-xzf', filename, '--no-same-owner', '-C', directory]);
+    return JSON.stringify(
+      files
+        .filter((file) => !file.endsWith('/'))
+        .sort()
+        .map((file) => {
+          const extracted = path.join(directory, file);
+          return [file, fs.statSync(extracted).mode & 0o111, hash(extracted)];
+        })
+    );
+  } finally {
+    fs.rmSync(directory, {recursive: true, force: true});
+  }
+}
+
+function verifyWorkspaces(directory = CANDIDATES) {
+  const candidates = readCandidates(directory);
+  const repacked = fs.mkdtempSync(path.join(os.tmpdir(), 'widget-restored-workspaces-'));
+  try {
+    packCandidates(repacked);
+    const restored = readCandidates(repacked);
+    const packages = new Map(restored.map((entry) => [entry.name, entry]));
+    if (
+      restored.length !== candidates.length ||
+      candidates.some((entry) => packages.get(entry.name)?.version !== entry.version)
+    ) {
+      throw new Error('Workspace package manifest differs from tested candidates.');
+    }
+    for (const entry of candidates) {
+      if (
+        archiveContents(path.join(directory, entry.file)) !==
+        archiveContents(path.join(repacked, packages.get(entry.name).file))
+      ) {
+        throw new Error(`Workspace contents differ from tested candidate: ${entry.name}`);
+      }
+    }
+  } finally {
+    fs.rmSync(repacked, {recursive: true, force: true});
+  }
+}
+
+module.exports = {CANDIDATES, packCandidates, readCandidates, verifyWorkspaces};
 
 if (require.main === module) {
   try {
-    const [command] = process.argv.slice(2);
-    if (command === 'pack') packCandidates();
-    else if (command === 'verify') readCandidates(CANDIDATES);
+    const [command, directory = CANDIDATES] = process.argv.slice(2);
+    if (command === 'pack') packCandidates(path.resolve(directory));
+    else if (command === 'verify') verifyWorkspaces(path.resolve(directory));
     else throw new Error('Use pack or verify.');
   } catch (error) {
     console.error(error.message);

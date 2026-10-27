@@ -99,7 +99,13 @@ describe('existing release tooling after consumer checks', () => {
   it('restores dependencies before prepared versions and requires the production build cache', () => {
     const names = publish.steps.map((step) => step.name);
     expect(names.indexOf('Install Dependencies')).toBeLessThan(names.indexOf('Restore Prepared Package Versions'));
-    expect(names.indexOf('Restore Prepared Package Versions')).toBeLessThan(names.indexOf('Deploy Packages'));
+    expect(names.indexOf('Restore Prepared Package Versions')).toBeLessThan(
+      names.indexOf('Verify Restored Workspace Contents')
+    );
+    expect(names.indexOf('Verify Restored Workspace Contents')).toBeLessThan(names.indexOf('Deploy Packages'));
+    const verify = publish.steps.find((step) => step.name === 'Verify Restored Workspace Contents');
+    expect(verify.run).toBe('yarn workspace webex-widgets consumer-builds:verify');
+    expect(verify['continue-on-error']).toBeUndefined();
     const cache = publish.steps.find((step) => step.name === 'Restore Distributables Cache');
     expect(cache.with).toMatchObject({path: '**/dist', key: 'dist-${{ env.rid }}', 'fail-on-cache-miss': true});
     expect(publish.steps.some((step) => /build:prod|package-tools (sync|increment)/.test(step.run || ''))).toBe(false);
