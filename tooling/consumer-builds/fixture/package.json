@@ -6,7 +6,7 @@
   "dependencies": {
     "@momentum-ui/core": "19.16.0",
     "@momentum-ui/icons": "8.28.5",
-    "@momentum-ui/react-collaboration": "26.201.9",
+    "@momentum-ui/react-collaboration": "26.197.0",
     "@momentum-ui/utils": "6.2.15",
     "@momentum-ui/web-components": "2.26.27",
     "lit-element": "2.3.1",

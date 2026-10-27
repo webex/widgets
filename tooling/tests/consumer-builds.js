@@ -8,6 +8,21 @@ const {packCandidates, readCandidates} = require('../consumer-builds/candidates.
 
 jest.mock('node:child_process');
 
+describe('consumer fixture', () => {
+  it('uses the Momentum UI version pinned by both Contact Center samples', () => {
+    const name = '@momentum-ui/react-collaboration';
+    const fixture = require('../consumer-builds/fixture/package.json');
+    const lock = require('../consumer-builds/fixture/package-lock.json');
+    const version = fixture.dependencies[name];
+    expect(lock.packages[''].dependencies[name]).toBe(version);
+    expect(lock.packages[`node_modules/${name}`].version).toBe(version);
+    for (const sample of ['samples-cc-react-app', 'samples-cc-wc-app']) {
+      const manifest = require(`../../widgets-samples/cc/${sample}/package.json`);
+      expect(version).toBe(manifest.dependencies[name]);
+    }
+  });
+});
+
 describe('consumer build configuration', () => {
   const config = () => Object.fromEntries(BUNDLERS.map((name) => [name, {enabled: true}]));
 

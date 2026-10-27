@@ -10,18 +10,19 @@ custom element registration. The consumer does not start an SDK session.
 The fixture has normal CSS, Sass, font, and image support. It does not have a wellness media loader
 or a workaround for Webpack loader syntax. Tool versions and UI peers are fixed in
 [`tooling/consumer-builds/fixture/package-lock.json`](../tooling/consumer-builds/fixture/package-lock.json).
-The fixture pins `@momentum-ui/react-collaboration` to `26.201.9`, which satisfies the Contact Center
-packages' declared minimum versions, including `@webex/cc-station-login`.
+The fixture pins `@momentum-ui/react-collaboration` to `26.197.0`, as used by both Contact Center
+sample apps. A regression test checks that the fixture and its lockfile match those sample pins.
+This version is below the `>=26.201.9` peer range declared by `@webex/cc-station-login`.
+The fixture follows the existing Contact Center integration. It does not
+confirm compatibility with every declared peer version. See Known regression below.
 These checks cover this fixture and these tool versions. They do not confirm all consumer settings,
 development servers, media playback, or CSP policies.
 
 ## Enable or disable a bundler
 
-Edit [`tooling/consumer-builds/config.json`](../tooling/consumer-builds/config.json). Webpack, Rollup,
-and esbuild are enabled by default. Vite and Parcel are temporarily disabled because the supported
-Momentum UI peer contains CSS that they reject (see Known regression below). The default release
-gate therefore covers three bundlers. Re-enable Vite and Parcel after a corrected peer passes both
-their builds and browser checks. Set a bundler's `enabled` flag to `false` to omit it from PRs and releases:
+Edit [`tooling/consumer-builds/config.json`](../tooling/consumer-builds/config.json). Webpack, Vite,
+Parcel, Rollup, and esbuild are enabled by default. Set a bundler's `enabled` flag to `false` to omit
+it from PRs and releases:
 
 ```json
 "rollup": {"enabled": false}
@@ -70,14 +71,12 @@ yarn workspace webex-widgets consumer-builds:pack
 yarn workspace webex-widgets consumer-builds:verify
 yarn workspace webex-widgets consumer-builds:matrix
 yarn workspace webex-widgets test:consumer-builds webpack
+yarn workspace webex-widgets test:consumer-builds vite
+yarn workspace webex-widgets test:consumer-builds parcel
 yarn workspace webex-widgets test:consumer-builds rollup
 yarn workspace webex-widgets test:consumer-builds esbuild
 yarn workspace webex-widgets test:tooling --runInBand tooling/tests/consumer-build
 ```
-
-To test Vite or Parcel, first set its `enabled` flag to `true`, then run
-`yarn workspace webex-widgets test:consumer-builds vite` or
-`yarn workspace webex-widgets test:consumer-builds parcel`.
 
 To check other candidate archives, pass their directory as the second argument to `test:consumer-builds`.
 It must contain `manifest.json` and all nine Contact Center archives. The runner creates its installs,
@@ -93,13 +92,17 @@ Archive links and paths outside `package/` are rejected before extraction.
 
 ## Known regression
 
-The supported Momentum UI peer `26.201.9` emits an invalid `::part(icon) path` selector from
-`MeetingRowContent.style.scss`. The fork run at `fbfb39d1` passed Webpack, Rollup, and esbuild;
-Vite and Parcel rejected this CSS. The same Sass block is present in sampled later versions,
-including `26.214.0`, which also failed both local checks. Vite and Parcel are opted out in the
-default configuration while this dependency issue remains. Enabling either check reproduces the
-failure and blocks publishing. Webpack, Rollup, and esbuild remain required by the default gate.
-The earlier passing run at `915df2a` used peer `26.197.0`, below the declared station-login minimum.
+Momentum UI `26.201.9` emits a `::part(icon) path` selector from `MeetingRowContent.style.scss`
+that Vite and Parcel reject. The fork run at `fbfb39d1` passed Webpack, Rollup, and esbuild but failed
+those two builds. Sampled later versions contain the same Sass block. Version `26.214.0` also
+failed both local checks. The earlier fork run at `915df2a` passed all five bundlers with `26.197.0`.
+
+The fixture keeps the Contact Center samples' `26.197.0` pin, and all five bundlers remain required.
+Both install commands use `--legacy-peer-deps`, so they do not enforce the station-login peer range.
+The higher station-login minimum and the newer Momentum CSS failure remain dependency issues.
+This workflow change does not change a published package's peer requirements or patch vendor CSS.
+When Contact Center changes its sample pins, update the fixture and lockfile and pass all five
+builds and browser checks before release. The fixture regression test detects a pin mismatch.
 
 The original `next` baseline at `c298215c` contained the wellness inline Webpack loader and development
 logging output. The consumer checks rejected that candidate. [PR #751](https://github.com/webex/widgets/pull/751)

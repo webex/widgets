@@ -1,7 +1,7 @@
 {
   "webpack": {"enabled": true},
-  "vite": {"enabled": false},
-  "parcel": {"enabled": false},
+  "vite": {"enabled": true},
+  "parcel": {"enabled": true},
   "rollup": {"enabled": true},
   "esbuild": {"enabled": true}
 }
