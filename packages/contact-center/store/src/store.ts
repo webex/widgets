@@ -67,6 +67,7 @@ class Store implements IStore {
   showE911Modal: boolean = false;
   isEmergencyModalAlreadyDisplayed: boolean = false;
   realTimeAssist: Record<string, RealTimeAssistPayload[]> = {};
+  aiSummaries: IStore['aiSummaries'] = {};
   offerActionErrors: Record<string, OfferActionErrorDisplay> = {};
   isWellnessBreakEnabled = false;
   wellnessAgentSessionId = '';
@@ -81,6 +82,7 @@ class Store implements IStore {
   constructor() {
     makeAutoObservable(this, {
       cc: observable.ref,
+      aiSummaries: observable.ref,
     });
   }
 
@@ -96,8 +98,8 @@ class Store implements IStore {
 
   registerCC(webex?: WithWebex['webex']): Promise<void> {
     if (webex) {
+      if (this.cc !== webex.cc) this.aiSummaries = {};
       this.cc = webex.cc;
-      this.cc.aiSummaries ??= {};
     }
 
     if (typeof webex === 'undefined' && typeof this.cc === 'undefined') {
@@ -125,6 +127,9 @@ class Store implements IStore {
             ? response.agentSessionId
             : '';
         runInAction(() => {
+          // Silent session restoration can omit orgId and the relogin event.
+          this.agentProfile.orgId = response.orgId || webex?.credentials?.getOrgId() || this.agentProfile.orgId;
+          this.agentProfile.agentSessionId = registeredSessionId || undefined;
           this.isWellnessBreakEnabled = isWellnessBreakEnabled;
           this.wellnessIdleCodeLookupPending = isWellnessBreakEnabled && Boolean(response.isAgentLoggedIn);
           if (this.wellnessAgentSessionId && this.wellnessAgentSessionId !== registeredSessionId) {

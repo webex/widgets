@@ -1,15 +1,23 @@
 import type {ILogger} from '@webex/cc-store';
-import type {AIAssistantActionKind} from '../ai-assistant.types';
-import {ADAPTIVE_CARD_MODULE, COPIED_FEEDBACK_MS, LINE_SEPARATOR_ID, SOURCE_TIMESTAMP_PLACEHOLDER} from '../constants';
+import type {AIAssistantActionKind, AdaptiveCardRendererProps} from '../ai-assistant.types';
+import {
+  ADAPTIVE_CARD_MODULE,
+  COPIED_FEEDBACK_MS,
+  LINE_SEPARATOR_ID,
+  SOURCE_TIMESTAMP_PLACEHOLDER,
+  SOURCE_TIMESTAMP_TEMPLATE_PLACEHOLDER,
+} from '../constants';
 import arrowDownRegularIcon from '@momentum-design/icons/dist/svg/arrow-down-regular.svg';
 import arrowRightRegularIcon from '@momentum-design/icons/dist/svg/arrow-right-regular.svg';
 import checkCircleFilledIcon from '@momentum-design/icons/dist/svg/check-circle-filled.svg';
 import copyRegularIcon from '@momentum-design/icons/dist/svg/copy-regular.svg';
 import dislikeFilledIcon from '@momentum-design/icons/dist/svg/dislike-filled.svg';
 import dislikeRegularIcon from '@momentum-design/icons/dist/svg/dislike-regular.svg';
+import editRegularIcon from '@momentum-design/icons/dist/svg/edit-regular.svg';
 import linkRegularIcon from '@momentum-design/icons/dist/svg/link-regular.svg';
 import likeFilledIcon from '@momentum-design/icons/dist/svg/like-filled.svg';
 import likeRegularIcon from '@momentum-design/icons/dist/svg/like-regular.svg';
+import sparkleFilledIcon from '@momentum-design/icons/dist/svg/sparkle-filled.svg';
 
 const CISCO_AI_ASSISTANT_COLOR_SVG =
   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">' +
@@ -30,13 +38,30 @@ const MOMENTUM_ICON_URLS: Record<string, string> = {
   'copy-regular.svg': copyRegularIcon,
   'dislike-filled.svg': dislikeFilledIcon,
   'dislike-regular.svg': dislikeRegularIcon,
+  'edit-regular.svg': editRegularIcon,
   'link-regular.svg': linkRegularIcon,
   'like-filled.svg': likeFilledIcon,
   'like-regular.svg': likeRegularIcon,
+  'sparkle-filled.svg': sparkleFilledIcon,
 };
 
+const EMPTY_LAYOUT_KEYS = new Set([
+  'type',
+  'id',
+  'width',
+  'height',
+  'minHeight',
+  'spacing',
+  'separator',
+  'style',
+  'bleed',
+  'isVisible',
+  'verticalContentAlignment',
+  'rtl',
+]);
+
 /** Format an epoch (ms) into "HH:MM"; empty string on bad input. */
-const formatSourceTimestamp = (raw: number | string | undefined): string => {
+export const formatSourceTimestamp = (raw: number | string | undefined): string => {
   if (raw === undefined || raw === null || raw === '') return '';
   const ms = typeof raw === 'number' ? raw : Number.parseInt(`${raw}`, 10);
   if (Number.isNaN(ms)) return '';
@@ -58,6 +83,34 @@ const extractMomentumIconName = (value: string): string | null => {
   if (!trimmed) return null;
   const match = trimmed.match(/([\w-]+\.svg)(?:[?#].*)?$/i);
   return match ? match[1].toLowerCase() : null;
+};
+
+/** Read only the backend's standalone AI icon/title header. */
+export const extractAssistantTitle = (card: unknown): string | undefined => {
+  if (!card || typeof card !== 'object' || Array.isArray(card)) return undefined;
+  const body = (card as Record<string, unknown>).body;
+  if (!Array.isArray(body)) return undefined;
+  const header = body[0] as Record<string, unknown> | undefined;
+  if (header?.type !== 'ColumnSet' || header.selectAction || !Array.isArray(header.columns)) return undefined;
+  if (header.columns.length !== 2) return undefined;
+
+  const items: Record<string, unknown>[] = [];
+  for (const column of header.columns) {
+    if (!column || typeof column !== 'object' || column.type !== 'Column' || column.selectAction) return undefined;
+    if (!Array.isArray(column.items) || column.items.length !== 1) return undefined;
+    const item = column.items[0];
+    if (!item || typeof item !== 'object' || Array.isArray(item) || item.selectAction) return undefined;
+    items.push(item);
+  }
+  const image = items.find((item) => item.type === 'Image');
+  const title = items.find((item) => item.type === 'TextBlock');
+  return image &&
+    typeof image.url === 'string' &&
+    extractMomentumIconName(image.url) === 'cisco-ai-assistant-color.svg' &&
+    typeof title?.text === 'string' &&
+    title.text.trim()
+    ? title.text
+    : undefined;
 };
 
 export const extractCustomerStatementTitle = (card: unknown): string | undefined => {
@@ -122,14 +175,93 @@ const removeDuplicateAssistantHeader = (
   return card;
 };
 
-export const prepareCardForRender = <T>(card: T, publishTimestamp?: number | string, assistantTitle?: string): T => {
+export const prepareCardForRender = <T>(
+  card: T,
+  publishTimestamp?: number | string,
+  assistantTitle?: string,
+  omitSourceTimestamp = false
+): T => {
   if (card === null || typeof card !== 'object') return card;
 
   const formattedTimestamp = formatSourceTimestamp(publishTimestamp);
+  const timestampPlaceholders = [SOURCE_TIMESTAMP_PLACEHOLDER, SOURCE_TIMESTAMP_TEMPLATE_PLACEHOLDER];
   const cardWithoutDuplicateHeader = removeDuplicateAssistantHeader(card as Record<string, unknown>, assistantTitle);
+  const readCardText = (node: Record<string, unknown>): unknown => {
+    if (node.type === 'TextBlock') return node.text;
+    if (node.type !== 'RichTextBlock' || !Array.isArray(node.inlines)) return undefined;
+    return node.inlines
+      .map((inline) => (typeof inline === 'string' ? inline : ((inline as Record<string, unknown> | null)?.text ?? '')))
+      .join('');
+  };
+  const isTimestampText = (text: unknown): boolean =>
+    typeof text === 'string' &&
+    timestampPlaceholders.some((placeholder) => text.includes(placeholder)) &&
+    timestampPlaceholders
+      .reduce((value, placeholder) => value.split(placeholder).join(''), text)
+      .replace(/[\s•·|]/g, '') === '';
+  const isTimestampNode = (node: unknown): boolean => {
+    if (!node || typeof node !== 'object' || Array.isArray(node)) return false;
+    const value = node as Record<string, unknown>;
+    return value.id === 'source-timestamp-richTextBlock' || isTimestampText(readCardText(value));
+  };
+  const containsTimestampNode = (node: unknown): boolean => {
+    if (isTimestampNode(node)) return true;
+    if (Array.isArray(node)) return node.some(containsTimestampNode);
+    return Boolean(node && typeof node === 'object' && Object.values(node).some(containsTimestampNode));
+  };
+  const isTimestampDecoration = (node: unknown): boolean => {
+    if (!node || typeof node !== 'object' || Array.isArray(node)) return false;
+    const value = node as Record<string, unknown>;
+    const isDecorationText = (text: unknown): boolean =>
+      typeof text === 'string' && /[•·|]/.test(text) && /^[\s•·|]+$/.test(text);
+    if (isDecorationText(readCardText(value))) return true;
+    if (value.type === 'ActionSet' && Array.isArray(value.actions)) {
+      return value.actions.every((action) => {
+        if (!action || typeof action !== 'object') return false;
+        const metadataAction = action as {type?: string; id?: string};
+        return (
+          metadataAction.type === 'Action.Submit' &&
+          ['likebutton', 'dislikebutton', 'copybutton'].includes(metadataAction.id?.toLowerCase() ?? '')
+        );
+      });
+    }
+    if (['Container', 'Column', 'ColumnSet'].includes(`${value.type}`)) {
+      const childrenKey = value.type === 'ColumnSet' ? 'columns' : 'items';
+      const children = value[childrenKey];
+      return (
+        Object.keys(value).every((key) => key === childrenKey || EMPTY_LAYOUT_KEYS.has(key)) &&
+        (children === undefined || (Array.isArray(children) && children.every(isTimestampDecoration)))
+      );
+    }
+    return false;
+  };
 
-  const visit = (node: unknown): unknown => {
-    if (Array.isArray(node)) return node.map(visit);
+  const visit = (node: unknown, pruneTimestampDecorations = false): unknown => {
+    if (omitSourceTimestamp && isTimestampNode(node)) return undefined;
+    if (Array.isArray(node)) {
+      if (!omitSourceTimestamp) return node.map((child) => visit(child));
+      const children = node.map((child) => visit(child));
+      const removedTimestamp = node.some(
+        (child, index) => children[index] === undefined && containsTimestampNode(child)
+      );
+      if (
+        pruneTimestampDecorations &&
+        removedTimestamp &&
+        children.every((child) => child === undefined || isTimestampDecoration(child))
+      ) {
+        return [];
+      }
+      const retained = children.filter((child) => child !== undefined);
+      const last = retained[retained.length - 1];
+      if (
+        children[children.length - 1] === undefined &&
+        last &&
+        typeof last === 'object' &&
+        (last as Record<string, unknown>).id === LINE_SEPARATOR_ID
+      )
+        retained.pop();
+      return retained;
+    }
     if (node && typeof node === 'object') {
       const out: Record<string, unknown> = {};
       for (const [key, value] of Object.entries(node as Record<string, unknown>)) {
@@ -142,8 +274,11 @@ export const prepareCardForRender = <T>(card: T, publishTimestamp?: number | str
               continue;
             }
           }
-          if (value.includes(SOURCE_TIMESTAMP_PLACEHOLDER)) {
-            out[key] = value.split(SOURCE_TIMESTAMP_PLACEHOLDER).join(formattedTimestamp);
+          if (timestampPlaceholders.some((placeholder) => value.includes(placeholder))) {
+            out[key] = timestampPlaceholders.reduce(
+              (text, placeholder) => text.split(placeholder).join(formattedTimestamp),
+              value
+            );
             continue;
           }
           if (key === 'text' && /(^|\n)\s*-\s+/.test(value)) {
@@ -151,10 +286,26 @@ export const prepareCardForRender = <T>(card: T, publishTimestamp?: number | str
             continue;
           }
         }
-        out[key] = visit(value);
+        out[key] = visit(
+          value,
+          ['Container', 'Column', 'ColumnSet'].includes(`${(node as Record<string, unknown>).type}`) &&
+            (key === 'items' || key === 'columns')
+        );
       }
       if (out.id === LINE_SEPARATOR_ID) {
         out.separator = true;
+      }
+      if (omitSourceTimestamp && ['Container', 'Column', 'ColumnSet'].includes(`${out.type}`)) {
+        const childrenKey = out.type === 'ColumnSet' ? 'columns' : 'items';
+        const originalChildren = (node as Record<string, unknown>)[childrenKey];
+        if (
+          Array.isArray(originalChildren) &&
+          originalChildren.length > 0 &&
+          Array.isArray(out[childrenKey]) &&
+          out[childrenKey].length === 0 &&
+          Object.keys(out).every((key) => key === childrenKey || EMPTY_LAYOUT_KEYS.has(key))
+        )
+          return undefined;
       }
       return out;
     }
@@ -203,12 +354,33 @@ export const preloadIcons = () => {
   });
 };
 
-/** Concatenate TextBlocks in the rendered card as a clipboard fallback. */
-export const extractCardText = (container: HTMLElement): string => {
-  const blocks = container.querySelectorAll('.ac-textBlock, .ac-richTextBlock');
+/** Summary copies include edited inputs and omit hidden content, source metadata and action labels. */
+export const extractCardText = (
+  container: HTMLElement,
+  {summaryOnly = false}: {summaryOnly?: boolean} = {}
+): string => {
+  const blocks = container.querySelectorAll(`.ac-textBlock, .ac-richTextBlock${summaryOnly ? ', .ac-textInput' : ''}`);
   const lines: string[] = [];
   blocks.forEach((el) => {
-    const text = (el.textContent || '').trim();
+    if (summaryOnly) {
+      if (
+        ['source-timestamp-richTextBlock', 'source-subtitle-richTextBlock', 'source-link-richTextBlock'].includes(
+          el.id
+        ) ||
+        el.closest('.ac-columnSet')?.querySelector('.ac-pushButton')
+      )
+        return;
+      const {visibility} = window.getComputedStyle(el);
+      if (visibility === 'hidden' || visibility === 'collapse') return;
+      // Adaptive Cards keeps isVisible:false elements in the DOM with display:none.
+      // Check containers too, since their child TextBlocks retain their own display.
+      for (let ancestor: Element | null = el; ancestor; ancestor = ancestor.parentElement) {
+        if (ancestor.hasAttribute('hidden') || window.getComputedStyle(ancestor).display === 'none') return;
+      }
+    }
+    const text = (
+      el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement ? el.value : el.textContent || ''
+    ).trim();
     if (text && text !== 'Source') lines.push(text);
   });
   return lines.join('\n');
@@ -230,14 +402,19 @@ export const addImageFallbacks = (container: HTMLElement) => {
   });
 };
 
-/** Paint `kind` as the only selected control; re-clicking it clears the selection. */
-export const toggleActionControls = (kind: 'like' | 'dislike', controls: Map<Element, AIAssistantActionKind>) => {
+/** Select the clicked feedback, clearing it when it is selected again. */
+export const getNextFeedback = <T extends string>(current: T | 'none', clicked: T): T | 'none' =>
+  current === clicked ? 'none' : clicked;
+
+/** Paint the host-confirmed feedback without changing the card DOM. */
+export const setActionControls = (
+  feedback: NonNullable<AdaptiveCardRendererProps['feedback']>,
+  controls: Map<Element, AIAssistantActionKind>
+) => {
   controls.forEach((thisKind, el) => {
     if (thisKind !== 'like' && thisKind !== 'dislike') return;
-    const active = el.getAttribute('data-active') === 'true';
-    const isThis = thisKind === kind;
-    // Mutually exclusive: clicking the active one clears it; clicking the other flips.
-    const nextActive = isThis ? !active : false;
+    const nextActive = thisKind === feedback;
+    el.setAttribute('aria-pressed', String(nextActive));
     const img = el.querySelector('img');
     if (img) {
       const nextIconUrl = resolveMomentumIconUrl(`${thisKind}-${nextActive ? 'filled' : 'regular'}.svg`);
@@ -256,9 +433,15 @@ export const toggleActionControls = (kind: 'like' | 'dislike', controls: Map<Ele
 /**
  * Copies `text` and briefly flashes the copy control as confirmation.  Falls
  * back to a hidden textarea for non-secure contexts without the async API.
+ * Returns whether the clipboard write succeeded.
  */
-export const copySuggestion = async (text: string, sourceEl?: Element, logger?: ILogger): Promise<void> => {
-  if (!text) return;
+export const copyToClipboard = async (
+  text: string,
+  sourceEl?: Element,
+  logger?: ILogger,
+  isCurrent: () => boolean = () => true
+): Promise<boolean> => {
+  if (!text) return false;
   try {
     if (navigator.clipboard?.writeText) {
       await navigator.clipboard.writeText(text);
@@ -268,12 +451,15 @@ export const copySuggestion = async (text: string, sourceEl?: Element, logger?: 
       ta.style.position = 'fixed';
       ta.style.opacity = '0';
       document.body.appendChild(ta);
-      ta.select();
-      document.execCommand('copy');
-      document.body.removeChild(ta);
+      try {
+        ta.select();
+        if (!document.execCommand('copy')) return false;
+      } finally {
+        ta.remove();
+      }
     }
     const img = sourceEl?.querySelector('img');
-    if (sourceEl && img) {
+    if (sourceEl?.isConnected && img && isCurrent()) {
       const previousSrc = img.getAttribute('src');
       const copiedIconUrl = resolveMomentumIconUrl('check-circle-filled.svg');
       if (copiedIconUrl) {
@@ -281,40 +467,31 @@ export const copySuggestion = async (text: string, sourceEl?: Element, logger?: 
       }
       sourceEl.setAttribute('data-copied', 'true');
       setTimeout(() => {
+        if (!sourceEl.isConnected || !isCurrent()) return;
         sourceEl.removeAttribute('data-copied');
         if (previousSrc) img.setAttribute('src', previousSrc);
       }, COPIED_FEEDBACK_MS);
     }
+    return true;
   } catch (err) {
     logger?.error(`CC-Components: copy to clipboard failed - ${err}`, {
       module: ADAPTIVE_CARD_MODULE,
-      method: 'copySuggestion',
+      method: 'copyToClipboard',
     });
+    return false;
   }
 };
 
 /** HostConfig wired to Momentum CSS tokens so cards inherit the active theme. */
-export const buildHostConfig = () => ({
-  fontFamily: 'inherit',
-  spacing: {
-    small: 4,
-    default: 8,
-    medium: 12,
-    large: 16,
-    extraLarge: 24,
-    padding: 0,
-  },
-  separator: {
-    lineThickness: 1,
-    lineColor: 'var(--mds-color-theme-outline-secondary-normal)',
-  },
-  containerStyles: (() => {
-    // Force every semantic foreground to the primary text color so card
-    // labels (e.g. "Source") don't read as alerts/links.
-    const primary = 'var(--mds-color-theme-text-primary-normal)';
-    const subtle = 'var(--mds-color-theme-text-secondary-normal)';
-    const flat = {default: primary, subtle: primary};
-    const foregroundColors = {
+export const buildHostConfig = (presentation: AdaptiveCardRendererProps['presentation'] = 'suggestion') => {
+  const isSummary = presentation === 'summary';
+  const primary = 'var(--mds-color-theme-text-primary-normal)';
+  const subtle = 'var(--mds-color-theme-text-secondary-normal)';
+  // Semantic card colors inherit the same text color instead of appearing as alerts or links.
+  const flat = {default: primary, subtle: primary};
+  const containerStyle = {
+    backgroundColor: 'transparent',
+    foregroundColors: {
       default: {default: primary, subtle},
       accent: flat,
       attention: flat,
@@ -322,23 +499,37 @@ export const buildHostConfig = () => ({
       warning: flat,
       dark: flat,
       light: flat,
-    };
-    return {
-      default: {
-        backgroundColor: 'transparent',
-        foregroundColors,
-      },
-      emphasis: {
-        backgroundColor: 'transparent',
-        foregroundColors,
-      },
-    };
-  })(),
-  actions: {
-    maxActions: 5,
-    spacing: 'default',
-    buttonSpacing: 8,
-    actionsOrientation: 'horizontal',
-    actionAlignment: 'left',
-  },
-});
+    },
+  };
+
+  return {
+    fontFamily: 'inherit',
+    ...(isSummary
+      ? {
+          fontSizes: {small: 10, default: 12, medium: 14, large: 17, extraLarge: 20},
+          fontWeights: {lighter: 300, default: 400, bolder: 600},
+          imageSizes: {small: 20, medium: 80, large: 160},
+        }
+      : {}),
+    spacing: isSummary
+      ? {small: 8, default: 16, medium: 20, large: 24, extraLarge: 32, padding: 0}
+      : {small: 4, default: 8, medium: 12, large: 16, extraLarge: 24, padding: 0},
+    separator: {
+      lineThickness: 1,
+      lineColor: 'var(--mds-color-theme-outline-secondary-normal)',
+    },
+    containerStyles: {
+      default: containerStyle,
+      emphasis: {...containerStyle, backgroundColor: 'var(--mds-color-theme-background-secondary-normal)'},
+      ...(isSummary ? {accent: containerStyle, attention: containerStyle} : {}),
+    },
+    actions: {
+      maxActions: 5,
+      spacing: 'default',
+      buttonSpacing: isSummary ? 4 : 8,
+      actionsOrientation: 'horizontal',
+      actionAlignment: isSummary ? 'stretch' : 'left',
+      ...(isSummary ? {iconSize: 24} : {}),
+    },
+  };
+};

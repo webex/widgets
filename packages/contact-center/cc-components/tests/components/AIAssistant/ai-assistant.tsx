@@ -1,7 +1,8 @@
 import React from 'react';
-import {fireEvent, render, screen, waitFor} from '@testing-library/react';
+import {act, fireEvent, render, screen, waitFor, within} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import AIAssistantComponent from '../../../src/components/AIAssistant/ai-assistant';
+import {AI_ASSISTANT_SUMMARY_MESSAGES} from '../../../src/components/AIAssistant/AISummary';
 import type {
   AIAssistantComponentProps,
   AIAssistantActionEvent,
@@ -16,21 +17,59 @@ jest.mock('../../../src/components/AIAssistant/AdaptiveCardRenderer/adaptive-car
   return {
     __esModule: true,
     default: ({
+      card,
       fallbackText,
+      displayOnly,
+      onRender,
       onUserAction,
+      footer,
     }: {
+      card?: unknown;
       fallbackText?: string;
+      displayOnly?: boolean;
+      onRender?: (rendered: boolean) => void;
       onUserAction?: (event: AIAssistantActionEvent) => void;
-    }) =>
-      ReactModule.createElement(
-        'button',
+      footer?: React.ReactNode;
+    }) => {
+      const [rendered, setRendered] = ReactModule.useState(
+        !(card as {mockDeferredRender?: boolean} | undefined)?.mockDeferredRender
+      );
+      ReactModule.useEffect(() => setRendered(true), [card]);
+      const shouldFallback = Boolean((card as {mockFallback?: boolean} | undefined)?.mockFallback);
+      const shouldRenderAction = !displayOnly && Boolean(onUserAction);
+      ReactModule.useEffect(() => {
+        onRender?.(rendered && !shouldFallback);
+      }, [onRender, rendered, shouldFallback]);
+      const renderedText =
+        typeof (card as {mockRenderedText?: unknown} | undefined)?.mockRenderedText === 'string'
+          ? (card as {mockRenderedText: string}).mockRenderedText
+          : 'Visible receiver card copy';
+      return ReactModule.createElement(
+        'div',
         {
-          type: 'button',
-          'data-testid': 'mock-adaptive-card',
-          onClick: () => onUserAction?.({type: 'like', actionId: 'likeButton'}),
+          'data-testid': 'ai-assistant:adaptive-card',
         },
-        fallbackText
-      ),
+        shouldFallback
+          ? ReactModule.createElement('span', {'data-testid': 'ai-assistant:adaptive-card-fallback'}, fallbackText)
+          : ReactModule.createElement(
+              'div',
+              {className: 'ai-assistant__card-host'},
+              rendered ? ReactModule.createElement('span', {className: 'ac-textBlock'}, renderedText) : null,
+              shouldRenderAction
+                ? ReactModule.createElement(
+                    'button',
+                    {
+                      type: 'button',
+                      'data-testid': 'mock-adaptive-card',
+                      onClick: () => onUserAction?.({type: 'like', actionId: 'likeButton'}),
+                    },
+                    'Mock card action'
+                  )
+                : null
+            ),
+        footer
+      );
+    },
   };
 });
 
@@ -57,6 +96,67 @@ const createProps = (overrides: Partial<AIAssistantComponentProps> = {}): AIAssi
   hasClearableContent: false,
   ...overrides,
 });
+
+type ReceiverSummaryContent = Extract<NonNullable<AIAssistantComponentProps['receiverSummary']>, {surface: 'content'}>;
+
+const createReceiverSummary = (overrides: Partial<ReceiverSummaryContent> = {}): ReceiverSummaryContent => ({
+  surface: 'content',
+  branchKey: 'interaction-1:agent-1:1',
+  content: {
+    conversationId: 'interaction-1',
+    adaptiveCard: {type: 'AdaptiveCard', version: '1.5', body: [{type: 'TextBlock', text: 'Receiver summary'}]},
+  },
+  selectedFeedback: 'none',
+  feedbackPending: false,
+  recordReceiverSummaryCopied: jest.fn().mockReturnValue(true),
+  setReceiverSummaryFeedback: jest.fn(),
+  ...overrides,
+});
+
+const renderStatefulReceiver = (
+  initialChrome: AIAssistantComponentProps['chrome'],
+  receiverSummary: ReceiverSummaryContent = createReceiverSummary(),
+  overrides: Partial<AIAssistantComponentProps> = {}
+) => {
+  const controls = {
+    open: jest.fn(),
+    close: jest.fn(),
+    minimize: jest.fn(),
+    restore: jest.fn(),
+  };
+  const Harness = () => {
+    const [chrome, setChrome] = React.useState<AIAssistantComponentProps['chrome']>(initialChrome);
+
+    return (
+      <AIAssistantComponent
+        {...createProps({
+          ...overrides,
+          chrome,
+          receiverSummary,
+          open: () => {
+            controls.open();
+            setChrome('open');
+          },
+          close: () => {
+            controls.close();
+            setChrome('closed');
+          },
+          minimize: () => {
+            controls.minimize();
+            setChrome('minimized');
+          },
+          restore: () => {
+            controls.restore();
+            setChrome('open');
+          },
+        })}
+      />
+    );
+  };
+
+  render(<Harness />);
+  return controls;
+};
 
 describe('AIAssistantComponent', () => {
   it('invokes the launcher, minimized, and header chrome actions', () => {
@@ -139,6 +239,105 @@ describe('AIAssistantComponent', () => {
     rerender(<AIAssistantComponent {...props} chrome="open" />);
     expect(screen.getByText('Well-being break completed')).toBeInTheDocument();
   });
+
+  it.each(['header', 'minimized', 'external'] as const)(
+    'shows the incoming summary directly when the host reopens after %s close',
+    async (source) => {
+      let updateChrome: React.Dispatch<React.SetStateAction<AIAssistantComponentProps['chrome']>> = () => undefined;
+      const receiverSummary = createReceiverSummary();
+      const Harness = () => {
+        const [chrome, setChrome] = React.useState<AIAssistantComponentProps['chrome']>('closed');
+        updateChrome = setChrome;
+        return (
+          <AIAssistantComponent
+            {...createProps({
+              chrome,
+              receiverSummary,
+              open: () => setChrome('open'),
+              close: () => setChrome('closed'),
+              minimize: () => setChrome('minimized'),
+            })}
+          />
+        );
+      };
+      render(<Harness />);
+      fireEvent.click(screen.getByTestId('ai-assistant:launcher'));
+      expect(await screen.findByTestId('ai-assistant:receiver-summary')).toBeInTheDocument();
+
+      if (source === 'external') {
+        act(() => updateChrome('closed'));
+      } else {
+        if (source === 'minimized') {
+          fireEvent.click(screen.getByTestId('ai-assistant:header-minimize'));
+        }
+        fireEvent.click(screen.getByTestId(`ai-assistant:${source}-close`));
+      }
+      expect(screen.getByTestId('ai-assistant:launcher')).toBeInTheDocument();
+      act(() => updateChrome('open'));
+
+      expect(await screen.findByTestId('ai-assistant:receiver-summary')).toBeInTheDocument();
+      expect(screen.queryByTestId('ai-assistant:view-summary')).not.toBeInTheDocument();
+    }
+  );
+
+  it.each(['completed', 'declined'] as const)(
+    'shows incoming summary on open and reopen over retained %s wellness history',
+    async (notice) => {
+      const wellness = {
+        enabled: true,
+        phase: 'idle' as const,
+        notice,
+        requestAvailable: false,
+        hasBlockingTasks: false,
+        elapsedSeconds: 0,
+        reducedMotion: false,
+        history: [{type: 'notice' as const, id: 'notice-1', createdAt: 1, notice}],
+        onRequest: jest.fn(),
+        onAccept: jest.fn(),
+        onLater: jest.fn(),
+        onMediaError: jest.fn(),
+      };
+      renderStatefulReceiver('closed', createReceiverSummary(), {wellness});
+      fireEvent.click(screen.getByTestId('ai-assistant:launcher'));
+
+      expect(await screen.findByTestId('ai-assistant:receiver-summary')).toBeInTheDocument();
+      expect(screen.queryByTestId('wellness-break:history')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('wellness-break:request-card')).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('ai-assistant:header-close'));
+      fireEvent.click(screen.getByTestId('ai-assistant:launcher'));
+      expect(await screen.findByTestId('ai-assistant:receiver-summary')).toBeInTheDocument();
+      expect(screen.queryByTestId('wellness-break:history')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('ai-assistant:view-summary')).not.toBeInTheDocument();
+    }
+  );
+
+  it.each(['offer-pending', 'starting'] as const)(
+    'keeps an active %s wellness flow ahead of the incoming summary',
+    async (phase) => {
+      const wellness = {
+        enabled: true,
+        phase,
+        requestAvailable: false,
+        hasBlockingTasks: false,
+        elapsedSeconds: 0,
+        reducedMotion: false,
+        onRequest: jest.fn(),
+        onAccept: jest.fn(),
+        onLater: jest.fn(),
+        onMediaError: jest.fn(),
+      };
+      renderStatefulReceiver('closed', createReceiverSummary(), {wellness});
+      fireEvent.click(screen.getByTestId('ai-assistant:launcher'));
+
+      expect(await screen.findByTestId('ai-assistant:panel')).toBeInTheDocument();
+      expect(screen.queryByTestId('ai-assistant:receiver-summary')).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', {name: 'Get Assistance'})).not.toBeInTheDocument();
+      expect(
+        screen.getByTestId(phase === 'starting' ? 'wellness-break:overlay' : 'wellness-break:offer-card')
+      ).toBeInTheDocument();
+    }
+  );
 
   it('renders the empty state and requests a suggestion', () => {
     const props = createProps();
@@ -317,6 +516,976 @@ describe('AIAssistantComponent', () => {
 
     fireEvent.click(screen.getByTestId('mock-adaptive-card'));
     expect(onRealTimeAssistAction).toHaveBeenCalledWith({type: 'like', actionId: 'likeButton'}, assist);
+  });
+
+  it.each(['closed', 'minimized', 'open'] as const)(
+    'omits a separate View summary control from %s assistant chrome',
+    async (chrome) => {
+      const receiverSummary = createReceiverSummary();
+      render(<AIAssistantComponent {...createProps({chrome, receiverSummary})} />);
+
+      expect(screen.queryByTestId('ai-assistant:view-summary')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('ai-assistant:summary-actions')).not.toBeInTheDocument();
+      if (chrome === 'open') {
+        expect(await screen.findByTestId('ai-assistant:receiver-summary')).toBeInTheDocument();
+        expect(screen.queryByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.viewSummary})).not.toBeInTheDocument();
+      } else {
+        const toast = screen.getByTestId('ai-assistant:summary-toast');
+        expect(
+          await within(toast).findByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.viewSummary})
+        ).toBeInTheDocument();
+      }
+    }
+  );
+
+  it.each(['closed', 'minimized'] as const)(
+    'opens the incoming summary directly from the toast in %s chrome',
+    async (chrome) => {
+      const controls = renderStatefulReceiver(chrome);
+      const toast = screen.getByTestId('ai-assistant:summary-toast');
+      await waitFor(() => expect(toast.querySelector('mdc-toast')).toHaveAttribute('variant', 'custom'));
+      expect(await within(toast).findByRole('button', {name: 'Later'})).toBeInTheDocument();
+
+      fireEvent.click(within(toast).getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.viewSummary}));
+
+      expect(await screen.findByTestId('ai-assistant:receiver-summary')).toBeInTheDocument();
+      expect(chrome === 'closed' ? controls.open : controls.restore).toHaveBeenCalledTimes(1);
+      expect(screen.queryByTestId('ai-assistant:summary-toast')).not.toBeInTheDocument();
+      fireEvent.click(screen.getByTestId('ai-assistant:header-minimize'));
+      expect(screen.queryByTestId('ai-assistant:summary-toast')).not.toBeInTheDocument();
+    }
+  );
+
+  it.each(['later', 'close'] as const)(
+    'dismisses an incoming summary toast with %s until a new summary arrives',
+    async (action) => {
+      const receiverSummary = createReceiverSummary();
+      const props = createProps({chrome: 'closed', receiverSummary});
+      const {rerender} = render(<AIAssistantComponent {...props} />);
+      const toast = screen.getByTestId('ai-assistant:summary-toast');
+      if (action === 'later') {
+        fireEvent.click(await within(toast).findByRole('button', {name: 'Later'}));
+      } else {
+        fireEvent(toast.querySelector('mdc-toast') as Element, new CustomEvent('close'));
+      }
+      expect(screen.queryByTestId('ai-assistant:summary-toast')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('ai-assistant:view-summary')).not.toBeInTheDocument();
+      expect(props.open).not.toHaveBeenCalled();
+
+      rerender(
+        <AIAssistantComponent
+          {...props}
+          receiverSummary={{...receiverSummary, selectedFeedback: 'thumbs_up', feedbackPending: true}}
+        />
+      );
+      expect(screen.queryByTestId('ai-assistant:summary-toast')).not.toBeInTheDocument();
+
+      rerender(<AIAssistantComponent {...props} receiverSummary={createReceiverSummary()} />);
+      expect(screen.getByTestId('ai-assistant:summary-toast')).toBeInTheDocument();
+    }
+  );
+
+  it.each(['later', 'view'] as const)(
+    'retains %s notification dismissal when switching between task summaries',
+    async (action) => {
+      const taskA = createReceiverSummary();
+      const taskB = createReceiverSummary({branchKey: 'interaction-2:agent-1:1'});
+      const props = createProps({chrome: 'closed', receiverSummary: taskA});
+      const {rerender} = render(<AIAssistantComponent {...props} />);
+      const dismissCurrentNotification = async () => {
+        const toast = screen.getByTestId('ai-assistant:summary-toast');
+        fireEvent.click(
+          await within(toast).findByRole('button', {
+            name: action === 'later' ? 'Later' : AI_ASSISTANT_SUMMARY_MESSAGES.viewSummary,
+          })
+        );
+      };
+      await dismissCurrentNotification();
+      rerender(<AIAssistantComponent {...props} receiverSummary={taskB} />);
+      await dismissCurrentNotification();
+
+      rerender(<AIAssistantComponent {...props} receiverSummary={taskA} />);
+      expect(screen.queryByTestId('ai-assistant:summary-toast')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('ai-assistant:view-summary')).not.toBeInTheDocument();
+
+      rerender(<AIAssistantComponent {...props} receiverSummary={createReceiverSummary()} />);
+      expect(screen.getByTestId('ai-assistant:summary-toast')).toBeInTheDocument();
+    }
+  );
+
+  it('does not notify for a summary already shown in the open panel or without an active interaction', async () => {
+    const receiverSummary = createReceiverSummary();
+    const props = createProps({receiverSummary});
+    const {rerender} = render(<AIAssistantComponent {...props} />);
+    expect(await screen.findByTestId('ai-assistant:receiver-summary')).toBeInTheDocument();
+    expect(screen.queryByTestId('ai-assistant:summary-toast')).not.toBeInTheDocument();
+
+    rerender(<AIAssistantComponent {...props} chrome="closed" />);
+    expect(screen.queryByTestId('ai-assistant:summary-toast')).not.toBeInTheDocument();
+    rerender(
+      <AIAssistantComponent
+        {...props}
+        chrome="closed"
+        hasActiveInteraction={false}
+        receiverSummary={createReceiverSummary()}
+      />
+    );
+    expect(screen.queryByTestId('ai-assistant:summary-toast')).not.toBeInTheDocument();
+  });
+
+  it('renders earlier consult summaries with feedback and copy bound to their own content', async () => {
+    const writeText = jest.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', {configurable: true, value: {writeText}});
+    const previousContent: ReceiverSummaryContent['content'] = {
+      conversationId: 'interaction-1',
+      timestamp: new Date(2026, 9, 26, 9, 15).getTime(),
+      adaptiveCard: {type: 'AdaptiveCard', version: '1.5', mockRenderedText: 'Earlier consult'},
+    };
+    const receiverSummary = createReceiverSummary({
+      history: [{...createReceiverSummary(), content: previousContent}],
+      content: {
+        conversationId: 'interaction-1',
+        timestamp: new Date(2026, 9, 26, 9, 30).getTime(),
+        adaptiveCard: {type: 'AdaptiveCard', version: '1.5', mockRenderedText: 'Latest consult'},
+      },
+    });
+    render(<AIAssistantComponent {...createProps({receiverSummary})} />);
+
+    const cards = await screen.findAllByTestId('ai-summary:mid-call-receiver');
+    expect(cards).toHaveLength(2);
+    expect(cards[0]).toHaveTextContent('Earlier consult');
+    expect(cards[0]).toHaveTextContent('09:15');
+    expect(cards[1]).toHaveTextContent('Latest consult');
+    expect(cards[1]).toHaveTextContent('09:30');
+    fireEvent.click(await within(cards[0]).findByRole('button', {name: 'This is helpful'}));
+    expect(receiverSummary.history?.[0].setReceiverSummaryFeedback).toHaveBeenCalledWith('thumbs_up');
+    expect(within(cards[0]).queryByRole('button', {name: 'Edit summary'})).not.toBeInTheDocument();
+    fireEvent.click(await within(cards[0]).findByRole('button', {name: 'Copy Summary'}));
+    await waitFor(() => expect(writeText).toHaveBeenCalledWith('Earlier consult'));
+    expect(receiverSummary.history?.[0].recordReceiverSummaryCopied).toHaveBeenCalled();
+    expect(receiverSummary.recordReceiverSummaryCopied).not.toHaveBeenCalled();
+    expect(receiverSummary.setReceiverSummaryFeedback).not.toHaveBeenCalled();
+    expect(await within(cards[1]).findByRole('button', {name: 'This is helpful'})).toBeInTheDocument();
+  });
+
+  it('preserves unavailable transcript status for an archived summary even when it contains a card', async () => {
+    const receiverSummary: AIAssistantComponentProps['receiverSummary'] = {
+      branchKey: 'interaction-1:agent-1:1',
+      surface: 'history',
+      history: [
+        {...createReceiverSummary(), content: {...createReceiverSummary().content, areTranscriptsAvailable: false}},
+      ],
+    };
+    render(<AIAssistantComponent {...createProps({receiverSummary})} />);
+
+    expect(await screen.findByTestId('ai-summary:unavailable')).toBeInTheDocument();
+    expect(screen.queryByTestId('ai-assistant:adaptive-card')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', {name: 'Copy Summary'})).not.toBeInTheDocument();
+  });
+
+  it('renders archived consult history without an unavailable current card or arrival toast', async () => {
+    const receiverSummary: AIAssistantComponentProps['receiverSummary'] = {
+      branchKey: 'interaction-1:agent-1:1',
+      surface: 'history',
+      history: [createReceiverSummary()],
+    };
+    const {rerender} = render(<AIAssistantComponent {...createProps({receiverSummary})} />);
+    expect(await screen.findAllByTestId('ai-summary:mid-call-receiver')).toHaveLength(1);
+    expect(screen.queryByTestId('ai-summary:unavailable')).not.toBeInTheDocument();
+    expect(screen.getByTestId('ai-assistant:summary-get-assistance')).toBeInTheDocument();
+
+    rerender(<AIAssistantComponent {...createProps({chrome: 'closed', receiverSummary})} />);
+    expect(screen.queryByTestId('ai-assistant:summary-toast')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('ai-assistant:view-summary')).not.toBeInTheDocument();
+  });
+
+  it('automatically displays a summary that arrives while the panel is open without moving host focus', async () => {
+    const props = createProps({isFeatureEnabled: false});
+    const renderHost = (receiverSummary?: AIAssistantComponentProps['receiverSummary']) => (
+      <>
+        <button type="button">Host control</button>
+        <AIAssistantComponent {...props} receiverSummary={receiverSummary} />
+      </>
+    );
+    const {rerender} = render(renderHost());
+    expect(screen.queryByTestId('ai-assistant:view-summary')).not.toBeInTheDocument();
+    const hostControl = screen.getByRole('button', {name: 'Host control'});
+    act(() => hostControl.focus());
+
+    rerender(renderHost(createReceiverSummary()));
+
+    expect(await screen.findByTestId('ai-assistant:receiver-summary')).toBeInTheDocument();
+    expect(screen.queryByTestId('ai-assistant:view-summary')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('ai-assistant:summary-actions')).not.toBeInTheDocument();
+    expect(props.open).not.toHaveBeenCalled();
+    expect(props.restore).not.toHaveBeenCalled();
+    expect(hostControl).toHaveFocus();
+  });
+
+  it('automatically displays an available receiver summary when initially mounted open', async () => {
+    const props = createProps({receiverSummary: createReceiverSummary()});
+    render(<AIAssistantComponent {...props} />);
+
+    expect(await screen.findByTestId('ai-assistant:receiver-summary')).toBeInTheDocument();
+    expect(screen.queryByTestId('ai-assistant:view-summary')).not.toBeInTheDocument();
+    expect(props.open).not.toHaveBeenCalled();
+    expect(props.restore).not.toHaveBeenCalled();
+  });
+
+  it.each([false, true])(
+    'automatically displays receiver content in StrictMode (available on mount: %s)',
+    async (availableOnMount) => {
+      const receiverSummary = createReceiverSummary();
+      const props = createProps();
+      const renderStrict = (summary?: AIAssistantComponentProps['receiverSummary']) => (
+        <React.StrictMode>
+          <AIAssistantComponent {...props} receiverSummary={summary} />
+        </React.StrictMode>
+      );
+      const {rerender} = render(renderStrict(availableOnMount ? receiverSummary : undefined));
+
+      if (!availableOnMount) {
+        expect(screen.getByTestId('ai-assistant:empty')).toBeInTheDocument();
+        rerender(renderStrict(receiverSummary));
+      }
+
+      expect(await screen.findByTestId('ai-assistant:receiver-summary')).toBeInTheDocument();
+      expect(screen.queryByTestId('ai-assistant:view-summary')).not.toBeInTheDocument();
+      expect(props.open).not.toHaveBeenCalled();
+      expect(props.restore).not.toHaveBeenCalled();
+    }
+  );
+
+  it.each(['offer-pending', 'starting'] as const)(
+    'keeps active %s wellness ahead of incoming summary and displays summary when idle',
+    async (phase) => {
+      const wellness = {
+        enabled: true,
+        phase,
+        requestAvailable: false,
+        hasBlockingTasks: false,
+        elapsedSeconds: 0,
+        reducedMotion: false,
+        onRequest: jest.fn(),
+        onAccept: jest.fn(),
+        onLater: jest.fn(),
+        onMediaError: jest.fn(),
+      };
+      const props = createProps({wellness});
+      const receiverSummary = createReceiverSummary();
+      const {rerender} = render(<AIAssistantComponent {...props} />);
+
+      rerender(<AIAssistantComponent {...props} receiverSummary={receiverSummary} />);
+
+      expect(
+        screen.getByTestId(phase === 'starting' ? 'wellness-break:overlay' : 'wellness-break:offer-card')
+      ).toBeInTheDocument();
+      expect(screen.queryByTestId('ai-assistant:receiver-summary')).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', {name: 'Get Assistance'})).not.toBeInTheDocument();
+      expect(props.open).not.toHaveBeenCalled();
+      expect(props.restore).not.toHaveBeenCalled();
+
+      rerender(
+        <AIAssistantComponent
+          {...props}
+          receiverSummary={receiverSummary}
+          wellness={{
+            ...wellness,
+            phase: 'idle',
+            history: [{type: 'notice', id: 'notice-1', createdAt: 1, notice: 'completed'}],
+          }}
+        />
+      );
+
+      expect(await screen.findByTestId('ai-assistant:receiver-summary')).toBeInTheDocument();
+      expect(screen.queryByTestId('wellness-break:history')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('wellness-break:overlay')).not.toBeInTheDocument();
+    }
+  );
+
+  it('omits an invalid receiver timestamp while keeping copy and feedback usable', async () => {
+    const receiverSummary = createReceiverSummary();
+    receiverSummary.content.timestamp = Number.NaN;
+    render(<AIAssistantComponent {...createProps({receiverSummary})} />);
+    const footer = await screen.findByTestId('ai-summary:receiver-footer');
+
+    expect(footer.querySelector('time')).toBeNull();
+    expect(footer).not.toHaveTextContent('${sourceTimestamp}');
+    expect(within(footer).getAllByRole('button')).toHaveLength(3);
+    expect(within(footer).getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary})).toBeEnabled();
+  });
+
+  it.each([false, true])(
+    'requests assistance once while retaining incoming summary (already started: %s)',
+    async (hasInitialRequestSucceeded) => {
+      const props = createProps({
+        receiverSummary: createReceiverSummary(),
+        hasInitialRequestSucceeded,
+        chatEntries: hasInitialRequestSucceeded
+          ? [{id: 'greeting-1', type: 'assistant-greeting', text: 'Existing assistance conversation'}]
+          : [],
+      });
+      render(<AIAssistantComponent {...props} />);
+      const summary = await screen.findByTestId('ai-assistant:receiver-summary');
+      const assistance = within(screen.getByTestId('ai-assistant:footer')).getByRole('button', {
+        name: 'Get Assistance',
+      });
+
+      fireEvent.click(assistance);
+
+      expect(props.requestRealTimeAssist).toHaveBeenCalledTimes(1);
+      expect(props.open).not.toHaveBeenCalled();
+      expect(props.restore).not.toHaveBeenCalled();
+      expect(summary).toBeInTheDocument();
+      expect(screen.getByTestId('ai-assistant:chat')).toContainElement(summary);
+      expect(screen.queryByTestId('ai-assistant:view-summary')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('ai-assistant:empty')).not.toBeInTheDocument();
+      if (hasInitialRequestSucceeded) {
+        expect(screen.getByText('Existing assistance conversation')).toBeInTheDocument();
+        expect(screen.getByTestId('ai-assistant:context-form')).toBeInTheDocument();
+      }
+    }
+  );
+
+  it('disables summary assistance and guards its callback while another assistance request is pending', async () => {
+    const props = createProps({receiverSummary: createReceiverSummary(), isRequesting: true});
+    render(<AIAssistantComponent {...props} />);
+    await screen.findByTestId('ai-assistant:receiver-summary');
+    const assistance = within(screen.getByTestId('ai-assistant:footer')).getByRole('button', {name: 'Get Assistance'});
+
+    expect(assistance).toHaveAttribute('disabled');
+    fireEvent.click(assistance);
+
+    expect(props.requestRealTimeAssist).not.toHaveBeenCalled();
+    expect(screen.getByTestId('ai-assistant:receiver-summary')).toBeInTheDocument();
+  });
+
+  it('retains incoming summaries through assistance progress, errors, responses and context', async () => {
+    const receiverSummary = createReceiverSummary({
+      history: [
+        createReceiverSummary({
+          content: {
+            conversationId: 'interaction-1',
+            adaptiveCard: {type: 'AdaptiveCard', mockRenderedText: 'Earlier consult'},
+          },
+        }),
+      ],
+    });
+    const props = createProps({receiverSummary});
+    const {rerender} = render(<AIAssistantComponent {...props} />);
+    fireEvent.click(await screen.findByTestId('ai-assistant:summary-get-assistance'));
+    const expectSummaryInChat = () => {
+      const chat = screen.getByTestId('ai-assistant:chat');
+      expect(chat).toContainElement(screen.getByTestId('ai-assistant:receiver-summary'));
+      expect(within(chat).getAllByTestId('ai-summary:mid-call-receiver')).toHaveLength(2);
+      expect(within(chat).getByText('Earlier consult')).toBeInTheDocument();
+      expect(screen.queryByTestId('ai-assistant:view-summary')).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.viewSummary})).not.toBeInTheDocument();
+      expect(screen.getByTestId('ai-assistant:body').querySelectorAll('.ai-assistant__chat')).toHaveLength(1);
+      return chat;
+    };
+    expectSummaryInChat();
+
+    rerender(<AIAssistantComponent {...props} requestStatus="listening" isRequesting />);
+    expect(expectSummaryInChat()).toContainElement(screen.getByTestId('ai-assistant:requesting'));
+
+    rerender(<AIAssistantComponent {...props} requestStatus="error" errorMessage="Please retry assistance" />);
+    expect(expectSummaryInChat()).toContainElement(screen.getByText('Please retry assistance'));
+    fireEvent.click(screen.getByTestId('ai-assistant:summary-get-assistance'));
+    expect(props.requestRealTimeAssist).toHaveBeenCalledTimes(2);
+
+    const responseProps = {
+      ...props,
+      hasInitialRequestSucceeded: true,
+      contextDraft: 'refund policy',
+      chatEntries: [
+        {id: 'greeting-1', type: 'assistant-greeting' as const, text: 'Assistance is ready'},
+        {
+          id: 'response-1',
+          type: 'assistant' as const,
+          realTimeAssist: {
+            data: {
+              title: 'Suggested response',
+              adaptiveCard: {type: 'AdaptiveCard', mockRenderedText: 'Check the refund policy'},
+            },
+          },
+        },
+      ],
+    };
+    rerender(<AIAssistantComponent {...responseProps} requestStatus="ready" />);
+    const chat = expectSummaryInChat();
+    expect(chat).toContainElement(screen.getByText('Assistance is ready'));
+    expect(chat).toContainElement(screen.getByText('Check the refund policy'));
+    const context = screen.getByTestId('ai-assistant:context-form');
+    expect(chat).not.toContainElement(context);
+    fireEvent.submit(context);
+    expect(props.submitContext).toHaveBeenCalledTimes(1);
+
+    rerender(<AIAssistantComponent {...responseProps} requestStatus="error" errorMessage="Context request failed" />);
+    expect(expectSummaryInChat()).toContainElement(screen.getByText('Context request failed'));
+    expect(screen.getByTestId('ai-assistant:context-form')).toBeInTheDocument();
+
+    rerender(<AIAssistantComponent {...responseProps} requestStatus="listening" isRequesting />);
+    expectSummaryInChat();
+    expect((screen.getByTestId('ai-assistant:context-submit') as HTMLElement & {disabled: boolean}).disabled).toBe(
+      true
+    );
+  });
+
+  it.each(['closed', 'minimized'] as const)(
+    'opens a long incoming summary at the top from %s chrome and scrolls for a new assistance reply',
+    async (chrome) => {
+      const scrollHeight = jest.spyOn(HTMLElement.prototype, 'scrollHeight', 'get').mockReturnValue(1200);
+      try {
+        const props = createProps({
+          chrome,
+          receiverSummary: createReceiverSummary(),
+          hasInitialRequestSucceeded: true,
+          requestStatus: 'ready',
+          chatEntries: [{id: 'greeting-1', type: 'assistant-greeting', text: 'Existing assistance'}],
+        });
+        const {rerender} = render(<AIAssistantComponent {...props} />);
+        fireEvent.click(screen.getByTestId(`ai-assistant:${chrome === 'closed' ? 'launcher' : 'minimized-restore'}`));
+        rerender(<AIAssistantComponent {...props} chrome="open" />);
+
+        const chat = await screen.findByTestId('ai-assistant:chat');
+        expect(chat).toContainElement(screen.getByTestId('ai-assistant:receiver-summary'));
+        expect(within(chat).getByText('Existing assistance')).toBeInTheDocument();
+        expect(chat.scrollHeight).toBe(1200);
+        expect(chat.scrollTop).toBe(0);
+
+        rerender(
+          <AIAssistantComponent
+            {...props}
+            chrome="open"
+            chatEntries={[
+              ...props.chatEntries,
+              {
+                id: 'reply-1',
+                type: 'assistant',
+                realTimeAssist: {
+                  data: {adaptiveCard: {type: 'AdaptiveCard', mockRenderedText: 'New assistance reply'}},
+                },
+              },
+            ]}
+          />
+        );
+        expect(within(chat).getByText('New assistance reply')).toBeInTheDocument();
+        expect(chat.scrollTop).toBe(1200);
+      } finally {
+        scrollHeight.mockRestore();
+      }
+    }
+  );
+
+  it('keeps ongoing assistance above idle wellness history after the incoming summary is removed', async () => {
+    const wellness = {
+      enabled: true,
+      phase: 'idle' as const,
+      notice: 'completed' as const,
+      requestAvailable: false,
+      hasBlockingTasks: false,
+      elapsedSeconds: 0,
+      reducedMotion: false,
+      history: [{type: 'notice' as const, id: 'notice-1', createdAt: 1, notice: 'completed' as const}],
+      onRequest: jest.fn(),
+      onAccept: jest.fn(),
+      onLater: jest.fn(),
+      onMediaError: jest.fn(),
+    };
+    const props = createProps({receiverSummary: createReceiverSummary(), wellness});
+    const {rerender} = render(<AIAssistantComponent {...props} />);
+    fireEvent.click(await screen.findByTestId('ai-assistant:summary-get-assistance'));
+    expect(props.requestRealTimeAssist).toHaveBeenCalledTimes(1);
+
+    rerender(<AIAssistantComponent {...props} receiverSummary={undefined} requestStatus="listening" isRequesting />);
+    expect(screen.getByTestId('ai-assistant:requesting')).toBeInTheDocument();
+    expect(screen.queryByTestId('wellness-break:history')).not.toBeInTheDocument();
+
+    rerender(
+      <AIAssistantComponent
+        {...props}
+        receiverSummary={undefined}
+        hasInitialRequestSucceeded
+        requestStatus="ready"
+        chatEntries={[{id: 'greeting-1', type: 'assistant-greeting', text: 'Assistance after the summary'}]}
+      />
+    );
+    expect(screen.getByText('Assistance after the summary')).toBeInTheDocument();
+    expect(screen.getByTestId('ai-assistant:context-form')).toBeInTheDocument();
+    expect(screen.queryByTestId('wellness-break:history')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('ai-assistant:view-summary')).not.toBeInTheDocument();
+  });
+
+  it.each([0, 2])('keeps Get Assistance fixed above the disclaimer with %i historical summaries', async (count) => {
+    const receiverSummary = createReceiverSummary();
+    receiverSummary.history = Array.from({length: count}, () =>
+      createReceiverSummary({content: receiverSummary.content})
+    );
+    render(<AIAssistantComponent {...createProps({receiverSummary})} />);
+    const summary = await screen.findByTestId('ai-assistant:receiver-summary');
+    const assistance = screen.getByRole('button', {name: 'Get Assistance'});
+    const cards = within(summary).getAllByTestId('ai-assistant:adaptive-card');
+    const footer = screen.getByTestId('ai-assistant:footer');
+
+    expect(screen.getByTestId('ai-assistant:chat')).toContainElement(summary);
+    expect(summary).toHaveClass('ai-assistant__chat-item');
+    expect(cards).toHaveLength(count + 1);
+    cards.forEach((card) => {
+      expect(summary).toContainElement(card);
+      expect(card).not.toContainElement(assistance);
+      expect(card).toContainElement(within(card).getByRole('button', {name: 'Copy Summary'}));
+    });
+    expect(summary).not.toContainElement(footer);
+    expect(summary).not.toContainElement(assistance);
+    expect(footer).toContainElement(assistance);
+    expect(assistance.compareDocumentPosition(screen.getByTestId('ai-assistant:disclaimer'))).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
+  });
+
+  it('does not expose summary assistance without Real-time Assist enablement or an active interaction', async () => {
+    const props = createProps({
+      receiverSummary: createReceiverSummary({history: [createReceiverSummary()]}),
+      isFeatureEnabled: false,
+    });
+    const {rerender} = render(<AIAssistantComponent {...props} />);
+    expect(await screen.findAllByTestId('ai-summary:mid-call-receiver')).toHaveLength(2);
+    expect(screen.getByTestId('ai-assistant:receiver-summary')).toBeInTheDocument();
+    expect(screen.queryByRole('button', {name: 'Get Assistance'})).not.toBeInTheDocument();
+    expect(screen.queryByTestId('ai-assistant:context-form')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('ai-assistant:view-summary')).not.toBeInTheDocument();
+
+    rerender(<AIAssistantComponent {...props} isFeatureEnabled hasActiveInteraction={false} />);
+
+    expect(screen.queryByRole('button', {name: 'Get Assistance'})).not.toBeInTheDocument();
+    expect(props.requestRealTimeAssist).not.toHaveBeenCalled();
+  });
+
+  it('automatically displays a different receiver branch arriving while the panel remains open', async () => {
+    const props = createProps({receiverSummary: createReceiverSummary()});
+    const {rerender} = render(<AIAssistantComponent {...props} />);
+    expect(await screen.findByTestId('ai-assistant:receiver-summary')).toBeInTheDocument();
+
+    rerender(
+      <AIAssistantComponent
+        {...props}
+        receiverSummary={createReceiverSummary({
+          branchKey: 'interaction-2:agent-1:1',
+          content: {
+            conversationId: 'interaction-2',
+            adaptiveCard: {
+              type: 'AdaptiveCard',
+              body: [{type: 'TextBlock', text: 'New incoming summary'}],
+              mockRenderedText: 'New incoming summary',
+            },
+          },
+        })}
+      />
+    );
+
+    expect(await screen.findByText('New incoming summary')).toBeInTheDocument();
+    expect(screen.queryByText('Visible receiver card copy')).not.toBeInTheDocument();
+    expect(props.open).not.toHaveBeenCalled();
+    expect(props.restore).not.toHaveBeenCalled();
+  });
+
+  it('automatically displays new receiver content on the same branch after ordinary reopening', async () => {
+    const receiverSummary = createReceiverSummary();
+    const props = createProps({receiverSummary});
+    const {rerender} = render(<AIAssistantComponent {...props} chrome="closed" />);
+    fireEvent.click(screen.getByTestId('ai-assistant:launcher'));
+    rerender(<AIAssistantComponent {...props} />);
+    expect(screen.getByTestId('ai-assistant:receiver-summary')).toBeInTheDocument();
+
+    rerender(
+      <AIAssistantComponent
+        {...props}
+        receiverSummary={{
+          ...receiverSummary,
+          content: {
+            conversationId: 'interaction-1',
+            adaptiveCard: {
+              type: 'AdaptiveCard',
+              body: [{type: 'TextBlock', text: 'New consult on the same interaction'}],
+              mockRenderedText: 'New consult on the same interaction',
+            },
+          },
+        }}
+      />
+    );
+
+    expect(await screen.findByText('New consult on the same interaction')).toBeInTheDocument();
+    expect(screen.queryByTestId('ai-assistant:empty')).not.toBeInTheDocument();
+    expect(props.open).toHaveBeenCalledTimes(1);
+    expect(props.restore).not.toHaveBeenCalled();
+  });
+
+  it('keeps summary visible when feedback metadata or callbacks change', async () => {
+    const receiverSummary = createReceiverSummary();
+    const props = createProps({receiverSummary});
+    const {rerender} = render(<AIAssistantComponent {...props} chrome="closed" />);
+    fireEvent.click(screen.getByTestId('ai-assistant:launcher'));
+    rerender(<AIAssistantComponent {...props} />);
+    expect(screen.getByTestId('ai-assistant:receiver-summary')).toBeInTheDocument();
+
+    rerender(
+      <AIAssistantComponent
+        {...props}
+        receiverSummary={{
+          ...receiverSummary,
+          selectedFeedback: 'thumbs_up',
+          feedbackPending: true,
+          recordReceiverSummaryCopied: jest.fn().mockReturnValue(true),
+          setReceiverSummaryFeedback: jest.fn(),
+        }}
+      />
+    );
+
+    expect(screen.getByTestId('ai-assistant:receiver-summary')).toBeInTheDocument();
+    expect(screen.queryByTestId('ai-assistant:view-summary')).not.toBeInTheDocument();
+    expect(props.open).toHaveBeenCalledTimes(1);
+    expect(props.restore).not.toHaveBeenCalled();
+  });
+
+  it('returns to ordinary assistance when the automatically displayed summary disappears', async () => {
+    const props = createProps({receiverSummary: createReceiverSummary()});
+    const {rerender} = render(<AIAssistantComponent {...props} />);
+    expect(await screen.findByTestId('ai-assistant:receiver-summary')).toBeInTheDocument();
+
+    rerender(<AIAssistantComponent {...props} receiverSummary={undefined} />);
+
+    expect(await screen.findByTestId('ai-assistant:empty')).toBeInTheDocument();
+    expect(screen.queryByTestId('ai-assistant:receiver-summary')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('ai-assistant:view-summary')).not.toBeInTheDocument();
+  });
+
+  it('hides the automatically displayed summary and its action after the interaction ends', async () => {
+    const props = createProps({receiverSummary: createReceiverSummary()});
+    const {rerender} = render(<AIAssistantComponent {...props} />);
+    expect(await screen.findByTestId('ai-assistant:receiver-summary')).toBeInTheDocument();
+
+    rerender(<AIAssistantComponent {...props} hasActiveInteraction={false} />);
+
+    expect(screen.getByTestId('ai-assistant:landing')).toBeInTheDocument();
+    expect(screen.queryByTestId('ai-assistant:receiver-summary')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('ai-assistant:view-summary')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('ai-assistant:summary-actions')).not.toBeInTheDocument();
+
+    rerender(<AIAssistantComponent {...props} />);
+
+    expect(screen.getByTestId('ai-assistant:receiver-summary')).toBeInTheDocument();
+  });
+
+  it.each(['closed', 'minimized'] as const)(
+    'does not expand %s chrome on summary arrival and opens directly from its ordinary control',
+    async (chrome) => {
+      const props = createProps({chrome});
+      const {rerender} = render(<AIAssistantComponent {...props} />);
+      const receiverSummary = createReceiverSummary();
+      rerender(<AIAssistantComponent {...props} receiverSummary={receiverSummary} />);
+      expect(screen.queryByTestId('ai-assistant:panel')).not.toBeInTheDocument();
+      expect(props.open).not.toHaveBeenCalled();
+      expect(props.restore).not.toHaveBeenCalled();
+      expect(screen.queryByTestId('ai-assistant:view-summary')).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId(`ai-assistant:${chrome === 'closed' ? 'launcher' : 'minimized-restore'}`));
+      expect(chrome === 'closed' ? props.open : props.restore).toHaveBeenCalledTimes(1);
+      rerender(<AIAssistantComponent {...props} chrome="open" receiverSummary={receiverSummary} />);
+      expect(await screen.findByTestId('ai-assistant:receiver-summary')).toBeInTheDocument();
+      expect(screen.queryByTestId('ai-assistant:view-summary')).not.toBeInTheDocument();
+    }
+  );
+
+  it('uses Momentum autofocus when opening incoming summary from the toast', async () => {
+    const controls = renderStatefulReceiver('closed');
+    const toast = screen.getByTestId('ai-assistant:summary-toast');
+    fireEvent.click(await within(toast).findByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.viewSummary}));
+
+    expect(await screen.findByTestId('ai-assistant:receiver-summary')).toBeInTheDocument();
+    expect(controls.open).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(screen.getByTestId('ai-assistant:header-minimize')).toHaveFocus());
+
+    fireEvent.click(screen.getByTestId('ai-assistant:header-minimize'));
+    expect(await screen.findByTestId('ai-assistant:panel-minimized')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('ai-assistant:minimized-restore'));
+
+    expect(await screen.findByTestId('ai-assistant:receiver-summary')).toBeInTheDocument();
+    expect(controls.restore).toHaveBeenCalledTimes(1);
+    expect(controls.open).toHaveBeenCalledTimes(1);
+  });
+
+  it('applies automatic direction to mixed-direction receiver summary content only', async () => {
+    const receiverSummary = createReceiverSummary({
+      content: {
+        conversationId: 'interaction-1',
+        adaptiveCard: {
+          type: 'AdaptiveCard',
+          version: '1.5',
+          mockRenderedText: 'סיכום Receiver 42',
+          body: [{type: 'TextBlock', text: 'סיכום Receiver 42'}],
+        },
+      },
+    });
+    renderStatefulReceiver('closed', receiverSummary);
+
+    fireEvent.click(screen.getByTestId('ai-assistant:launcher'));
+
+    const receiverBranch = await screen.findByTestId('ai-assistant:receiver-summary');
+    expect(receiverBranch).not.toHaveAttribute('dir', 'auto');
+    const card = within(receiverBranch).getByTestId('ai-assistant:adaptive-card');
+    expect(card.closest('[dir]')).toHaveAttribute('dir', 'auto');
+    const actions = await screen.findByTestId('ai-summary:actions');
+    expect(actions.closest('[dir]')).not.toHaveAttribute('dir', 'auto');
+    expect(screen.getByTestId('ai-assistant:panel')).not.toHaveAttribute('dir');
+    expect(within(receiverBranch).getByText('סיכום Receiver 42')).toBeInTheDocument();
+  });
+
+  it('keeps receiver card actions inert and copies only visible rendered card text', async () => {
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: {writeText: jest.fn().mockResolvedValue(undefined)},
+    });
+    const receiverSummary = createReceiverSummary({
+      content: {
+        conversationId: 'interaction-1',
+        adaptiveCard: {
+          type: 'AdaptiveCard',
+          version: '1.5',
+          selectAction: {type: 'Action.Submit', id: 'selectCard', title: 'Select'},
+          body: [
+            {type: 'TextBlock', text: 'Receiver summary'},
+            {
+              type: 'ActionSet',
+              actions: [
+                {type: 'Action.Submit', id: 'copyButton', title: 'Copy'},
+                {type: 'Action.Execute', id: 'likeButton', title: 'Like'},
+              ],
+            },
+          ],
+          actions: [{type: 'Action.Submit', id: 'dislikeButton', title: 'Dislike'}],
+        },
+      },
+    });
+    renderStatefulReceiver('closed', receiverSummary);
+
+    fireEvent.click(screen.getByTestId('ai-assistant:launcher'));
+
+    const card = await screen.findByTestId('ai-assistant:adaptive-card');
+    expect(screen.getByTestId('ai-summary:mid-call-receiver')).toContainElement(card);
+    const cardBody = card.querySelector('.ai-assistant__card-host');
+    expect(cardBody).not.toBeNull();
+    expect(within(cardBody as HTMLElement).queryByRole('button')).not.toBeInTheDocument();
+
+    const copyButton = await screen.findByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary});
+    expect(card).toContainElement(screen.getByTestId('ai-summary:actions'));
+    fireEvent.click(copyButton);
+
+    await waitFor(() => expect(navigator.clipboard.writeText).toHaveBeenCalledWith('Visible receiver card copy'));
+    expect(receiverSummary.recordReceiverSummaryCopied).toHaveBeenCalledWith();
+  });
+
+  it('reports receiver feedback through the bound callback and paints the selection it is given', async () => {
+    const receiverSummary = createReceiverSummary();
+    renderStatefulReceiver('closed', receiverSummary);
+
+    fireEvent.click(screen.getByTestId('ai-assistant:launcher'));
+    const like = await screen.findByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.like});
+    fireEvent.click(like);
+
+    expect(receiverSummary.setReceiverSummaryFeedback).toHaveBeenCalledWith('thumbs_up');
+    expect(like).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('opens incoming summary directly from the launcher and disables pending feedback controls', async () => {
+    renderStatefulReceiver('closed', createReceiverSummary({feedbackPending: true}));
+    fireEvent.click(screen.getByTestId('ai-assistant:launcher'));
+
+    expect(await screen.findByTestId('ai-assistant:receiver-summary')).toBeInTheDocument();
+    expect(screen.queryByTestId('ai-assistant:view-summary')).not.toBeInTheDocument();
+    expect(await screen.findByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.like})).toHaveAttribute('disabled');
+  });
+
+  it('opens the receiver branch when Real-time Assist is disabled', async () => {
+    renderStatefulReceiver('closed', createReceiverSummary(), {isFeatureEnabled: false});
+
+    fireEvent.click(screen.getByTestId('ai-assistant:launcher'));
+
+    expect(await screen.findByTestId('ai-assistant:receiver-summary')).toBeInTheDocument();
+    expect(screen.queryByTestId('ai-assistant:landing')).not.toBeInTheDocument();
+    expect(screen.getByTestId('ai-assistant:footer')).toBeInTheDocument();
+  });
+
+  it('renders receiver actions when the host opens chrome after activation settles', async () => {
+    const props = createProps({chrome: 'closed', receiverSummary: createReceiverSummary()});
+    const {rerender} = render(<AIAssistantComponent {...props} />);
+    fireEvent.click(screen.getByTestId('ai-assistant:launcher'));
+    expect(props.open).toHaveBeenCalledTimes(1);
+    expect(screen.queryByTestId('ai-summary:actions')).not.toBeInTheDocument();
+    rerender(<AIAssistantComponent {...props} chrome="open" />);
+    expect(await screen.findByTestId('ai-summary:actions')).toBeInTheDocument();
+  });
+
+  it('removes receiver actions when the renderer falls back', async () => {
+    const receiverSummary = createReceiverSummary();
+    const fallbackReceiverSummary = createReceiverSummary({
+      branchKey: receiverSummary.branchKey,
+      content: {
+        conversationId: 'interaction-1',
+        adaptiveCard: {
+          type: 'AdaptiveCard',
+          mockFallback: true,
+        },
+      },
+    });
+    let setSummary: React.Dispatch<React.SetStateAction<ReceiverSummaryContent>> = () => undefined;
+    const Harness = () => {
+      const [chrome, setChrome] = React.useState<AIAssistantComponentProps['chrome']>('closed');
+      const [summary, setSummaryState] = React.useState(receiverSummary);
+      setSummary = setSummaryState;
+
+      return (
+        <AIAssistantComponent
+          {...createProps({
+            chrome,
+            receiverSummary: summary,
+            open: () => setChrome('open'),
+            close: () => setChrome('closed'),
+            minimize: () => setChrome('minimized'),
+            restore: () => setChrome('open'),
+          })}
+        />
+      );
+    };
+    render(<Harness />);
+
+    fireEvent.click(screen.getByTestId('ai-assistant:launcher'));
+    const copyButton = await screen.findByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary});
+    act(() => {
+      copyButton.focus();
+    });
+    expect(copyButton).toHaveFocus();
+
+    act(() => {
+      setSummary(fallbackReceiverSummary);
+    });
+
+    expect(await screen.findByTestId('ai-assistant:adaptive-card-fallback')).toHaveTextContent(
+      AI_ASSISTANT_SUMMARY_MESSAGES.unavailable
+    );
+    await waitFor(() => expect(screen.queryByTestId('ai-summary:actions')).not.toBeInTheDocument());
+    expect(screen.queryByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary})).not.toBeInTheDocument();
+    expect(screen.getByTestId('ai-assistant:panel')).toBeInTheDocument();
+  });
+
+  it.each([
+    AI_ASSISTANT_SUMMARY_MESSAGES.copySummary,
+    AI_ASSISTANT_SUMMARY_MESSAGES.like,
+    AI_ASSISTANT_SUMMARY_MESSAGES.dislike,
+  ])('keeps the focused %s action connected when a valid receiver card is replaced', async (name) => {
+    const receiverSummary = createReceiverSummary();
+    let replaceSummary: React.Dispatch<React.SetStateAction<ReceiverSummaryContent>> = () => undefined;
+    const Harness = () => {
+      const [chrome, setChrome] = React.useState<AIAssistantComponentProps['chrome']>('closed');
+      const [summary, setSummary] = React.useState(receiverSummary);
+      replaceSummary = setSummary;
+      return (
+        <AIAssistantComponent {...createProps({chrome, receiverSummary: summary, open: () => setChrome('open')})} />
+      );
+    };
+    render(<Harness />);
+    fireEvent.click(screen.getByTestId('ai-assistant:launcher'));
+    const action = await screen.findByRole('button', {name});
+    act(() => action.focus());
+
+    act(() => {
+      replaceSummary(
+        createReceiverSummary({
+          content: {
+            conversationId: 'interaction-1',
+            adaptiveCard: {
+              type: 'AdaptiveCard',
+              mockDeferredRender: true,
+              body: [{type: 'TextBlock', text: 'Replacement summary'}],
+              mockRenderedText: 'Replacement summary',
+            },
+          },
+        })
+      );
+    });
+
+    await screen.findByText('Replacement summary');
+    expect(screen.getByRole('button', {name})).toBe(action);
+    expect(action).toHaveFocus();
+  });
+
+  it('preserves external focus when an incoming summary is removed', async () => {
+    const props = createProps({receiverSummary: createReceiverSummary()});
+    const renderHost = (receiverSummary: AIAssistantComponentProps['receiverSummary']) => (
+      <>
+        <button type="button">Host control</button>
+        <AIAssistantComponent {...props} receiverSummary={receiverSummary} />
+      </>
+    );
+    const {rerender} = render(renderHost(props.receiverSummary));
+    await screen.findByTestId('ai-assistant:receiver-summary');
+    const host = screen.getByRole('button', {name: 'Host control'});
+    act(() => host.focus());
+    rerender(renderHost(undefined));
+    expect(host).toHaveFocus();
+  });
+
+  it('returns to ordinary assistant content when the receiver summary branch is removed', async () => {
+    let clearSummary: () => void = () => undefined;
+    const receiverSummary = createReceiverSummary();
+    const Harness = () => {
+      const [chrome, setChrome] = React.useState<AIAssistantComponentProps['chrome']>('closed');
+      const [summary, setSummary] = React.useState<AIAssistantComponentProps['receiverSummary']>(receiverSummary);
+      clearSummary = () => setSummary(undefined);
+
+      return (
+        <AIAssistantComponent
+          {...createProps({
+            chrome,
+            receiverSummary: summary,
+            open: () => setChrome('open'),
+            close: () => setChrome('closed'),
+            minimize: () => setChrome('minimized'),
+            restore: () => setChrome('open'),
+          })}
+        />
+      );
+    };
+    render(<Harness />);
+
+    fireEvent.click(screen.getByTestId('ai-assistant:launcher'));
+    const copyButton = await screen.findByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.copySummary});
+    act(() => {
+      copyButton.focus();
+    });
+    expect(copyButton).toHaveFocus();
+
+    act(() => {
+      clearSummary();
+    });
+
+    await waitFor(() => expect(screen.queryByTestId('ai-assistant:receiver-summary')).not.toBeInTheDocument());
+    expect(screen.getByTestId('ai-assistant:empty')).toBeInTheDocument();
+  });
+
+  it('keeps incoming summary and history visible after close, reopen and restore', async () => {
+    const receiverSummary = createReceiverSummary({history: [createReceiverSummary()]});
+    renderStatefulReceiver('closed', receiverSummary);
+    fireEvent.click(screen.getByTestId('ai-assistant:launcher'));
+    expect(await screen.findAllByTestId('ai-summary:mid-call-receiver')).toHaveLength(2);
+    fireEvent.click(screen.getByTestId('ai-assistant:header-close'));
+    fireEvent.click(screen.getByTestId('ai-assistant:launcher'));
+    expect(await screen.findAllByTestId('ai-summary:mid-call-receiver')).toHaveLength(2);
+    fireEvent.click(screen.getByTestId('ai-assistant:header-minimize'));
+    fireEvent.click(screen.getByTestId('ai-assistant:minimized-restore'));
+    expect(await screen.findAllByTestId('ai-summary:mid-call-receiver')).toHaveLength(2);
+    expect(screen.queryByTestId('ai-assistant:view-summary')).not.toBeInTheDocument();
   });
 
   it('applies the full-screen class and matching header control label', () => {

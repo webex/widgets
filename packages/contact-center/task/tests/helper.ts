@@ -1,5 +1,6 @@
 import {renderHook, act, waitFor} from '@testing-library/react';
-import {useIncomingTask, useTaskList, useCallControl, useOutdialCall} from '../src/helper';
+import {runInAction} from 'mobx';
+import {useIncomingTask, useTaskList, useCallControl, useOutdialCall, getAISummaryProps} from '../src/helper';
 import {resetMuteCoordinatorForTests} from '../src/mute-coordinator';
 import {resetOfferActionAttemptsForTests} from '../src/offer-action-attempts';
 import {
@@ -22,6 +23,8 @@ import {
   createMockTaskUIControls,
   disabledControl,
   enabledControl,
+  makeMockTask,
+  aiSummaryFixtures,
 } from '@webex/test-fixtures';
 import store from '@webex/cc-store';
 const taskMock = {
@@ -43,6 +46,57 @@ const onTaskDeclined = jest.fn();
 const onTaskSelected = jest.fn().mockImplementation(() => {});
 
 const logger = mockCC.LoggerProxy;
+const initialStoreLogger = store.store.logger;
+
+const AI_SUMMARY_INTERACTION_ID = 'interaction-main-1';
+
+const resetAISummaryStoreState = (): void => {
+  runInAction(() => {
+    store.store.aiSummaries = {};
+    store.store.currentTask = null;
+    store.store.isAgentLoggedIn = true;
+    store.store.agentId = 'agent1';
+    store.store.logger = initialStoreLogger;
+  });
+};
+
+const createAISummaryTask = (overrides: Partial<ITask> = {}): ITask => {
+  const baseTask = makeMockTask({
+    data: {
+      interactionId: AI_SUMMARY_INTERACTION_ID,
+      mediaResourceId: AI_SUMMARY_INTERACTION_ID,
+      interaction: {
+        interactionId: AI_SUMMARY_INTERACTION_ID,
+        mainInteractionId: AI_SUMMARY_INTERACTION_ID,
+        mediaChannel: 'telephony',
+        owner: 'agent1',
+        media: {
+          [AI_SUMMARY_INTERACTION_ID]: {
+            mediaResourceId: AI_SUMMARY_INTERACTION_ID,
+            mType: 'mainCall',
+            participants: ['agent1', 'customer1'],
+          },
+        },
+      },
+    },
+  });
+  return {
+    ...baseTask,
+    aiSummaryCapabilities: {midCallEnabled: true, postCallEnabled: true},
+    requestMidCallSummary: jest.fn().mockResolvedValue(aiSummaryFixtures.initiatingMidCall.typedSections),
+    requestPostCallSummary: jest.fn().mockResolvedValue(aiSummaryFixtures.postCall.structured),
+    sendMidCallSummaryResponse: jest.fn().mockResolvedValue(undefined),
+    sendPostCallSummaryResponse: jest.fn().mockResolvedValue(undefined),
+    ...overrides,
+  };
+};
+
+const activateAISummaryTask = (task: ITask = createAISummaryTask()): ITask => {
+  runInAction(() => {
+    store.store.currentTask = task;
+  });
+  return store.currentTask;
+};
 
 const resetStoreOfferActionErrors = (): void => {
   if (typeof store.clearOfferActionError === 'function' && store.offerActionErrors) {
@@ -74,6 +128,350 @@ beforeAll(() => {
       }),
     },
   } as IContactCenter;
+});
+
+describe('getAISummaryProps', () => {
+  beforeEach(() => {
+    resetAISummaryStoreState();
+  });
+
+  afterEach(() => {
+    resetAISummaryStoreState();
+    jest.restoreAllMocks();
+  });
+
+  it('should map SDK summaries and record local edits, copies and deferred feedback in their responses', async () => {
+    const sdkTask = createAISummaryTask();
+    const task = activateAISummaryTask(sdkTask);
+    const initial = getAISummaryProps(task);
+    expect(initial?.midCall?.state).toBe('generating');
+    expect(initial?.postCall?.state).toBe('generating');
+
+    await initial?.requestMidCallSummary?.('CONSULT');
+    expect(sdkTask.requestMidCallSummary).toHaveBeenCalledWith('CONSULT');
+    const midCall = getAISummaryProps(task)?.midCall;
+    expect(midCall?.state).toBe('content');
+    expect(midCall?.content).toBe(store.aiSummaries[AI_SUMMARY_INTERACTION_ID]?.initiator?.content);
+    midCall?.onFeedback('thumbs_up');
+    expect(getAISummaryProps(task)?.midCall?.selectedFeedback).toBe('thumbs_up');
+    expect(sdkTask.sendMidCallSummaryResponse).not.toHaveBeenCalled();
+
+    getAISummaryProps(task)?.requestPostCallSummary?.();
+    await Promise.resolve();
+    expect(sdkTask.requestPostCallSummary).toHaveBeenCalledWith();
+    const postCall = getAISummaryProps(task)?.postCall;
+    const sdkContent = postCall?.content;
+    expect(postCall?.state).toBe('content');
+    expect(postCall?.onEdit('initialContactReason', 'Edited reason')).toBe(true);
+    expect(postCall?.onCopy()).toBe(true);
+    postCall?.onFeedback('thumbs_down');
+
+    const updated = getAISummaryProps(task)?.postCall;
+    expect(updated?.content).toBe(sdkContent);
+    expect(updated?.content?.sections?.initialContactReason).not.toBe('Edited reason');
+    expect(updated?.editedSummary).toEqual({initialContactReason: 'Edited reason'});
+    expect(updated?.selectedFeedback).toBe('thumbs_down');
+    expect(sdkTask.sendPostCallSummaryResponse).not.toHaveBeenCalled();
+    await store.sendPostCallSummaryResponse('wrap1', task);
+    expect(sdkTask.sendPostCallSummaryResponse).toHaveBeenCalledWith(
+      expect.objectContaining({
+        summary: {initialContactReason: 'Edited reason'},
+        feedback: 'thumbs_down',
+        numberOfTimesEdited: 1,
+        numberOfTimesCopied: 1,
+        wrapUpCode: 'wrap1',
+      })
+    );
+  });
+
+  it('should omit summaries the SDK reports as disabled for the task', () => {
+    const disabledTask = createAISummaryTask({
+      aiSummaryCapabilities: {midCallEnabled: false, postCallEnabled: false},
+    });
+    expect(getAISummaryProps(disabledTask)).toBeUndefined();
+    expect(getAISummaryProps()).toBeUndefined();
+
+    const props = getAISummaryProps(
+      createAISummaryTask({aiSummaryCapabilities: {midCallEnabled: false, postCallEnabled: true}})
+    );
+    expect(props?.midCall).toBeUndefined();
+    expect(props?.postCall?.state).toBe('generating');
+  });
+
+  it('should wire Exclude locally and retain the SDK summary until the owning action submits it', async () => {
+    const sdkTask = createAISummaryTask();
+    const task = activateAISummaryTask(sdkTask);
+    await store.requestMidCallSummary('CONSULT', task);
+    const summary = getAISummaryProps(task)?.midCall;
+    const content = summary.content;
+
+    expect(summary.excluded).toBe(false);
+    expect(summary.onExcludeChange?.(true)).toBe(true);
+    expect(getAISummaryProps(task)?.midCall).toMatchObject({excluded: true, content});
+    expect(summary.onEdit('reasonForTransferOrConsult', 'Blocked edit')).toBe(false);
+    expect(summary.onCopy()).toBe(false);
+    expect(sdkTask.sendMidCallSummaryResponse).not.toHaveBeenCalled();
+
+    await store.sendMidCallSummaryResponse('CONSULT', task);
+    expect(sdkTask.sendMidCallSummaryResponse).toHaveBeenCalledWith(
+      expect.objectContaining({state: 'EXCLUDED'}),
+      'CONSULT'
+    );
+    getAISummaryProps(task)?.resetMidCallSummaryExclusion?.();
+    expect(getAISummaryProps(task)?.midCall).toMatchObject({excluded: false});
+    expect(getAISummaryProps(task)?.midCall?.content).toBe(content);
+  });
+
+  it('should send cancellation before clearing exclusion and ignore stale cancellation/reset controls', async () => {
+    const sdkTask = createAISummaryTask();
+    const task = activateAISummaryTask(sdkTask);
+    await store.requestMidCallSummary('TRANSFER', task);
+    const props = getAISummaryProps(task);
+    props.midCall.onExcludeChange?.(true);
+    props.cancelMidCallSummary?.('TRANSFER');
+    props.resetMidCallSummaryExclusion?.();
+    expect(sdkTask.sendMidCallSummaryResponse).toHaveBeenCalledWith(
+      expect.objectContaining({state: 'MID_CALL_CANCELLED'}),
+      'TRANSFER'
+    );
+    expect(getAISummaryProps(task)?.midCall?.excluded).toBe(false);
+    props.midCall.onExcludeChange?.(true);
+    activateAISummaryTask(createAISummaryTask());
+    props.cancelMidCallSummary?.('TRANSFER');
+    props.resetMidCallSummaryExclusion?.();
+    expect(sdkTask.sendMidCallSummaryResponse).toHaveBeenCalledTimes(1);
+    expect(store.aiSummaries[AI_SUMMARY_INTERACTION_ID].initiator.excluded).toBe(true);
+  });
+
+  it.each(['midCall', 'postCall'] as const)('should clear %s feedback without submitting a summary', async (role) => {
+    const sdkTask = createAISummaryTask();
+    const task = activateAISummaryTask(sdkTask);
+    await store.requestMidCallSummary('CONSULT', task);
+    await store.requestPostCallSummary(task);
+    const summary = getAISummaryProps(task)?.[role];
+    summary.onFeedback('thumbs_down');
+    expect(getAISummaryProps(task)?.[role]?.selectedFeedback).toBe('thumbs_down');
+
+    summary.onFeedback('none');
+
+    expect(getAISummaryProps(task)?.[role]?.selectedFeedback).toBe('none');
+    expect(sdkTask.sendMidCallSummaryResponse).not.toHaveBeenCalled();
+    expect(sdkTask.sendPostCallSummaryResponse).not.toHaveBeenCalled();
+  });
+
+  it('should prioritize SDK transcript availability and retained content when mapping request state', async () => {
+    const task = activateAISummaryTask();
+    await store.requestMidCallSummary('CONSULT', task);
+    await store.requestPostCallSummary(task);
+    const entries = store.aiSummaries[AI_SUMMARY_INTERACTION_ID];
+    runInAction(() => {
+      store.store.aiSummaries = {
+        [AI_SUMMARY_INTERACTION_ID]: {
+          initiator: {...entries.initiator, status: 'error', content: undefined},
+          'post-call': {...entries['post-call'], status: 'error'},
+        },
+      };
+    });
+    expect(getAISummaryProps(task)?.midCall).toMatchObject({state: 'generic-error', content: undefined});
+    expect(getAISummaryProps(task)?.postCall?.state).toBe('content');
+
+    runInAction(() => {
+      const postCall = store.aiSummaries[AI_SUMMARY_INTERACTION_ID]['post-call'];
+      store.aiSummaries[AI_SUMMARY_INTERACTION_ID]['post-call'] = {
+        ...postCall,
+        status: 'loading',
+        content: {...postCall.content, areTranscriptsAvailable: false},
+      };
+    });
+    expect(getAISummaryProps(task)?.postCall).toMatchObject({state: 'unavailable', controlsDisabled: true});
+  });
+
+  it('should reject stale controls after another SDK summary replaces the displayed content', async () => {
+    const sdkTask = createAISummaryTask();
+    const task = activateAISummaryTask(sdkTask);
+    await store.requestMidCallSummary('CONSULT', task);
+    const stale = getAISummaryProps(task)?.midCall;
+    (sdkTask.requestMidCallSummary as jest.Mock).mockResolvedValueOnce({
+      ...aiSummaryFixtures.initiatingMidCall.typedSections,
+      summaryText: 'A replacement summary.',
+    });
+    await store.requestMidCallSummary('TRANSFER', task);
+    const replacement = store.aiSummaries[AI_SUMMARY_INTERACTION_ID].initiator;
+    const response = replacement.response;
+
+    expect(stale?.onEdit('reasonForTransferOrConsult', 'Stale edit')).toBe(false);
+    expect(stale?.onCopy()).toBe(false);
+    stale?.onFeedback('thumbs_up');
+    expect(store.aiSummaries[AI_SUMMARY_INTERACTION_ID].initiator.response).toBe(response);
+  });
+
+  it('should reject local response changes after the selected task changes or is removed', async () => {
+    const task = activateAISummaryTask();
+    await store.requestPostCallSummary(task);
+    const stale = getAISummaryProps(task)?.postCall;
+    const response = store.aiSummaries[AI_SUMMARY_INTERACTION_ID]['post-call'].response;
+    activateAISummaryTask(createAISummaryTask());
+    expect(stale?.onEdit('initialContactReason', 'Stale edit')).toBe(false);
+    expect(stale?.onCopy()).toBe(false);
+    stale?.onFeedback('thumbs_up');
+    runInAction(() => {
+      store.store.currentTask = null;
+    });
+    expect(stale?.onCopy()).toBe(false);
+    expect(store.aiSummaries[AI_SUMMARY_INTERACTION_ID]['post-call'].response).toBe(response);
+  });
+
+  it('should disable response changes while a replacement request is pending and retain edits after failure', async () => {
+    const sdkTask = createAISummaryTask();
+    const task = activateAISummaryTask(sdkTask);
+    await store.requestPostCallSummary(task);
+    const content = getAISummaryProps(task)?.postCall;
+    expect(content?.onEdit('initialContactReason', 'Kept draft')).toBe(true);
+    let resolveRequest: (value: undefined) => void;
+    (sdkTask.requestPostCallSummary as jest.Mock).mockImplementationOnce(
+      () =>
+        new Promise<undefined>((resolve) => {
+          resolveRequest = resolve;
+        })
+    );
+    const retry = getAISummaryProps(task)?.postCall?.onRetry();
+    expect(getAISummaryProps(task)?.postCall).toMatchObject({state: 'content', controlsDisabled: true});
+    expect(content?.onCopy()).toBe(false);
+    expect(content?.onEdit('initialContactReason', 'Pending edit')).toBe(false);
+    content?.onFeedback('thumbs_up');
+    resolveRequest(undefined);
+    await expect(retry).resolves.toBeUndefined();
+    expect(getAISummaryProps(task)?.postCall).toMatchObject({
+      state: 'content',
+      controlsDisabled: false,
+      selectedFeedback: 'none',
+      editedSummary: {initialContactReason: 'Kept draft'},
+    });
+  });
+
+  it('should record a plain-text edit without changing the SDK summary', async () => {
+    const task = activateAISummaryTask(
+      createAISummaryTask({
+        requestPostCallSummary: jest.fn().mockResolvedValue({
+          conversationId: AI_SUMMARY_INTERACTION_ID,
+          summaryText: 'Original summary.',
+        }),
+      })
+    );
+    await store.requestPostCallSummary(task);
+    expect(getAISummaryProps(task)?.postCall?.onEdit('summaryText', 'Edited summary.')).toBe(true);
+    expect(getAISummaryProps(task)?.postCall).toMatchObject({
+      content: {summaryText: 'Original summary.'},
+      editedSummary: 'Edited summary.',
+    });
+  });
+
+  it('should accept unchanged displayed values without changing the response or counting another edit', async () => {
+    const task = activateAISummaryTask();
+    await store.requestPostCallSummary(task);
+    const summary = getAISummaryProps(task)?.postCall;
+    const original = summary.content.sections.initialContactReason;
+    const initialResponse = store.aiSummaries[AI_SUMMARY_INTERACTION_ID]['post-call'].response;
+
+    expect(summary.onEdit('initialContactReason', original)).toBe(true);
+    expect(store.aiSummaries[AI_SUMMARY_INTERACTION_ID]['post-call'].response).toBe(initialResponse);
+    expect(initialResponse.numberOfTimesEdited).toBe(0);
+    expect(summary.onEdit('initialContactReason', 'Edited reason')).toBe(true);
+    const editedResponse = store.aiSummaries[AI_SUMMARY_INTERACTION_ID]['post-call'].response;
+    expect(summary.onEdit('initialContactReason', 'Edited reason')).toBe(true);
+    expect(store.aiSummaries[AI_SUMMARY_INTERACTION_ID]['post-call'].response).toBe(editedResponse);
+    expect(editedResponse.numberOfTimesEdited).toBe(1);
+  });
+
+  it('should remove reverted structured edits so displayed fields fall back to the raw SDK values', async () => {
+    const task = activateAISummaryTask();
+    await store.requestPostCallSummary(task);
+    const summary = getAISummaryProps(task)?.postCall;
+    const sdkContent = summary.content;
+    const original = sdkContent.sections.initialContactReason;
+
+    expect(summary.onEdit('initialContactReason', 'Edited reason')).toBe(true);
+    expect(summary.onEdit('keyActionsTaken', 'Another edit')).toBe(true);
+    expect(summary.onEdit('initialContactReason', original)).toBe(true);
+    const reverted = getAISummaryProps(task)?.postCall;
+    expect(reverted.content).toBe(sdkContent);
+    expect(reverted.editedSummary).toEqual({keyActionsTaken: 'Another edit'});
+    expect(reverted.content.sections.initialContactReason).toBe(original);
+    expect(store.aiSummaries[AI_SUMMARY_INTERACTION_ID]['post-call'].response.numberOfTimesEdited).toBe(1);
+  });
+
+  it('should accept omitted SDK section fields while rejecting unknown keys and plain text on a structured summary', async () => {
+    const task = activateAISummaryTask();
+    await store.requestMidCallSummary('CONSULT', task);
+    const summary = getAISummaryProps(task)?.midCall;
+    expect(summary.onEdit('initialContactReason', 'Newly entered reason')).toBe(true);
+    const response = store.aiSummaries[AI_SUMMARY_INTERACTION_ID].initiator.response;
+    expect(response.summary).toEqual({initialContactReason: 'Newly entered reason'});
+    expect(summary.onEdit('summaryText', 'Structured summary text is not displayed')).toBe(false);
+    expect(summary.onEdit('unknownField' as 'initialContactReason', 'Unknown key')).toBe(false);
+    expect(store.aiSummaries[AI_SUMMARY_INTERACTION_ID].initiator.response).toBe(response);
+  });
+
+  it('should call the store for every mid-call summary request', async () => {
+    const task = createAISummaryTask();
+    const requestSpy = jest.spyOn(store, 'requestMidCallSummary').mockResolvedValue(undefined);
+    const props = getAISummaryProps(task);
+
+    await props?.requestMidCallSummary?.('CONSULT');
+    await props?.requestMidCallSummary?.('CONSULT');
+    await props?.requestMidCallSummary?.('TRANSFER');
+
+    expect(requestSpy).toHaveBeenCalledTimes(3);
+    expect(requestSpy).toHaveBeenLastCalledWith('TRANSFER', task);
+  });
+
+  it('should request the post-call summary only once per wrap-up', async () => {
+    const task = createAISummaryTask();
+    const requestSpy = jest.spyOn(store, 'requestPostCallSummary');
+    const props = getAISummaryProps(task);
+
+    await act(async () => {
+      props?.requestPostCallSummary?.();
+      await Promise.resolve();
+    });
+    props?.requestPostCallSummary?.();
+
+    expect(requestSpy).toHaveBeenCalledTimes(1);
+    expect(requestSpy).toHaveBeenCalledWith(task);
+  });
+
+  it('should report the initiator summary as each consult or transfer starts', async () => {
+    const task = createAISummaryTask();
+    const order: string[] = [];
+    jest.spyOn(store, 'sendMidCallSummaryResponse').mockImplementation(async (action) => {
+      order.push(`summary:${action}`);
+      return 'submitted';
+    });
+    (task.consult as jest.Mock).mockImplementation(async () => {
+      order.push('consult');
+    });
+    (task.transfer as jest.Mock).mockImplementation(async () => {
+      order.push('transfer');
+    });
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: task,
+        logger,
+        isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'agent1',
+      })
+    );
+
+    await act(async () => {
+      await result.current.consultCall('agent2', 'agent', false);
+      await result.current.transferCall('agent3', 'agent');
+    });
+
+    expect(order).toEqual(['summary:CONSULT', 'consult', 'summary:TRANSFER', 'transfer']);
+    expect(store.sendMidCallSummaryResponse).toHaveBeenCalledWith('CONSULT', task);
+    expect(store.sendMidCallSummaryResponse).toHaveBeenCalledWith('TRANSFER', task);
+  });
 });
 
 describe('useIncomingTask Hook', () => {
@@ -2924,6 +3322,54 @@ describe('useCallControl', () => {
     });
   });
 
+  it('should wrap up without a summary response when the task has no post-call summary', async () => {
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: mockCurrentTask,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+        isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'test-agent-id',
+      })
+    );
+
+    await act(async () => {
+      await result.current.wrapupCall('Wrap reason', '123');
+    });
+
+    expect(mockCurrentTask.wrapup).toHaveBeenCalledWith({wrapUpReason: 'Wrap reason', auxCodeId: '123'});
+  });
+
+  it('should keep the post-call summary when wrap-up fails', async () => {
+    resetAISummaryStoreState();
+    const task = createAISummaryTask({wrapup: jest.fn().mockRejectedValue(new Error('wrap-up failed'))});
+    await act(async () => {
+      await store.requestPostCallSummary(task);
+    });
+    const {result} = renderHook(() =>
+      useCallControl({
+        currentTask: task,
+        onHoldResume: mockOnHoldResume,
+        onEnd: mockOnEnd,
+        onWrapUp: mockOnWrapUp,
+        logger: mockLogger,
+        isMuted: false,
+        conferenceEnabled: true,
+        agentId: 'agent1',
+      })
+    );
+
+    await act(async () => {
+      await result.current.wrapupCall('Customer Issue', 'wrap1');
+    });
+
+    expect(task.sendPostCallSummaryResponse).toHaveBeenCalledTimes(1);
+    expect(store.aiSummaries[AI_SUMMARY_INTERACTION_ID]?.['post-call']?.content).toBeDefined();
+  });
+
   describe('post-call summary submission during wrap-up', () => {
     const createPostCallTask = () => ({
       ...mockCurrentTask,
@@ -2931,7 +3377,7 @@ describe('useCallControl', () => {
       wrapup: jest.fn().mockResolvedValue(undefined),
     });
 
-    it('should await post-call summary submission with the selected code and task before wrapping up', async () => {
+    it('should dispatch the selected code and task without waiting for summary submission before wrapping up', async () => {
       const task = createPostCallTask();
       let resolveSubmission!: (result: 'submitted') => void;
       const submissionPromise = new Promise<'submitted'>((resolve) => {
@@ -2955,20 +3401,21 @@ describe('useCallControl', () => {
 
       expect(sendSummaryResponse).toHaveBeenCalledTimes(1);
       expect(sendSummaryResponse).toHaveBeenCalledWith('123', task);
-      expect(task.wrapup).not.toHaveBeenCalled();
+      expect(task.wrapup).toHaveBeenCalledTimes(1);
+      expect(task.wrapup).toHaveBeenCalledWith({wrapUpReason: 'Wrap reason', auxCodeId: '123'});
 
       await act(async () => {
-        resolveSubmission('submitted');
         await wrapupPromise;
       });
-
-      expect(task.wrapup).toHaveBeenCalledTimes(1);
-      expect(task.wrapup).toHaveBeenCalledWith({wrapUpReason: 'Wrap reason', auxCodeId: '123'});
+      resolveSubmission('submitted');
+      await submissionPromise;
     });
 
-    it('should continue wrapping up when post-call summary submission returns response-failed', async () => {
-      const task = createPostCallTask();
-      const sendSummaryResponse = jest.spyOn(store, 'sendPostCallSummaryResponse').mockResolvedValue('response-failed');
+    it('should continue wrapping up when the SDK summary submission fails', async () => {
+      const task = {
+        ...createPostCallTask(),
+        sendPostCallSummaryResponse: jest.fn().mockRejectedValue(new Error('Summary submission failed')),
+      };
       const {result} = renderHook(() =>
         useCallControl({
           currentTask: task,
@@ -2983,35 +3430,7 @@ describe('useCallControl', () => {
         await result.current.wrapupCall('Wrap reason', '123');
       });
 
-      expect(sendSummaryResponse).toHaveBeenCalledWith('123', task);
-      expect(task.wrapup).toHaveBeenCalledTimes(1);
-      expect(task.wrapup).toHaveBeenCalledWith({wrapUpReason: 'Wrap reason', auxCodeId: '123'});
-    });
-
-    it('should log unexpected post-call summary rejection and continue wrapping up', async () => {
-      const task = createPostCallTask();
-      const sendSummaryResponse = jest
-        .spyOn(store, 'sendPostCallSummaryResponse')
-        .mockRejectedValue(new Error('Unexpected summary submission error'));
-      const {result} = renderHook(() =>
-        useCallControl({
-          currentTask: task,
-          logger: mockLogger,
-          isMuted: false,
-          conferenceEnabled: true,
-          agentId: 'test-agent-id',
-        })
-      );
-
-      await act(async () => {
-        await result.current.wrapupCall('Wrap reason', '123');
-      });
-
-      expect(sendSummaryResponse).toHaveBeenCalledWith('123', task);
-      expect(mockLogger.error).toHaveBeenCalledWith(
-        'CC-Widgets: AI summary response failed: Error: Unexpected summary submission error',
-        {module: 'useCallControl', method: 'wrapupCall'}
-      );
+      expect(task.sendPostCallSummaryResponse).toHaveBeenCalledWith(expect.objectContaining({wrapUpCode: '123'}));
       expect(task.wrapup).toHaveBeenCalledTimes(1);
       expect(task.wrapup).toHaveBeenCalledWith({wrapUpReason: 'Wrap reason', auxCodeId: '123'});
     });

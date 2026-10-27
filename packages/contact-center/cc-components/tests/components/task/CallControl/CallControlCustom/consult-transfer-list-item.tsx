@@ -117,6 +117,23 @@ describe('CallControlListItemPresentational', () => {
     expect(mockOnButtonPress).toHaveBeenCalledTimes(1);
   });
 
+  it('uses Momentum selection styling and lets the staged destination be selected from its row', () => {
+    const view = render(<ConsultTransferListComponent {...defaultProps} isSelected={false} />);
+    const item = view.getByRole('listitem', {name: defaultProps.title});
+    expect(view.getByRole('button')).toHaveAttribute('aria-pressed', 'false');
+    expect(view.getByRole('button')).toHaveAttribute('data-size', '28');
+    expect(view.getByRole('button')).toHaveAttribute('data-color', 'primary');
+    expect(view.getByRole('button')).toHaveAttribute('data-ghost', 'true');
+    expect(view.getByRole('button')).toHaveAttribute('data-outline', 'true');
+    fireEvent.click(item);
+    expect(mockOnButtonPress).toHaveBeenCalledTimes(1);
+    view.rerender(<ConsultTransferListComponent {...defaultProps} isSelected />);
+    expect(item).toHaveClass('active');
+    expect(view.getByRole('button')).toHaveAttribute('aria-pressed', 'true');
+    fireEvent.click(view.getByRole('button'));
+    expect(mockOnButtonPress).toHaveBeenCalledTimes(2);
+  });
+
   it('renders without subtitle when not provided', async () => {
     const propsWithoutSubtitle = {
       ...defaultProps,

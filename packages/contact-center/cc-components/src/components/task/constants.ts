@@ -1,3 +1,20 @@
+import type {CategoryType} from './task.types';
+
+// Display labels for those categories in the voice destination picker.
+export const VOICE_DESTINATION_CATEGORY_LABELS: Record<CategoryType, string> = {
+  Agents: 'Agent',
+  Queues: 'Queue',
+  'Dial Number': 'Dial Number',
+  'Entry Point': 'Entry Point',
+};
+
+export const VOICE_DESTINATION_SEARCH_PLACEHOLDERS: Record<CategoryType, string> = {
+  Agents: 'Search agents',
+  Queues: 'Search queues',
+  'Dial Number': 'Search by Name or Number',
+  'Entry Point': 'Search Entry Points',
+};
+
 // Shared text constants for task components
 export const UNTIL_AUTO_WRAPUP = 'Until auto wrap-up';
 export const CANCEL = 'Cancel';
