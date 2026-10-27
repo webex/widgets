@@ -8,6 +8,10 @@ export const AI_ASSISTANT_SUMMARY_MODES = {
 
 export const AI_ASSISTANT_SUMMARY_MESSAGES = {
   viewSummary: 'View summary',
+  incomingNotificationTitle: 'Transfer summary available',
+  incomingNotificationDescription: 'A summary of the conversation is ready to view.',
+  dismissNotification: 'Dismiss summary notification',
+  later: 'Later',
   editSummary: 'Edit summary',
   editing: 'Editing',
   generatingTitle: 'Generating summary...',

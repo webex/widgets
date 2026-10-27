@@ -42,6 +42,8 @@ import type {
   AISummaryFeedback,
   AISummaryResponse,
   AISummarySections,
+  AISummaryFeatureEnablement,
+  Task,
 } from '@webex/contact-center';
 import {
   DEVICE_TYPE_BROWSER,
@@ -53,6 +55,11 @@ import {
 import {runInAction} from 'mobx';
 import {isIncomingTask, isSecondaryAgent} from './task-utils';
 import {SUGGESTED_RESPONSE_EVENT, TASK_MULTI_LOGIN_HYDRATE} from './constants';
+import {
+  clearAISummaryEnablement,
+  readAISummaryEnablement,
+  writeAISummaryEnablement,
+} from './ai-summary-enablement-storage';
 
 const EMPTY_AI_SUMMARY_RESPONSE: AISummaryResponse = {
   summary: '',
@@ -106,8 +113,60 @@ class StoreWrapper implements IStoreWrapper {
   private taskEndListeners: Record<string, {task: ITask; listener: () => void}> = {};
   private muteStateByInteractionId: Record<string, boolean> = {};
   // Keep the task and callback so replacement, removal, and logout can detach the exact listener.
-  private aiSummaryReceivedListeners: Record<string, {task: ITask; listener: (payload: AISummary) => void}> = {};
+  private aiSummaryTaskListeners: Record<
+    string,
+    {
+      task: ITask;
+      summaryListener: (payload: AISummary) => void;
+      enablementListener: (payload: AISummaryFeatureEnablement) => void;
+      liveEnablement?: AISummaryFeatureEnablement;
+      enablementSessionKey?: string;
+    }
+  > = {};
   private aiSummaryRequestGeneration = 0;
+
+  private getAISummarySessionKey = (): string | undefined => {
+    const {orgId, agentSessionId} = this.store.agentProfile ?? {};
+    return orgId && this.agentId && agentSessionId ? JSON.stringify([orgId, this.agentId, agentSessionId]) : undefined;
+  };
+
+  private applyAISummaryEnablement = (task: ITask, enablement: AISummaryFeatureEnablement): void => {
+    // The public Task class declares this setter, while this SDK's ITask declaration omits it.
+    if ('setFeatureEnablement' in task && typeof task.setFeatureEnablement === 'function') {
+      (task as ITask & Pick<Task, 'setFeatureEnablement'>).setFeatureEnablement(enablement);
+    }
+  };
+
+  private restoreAISummaryEnablement = (interactionId?: string): void => {
+    const sessionKey = this.getAISummarySessionKey();
+    if (!sessionKey) return;
+    const entries = interactionId
+      ? [this.aiSummaryTaskListeners[interactionId]].filter(Boolean)
+      : Object.values(this.aiSummaryTaskListeners);
+    entries.forEach((entry) => {
+      if (entry.liveEnablement) {
+        // Hydration can precede registration identity; retain a live frame until it can be saved.
+        if (entry.enablementSessionKey && entry.enablementSessionKey !== sessionKey) return;
+        entry.enablementSessionKey = sessionKey;
+        writeAISummaryEnablement(sessionKey, entry.liveEnablement);
+        return;
+      }
+      const taskId = entry.task.data.interactionId;
+      const saved = readAISummaryEnablement(sessionKey, taskId);
+      if (!saved) return;
+      // SDK hydration publishes a pending live frame after task:hydrate; let that frame win.
+      queueMicrotask(() => {
+        if (
+          !entry.liveEnablement &&
+          this.aiSummaryTaskListeners[taskId] === entry &&
+          sessionKey === this.getAISummarySessionKey()
+        ) {
+          this.applyAISummaryEnablement(entry.task, saved);
+          this.refreshTaskList();
+        }
+      });
+    });
+  };
 
   constructor() {
     this.store = Store.getInstance();
@@ -654,13 +713,35 @@ class StoreWrapper implements IStoreWrapper {
     role: AISummaryRole,
     expectedSummary: AISummary | undefined,
     task: ITask = this.currentTask
-  ): boolean =>
-    this.updateAISummaryResponse(
+  ): boolean => {
+    if (role === 'receiver') {
+      const receiver = task && this.store.aiSummaries[task.data.interactionId]?.receiver;
+      if (
+        this.currentTask !== task ||
+        !expectedSummary ||
+        expectedSummary.areTranscriptsAvailable === false ||
+        !receiver ||
+        (receiver.content !== expectedSummary && !receiver.history?.includes(expectedSummary)) ||
+        receiver.cardFeedback?.some((card) => card.content === expectedSummary && card.pending) ||
+        (receiver.content === expectedSummary && receiver.feedbackPending)
+      ) {
+        return false;
+      }
+      void this.sendReceiverSummaryAction('copyButton', expectedSummary, task).catch((error) => {
+        this.store.logger?.error(`CC-Widgets: AI summary copy action failed: ${error}`, {
+          module: 'storeEventsWrapper.ts',
+          method: 'recordAISummaryCopied',
+        });
+      });
+      if (receiver.content !== expectedSummary) return true;
+    }
+    return this.updateAISummaryResponse(
       role,
       expectedSummary,
       (response) => ({...response, numberOfTimesCopied: response.numberOfTimesCopied + 1}),
       task
     );
+  };
 
   /** Initiator and post-call feedback is kept locally until the owning call action submits it. */
   setAISummaryFeedback = (
@@ -707,47 +788,54 @@ class StoreWrapper implements IStoreWrapper {
     return true;
   };
 
-  /** The receiving agent's feedback is sent right away; the selection is kept once the SDK confirms it. */
+  private sendReceiverSummaryAction = async (
+    actionId: 'likeButton' | 'dislikeButton' | 'copyButton',
+    summary: AISummary,
+    task: ITask
+  ): Promise<void> => {
+    const api = this.cc?.apiAIAssistant;
+    if (!summary.adaptiveCardId || !this.agentId || !api?.sendEvent) return;
+    await api.sendEvent(
+      this.agentId,
+      task.data.interactionId,
+      'CUSTOM_EVENT',
+      // The public SDK forwards event names; its union omits this captured Desktop event.
+      'MID_CALL_SUMMARY_USER_ACTION' as Parameters<NonNullable<typeof api.sendEvent>>[3],
+      {adaptiveCardId: summary.adaptiveCardId, userAction: {actionType: 'Action.Submit', actionId}},
+      summary.languageCode ?? 'en',
+      typeof summary.trackingId === 'string' ? summary.trackingId : undefined
+    );
+  };
+
+  /** Receiver actions belong to the displayed adaptive card, including earlier incoming summaries. */
   setReceiverSummaryFeedback = async (
     feedback: AISummaryFeedback,
     expectedSummary: AISummary,
     task: ITask = this.currentTask
   ): Promise<void> => {
     const entry = task && this.store.aiSummaries[task.data.interactionId]?.receiver;
+    const cardId = expectedSummary.adaptiveCardId;
     if (
       this.currentTask !== task ||
-      !entry?.content ||
-      !entry.action ||
-      entry.content !== expectedSummary ||
-      entry.feedbackPending
+      !entry ||
+      !cardId ||
+      !this.agentId ||
+      !this.cc?.apiAIAssistant?.sendEvent ||
+      (entry.content !== expectedSummary && !entry.history?.includes(expectedSummary)) ||
+      entry.cardFeedback?.some((card) => card.content === expectedSummary && card.pending) ||
+      (entry.content === expectedSummary && entry.feedbackPending)
     ) {
       return;
     }
     const interactionId = task.data.interactionId;
-    runInAction(() => {
-      this.store.aiSummaries = {
-        ...this.store.aiSummaries,
-        [interactionId]: {
-          ...this.store.aiSummaries[interactionId],
-          receiver: {...entry, feedbackPending: true},
-        },
-      };
-    });
-
-    let sent = true;
-    try {
-      await task.sendMidCallSummaryResponse({...entry.response, feedback}, entry.action);
-    } catch (error) {
-      sent = false;
-      this.store.logger?.error(`CC-Widgets: AI summary feedback failed: ${error}`, {
-        module: 'storeEventsWrapper.ts',
-        method: 'feedback',
-      });
-    }
-
-    const current = this.store.aiSummaries[interactionId]?.receiver;
-    // A new summary replaced this one, or the task was removed, while the response was in flight.
-    if (current?.content === expectedSummary && current.feedbackPending) {
+    const previousFeedback =
+      entry.cardFeedback?.find((card) => card.content === expectedSummary)?.feedback ??
+      (entry.content === expectedSummary ? entry.response.feedback : 'none');
+    const actionId =
+      (feedback === 'none' ? previousFeedback : feedback) === 'thumbs_down' ? 'dislikeButton' : 'likeButton';
+    const updateFeedback = (pending: boolean, confirmedFeedback: AISummaryFeedback) => {
+      const current = this.store.aiSummaries[interactionId]?.receiver;
+      if (!current || (current.content !== expectedSummary && !current.history?.includes(expectedSummary))) return;
       runInAction(() => {
         this.store.aiSummaries = {
           ...this.store.aiSummaries,
@@ -755,11 +843,27 @@ class StoreWrapper implements IStoreWrapper {
             ...this.store.aiSummaries[interactionId],
             receiver: {
               ...current,
-              response: sent ? {...current.response, feedback} : current.response,
-              feedbackPending: false,
+              cardFeedback: [
+                ...(current.cardFeedback ?? []).filter((card) => card.content !== expectedSummary),
+                {content: expectedSummary, feedback: confirmedFeedback, pending},
+              ],
+              ...(current.content === expectedSummary
+                ? {feedbackPending: pending, response: {...current.response, feedback: confirmedFeedback}}
+                : {}),
             },
           },
         };
+      });
+    };
+    updateFeedback(true, previousFeedback);
+    try {
+      await this.sendReceiverSummaryAction(actionId, expectedSummary, task);
+      updateFeedback(false, feedback);
+    } catch (error) {
+      updateFeedback(false, previousFeedback);
+      this.store.logger?.error(`CC-Widgets: AI summary feedback failed: ${error}`, {
+        module: 'storeEventsWrapper.ts',
+        method: 'feedback',
       });
     }
   };
@@ -1119,10 +1223,12 @@ class StoreWrapper implements IStoreWrapper {
         roles: profile.roles || undefined,
         deviceType: profile.deviceType || undefined,
         agentProfileID: profile.agentProfileID || undefined,
+        agentSessionId: profile.agentSessionId || undefined,
         isTimeoutDesktopInactivityEnabled: profile.isTimeoutDesktopInactivityEnabled || undefined,
         timeoutDesktopInactivityMins: profile.timeoutDesktopInactivityMins || undefined,
       };
     });
+    this.restoreAISummaryEnablement();
   };
 
   removeCCCallback = (event: CC_EVENTS) => {
@@ -1145,19 +1251,22 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   init(options: InitParams): Promise<void> {
-    return this.store.init(options, this.setupIncomingTaskHandler).catch((error) => {
-      const err = error instanceof Error ? error : new Error(`Store initialization failed: ${String(error)}`);
+    return this.store
+      .init(options, this.setupIncomingTaskHandler)
+      .then(() => this.restoreAISummaryEnablement())
+      .catch((error) => {
+        const err = error instanceof Error ? error : new Error(`Store initialization failed: ${String(error)}`);
 
-      if (this.onErrorCallback) {
-        this.onErrorCallback('Store', err);
-      }
+        if (this.onErrorCallback) {
+          this.onErrorCallback('Store', err);
+        }
 
-      throw err;
-    });
+        throw err;
+      });
   }
 
   registerCC = (webex?: WithWebex['webex']) => {
-    return this.store.registerCC(webex);
+    return this.store.registerCC(webex).then(() => this.restoreAISummaryEnablement());
   };
 
   handleTaskRemove = (taskToRemove: ITask) => {
@@ -1225,11 +1334,11 @@ class StoreWrapper implements IStoreWrapper {
         (listenerTask ?? taskToRemove).off(SUGGESTED_RESPONSE_EVENT, listener);
         delete this.realTimeAssistListeners[taskId];
       }
-      if (taskId && this.aiSummaryReceivedListeners[taskId]) {
-        const {task: listenerTask, listener} = this.aiSummaryReceivedListeners[taskId];
-        listenerTask.off(TASK_EVENTS.TASK_MID_CALL_SUMMARY_RECEIVED, listener);
-        listenerTask.off(TASK_EVENTS.TASK_FEATURE_ENABLEMENT, this.refreshTaskList);
-        delete this.aiSummaryReceivedListeners[taskId];
+      if (taskId && this.aiSummaryTaskListeners[taskId]) {
+        const {task: listenerTask, summaryListener, enablementListener} = this.aiSummaryTaskListeners[taskId];
+        listenerTask.off(TASK_EVENTS.TASK_MID_CALL_SUMMARY_RECEIVED, summaryListener);
+        listenerTask.off(TASK_EVENTS.TASK_FEATURE_ENABLEMENT, enablementListener);
+        delete this.aiSummaryTaskListeners[taskId];
       }
       if (taskId && this.store.realTimeAssist && this.store.realTimeAssist[taskId]) {
         runInAction(() => {
@@ -1241,9 +1350,26 @@ class StoreWrapper implements IStoreWrapper {
       if (taskId && this.store.aiSummaries[taskId]) {
         runInAction(() => {
           const next = {...this.store.aiSummaries};
-          delete next[taskId];
+          const receiver = next[taskId].receiver;
+          const history = [...(receiver?.history ?? []), ...(receiver?.content ? [receiver.content] : [])];
+          if (history.length) {
+            next[taskId] = {
+              receiver: {
+                status: 'ready',
+                history,
+                cardFeedback: receiver?.cardFeedback,
+                response: {...EMPTY_AI_SUMMARY_RESPONSE},
+              },
+            };
+          } else {
+            delete next[taskId];
+          }
           this.store.aiSummaries = next;
         });
+      }
+      // A consult can return for this same interaction; final primary-task removal retires its flags.
+      if (taskId && !isSecondaryAgent(taskToRemove)) {
+        clearAISummaryEnablement(this.getAISummarySessionKey(), taskId);
       }
     }
 
@@ -1740,13 +1866,28 @@ class StoreWrapper implements IStoreWrapper {
         this.realTimeAssistListeners[taskId] = {task, listener};
         task.on(SUGGESTED_RESPONSE_EVENT, listener);
       }
-      const existingSummary = this.aiSummaryReceivedListeners[taskId];
+      const existingSummary = this.aiSummaryTaskListeners[taskId];
       if (existingSummary?.task !== task) {
-        existingSummary?.task.off(TASK_EVENTS.TASK_MID_CALL_SUMMARY_RECEIVED, existingSummary.listener);
-        existingSummary?.task.off(TASK_EVENTS.TASK_FEATURE_ENABLEMENT, this.refreshTaskList);
+        existingSummary?.task.off(TASK_EVENTS.TASK_MID_CALL_SUMMARY_RECEIVED, existingSummary.summaryListener);
+        existingSummary?.task.off(TASK_EVENTS.TASK_FEATURE_ENABLEMENT, existingSummary.enablementListener);
         // Receiver summaries are pushed regardless of this agent's feature enablement.
-        const listener = (payload: AISummary) => {
+        const summaryListener = (payload: AISummary) => {
           const interactionId = task.data.interactionId;
+          const previous = this.store.aiSummaries[interactionId]?.receiver;
+          const received = [...(previous?.history ?? []), ...(previous?.content ? [previous.content] : [])];
+          if (
+            received.some(
+              (summary) =>
+                summary === payload ||
+                (Boolean(payload.adaptiveCardId) &&
+                  Number.isFinite(payload.timestamp) &&
+                  summary.conversationId === payload.conversationId &&
+                  summary.adaptiveCardId === payload.adaptiveCardId &&
+                  summary.timestamp === payload.timestamp)
+            )
+          ) {
+            return;
+          }
           runInAction(() => {
             this.store.aiSummaries = {
               ...this.store.aiSummaries,
@@ -1755,6 +1896,8 @@ class StoreWrapper implements IStoreWrapper {
                 receiver: {
                   status: 'ready',
                   content: payload,
+                  history: received,
+                  cardFeedback: previous?.cardFeedback,
                   response: {
                     ...EMPTY_AI_SUMMARY_RESPONSE,
                     summary: payload.summaryText ?? '',
@@ -1767,10 +1910,20 @@ class StoreWrapper implements IStoreWrapper {
             };
           });
         };
-        this.aiSummaryReceivedListeners[taskId] = {task, listener};
-        task.on(TASK_EVENTS.TASK_MID_CALL_SUMMARY_RECEIVED, listener);
-        // The SDK updates task.aiSummaryCapabilities before emitting; refresh so widgets read the new flags.
-        task.on(TASK_EVENTS.TASK_FEATURE_ENABLEMENT, this.refreshTaskList);
+        const enablementListener = (payload: AISummaryFeatureEnablement) => {
+          if (payload.interactionId !== taskId) return;
+          const entry = this.aiSummaryTaskListeners[taskId];
+          if (entry?.task !== task) return;
+          entry.liveEnablement = payload;
+          entry.enablementSessionKey = this.getAISummarySessionKey();
+          this.applyAISummaryEnablement(task, payload);
+          writeAISummaryEnablement(entry.enablementSessionKey, payload);
+          this.refreshTaskList();
+        };
+        this.aiSummaryTaskListeners[taskId] = {task, summaryListener, enablementListener};
+        task.on(TASK_EVENTS.TASK_MID_CALL_SUMMARY_RECEIVED, summaryListener);
+        task.on(TASK_EVENTS.TASK_FEATURE_ENABLEMENT, enablementListener);
+        this.restoreAISummaryEnablement(taskId);
       }
     }
   };
@@ -2119,6 +2272,7 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   cleanUpStore = () => {
+    clearAISummaryEnablement(this.getAISummarySessionKey());
     this.store.logger.info('CC-Widgets: cleanUpStore(): resetting store on logout', {
       module: 'storeEventsWrapper.ts',
       method: 'cleanUpStore',
@@ -2145,11 +2299,11 @@ class StoreWrapper implements IStoreWrapper {
       this.realTimeAssistListeners = {};
       this.resetWellnessSession();
 
-      Object.values(this.aiSummaryReceivedListeners).forEach(({task, listener}) => {
-        task.off(TASK_EVENTS.TASK_MID_CALL_SUMMARY_RECEIVED, listener);
-        task.off(TASK_EVENTS.TASK_FEATURE_ENABLEMENT, this.refreshTaskList);
+      Object.values(this.aiSummaryTaskListeners).forEach(({task, summaryListener, enablementListener}) => {
+        task.off(TASK_EVENTS.TASK_MID_CALL_SUMMARY_RECEIVED, summaryListener);
+        task.off(TASK_EVENTS.TASK_FEATURE_ENABLEMENT, enablementListener);
       });
-      this.aiSummaryReceivedListeners = {};
+      this.aiSummaryTaskListeners = {};
       this.store.aiSummaries = {};
     });
   };
@@ -2162,8 +2316,8 @@ class StoreWrapper implements IStoreWrapper {
         module: 'storeEventsWrapper.ts',
         method: 'setupIncomingTaskHandler#handleLogOut',
       });
-      this.setAgentProfile({});
       this.cleanUpStore();
+      this.setAgentProfile({});
       removeEventListeners();
       listenersAdded = false;
     };

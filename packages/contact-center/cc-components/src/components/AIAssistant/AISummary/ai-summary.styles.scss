@@ -9,6 +9,10 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+
+  .ai-assistant__card {
+    background: var(--mds-color-theme-background-primary-normal, #fff);
+  }
 }
 
 .ai-summary mdc-text::part(text) {
@@ -136,7 +140,8 @@
   display: inline-flex;
 }
 
-.ai-summary__feedback-group {
+.ai-summary__feedback-group,
+.ai-summary__receiver-controls {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
@@ -178,11 +183,4 @@
   font-size: 0.75rem;
   line-height: 1.5;
   white-space: nowrap;
-}
-
-.ai-summary__receiver-controls {
-  display: inline-flex;
-  align-items: center;
-  flex: 0 0 auto;
-  gap: 0.25rem;
 }

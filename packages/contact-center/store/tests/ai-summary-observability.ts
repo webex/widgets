@@ -3,6 +3,7 @@ import type {IReactionDisposer} from 'mobx';
 import {mockCC, mockProfile, mockTask} from '@webex/test-fixtures';
 import {aiSummaryFixtures} from '../../test-fixtures/src/aiSummaryFixtures';
 import store from '../src/storeEventsWrapper';
+import {writeAISummaryEnablement} from '../src/ai-summary-enablement-storage';
 import {TASK_EVENTS} from '../src/store.types';
 import type {AISummaryEntry, IContactCenter, ITask, WithWebex} from '../src/store.types';
 
@@ -108,11 +109,13 @@ describe('AI summary notifications with the real MobX store', () => {
     receive(summary);
 
     let confirmFeedback: () => void = () => undefined;
-    task.sendMidCallSummaryResponse = jest.fn().mockReturnValue(
-      new Promise<void>((resolve) => {
-        confirmFeedback = resolve;
-      })
-    );
+    Object.assign(cc.apiAIAssistant, {
+      sendEvent: jest.fn().mockReturnValue(
+        new Promise<void>((resolve) => {
+          confirmFeedback = resolve;
+        })
+      ),
+    });
     const pending = store.setReceiverSummaryFeedback('thumbs_up', summary, task);
     expect(entries.map((entry) => entry?.content)).toEqual([undefined, unavailable, summary, summary]);
     expect(entries[3]).toMatchObject({feedbackPending: true, response: {feedback: 'none'}});
@@ -203,4 +206,57 @@ describe('AI summary notifications with the real MobX store', () => {
     expect(nextCC.apiAIAssistant).toBe(api);
     expect(api).not.toHaveProperty('aiSummaries');
   });
+
+  it.each(['before', 'after'] as const)(
+    'restores cached summary flags when hydration occurs %s silent registration',
+    async (hydrateTiming) => {
+      const previousProfile = store.agentProfile;
+      const previousAgentId = store.agentId;
+      const previousGetAllTasks = cc.taskManager.getAllTasks;
+      const sessionId = 'silently-restored-session';
+      Object.assign(task, {
+        on: jest.fn(),
+        off: jest.fn(),
+        aiSummaryCapabilities: {midCallEnabled: false, postCallEnabled: false},
+        setFeatureEnablement: (flags: ITask['aiSummaryCapabilities']) => {
+          Object.assign(task.aiSummaryCapabilities, {
+            midCallEnabled: flags.midCallEnabled,
+            postCallEnabled: flags.postCallEnabled,
+          });
+        },
+      });
+      cc.taskManager.getAllTasks = jest.fn(() => ({[INTERACTION_ID]: task}));
+      webex.credentials = {getOrgId: () => 'sdk-org'};
+      writeAISummaryEnablement(JSON.stringify(['sdk-org', mockProfile.agentId, sessionId]), {
+        interactionId: INTERACTION_ID,
+        midCallEnabled: true,
+        postCallEnabled: true,
+      });
+      runInAction(() => {
+        store.store.agentProfile = {};
+        store.store.agentId = '';
+      });
+      cc.register = jest.fn(async () => {
+        if (hydrateTiming === 'before') store.handleTaskHydrate(task);
+        return {...mockProfile, orgId: undefined, isAgentLoggedIn: true, agentSessionId: sessionId};
+      });
+
+      try {
+        await store.registerCC(webex);
+        if (hydrateTiming === 'after') store.handleTaskHydrate(task);
+        await Promise.resolve();
+
+        expect(store.agentProfile.orgId).toBe('sdk-org');
+        expect(task.aiSummaryCapabilities).toEqual({midCallEnabled: true, postCallEnabled: true});
+      } finally {
+        store.handleTaskRemove(task);
+        cc.taskManager.getAllTasks = previousGetAllTasks;
+        runInAction(() => {
+          store.store.agentProfile = previousProfile;
+          store.store.agentId = previousAgentId;
+        });
+        sessionStorage.clear();
+      }
+    }
+  );
 });

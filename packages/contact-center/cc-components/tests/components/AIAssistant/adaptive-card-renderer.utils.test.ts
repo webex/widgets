@@ -363,7 +363,15 @@ describe('AdaptiveCardRenderer utilities', () => {
     {backgroundImage: 'https://example.invalid/summary.png', items: []},
     {selectAction: {type: 'Action.OpenUrl', url: 'https://example.invalid/case'}},
     {selectAction: {type: 'Action.OpenUrl', url: 'https://example.invalid/case'}, items: []},
-  ])('preserves empty-looking columns with unsupported content %s', (content) => {
+    {
+      backgroundImage: 'https://example.invalid/summary.png',
+      items: [{type: 'TextBlock', text: '•'}],
+    },
+    {
+      selectAction: {type: 'Action.OpenUrl', url: 'https://example.invalid/case'},
+      items: [{type: 'TextBlock', text: '•'}],
+    },
+  ])('preserves columns with unsupported content %s', (content) => {
     const card = {
       type: 'AdaptiveCard',
       body: [
@@ -390,6 +398,27 @@ describe('AdaptiveCardRenderer utilities', () => {
 
     expect(prepared.body).toHaveLength(1);
     expect(prepared.body[0].columns).toEqual([{type: 'Column', width: 'stretch', ...content}]);
+  });
+
+  it.each([
+    {backgroundImage: 'https://example.invalid/summary.png'},
+    {selectAction: {type: 'Action.OpenUrl', url: 'https://example.invalid/case'}},
+  ])('preserves non-layout container content when timestamp removal empties its children %s', (content) => {
+    const card = {
+      type: 'AdaptiveCard',
+      body: [
+        {
+          type: 'Container',
+          ...content,
+          items: [{type: 'TextBlock', text: '${sourceTimestamp}'}],
+        },
+      ],
+    };
+
+    const prepared = prepareCardForRender(card, undefined, undefined, true);
+
+    expect(prepared.body).toEqual([{type: 'Container', ...content, items: []}]);
+    expect(card.body[0].items).toHaveLength(1);
   });
 
   it('turns the backend separator placeholder into a horizontal rule', () => {
@@ -554,11 +583,11 @@ describe('AdaptiveCardRenderer utilities', () => {
     }
   });
 
-  it('uses transparent card containers and the compact action layout', () => {
+  it('keeps the card heading transparent and emphasized content on a themed surface', () => {
     const config = buildHostConfig();
 
     expect(config.containerStyles.default.backgroundColor).toBe('transparent');
-    expect(config.containerStyles.emphasis.backgroundColor).toBe('transparent');
+    expect(config.containerStyles.emphasis.backgroundColor).toBe('var(--mds-color-theme-background-secondary-normal)');
     expect(config.spacing.padding).toBe(0);
     expect(config.actions).toMatchObject({
       maxActions: 5,

@@ -425,9 +425,9 @@ Desktop's supplied summary templates use `Action.Submit`; native disabled contro
 and the action callback guard handle summary exclusion/loading without capture-phase
 click or keyboard listeners for arbitrary selectable-container actions.
 The raw SDK card and summary content remain unchanged. Shared card inputs use Momentum theme tokens for their border, radius, text and focus styling. The renderer's `summary` presentation uses Desktop's 12/14px typography, 600-weight labels and compact actions, without the suggestion surface or an extra host border. Summary template body containers scroll at 182px while their actions stay outside that body; structured inputs use CSS content sizing instead of DOM measurement. These overrides are scoped to summary cards and their template IDs so suggestion cards retain their existing presentation.
-Host configuration shares one per-call transparent container style across semantic
-container variants; summary typography, spacing and actions are selected in that
-same configuration without changing suggestion defaults.
+Host configuration keeps default containers transparent and gives emphasis containers
+Momentum's secondary background surface. Summary typography, spacing and actions are
+selected in that same configuration without changing suggestion defaults.
 
 Fallback controls also share the copy and feedback utility functions.
 Clipboard failures are handled once by `copyToClipboard`; the summary hook checks
@@ -448,13 +448,28 @@ when the panel is already open and an interaction is active, including a replace
 SDK content object for the same interaction. Feedback and copy updates that retain
 the SDK content object do not count as arrivals. Passive selection does not invoke
 chrome callbacks or explicitly move focus. Closed and minimized panels remain in
-their current state and expose View summary; arrivals observed in those states or
-without an active interaction are not replayed by an ordinary Open/Restore action.
+their current state and expose View summary. A newly received content payload also
+shows a Momentum toast while closed or minimized, following the existing wellness
+offer toast's placement, AI icon, and footer action slots. Later and dismiss hide
+that notification; View summary dismisses it and opens or restores the receiver
+branch directly. Opening the panel marks that payload as seen so minimizing or
+closing does not show the same notification again. Feedback/copy updates retaining
+the SDK content do not reset dismissal. Dismissal is retained per receiver branch,
+so switching tasks does not replay an already dismissed payload. Active wellness
+offers and overlays keep notification priority. Arrivals observed in collapsed states or without an active
+interaction are not replayed by an ordinary Open/Restore action.
 View summary is also available in a separate row below the open panel's header
 when the agent has returned to ordinary assistance. Selecting it hides the action
 row and opens the receiver branch independently of Real-time Assist enablement.
 Each chrome branch checks eligibility before rendering the shared trigger button.
 No summary or trigger is shown without an active interaction.
+The receiver branch renders its optional prior-payload `history` before the latest
+summary in arrival order, reusing `AISummary` and each payload's original timestamp.
+Historical cards preserve `areTranscriptsAvailable: false` as unavailable even when
+an Adaptive Card is supplied. Available historical cards expose helpful, unhelpful, and Copy controls bound to
+their own SDK payload, with independent confirmed feedback and pending state. An archived-only `history` surface renders
+those prior cards without an unavailable latest-card placeholder or arrival toast.
+The existing Get Assistance action remains available for an active enabled interaction.
 Summary view, edit, and receiver cards receive the SDK summary's epoch-millisecond
 `timestamp` and render it in browser-local `HH:mm`. Shared card preparation supports
 both the legacy `SOURCE_TIMESTAMP_PLACEHOLDER` token and the summary
@@ -476,8 +491,9 @@ that decoration group and its now-orphaned trailing divider. Substantive sibling
 and unrelated bullet content are retained; ordinary cards keep the original layout.
 Scoped metadata cleanup also recognizes empty layout spacers with omitted or empty
 children and ActionSets containing only known likeButton/dislikeButton/copyButton
-Submit actions. Unknown actions and non-layout content are preserved. Substitution changes a render clone only; the SDK
-content and card remain intact. Missing or invalid timestamps render blank rather
+Submit actions. Unknown actions and non-layout content are preserved. A parent with
+its own non-layout content or actions is retained when a timestamp child is removed.
+Substitution changes a render clone only; the SDK content and card remain intact. Missing or invalid timestamps render blank rather
 than a fabricated current time.
 Copy uses
 visible rendered card text through the shared Adaptive Card text extractor's
@@ -499,9 +515,13 @@ host callback, so external reopening returns to the ordinary assistant view.
 A selected receiver summary takes precedence over retained wellness
 history; an active wellness offer, transition, error or overlay retains priority.
 Wellness history remains available when returning to the ordinary assistant view.
+Receiver cards and incoming-summary headings use Momentum's primary background
+surface. Native emphasis containers use Momentum's secondary surface so the summary
+body remains shaded independently of its heading.
 When Real-time Assist is enabled during an active interaction, the receiver view
-also exposes Get Assistance in a separate padded row below the card with a vertical
-gap, matching Desktop's access to that existing feature. In the compact panel, receiver content scrolls within the available body height so the footer and Get Assistance remain reachable for long summaries. It returns to ordinary assistance and invokes the existing
+also exposes Get Assistance in the fixed panel footer above the disclaimer.
+The cards use the existing chat scroller and chat item layout, so summary history
+scrolls while Get Assistance and the disclaimer remain visible. It returns to ordinary assistance and invokes the existing
 request callback once, retaining assistance history and context. Pending requests
 disable the action; inactive interactions and active wellness content do not offer
 it. The summary remains reachable through View summary after returning to assistance.
@@ -544,7 +564,7 @@ bundled SVG image colors. Native Momentum controls inherit their theme, but sema
 Markdown lists and raw-card SVG recoloring are not equivalent to Desktop.
 
 Evidence: `components/AIAssistant/AISummary/` and `components/AIAssistant/`; tests:
-`tests/components/AIAssistant/AISummary/ai-summary.tsx`, `tests/components/AIAssistant/AISummary/ai-summary-parity.tsx`,
+`tests/components/AIAssistant/AISummary/ai-summary.tsx`, `tests/components/AIAssistant/AISummary/ai-summary-interactions.tsx`,
 `tests/components/AIAssistant/ai-assistant.tsx`, and
 `tests/components/AIAssistant/adaptive-card-renderer.test.tsx`.
 

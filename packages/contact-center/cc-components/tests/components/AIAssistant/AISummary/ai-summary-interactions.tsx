@@ -5,14 +5,14 @@ import AISummary from '../../../../src/components/AIAssistant/AISummary/ai-summa
 import type {AISummaryProps} from '../../../../src/components/AIAssistant/AISummary/ai-summary.types';
 
 const content = {
-  conversationId: 'summary-parity',
+  conversationId: 'interaction-summary-1',
   sections: {initialContactReason: 'Invoice question', nextSteps: ''},
 };
 
 const renderSummary = (props: Partial<AISummaryProps> = {}) =>
   render(<AISummary mode="post-call" state="content" content={content} onEdit={jest.fn()} {...props} />);
 
-describe('Desktop summary interactions', () => {
+describe('AISummary interactions', () => {
   const innerText = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'innerText');
   beforeAll(() => {
     // Adaptive Cards uses innerText; jsdom only implements textContent.

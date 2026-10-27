@@ -127,6 +127,9 @@ class Store implements IStore {
             ? response.agentSessionId
             : '';
         runInAction(() => {
+          // Silent session restoration can omit orgId and the relogin event.
+          this.agentProfile.orgId = response.orgId || webex?.credentials?.getOrgId() || this.agentProfile.orgId;
+          this.agentProfile.agentSessionId = registeredSessionId || undefined;
           this.isWellnessBreakEnabled = isWellnessBreakEnabled;
           this.wellnessIdleCodeLookupPending = isWellnessBreakEnabled && Boolean(response.isAgentLoggedIn);
           if (this.wellnessAgentSessionId && this.wellnessAgentSessionId !== registeredSessionId) {

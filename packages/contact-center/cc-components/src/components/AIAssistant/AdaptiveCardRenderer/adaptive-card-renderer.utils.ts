@@ -200,10 +200,10 @@ export const prepareCardForRender = <T>(
     if (['Container', 'Column', 'ColumnSet'].includes(`${value.type}`)) {
       const childrenKey = value.type === 'ColumnSet' ? 'columns' : 'items';
       const children = value[childrenKey];
-      if (children === undefined || (Array.isArray(children) && children.length === 0)) {
-        return Object.keys(value).every((key) => key === childrenKey || EMPTY_LAYOUT_KEYS.has(key));
-      }
-      return Array.isArray(children) && children.every(isTimestampDecoration);
+      return (
+        Object.keys(value).every((key) => key === childrenKey || EMPTY_LAYOUT_KEYS.has(key)) &&
+        (children === undefined || (Array.isArray(children) && children.every(isTimestampDecoration)))
+      );
     }
     return false;
   };
@@ -274,7 +274,8 @@ export const prepareCardForRender = <T>(
           Array.isArray(originalChildren) &&
           originalChildren.length > 0 &&
           Array.isArray(out[childrenKey]) &&
-          out[childrenKey].length === 0
+          out[childrenKey].length === 0 &&
+          Object.keys(out).every((key) => key === childrenKey || EMPTY_LAYOUT_KEYS.has(key))
         )
           return undefined;
       }
@@ -490,7 +491,7 @@ export const buildHostConfig = (presentation: AdaptiveCardRendererProps['present
     },
     containerStyles: {
       default: containerStyle,
-      emphasis: containerStyle,
+      emphasis: {...containerStyle, backgroundColor: 'var(--mds-color-theme-background-secondary-normal)'},
       ...(isSummary ? {accent: containerStyle, attention: containerStyle} : {}),
     },
     actions: {

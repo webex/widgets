@@ -295,20 +295,31 @@ snapshots) is covered in `cc-components/tests/components/AIAssistant/`.
 
 `getReceiverSummary` in `src/helper.ts` reads the current interaction's receiver entry
 from `store.aiSummaries`, maps its request status and SDK `areTranscriptsAvailable`
-flag to a display surface, and passes the raw SDK content, confirmed feedback from
-`summaryData.response.feedback` and pending state to the presentation component. Receiver feedback accepts `none` to withdraw a confirmed selection, using the same displayed-payload and pending-request guards. Received
+flag to a display surface, and passes the raw SDK content and per-payload confirmed
+feedback/pending state from `summaryData.cardFeedback` to the presentation component,
+falling back to the response fields for the latest payload. Receiver feedback accepts
+`none` to withdraw a confirmed selection, using the same displayed-payload and
+pending-request guards. Received
 content remains visible during a failed or pending refresh. Copy callbacks delegate to
 `store.recordAISummaryCopied` for the receiver role; the store owns the response update
 and MobX action. The widget helper does not import MobX or mutate summary entries.
 Copy and feedback callbacks retain the displayed SDK content and Task identities;
-replacement content or a different active Task invalidates those callbacks. Feedback
+a removed payload or a different active Task invalidates those callbacks. Feedback
 passes that SDK payload and Task to `store.setReceiverSummaryFeedback`, which owns
 submission and acknowledgement. The widget makes no summary SDK calls.
+
+The receiver entry's optional `history` contains prior incoming summaries in arrival order.
+The helper forwards these raw SDK payloads with the latest summary. If consult cleanup
+has archived the latest content, a `history` surface keeps those cards reachable without
+creating a latest-summary placeholder. Historical cards receive the same store
+copy and feedback callbacks bound to each original payload and the current Task. Feedback selection and
+pending state are retained per adaptive card
+so an earlier consult remains actionable after a later summary arrives.
 
 The receiver branch is independent of Real-time Assist enablement. A missing receiver
 entry supplies no branch. SDK content with `areTranscriptsAvailable: false` supplies
 the unavailable surface. Without content, an error status supplies the generic error
-surface; other statuses supply no branch.
+surface; other statuses supply no branch unless retained history is available.
 Raw content without an adaptive card still supplies a branch; card rendering and
 unsupported-card fallback belong to the presentation component.
 Summary changes are observed by `AIAssistantInternal`.

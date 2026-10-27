@@ -24,7 +24,7 @@ console.log = jest.fn();
 
 import {CC_EVENTS, TASK_EVENTS} from '../src/store.types';
 import type {AISummaryAction, AISummaryRole, RealTimeAssistPayload} from '../src/store.types';
-import type {AISummary, AISummaryResponse} from '@webex/contact-center';
+import type {AISummary, AISummaryFeatureEnablement, AISummaryResponse, Task} from '@webex/contact-center';
 import {aiSummaryFixtures} from '../../test-fixtures/src/aiSummaryFixtures';
 import storeWrapper from '../src/storeEventsWrapper';
 import {ITask} from '../src/store.types';
@@ -154,7 +154,7 @@ jest.mock('../src/store', () => ({
     refreshTaskList: jest.fn(),
     setCurrentTheme: jest.fn(),
     setIsAgentLoggedIn: jest.fn(),
-    registerCC: jest.fn(),
+    registerCC: jest.fn().mockResolvedValue(undefined),
   }),
 }));
 
@@ -376,15 +376,15 @@ describe('storeEventsWrapper', () => {
       });
     });
 
-    it('should call registerCC', () => {
-      const mockRegisterCC = jest.fn();
+    it('should call registerCC', async () => {
+      const mockRegisterCC = jest.fn().mockResolvedValue(undefined);
       storeWrapper['store'].registerCC = mockRegisterCC;
 
-      storeWrapper.registerCC();
+      await storeWrapper.registerCC();
       expect(mockRegisterCC).toHaveBeenCalled();
 
       const mockLogger = {log: jest.fn(), warn: jest.fn(), error: jest.fn(), info: jest.fn(), trace: jest.fn()};
-      storeWrapper.registerCC({
+      await storeWrapper.registerCC({
         cc: mockCC,
         logger: mockLogger,
       });
@@ -3881,8 +3881,9 @@ describe('storeEventsWrapper', () => {
 
   describe('AI summaries', () => {
     const INTERACTION_ID = 'interaction-main-1';
+    const sendReceiverEvent = jest.fn().mockResolvedValue({});
 
-    type AISummaryTestTask = jest.Mocked<ITask>;
+    type AISummaryTestTask = jest.Mocked<ITask & Pick<Task, 'setFeatureEnablement'>>;
 
     const makeAISummaryTask = (
       interaction: Record<string, unknown> = {},
@@ -3894,6 +3895,14 @@ describe('storeEventsWrapper', () => {
           interaction: {interactionId: INTERACTION_ID, mediaType: 'telephony', ...interaction},
         },
         aiSummaryCapabilities,
+        setFeatureEnablement: jest.fn(function (this: AISummaryTestTask, enablement: AISummaryFeatureEnablement) {
+          Object.assign(this, {
+            aiSummaryCapabilities: {
+              midCallEnabled: enablement.midCallEnabled === true,
+              postCallEnabled: enablement.postCallEnabled === true,
+            },
+          });
+        }),
         on: jest.fn(),
         off: jest.fn(),
         requestMidCallSummary: jest.fn().mockResolvedValue(aiSummaryFixtures.initiatingMidCall.typedSections),
@@ -3924,7 +3933,9 @@ describe('storeEventsWrapper', () => {
 
     beforeEach(() => {
       storeWrapper['store'].aiSummaries = {};
-      storeWrapper['aiSummaryReceivedListeners'] = {};
+      storeWrapper['aiSummaryTaskListeners'] = {};
+      sendReceiverEvent.mockReset().mockResolvedValue({});
+      Object.assign(storeWrapper['store'].cc, {apiAIAssistant: {sendEvent: sendReceiverEvent}});
     });
 
     afterEach(() => {
@@ -4117,6 +4128,46 @@ describe('storeEventsWrapper', () => {
     });
 
     describe('receiving agent summary', () => {
+      it('should retain distinct summaries across ended and repeated consults without archiving replays', () => {
+        const task = makeAISummaryTask();
+        registerTaskEventListeners(task);
+        const first = aiSummaryFixtures.receivingMidCall.adaptiveCard;
+        receivedListenerOf(task)(first);
+        receivedListenerOf(task)({...first});
+        expect(entryFor('receiver').history ?? []).toEqual([]);
+
+        storeWrapper.handleTaskRemove(task);
+        storeWrapper.handleTaskRemove(task);
+        expect(entryFor('receiver')).toMatchObject({history: [first]});
+        expect(entryFor('receiver').content).toBeUndefined();
+        expect(entryFor('receiver').action).toBeUndefined();
+
+        const nextConsult = makeAISummaryTask();
+        registerTaskEventListeners(nextConsult);
+        receivedListenerOf(nextConsult)({...first});
+        expect(entryFor('receiver').content).toBeUndefined();
+        const second = {...first, timestamp: first.timestamp + 1};
+        receivedListenerOf(nextConsult)(second);
+        expect(entryFor('receiver').history).toEqual([first]);
+        expect(entryFor('receiver').content).toBe(second);
+
+        const third = {...second, timestamp: second.timestamp + 1};
+        receivedListenerOf(nextConsult)(third);
+        expect(entryFor('receiver').history).toEqual([first, second]);
+        expect(entryFor('receiver').content).toBe(third);
+      });
+
+      it('should keep equal text as distinct summaries when the SDK provides no replay identity', () => {
+        const task = makeAISummaryTask();
+        registerTaskEventListeners(task);
+        const first: AISummary = {conversationId: INTERACTION_ID, summaryText: 'Same summary'};
+        const second = {...first};
+        receivedListenerOf(task)(first);
+        receivedListenerOf(task)(second);
+        expect(entryFor('receiver').history).toEqual([first]);
+        expect(entryFor('receiver').content).toBe(second);
+      });
+
       it('should store the adaptive card pushed for the task with the consult or transfer it belongs to', () => {
         const transferTask = makeAISummaryTask();
         registerTaskEventListeners(transferTask);
@@ -4134,7 +4185,7 @@ describe('storeEventsWrapper', () => {
           callProcessingDetails: {relationshipType: 'consult', parentInteractionId: 'parent-interaction'},
         });
         registerTaskEventListeners(consultTask);
-        receivedListenerOf(consultTask)(aiSummaryFixtures.receivingMidCall.adaptiveCard);
+        receivedListenerOf(consultTask)({...aiSummaryFixtures.receivingMidCall.adaptiveCard, timestamp: 2101});
 
         expect(entryFor('receiver')).toMatchObject({action: 'CONSULT'});
       });
@@ -4165,7 +4216,10 @@ describe('storeEventsWrapper', () => {
         ).toHaveLength(1);
         expect(task.on.mock.calls.filter(([event]) => event === TASK_EVENTS.TASK_FEATURE_ENABLEMENT)).toHaveLength(1);
         expect(task.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_MID_CALL_SUMMARY_RECEIVED, listener);
-        expect(task.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_FEATURE_ENABLEMENT, storeWrapper.refreshTaskList);
+        expect(task.off).toHaveBeenCalledWith(
+          TASK_EVENTS.TASK_FEATURE_ENABLEMENT,
+          task.on.mock.calls.find(([event]) => event === TASK_EVENTS.TASK_FEATURE_ENABLEMENT)?.[1]
+        );
 
         storeWrapper.handleTaskRemove(replacement);
 
@@ -4173,7 +4227,7 @@ describe('storeEventsWrapper', () => {
           TASK_EVENTS.TASK_MID_CALL_SUMMARY_RECEIVED,
           receivedListenerOf(replacement)
         );
-        expect(storeWrapper['aiSummaryReceivedListeners'][INTERACTION_ID]).toBeUndefined();
+        expect(storeWrapper['aiSummaryTaskListeners'][INTERACTION_ID]).toBeUndefined();
       });
 
       it('should detach both summary listeners on logout', () => {
@@ -4184,8 +4238,122 @@ describe('storeEventsWrapper', () => {
         storeWrapper.cleanUpStore();
 
         expect(task.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_MID_CALL_SUMMARY_RECEIVED, listener);
-        expect(task.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_FEATURE_ENABLEMENT, storeWrapper.refreshTaskList);
-        expect(storeWrapper['aiSummaryReceivedListeners']).toEqual({});
+        expect(task.off).toHaveBeenCalledWith(
+          TASK_EVENTS.TASK_FEATURE_ENABLEMENT,
+          task.on.mock.calls.find(([event]) => event === TASK_EVENTS.TASK_FEATURE_ENABLEMENT)?.[1]
+        );
+        expect(storeWrapper['aiSummaryTaskListeners']).toEqual({});
+      });
+    });
+
+    describe('summary enablement recovery', () => {
+      const originalProfile = storeWrapper.agentProfile;
+      const originalAgentId = storeWrapper.agentId;
+      let previousGetAllTasks: typeof storeWrapper.cc.taskManager.getAllTasks;
+      let activeTask: AISummaryTestTask;
+      const featureListenerOf = (task: AISummaryTestTask) =>
+        task.on.mock.calls.find(([event]) => event === TASK_EVENTS.TASK_FEATURE_ENABLEMENT)?.[1];
+
+      beforeEach(() => {
+        sessionStorage.clear();
+        storeWrapper['store'].agentId = 'summary-agent';
+        storeWrapper['store'].agentProfile = {orgId: 'summary-org', agentSessionId: 'summary-session'};
+        previousGetAllTasks = storeWrapper.cc.taskManager.getAllTasks;
+        storeWrapper.cc.taskManager.getAllTasks = jest.fn(() => ({[INTERACTION_ID]: activeTask}));
+        activeTask = makeAISummaryTask();
+      });
+
+      afterEach(() => {
+        storeWrapper['store'].agentId = originalAgentId;
+        storeWrapper['store'].agentProfile = originalProfile;
+        storeWrapper.cc.taskManager.getAllTasks = previousGetAllTasks;
+        sessionStorage.clear();
+      });
+
+      const saveEnablement = (enabled: boolean) => {
+        registerTaskEventListeners(activeTask);
+        featureListenerOf(activeTask)({
+          interactionId: INTERACTION_ID,
+          midCallEnabled: enabled,
+          postCallEnabled: enabled,
+        });
+      };
+
+      it.each([true, false])('should restore confirmed %s flags onto the recovered SDK task', async (enabled) => {
+        saveEnablement(enabled);
+        activeTask = makeAISummaryTask({}, {midCallEnabled: !enabled, postCallEnabled: !enabled});
+
+        storeWrapper.handleTaskHydrate(activeTask);
+        await Promise.resolve();
+
+        expect(activeTask.aiSummaryCapabilities).toEqual({midCallEnabled: enabled, postCallEnabled: enabled});
+        expect(storeWrapper.currentTask.aiSummaryCapabilities).toEqual(activeTask.aiSummaryCapabilities);
+      });
+
+      it('should let a fresh disabled frame after hydration override cached enablement', async () => {
+        saveEnablement(true);
+        activeTask = makeAISummaryTask({}, {midCallEnabled: false, postCallEnabled: false});
+
+        storeWrapper.handleTaskHydrate(activeTask);
+        featureListenerOf(activeTask)({interactionId: INTERACTION_ID, midCallEnabled: false, postCallEnabled: false});
+        await Promise.resolve();
+
+        expect(activeTask.aiSummaryCapabilities).toEqual({midCallEnabled: false, postCallEnabled: false});
+        activeTask = makeAISummaryTask();
+        storeWrapper.handleTaskHydrate(activeTask);
+        await Promise.resolve();
+        expect(activeTask.aiSummaryCapabilities).toEqual({midCallEnabled: false, postCallEnabled: false});
+      });
+
+      it.each([false, true])(
+        'should recover after hydration precedes registration identity (live frame: %s)',
+        async (liveFrame) => {
+          saveEnablement(true);
+          const profile = storeWrapper.agentProfile;
+          storeWrapper['store'].agentProfile = {};
+          activeTask = makeAISummaryTask({}, {midCallEnabled: false, postCallEnabled: false});
+          storeWrapper.handleTaskHydrate(activeTask);
+          if (liveFrame) {
+            featureListenerOf(activeTask)({
+              interactionId: INTERACTION_ID,
+              midCallEnabled: false,
+              postCallEnabled: false,
+            });
+          }
+          await Promise.resolve();
+          expect(activeTask.aiSummaryCapabilities).toEqual({midCallEnabled: false, postCallEnabled: false});
+
+          const registerCC = jest.spyOn(storeWrapper['store'], 'registerCC').mockImplementation(async () => {
+            storeWrapper['store'].agentProfile = profile;
+          });
+          try {
+            await storeWrapper.registerCC();
+            await Promise.resolve();
+            expect(activeTask.aiSummaryCapabilities).toEqual({midCallEnabled: !liveFrame, postCallEnabled: !liveFrame});
+            activeTask = makeAISummaryTask();
+            storeWrapper.handleTaskHydrate(activeTask);
+            await Promise.resolve();
+            expect(activeTask.aiSummaryCapabilities).toEqual({midCallEnabled: !liveFrame, postCallEnabled: !liveFrame});
+          } finally {
+            registerCC.mockRestore();
+          }
+        }
+      );
+
+      it('should isolate sessions and clear saved flags on logout', async () => {
+        saveEnablement(true);
+        storeWrapper.setAgentProfile({...storeWrapper.agentProfile, agentSessionId: 'another-session'});
+        activeTask = makeAISummaryTask({}, {midCallEnabled: false, postCallEnabled: false});
+        storeWrapper.handleTaskHydrate(activeTask);
+        await Promise.resolve();
+        expect(activeTask.setFeatureEnablement).not.toHaveBeenCalled();
+
+        storeWrapper['store'].agentProfile = {...storeWrapper.agentProfile, agentSessionId: 'summary-session'};
+        storeWrapper.cleanUpStore();
+        activeTask = makeAISummaryTask({}, {midCallEnabled: false, postCallEnabled: false});
+        storeWrapper.handleTaskHydrate(activeTask);
+        await Promise.resolve();
+        expect(activeTask.setFeatureEnablement).not.toHaveBeenCalled();
       });
     });
 
@@ -4236,7 +4404,10 @@ describe('storeEventsWrapper', () => {
 
         getAllTasks.mockReturnValue({});
         storeWrapper.handleTaskRemove(task);
-        expect(task.off).toHaveBeenCalledWith(TASK_EVENTS.TASK_FEATURE_ENABLEMENT, storeWrapper.refreshTaskList);
+        expect(task.off).toHaveBeenCalledWith(
+          TASK_EVENTS.TASK_FEATURE_ENABLEMENT,
+          task.on.mock.calls.find(([event]) => event === TASK_EVENTS.TASK_FEATURE_ENABLEMENT)?.[1]
+        );
       } finally {
         taskManager.getAllTasks = previousGetAllTasks;
         storeWrapper['store'].currentTask = previousTask;
@@ -4453,6 +4624,91 @@ describe('storeEventsWrapper', () => {
     });
 
     describe('feedback', () => {
+      it.each([false, true])('does not report copying a pending receiver card (historical: %s)', async (historical) => {
+        const task = makeAISummaryTask();
+        storeWrapper['store'].currentTask = task;
+        registerTaskEventListeners(task);
+        const first = aiSummaryFixtures.receivingMidCall.adaptiveCard;
+        receivedListenerOf(task)(first);
+        if (historical) receivedListenerOf(task)({...first, timestamp: first.timestamp + 1});
+        const send = deferred();
+        sendReceiverEvent.mockReturnValueOnce(send.promise);
+        const feedback = storeWrapper.setReceiverSummaryFeedback('thumbs_up', first, task);
+
+        expect(storeWrapper.recordAISummaryCopied('receiver', first, task)).toBe(false);
+        expect(sendReceiverEvent).toHaveBeenCalledTimes(1);
+
+        send.resolve();
+        await feedback;
+        expect(storeWrapper.recordAISummaryCopied('receiver', first, task)).toBe(true);
+        expect(sendReceiverEvent).toHaveBeenCalledTimes(2);
+      });
+
+      it('sends incoming-card actions for the selected historical card without reporting a new transfer', async () => {
+        const sendEvent = jest.fn().mockResolvedValue({});
+        Object.assign(storeWrapper['store'].cc, {apiAIAssistant: {sendEvent}});
+        const task = makeAISummaryTask();
+        storeWrapper['store'].currentTask = task;
+        registerTaskEventListeners(task);
+        const first = {...aiSummaryFixtures.receivingMidCall.adaptiveCard, trackingId: 'incoming-card-tracking'};
+        const second = {...first, adaptiveCardId: 'second-card', timestamp: first.timestamp + 1};
+        receivedListenerOf(task)(first);
+        receivedListenerOf(task)(second);
+
+        await storeWrapper.setReceiverSummaryFeedback('thumbs_up', first, task);
+
+        expect(sendEvent).toHaveBeenCalledWith(
+          storeWrapper.agentId,
+          INTERACTION_ID,
+          'CUSTOM_EVENT',
+          'MID_CALL_SUMMARY_USER_ACTION',
+          {adaptiveCardId: first.adaptiveCardId, userAction: {actionType: 'Action.Submit', actionId: 'likeButton'}},
+          first.languageCode,
+          first.trackingId
+        );
+        expect(task.sendMidCallSummaryResponse).not.toHaveBeenCalled();
+        expect(entryFor('receiver').response.feedback).toBe('none');
+        expect(entryFor('receiver')).toMatchObject({
+          cardFeedback: [{content: first, feedback: 'thumbs_up', pending: false}],
+        });
+        expect(storeWrapper.recordAISummaryCopied('receiver', first, task)).toBe(true);
+        expect(sendEvent).toHaveBeenLastCalledWith(
+          storeWrapper.agentId,
+          INTERACTION_ID,
+          'CUSTOM_EVENT',
+          'MID_CALL_SUMMARY_USER_ACTION',
+          {adaptiveCardId: first.adaptiveCardId, userAction: {actionType: 'Action.Submit', actionId: 'copyButton'}},
+          first.languageCode,
+          first.trackingId
+        );
+      });
+
+      it('retains independent feedback when incoming cards reuse a backend card ID and retries only a failed card', async () => {
+        const task = makeAISummaryTask();
+        storeWrapper['store'].currentTask = task;
+        registerTaskEventListeners(task);
+        const first = aiSummaryFixtures.receivingMidCall.adaptiveCard;
+        const second = {...first, timestamp: first.timestamp + 1};
+        receivedListenerOf(task)(first);
+        await storeWrapper.setReceiverSummaryFeedback('thumbs_up', first, task);
+        receivedListenerOf(task)(second);
+        sendReceiverEvent.mockRejectedValueOnce(new Error('503'));
+
+        await storeWrapper.setReceiverSummaryFeedback('thumbs_down', second, task);
+        expect(entryFor('receiver').response.feedback).toBe('none');
+        expect(entryFor('receiver').cardFeedback).toEqual([
+          {content: first, feedback: 'thumbs_up', pending: false},
+          {content: second, feedback: 'none', pending: false},
+        ]);
+        await storeWrapper.setReceiverSummaryFeedback('thumbs_down', second, task);
+        expect(entryFor('receiver').response.feedback).toBe('thumbs_down');
+        expect(entryFor('receiver').cardFeedback).toContainEqual({
+          content: first,
+          feedback: 'thumbs_up',
+          pending: false,
+        });
+      });
+
       it('should clear deferred feedback without changing summary content, edits or copy counts', async () => {
         const task = makeAISummaryTask();
         storeWrapper['store'].currentTask = task;
@@ -4479,11 +4735,19 @@ describe('storeEventsWrapper', () => {
         await storeWrapper.setReceiverSummaryFeedback('thumbs_up', content, task);
         const response = entryFor('receiver').response;
         const send = deferred();
-        task.sendMidCallSummaryResponse.mockReturnValueOnce(send.promise);
+        sendReceiverEvent.mockReturnValueOnce(send.promise);
 
         const clear = storeWrapper.setReceiverSummaryFeedback('none', content, task);
 
-        expect(task.sendMidCallSummaryResponse).toHaveBeenLastCalledWith({...response, feedback: 'none'}, 'TRANSFER');
+        expect(sendReceiverEvent).toHaveBeenLastCalledWith(
+          storeWrapper.agentId,
+          INTERACTION_ID,
+          'CUSTOM_EVENT',
+          'MID_CALL_SUMMARY_USER_ACTION',
+          {adaptiveCardId: content.adaptiveCardId, userAction: {actionType: 'Action.Submit', actionId: 'likeButton'}},
+          content.languageCode,
+          undefined
+        );
         expect(entryFor('receiver')).toMatchObject({feedbackPending: true, response: {feedback: 'thumbs_up'}});
         send.resolve();
         await clear;
@@ -4492,13 +4756,13 @@ describe('storeEventsWrapper', () => {
         expect(entryFor('receiver')).toMatchObject({feedbackPending: false, response: {...response, feedback: 'none'}});
       });
 
-      it('should send the receiving agent feedback with SDK text and keep it once the SDK confirms it', async () => {
+      it('should send the receiving card identity and keep feedback once the SDK confirms it', async () => {
         const task = makeAISummaryTask();
         storeWrapper['store'].currentTask = task;
         registerTaskEventListeners(task);
         receivedListenerOf(task)(aiSummaryFixtures.receivingMidCall.adaptiveCard);
         const send = deferred();
-        task.sendMidCallSummaryResponse.mockReturnValue(send.promise);
+        sendReceiverEvent.mockReturnValue(send.promise);
 
         const feedback = storeWrapper.setReceiverSummaryFeedback(
           'thumbs_up',
@@ -4507,12 +4771,17 @@ describe('storeEventsWrapper', () => {
         );
 
         expect(entryFor('receiver')).toMatchObject({feedbackPending: true, response: {feedback: 'none'}});
-        expect(task.sendMidCallSummaryResponse).toHaveBeenCalledWith(
-          expect.objectContaining({
-            summary: aiSummaryFixtures.receivingMidCall.adaptiveCard.summaryText,
-            feedback: 'thumbs_up',
-          }),
-          'TRANSFER'
+        expect(sendReceiverEvent).toHaveBeenCalledWith(
+          storeWrapper.agentId,
+          INTERACTION_ID,
+          'CUSTOM_EVENT',
+          'MID_CALL_SUMMARY_USER_ACTION',
+          {
+            adaptiveCardId: aiSummaryFixtures.receivingMidCall.adaptiveCard.adaptiveCardId,
+            userAction: {actionType: 'Action.Submit', actionId: 'likeButton'},
+          },
+          aiSummaryFixtures.receivingMidCall.adaptiveCard.languageCode,
+          undefined
         );
 
         const current = entryFor('receiver');
@@ -4528,7 +4797,7 @@ describe('storeEventsWrapper', () => {
         });
       });
 
-      it('should send empty text when the receiver SDK payload contains only a card', async () => {
+      it('should ignore feedback when the receiver payload has no adaptive card identity', async () => {
         const task = makeAISummaryTask();
         storeWrapper['store'].currentTask = task;
         registerTaskEventListeners(task);
@@ -4540,10 +4809,8 @@ describe('storeEventsWrapper', () => {
 
         await storeWrapper.setReceiverSummaryFeedback('thumbs_up', payload, task);
 
-        expect(task.sendMidCallSummaryResponse).toHaveBeenCalledWith(
-          expect.objectContaining({summary: '', state: 'DEFAULT', numberOfTimesViewed: 1, feedback: 'thumbs_up'}),
-          'TRANSFER'
-        );
+        expect(sendReceiverEvent).not.toHaveBeenCalled();
+        expect(entryFor('receiver').response.feedback).toBe('none');
       });
 
       it.each(['thumbs_down', 'none'] as const)(
@@ -4558,7 +4825,7 @@ describe('storeEventsWrapper', () => {
             aiSummaryFixtures.receivingMidCall.adaptiveCard,
             task
           );
-          task.sendMidCallSummaryResponse.mockRejectedValueOnce(new Error('503'));
+          sendReceiverEvent.mockRejectedValueOnce(new Error('503'));
 
           await storeWrapper.setReceiverSummaryFeedback(
             feedback,
@@ -4575,14 +4842,14 @@ describe('storeEventsWrapper', () => {
         storeWrapper['store'].currentTask = task;
         registerTaskEventListeners(task);
         receivedListenerOf(task)(aiSummaryFixtures.receivingMidCall.adaptiveCard);
-        task.sendMidCallSummaryResponse.mockReturnValue(deferred().promise);
+        sendReceiverEvent.mockReturnValue(deferred().promise);
 
         await storeWrapper.setReceiverSummaryFeedback(
           'thumbs_up',
           {...aiSummaryFixtures.receivingMidCall.adaptiveCard},
           task
         );
-        expect(task.sendMidCallSummaryResponse).not.toHaveBeenCalled();
+        expect(sendReceiverEvent).not.toHaveBeenCalled();
 
         void storeWrapper.setReceiverSummaryFeedback(
           'thumbs_up',
@@ -4595,7 +4862,7 @@ describe('storeEventsWrapper', () => {
           task
         );
 
-        expect(task.sendMidCallSummaryResponse).toHaveBeenCalledTimes(1);
+        expect(sendReceiverEvent).toHaveBeenCalledTimes(1);
       });
 
       it('should not apply confirmed receiver feedback to a summary that replaced it in flight', async () => {
@@ -4605,10 +4872,14 @@ describe('storeEventsWrapper', () => {
         const original = aiSummaryFixtures.receivingMidCall.adaptiveCard;
         receivedListenerOf(task)(original);
         const send = deferred();
-        task.sendMidCallSummaryResponse.mockReturnValue(send.promise);
+        sendReceiverEvent.mockReturnValue(send.promise);
 
         const feedback = storeWrapper.setReceiverSummaryFeedback('thumbs_up', original, task);
-        const replacement: AISummary = {...original, summaryText: 'A newly received summary'};
+        const replacement: AISummary = {
+          ...original,
+          timestamp: original.timestamp + 1,
+          summaryText: 'A newly received summary',
+        };
         receivedListenerOf(task)(replacement);
         send.resolve();
         await feedback;
@@ -4616,23 +4887,30 @@ describe('storeEventsWrapper', () => {
         expect(entryFor('receiver').content).toBe(replacement);
         expect(entryFor('receiver')).toMatchObject({response: {feedback: 'none'}});
         expect(entryFor('receiver').feedbackPending).toBeFalsy();
+        expect(entryFor('receiver').cardFeedback).toContainEqual({
+          content: original,
+          feedback: 'thumbs_up',
+          pending: false,
+        });
       });
 
-      it('should not recreate a removed interaction when receiver feedback completes', async () => {
+      it('should not restore live summary actions when receiver feedback completes after removal', async () => {
         const task = makeAISummaryTask();
         storeWrapper['store'].currentTask = task;
         registerTaskEventListeners(task);
         const original = aiSummaryFixtures.receivingMidCall.adaptiveCard;
         receivedListenerOf(task)(original);
         const send = deferred();
-        task.sendMidCallSummaryResponse.mockReturnValue(send.promise);
+        sendReceiverEvent.mockReturnValue(send.promise);
         const feedback = storeWrapper.setReceiverSummaryFeedback('thumbs_up', original, task);
 
         storeWrapper.handleTaskRemove(task);
         send.resolve();
         await feedback;
 
-        expect(storeWrapper.aiSummaries[INTERACTION_ID]).toBeUndefined();
+        expect(entryFor('receiver').content).toBeUndefined();
+        expect(entryFor('receiver').history).toEqual([original]);
+        expect(entryFor('receiver').response.feedback).toBe('none');
       });
 
       it('should not apply old feedback after the interaction is removed and recreated with a new payload', async () => {
@@ -4642,13 +4920,17 @@ describe('storeEventsWrapper', () => {
         const original = aiSummaryFixtures.receivingMidCall.adaptiveCard;
         receivedListenerOf(task)(original);
         const send = deferred();
-        task.sendMidCallSummaryResponse.mockReturnValue(send.promise);
+        sendReceiverEvent.mockReturnValue(send.promise);
         const feedback = storeWrapper.setReceiverSummaryFeedback('thumbs_up', original, task);
 
         storeWrapper.handleTaskRemove(task);
         const replacementTask = makeAISummaryTask();
         registerTaskEventListeners(replacementTask);
-        const replacement: AISummary = {...original, summaryText: 'Summary for the recreated interaction'};
+        const replacement: AISummary = {
+          ...original,
+          timestamp: original.timestamp + 1,
+          summaryText: 'Summary for the recreated interaction',
+        };
         receivedListenerOf(replacementTask)(replacement);
         send.resolve();
         await feedback;

@@ -680,17 +680,18 @@
   align-self: flex-start;
 }
 
-.ai-assistant__receiver-summary {
-  display: flex;
-  flex: 1 1 auto;
-  flex-direction: column;
-  gap: 0.75rem;
-  min-block-size: 0;
-  min-inline-size: 0;
-  overflow-y: auto;
+.ai-assistant__summary-toast-anchor {
+  max-width: calc(100vw - 2rem);
+  position: fixed;
+  right: 1rem;
+  top: 1rem;
+  z-index: 1100;
+
+  > mdc-toast {
+    --mdc-toast-width: min(24rem, calc(100vw - 2rem));
+  }
 }
 
-.ai-assistant__receiver-assistance {
+.ai-assistant__summary-toast-icon {
   display: flex;
-  padding: 0.5rem 0.75rem;
 }

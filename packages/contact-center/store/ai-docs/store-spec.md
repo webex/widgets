@@ -417,8 +417,11 @@ actions update these records inside `runInAction`. Widget helpers bind editing,
 copy tracking and deferred initiator/post-call feedback to store methods using the
 displayed SDK content and Task identities.
 A new SDK result replaces the unchanged `content` and initializes a fresh response.
-Refreshing or failing a request retains
-content already displayed and its response record; task removal and logout clear them.
+Refreshing or failing a request retains content already displayed and its response record.
+Receiver entries retain prior raw incoming payloads in `history` for the same interaction
+and agent session. Task removal archives the live receiver payload, clears its content,
+action and latest-response bookkeeping, preserves per-card feedback, and discards
+request roles; logout clears all entries.
 
 `Store.aiSummaries` starts empty and uses `observable.ref`, preserving SDK summary
 payload identities. `StoreWrapper.aiSummaries` exposes the map through a getter.
@@ -431,7 +434,11 @@ An agent can receive a transferred call and then consult or transfer it again. T
 received card remains in AI Assistant while the initiator summary is used in the
 consult/transfer modal, so their content, copies and feedback stay independent.
 The post-call entry holds the wrap-up summary. Grouping these entries under the task's
-interaction ID lets task cleanup remove them together; entries are created as needed.
+interaction ID keeps request cleanup and incoming-summary history separate; entries are created as needed.
+Repeated incoming consults append distinct summaries even when their text is equal.
+Only reference-equal payloads or matching conversation ID, nonempty adaptive-card ID and
+finite timestamp count as replays. Historical payloads retain per-card copy and feedback
+actions while the same interaction is active.
 
 - `requestMidCallSummary(action, task)` and `requestPostCallSummary(task)` each call their
   corresponding Task SDK method directly when `task.aiSummaryCapabilities` enables that
@@ -444,14 +451,21 @@ interaction ID lets task cleanup remove them together; entries are created as ne
   The SDK owns validation, transport correlation and timeouts. The store keeps a request
   generation only to stop an older local Promise settlement, including a delayed SDK
   publish failure, from overwriting a newer UI request. It does not correlate backend replies.
-- `TASK_FEATURE_ENABLEMENT` (`task:featureEnablement`) refreshes the task view after the
-  SDK updates `task.aiSummaryCapabilities`. The current task is refreshed so observers
-  read the latest flags, including enablement arriving after the task and later disabling
-  the feature. The SDK owns the flags; the store adds no capability map or enablement helper.
-  On refresh, recovered SDK Tasks start with both flags disabled until a feature-enablement
-  frame is received. The widget does not infer enablement from organization settings or
-  another application's session storage; live summary checks therefore need a replayed
-  frame or a fresh call after initialization.
+- `TASK_FEATURE_ENABLEMENT` (`task:featureEnablement`) applies the authoritative payload
+  through the public SDK Task setter and refreshes the task view so observers read the
+  latest flags, including later disablement. Confirmed booleans are saved in guarded
+  `sessionStorage`, scoped by organization, agent, session and interaction; summary content
+  is never persisted. Registration and login retain the session identity in `agentProfile`.
+  When the registration profile omits `orgId`, registration uses the public Webex
+  credentials organization getter, then the retained relogin organization. Cold silent
+  restoration therefore has a complete session key without another relogin event.
+  Recovered canonical SDK Tasks restore these flags before the deferred task-view refresh.
+  Restoration waits one microtask because SDK hydration publishes a pending live frame
+  immediately after `task:hydrate`; any such frame takes priority over cached values.
+  Initialization, registration and profile updates retry the same restoration after
+  identity becomes available; a live frame received earlier is saved instead of replaced.
+  Missing or invalid storage leaves SDK defaults unchanged. Primary-task removal and
+  logout clear saved records; consult removal preserves flags for a repeated consult.
   `TASK_MID_CALL_SUMMARY_RECEIVED` supplies the receiver summary. Listeners are rebound
   together when a task object is replaced, registered once per task object, and detached
   on task removal and logout.
@@ -465,15 +479,17 @@ interaction ID lets task cleanup remove them together; entries are created as ne
   transport payloads belong to the SDK boundary.
 - Each entry stores an SDK `AISummaryResponse` in `response`. The store's
   `editAISummary` and `setAISummaryFeedback` methods update initiator/post-call response
-  fields, including `feedback: none` to withdraw a selection; `recordAISummaryCopied` tracks copies for all three roles. These methods do
-  not change SDK content or submit a response. Each method accepts the displayed SDK payload and Task, rejecting task
+  fields, including `feedback: none` to withdraw a selection; `recordAISummaryCopied` tracks copies for all three roles.
+  These methods retain SDK content. Initiator/post-call bookkeeping stays local until submission;
+  receiver copies also send the displayed card's `copyButton` action immediately.
+  Each method accepts the displayed SDK payload and Task, rejecting task
   switches, replaced content, unavailable transcripts, excluded summaries and pending refreshes. Edits
   accept only SDK-defined editable section keys or plain summary text. The shared
   `AI_SUMMARY_EDITABLE_SECTION_KEYS` constant is typed against SDK `AISummarySections`;
   an omitted optional section has an empty-string baseline so the SDK edit card can fill it.
   Unknown fields and the separate read-only resolution are rejected. Unchanged values preserve the
   response identity and reverting a structured field removes its override. Receiver
-  copy updates are also rejected while feedback submission is pending. Senders forward
+  copy actions, including historical cards, are rejected while that card's feedback submission is pending. Senders forward
   the record to the SDK.
   The SDK sends these fields verbatim and supplies no runtime defaults. Received
   summaries start with `DEFAULT` and one view. Requests without content start with
@@ -488,14 +504,18 @@ interaction ID lets task cleanup remove them together; entries are created as ne
   content always uses `NOT_RECEIVED`, ahead of exclusion, matching Desktop submission precedence.
   Request completion and Retry retain the current picker choice; closing the picker clears it.
 - `setReceiverSummaryFeedback(feedback, expectedSummary, task)` submits receiver feedback
-  immediately. It accepts the displayed SDK payload itself, with no revision counter.
-  The store rejects callbacks from a different active Task, blocks overlapping sends
-  and applies the acknowledgement only while that same SDK payload remains current.
-  A task switch during submission still allows the matching entry to settle;
-  replacement events and task removal invalidate it.
-  A successful send confirms the feedback, including `none` to clear it; a failed send preserves the previous selection. Selection remains unchanged while acknowledgement is pending.
-  Receiver responses use SDK `summaryText`, including when the payload also has sections
-  or an adaptive card; absent text is sent as `''`.
+  immediately through the SDK's public `apiAIAssistant.sendEvent`. Incoming-card
+  actions use `CUSTOM_EVENT` / `MID_CALL_SUMMARY_USER_ACTION` with the displayed
+  `adaptiveCardId` and `Action.Submit` action (`likeButton`, `dislikeButton`, or
+  `copyButton`), matching captured Agent Desktop requests. The installed SDK's
+  event-name union omits this observed event; only that argument has a documented
+  narrow type assertion. The store sends no receiver transfer-response CTI event.
+  The displayed payload must belong to the latest receiver entry or retained history,
+  and its Task must still be active. Each unchanged SDK payload retains its own confirmed feedback
+  and pending flag in `cardFeedback`; overlapping sends on that card are ignored.
+  A successful send confirms feedback, including `none` to clear it; a failed send
+  preserves the previous selection. Acknowledgements settle only the matching card
+  even when a later incoming summary has arrived. Missing card identity is ignored.
 - `sendMidCallSummaryResponse(action, task, state?)` and `sendPostCallSummaryResponse(wrapUpCode, task)`
   return `AISummaryResponseSubmissionResult`: `submitted` after SDK acknowledgement,
   `response-failed` after a failed send, or `not-applicable` when the required task or
@@ -528,13 +548,13 @@ The React sample uses the SDK-supported `User requested logout` reason for page-
 `AISummary` is the common incoming payload type; `AISummaryResponse` is the distinct
 feedback payload sent back to the SDK. The store retains both types directly. The UI
 entry adds request lifecycle, local request generation, the pending receiver-feedback
-flag, optional initiator exclusion choice and the consult/transfer action. Copy counts, edits and feedback
+flag, prior raw receiver payloads, optional initiator exclusion choice and the consult/transfer action. Copy counts, edits and feedback
 use SDK response fields rather than duplicate widget fields.
 
 Evidence: `src/store.ts`, `src/storeEventsWrapper.ts`, `src/store.types.ts`, `src/task-utils.ts`;
 tests: `tests/ai-summary-observability.ts` uses real MobX for asynchronous success,
 failure and repeated registration; additional AI summary cases are in
-`tests/storeEventsWrapper.ts` and `tests/task-utils.ts`.
+`tests/storeEventsWrapper.ts`, `tests/ai-summary-enablement-storage.ts` and `tests/task-utils.ts`.
 
 ## Traceability
 

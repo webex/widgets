@@ -33,10 +33,12 @@ import {
 } from '@webex/contact-center';
 import type {
   AISummary,
+  ApiAIAssistant,
   AISummaryAction,
   AISummaryFeedback,
   AISummaryResponse,
   AISummarySections,
+  WebexSDK,
 } from '@webex/contact-center';
 import type {RealTimeAssistanceParams} from 'node_modules/@webex/contact-center/dist/types/types';
 import {
@@ -92,6 +94,7 @@ interface IContactCenter {
   removePreviewContact(payload: PreviewContactPayload): Promise<TaskResponse>;
   userPreference?: IUserPreferenceService;
   apiAIAssistant?: {
+    sendEvent?: ApiAIAssistant['sendEvent'];
     getRealTimeAssistance(params: RealTimeAssistRequestParams & {actionTimeStamp?: number}): Promise<unknown>;
     sendRealTimeAssistanceUserAction(params: RealTimeAssistUserActionParams): Promise<unknown>;
     requestWellnessBreak(): Promise<void>;
@@ -224,7 +227,12 @@ type ILogger = {
 };
 
 type WithWebex = {
-  webex: {cc: IContactCenter; logger: ILogger; config?: {cc?: WebexCcInitConfig}};
+  webex: {
+    cc: IContactCenter;
+    logger: ILogger;
+    config?: {cc?: WebexCcInitConfig};
+    credentials?: Pick<WebexSDK['credentials'], 'getOrgId'>;
+  };
 };
 
 /** Host init config read from `webexConfig.cc` before `store.init()`. */
@@ -702,7 +710,7 @@ export const AI_SUMMARY_EDITABLE_SECTION_KEYS = [
   'reasonForTransferOrConsult',
 ] as const satisfies readonly (keyof AISummarySections)[];
 
-/** One summary of an interaction, stored at `Store.aiSummaries[interactionId][role]`. */
+/** Latest summary and optional incoming history, stored at `Store.aiSummaries[interactionId][role]`. */
 export type AISummaryEntry = {
   /** Lifecycle of the latest request, or of the pushed receiver summary. */
   status: 'loading' | 'ready' | 'error';
@@ -710,6 +718,10 @@ export type AISummaryEntry = {
    * The unchanged SDK summary, retained while a newer request loads or after it fails.
    */
   content?: AISummary;
+  /** Earlier incoming summaries for this interaction in the current agent session. */
+  history?: AISummary[];
+  /** Independent feedback for each retained receiver adaptive card. */
+  cardFeedback?: Array<{content: AISummary; feedback: AISummaryFeedback; pending: boolean}>;
   /** SDK submission record; edits, copy counts and feedback are updated through store actions. */
   response: AISummaryResponse;
   /** Orders local request promise settlements; SDK transport correlation remains SDK-owned. */

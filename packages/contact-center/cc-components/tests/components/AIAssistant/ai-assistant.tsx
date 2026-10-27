@@ -521,7 +521,7 @@ describe('AIAssistantComponent', () => {
     const receiverSummary = createReceiverSummary();
     const {rerender} = render(<AIAssistantComponent {...createProps({chrome: 'closed', receiverSummary})} />);
 
-    const trigger = await screen.findByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.viewSummary});
+    const trigger = await screen.findByTestId('ai-assistant:view-summary');
     expect(trigger.tagName.toLowerCase()).toBe('mdc-button');
     expect(trigger).toHaveTextContent(AI_ASSISTANT_SUMMARY_MESSAGES.viewSummary);
     expect(trigger).toHaveAttribute('aria-label', AI_ASSISTANT_SUMMARY_MESSAGES.viewSummary);
@@ -551,6 +551,167 @@ describe('AIAssistantComponent', () => {
       rerender(<AIAssistantComponent {...createProps({chrome, receiverSummary, hasActiveInteraction: false})} />);
       expect(screen.queryByTestId('ai-assistant:view-summary')).not.toBeInTheDocument();
     }
+  });
+
+  it.each(['closed', 'minimized'] as const)(
+    'opens the incoming summary directly from the toast in %s chrome',
+    async (chrome) => {
+      const controls = renderStatefulReceiver(chrome);
+      const toast = screen.getByTestId('ai-assistant:summary-toast');
+      await waitFor(() => expect(toast.querySelector('mdc-toast')).toHaveAttribute('variant', 'custom'));
+      expect(await within(toast).findByRole('button', {name: 'Later'})).toBeInTheDocument();
+
+      fireEvent.click(within(toast).getByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.viewSummary}));
+
+      expect(await screen.findByTestId('ai-assistant:receiver-summary')).toBeInTheDocument();
+      expect(chrome === 'closed' ? controls.open : controls.restore).toHaveBeenCalledTimes(1);
+      expect(screen.queryByTestId('ai-assistant:summary-toast')).not.toBeInTheDocument();
+      fireEvent.click(screen.getByTestId('ai-assistant:header-minimize'));
+      expect(screen.queryByTestId('ai-assistant:summary-toast')).not.toBeInTheDocument();
+    }
+  );
+
+  it.each(['later', 'close'] as const)(
+    'dismisses an incoming summary toast with %s until a new summary arrives',
+    async (action) => {
+      const receiverSummary = createReceiverSummary();
+      const props = createProps({chrome: 'closed', receiverSummary});
+      const {rerender} = render(<AIAssistantComponent {...props} />);
+      const toast = screen.getByTestId('ai-assistant:summary-toast');
+      if (action === 'later') {
+        fireEvent.click(await within(toast).findByRole('button', {name: 'Later'}));
+      } else {
+        fireEvent(toast.querySelector('mdc-toast') as Element, new CustomEvent('close'));
+      }
+      expect(screen.queryByTestId('ai-assistant:summary-toast')).not.toBeInTheDocument();
+      expect(screen.getByTestId('ai-assistant:view-summary')).toBeInTheDocument();
+      expect(props.open).not.toHaveBeenCalled();
+
+      rerender(
+        <AIAssistantComponent
+          {...props}
+          receiverSummary={{...receiverSummary, selectedFeedback: 'thumbs_up', feedbackPending: true}}
+        />
+      );
+      expect(screen.queryByTestId('ai-assistant:summary-toast')).not.toBeInTheDocument();
+
+      rerender(<AIAssistantComponent {...props} receiverSummary={createReceiverSummary()} />);
+      expect(screen.getByTestId('ai-assistant:summary-toast')).toBeInTheDocument();
+    }
+  );
+
+  it.each(['later', 'view'] as const)(
+    'retains %s notification dismissal when switching between task summaries',
+    async (action) => {
+      const taskA = createReceiverSummary();
+      const taskB = createReceiverSummary({branchKey: 'interaction-2:agent-1:1'});
+      const props = createProps({chrome: 'closed', receiverSummary: taskA});
+      const {rerender} = render(<AIAssistantComponent {...props} />);
+      const dismissCurrentNotification = async () => {
+        const toast = screen.getByTestId('ai-assistant:summary-toast');
+        fireEvent.click(
+          await within(toast).findByRole('button', {
+            name: action === 'later' ? 'Later' : AI_ASSISTANT_SUMMARY_MESSAGES.viewSummary,
+          })
+        );
+      };
+      await dismissCurrentNotification();
+      rerender(<AIAssistantComponent {...props} receiverSummary={taskB} />);
+      await dismissCurrentNotification();
+
+      rerender(<AIAssistantComponent {...props} receiverSummary={taskA} />);
+      expect(screen.queryByTestId('ai-assistant:summary-toast')).not.toBeInTheDocument();
+      expect(screen.getByTestId('ai-assistant:view-summary')).toBeInTheDocument();
+
+      rerender(<AIAssistantComponent {...props} receiverSummary={createReceiverSummary()} />);
+      expect(screen.getByTestId('ai-assistant:summary-toast')).toBeInTheDocument();
+    }
+  );
+
+  it('does not notify for a summary already shown in the open panel or without an active interaction', async () => {
+    const receiverSummary = createReceiverSummary();
+    const props = createProps({receiverSummary});
+    const {rerender} = render(<AIAssistantComponent {...props} />);
+    expect(await screen.findByTestId('ai-assistant:receiver-summary')).toBeInTheDocument();
+    expect(screen.queryByTestId('ai-assistant:summary-toast')).not.toBeInTheDocument();
+
+    rerender(<AIAssistantComponent {...props} chrome="closed" />);
+    expect(screen.queryByTestId('ai-assistant:summary-toast')).not.toBeInTheDocument();
+    rerender(
+      <AIAssistantComponent
+        {...props}
+        chrome="closed"
+        hasActiveInteraction={false}
+        receiverSummary={createReceiverSummary()}
+      />
+    );
+    expect(screen.queryByTestId('ai-assistant:summary-toast')).not.toBeInTheDocument();
+  });
+
+  it('renders earlier consult summaries with feedback and copy bound to their own content', async () => {
+    const writeText = jest.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', {configurable: true, value: {writeText}});
+    const previousContent: ReceiverSummaryContent['content'] = {
+      conversationId: 'interaction-1',
+      timestamp: new Date(2026, 9, 26, 9, 15).getTime(),
+      adaptiveCard: {type: 'AdaptiveCard', version: '1.5', mockRenderedText: 'Earlier consult'},
+    };
+    const receiverSummary = createReceiverSummary({
+      history: [{...createReceiverSummary(), content: previousContent}],
+      content: {
+        conversationId: 'interaction-1',
+        timestamp: new Date(2026, 9, 26, 9, 30).getTime(),
+        adaptiveCard: {type: 'AdaptiveCard', version: '1.5', mockRenderedText: 'Latest consult'},
+      },
+    });
+    render(<AIAssistantComponent {...createProps({receiverSummary})} />);
+
+    const cards = await screen.findAllByTestId('ai-summary:mid-call-receiver');
+    expect(cards).toHaveLength(2);
+    expect(cards[0]).toHaveTextContent('Earlier consult');
+    expect(cards[0]).toHaveTextContent('09:15');
+    expect(cards[1]).toHaveTextContent('Latest consult');
+    expect(cards[1]).toHaveTextContent('09:30');
+    fireEvent.click(await within(cards[0]).findByRole('button', {name: 'This is helpful'}));
+    expect(receiverSummary.history?.[0].setReceiverSummaryFeedback).toHaveBeenCalledWith('thumbs_up');
+    expect(within(cards[0]).queryByRole('button', {name: 'Edit summary'})).not.toBeInTheDocument();
+    fireEvent.click(await within(cards[0]).findByRole('button', {name: 'Copy Summary'}));
+    await waitFor(() => expect(writeText).toHaveBeenCalledWith('Earlier consult'));
+    expect(receiverSummary.history?.[0].recordReceiverSummaryCopied).toHaveBeenCalled();
+    expect(receiverSummary.recordReceiverSummaryCopied).not.toHaveBeenCalled();
+    expect(receiverSummary.setReceiverSummaryFeedback).not.toHaveBeenCalled();
+    expect(await within(cards[1]).findByRole('button', {name: 'This is helpful'})).toBeInTheDocument();
+  });
+
+  it('preserves unavailable transcript status for an archived summary even when it contains a card', async () => {
+    const receiverSummary: AIAssistantComponentProps['receiverSummary'] = {
+      branchKey: 'interaction-1:agent-1:1',
+      surface: 'history',
+      history: [
+        {...createReceiverSummary(), content: {...createReceiverSummary().content, areTranscriptsAvailable: false}},
+      ],
+    };
+    render(<AIAssistantComponent {...createProps({receiverSummary})} />);
+
+    expect(await screen.findByTestId('ai-summary:unavailable')).toBeInTheDocument();
+    expect(screen.queryByTestId('ai-assistant:adaptive-card')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', {name: 'Copy Summary'})).not.toBeInTheDocument();
+  });
+
+  it('renders archived consult history without an unavailable current card or arrival toast', async () => {
+    const receiverSummary: AIAssistantComponentProps['receiverSummary'] = {
+      branchKey: 'interaction-1:agent-1:1',
+      surface: 'history',
+      history: [createReceiverSummary()],
+    };
+    const {rerender} = render(<AIAssistantComponent {...createProps({receiverSummary})} />);
+    expect(await screen.findAllByTestId('ai-summary:mid-call-receiver')).toHaveLength(1);
+    expect(screen.queryByTestId('ai-summary:unavailable')).not.toBeInTheDocument();
+    expect(screen.getByTestId('ai-assistant:summary-get-assistance')).toBeInTheDocument();
+
+    rerender(<AIAssistantComponent {...createProps({chrome: 'closed', receiverSummary})} />);
+    expect(screen.queryByTestId('ai-assistant:summary-toast')).not.toBeInTheDocument();
+    expect(screen.getByTestId('ai-assistant:view-summary')).toBeInTheDocument();
   });
 
   it('automatically displays a summary that arrives while the panel is open without moving host focus', async () => {
@@ -680,8 +841,10 @@ describe('AIAssistantComponent', () => {
           : [],
       });
       render(<AIAssistantComponent {...props} />);
-      const summary = await screen.findByTestId('ai-assistant:receiver-summary');
-      const assistance = within(summary).getByRole('button', {name: 'Get Assistance'});
+      await screen.findByTestId('ai-assistant:receiver-summary');
+      const assistance = within(screen.getByTestId('ai-assistant:footer')).getByRole('button', {
+        name: 'Get Assistance',
+      });
       expect(assistance).toHaveClass('ai-assistant__pill-button');
 
       fireEvent.click(assistance);
@@ -704,8 +867,8 @@ describe('AIAssistantComponent', () => {
   it('disables summary assistance and guards its callback while another assistance request is pending', async () => {
     const props = createProps({receiverSummary: createReceiverSummary(), isRequesting: true});
     render(<AIAssistantComponent {...props} />);
-    const summary = await screen.findByTestId('ai-assistant:receiver-summary');
-    const assistance = within(summary).getByRole('button', {name: 'Get Assistance'});
+    await screen.findByTestId('ai-assistant:receiver-summary');
+    const assistance = within(screen.getByTestId('ai-assistant:footer')).getByRole('button', {name: 'Get Assistance'});
 
     expect(assistance).toHaveAttribute('disabled');
     fireEvent.click(assistance);
@@ -731,9 +894,9 @@ describe('AIAssistantComponent', () => {
     };
     const props = createProps({receiverSummary: createReceiverSummary(), wellness});
     const {rerender} = render(<AIAssistantComponent {...props} />);
-    const summary = await screen.findByTestId('ai-assistant:receiver-summary');
+    await screen.findByTestId('ai-assistant:receiver-summary');
 
-    fireEvent.click(within(summary).getByRole('button', {name: 'Get Assistance'}));
+    fireEvent.click(within(screen.getByTestId('ai-assistant:footer')).getByRole('button', {name: 'Get Assistance'}));
 
     expect(props.requestRealTimeAssist).toHaveBeenCalledTimes(1);
     expect(screen.getByTestId('ai-assistant:empty')).toBeInTheDocument();
@@ -761,16 +924,32 @@ describe('AIAssistantComponent', () => {
     expect(screen.queryByTestId('ai-assistant:empty')).not.toBeInTheDocument();
   });
 
-  it('keeps Get Assistance in its own row outside the receiver card and its footer', async () => {
-    render(<AIAssistantComponent {...createProps({receiverSummary: createReceiverSummary()})} />);
+  it.each([0, 2])('keeps Get Assistance fixed above the disclaimer with %i historical summaries', async (count) => {
+    const receiverSummary = createReceiverSummary();
+    receiverSummary.history = Array.from({length: count}, () =>
+      createReceiverSummary({content: receiverSummary.content})
+    );
+    render(<AIAssistantComponent {...createProps({receiverSummary})} />);
     const summary = await screen.findByTestId('ai-assistant:receiver-summary');
-    const row = within(summary).getByTestId('ai-assistant:receiver-assistance');
-    const assistance = within(row).getByRole('button', {name: 'Get Assistance'});
-    const card = within(summary).getByTestId('ai-assistant:adaptive-card');
+    const assistance = screen.getByRole('button', {name: 'Get Assistance'});
+    const cards = within(summary).getAllByTestId('ai-assistant:adaptive-card');
+    const item = summary.querySelector('.ai-assistant__chat-item');
+    const footer = screen.getByTestId('ai-assistant:footer');
 
-    expect(row).toContainElement(assistance);
-    expect(card).not.toContainElement(row);
-    expect(card).toContainElement(within(summary).getByRole('button', {name: 'Copy Summary'}));
+    expect(summary).toHaveClass('ai-assistant__chat');
+    expect(summary).toContainElement(item as HTMLElement);
+    expect(cards).toHaveLength(count + 1);
+    cards.forEach((card) => {
+      expect(item).toContainElement(card);
+      expect(card).not.toContainElement(assistance);
+      expect(card).toContainElement(within(card).getByRole('button', {name: 'Copy Summary'}));
+    });
+    expect(summary).not.toContainElement(footer);
+    expect(summary).not.toContainElement(assistance);
+    expect(footer).toContainElement(assistance);
+    expect(assistance.compareDocumentPosition(screen.getByTestId('ai-assistant:disclaimer'))).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
   });
 
   it('does not expose summary assistance without Real-time Assist enablement or an active interaction', async () => {
@@ -910,7 +1089,7 @@ describe('AIAssistantComponent', () => {
 
       rerender(<AIAssistantComponent {...props} receiverSummary={createReceiverSummary()} />);
 
-      const trigger = await screen.findByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.viewSummary});
+      const trigger = await screen.findByTestId('ai-assistant:view-summary');
       expect(screen.queryByTestId('ai-assistant:panel')).not.toBeInTheDocument();
       expect(screen.queryByTestId('ai-assistant:receiver-summary')).not.toBeInTheDocument();
       expect(props.open).not.toHaveBeenCalled();
@@ -1182,7 +1361,7 @@ describe('AIAssistantComponent', () => {
       </>
     );
     const {rerender} = render(renderHost(props.receiverSummary));
-    const trigger = await screen.findByRole('button', {name: AI_ASSISTANT_SUMMARY_MESSAGES.viewSummary});
+    const trigger = await screen.findByTestId('ai-assistant:view-summary');
     act(() => trigger.focus());
     expect(trigger).toHaveFocus();
     const host = screen.getByRole('button', {name: 'Host control'});

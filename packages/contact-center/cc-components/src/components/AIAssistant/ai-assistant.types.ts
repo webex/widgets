@@ -98,23 +98,21 @@ export type AIAssistantChatEntry =
       realTimeAssist?: RealTimeAssistPayload;
     };
 
-export type AIAssistantReceiverSummary =
-  | {
-      surface: 'content';
-      /** Stable identity for this interaction's receiver summary; changes when the active interaction changes. */
-      branchKey: string;
-      content: NonNullable<AISummaryEntry['content']>;
-      selectedFeedback: AISummaryFeedback;
-      feedbackPending: boolean;
-      /** Bound by the widget to the displayed SDK summary. */
-      recordReceiverSummaryCopied: () => boolean;
-      setReceiverSummaryFeedback: (feedback: AISummaryFeedback) => void;
-    }
-  | {
-      surface: 'unavailable' | 'generic-error';
-      /** Stable identity for this interaction's receiver summary; changes when the active interaction changes. */
-      branchKey: string;
-    };
+export type AIAssistantReceiverSummaryCard = {
+  content: NonNullable<AISummaryEntry['content']>;
+  selectedFeedback: AISummaryFeedback;
+  feedbackPending: boolean;
+  /** Bound by the widget to the displayed SDK summary. */
+  recordReceiverSummaryCopied: () => boolean;
+  setReceiverSummaryFeedback: (feedback: AISummaryFeedback) => void;
+};
+
+export type AIAssistantReceiverSummary = {
+  /** Earlier received summaries for this interaction, in arrival order. */
+  history?: AIAssistantReceiverSummaryCard[];
+  /** Stable identity for this interaction's receiver summary. */
+  branchKey: string;
+} & (({surface: 'content'} & AIAssistantReceiverSummaryCard) | {surface: 'unavailable' | 'generic-error' | 'history'});
 
 /** Props for the top-level AIAssistant presentational component. */
 export interface AIAssistantComponentProps {

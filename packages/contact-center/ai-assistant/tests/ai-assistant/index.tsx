@@ -223,6 +223,20 @@ describe('AIAssistant widget', () => {
     expect(screen.queryByTestId('ai-assistant:landing')).not.toBeInTheDocument();
   });
 
+  it('opens the received summary directly from its toast without requesting assistance', async () => {
+    storeMock.featureFlags = {isSuggestedResponsesEnabled: false};
+    setReceiverEntry(receiverEntry());
+    const onOpen = jest.fn();
+    render(<AIAssistant onOpen={onOpen} />);
+
+    fireEvent.click(screen.getByTestId('ai-assistant:toast-view-summary'));
+
+    expect(await screen.findByTestId('ai-assistant:receiver-summary')).toBeInTheDocument();
+    expect(screen.queryByTestId('ai-assistant:summary-toast')).not.toBeInTheDocument();
+    expect(onOpen).toHaveBeenCalledTimes(1);
+    expect(storeMock.cc.apiAIAssistant.getRealTimeAssistance).not.toHaveBeenCalled();
+  });
+
   it('delegates receiver copies and feedback with the displayed SDK content', async () => {
     const entry = receiverEntry();
     setReceiverEntry(entry);
@@ -254,6 +268,70 @@ describe('AIAssistant widget', () => {
       setReceiverEntry({...entry, status});
       expect(helper.getReceiverSummary(store.currentTask)).toMatchObject({surface: 'content', content: entry.content});
     }
+  });
+
+  it('projects prior consult summaries alongside the latest received summary', () => {
+    const previous = receiverEntry().content!;
+    const latest = receiverEntry();
+    setReceiverEntry(Object.assign(latest, {history: [previous]}));
+
+    expect(helper.getReceiverSummary(store.currentTask)).toMatchObject({
+      surface: 'content',
+      content: latest.content,
+      history: [expect.objectContaining({content: previous, selectedFeedback: 'none', feedbackPending: false})],
+    });
+  });
+
+  it('projects independent pending and confirmed feedback for an earlier incoming card', () => {
+    const previous = receiverEntry().content!;
+    const latest = receiverEntry();
+    setReceiverEntry({
+      ...latest,
+      history: [previous],
+      cardFeedback: [{content: previous, feedback: 'thumbs_up', pending: true}],
+    });
+
+    expect(helper.getReceiverSummary(store.currentTask)).toMatchObject({
+      surface: 'content',
+      selectedFeedback: 'none',
+      feedbackPending: false,
+      history: [expect.objectContaining({content: previous, selectedFeedback: 'thumbs_up', feedbackPending: true})],
+    });
+  });
+
+  it('keeps archived consult summaries reachable with actions bound to the original card', () => {
+    const previous = receiverEntry().content!;
+    setReceiverEntry(Object.assign(receiverEntry({content: undefined}), {history: [previous]}));
+
+    expect(helper.getReceiverSummary(store.currentTask)).toMatchObject({
+      surface: 'history',
+      history: [expect.objectContaining({content: previous})],
+    });
+    helper.getReceiverSummary(store.currentTask)?.history?.[0].setReceiverSummaryFeedback('thumbs_up');
+    expect(storeMock.setReceiverSummaryFeedback).toHaveBeenCalledWith('thumbs_up', previous, storeMock.currentTask);
+    expect(helper.getReceiverSummary(store.currentTask)).not.toHaveProperty('setReceiverSummaryFeedback');
+  });
+
+  it('shows both consult summaries after the next summary arrives for the same interaction', async () => {
+    const first = receiverEntry().content!;
+    const second = {
+      ...first,
+      adaptiveCard: {
+        type: 'AdaptiveCard',
+        version: '1.5',
+        body: [{type: 'TextBlock', text: 'Second consult summary'}],
+      },
+    };
+    setReceiverEntry(Object.assign(receiverEntry({content: second}), {history: [first]}));
+    render(<AIAssistant />);
+
+    fireEvent.click(screen.getByTestId('ai-assistant:view-summary'));
+
+    const summaryPanel = await screen.findByTestId('ai-assistant:receiver-summary');
+    expect(within(summaryPanel).getByText('Receiver summary')).toBeInTheDocument();
+    expect(within(summaryPanel).getByText('Second consult summary')).toBeInTheDocument();
+    expect(within(summaryPanel).getAllByTestId('ai-summary:mid-call-receiver')).toHaveLength(2);
+    expect(within(summaryPanel).getAllByRole('button', {name: 'This is helpful'})).toHaveLength(2);
   });
 
   it('delegates receiver feedback deselection with the displayed SDK content and task', () => {

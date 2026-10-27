@@ -1,6 +1,6 @@
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import store from '@webex/cc-store';
-import type {ITask, RealTimeAssistPayload} from '@webex/cc-store';
+import type {AISummaryEntry, AISummaryFeedback, ITask, RealTimeAssistPayload} from '@webex/cc-store';
 import type {
   AIAssistantActionEvent,
   AIAssistantChatEntry,
@@ -307,24 +307,34 @@ export const getReceiverSummary = (task?: ITask): AIAssistantReceiverSummary | u
     return undefined;
   }
   const branchKey = `mid-call:receiver:${interactionId}`;
+  const projectCard = (content: NonNullable<AISummaryEntry['content']>) => {
+    const feedback = summaryData.cardFeedback?.find((card) => card.content === content);
+    return {
+      content,
+      selectedFeedback:
+        feedback?.feedback ?? (summaryData.content === content ? summaryData.response.feedback : 'none'),
+      feedbackPending: feedback?.pending ?? (summaryData.content === content && Boolean(summaryData.feedbackPending)),
+      recordReceiverSummaryCopied: () => store.recordAISummaryCopied('receiver', content, task),
+      setReceiverSummaryFeedback: (selected: AISummaryFeedback) => {
+        void store.setReceiverSummaryFeedback(selected, content, task);
+      },
+    };
+  };
+  const history = summaryData.history?.map(projectCard);
   const content = summaryData.content;
   if (!content) {
+    if (history?.length) return {surface: 'history', branchKey, history};
     return summaryData.status === 'error' ? {surface: 'generic-error', branchKey} : undefined;
   }
   // The SDK flag is optional; an omitted value must not hide supplied content.
   if (content.areTranscriptsAvailable === false) {
-    return {surface: 'unavailable', branchKey};
+    return {surface: 'unavailable', branchKey, history};
   }
   return {
     surface: 'content',
     branchKey,
-    content,
-    selectedFeedback: summaryData.response.feedback,
-    feedbackPending: Boolean(summaryData.feedbackPending),
-    recordReceiverSummaryCopied: () => store.recordAISummaryCopied('receiver', content, task),
-    setReceiverSummaryFeedback: (feedback) => {
-      void store.setReceiverSummaryFeedback(feedback, content, task);
-    },
+    history,
+    ...projectCard(content),
   };
 };
 
