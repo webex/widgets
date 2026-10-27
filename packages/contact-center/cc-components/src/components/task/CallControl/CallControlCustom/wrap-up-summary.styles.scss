@@ -1,0 +1,108 @@
+.wrap-up-summary mdc-text::part(text) {
+  margin: 0;
+}
+
+.wrap-up-summary {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  inline-size: min(var(--cc-summary-panel-width, 27.5rem), calc(100vw - 2rem));
+  max-block-size: 80vh;
+  min-block-size: 0;
+  padding: 1rem;
+}
+
+.wrap-up-summary__scroll-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-block-size: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+
+  > * {
+    flex-shrink: 0;
+  }
+}
+
+.wrap-up-summary__header {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.wrap-up-summary__intro,
+.wrap-up-summary__suggestions-label {
+  color: var(--mds-color-theme-text-secondary-normal);
+}
+
+.wrap-up-summary__reason-picker {
+  --mdc-combobox-listbox-height: 12rem;
+}
+
+.wrap-up-summary__suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.wrap-up-summary__suggestions-label::part(text) {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.wrap-up-summary__suggestions-icon {
+  color: var(--mds-color-theme-text-accent-normal);
+}
+
+.wrap-up-summary__suggestion-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.wrap-up-summary__suggestion-chip::part(icon) {
+  order: 1;
+  inline-size: 0.75rem;
+  block-size: 0.75rem;
+}
+
+.wrap-up-summary__body {
+  min-inline-size: 0;
+  min-block-size: 0;
+  border-block-start: 0.0625rem solid var(--mds-color-theme-outline-secondary-normal);
+  padding-block-start: 0.75rem;
+}
+
+// The raw SDK card owns its internal 182px body and actions. Fallback summaries
+// use the same bounded content area while keeping their controls in view.
+.wrap-up-summary__body .ai-summary__content {
+  max-block-size: 11.375rem;
+  min-block-size: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.wrap-up-summary__body .ai-summary__status {
+  min-block-size: 11.375rem;
+}
+
+.wrap-up-summary__actions {
+  align-self: flex-end;
+  flex-shrink: 0;
+}
+
+.wrapup-popover.md-modal-container-wrapper:has(.wrap-up-summary) {
+  padding: 0;
+}
+
+@media (max-height: 600px) {
+  .wrap-up-summary {
+    gap: 0.5rem;
+    padding: 0.75rem;
+  }
+}

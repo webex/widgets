@@ -84,7 +84,6 @@
   text-transform: uppercase;
 }
 
-
 .wrapup-group {
   display: flex;
   flex-direction: column;
@@ -519,4 +518,31 @@
       min-width: 20rem;
     }
   }
+}
+
+// Momentum owns modal focus, Escape, backdrop and focus restoration. The host
+// uses viewport positioning so embedded widget containers cannot anchor it.
+.call-control-summary-dialog {
+  --mdc-dialog-width: min(var(--cc-summary-panel-width, 30.5rem), calc(100vw - 2rem));
+  --mdc-dialog-height: 80vh;
+  --mdc-dialog-padding: 1rem;
+
+  position: fixed;
+
+  &::part(body) {
+    flex: 1 1 auto;
+    min-block-size: 0;
+    justify-content: flex-start;
+    overflow: hidden;
+  }
+}
+
+.call-control-summary-dialog__body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  inline-size: 100%;
+  block-size: 100%;
+  min-block-size: 0;
+  min-inline-size: 0;
 }

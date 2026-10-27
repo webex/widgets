@@ -435,7 +435,7 @@ The six widget shells are siblings that each bind to exactly one hook and one pr
 - **UC-5 Mute / unmute (CallControl):** Agent clicks mute → `toggleMute()` (gated by `controlVisibility.muteUnmute`) → `currentTask.toggleMute()` → `store.setIsMuted`, `onToggleMute`. Evidence: `src/helper.ts`, `tests/helper.ts` ("should successfully toggle mute…", "rapid toggleMute"). UI flow: shows error-safe revert on failure.
 - **UC-6 Consult an agent/queue/EP-DN then transfer or conference (CallControl):** Agent opens consult modal → component reads the matching ordered category array from `currentTask.uiControls.consultTransferDestinations` → `consultCall(dest,type,allow)` → on completion `consultTransfer()` (or `transferConference` in conference) or `endConsultCall()`. Evidence: `src/helper.ts`, `src/CallControl/index.tsx`, `packages/contact-center/cc-components/src/components/task/CallControl/call-control.tsx`.
 - **UC-7 Blind transfer (CallControl):** Agent picks destination → `transferCall(to,type)` → `currentTask.transfer(...)`; failure re-thrown to the modal. Evidence: `src/helper.ts`, `tests/helper.ts` ("should call transferCall successfully").
-- **UC-8 Wrap up a call (CallControl):** Call ends → wrap-up codes shown → Agent selects code → when enabled, await `store.sendPostCallSummaryResponse(auxCodeId, currentTask)` with that exact task and selected code → `currentTask.wrapup({wrapUpReason, auxCodeId})` → next task promoted to `currentTask`, agent → ENGAGED. The disabled capability skips summary submission; both `response-failed` and unexpected summary submission rejections allow wrap-up to continue. Evidence: `src/helper.ts`, `tests/helper.ts` ("should call wrapupCall" and "post-call summary submission during wrap-up", including deferred success ordering, both failure paths, and disabled capability). Auto-wrap-up: countdown shown with Cancel. UI flow: wrap-up dropdown + optional auto-wrap-up countdown.
+- **UC-8 Wrap up a call (CallControl):** Call ends → wrap-up codes shown → Agent selects code → when enabled, dispatch `store.sendPostCallSummaryResponse(auxCodeId, currentTask)` with that exact task and selected code → immediately call `currentTask.wrapup({wrapUpReason, auxCodeId})` → next task promoted to `currentTask`, agent → ENGAGED. Summary acknowledgement does not delay wrap-up; disabled capability skips submission and failed sends are logged. Evidence: `src/helper.ts`, `tests/helper.ts` ("should call wrapupCall" and "post-call summary submission during wrap-up", including pending summary submission, send failures, and disabled capability). Auto-wrap-up: countdown shown with Cancel. UI flow: wrap-up dropdown + optional auto-wrap-up countdown.
 - **UC-9 Place an outbound call (OutdialCall):** Agent enters number, selects ANI → dial → `startOutdial(destination, origin)`; empty number alerts and aborts; disabled while a telephony task is active. Evidence: `src/helper.ts` (`useOutdialCall`), `tests/OutdialCall/index.tsx`. UI flow: dialpad with validation, ANI dropdown, address book toggled by `isAddressBookEnabled`.
 - **UC-10 Manage concurrent tasks (TaskList):** Agent sees all tasks → accept/decline per task or click to select → selection sets `currentTask` so CallControl follows. Evidence: `src/helper.ts` (`useTaskList`), `tests/helper.ts` (task-list cases), `tests/TaskList/index.tsx`.
 - **UC-11 View live transcript (RealTimeTranscript):** As `store.realtimeTranscriptionData` updates for `currentTask`, lines are mapped to entries with normalized speaker/time. Evidence: `src/helper.ts` (`useRealTimeTranscript`), `tests/RealtimeTranscript/index.tsx`.
@@ -557,6 +557,81 @@ Tests are split between widget-shell render tests (each `tests/<Widget>/index.ts
 | `TASK-R-023` campaign-preview gating              | None found                                                                                                                                           | No test for unaccepted-campaign-preview early return                   |
 | `TASK-R-024` participant Drop orchestration       | `tests/helper.ts` (exact payload, duplicate prevention, success/failure cleanup, sanitized callback/logging, stale completion, roster re-derivation) | Live routing-event behavior is covered by SDK/manual integration tests |
 | `TASK-R-025` SDK destination-control pass-through | `tests/CallControl/index.tsx`, `tests/CallControlCAD/index.tsx`; cc-components focused destination tests                                             | None                                                                   |
+
+## AI summaries in CallControl
+
+`getAISummaryProps` in `src/helper.ts` maps the current task's SDK capabilities and
+`store.aiSummaries` entries into optional mid-call and post-call views.
+It reads `task.aiSummaryCapabilities` directly, with no additional media-type filter,
+and supplies no summary props when both capabilities are disabled. Each view receives
+the entry's raw SDK content, which can be absent during generation or failure, and
+feedback from `entry.response.feedback`. An enabled view without an entry starts in
+the generating state. Unavailable transcripts take priority over content; retained
+content remains visible during a refresh or after a failed refresh. The adapter imports
+the view prop type from `@webex/cc-components` and passes the SDK content unchanged,
+with `entry.response.summary` supplied separately as the editable display values.
+Edits, copy counts and deferred feedback call the store's `editAISummary`,
+`recordAISummaryCopied` and `setAISummaryFeedback` methods. The store updates that
+existing SDK response record inside `runInAction`; the task helper does not import MobX
+or mutate the SDK summary. Each callback captures the selected task and raw SDK
+content identity, so the store rejects stale controls after a task switch, replacement
+summary or pending refresh. Only canonical SDK section fields or plain summary text can be edited;
+omitted optional sections shown by the SDK edit card use an empty-string baseline. Unknown keys
+and the separate resolution remain read-only. The renderer forwards each real SDK `Input.Text.id`
+and validates it against the shared canonical editable keys before recording a section edit. Unchanged
+values leave the response untouched, and reverting a structured field removes that
+field's response override. The edit count is the existing zero-or-one edited flag.
+Requests and response submission remain store/SDK
+operations, with no widget-owned transport validation or correlation.
+
+The mid-call view also receives `excluded` and `onExcludeChange`, wired to
+`store.setAISummaryExcluded` with the displayed content and selected task identities.
+Exclude changes only local state until the final action sends its response, disables
+summary editing/copy/feedback, and leaves a valid destination actionable. The choice
+survives generation completion and Retry. An empty failed request sends `NOT_RECEIVED`
+ahead of `EXCLUDED`; clearing the checkbox restores the content or pending baseline state.
+`cancelMidCallSummary(action)` sends a `MID_CALL_CANCELLED` response snapshot through
+the store. Only footer Cancel invokes it before `resetMidCallSummaryExclusion`.
+Header close, Escape, and successful submission close through the reset callback
+without cancellation. Both callbacks are bound to the active task;
+the reset reads its latest content so a completed in-flight request cannot retain an
+old checkbox selection on reopening. Reopening therefore starts unchecked.
+
+Opening consult/transfer requests the corresponding mid-call summary exactly once.
+The summary-enabled voice presentation uses the shared Momentum Dialog, while
+non-summary destinations and keypad retain their popover presentation. Retry requests
+the currently open Consult/Transfer action through the same widget callback.
+Summary-enabled voice rows select a destination; only the explicit final Consult or
+Transfer action invokes the widget callback. Search/reload invalidates stale
+selections and Refresh stays available. Wrap-up reason searches clear the previous
+selection before completion can use a hidden reason. Summary feedback callbacks
+accept `none` to withdraw a previous selection. `consultCall`
+and `transferCall` send the initiator response through the store as the existing SDK
+operation starts; they do not wait for summary submission. When post-call summary
+capability is enabled, `wrapupCall` dispatches
+`store.sendPostCallSummaryResponse(auxCodeId, currentTask)` without awaiting its
+acknowledgement, then immediately calls and awaits Task `wrapup` before promoting the
+next task. The store snapshots the response synchronously and logs submission failures.
+The response's `wrapUpCode` is the selected code ID; disabled capability skips submission.
+An unedited structured summary has an empty `summary` object. The UI reuses the existing
+wrap-up handler, which clears the selected reason immediately after dispatch.
+Desktop sends the summary after successful wrap-up; widgets dispatch it beforehand to
+capture the current response. Neither path delays wrap-up for summary acknowledgement.
+
+Widgets access summary APIs through `@webex/cc-store`.
+Summary views expose one `controlsDisabled` flag for request loading. The
+consult/transfer panel combines it with exclusion before rendering `AISummary`.
+
+### Reactive summary updates
+
+The store observes its own `aiSummaries` map by reference. CallControl's
+observer reads that property through `getAISummaryProps`, so request completion,
+failure and local response updates refresh an open summary view without another task
+event or reopening the consult/transfer panel. SDK objects and summary payloads
+retain their original identities.
+
+Evidence: `src/helper.ts`, `src/CallControl/index.tsx`, `src/task.types.ts`;
+tests: AI summary cases in `tests/helper.ts`.
 
 ## Traceability
 

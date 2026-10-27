@@ -1,0 +1,230 @@
+.consult-transfer-summary {
+  min-inline-size: 0;
+  border-block-start: 0.0625rem solid var(--mds-color-theme-outline-secondary-normal, #d7d7d8);
+  margin-block-start: 0.75rem;
+  padding-block-start: 0.75rem;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.consult-transfer-summary__heading {
+  margin: 0 0 0.5rem;
+}
+
+// Momentum Text exposes its actual heading through a shadow part. Flex on
+// the host cannot align the icon/text inside that heading, or reset its margin.
+.consult-transfer-summary__heading::part(text) {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin: 0;
+}
+
+.consult-transfer-summary__sparkle {
+  color: var(--mds-color-theme-text-accent-normal, #0b5cad);
+  flex: 0 0 auto;
+}
+
+.consult-category-radios.md-radio-group {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.75rem;
+  inline-size: 100%;
+  margin-block-end: 0.75rem;
+
+  > .md-radio-wrapper > .md-radio-label {
+    font-size: 0.875rem;
+    margin-inline: 0;
+  }
+}
+
+// Bound the voice panel; long destination lists and summary content scroll
+// independently without pushing the heading or summary actions off screen.
+.agent-popover.md-modal-container-wrapper:has(.agent-popover-content--voice) {
+  padding: 0;
+}
+
+.agent-popover .agent-popover-content.agent-popover-content--voice {
+  min-width: 0;
+  width: min(var(--cc-summary-panel-width, 30rem), calc(100vw - 2rem));
+  block-size: 80vh;
+  max-block-size: 80vh;
+  min-block-size: 0;
+  padding: 1rem;
+  overflow: visible;
+  font-family: var(--mds-font-family-primary, Inter, CiscoSans, 'Helvetica Neue', Arial, sans-serif);
+
+  .agent-popover-title::part(text) {
+    margin: 0;
+  }
+
+  .agent-popover-title {
+    padding-inline-end: 2rem;
+  }
+
+  .consult-close-button {
+    position: absolute;
+    inset-block-start: 1rem;
+    inset-inline-end: 1rem;
+  }
+
+  > :not(.consult-list-container, .consult-transfer-summary) {
+    flex-shrink: 0;
+  }
+
+  .consult-list-container {
+    flex: 1 1 35%;
+    min-block-size: 0;
+    max-block-size: none;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .agent-list {
+    min-inline-size: 0;
+  }
+
+  .call-control-list-item {
+    min-block-size: 3.5rem;
+  }
+
+  .call-control-list-item:focus-within .hover-button,
+  .call-control-list-item.active .hover-button {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .consult-transfer-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    padding-block-start: 0.75rem;
+    border-block-start: 0.0625rem solid var(--mds-color-theme-outline-secondary-normal, #d7d7d8);
+  }
+
+  .consult-transfer-summary {
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 auto;
+    min-block-size: 0;
+  }
+
+  .consult-transfer-summary > .ai-summary,
+  .consult-transfer-summary .ai-summary__content {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .consult-transfer-summary > .ai-summary,
+  .consult-transfer-summary .ai-summary__editor-surface,
+  .consult-transfer-summary .ai-summary__content {
+    flex: 1 1 auto;
+    min-block-size: 0;
+  }
+
+  .consult-transfer-summary .ai-summary__content {
+    gap: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .consult-transfer-summary .ai-summary__content > *,
+  .consult-transfer-summary .ai-summary__actions,
+  .consult-transfer-summary__heading {
+    flex-shrink: 0;
+  }
+
+  .consult-transfer-summary > .ai-summary > .ai-summary__status {
+    min-block-size: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
+
+@media (max-height: 480px) {
+  .agent-popover .agent-popover-content.agent-popover-content--voice {
+    padding: 0.5rem;
+    gap: 0.125rem;
+
+    .agent-popover-title {
+      margin-block-end: 0;
+    }
+
+    .consult-category-radios.md-radio-group {
+      margin-block-end: 0.125rem;
+    }
+
+    .consult-list-container {
+      flex: 0 0 auto;
+      min-block-size: 1.5rem;
+      max-block-size: 6rem;
+    }
+
+    .consult-transfer-summary {
+      margin-block-start: 0.25rem;
+      padding-block-start: 0.25rem;
+    }
+
+    .consult-transfer-summary__heading {
+      margin-block-end: 0.125rem;
+    }
+
+    .ai-summary__editor-surface {
+      padding: 0.25rem 0.5rem;
+    }
+  }
+}
+
+.call-control-summary-dialog.agent-popover .agent-popover-content.agent-popover-content--voice {
+  width: 100%;
+  max-width: 100%;
+  block-size: 100%;
+  max-block-size: 100%;
+  padding: 0;
+  overflow: hidden;
+
+  .consult-list-container {
+    margin-block-end: 0;
+  }
+}
+
+.consult-transfer-actions__exclude {
+  margin-inline-end: auto;
+}
+
+@media (max-height: 480px) {
+  .call-control-summary-dialog.agent-popover .agent-popover-content.agent-popover-content--voice {
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+
+    .consult-transfer-actions {
+      position: sticky;
+      inset-block-end: 0;
+      z-index: 2;
+      background: var(--mds-color-theme-background-primary-normal, #fff);
+    }
+  }
+}
+
+.consult-transfer-summary--excluded {
+  position: relative;
+  pointer-events: none;
+  user-select: none;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0.75rem 0 0;
+    background-color: var(
+      --mds-color-theme-background-glass-overlay-inactive,
+      color-mix(in srgb, var(--mds-color-theme-background-primary-normal, #fff) 65%, transparent)
+    );
+    z-index: 1;
+  }
+}

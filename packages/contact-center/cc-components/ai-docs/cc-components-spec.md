@@ -355,6 +355,322 @@ Each component is tested in isolation with React Testing Library: render from a 
 | `CC-COMPONENTS-R-017`  | `tests/components/task/CallControlCAD/call-control-cad.tsx` (Momentum structure/configuration, sections, immediate/confirmed Drop, pending/consult disabled state, read-only rows, focus fallback, live regions) | Momentum overlay keyboard behavior and visual placement receive final manual coverage |
 | `CC-COMPONENTS-R-018`  | `tests/components/task/CallControl/CallControlCustom/consult-transfer-popover.tsx`, `tests/components/task/CallControl/CallControlCustom/consult-transfer-popover.snapshot.tsx`                                  | None                                                                                  |
 
+## AI Assistant summary presentation
+
+The internal `components/AIAssistant/AISummary` surface renders generating, unavailable, error,
+and content states from props. Initiator and post-call summaries support keyed text
+edits, copy and feedback. Initiator and post-call errors support Retry when supplied; post-call shows a read-only Outcome from SDK
+`resolution`; the display labels never become SDK section keys. Receiver summaries
+use copy and feedback actions around a display-only Adaptive Card. Receiver content
+without an Adaptive Card renders as unavailable and exposes no summary actions.
+
+Summary content props retain the store's SDK `AISummary` shape, including the required
+`conversationId`; feedback and lifecycle values are supplied by the widget from the
+store entry. Generating and error states accept absent content so widgets can pass
+the store value directly without constructing an empty SDK payload. An editable
+content state without a payload falls back to unavailable and exposes no actions.
+Edit callbacks notify the owner without requiring a return value. Component tests
+use the same SDK shape. `AISummary` owns receiver card rendering and actions;
+the assistant selects the summary branch alongside its chrome.
+A common props interface declares the mode and shared optional callbacks once. Mode
+values live in summary constants. Missing edit callbacks produce read-only content;
+missing action or Retry callbacks hide those controls. The shared
+action surface uses that SDK payload only as identity. Callbacks are bound by the widget to the displayed
+SDK summary and accept no numeric revision. Section ordering, labels, plain-text
+clipboard formatting and the Momentum fallback presentation belong to
+this component. Widget helpers dispatch local edits, copy counts and deferred feedback
+to store actions for the applicable role. SDK submission stays in the store.
+The presentation-state union is declared locally rather than derived from a store
+selector. Pending clipboard completions cannot update confirmation after the
+displayed SDK payload changes.
+
+Summary content starts in a read-only view. The explicit Edit summary action switches
+from the SDK's `adaptiveCard` to `editAdaptiveCard`, reusing `AdaptiveCardRenderer`.
+Existing response drafts reopen the edit surface so unchanged SDK view cards cannot
+hide local edits. Without a supplied card, Momentum `Text`, `Button` and `Textarea`
+provide the same explicit view/edit transition. All present editable fields, including
+empty strings, stay available after blur so cleared text can be restored. Outcome
+remains read-only. No per-section text buttons, hidden measurement element, font
+listeners or resize observer are used. Fallback textareas retain Momentum's normal
+field styling and public row sizing.
+Fallback text uses explicit Momentum `Text.type` values and icons use public size
+props; no descendant-wide font override or fixed feedback-button wrapper dimensions
+replace native typography and sizing.
+Plain and structured fallbacks share one field iteration and one Momentum textarea
+path. The content grid spaces fields directly without a single-child section wrapper.
+Status states share one container, heading and description; content rendering follows
+one content-state check. Editable controls derive from the hook's edit state, which
+already requires an edit callback. Receiver mode keeps its externally rendered card
+and exposes only the shared action controls.
+
+The renderer shares `copyToClipboard`, feedback selection and control painting with
+suggested responses. One action snapshot supplies action visibility, control kinds
+and original labels; the same update pass applies contextual labels and action state.
+Summary copy events occur only after a successful clipboard write;
+replaced cards, content identities and unmounts invalidate pending completions.
+Controlled summary feedback uses the store's confirmed selection and permits clearing
+a repeated selection to `none`. Suggested responses keep their existing SDK action
+IDs, `{type, actionId}` event payload, acknowledgement-driven feedback toggle and
+immediate copy-action notification. Only supplied controlled feedback is repainted
+on props updates. The renderer accepts contextual action labels without referring to summary
+or store implementations. It overlays keyed drafts on matching `Input.Text` IDs
+without reparsing the card or replacing the focused input; a plain draft string is
+applied only to a card with one text input. An empty initial response does not erase
+a card-only plain editor's SDK value when `summaryText` is absent. It reports the original input ID to its
+owner. One `controlsDisabled` prop disables card actions and inputs; callers combine
+request loading and exclusion before passing it. Missing callbacks
+hide their corresponding actions; inputs stay read-only until Edit and whenever
+editing is unavailable. Summary Edit/sparkle icons resolve to bundled Momentum assets.
+Desktop's supplied summary templates use `Action.Submit`; native disabled controls
+and the action callback guard handle summary exclusion/loading without capture-phase
+click or keyboard listeners for arbitrary selectable-container actions.
+The raw SDK card and summary content remain unchanged. Shared card inputs use Momentum theme tokens for their border, radius, text and focus styling. The renderer's `summary` presentation uses Desktop's 12/14px typography, 600-weight labels and compact actions, without the suggestion surface or an extra host border. Summary template body containers scroll at 182px while their actions stay outside that body; structured inputs use CSS content sizing instead of DOM measurement. These overrides are scoped to summary cards and their template IDs so suggestion cards retain their existing presentation.
+Host configuration keeps default containers transparent and gives emphasis containers
+Momentum's secondary background surface. Summary typography, spacing and actions are
+selected in that same configuration without changing suggestion defaults.
+
+Fallback controls also share the copy and feedback utility functions.
+Clipboard failures are handled once by `copyToClipboard`; the summary hook checks
+its result before recording or confirming a copy. Card input changes resolve the
+editable key once and dispatch through the same edit callback as fallback fields.
+Momentum Tooltip owns hover, focus and Escape behavior through its `triggerID` binding;
+the summary adds no document keyboard listener or manual visibility state.
+Momentum Button's `active` property owns feedback icon fill and `aria-pressed`.
+Selected feedback adds no separate pending-submission message, matching Desktop.
+Its native variants, sizes and states own hover, selected, disabled and focus
+styling; summary CSS adds layout without replacing those interaction styles.
+Clipboard confirmation retains payload identity checks.
+Empty read-only sections and clipboard blocks are omitted; empty fields remain
+available throughout editing.
+
+`AIAssistantComponent.receiverSummary` renders the current interaction's incoming
+summary directly whenever the panel is open, including on Open and Restore.
+There is no separate View summary button or summary-selection state inside the
+assistant chrome. Passive arrivals do not invoke chrome callbacks or explicitly
+move focus. Closed and minimized panels remain in their current state. A newly received content payload
+shows a Momentum toast while closed or minimized, following the existing wellness
+offer toast's placement, AI icon, and footer action slots. Later and dismiss hide
+that notification; View summary dismisses it and opens or restores the receiver
+branch directly. Opening the panel marks that payload as seen so minimizing or
+closing does not show the same notification again. Feedback/copy updates retaining
+the SDK content do not reset dismissal. Dismissal is retained per receiver branch,
+so switching tasks does not replay an already dismissed payload. Active wellness
+offers and overlays keep notification priority. The toast's View summary remains
+an explicit Open/Restore action; the ordinary launcher and Restore show the same
+available summaries without another navigation step. No summary is shown without
+an active interaction, and receiver content does not require Real-time Assist enablement.
+The receiver branch renders its optional prior-payload `history` before the latest
+summary in arrival order, reusing `AISummary` and each payload's original timestamp.
+Historical cards preserve `areTranscriptsAvailable: false` as unavailable even when
+an Adaptive Card is supplied. Available historical cards expose helpful, unhelpful, and Copy controls bound to
+their own SDK payload, with independent confirmed feedback and pending state. An archived-only `history` surface renders
+those prior cards without an unavailable latest-card placeholder or arrival toast.
+The existing Get Assistance action remains available for an active enabled interaction.
+Summary view, edit, and receiver cards receive the SDK summary's epoch-millisecond
+`timestamp` and render it in browser-local `HH:mm`. Shared card preparation supports
+both the legacy `SOURCE_TIMESTAMP_PLACEHOLDER` token and the summary
+`${sourceTimestamp}` binding. Receiver cards omit dedicated backend timestamp-only
+metadata in the render clone and show one native `HH:mm` timestamp in the shared
+card footer, followed by helpful, unhelpful, and Copy controls. These 24-pixel
+controls form a compact row aligned to the end, wrapping at narrow widths; the
+footer remains left-to-right while card content keeps automatic text direction.
+The receiver footer has no detached editor border. `AdaptiveCardRenderer.footer`
+places host controls inside the same card surface without reparsing the Adaptive
+Card when feedback, pending, or copy state changes. `omitSourceTimestamp` defaults
+to false; ordinary suggestions, initiator view/edit cards, and post-call cards
+retain their existing metadata and layout. Clone preparation removes only known
+or strictly timestamp-only TextBlock/RichTextBlock metadata and newly emptied
+metadata containers; timestamp runs within substantive rich text remain intact.
+When a timestamp child is actually removed from a Container/Column/ColumnSet
+sibling group and only bullet/pipe-only metadata remains, clone preparation removes
+that decoration group and its now-orphaned trailing divider. Substantive siblings
+and unrelated bullet content are retained; ordinary cards keep the original layout.
+Scoped metadata cleanup also recognizes empty layout spacers with omitted or empty
+children and ActionSets containing only known likeButton/dislikeButton/copyButton
+Submit actions. Unknown actions and non-layout content are preserved. A parent with
+its own non-layout content or actions is retained when a timestamp child is removed.
+Substitution changes a render clone only; the SDK content and card remain intact. Missing or invalid timestamps render blank rather
+than a fabricated current time.
+Copy uses
+visible rendered card text through the shared Adaptive Card text extractor's
+`summaryOnly` option. Summary presentation enables that same filter for card-provided
+copy actions. Hidden text blocks, descendants of hidden card containers, source
+timestamp/subtitle/link metadata and action-row labels are excluded from summary
+copying; ordinary Real-time Assist copying keeps its existing behavior. Visible
+nested blocks keep their text and line breaks.
+The renderer uses Adaptive Cards' `supportsInteractivity: false` for receiver content, keeping
+card-provided actions, select actions and inputs inert without rewriting the SDK
+card. Within `AISummary`, its render callback controls whether the copy/feedback controls are
+shown; parsing or rendering failure hides them. Valid replacement cards preserve
+those controls and their focus. Replacing a display-only receiver card resets its
+error boundary; ordinary Real-time Assist cards keep their existing recovery
+behavior. Receiver visibility derives from the active interaction and supplied
+summary; closing and reopening does not discard its content. Incoming summaries take precedence over retained wellness
+history; an active wellness offer, transition, error or overlay retains priority.
+Wellness history remains retained when incoming summary content takes precedence.
+Incoming-summary headings reuse the existing assistant header layout and Momentum
+Text on the primary surface. A recognized SDK icon-and-title header is rendered
+once outside the shared suggested-response card; unfamiliar headers stay intact.
+The body, divider, timestamp, feedback and copy controls share that card's rounded
+Momentum secondary surface and padding; nested template emphasis remains transparent.
+Display-only receiver cards use Desktop's compact
+Adaptive Cards typography, while ordinary suggested-response styling is unchanged.
+When Real-time Assist is enabled during an active interaction, the receiver view
+also exposes Get Assistance in the fixed panel footer above the disclaimer.
+The cards use the existing chat scroller and chat item layout, so summary history
+scrolls while Get Assistance and the disclaimer remain visible. Get Assistance invokes the existing
+request callback once, retaining the incoming cards, assistance history and context. Pending requests
+disable the action; inactive interactions and active wellness content do not offer
+it. Incoming cards are passed as leading React children to the existing
+`RealTimeAssist` chat, so loading, errors and assistance replies remain visible
+in the same scroller without a separate summary/assistance navigation mode.
+Opening or restoring the panel starts incoming content at the top; subsequent
+assistance activity scrolls to the latest reply. Active wellness flows retain
+priority. Removing a receiver entry keeps ongoing assistance visible instead of
+returning to retained idle wellness history.
+Opening from the toast uses Momentum Button's `autoFocusOnMount` on its newly
+mounted header control. The assistant remains a non-modal panel; it does not scan
+controls for focus successors, force Momentum tab indexes, or repair focus after
+arbitrary content removal. Receiver copying uses `AISummary`'s existing root DOM
+reference to extract the card's visible text; no parent DOM getter is passed through props.
+The toast action and existing launcher use Momentum buttons without custom
+hover/focus styling.
+
+Summary presentation constants use the `AI_ASSISTANT_SUMMARY_` prefix. These components
+receive data and callbacks through props and make no SDK calls.
+`ai-summary.tsx` owns the rendered UI; its local `helper.ts` owns summary interaction,
+clipboard and edit behavior.
+Fallback status text, action controls and editors use Momentum `Text`, `Button` and
+`Textarea`. Momentum's `autoFocusOnMount` enters the first fallback editor. Native
+AdaptiveCards editors receive one initial input focus when Edit mounts the card,
+matching Desktop's AdaptiveCards integration. Shared card
+rendering remains imperative at its DOM boundary and uses one committed props
+reference to keep callbacks and controlled values current without reparsing;
+widget/store adapters own all SDK operations and response changes.
+`AISummary` remains internal; it is not exported by the package's root React barrel.
+
+The Desktop source comparison uses `InteractionSummary/InteractionSummary.ts`,
+`InteractionSummaryCard.ts` and `@uuip/adaptive-cards/src/components/AdaptiveCard.ts`
+in the separate `wxcc-desktop` checkout. Both implementations delegate supplied
+cards to AdaptiveCards and retain imperative card/input/clipboard handling. The
+widget's typed/plain fallbacks additionally handle SDK payloads without a card.
+Desktop supplies a Markdown parser and recolors external SVG assets for its theme;
+this shared renderer instead normalizes hyphen bullets to text and retains the
+bundled SVG image colors. Native Momentum controls inherit their theme, but semantic
+Markdown lists and raw-card SVG recoloring are not equivalent to Desktop.
+
+Evidence: `components/AIAssistant/AISummary/` and `components/AIAssistant/`; tests:
+`tests/components/AIAssistant/AISummary/ai-summary.tsx`, `tests/components/AIAssistant/AISummary/ai-summary-interactions.tsx`,
+`tests/components/AIAssistant/ai-assistant.tsx`, and
+`tests/components/AIAssistant/adaptive-card-renderer.test.tsx`.
+
+## AI summaries in CallControl
+
+Consult/transfer and wrap-up panels forward their summary view props to the shared
+`AIAssistant/AISummary` component. The widget binds callbacks to the displayed SDK
+content and supplies local response edits separately through `editedSummary`, so
+raw content retains its identity. These components perform no SDK operations.
+
+The compact wrap-up panel is titled Wrap Up Reasons, instructs
+"Choose a code, and click the summary to edit it if needed.", and uses the existing Momentum
+`Combobox`, `Selectlistbox` and `Option` components for searchable reason selection,
+with the label Choose a reason to wrap up and placeholder Search topic. Momentum owns
+filtering, dropdown placement and keyboard interaction. Typing clears the eligible
+reason and disables submission until a configured option is committed; the picker
+retains only a temporary snapshot of the native committed value while searching so
+clearing eligibility does not erase the first typed character. Outside search, its
+value derives directly from the selected reason. Selection events use the configured ID and name,
+ignoring event-provided labels. SDK `suggestedWrapUpCodes` appear as native Momentum
+`Chip` controls with a trailing plus icon only when an explicit ID or an unambiguous name maps to a configured
+reason; duplicate suggestions and unknown codes cannot become actions. Selecting a
+suggested reason fills the picker and hides the suggestion chips without submitting.
+An SDK suggestion message appears as a noninteractive Momentum `StaticChip` with a
+do-not-disturb icon in the same AI-suggested row when there are no valid suggested chips. Summary
+content is separated from the picker and uses its shared 182px scrolling body. The
+27.5rem panel uses natural height bounded by 80vh, retaining its footer in short views.
+Submit Wrap Up stays enabled with a committed reason while summary generation is
+pending. It uses CallControl's existing wrap-up handler, which dispatches the action
+and clears the selected reason immediately. Summary acknowledgement does not block
+wrap-up, and the presentation adds no completion state or summary freeze. An absent
+summary prop preserves the existing CallControl form.
+
+Summary-enabled voice destinations use Momentum selection controls, then an explicit
+Consult or Transfer footer action. Selecting a row does not start the call operation.
+Only footer Cancel invokes the supplied cancellation callback before clearing
+exclusion and closing the picker. The dialog close button, Escape, and final dispatch
+clear exclusion and close without emitting cancellation. Menu state owns open/close;
+native hide callbacks only clear it and never send cancellation. Final dispatch
+disables its button until reopening, using one React state flag as Desktop does;
+a synchronous dispatch failure
+leaves it retryable. Selection is kept per category, invalidated on search or reload,
+and the final action revalidates the destination against the current list.
+Refresh remains available alongside search. Mid-call Retry repeats the currently
+open Consult/Transfer action through the widget callback, rather than an older
+content entry's action identity. Non-summary destination behavior is preserved.
+
+Destination keys map to internal categories through the popover's existing local
+`DESTINATION_CATEGORY` map;
+`VOICE_DESTINATION_CATEGORY_LABELS` supplies Agent, Queue, Dial Number, and Entry Point
+labels, and `VOICE_DESTINATION_SEARCH_PLACEHOLDERS` supplies category-specific search
+copy matching Desktop. These presentation labels live in the shared task `constants.ts`. Voice
+agent rows show names and presence without extension subtitles. SDK view/edit cards
+supply their own summary title; the fallback title is rendered only without either
+card. Empty destination categories use the existing shared
+`ConsultTransferEmptyState`; existing category loading, empty-state and pagination
+paths retain their established markup.
+Voice destination rows supply Momentum's item index for native roving focus and
+arrow-key/Enter selection. Their scroll wrapper adds no extra tab stop or mouse
+event suppression. Row action buttons use native size, ghost and outline props.
+Voice destination search uses Momentum `Searchfield`, including its leading icon,
+clear button, typography and input focus. Typing or clearing invalidates a staged
+destination through the existing query handler. Non-summary search retains its
+existing input. The voice layout adds no overlaid search-icon wrapper or input
+padding override.
+
+Summary-enabled voice Consult/Transfer opens in Momentum Design `Dialog`, centered
+in the viewport independently of the embedded widget container. Summary wrap-up
+retains the right-aligned anchored `PopoverNext`, with bounded content and native
+viewport adjustment. Legacy wrap-up keeps its bottom-start placement. The dialog
+owns its backdrop, focus trap, Escape handling, close button, and trigger focus
+restoration. Consult/Transfer uses the native Consult Request or Transfer Request
+header and suppresses duplicate content headings and close controls. The panel keeps
+its selected overlay until it closes when summary capability changes, and changing
+the task closes it. Non-summary destinations and the keypad retain `PopoverNext`;
+keypad close does not reset summary exclusion.
+The dialog constrains its host to 80vh and its width to the viewport; inner flex
+regions keep destination lists and summary content scrollable while final actions
+stay visible. SDK cards reserve their natural height so summary actions stay above
+the modal footer. At short viewport heights the picker content scrolls above a sticky
+action footer. The wrap-up popover always permits its content region to scroll while
+retaining its directly aligned native completion button outside that region,
+including longer suggestion rows and enlarged text.
+The Exclude summary control aligns at the start of the action
+footer. Excluded summary content receives an inactive glass overlay using the
+Momentum theme token, with summary controls disabled and destination actions
+remaining available. Each CallControl panel stylesheet owns its constrained flex and scroll
+layout; the shared summary stylesheet owns the editor, status, and action presentation.
+
+Consult/transfer retains its summary layout until the panel closes after capability
+revocation, preserving destination controls and the close action. Native Dialog
+and Popover own overlay focus and keyboard
+behavior. Shared summaries do not receive containing-panel DOM refs or implement
+their own focus recovery. Wrap-up renders directly in the native Popover's content
+region without an extra layout wrapper, focus capture handlers, fallback tab stop
+or DOM recovery effect when summary capability changes. Requests, local
+response changes, retry and submission remain in the widget/store layers.
+The consult/transfer panel receives its accessible label directly from its heading.
+Momentum's wrap-up Combobox owns its input and label IDs. Summary tooltips use
+per-instance trigger IDs allocated once with the existing counter and lazy `useState`
+pattern; no React type bridge or shared ID hook is required.
+Layout effects synchronously invalidate task/content callbacks and retain current
+clipboard props. One active-menu record holds the selected menu, overlay choice and
+latched summary appearance. A passive effect retains the summary layout if summary
+content first becomes available while that menu is open.
+
+Evidence: `components/task/CallControl/call-control.tsx` and `CallControlCustom/`;
+tests: `tests/components/task/CallControl/call-control.tsx`,
+`CallControlCustom/consult-transfer-popover.tsx`, and `CallControlCustom/wrap-up-summary.tsx`.
+
 ## Traceability
 
 - Repo architecture: [`ARCHITECTURE.md`](../../../../ai-docs/ARCHITECTURE.md) · Registry: [`SPEC_INDEX.md`](../../../../ai-docs/SPEC_INDEX.md) · Contracts: [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md)

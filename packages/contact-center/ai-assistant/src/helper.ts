@@ -1,10 +1,11 @@
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import store from '@webex/cc-store';
-import type {RealTimeAssistPayload} from '@webex/cc-store';
+import type {AISummaryEntry, AISummaryFeedback, ITask, RealTimeAssistPayload} from '@webex/cc-store';
 import type {
   AIAssistantActionEvent,
   AIAssistantChatEntry,
   AIAssistantChromeState,
+  AIAssistantReceiverSummary,
   AIAssistantRequestStatus,
 } from '@webex/cc-components';
 import {
@@ -296,6 +297,45 @@ export const useAiAssistant = (input: UseAiAssistantInput) => {
   const realTimeAssist = useRealTimeAssist(input);
 
   return useMemo(() => ({...chrome, ...realTimeAssist}), [chrome, realTimeAssist]);
+};
+
+/** The receiving agent's consult/transfer summary, pushed by the backend for the task's interaction. */
+export const getReceiverSummary = (task?: ITask): AIAssistantReceiverSummary | undefined => {
+  const interactionId = task?.data.interactionId;
+  const summaryData = interactionId ? store.aiSummaries[interactionId]?.receiver : undefined;
+  if (!task || !interactionId || !summaryData) {
+    return undefined;
+  }
+  const branchKey = `mid-call:receiver:${interactionId}`;
+  const projectCard = (content: NonNullable<AISummaryEntry['content']>) => {
+    const feedback = summaryData.cardFeedback?.find((card) => card.content === content);
+    return {
+      content,
+      selectedFeedback:
+        feedback?.feedback ?? (summaryData.content === content ? summaryData.response.feedback : 'none'),
+      feedbackPending: feedback?.pending ?? (summaryData.content === content && Boolean(summaryData.feedbackPending)),
+      recordReceiverSummaryCopied: () => store.recordAISummaryCopied('receiver', content, task),
+      setReceiverSummaryFeedback: (selected: AISummaryFeedback) => {
+        void store.setReceiverSummaryFeedback(selected, content, task);
+      },
+    };
+  };
+  const history = summaryData.history?.map(projectCard);
+  const content = summaryData.content;
+  if (!content) {
+    if (history?.length) return {surface: 'history', branchKey, history};
+    return summaryData.status === 'error' ? {surface: 'generic-error', branchKey} : undefined;
+  }
+  // The SDK flag is optional; an omitted value must not hide supplied content.
+  if (content.areTranscriptsAvailable === false) {
+    return {surface: 'unavailable', branchKey, history};
+  }
+  return {
+    surface: 'content',
+    branchKey,
+    history,
+    ...projectCard(content),
+  };
 };
 
 export {REAL_TIME_ASSIST_FLAG};

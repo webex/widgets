@@ -517,26 +517,6 @@ export const updateCallStateFromTask = (
 };
 
 /**
- * Handles close button press for popover components
- */
-export const handleCloseButtonPress = (
-  setShowAgentMenu: (show: boolean) => void,
-  setAgentMenuType: (type: CallControlMenuType | null) => void,
-  logger?
-): void => {
-  try {
-    setShowAgentMenu(false);
-    setAgentMenuType(null);
-  } catch (error) {
-    logger?.error('CC-Widgets: CallControl: Error in handleCloseButtonPress', {
-      module: 'cc-components#call-control.utils.ts',
-      method: 'handleCloseButtonPress',
-      error: error.message,
-    });
-  }
-};
-
-/**
  * Handles wrapup reason selection change event
  */
 export const handleWrapupReasonChange = (

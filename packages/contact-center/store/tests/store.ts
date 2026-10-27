@@ -73,6 +73,7 @@ describe('Store', () => {
 
     expect(makeAutoObservable).toHaveBeenCalledWith(storeInstance, {
       cc: expect.any(Function),
+      aiSummaries: expect.any(Function),
     });
   });
 
@@ -113,6 +114,61 @@ describe('Store', () => {
         timeoutDesktopInactivityMins: 15,
       });
       expect(storeInstance.dataCenter).toEqual(mockResponse.environment);
+    });
+
+    it('preserves the relogin organization when registration omits it', async () => {
+      const previousProfile = storeInstance.agentProfile;
+      storeInstance.agentProfile = {orgId: 'relogin-org', agentSessionId: 'relogin-session'};
+      mockWebex.cc.register.mockResolvedValue({
+        ...mockProfile,
+        orgId: undefined,
+        isAgentLoggedIn: true,
+        agentSessionId: 'relogin-session',
+      });
+
+      try {
+        await storeInstance.registerCC(mockWebex);
+
+        expect(storeInstance.agentProfile.orgId).toBe('relogin-org');
+        expect(storeInstance.agentProfile.agentSessionId).toBe('relogin-session');
+      } finally {
+        storeInstance.agentProfile = previousProfile;
+      }
+    });
+
+    it('uses the organization supplied by registration', async () => {
+      const previousProfile = storeInstance.agentProfile;
+      storeInstance.agentProfile = {orgId: 'previous-org'};
+      mockWebex.cc.register.mockResolvedValue({...mockProfile, orgId: 'registered-org'});
+
+      try {
+        await storeInstance.registerCC(mockWebex);
+
+        expect(storeInstance.agentProfile.orgId).toBe('registered-org');
+      } finally {
+        storeInstance.agentProfile = previousProfile;
+      }
+    });
+
+    it('recovers the organization from SDK credentials after a silent session restore', async () => {
+      const previousProfile = storeInstance.agentProfile;
+      storeInstance.agentProfile = {};
+      mockWebex.credentials = {getOrgId: jest.fn(() => 'sdk-org')};
+      mockWebex.cc.register.mockResolvedValue({
+        ...mockProfile,
+        orgId: undefined,
+        isAgentLoggedIn: true,
+        agentSessionId: 'restored-session',
+      });
+
+      try {
+        await storeInstance.registerCC(mockWebex);
+
+        expect(storeInstance.agentProfile.orgId).toBe('sdk-org');
+        expect(storeInstance.agentProfile.agentSessionId).toBe('restored-session');
+      } finally {
+        storeInstance.agentProfile = previousProfile;
+      }
     });
 
     it('should log an error on failed register', async () => {

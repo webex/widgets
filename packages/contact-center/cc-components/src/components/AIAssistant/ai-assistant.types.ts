@@ -1,4 +1,7 @@
+import type {ReactNode} from 'react';
 import type {
+  AISummaryEntry,
+  AISummaryFeedback,
   ILogger,
   RealTimeAssistPayload,
   WellnessBreakError,
@@ -95,6 +98,22 @@ export type AIAssistantChatEntry =
       realTimeAssist?: RealTimeAssistPayload;
     };
 
+export type AIAssistantReceiverSummaryCard = {
+  content: NonNullable<AISummaryEntry['content']>;
+  selectedFeedback: AISummaryFeedback;
+  feedbackPending: boolean;
+  /** Bound by the widget to the displayed SDK summary. */
+  recordReceiverSummaryCopied: () => boolean;
+  setReceiverSummaryFeedback: (feedback: AISummaryFeedback) => void;
+};
+
+export type AIAssistantReceiverSummary = {
+  /** Earlier received summaries for this interaction, in arrival order. */
+  history?: AIAssistantReceiverSummaryCard[];
+  /** Stable identity for this interaction's receiver summary. */
+  branchKey: string;
+} & (({surface: 'content'} & AIAssistantReceiverSummaryCard) | {surface: 'unavailable' | 'generic-error' | 'history'});
+
 /** Props for the top-level AIAssistant presentational component. */
 export interface AIAssistantComponentProps {
   /** Current chrome visibility state. */
@@ -119,6 +138,8 @@ export interface AIAssistantComponentProps {
   agentName?: string;
   /** Whether the first real-time assist request has completed successfully. */
   hasInitialRequestSucceeded: boolean;
+  /** Optional receiving-agent summary branch. */
+  receiverSummary?: AIAssistantReceiverSummary;
   /** Transition the chrome to `open`. */
   open: () => void;
   /** Transition the chrome to `closed`; preserves chat state. */
@@ -196,6 +217,8 @@ export interface WellnessBreakErrorProps {
 }
 
 export interface RealTimeAssistProps {
+  /** Existing assistant content shown before real-time assistance in the chat scroller. */
+  children?: ReactNode;
   status: AIAssistantRequestStatus;
   errorMessage?: string;
   chatEntries: AIAssistantChatEntry[];
@@ -218,11 +241,39 @@ export interface AIAssistantActionEvent {
   type: AIAssistantActionKind;
   /** The id of the underlying card action that fired this event. */
   actionId: string;
+  /** Controlled summary selection after a feedback click; repeated clicks clear it. */
+  feedback?: 'like' | 'dislike' | 'none';
 }
 
 export interface AdaptiveCardRendererProps {
   card: unknown;
-  /** Title already rendered by RealTimeAssist; removes the matching header embedded in backend cards. */
+  /** Host-owned summary controls, rendered inside the card surface after its content. */
+  footer?: ReactNode;
+  /** Omit backend timestamp-only metadata from the render clone when the host supplies its footer. */
+  omitSourceTimestamp?: boolean;
+  /** Summary cards use Desktop's compact typography and their own content frame. */
+  presentation?: 'suggestion' | 'summary';
+  /** Host response identity: replacing it invalidates old actions and recovers card render errors. */
+  contentIdentity?: unknown;
+  /** Render summary content without card-provided actions or inputs. */
+  displayOnly?: boolean;
+  /** Disable card actions and inputs while the host is completing an operation. */
+  disabled?: boolean;
+  /** Hide unsupported host actions by their exact card action id. */
+  hiddenActionIds?: readonly string[];
+  /** Preserve displayed text inputs while preventing edits when the host cannot accept them. */
+  readOnlyInputs?: boolean;
+  /** Controlled feedback selection, restored when the card is mounted again. */
+  feedback?: 'like' | 'dislike' | 'none';
+  /** Local edits keyed by Input.Text id, or a string for a card with exactly one text input. */
+  inputValues?: Readonly<Record<string, string>> | string;
+  /** Receives changes using the original Input.Text id from the card. */
+  onInputChange?: (id: string, value: string) => void;
+  /** Accessible action labels supplied by the host's context; suggestion labels are the default. */
+  actionLabels?: Partial<Record<AIAssistantActionKind, string>>;
+  /** Reports whether card content rendered, so the container can show its controls. */
+  onRender?: (rendered: boolean) => void;
+  /** Title already rendered by the host; removes the matching header embedded in backend cards. */
   assistantTitle?: string;
   /** Plain-text fallback rendered when the Adaptive Card cannot be parsed/rendered. */
   fallbackText?: string;
@@ -234,7 +285,8 @@ export interface AdaptiveCardRendererProps {
   suggestionText?: string;
   /** Fires when the user clicks the like / dislike / copy controls inside the
    * card.  Like/dislike is only painted as selected once the returned promise
-   * resolves; a rejection leaves the control untouched. */
+   * resolves; a rejection leaves the control untouched. Summary copy events
+   * wait for clipboard success; suggestion copy events are immediate. */
   onUserAction?: (event: AIAssistantActionEvent) => void | Promise<void>;
   onAction?: (action: unknown) => void;
   logger?: ILogger;

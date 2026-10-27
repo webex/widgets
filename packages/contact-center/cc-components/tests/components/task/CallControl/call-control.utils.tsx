@@ -13,7 +13,6 @@ import {
   filterButtonsForConsultation,
   getConsultFilterPhase,
   updateCallStateFromTask,
-  handleCloseButtonPress,
   handleWrapupReasonChange,
   handleAudioRef,
   onInputDialNumber,
@@ -1372,18 +1371,6 @@ describe('CallControl Utils', () => {
       updateCallStateFromTask(taskWithoutCallProcessing as unknown as ITask, mockSetIsRecording);
 
       expect(mockSetIsRecording).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('handleCloseButtonPress', () => {
-    it('should set showAgentMenu to false and agentMenuType to null', () => {
-      const mockSetShowAgentMenu = jest.fn();
-      const mockSetAgentMenuType = jest.fn();
-
-      handleCloseButtonPress(mockSetShowAgentMenu, mockSetAgentMenuType);
-
-      expect(mockSetShowAgentMenu).toHaveBeenCalledWith(false);
-      expect(mockSetAgentMenuType).toHaveBeenCalledWith(null);
     });
   });
 

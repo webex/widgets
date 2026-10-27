@@ -621,7 +621,6 @@ const mockQueuesResponse: ContactServiceQueuesResponse = {
 };
 
 const mockCC: IContactCenter = {
-  aiSummaries: {},
   on: jest.fn(),
   off: jest.fn(),
   updateAgentProfile: jest.fn(),

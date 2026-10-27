@@ -95,6 +95,7 @@ not at all.
 
 **Where it appears**
 - `packages/contact-center/store/src/storeEventsWrapper.ts` (dozens of setters and event handlers wrap writes in `runInAction`) , `packages/contact-center/task/src/helper.ts` , `packages/contact-center/user-state/src/helper.ts`
+- `packages/contact-center/store/src/store.ts` (`aiSummaries` is a store-owned `observable.ref` field; widgets call store methods for response bookkeeping)
 
 **Edge cases / exceptions**
 - Reads never need `runInAction`; only writes to observables do.
