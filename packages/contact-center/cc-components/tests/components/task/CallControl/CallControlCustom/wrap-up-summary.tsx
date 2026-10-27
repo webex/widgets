@@ -84,7 +84,8 @@ describe('WrapUpSummary', () => {
     expect(picker.querySelectorAll('mdc-selectlistbox > mdc-option')).toHaveLength(3);
     expect(screen.queryByRole('radiogroup')).not.toBeInTheDocument();
     expect(await screen.findByRole('button', {name: COMPLETE_WRAP_UP_LABEL})).toBeDisabled();
-    expect(screen.getByText(AI_SUMMARY_MESSAGES.postCall.instructions)).toBeInTheDocument();
+    expect(screen.getByText('Choose a code, and click the summary to edit it if needed.')).toBeInTheDocument();
+    expect(screen.queryByTestId('wrap-up-summary:suggestions')).not.toBeInTheDocument();
   });
 
   it('clears selection when typing and accepts only configured IDs from picker events', async () => {
@@ -129,6 +130,7 @@ describe('WrapUpSummary', () => {
       content: {
         ...createSummary().content,
         suggestedWrapUpCodes: [{name: 'Billing question'}, {name: 'Unknown reason'}, {name: 'Billing question'}],
+        suggestedWrapUpCodesMessage: 'No suitable suggestion is available.',
       },
     });
     const Harness = () => {
@@ -148,8 +150,12 @@ describe('WrapUpSummary', () => {
     };
     render(<Harness />);
     const chips = await screen.findByTestId('wrap-up-summary:suggestions');
-    expect(chips.querySelectorAll('mdc-filterchip')).toHaveLength(1);
-    const chip = chips.querySelector('mdc-filterchip') as HTMLElement;
+    expect(chips.querySelectorAll('mdc-chip')).toHaveLength(1);
+    expect(chips.querySelector('mdc-filterchip, mdc-staticchip')).toBeNull();
+    expect(screen.queryByText('No suitable suggestion is available.')).not.toBeInTheDocument();
+    const chip = chips.querySelector('mdc-chip') as HTMLElement;
+    await waitFor(() => expect(chip).toHaveAttribute('icon-name', 'plus-bold'));
+    expect(chip).toHaveAttribute('role', 'button');
     fireEvent.click(chip);
     expect(onReasonChange).toHaveBeenCalledWith(reasons[2]);
     expect(onComplete).not.toHaveBeenCalled();
@@ -160,7 +166,9 @@ describe('WrapUpSummary', () => {
     expect(onComplete).toHaveBeenCalledWith(reasons[2]);
   });
 
-  it('does not offer unknown IDs or ambiguous names as suggested actions', () => {
+  it('shows the backend no-suggestion message as a noninteractive chip for unknown IDs or ambiguous names', async () => {
+    const onReasonChange = jest.fn();
+    const onComplete = jest.fn();
     render(
       <WrapUpSummary
         reasons={[...reasons, {id: 'aux-4', name: 'Resolved'}]}
@@ -171,12 +179,29 @@ describe('WrapUpSummary', () => {
             suggestedWrapUpCodesMessage: 'No suitable suggestion is available.',
           },
         })}
-        onReasonChange={jest.fn()}
-        onComplete={jest.fn()}
+        onReasonChange={onReasonChange}
+        onComplete={onComplete}
       />
     );
-    expect(screen.queryByTestId('wrap-up-summary:suggestions')).not.toBeInTheDocument();
-    expect(screen.getByText('No suitable suggestion is available.')).toBeInTheDocument();
+    const row = screen.getByTestId('wrap-up-summary:suggestions');
+    expect(row.querySelector('mdc-chip, mdc-filterchip')).toBeNull();
+    const infoChip = row.querySelector('mdc-staticchip') as HTMLElement;
+    expect(infoChip).not.toBeNull();
+    expect(infoChip).toHaveAttribute('icon-name', 'dnd-presence-filled');
+    expect(infoChip).not.toHaveAttribute('role', 'button');
+    expect(infoChip).not.toHaveAttribute('tabindex', '0');
+    await waitFor(() =>
+      expect(infoChip.shadowRoot?.querySelector('[part="label"]')).toHaveTextContent(
+        'No suitable suggestion is available.'
+      )
+    );
+
+    fireEvent.click(infoChip);
+    fireEvent.keyDown(infoChip, {key: 'Enter', code: 'Enter'});
+    fireEvent.keyDown(infoChip, {key: ' ', code: 'Space'});
+    expect(onReasonChange).not.toHaveBeenCalled();
+    expect(onComplete).not.toHaveBeenCalled();
+    expect(await screen.findByRole('button', {name: COMPLETE_WRAP_UP_LABEL})).toBeDisabled();
   });
 
   it('does not clear a picker selection when Momentum emits its preceding input event', () => {

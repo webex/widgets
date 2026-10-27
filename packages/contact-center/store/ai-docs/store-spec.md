@@ -453,19 +453,18 @@ actions while the same interaction is active.
   publish failure, from overwriting a newer UI request. It does not correlate backend replies.
 - `TASK_FEATURE_ENABLEMENT` (`task:featureEnablement`) applies the authoritative payload
   through the public SDK Task setter and refreshes the task view so observers read the
-  latest flags, including later disablement. Confirmed booleans are saved in guarded
-  `sessionStorage`, scoped by organization, agent, session and interaction; summary content
-  is never persisted. Registration and login retain the session identity in `agentProfile`.
-  When the registration profile omits `orgId`, registration uses the public Webex
-  credentials organization getter, then the retained relogin organization. Cold silent
-  restoration therefore has a complete session key without another relogin event.
-  Recovered canonical SDK Tasks restore these flags before the deferred task-view refresh.
-  Restoration waits one microtask because SDK hydration publishes a pending live frame
-  immediately after `task:hydrate`; any such frame takes priority over cached values.
-  Initialization, registration and profile updates retry the same restoration after
-  identity becomes available; a live frame received earlier is saved instead of replaced.
-  Missing or invalid storage leaves SDK defaults unchanged. Primary-task removal and
-  logout clear saved records; consult removal preserves flags for a repeated consult.
+  latest flags, including later disablement. Until a matching event arrives, use the
+  registration profile's `aiFeature.generatedSummaries.consultTransferSummariesEnabled`
+  and `wrapUpSummariesEnabled`, projected through the existing `featureFlags` extractor.
+  Only strict `true` enables the corresponding capability. Apply config through the
+  same SDK Task setter so SDK requests and widget controls share one value.
+  Config fallback waits one microtask because SDK hydration replays a pending live frame
+  immediately after `task:hydrate`; that frame takes precedence. Retry fallback after
+  initialization/registration because silent hydration can precede the profile response.
+  Live enablement remains in the task listener entry and follows a replacement Task for
+  the same active interaction; task removal/logout retire it. No summary enablement or
+  content is persisted in browser storage. After refresh or a new browser session, config
+  is the fallback until that session receives a matching live event.
   `TASK_MID_CALL_SUMMARY_RECEIVED` supplies the receiver summary. Listeners are rebound
   together when a task object is replaced, registered once per task object, and detached
   on task removal and logout.
@@ -554,7 +553,7 @@ use SDK response fields rather than duplicate widget fields.
 Evidence: `src/store.ts`, `src/storeEventsWrapper.ts`, `src/store.types.ts`, `src/task-utils.ts`;
 tests: `tests/ai-summary-observability.ts` uses real MobX for asynchronous success,
 failure and repeated registration; additional AI summary cases are in
-`tests/storeEventsWrapper.ts`, `tests/ai-summary-enablement-storage.ts` and `tests/task-utils.ts`.
+`tests/storeEventsWrapper.ts`, `tests/ai-summary-observability.ts`, `tests/util.ts` and `tests/task-utils.ts`.
 
 ## Traceability
 

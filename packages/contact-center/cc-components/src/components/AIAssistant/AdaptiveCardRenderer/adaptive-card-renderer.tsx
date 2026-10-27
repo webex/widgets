@@ -73,9 +73,14 @@ const AdaptiveCardRendererBody: React.FC<AdaptiveCardRendererProps> = (props) =>
       let copyControl: Element | undefined;
       const adaptiveCard = new AdaptiveCards.AdaptiveCard();
       adaptiveCard.hostConfig = new AdaptiveCards.HostConfig({
-        ...buildHostConfig(presentation),
+        ...buildHostConfig(displayOnly ? 'summary' : presentation),
         supportsInteractivity: !displayOnly,
       });
+      if (displayOnly) {
+        // The shared card owns the surface. HostConfig's parser ignores configured zero padding.
+        adaptiveCard.hostConfig.spacing.padding = 0;
+        adaptiveCard.hostConfig.containerStyles.emphasis.backgroundColor = 'transparent';
+      }
       adaptiveCard.onExecuteAction = (action) => {
         if (!isCurrent() || propsRef.current.disabled || displayOnly) return;
         const a = action as {id?: string; title?: string};

@@ -48,7 +48,7 @@ export const AI_ASSISTANT_SUMMARY_MESSAGES = {
     searchPlaceholder: 'Search topic',
     completeAction: 'Submit Wrap Up',
     suggested: 'AI-suggested:',
-    instructions: 'Choose a code, and select Edit summary to make changes if needed.',
+    instructions: 'Choose a code, and click the summary to edit it if needed.',
     chooseReason: 'Choose a reason to wrap up',
     noReasonMatches: 'No wrap-up reasons match your search.',
   },

@@ -61,5 +61,13 @@ export function getFeatureFlags(agentProfile: Profile) {
     keyValuePairs[AI_FEATURE_WELLNESS_BREAK_KEY] = wellnessEnabled;
   }
 
+  const generatedSummaries = agentProfile.aiFeature?.generatedSummaries;
+  for (const key of ['consultTransferSummariesEnabled', 'wrapUpSummariesEnabled'] as const) {
+    const value = generatedSummaries?.[key];
+    if (typeof value === 'boolean') {
+      keyValuePairs[key] = value;
+    }
+  }
+
   return keyValuePairs;
 }

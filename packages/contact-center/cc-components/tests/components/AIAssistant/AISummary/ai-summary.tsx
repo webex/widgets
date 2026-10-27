@@ -1271,6 +1271,7 @@ describe('AISummary', () => {
   });
 
   it('renders one timestamp and compact feedback then copy inside the receiver card footer', async () => {
+    const title = 'An agent could use some help. Here is a quick summary.';
     const sdkContent = {
       ...receiverContent,
       timestamp: new Date(2026, 9, 26, 14, 7).getTime(),
@@ -1278,7 +1279,22 @@ describe('AISummary', () => {
         type: 'AdaptiveCard',
         version: '1.3',
         body: [
-          {type: 'TextBlock', text: 'סיכום Receiver details'},
+          {
+            type: 'ColumnSet',
+            columns: [
+              {
+                type: 'Column',
+                width: 'auto',
+                items: [{type: 'Image', url: 'cisco-ai-assistant-color.svg', size: 'Small'}],
+              },
+              {type: 'Column', width: 'stretch', items: [{type: 'TextBlock', text: title, weight: 'Bolder'}]},
+            ],
+          },
+          {
+            type: 'Container',
+            style: 'emphasis',
+            items: [{type: 'TextBlock', text: 'סיכום Receiver details', size: 'Medium'}],
+          },
           {
             type: 'RichTextBlock',
             id: 'source-timestamp-richTextBlock',
@@ -1295,6 +1311,15 @@ describe('AISummary', () => {
     const footer = await screen.findByTestId('ai-summary:receiver-footer');
     const card = screen.getByTestId('ai-assistant:adaptive-card');
     expect(card).toContainElement(footer);
+    expect(card).toContainElement(screen.getByText('סיכום Receiver details'));
+    expect(card).not.toContainElement(screen.getByText(title));
+    expect(screen.getByText(title)).toHaveAttribute('tagname', 'h3');
+    expect(screen.getAllByText(title)).toHaveLength(1);
+    expect(screen.getByText('סיכום Receiver details')).toHaveStyle({fontSize: '14px'});
+    const bodyStyle = getComputedStyle(screen.getByText('סיכום Receiver details').closest('.ac-container')!);
+    expect(bodyStyle.paddingTop).toBe('0px');
+    expect(bodyStyle.paddingLeft).toBe('0px');
+    expect(bodyStyle.backgroundColor).toBe('transparent');
     expect(screen.queryByTestId('ai-summary:editor-surface')).not.toBeInTheDocument();
     expect(screen.getAllByText('14:07')).toHaveLength(1);
     expect(footer).toHaveAttribute('dir', 'ltr');

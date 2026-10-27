@@ -9,7 +9,8 @@ import {
 } from './ai-summary.constants';
 import {getDisplaySections, useAISummaryInteractions} from './helper';
 import AdaptiveCardRenderer from '../AdaptiveCardRenderer/adaptive-card-renderer';
-import {formatSourceTimestamp} from '../AdaptiveCardRenderer/adaptive-card-renderer.utils';
+import {extractAssistantTitle, formatSourceTimestamp} from '../AdaptiveCardRenderer/adaptive-card-renderer.utils';
+import CiscoAIAssistantColorIcon from '../CiscoAIAssistantColorIcon';
 import type {AISummaryProps} from './ai-summary.types';
 import './ai-summary.styles.scss';
 
@@ -188,6 +189,7 @@ const AISummary = (props: AISummaryProps): React.ReactElement => {
       </span>
     ) : null;
   if (isReceiver && props.content?.adaptiveCard) {
+    const assistantTitle = extractAssistantTitle(props.content.adaptiveCard);
     const timestamp = formatSourceTimestamp(props.content.timestamp);
     const footer =
       timestamp || showCopy || showFeedback ? (
@@ -217,9 +219,20 @@ const AISummary = (props: AISummaryProps): React.ReactElement => {
         data-testid={`ai-summary:${props.mode}`}
         ref={rootRef}
       >
+        {assistantTitle ? (
+          <div className="ai-assistant__assistant-header">
+            <span className="ai-assistant__assistant-icon" aria-hidden="true">
+              <CiscoAIAssistantColorIcon size={20} />
+            </span>
+            <Text tagname="h3" type="body-midsize-bold" className="ai-assistant__suggestion-title">
+              {assistantTitle}
+            </Text>
+          </div>
+        ) : null}
         <div dir="auto">
           <AdaptiveCardRenderer
             card={props.content.adaptiveCard}
+            assistantTitle={assistantTitle}
             publishTimestamp={props.content.timestamp}
             displayOnly
             omitSourceTimestamp

@@ -55,11 +55,6 @@ import {
 import {runInAction} from 'mobx';
 import {isIncomingTask, isSecondaryAgent} from './task-utils';
 import {SUGGESTED_RESPONSE_EVENT, TASK_MULTI_LOGIN_HYDRATE} from './constants';
-import {
-  clearAISummaryEnablement,
-  readAISummaryEnablement,
-  writeAISummaryEnablement,
-} from './ai-summary-enablement-storage';
 
 const EMPTY_AI_SUMMARY_RESPONSE: AISummaryResponse = {
   summary: '',
@@ -120,49 +115,37 @@ class StoreWrapper implements IStoreWrapper {
       summaryListener: (payload: AISummary) => void;
       enablementListener: (payload: AISummaryFeatureEnablement) => void;
       liveEnablement?: AISummaryFeatureEnablement;
-      enablementSessionKey?: string;
     }
   > = {};
   private aiSummaryRequestGeneration = 0;
 
-  private getAISummarySessionKey = (): string | undefined => {
-    const {orgId, agentSessionId} = this.store.agentProfile ?? {};
-    return orgId && this.agentId && agentSessionId ? JSON.stringify([orgId, this.agentId, agentSessionId]) : undefined;
-  };
-
-  private applyAISummaryEnablement = (task: ITask, enablement: AISummaryFeatureEnablement): void => {
+  private applyAISummaryEnablement = (task: ITask, enablement: AISummaryFeatureEnablement): boolean => {
     // The public Task class declares this setter, while this SDK's ITask declaration omits it.
     if ('setFeatureEnablement' in task && typeof task.setFeatureEnablement === 'function') {
       (task as ITask & Pick<Task, 'setFeatureEnablement'>).setFeatureEnablement(enablement);
+      return true;
     }
+    return false;
   };
 
-  private restoreAISummaryEnablement = (interactionId?: string): void => {
-    const sessionKey = this.getAISummarySessionKey();
-    if (!sessionKey) return;
+  private applyAISummaryConfig = (interactionId?: string): void => {
     const entries = interactionId
       ? [this.aiSummaryTaskListeners[interactionId]].filter(Boolean)
       : Object.values(this.aiSummaryTaskListeners);
     entries.forEach((entry) => {
-      if (entry.liveEnablement) {
-        // Hydration can precede registration identity; retain a live frame until it can be saved.
-        if (entry.enablementSessionKey && entry.enablementSessionKey !== sessionKey) return;
-        entry.enablementSessionKey = sessionKey;
-        writeAISummaryEnablement(sessionKey, entry.liveEnablement);
-        return;
-      }
       const taskId = entry.task.data.interactionId;
-      const saved = readAISummaryEnablement(sessionKey, taskId);
-      if (!saved) return;
       // SDK hydration publishes a pending live frame after task:hydrate; let that frame win.
       queueMicrotask(() => {
-        if (
-          !entry.liveEnablement &&
-          this.aiSummaryTaskListeners[taskId] === entry &&
-          sessionKey === this.getAISummarySessionKey()
-        ) {
-          this.applyAISummaryEnablement(entry.task, saved);
-          this.refreshTaskList();
+        if (!entry.liveEnablement && this.aiSummaryTaskListeners[taskId] === entry) {
+          if (
+            this.applyAISummaryEnablement(entry.task, {
+              interactionId: taskId,
+              midCallEnabled: this.featureFlags.consultTransferSummariesEnabled === true,
+              postCallEnabled: this.featureFlags.wrapUpSummariesEnabled === true,
+            })
+          ) {
+            this.refreshTaskList();
+          }
         }
       });
     });
@@ -1228,7 +1211,6 @@ class StoreWrapper implements IStoreWrapper {
         timeoutDesktopInactivityMins: profile.timeoutDesktopInactivityMins || undefined,
       };
     });
-    this.restoreAISummaryEnablement();
   };
 
   removeCCCallback = (event: CC_EVENTS) => {
@@ -1253,7 +1235,7 @@ class StoreWrapper implements IStoreWrapper {
   init(options: InitParams): Promise<void> {
     return this.store
       .init(options, this.setupIncomingTaskHandler)
-      .then(() => this.restoreAISummaryEnablement())
+      .then(() => this.applyAISummaryConfig())
       .catch((error) => {
         const err = error instanceof Error ? error : new Error(`Store initialization failed: ${String(error)}`);
 
@@ -1266,7 +1248,7 @@ class StoreWrapper implements IStoreWrapper {
   }
 
   registerCC = (webex?: WithWebex['webex']) => {
-    return this.store.registerCC(webex).then(() => this.restoreAISummaryEnablement());
+    return this.store.registerCC(webex).then(() => this.applyAISummaryConfig());
   };
 
   handleTaskRemove = (taskToRemove: ITask) => {
@@ -1366,10 +1348,6 @@ class StoreWrapper implements IStoreWrapper {
           }
           this.store.aiSummaries = next;
         });
-      }
-      // A consult can return for this same interaction; final primary-task removal retires its flags.
-      if (taskId && !isSecondaryAgent(taskToRemove)) {
-        clearAISummaryEnablement(this.getAISummarySessionKey(), taskId);
       }
     }
 
@@ -1915,15 +1893,15 @@ class StoreWrapper implements IStoreWrapper {
           const entry = this.aiSummaryTaskListeners[taskId];
           if (entry?.task !== task) return;
           entry.liveEnablement = payload;
-          entry.enablementSessionKey = this.getAISummarySessionKey();
           this.applyAISummaryEnablement(task, payload);
-          writeAISummaryEnablement(entry.enablementSessionKey, payload);
           this.refreshTaskList();
         };
-        this.aiSummaryTaskListeners[taskId] = {task, summaryListener, enablementListener};
+        const liveEnablement = existingSummary?.liveEnablement;
+        this.aiSummaryTaskListeners[taskId] = {task, summaryListener, enablementListener, liveEnablement};
         task.on(TASK_EVENTS.TASK_MID_CALL_SUMMARY_RECEIVED, summaryListener);
         task.on(TASK_EVENTS.TASK_FEATURE_ENABLEMENT, enablementListener);
-        this.restoreAISummaryEnablement(taskId);
+        if (liveEnablement) this.applyAISummaryEnablement(task, liveEnablement);
+        this.applyAISummaryConfig(taskId);
       }
     }
   };
@@ -2272,7 +2250,6 @@ class StoreWrapper implements IStoreWrapper {
   };
 
   cleanUpStore = () => {
-    clearAISummaryEnablement(this.getAISummarySessionKey());
     this.store.logger.info('CC-Widgets: cleanUpStore(): resetting store on logout', {
       module: 'storeEventsWrapper.ts',
       method: 'cleanUpStore',

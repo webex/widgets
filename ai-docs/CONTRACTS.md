@@ -53,10 +53,11 @@ incoming-card actions through the SDK, including actions on earlier cards. Recei
 history is retained for repeated consults in the same agent session and
 cleared by the existing SDK-instance/logout reset.
 
-Confirmed per-interaction summary enablement is saved in session storage and restored
-onto recovered SDK Tasks through the existing `setFeatureEnablement` method. Live
-feature-enablement events take precedence over saved values; widgets continue to read
-`task.aiSummaryCapabilities`.
+Summary enablement uses registration config flags until a matching live
+feature-enablement event arrives. Config fallback and live events update the SDK Task
+through `setFeatureEnablement`; widgets continue to read `task.aiSummaryCapabilities`.
+Live events, including disablement, take precedence. Refresh and new browser sessions
+use config again until an event arrives, without browser storage.
 
 `AI_SUMMARY_EDITABLE_SECTION_KEYS` exports the canonical editable structured keys, checked
 against SDK `AISummarySections`. Summary editors may fill omitted optional fields from the

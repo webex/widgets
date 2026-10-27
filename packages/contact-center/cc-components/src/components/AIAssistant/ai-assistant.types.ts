@@ -273,7 +273,7 @@ export interface AdaptiveCardRendererProps {
   actionLabels?: Partial<Record<AIAssistantActionKind, string>>;
   /** Reports whether card content rendered, so the container can show its controls. */
   onRender?: (rendered: boolean) => void;
-  /** Title already rendered by RealTimeAssist; removes the matching header embedded in backend cards. */
+  /** Title already rendered by the host; removes the matching header embedded in backend cards. */
   assistantTitle?: string;
   /** Plain-text fallback rendered when the Adaptive Card cannot be parsed/rendered. */
   fallbackText?: string;

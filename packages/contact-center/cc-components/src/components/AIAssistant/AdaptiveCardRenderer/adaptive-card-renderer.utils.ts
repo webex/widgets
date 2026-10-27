@@ -85,6 +85,34 @@ const extractMomentumIconName = (value: string): string | null => {
   return match ? match[1].toLowerCase() : null;
 };
 
+/** Read only the backend's standalone AI icon/title header. */
+export const extractAssistantTitle = (card: unknown): string | undefined => {
+  if (!card || typeof card !== 'object' || Array.isArray(card)) return undefined;
+  const body = (card as Record<string, unknown>).body;
+  if (!Array.isArray(body)) return undefined;
+  const header = body[0] as Record<string, unknown> | undefined;
+  if (header?.type !== 'ColumnSet' || header.selectAction || !Array.isArray(header.columns)) return undefined;
+  if (header.columns.length !== 2) return undefined;
+
+  const items: Record<string, unknown>[] = [];
+  for (const column of header.columns) {
+    if (!column || typeof column !== 'object' || column.type !== 'Column' || column.selectAction) return undefined;
+    if (!Array.isArray(column.items) || column.items.length !== 1) return undefined;
+    const item = column.items[0];
+    if (!item || typeof item !== 'object' || Array.isArray(item) || item.selectAction) return undefined;
+    items.push(item);
+  }
+  const image = items.find((item) => item.type === 'Image');
+  const title = items.find((item) => item.type === 'TextBlock');
+  return image &&
+    typeof image.url === 'string' &&
+    extractMomentumIconName(image.url) === 'cisco-ai-assistant-color.svg' &&
+    typeof title?.text === 'string' &&
+    title.text.trim()
+    ? title.text
+    : undefined;
+};
+
 export const extractCustomerStatementTitle = (card: unknown): string | undefined => {
   if (Array.isArray(card)) {
     for (const item of card) {
@@ -480,6 +508,7 @@ export const buildHostConfig = (presentation: AdaptiveCardRendererProps['present
       ? {
           fontSizes: {small: 10, default: 12, medium: 14, large: 17, extraLarge: 20},
           fontWeights: {lighter: 300, default: 400, bolder: 600},
+          imageSizes: {small: 20, medium: 80, large: 160},
         }
       : {}),
     spacing: isSummary

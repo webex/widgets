@@ -1,5 +1,14 @@
 import React, {useState} from 'react';
-import {Button, Combobox, FilterChip, Icon, Option, Selectlistbox, Text} from '@momentum-design/components/dist/react';
+import {
+  Button,
+  Chip,
+  Combobox,
+  Icon,
+  Option,
+  Selectlistbox,
+  StaticChip,
+  Text,
+} from '@momentum-design/components/dist/react';
 import AISummary, {AI_ASSISTANT_SUMMARY_MESSAGES as AI_SUMMARY_MESSAGES} from '../../../AIAssistant/AISummary';
 import type {WrapUpSummaryProps, WrapUpSummaryReason} from '../../task.types';
 import './wrap-up-summary.styles.scss';
@@ -32,8 +41,10 @@ const WrapUpSummary: React.FC<WrapUpSummaryProps> = ({
     },
     []
   );
-  const showSuggestions =
-    suggestedReasons.length > 0 && !suggestedReasons.some((reason) => reason.id === selectedReasonId);
+  const suggestionMessage = summary?.content?.suggestedWrapUpCodesMessage;
+  const showSuggestions = suggestedReasons.length
+    ? !suggestedReasons.some((reason) => reason.id === selectedReasonId)
+    : Boolean(suggestionMessage);
 
   return (
     <section className="wrap-up-summary agent-popover-content" data-testid="wrap-up-summary">
@@ -91,15 +102,19 @@ const WrapUpSummary: React.FC<WrapUpSummaryProps> = ({
             </Text>
             <div className="wrap-up-summary__suggestion-chips">
               {suggestedReasons.map((reason) => (
-                <FilterChip key={reason.id} label={reason.name} onClick={() => selectReason(reason)} />
+                <Chip
+                  key={reason.id}
+                  className="wrap-up-summary__suggestion-chip"
+                  icon-name="plus-bold"
+                  label={reason.name}
+                  onClick={() => selectReason(reason)}
+                />
               ))}
+              {!suggestedReasons.length && suggestionMessage ? (
+                <StaticChip icon-name="dnd-presence-filled" label={suggestionMessage} />
+              ) : null}
             </div>
           </div>
-        )}
-        {!suggestedReasons.length && summary?.content?.suggestedWrapUpCodesMessage && (
-          <Text tagname="p" type="body-midsize-regular" className="wrap-up-summary__suggestion-message">
-            {summary.content.suggestedWrapUpCodesMessage}
-          </Text>
         )}
         {summary && summary.state !== 'omitted' ? (
           <div className="wrap-up-summary__body" data-testid="wrap-up-summary:body">

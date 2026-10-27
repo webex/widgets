@@ -5,6 +5,7 @@ import {
   buildHostConfig,
   copyToClipboard,
   extractCardText,
+  extractAssistantTitle,
   extractCustomerStatementTitle,
   prepareCardForRender,
   resolveMomentumIconUrl,
@@ -16,6 +17,7 @@ describe('AdaptiveCardRenderer utilities', () => {
     expect(buildHostConfig('summary')).toMatchObject({
       fontSizes: {small: 10, default: 12, medium: 14, large: 17, extraLarge: 20},
       fontWeights: {lighter: 300, default: 400, bolder: 600},
+      imageSizes: {small: 20, medium: 80, large: 160},
       spacing: {small: 8, default: 16, medium: 20, large: 24, extraLarge: 32, padding: 0},
       containerStyles: {accent: {backgroundColor: 'transparent'}, attention: {backgroundColor: 'transparent'}},
       actions: {buttonSpacing: 4, actionAlignment: 'stretch', iconSize: 24},
@@ -26,6 +28,7 @@ describe('AdaptiveCardRenderer utilities', () => {
     });
     expect(suggestion).not.toHaveProperty('fontSizes');
     expect(suggestion).not.toHaveProperty('fontWeights');
+    expect(suggestion).not.toHaveProperty('imageSizes');
     expect(suggestion.actions).not.toHaveProperty('iconSize');
     expect(suggestion.containerStyles).not.toHaveProperty('accent');
     expect(suggestion.containerStyles).not.toHaveProperty('attention');
@@ -432,6 +435,122 @@ describe('AdaptiveCardRenderer utilities', () => {
       separator: true,
       text: ' ',
     });
+  });
+
+  it.each([
+    'cisco-ai-assistant-color.svg',
+    '/icons/cisco-ai-assistant-color.svg',
+    'https://example.invalid/icons/cisco-ai-assistant-color.svg?theme=dark',
+  ])('extracts only the standalone AI header title for %s without changing its text', (url) => {
+    const title = '  {name} generated content  ';
+    const card = {
+      type: 'AdaptiveCard',
+      body: [
+        {
+          type: 'ColumnSet',
+          columns: [
+            {type: 'Column', width: 'auto', items: [{type: 'Image', url}]},
+            {type: 'Column', width: 'stretch', items: [{type: 'TextBlock', text: title}]},
+          ],
+        },
+        {type: 'TextBlock', text: 'Keep the incoming summary.'},
+      ],
+    };
+
+    expect(extractAssistantTitle(card)).toBe(title);
+    expect(prepareCardForRender(card, undefined, title).body).toEqual([
+      {type: 'TextBlock', text: 'Keep the incoming summary.'},
+    ]);
+    expect(card.body).toHaveLength(2);
+  });
+
+  it('ignores ordinary content and AI headers outside the first root body item', () => {
+    const header = {
+      type: 'ColumnSet',
+      columns: [
+        {type: 'Column', items: [{type: 'Image', url: '/cisco-ai-assistant-color.svg'}]},
+        {type: 'Column', items: [{type: 'TextBlock', text: 'Incoming summary'}]},
+      ],
+    };
+    const content = {type: 'TextBlock', text: 'Ordinary summary content'};
+    [
+      undefined,
+      null,
+      'summary',
+      [],
+      {},
+      {body: [content, header]},
+      {body: [{type: 'Container', items: [header]}]},
+    ].forEach((card) => expect(extractAssistantTitle(card)).toBeUndefined());
+  });
+
+  it.each([
+    {type: 'Image', url: '/sparkle-filled.svg'},
+    {type: 'Image', url: '/cisco-ai-assistant-color.svg.backup'},
+    {type: 'TextBlock', text: 'cisco-ai-assistant-color.svg'},
+  ])('keeps a header without the recognized AI image untouched: %s', (image) => {
+    const card = {
+      type: 'AdaptiveCard',
+      body: [
+        {
+          type: 'ColumnSet',
+          columns: [
+            {type: 'Column', items: [image]},
+            {type: 'Column', items: [{type: 'TextBlock', text: 'Incoming summary'}]},
+          ],
+        },
+      ],
+    };
+    expect(extractAssistantTitle(card)).toBeUndefined();
+    expect(prepareCardForRender(card, undefined, extractAssistantTitle(card)).body).toHaveLength(1);
+  });
+
+  it.each([
+    {
+      items: [
+        {type: 'TextBlock', text: 'Incoming summary'},
+        {type: 'TextBlock', text: 'Substantive summary body'},
+      ],
+    },
+    {items: [{type: 'ActionSet', actions: [{type: 'Action.Submit', title: 'Keep this action'}]}]},
+    {items: [{type: 'TextBlock', text: '   '}]},
+    {items: [{type: 'TextBlock', text: 'Incoming summary'}], selectAction: {type: 'Action.Submit'}},
+  ])('does not extract a title when the header contains unsupported content: %s', (column) => {
+    const card = {
+      type: 'AdaptiveCard',
+      body: [
+        {
+          type: 'ColumnSet',
+          columns: [
+            {type: 'Column', items: [{type: 'Image', url: '/cisco-ai-assistant-color.svg'}]},
+            {type: 'Column', ...column},
+          ],
+        },
+      ],
+    };
+    expect(extractAssistantTitle(card)).toBeUndefined();
+    const prepared = prepareCardForRender(card, undefined, extractAssistantTitle(card));
+    expect(prepared.body[0].columns[1]).toEqual(card.body[0].columns[1]);
+  });
+
+  it('does not replace an actionable AI header with a presentation-only heading', () => {
+    const card = {
+      type: 'AdaptiveCard',
+      body: [
+        {
+          type: 'ColumnSet',
+          selectAction: {type: 'Action.OpenUrl', url: 'https://example.invalid/case'},
+          columns: [
+            {type: 'Column', items: [{type: 'Image', url: '/cisco-ai-assistant-color.svg'}]},
+            {type: 'Column', items: [{type: 'TextBlock', text: 'Incoming summary'}]},
+          ],
+        },
+      ],
+    };
+    expect(extractAssistantTitle(card)).toBeUndefined();
+    expect(prepareCardForRender(card, undefined, extractAssistantTitle(card)).body[0].selectAction).toEqual(
+      card.body[0].selectAction
+    );
   });
 
   it('extracts and removes a customer-statement header while preserving its quote', () => {

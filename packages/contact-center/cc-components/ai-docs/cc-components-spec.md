@@ -508,9 +508,13 @@ behavior. Receiver visibility derives from the active interaction and supplied
 summary; closing and reopening does not discard its content. Incoming summaries take precedence over retained wellness
 history; an active wellness offer, transition, error or overlay retains priority.
 Wellness history remains retained when incoming summary content takes precedence.
-Receiver cards and incoming-summary headings use Momentum's primary background
-surface. Native emphasis containers use Momentum's secondary surface so the summary
-body remains shaded independently of its heading.
+Incoming-summary headings reuse the existing assistant header layout and Momentum
+Text on the primary surface. A recognized SDK icon-and-title header is rendered
+once outside the shared suggested-response card; unfamiliar headers stay intact.
+The body, divider, timestamp, feedback and copy controls share that card's rounded
+Momentum secondary surface and padding; nested template emphasis remains transparent.
+Display-only receiver cards use Desktop's compact
+Adaptive Cards typography, while ordinary suggested-response styling is unchanged.
 When Real-time Assist is enabled during an active interaction, the receiver view
 also exposes Get Assistance in the fixed panel footer above the disclaimer.
 The cards use the existing chat scroller and chat item layout, so summary history
@@ -567,7 +571,8 @@ Consult/transfer and wrap-up panels forward their summary view props to the shar
 content and supplies local response edits separately through `editedSummary`, so
 raw content retains its identity. These components perform no SDK operations.
 
-The compact wrap-up panel is titled Wrap Up Reasons and uses the existing Momentum
+The compact wrap-up panel is titled Wrap Up Reasons, instructs
+"Choose a code, and click the summary to edit it if needed.", and uses the existing Momentum
 `Combobox`, `Selectlistbox` and `Option` components for searchable reason selection,
 with the label Choose a reason to wrap up and placeholder Search topic. Momentum owns
 filtering, dropdown placement and keyboard interaction. Typing clears the eligible
@@ -576,10 +581,11 @@ retains only a temporary snapshot of the native committed value while searching 
 clearing eligibility does not erase the first typed character. Outside search, its
 value derives directly from the selected reason. Selection events use the configured ID and name,
 ignoring event-provided labels. SDK `suggestedWrapUpCodes` appear as native Momentum
-suggestion chips only when an explicit ID or an unambiguous name maps to a configured
+`Chip` controls with a trailing plus icon only when an explicit ID or an unambiguous name maps to a configured
 reason; duplicate suggestions and unknown codes cannot become actions. Selecting a
 suggested reason fills the picker and hides the suggestion chips without submitting.
-An SDK suggestion message is shown when there are no valid suggested chips. Summary
+An SDK suggestion message appears as a noninteractive Momentum `StaticChip` with a
+do-not-disturb icon in the same AI-suggested row when there are no valid suggested chips. Summary
 content is separated from the picker and uses its shared 182px scrolling body. The
 27.5rem panel uses natural height bounded by 80vh, retaining its footer in short views.
 Submit Wrap Up stays enabled with a committed reason while summary generation is

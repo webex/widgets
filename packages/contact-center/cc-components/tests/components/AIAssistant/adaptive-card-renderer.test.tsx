@@ -45,7 +45,7 @@ jest.mock('adaptivecards', () => ({
     };
     return adaptiveCard;
   }),
-  HostConfig: jest.fn(),
+  HostConfig: jest.fn().mockImplementation((config) => config),
 }));
 
 describe('AdaptiveCardRenderer', () => {

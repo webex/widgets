@@ -3,7 +3,6 @@ import type {IReactionDisposer} from 'mobx';
 import {mockCC, mockProfile, mockTask} from '@webex/test-fixtures';
 import {aiSummaryFixtures} from '../../test-fixtures/src/aiSummaryFixtures';
 import store from '../src/storeEventsWrapper';
-import {writeAISummaryEnablement} from '../src/ai-summary-enablement-storage';
 import {TASK_EVENTS} from '../src/store.types';
 import type {AISummaryEntry, IContactCenter, ITask, WithWebex} from '../src/store.types';
 
@@ -29,6 +28,10 @@ describe('AI summary notifications with the real MobX store', () => {
     cc = {
       ...mockCC,
       register: jest.fn().mockResolvedValue(mockProfile),
+      taskManager: {
+        ...mockCC.taskManager,
+        getAllTasks: jest.fn(() => ({[INTERACTION_ID]: task})),
+      },
     };
     webex = {cc, logger: cc.LoggerProxy};
     task = {
@@ -208,10 +211,11 @@ describe('AI summary notifications with the real MobX store', () => {
   });
 
   it.each(['before', 'after'] as const)(
-    'restores cached summary flags when hydration occurs %s silent registration',
+    'uses SDK configuration when hydration occurs %s silent registration',
     async (hydrateTiming) => {
       const previousProfile = store.agentProfile;
       const previousAgentId = store.agentId;
+      const previousFeatureFlags = store.featureFlags;
       const previousGetAllTasks = cc.taskManager.getAllTasks;
       const sessionId = 'silently-restored-session';
       Object.assign(task, {
@@ -227,18 +231,19 @@ describe('AI summary notifications with the real MobX store', () => {
       });
       cc.taskManager.getAllTasks = jest.fn(() => ({[INTERACTION_ID]: task}));
       webex.credentials = {getOrgId: () => 'sdk-org'};
-      writeAISummaryEnablement(JSON.stringify(['sdk-org', mockProfile.agentId, sessionId]), {
-        interactionId: INTERACTION_ID,
-        midCallEnabled: true,
-        postCallEnabled: true,
-      });
       runInAction(() => {
         store.store.agentProfile = {};
         store.store.agentId = '';
       });
       cc.register = jest.fn(async () => {
         if (hydrateTiming === 'before') store.handleTaskHydrate(task);
-        return {...mockProfile, orgId: undefined, isAgentLoggedIn: true, agentSessionId: sessionId};
+        return {
+          ...mockProfile,
+          orgId: undefined,
+          isAgentLoggedIn: true,
+          agentSessionId: sessionId,
+          aiFeature: {generatedSummaries: {consultTransferSummariesEnabled: true, wrapUpSummariesEnabled: true}},
+        };
       });
 
       try {
@@ -254,8 +259,8 @@ describe('AI summary notifications with the real MobX store', () => {
         runInAction(() => {
           store.store.agentProfile = previousProfile;
           store.store.agentId = previousAgentId;
+          store.store.featureFlags = previousFeatureFlags;
         });
-        sessionStorage.clear();
       }
     }
   );
