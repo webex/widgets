@@ -217,6 +217,8 @@ export interface WellnessBreakErrorProps {
 }
 
 export interface RealTimeAssistProps {
+  /** Existing assistant content shown before real-time assistance in the chat scroller. */
+  children?: ReactNode;
   status: AIAssistantRequestStatus;
   errorMessage?: string;
   chatEntries: AIAssistantChatEntry[];

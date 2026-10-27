@@ -40,13 +40,6 @@
   }
 }
 
-.ai-assistant__closed-chrome {
-  align-items: flex-start;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
 // Default chrome: small floating card with border + shadow.
 .ai-assistant__panel {
   background: var(--mds-color-theme-background-primary-normal);
@@ -104,12 +97,6 @@
   align-items: center;
   display: flex;
   gap: 0.25rem;
-}
-
-.ai-assistant__summary-actions {
-  display: flex;
-  flex-shrink: 0;
-  padding: 0.5rem 1.125rem;
 }
 
 .ai-assistant__body {
@@ -674,10 +661,6 @@
   &::part(mdc-input) {
     border-radius: 1.5rem;
   }
-}
-
-.ai-assistant__summary-trigger {
-  align-self: flex-start;
 }
 
 .ai-assistant__summary-toast-anchor {

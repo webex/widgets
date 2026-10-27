@@ -55,9 +55,6 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
     assistantHeaderSequence += 1;
     return `ai-assistant-header-${assistantHeaderSequence}`;
   });
-  // Select incoming summaries in an open panel; ordinary Open/Restore can return to assistance.
-  const [viewingReceiverKey, setViewingReceiverKey] = useState<string | null>(null);
-  const [isAssistanceSelected, setIsAssistanceSelected] = useState(false);
   const focusReceiverSummaryRef = useRef(false);
   // Fullscreen is consumer-owned: we emit onFullScreenToggle; the host owns layout.
   const wellnessOverlayPhase = wellness && isWellnessOverlayPhase(wellness.phase) ? wellness.phase : undefined;
@@ -71,14 +68,9 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
   const panelClass = ['ai-assistant__panel', isFullScreen ? 'ai-assistant__panel--full-screen' : '']
     .filter(Boolean)
     .join(' ');
-  const canViewReceiverSummary = Boolean(receiverSummary && hasActiveInteraction);
-  const summary =
-    receiverSummary && hasActiveInteraction && viewingReceiverKey === receiverSummary.branchKey
-      ? receiverSummary
-      : undefined;
+  const summary = hasActiveInteraction ? receiverSummary : undefined;
   const showLanding = !summary && (!hasActiveInteraction || !isFeatureEnabled);
   const receiverBranchKey = receiverSummary?.branchKey;
-  const receiverSurface = receiverSummary?.surface;
   const receiverContent = receiverSummary?.surface === 'content' ? receiverSummary.content : undefined;
   const [dismissedReceiverNotifications, setDismissedReceiverNotifications] = useState(
     () => new Map<string, NonNullable<typeof receiverContent>>()
@@ -88,11 +80,6 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
       setDismissedReceiverNotifications((dismissed) => new Map(dismissed).set(receiverBranchKey, receiverContent));
     }
   };
-  const observedReceiverRef = useRef<{
-    branchKey: typeof receiverBranchKey;
-    surface: typeof receiverSurface;
-    content: typeof receiverContent;
-  }>({branchKey: undefined, surface: undefined, content: undefined});
 
   const wellnessHistory = wellness?.history ?? [];
   const hasWellnessHistory = Boolean(wellness?.enabled && !wellness.contentCleared && wellnessHistory.length > 0);
@@ -109,10 +96,13 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
   );
   // Keep prior messages in the view model, but let a newly eligible Desktop-style
   // suggestion temporarily own the complete assistant body.
-  // A selected summary takes precedence over a completed/dismissed
+  // Incoming summaries take precedence over a completed/dismissed
   // wellness transcript, while in-progress wellness flows keep their priority.
-  const showSelectedAssistance = isAssistanceSelected && hasActiveInteraction && isFeatureEnabled;
-  const showRetainedWellness = wellness?.phase !== 'idle' || (!summary && !showSelectedAssistance);
+  const hasActiveAssistance =
+    hasActiveInteraction &&
+    isFeatureEnabled &&
+    (isRequesting || hasInitialRequestSucceeded || requestStatus === 'error');
+  const showRetainedWellness = wellness?.phase !== 'idle' || (!summary && !hasActiveAssistance);
   const showWellnessHistory = hasWellnessHistory && !showWellnessSuggestion && showRetainedWellness;
   const showWellnessRequestState = Boolean(
     wellness?.enabled &&
@@ -139,7 +129,7 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
       showWellnessOverlay
   );
   const showReceiverSummaryToast = Boolean(
-    canViewReceiverSummary &&
+    summary &&
       receiverContent &&
       chrome !== 'open' &&
       !showWellnessOffer &&
@@ -151,55 +141,26 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
     : !showLanding;
 
   useEffect(() => {
+    if (chrome !== 'open' || !hasActiveInteraction) {
+      focusReceiverSummaryRef.current = false;
+    }
     if (chrome === 'open' && hasActiveInteraction && receiverBranchKey && receiverContent) {
       setDismissedReceiverNotifications((dismissed) => new Map(dismissed).set(receiverBranchKey, receiverContent));
     }
   }, [chrome, receiverBranchKey, receiverContent, hasActiveInteraction]);
 
-  useEffect(() => {
-    const previous = observedReceiverRef.current;
-    const incomingSummaryChanged =
-      previous.branchKey !== receiverBranchKey ||
-      previous.surface !== receiverSurface ||
-      previous.content !== receiverContent;
-    // Observe arrivals while collapsed/inactive too, so ordinary Open/Restore
-    // does not replay an older summary. Feedback retains the SDK content object.
-    observedReceiverRef.current = {branchKey: receiverBranchKey, surface: receiverSurface, content: receiverContent};
-
-    if (!hasActiveInteraction || !receiverBranchKey || chrome === 'closed') {
-      focusReceiverSummaryRef.current = false;
-      setViewingReceiverKey(null);
-      if (!hasActiveInteraction || chrome === 'closed') {
-        setIsAssistanceSelected(false);
-      }
-    } else if (incomingSummaryChanged && chrome === 'open') {
-      focusReceiverSummaryRef.current = false;
-      setViewingReceiverKey(receiverBranchKey);
-      setIsAssistanceSelected(false);
-      // Passive arrival changes content without moving focus or changing chrome.
-    } else {
-      setViewingReceiverKey((key) => (key === receiverBranchKey ? key : null));
-    }
-  }, [chrome, receiverBranchKey, receiverSurface, receiverContent, hasActiveInteraction]);
-
   const closeAssistant = () => {
-    setIsAssistanceSelected(false);
     focusReceiverSummaryRef.current = false;
-    setViewingReceiverKey(null);
     close();
   };
 
-  const openRealTimeAssist = () => {
-    setIsAssistanceSelected(false);
+  const openAssistant = () => {
     focusReceiverSummaryRef.current = false;
-    setViewingReceiverKey(null);
     open();
   };
 
-  const restoreRealTimeAssist = () => {
-    setIsAssistanceSelected(false);
+  const restoreAssistant = () => {
     focusReceiverSummaryRef.current = false;
-    setViewingReceiverKey(null);
     restore();
   };
 
@@ -207,8 +168,6 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
     if (!hasActiveInteraction || !isFeatureEnabled || isRequesting) {
       return;
     }
-    setViewingReceiverKey(null);
-    setIsAssistanceSelected(true);
     focusReceiverSummaryRef.current = false;
     requestRealTimeAssist();
   };
@@ -219,8 +178,6 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
     }
     dismissReceiverNotification();
     focusReceiverSummaryRef.current = true;
-    setViewingReceiverKey(receiverSummary.branchKey);
-    setIsAssistanceSelected(false);
     if (chrome === 'minimized') {
       restore();
       return;
@@ -230,26 +187,44 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
     }
   };
 
-  const renderReceiverSummaryTrigger = () => (
-    <Button
-      type="button"
-      variant="secondary"
-      size={28}
-      onClick={openReceiverSummary}
-      className="ai-assistant__summary-trigger"
-      data-testid="ai-assistant:view-summary"
-      aria-label={AI_ASSISTANT_SUMMARY_MESSAGES.viewSummary}
-    >
-      {AI_ASSISTANT_SUMMARY_MESSAGES.viewSummary}
-    </Button>
-  );
+  const receiverCards = summary ? (
+    <div className="ai-assistant__chat-item" data-testid="ai-assistant:receiver-summary" dir="ltr">
+      {summary.history?.map((card, index) => (
+        <AISummary
+          key={`history-${index}`}
+          mode="mid-call-receiver"
+          state={card.content.areTranscriptsAvailable === false ? 'unavailable' : 'content'}
+          content={card.content}
+          controlsDisabled={card.feedbackPending}
+          selectedFeedback={card.selectedFeedback}
+          onCopy={card.recordReceiverSummaryCopied}
+          onFeedback={card.setReceiverSummaryFeedback}
+        />
+      ))}
+      {summary.surface !== 'history' ? (
+        <AISummary
+          mode="mid-call-receiver"
+          state={summary.surface}
+          {...(summary.surface === 'content'
+            ? {
+                content: summary.content,
+                controlsDisabled: summary.feedbackPending,
+                selectedFeedback: summary.selectedFeedback,
+                onCopy: summary.recordReceiverSummaryCopied,
+                onFeedback: summary.setReceiverSummaryFeedback,
+              }
+            : {})}
+        />
+      ) : null}
+    </div>
+  ) : null;
 
   const renderLauncherButton = () => (
     <Button
       type="button"
       variant="tertiary"
       size={52}
-      onClick={openRealTimeAssist}
+      onClick={openAssistant}
       className="ai-assistant__launcher"
       data-testid="ai-assistant:launcher"
       aria-label="Open AI Assistant"
@@ -261,14 +236,7 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
   return (
     <div className={rootClass} data-testid="ai-assistant:root">
       {chrome === 'closed' ? (
-        canViewReceiverSummary ? (
-          <div className="ai-assistant__closed-chrome" data-testid="ai-assistant:closed-chrome">
-            {renderReceiverSummaryTrigger()}
-            {renderLauncherButton()}
-          </div>
-        ) : (
-          renderLauncherButton()
-        )
+        renderLauncherButton()
       ) : chrome === 'minimized' ? (
         <div className="ai-assistant__panel ai-assistant__panel--minimized" data-testid="ai-assistant:panel-minimized">
           <div className="ai-assistant__minimized-bar" data-testid="ai-assistant:minimized-bar">
@@ -276,7 +244,6 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
               {AI_ASSISTANT_TITLE}
             </Text>
             <div className="ai-assistant__header-actions">
-              {canViewReceiverSummary && renderReceiverSummaryTrigger()}
               <Button
                 id={`${headerActionId}-restore`}
                 type="button"
@@ -285,7 +252,7 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
                 prefix-icon="arrow-up-bold"
                 aria-label="Restore"
                 data-testid="ai-assistant:minimized-restore"
-                onClick={restoreRealTimeAssist}
+                onClick={restoreAssistant}
               />
               <Tooltip triggerID={`${headerActionId}-restore`} placement="bottom" tooltipType="label">
                 Restore
@@ -374,11 +341,6 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
               </Tooltip>
             </div>
           </header>
-          {canViewReceiverSummary && !summary ? (
-            <div className="ai-assistant__summary-actions" data-testid="ai-assistant:summary-actions">
-              {renderReceiverSummaryTrigger()}
-            </div>
-          ) : null}
           <div
             className={`ai-assistant__body${
               (showLanding && !showWellnessContent) || showWellnessSuggestion ? ' ai-assistant__body--landing' : ''
@@ -424,40 +386,10 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
             ) : null}
             {showWellnessError && wellness ? <WellnessBreakError error={wellness.error} /> : null}
             {!showWellnessContent ? (
-              summary ? (
-                <div className="ai-assistant__chat" data-testid="ai-assistant:receiver-summary" dir="ltr">
-                  <div className="ai-assistant__chat-item">
-                    {summary.history?.map((card, index) => (
-                      <AISummary
-                        key={`history-${index}`}
-                        mode="mid-call-receiver"
-                        state={card.content.areTranscriptsAvailable === false ? 'unavailable' : 'content'}
-                        content={card.content}
-                        controlsDisabled={card.feedbackPending}
-                        selectedFeedback={card.selectedFeedback}
-                        onCopy={card.recordReceiverSummaryCopied}
-                        onFeedback={card.setReceiverSummaryFeedback}
-                      />
-                    ))}
-                    {summary.surface !== 'history' ? (
-                      <AISummary
-                        mode="mid-call-receiver"
-                        state={summary.surface}
-                        {...(summary.surface === 'content'
-                          ? {
-                              content: summary.content,
-                              controlsDisabled: summary.feedbackPending,
-                              selectedFeedback: summary.selectedFeedback,
-                              onCopy: summary.recordReceiverSummaryCopied,
-                              onFeedback: summary.setReceiverSummaryFeedback,
-                            }
-                          : {})}
-                      />
-                    ) : null}
-                  </div>
-                </div>
-              ) : showLanding ? (
+              showLanding ? (
                 <AIAssistantLanding agentName={agentName} showRealTimeAssist={isFeatureEnabled} />
+              ) : summary && !isFeatureEnabled ? (
+                <div className="ai-assistant__chat">{receiverCards}</div>
               ) : (
                 <RealTimeAssist
                   status={requestStatus}
@@ -471,7 +403,9 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
                   hasInitialRequestSucceeded={hasInitialRequestSucceeded}
                   onRealTimeAssistAction={onRealTimeAssistAction}
                   logger={logger}
-                />
+                >
+                  {receiverCards}
+                </RealTimeAssist>
               )
             ) : null}
           </div>
@@ -481,7 +415,7 @@ const AIAssistantComponent: React.FC<AIAssistantComponentProps> = ({
                 <Button
                   type="button"
                   variant="secondary"
-                  className="ai-assistant__pill-button ai-assistant__summary-trigger"
+                  className="ai-assistant__pill-button"
                   disabled={isRequesting}
                   onClick={requestAssistanceFromSummary}
                   data-testid="ai-assistant:summary-get-assistance"

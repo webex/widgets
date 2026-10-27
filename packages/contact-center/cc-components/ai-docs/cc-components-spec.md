@@ -443,12 +443,11 @@ Clipboard confirmation retains payload identity checks.
 Empty read-only sections and clipboard blocks are omitted; empty fields remain
 available throughout editing.
 
-`AIAssistantComponent.receiverSummary` automatically selects a newly received summary
-when the panel is already open and an interaction is active, including a replacement
-SDK content object for the same interaction. Feedback and copy updates that retain
-the SDK content object do not count as arrivals. Passive selection does not invoke
-chrome callbacks or explicitly move focus. Closed and minimized panels remain in
-their current state and expose View summary. A newly received content payload also
+`AIAssistantComponent.receiverSummary` renders the current interaction's incoming
+summary directly whenever the panel is open, including on Open and Restore.
+There is no separate View summary button or summary-selection state inside the
+assistant chrome. Passive arrivals do not invoke chrome callbacks or explicitly
+move focus. Closed and minimized panels remain in their current state. A newly received content payload
 shows a Momentum toast while closed or minimized, following the existing wellness
 offer toast's placement, AI icon, and footer action slots. Later and dismiss hide
 that notification; View summary dismisses it and opens or restores the receiver
@@ -456,13 +455,10 @@ branch directly. Opening the panel marks that payload as seen so minimizing or
 closing does not show the same notification again. Feedback/copy updates retaining
 the SDK content do not reset dismissal. Dismissal is retained per receiver branch,
 so switching tasks does not replay an already dismissed payload. Active wellness
-offers and overlays keep notification priority. Arrivals observed in collapsed states or without an active
-interaction are not replayed by an ordinary Open/Restore action.
-View summary is also available in a separate row below the open panel's header
-when the agent has returned to ordinary assistance. Selecting it hides the action
-row and opens the receiver branch independently of Real-time Assist enablement.
-Each chrome branch checks eligibility before rendering the shared trigger button.
-No summary or trigger is shown without an active interaction.
+offers and overlays keep notification priority. The toast's View summary remains
+an explicit Open/Restore action; the ordinary launcher and Restore show the same
+available summaries without another navigation step. No summary is shown without
+an active interaction, and receiver content does not require Real-time Assist enablement.
 The receiver branch renders its optional prior-payload `history` before the latest
 summary in arrival order, reusing `AISummary` and each payload's original timestamp.
 Historical cards preserve `areTranscriptsAvailable: false` as unavailable even when
@@ -508,37 +504,33 @@ card. Within `AISummary`, its render callback controls whether the copy/feedback
 shown; parsing or rendering failure hides them. Valid replacement cards preserve
 those controls and their focus. Replacing a display-only receiver card resets its
 error boundary; ordinary Real-time Assist cards keep their existing recovery
-behavior. Receiver selection clears when the interaction becomes inactive, its
-summary is removed, or chrome closes. A new eligible branch is selected while the
-panel remains open. Closing either chrome clears the receiver selection before invoking the
-host callback, so external reopening returns to the ordinary assistant view.
-A selected receiver summary takes precedence over retained wellness
+behavior. Receiver visibility derives from the active interaction and supplied
+summary; closing and reopening does not discard its content. Incoming summaries take precedence over retained wellness
 history; an active wellness offer, transition, error or overlay retains priority.
-Wellness history remains available when returning to the ordinary assistant view.
+Wellness history remains retained when incoming summary content takes precedence.
 Receiver cards and incoming-summary headings use Momentum's primary background
 surface. Native emphasis containers use Momentum's secondary surface so the summary
 body remains shaded independently of its heading.
 When Real-time Assist is enabled during an active interaction, the receiver view
 also exposes Get Assistance in the fixed panel footer above the disclaimer.
 The cards use the existing chat scroller and chat item layout, so summary history
-scrolls while Get Assistance and the disclaimer remain visible. It returns to ordinary assistance and invokes the existing
-request callback once, retaining assistance history and context. Pending requests
+scrolls while Get Assistance and the disclaimer remain visible. Get Assistance invokes the existing
+request callback once, retaining the incoming cards, assistance history and context. Pending requests
 disable the action; inactive interactions and active wellness content do not offer
-it. The summary remains reachable through View summary after returning to assistance.
-Selecting assistance temporarily takes priority over idle retained wellness history
-without clearing its records. Active wellness flows retain priority; when they
-return to idle, the explicitly selected assistance remains visible. Closing the
-assistant, ordinary Open/Restore, View summary, a new selected receiver arrival,
-or an inactive interaction clears this selection. Removing a receiver entry alone
-does not interrupt already selected assistance while the interaction stays active.
-Opening the receiver branch uses Momentum Button's `autoFocusOnMount` on its newly
+it. Incoming cards are passed as leading React children to the existing
+`RealTimeAssist` chat, so loading, errors and assistance replies remain visible
+in the same scroller without a separate summary/assistance navigation mode.
+Opening or restoring the panel starts incoming content at the top; subsequent
+assistance activity scrolls to the latest reply. Active wellness flows retain
+priority. Removing a receiver entry keeps ongoing assistance visible instead of
+returning to retained idle wellness history.
+Opening from the toast uses Momentum Button's `autoFocusOnMount` on its newly
 mounted header control. The assistant remains a non-modal panel; it does not scan
 controls for focus successors, force Momentum tab indexes, or repair focus after
 arbitrary content removal. Receiver copying uses `AISummary`'s existing root DOM
 reference to extract the card's visible text; no parent DOM getter is passed through props.
-View summary uses the native secondary button variant without a browser title
-tooltip or custom hover/focus styling. The existing launcher keeps its prior markup
-and presentation.
+The toast action and existing launcher use Momentum buttons without custom
+hover/focus styling.
 
 Summary presentation constants use the `AI_ASSISTANT_SUMMARY_` prefix. These components
 receive data and callbacks through props and make no SDK calls.

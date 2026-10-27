@@ -43,6 +43,8 @@ The React entry of `@webex/cc-widgets` re-exports the widgets, including `AIAssi
 ## AI summary surfaces
 
 Receiver entries retain prior raw SDK payloads in optional `AISummaryEntry.history`.
+An open assistant displays these incoming summaries directly. Get Assistance retains
+the cards alongside assistance replies; no in-panel View summary navigation is required.
 The receiver presentation forwards that history alongside the latest content and accepts
 a `history` surface when consult cleanup has archived the live content. Historical cards
 retain copy and feedback actions bound to the displayed Task and their original SDK

@@ -26,6 +26,7 @@ const ListeningStatus: React.FC = () => (
 );
 
 const RealTimeAssist: React.FC<RealTimeAssistProps> = ({
+  children,
   status,
   errorMessage,
   chatEntries,
@@ -47,6 +48,14 @@ const RealTimeAssist: React.FC<RealTimeAssistProps> = ({
     node.scrollTop = node.scrollHeight;
   }, [chatEntries.length, status]);
 
+  const hasIncomingContent = Boolean(children);
+  useEffect(() => {
+    // Open incoming content at its beginning; new assistance replies still scroll below it.
+    if (hasIncomingContent && listRef.current) {
+      listRef.current.scrollTop = 0;
+    }
+  }, [hasIncomingContent]);
+
   const handleContextSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     // Also covers the Enter key, which a disabled submit button doesn't block.
@@ -54,16 +63,22 @@ const RealTimeAssist: React.FC<RealTimeAssistProps> = ({
     onSubmitContext();
   };
 
+  const requestFeedback = isRequesting ? (
+    <Spinner size="small" role="status" aria-label={REQUESTING_TEXT} data-testid="ai-assistant:requesting" />
+  ) : status === 'error' ? (
+    <Text tagname="p" type="body-midsize-regular" className="ai-assistant__error-text" data-testid="ai-assistant:error">
+      {errorMessage || REQUEST_FAILED_TEXT}
+    </Text>
+  ) : null;
+
   const content = (() => {
-    if (!hasInitialRequestSucceeded) {
+    if (!children && !hasInitialRequestSucceeded) {
       return (
         <div className="ai-assistant__body-empty" data-testid="ai-assistant:empty">
           <Text tagname="h3" type="body-large-bold">
             {EMPTY_TITLE}
           </Text>
-          {isRequesting ? (
-            <Spinner size="small" role="status" aria-label={REQUESTING_TEXT} data-testid="ai-assistant:requesting" />
-          ) : (
+          {!isRequesting ? (
             <Button
               type="button"
               variant="secondary"
@@ -73,25 +88,17 @@ const RealTimeAssist: React.FC<RealTimeAssistProps> = ({
             >
               {GET_ASSISTANCE_LABEL}
             </Button>
-          )}
-          {status === 'error' ? (
-            <Text
-              tagname="p"
-              type="body-midsize-regular"
-              className="ai-assistant__error-text"
-              data-testid="ai-assistant:error"
-            >
-              {errorMessage || REQUEST_FAILED_TEXT}
-            </Text>
           ) : null}
+          {requestFeedback}
         </div>
       );
     }
 
-    if (chatEntries.length > 0) {
-      return (
-        <div className="ai-assistant__chat" ref={listRef} data-testid="ai-assistant:chat">
-          {chatEntries.map((entry) => {
+    return (
+      <div className="ai-assistant__chat" ref={listRef} data-testid="ai-assistant:chat">
+        {children}
+        {hasInitialRequestSucceeded &&
+          chatEntries.map((entry) => {
             if (entry.type === 'user') {
               return (
                 <div
@@ -149,12 +156,9 @@ const RealTimeAssist: React.FC<RealTimeAssistProps> = ({
               </div>
             );
           })}
-          <ListeningStatus />
-        </div>
-      );
-    }
-
-    return <ListeningStatus />;
+        {(children && requestFeedback) || (hasInitialRequestSucceeded ? <ListeningStatus /> : null)}
+      </div>
+    );
   })();
 
   return (

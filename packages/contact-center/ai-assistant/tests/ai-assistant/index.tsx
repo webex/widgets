@@ -183,9 +183,12 @@ describe('AIAssistant widget', () => {
     expect(container.querySelector('.my-host-class')).toBeInTheDocument();
   });
 
-  it('should omit the View summary trigger until a receiver summary arrives for the current interaction', () => {
+  it('does not display a different interaction summary when opening the assistant', () => {
     storeMock.aiSummaries = {'other-interaction': {receiver: receiverEntry()}};
     render(<AIAssistant />);
+    fireEvent.click(screen.getByTestId('ai-assistant:launcher'));
+    expect(screen.queryByTestId('ai-assistant:receiver-summary')).not.toBeInTheDocument();
+    expect(screen.getByTestId('ai-assistant:empty')).toBeInTheDocument();
     expect(screen.queryByTestId('ai-assistant:view-summary')).not.toBeInTheDocument();
   });
 
@@ -193,7 +196,7 @@ describe('AIAssistant widget', () => {
     setReceiverEntry(receiverEntry({content: {conversationId: 'interaction-1', areTranscriptsAvailable: false}}));
     const {rerender} = render(<AIAssistant />);
 
-    fireEvent.click(screen.getByTestId('ai-assistant:view-summary'));
+    fireEvent.click(screen.getByTestId('ai-assistant:launcher'));
     expect(screen.getByTestId('ai-summary:unavailable')).toBeInTheDocument();
 
     setReceiverEntry(receiverEntry({status: 'error', content: undefined}));
@@ -203,13 +206,29 @@ describe('AIAssistant widget', () => {
     expect(screen.queryByTestId('ai-summary:unavailable')).not.toBeInTheDocument();
   });
 
-  it('should open the receiver summary from the View summary trigger', async () => {
+  it('opens the receiver summary directly from the assistant launcher', async () => {
     setReceiverEntry(receiverEntry());
     render(<AIAssistant />);
 
-    fireEvent.click(screen.getByTestId('ai-assistant:view-summary'));
+    fireEvent.click(screen.getByTestId('ai-assistant:launcher'));
 
     expect(await screen.findByTestId('ai-assistant:receiver-summary')).toBeInTheDocument();
+  });
+
+  it('retains the incoming summary after requesting assistance without another View summary step', async () => {
+    setReceiverEntry(receiverEntry());
+    storeMock.cc.apiAIAssistant.getRealTimeAssistance.mockResolvedValueOnce({});
+    render(<AIAssistant />);
+    fireEvent.click(screen.getByTestId('ai-assistant:launcher'));
+
+    fireEvent.click(await screen.findByTestId('ai-assistant:summary-get-assistance'));
+
+    expect(await screen.findByTestId('ai-assistant:context-form')).toBeInTheDocument();
+    expect(storeMock.cc.apiAIAssistant.getRealTimeAssistance).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId('ai-assistant:chat')).toContainElement(
+      screen.getByTestId('ai-assistant:receiver-summary')
+    );
+    expect(screen.queryByRole('button', {name: 'View summary'})).not.toBeInTheDocument();
   });
 
   it('opens a receiver summary even when Real-time Assist is disabled', async () => {
@@ -217,7 +236,7 @@ describe('AIAssistant widget', () => {
     setReceiverEntry(receiverEntry());
     render(<AIAssistant />);
 
-    fireEvent.click(screen.getByTestId('ai-assistant:view-summary'));
+    fireEvent.click(screen.getByTestId('ai-assistant:launcher'));
 
     expect(await screen.findByTestId('ai-assistant:receiver-summary')).toBeInTheDocument();
     expect(screen.queryByTestId('ai-assistant:landing')).not.toBeInTheDocument();
@@ -242,7 +261,7 @@ describe('AIAssistant widget', () => {
     setReceiverEntry(entry);
     render(<AIAssistant />);
 
-    fireEvent.click(screen.getByTestId('ai-assistant:view-summary'));
+    fireEvent.click(screen.getByTestId('ai-assistant:launcher'));
     fireEvent.click(await screen.findByRole('button', {name: 'Copy Summary'}));
 
     await waitFor(() => expect(navigator.clipboard.writeText).toHaveBeenCalledWith('Receiver summary'));
@@ -325,7 +344,7 @@ describe('AIAssistant widget', () => {
     setReceiverEntry(Object.assign(receiverEntry({content: second}), {history: [first]}));
     render(<AIAssistant />);
 
-    fireEvent.click(screen.getByTestId('ai-assistant:view-summary'));
+    fireEvent.click(screen.getByTestId('ai-assistant:launcher'));
 
     const summaryPanel = await screen.findByTestId('ai-assistant:receiver-summary');
     expect(within(summaryPanel).getByText('Receiver summary')).toBeInTheDocument();
@@ -358,7 +377,7 @@ describe('AIAssistant widget', () => {
     setReceiverEntry(receiverEntry({content: {conversationId: 'interaction-1', summaryText: 'Text-only summary'}}));
     render(<AIAssistant />);
 
-    fireEvent.click(screen.getByTestId('ai-assistant:view-summary'));
+    fireEvent.click(screen.getByTestId('ai-assistant:launcher'));
 
     expect(await screen.findByTestId('ai-summary:unavailable')).toBeInTheDocument();
     expect(screen.queryByRole('button', {name: 'Copy Summary'})).not.toBeInTheDocument();
@@ -403,7 +422,7 @@ describe('AIAssistant widget', () => {
     setReceiverEntry(receiverEntry({feedbackPending: true}));
     render(<AIAssistant />);
 
-    fireEvent.click(screen.getByTestId('ai-assistant:view-summary'));
+    fireEvent.click(screen.getByTestId('ai-assistant:launcher'));
 
     const like = await screen.findByRole('button', {name: 'This is helpful'});
     expect(like).toBeDisabled();
@@ -419,7 +438,7 @@ describe('AIAssistant widget', () => {
     });
     const {rerender} = render(<AIAssistant />);
 
-    fireEvent.click(screen.getByTestId('ai-assistant:view-summary'));
+    fireEvent.click(screen.getByTestId('ai-assistant:launcher'));
     const like = await screen.findByRole('button', {name: 'This is helpful'});
     fireEvent.click(like);
     rerender(<AIAssistant />);
