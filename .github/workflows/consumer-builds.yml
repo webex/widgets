@@ -35,7 +35,9 @@ jobs:
           cache: yarn
       - name: Read Enabled Bundlers
         id: config
-        run: echo "bundlers=$(node tooling/consumer-builds/config.cjs)" >> "$GITHUB_OUTPUT"
+        run: |
+          BUNDLERS=$(node tooling/consumer-builds/config.cjs)
+          echo "bundlers=$BUNDLERS" >> "$GITHUB_OUTPUT"
       - name: Install and Build Packages
         run: |
           yarn install --immutable

@@ -134,7 +134,9 @@ jobs:
       - name: Read Enabled Bundlers
         id: config
         if: steps.check-changes.outputs.has_changes == 'true'
-        run: echo "bundlers=$(node tooling/consumer-builds/config.cjs)" >> "$GITHUB_OUTPUT"
+        run: |
+          BUNDLERS=$(node tooling/consumer-builds/config.cjs)
+          echo "bundlers=$BUNDLERS" >> "$GITHUB_OUTPUT"
 
       - name: Install Dependencies
         run: yarn install --immutable

@@ -27,6 +27,8 @@ are enabled by default. Set a bundler's `enabled` flag to `false` to omit its ch
 Use a boolean value. Keep all five entries. Unknown entries, missing flags, and an empty enabled list
 fail configuration validation. At least one bundler must be enabled. The workflow has no separate
 list of required bundlers. Disabled tools remain in the fixture lockfile.
+Both workflow paths stop on configuration errors before writing a matrix output. A valid opt out
+does not require changes to the tooling tests.
 
 ## Release sequence
 
@@ -85,6 +87,12 @@ executable flags, package sets and versions, timestamp differences, and temporar
 Archive links and paths outside `package/` are rejected before extraction.
 
 ## Known regression
+
+The supported Momentum UI peer `26.201.9` emits an invalid `::part(icon) path` selector from
+`MeetingRowContent.style.scss`. The fork run at `fbfb39d1` passed Webpack, Rollup, and esbuild;
+Vite and Parcel rejected this CSS. The same Sass block is present in sampled later versions,
+including `26.214.0`, which also failed both local checks. These failures block the release gate.
+The earlier passing run at `915df2a` used peer `26.197.0`, below the declared station-login minimum.
 
 The original `next` baseline at `c298215c` contained the wellness inline Webpack loader and development
 logging output. The consumer checks rejected that candidate. [PR #751](https://github.com/webex/widgets/pull/751)

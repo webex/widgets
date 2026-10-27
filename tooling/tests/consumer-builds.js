@@ -11,8 +11,9 @@ jest.mock('node:child_process');
 describe('consumer build configuration', () => {
   const config = () => Object.fromEntries(BUNDLERS.map((name) => [name, {enabled: true}]));
 
-  it('enables all five bundlers by default', () => {
-    expect(enabledBundlers()).toEqual(['webpack', 'vite', 'parcel', 'rollup', 'esbuild']);
+  it('reads the enabled list from the checked-in configuration', () => {
+    const value = require('../consumer-builds/config.json');
+    expect(enabledBundlers()).toEqual(BUNDLERS.filter((name) => value[name].enabled));
   });
 
   it('omits a bundler only when its flag is false', () => {

@@ -3,11 +3,16 @@ const {execFileSync} = require('node:child_process');
 const {readCandidates} = require('../consumer-builds/candidates.cjs');
 const {checkBrowser} = require('../consumer-builds/smoke.cjs');
 const {run} = require('../consumer-builds/run.cjs');
+const {BUNDLERS, enabledBundlers} = require('../consumer-builds/config.cjs');
 
 jest.mock('node:fs');
 jest.mock('node:child_process');
 jest.mock('../consumer-builds/candidates.cjs', () => ({CANDIDATES: '/candidates', readCandidates: jest.fn()}));
 jest.mock('../consumer-builds/smoke.cjs', () => ({checkBrowser: jest.fn()}));
+jest.mock('../consumer-builds/config.cjs', () => ({
+  ...jest.requireActual('../consumer-builds/config.cjs'),
+  enabledBundlers: jest.fn(),
+}));
 
 describe('consumer build runner', () => {
   const candidates = Array.from({length: 9}, (_, index) => ({
@@ -20,6 +25,7 @@ describe('consumer build runner', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
+    enabledBundlers.mockReturnValue(BUNDLERS);
     readCandidates.mockReturnValue(candidates);
     fs.openSync.mockReturnValue(10);
     fs.readFileSync.mockReturnValue(JSON.stringify({version: '1.0.0-next.1'}));
@@ -56,6 +62,12 @@ describe('consumer build runner', () => {
 
   it('rejects unknown bundlers before starting commands', async () => {
     await expect(run('unknown')).rejects.toThrow('disabled or unknown');
+    expect(execFileSync).not.toHaveBeenCalled();
+  });
+
+  it('rejects a configured opt-out before starting commands', async () => {
+    enabledBundlers.mockReturnValue(['webpack']);
+    await expect(run('parcel')).rejects.toThrow('disabled or unknown');
     expect(execFileSync).not.toHaveBeenCalled();
   });
 
