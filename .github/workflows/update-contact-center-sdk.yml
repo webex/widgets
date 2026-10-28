@@ -33,15 +33,32 @@ jobs:
       - name: Update SDK
         id: sdk
         run: |
+          current_version="$(node -p "require('./packages/contact-center/store/package.json').dependencies['@webex/contact-center']")"
           version="$(npm view @webex/contact-center@next version)"
+          webex_version="$(npm view webex@next version)"
+          webex_sdk_version="$(npm view "webex@$webex_version" dependencies.@webex/contact-center)"
+
+          if [ "$webex_sdk_version" != "$version" ]; then
+            echo "::error::webex@$webex_version bundles @webex/contact-center@$webex_sdk_version, not @$version"
+            exit 1
+          fi
+
           echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "webex_version=$webex_version" >> "$GITHUB_OUTPUT"
           yarn workspace @webex/cc-store add "@webex/contact-center@$version"
           yarn workspace samples-cc-react-app add "@webex/contact-center@$version"
+          yarn workspace samples-cc-react-app add "webex@$webex_version"
+
+          perl -pi -e "s/\\Q$current_version\\E/$version/g" \
+            packages/contact-center/store/ai-docs/store-spec.md \
+            ai-docs/CONTRACTS.md
+
+      - name: Build workspace dependencies
+        run: yarn build:dev
 
       - name: Validate SDK update
         run: |
           yarn workspace @webex/cc-store test:unit
-          yarn workspace @webex/cc-store build
           yarn workspace samples-cc-react-app build
 
       - name: Create pull request
@@ -50,10 +67,11 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: automation/update-contact-center-sdk
           delete-branch: true
-          title: "chore(cc): update contact center SDK to ${{ steps.sdk.outputs.version }}"
-          commit-message: "chore(cc): update contact center SDK to ${{ steps.sdk.outputs.version }}"
+          title: "chore(cc): update SDK to ${{ steps.sdk.outputs.version }}"
+          commit-message: "chore(cc): update SDK to ${{ steps.sdk.outputs.version }}"
           body: |
-            Automated weekly update of `@webex/contact-center` from the npm `next` dist-tag.
+            Automated weekly update of the Contact Center SDK from the npm `next` dist-tag.
 
-            SDK version: `${{ steps.sdk.outputs.version }}`
+            - `@webex/contact-center`: `${{ steps.sdk.outputs.version }}`
+            - `webex`: `${{ steps.sdk.outputs.webex_version }}`
           labels: dependencies,contact-center
