@@ -19,7 +19,9 @@ export default defineConfig({
   },
   retries: 0,
   fullyParallel: true,
-  workers: Object.keys(USER_SETS).length, // Dynamic worker count based on USER_SETS
+  // Match CI concurrency to the runner's available resources while preserving
+  // one worker per user set for local runs.
+  workers: process.env.CI ? 4 : Object.keys(USER_SETS).length,
   reporter: 'html',
   use: {
     baseURL: 'http://localhost:3000',
