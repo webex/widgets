@@ -1,3 +1,7 @@
+---
+description: Validate ai-docs affected by staged/unstaged changes (lightweight pre-commit drift check)
+---
+
 # Spec Drift Detection — Changed Files Only
 
 Validate ai-docs affected by any staged/unstaged changes — whether the changes are to ai-docs themselves OR to source code that has corresponding ai-docs. Lightweight mode for pre-commit validation.

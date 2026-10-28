@@ -1,3 +1,8 @@
+---
+description: Stage 1 of bug-fix pipeline - classify bug tickets as prioritize/followup/dolater for AI-readiness
+argument-hint: "[TICKET-ID...]"
+---
+
 # Scrub Command
 
 ## Description
@@ -61,7 +66,7 @@ Agent({
   subagent_type: "general-purpose",
   model: "haiku",
   description: "Scrub ticket {TICKET_ID}",
-  prompt: `You are a scrubber agent. Follow the instructions in .claude/agents/scrubber.md.
+  prompt: `You are a scrubber agent. Follow the instructions in .claude/agents/cypher/scrubber.md.
 
 TICKET_ID: {TICKET_ID}
 
@@ -80,7 +85,7 @@ Description:
 Comments:
 {all comments}
 
-Read .claude/agents/scrubber.md for your full workflow. Evaluate this ticket and return result JSON.`,
+Read .claude/agents/cypher/scrubber.md for your full workflow. Evaluate this ticket and return result JSON.`,
   run_in_background: true
 })
 ```
