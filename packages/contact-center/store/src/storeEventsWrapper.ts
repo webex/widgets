@@ -74,6 +74,8 @@ const CONSULT_TRANSFER_CHANNELS = {
 
 const WELLNESS_NOTIFICATION_ACTIONS = new Set(Object.values(WELLNESS_BREAK_NOTIFICATION_ACTIONS));
 
+const DEFAULT_CODE = '0'; // Default aux-code id representing the Available state
+
 const getSupportedMediaType = (mediaType?: string): keyof typeof CONSULT_TRANSFER_CHANNELS | undefined => {
   const normalizedMediaType = typeof mediaType === 'string' ? mediaType.toLowerCase() : '';
   const channel = CONSULT_TRANSFER_CHANNELS[normalizedMediaType as keyof typeof CONSULT_TRANSFER_CHANNELS];
@@ -1069,9 +1071,13 @@ class StoreWrapper implements IStoreWrapper {
         }
         this.setCurrentTask(null);
         this.setState({reset: true});
-        // Ensure agent state is set to Available (auxCodeId '0') when no tasks remain
-        // The backend should send AGENT_STATE_CHANGE, but in test environments it may not
-        this.setCurrentState('0');
+        // Only reset to Available when no Idle state is already selected.
+        // When the agent selected an Idle state during wrap-up, retain it and
+        // let the backend AGENT_STATE_CHANGE event (handleStateChange) remain
+        // the authoritative post-wrap-up state source.
+        if (!this.currentState || this.currentState === DEFAULT_CODE) {
+          this.setCurrentState(DEFAULT_CODE);
+        }
       } else if (this.currentTask && this.store.taskList[this.currentTask.data.interactionId]) {
         this.setCurrentTask(this.store.taskList[this.currentTask?.data?.interactionId]);
       } else if (taskListKeys.length > 0) {
@@ -1973,7 +1979,6 @@ class StoreWrapper implements IStoreWrapper {
         });
         return;
       }
-      const DEFAULT_CODE = '0'; // Default code when no aux code is present
       this.setCurrentState(data.auxCodeId?.trim() !== '' ? data.auxCodeId : DEFAULT_CODE);
 
       this.setLastStateChangeTimestamp(data.lastStateChangeTimestamp);
@@ -2342,7 +2347,7 @@ class StoreWrapper implements IStoreWrapper {
         this.setDeviceType(payload.deviceType);
         this.setDialNumber(payload.dn);
         // @ts-expect-error To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
-        this.setCurrentState(payload.auxCodeId?.trim() !== '' ? payload.auxCodeId : '0');
+        this.setCurrentState(payload.auxCodeId?.trim() !== '' ? payload.auxCodeId : DEFAULT_CODE);
         this.setLastStateChangeTimestamp(payload.lastStateChangeTimestamp);
         this.setLastIdleCodeChangeTimestamp(payload.lastIdleCodeChangeTimestamp);
         // @ts-expect-error To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
