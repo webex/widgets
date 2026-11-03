@@ -16,6 +16,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          persist-credentials: false
 
       - name: Setup Node
         uses: actions/setup-node@v6
@@ -64,14 +66,58 @@ jobs:
       - name: Create pull request
         uses: peter-evans/create-pull-request@v7
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.AUTOMATION_ACCOUNT_TOKEN }}
           branch: automation/update-contact-center-sdk
           delete-branch: true
           title: "chore(cc): update SDK to ${{ steps.sdk.outputs.version }}"
           commit-message: "chore(cc): update SDK to ${{ steps.sdk.outputs.version }}"
           body: |
-            Automated weekly update of the Contact Center SDK from the npm `next` dist-tag.
+            # COMPLETES N/A (automated weekly dependency update, no linked issue)
+
+            ## This pull request addresses
+
+            Keeping `@webex/contact-center` in sync with the latest `next` pre-release so the widgets keep building against a current, compatible SDK contract.
+
+            ## by making the following changes
+
+            Automated weekly update of the Contact Center SDK from the npm `next` dist-tag:
 
             - `@webex/contact-center`: `${{ steps.sdk.outputs.version }}`
             - `webex`: `${{ steps.sdk.outputs.webex_version }}`
+
+            ### Change Type
+
+            - [ ] Bug fix (non-breaking change which fixes an issue)
+            - [ ] New feature (non-breaking change which adds functionality)
+            - [ ] Breaking change (fix or feature that would cause existing functionality to change)
+            - [ ] Documentation update
+            - [x] Tooling change
+            - [ ] Internal code refactor
+
+            ## The following scenarios were tested
+
+            - [ ] The testing is done with the amplify link
+            - `yarn workspace @webex/cc-store test:unit` and `yarn workspace samples-cc-react-app build` both passed in this workflow run before the PR was opened.
+
+            ## The GAI Coding Policy And Copyright Annotation Best Practices ##
+
+            - [x] GAI was not used (or, no additional notation is required)
+            - [ ] Code was generated entirely by GAI
+            - [ ] GAI was used to create a draft that was subsequently customized or modified
+            - [ ] Coder created a draft manually that was non-substantively modified by GAI (e.g., refactoring was performed by GAI on manually written code)
+            - [ ] Tool used for AI assistance (GitHub Copilot / Other - specify)
+              - [ ] Github Copilot
+              - [ ] Other - Please Specify
+            - [x] This PR is related to
+              - [ ] Feature
+              - [ ] Defect fix
+              - [ ] Tech Debt
+              - [x] Automation
+
+            ### Checklist before merging
+
+            - [x] I have not skipped any automated checks
+            - [x] All existing and new tests passed
+            - [ ] I have updated the testing document
+            - [ ] I have tested the functionality with amplify link
           labels: dependencies,contact-center
