@@ -1,4 +1,4 @@
-import {IdleCode, ICustomState, ILogger, IContactCenter} from '@webex/cc-store';
+import {IdleCode, ICustomState, ILogger, IContactCenter, VoiceConnectionState} from '@webex/cc-store';
 
 /**
  * Interface representing the state of a user.
@@ -79,6 +79,24 @@ export interface IUserState {
    * The timestamp of the last idle code change.
    */
   lastIdleCodeChangeTimestamp?: number;
+
+  /** Current SDK browser voice readiness. */
+  voiceConnectionState?: VoiceConnectionState;
+
+  /** Shows the recovery dialog after browser voice has remained unavailable. */
+  voiceConnectionLossDialogOpen?: boolean;
+
+  /** Host callback that retries browser voice registration. */
+  onVoiceReconnect?: () => void | Promise<void>;
+
+  /** Closes the browser voice recovery dialog. */
+  onVoiceConnectionLossDialogClose?: () => void;
+
+  /** Safe user-facing reconnect failure. */
+  voiceReconnectError?: string;
+
+  /** Accessible message shown when a requested state change fails. */
+  stateChangeError?: string;
 }
 
 export type UserStateComponentsProps = Pick<
@@ -90,6 +108,12 @@ export type UserStateComponentsProps = Pick<
   | 'lastIdleStateChangeElapsedTime'
   | 'currentState'
   | 'customState'
+  | 'voiceConnectionState'
+  | 'voiceConnectionLossDialogOpen'
+  | 'onVoiceReconnect'
+  | 'onVoiceConnectionLossDialogClose'
+  | 'voiceReconnectError'
+  | 'stateChangeError'
   | 'logger'
 >;
 

@@ -1,6 +1,11 @@
 import {useState, useEffect, useRef} from 'react';
 import store from '@webex/cc-store';
+import {VOICE_CONNECTION_EVENTS} from '@webex/cc-store';
+import type {VoiceConnectionState} from '@webex/cc-store';
+import {VOICE_CONNECTION_STATUS} from '@webex/cc-store';
 import {UseUserStateProps} from './user-state.types';
+
+const VOICE_CONNECTION_LOSS_TIMEOUT_MS = 2000;
 
 export const useUserState = ({
   idleCodes,
@@ -11,18 +16,116 @@ export const useUserState = ({
   lastStateChangeTimestamp,
   logger,
   onStateChange,
+  onVoiceReconnect,
   lastIdleCodeChangeTimestamp,
   isCurrentStateExternallyManaged = false,
   wellnessIdleCodeLookupPending = false,
+  isBrowserVoiceSession = false,
+  isAgentLoggedIn = false,
 }: UseUserStateProps) => {
   const [isSettingAgentStatus, setIsSettingAgentStatus] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [lastIdleStateChangeElapsedTime, setLastIdleStateChangeElapsedTime] = useState(0);
+  const [voiceConnectionState, setVoiceConnectionState] = useState<VoiceConnectionState>(() =>
+    cc.getVoiceConnectionState()
+  );
+  const [stateChangeError, setStateChangeError] = useState<string>();
+  const [voiceConnectionLossDialogOpen, setVoiceConnectionLossDialogOpen] = useState(false);
+  const [voiceReconnectError, setVoiceReconnectError] = useState<string>();
   const workerRef = useRef<Worker | null>(null);
 
   const prevStateRef = useRef(currentState);
   const externallyManagedStateRef = useRef(isCurrentStateExternallyManaged);
   const pendingUserSelectionRef = useRef<string>();
+  const previousVoiceStatusRef = useRef(voiceConnectionState.status);
+  const currentStateRef = useRef(currentState);
+  currentStateRef.current = currentState;
+
+  useEffect(() => {
+    const updateVoiceConnectionState = (nextState: VoiceConnectionState) => {
+      setVoiceConnectionState((currentState) => {
+        const isUnchanged =
+          currentState.status === nextState.status &&
+          currentState.lineStatus === nextState.lineStatus &&
+          currentState.mobiusSocketStatus === nextState.mobiusSocketStatus &&
+          currentState.reason === nextState.reason &&
+          currentState.retryable === nextState.retryable;
+        return isUnchanged ? currentState : nextState;
+      });
+    };
+    const handleVoiceConnectionStateChange = (state: VoiceConnectionState) => updateVoiceConnectionState(state);
+    cc.on(VOICE_CONNECTION_EVENTS.STATE_CHANGE, handleVoiceConnectionStateChange);
+    // Subscribe before reading the snapshot so a transition during mount cannot be missed.
+    updateVoiceConnectionState(cc.getVoiceConnectionState());
+    return () => cc.off(VOICE_CONNECTION_EVENTS.STATE_CHANGE, handleVoiceConnectionStateChange);
+  }, [cc]);
+
+  useEffect(() => {
+    const previousStatus = previousVoiceStatusRef.current;
+    previousVoiceStatusRef.current = voiceConnectionState.status;
+
+    if (
+      voiceConnectionState.status !== VOICE_CONNECTION_STATUS.UNAVAILABLE ||
+      !isAgentLoggedIn ||
+      !isBrowserVoiceSession
+    ) {
+      setVoiceConnectionLossDialogOpen(false);
+      setVoiceReconnectError(undefined);
+    }
+
+    if (
+      !isAgentLoggedIn ||
+      !isBrowserVoiceSession ||
+      previousStatus !== VOICE_CONNECTION_STATUS.READY ||
+      voiceConnectionState.status !== VOICE_CONNECTION_STATUS.UNAVAILABLE
+    ) {
+      return;
+    }
+
+    setVoiceReconnectError(undefined);
+    const timeoutId = setTimeout(() => {
+      try {
+        const latestVoiceStatus = cc.getVoiceConnectionState().status;
+        if (latestVoiceStatus !== VOICE_CONNECTION_STATUS.UNAVAILABLE || !isAgentLoggedIn || !isBrowserVoiceSession) {
+          return;
+        }
+
+        const defaultIdleCode = idleCodes.find((idleCode) => idleCode.isDefault);
+        if (defaultIdleCode && currentStateRef.current !== defaultIdleCode.id) {
+          store.setCurrentState(defaultIdleCode.id);
+        }
+        setVoiceConnectionLossDialogOpen(true);
+      } catch (error) {
+        logger.error('CC-Widgets: UserState failed to handle browser voice loss', {
+          module: 'useUserState',
+          method: 'voiceConnectionLossTimeout',
+          error,
+        });
+      }
+    }, VOICE_CONNECTION_LOSS_TIMEOUT_MS);
+
+    return () => clearTimeout(timeoutId);
+  }, [voiceConnectionState.status, isAgentLoggedIn, isBrowserVoiceSession, cc, idleCodes]);
+
+  const handleVoiceReconnect = async () => {
+    setVoiceReconnectError(undefined);
+    try {
+      if (!onVoiceReconnect) {
+        setVoiceReconnectError('Reconnect is not configured by the host application.');
+        return;
+      }
+      await onVoiceReconnect();
+    } catch (error) {
+      setVoiceReconnectError('Unable to reconnect browser calling. Please try again.');
+      logger.error('CC-Widgets: UserState reconnect request failed', {
+        module: 'useUserState',
+        method: 'handleVoiceReconnect',
+        error,
+      });
+    }
+  };
+
+  const dismissVoiceConnectionLossDialog = () => setVoiceConnectionLossDialogOpen(false);
 
   const callOnStateChange = () => {
     try {
@@ -251,6 +354,7 @@ export const useUserState = ({
   // UI change calls this method and gets the store updated
   const setAgentStatus = (selectedCode) => {
     try {
+      setStateChangeError(undefined);
       logger.info('CC-Widgets: useUserState setAgentStatus(): updating currentState', {
         module: 'useUserState',
         method: 'setAgentStatus',
@@ -292,6 +396,7 @@ export const useUserState = ({
           }
         })
         .catch((error) => {
+          setStateChangeError('Unable to update agent state.');
           logger.error(`Error setting agent state: ${error.toString()}`, {
             module: 'useUserState',
             method: 'updateAgentState',
@@ -320,5 +425,11 @@ export const useUserState = ({
     lastIdleStateChangeElapsedTime,
     currentState,
     onStateChange,
+    voiceConnectionState,
+    stateChangeError,
+    voiceConnectionLossDialogOpen,
+    onVoiceReconnect: onVoiceReconnect ? handleVoiceReconnect : undefined,
+    onVoiceConnectionLossDialogClose: dismissVoiceConnectionLossDialog,
+    voiceReconnectError,
   };
 };

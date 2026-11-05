@@ -5,6 +5,7 @@ import UserStateComponent from '../../../src/components/UserState/user-state';
 import {IUserState} from '../../../src/components/UserState/user-state.types';
 import * as userStateUtils from '../../../src/components/UserState/user-state.utils';
 import {mockCC} from '@webex/test-fixtures';
+import {VOICE_CONNECTION_STATUS, VoiceLineStatus, VoiceMobiusSocketStatus} from '@webex/cc-store';
 
 describe('UserStateComponent', () => {
   const mockLogger = {
@@ -38,6 +39,11 @@ describe('UserStateComponent', () => {
     customState: null,
     onStateChange: mockOnStateChange,
     logger: mockLogger,
+    voiceConnectionState: {
+      status: VOICE_CONNECTION_STATUS.NOT_REQUIRED,
+      lineStatus: VoiceLineStatus.UNKNOWN,
+      mobiusSocketStatus: VoiceMobiusSocketStatus.NOT_IN_USE,
+    },
   };
 
   let getDropdownClassSpy,
@@ -81,6 +87,7 @@ describe('UserStateComponent', () => {
       expect(stateSelect).toHaveAttribute('id', 'user-state-tooltip');
       expect(stateSelect).toHaveAttribute('aria-label', 'user-state');
       expect(stateSelect).toHaveAttribute('data-testid', 'state-select');
+      expect(stateSelect).not.toHaveAttribute('disabled');
 
       const userStateIcon = stateSelect.querySelector('mdc-icon');
       expect(userStateIcon).toHaveAttribute('class', 'state-icon idle');
@@ -112,6 +119,37 @@ describe('UserStateComponent', () => {
       const arrowIcon = screen.getByTestId('select-arrow-icon');
       expect(arrowIcon).toHaveAttribute('name', 'arrow-down-bold');
       expect(arrowIcon).toHaveClass('select-arrow-icon');
+    });
+
+    it('warns accessibly and disables state selection when browser voice is unavailable', async () => {
+      let screen;
+      await act(async () => {
+        screen = render(
+          <UserStateComponent
+            {...defaultProps}
+            voiceConnectionState={{
+              status: VOICE_CONNECTION_STATUS.UNAVAILABLE,
+              lineStatus: VoiceLineStatus.RECONNECTING,
+              mobiusSocketStatus: VoiceMobiusSocketStatus.DISCONNECTED,
+            }}
+          />
+        );
+      });
+
+      expect(screen.getByRole('alert')).toHaveTextContent(
+        'Browser calling is reconnecting. Agent state changes are disabled until voice is ready.'
+      );
+      expect(screen.getByTestId('state-select')).toHaveAttribute('disabled');
+    });
+
+    it('keeps state selection enabled when browser voice is not required', async () => {
+      let screen;
+      await act(async () => {
+        screen = render(<UserStateComponent {...defaultProps} />);
+      });
+
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+      expect(screen.getByTestId('state-select')).not.toHaveAttribute('disabled');
     });
 
     it('should render elapsed time without lastIdleStateChangeElapsedTime when negative', async () => {

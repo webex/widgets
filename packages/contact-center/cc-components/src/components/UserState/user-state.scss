@@ -2,8 +2,20 @@
   position: relative;
   width: 100%; /* Ensure the select trigger takes the full width of its parent */
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between; /* Space out the elements within the select trigger */
+}
+
+.voice-connection-warning,
+.state-change-error {
+  flex: 0 0 100%;
+  margin-top: 0.25rem;
+  color: var(--mds-color-theme-text-warning-normal);
+}
+
+.state-change-error {
+  color: var(--mds-color-theme-text-error-normal);
 }
 
 .select-trigger .md-select {
