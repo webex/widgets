@@ -3,6 +3,12 @@ import {renderHook, act, waitFor} from '@testing-library/react';
 import {useUserState} from '../src/helper';
 import store from '@webex/cc-store';
 import {mockCC} from '@webex/test-fixtures';
+import {
+  VOICE_CONNECTION_EVENTS,
+  VOICE_CONNECTION_STATUS,
+  VoiceLineStatus,
+  VoiceMobiusSocketStatus,
+} from '@webex/cc-store';
 
 describe('useUserState Hook', () => {
   const idleCodes = [
@@ -97,6 +103,11 @@ describe('useUserState Hook', () => {
 
   beforeEach(() => {
     jest.useFakeTimers();
+    jest.spyOn(mockCC, 'getVoiceConnectionState').mockReturnValue({
+      status: VOICE_CONNECTION_STATUS.NOT_REQUIRED,
+      lineStatus: VoiceLineStatus.UNKNOWN,
+      mobiusSocketStatus: VoiceMobiusSocketStatus.NOT_IN_USE,
+    });
     ccSetAgentStateSpy.mockReset();
     ccOnSpy.mockReset();
     ccOffSpy.mockReset();
@@ -165,6 +176,62 @@ describe('useUserState Hook', () => {
     expect(workerMock.postMessage).toHaveBeenCalledWith({type: 'stop'});
     expect(workerMock.postMessage).toHaveBeenCalledWith({type: 'stopIdleCode'});
     expect(workerMock.terminate).toHaveBeenCalled();
+    expect(ccOffSpy).toHaveBeenCalledWith(VOICE_CONNECTION_EVENTS.STATE_CHANGE, ccOnSpy.mock.calls[0][1]);
+  });
+
+  it('uses the voice snapshot on mount and follows SDK connection events', () => {
+    const readyState = {
+      status: VOICE_CONNECTION_STATUS.READY,
+      lineStatus: VoiceLineStatus.REGISTERED,
+      mobiusSocketStatus: VoiceMobiusSocketStatus.CONNECTED,
+    };
+    const unavailableState = {
+      status: VOICE_CONNECTION_STATUS.UNAVAILABLE,
+      lineStatus: VoiceLineStatus.RECONNECTING,
+      mobiusSocketStatus: VoiceMobiusSocketStatus.DISCONNECTED,
+    };
+    jest.spyOn(mockCC, 'getVoiceConnectionState').mockReturnValue(readyState);
+    const {result} = renderHook(() =>
+      useUserState({
+        idleCodes,
+        agentId,
+        cc: mockCC,
+        currentState: '0',
+        customState: null,
+        logger,
+        onStateChange,
+      })
+    );
+
+    expect(result.current.voiceConnectionState).toEqual(readyState);
+    const listener = ccOnSpy.mock.calls.find(([eventName]) => eventName === VOICE_CONNECTION_EVENTS.STATE_CHANGE)?.[1];
+    expect(listener).toBeDefined();
+    act(() => listener?.(unavailableState));
+    expect(result.current.voiceConnectionState).toEqual(unavailableState);
+    act(() => listener?.(readyState));
+    expect(result.current.voiceConnectionState).toEqual(readyState);
+  });
+
+  it('uses an unavailable snapshot when mounted after voice initialization failed', () => {
+    const unavailableState = {
+      status: VOICE_CONNECTION_STATUS.UNAVAILABLE,
+      lineStatus: VoiceLineStatus.ERROR,
+      mobiusSocketStatus: VoiceMobiusSocketStatus.DISCONNECTED,
+    };
+    jest.spyOn(mockCC, 'getVoiceConnectionState').mockReturnValue(unavailableState);
+    const {result} = renderHook(() =>
+      useUserState({
+        idleCodes,
+        agentId,
+        cc: mockCC,
+        currentState: '0',
+        customState: null,
+        logger,
+        onStateChange,
+      })
+    );
+
+    expect(result.current.voiceConnectionState).toEqual(unavailableState);
   });
 
   it('should increment elapsedTime every second', async () => {
@@ -429,7 +496,7 @@ describe('useUserState Hook', () => {
 
   it('should handle errors from setAgentState and revert state', async () => {
     ccSetAgentStateSpy.mockRejectedValueOnce(new Error('Error setting agent status'));
-    const {rerender} = renderHook(
+    const {rerender, result} = renderHook(
       ({currentState}) =>
         useUserState({
           idleCodes,
@@ -456,6 +523,8 @@ describe('useUserState Hook', () => {
         method: 'updateAgentState',
       });
     });
+    expect(store.setCurrentState).toHaveBeenCalledWith('0');
+    expect(result.current.stateChangeError).toBe('Unable to update agent state.');
   });
 
   it('should handle stopIdleCodeTimer event and set lastIdleStateChangeElapsedTime to -1', () => {

@@ -48,7 +48,7 @@ Owns Contact Center client-side state and the SDK boundary: initialize/register 
 
 ## Stack
 
-TypeScript 5.6.3, MobX 6.13.5 (`makeAutoObservable`, `observable.ref`, `runInAction`). Consumed in React 18 via `mobx-react-lite` `observer()` in downstream packages (not a dependency of this package itself). SDK dependency `@webex/contact-center` 3.12.0-next.159. Tests: Jest 29 + ts compile (`tsc --project tsconfig.test.json && jest --coverage`). Build target: `dist/index.js` (Webpack). Evidence: `packages/contact-center/store/package.json`.
+TypeScript 5.6.3, MobX 6.13.5 (`makeAutoObservable`, `observable.ref`, `runInAction`). Consumed in React 18 via `mobx-react-lite` `observer()` in downstream packages (not a dependency of this package itself). SDK dependency `@webex/contact-center` 3.13.0-next.5. Tests: Jest 29 + ts compile (`tsc --project tsconfig.test.json && jest --coverage`). Build target: `dist/index.js` (Webpack). Evidence: `packages/contact-center/store/package.json`.
 
 ## Folder / Package Structure
 
@@ -94,7 +94,7 @@ Compatibility notes:
 
 ## Requires (dependencies)
 
-- `@webex/contact-center` SDK (pinned in `package.json` at `3.12.0-next.159`) — the entire CC runtime: `Webex.init()`, `webex.cc.*` methods, the CC/task event stream, agent `Profile`, `webex.credentials.getUserToken()`. Consumed ONLY through the store. Fallback on unavailability: `Store.init()` rejects after a 6000ms timeout (`src/store.ts:140-142`); the wrapper wraps the rejection and invokes `onErrorCallback('Store', err)` (`src/storeEventsWrapper.ts:442-452`).
+- `@webex/contact-center` SDK (pinned in `package.json` at `3.13.0-next.5`) — the entire CC runtime: `Webex.init()`, `webex.cc.*` methods, the CC/task event stream, agent `Profile`, `webex.credentials.getUserToken()`. Consumed ONLY through the store. Fallback on unavailability: `Store.init()` rejects after a 6000ms timeout (`src/store.ts:140-142`); the wrapper wraps the rejection and invokes `onErrorCallback('Store', err)` (`src/storeEventsWrapper.ts:442-452`).
 - `mobx` ^6.13.5 — observable state and `runInAction` for all mutations.
 - Internal: none upstream. The store is the lowest widget-layer dependency (`cc-components → widget packages → store → SDK`); it imports no widget package.
 
@@ -528,7 +528,7 @@ actions while the same interaction is active.
   code synchronously without writing the submission payload back to summary state,
   then dispatches it on that task. CallControl starts `task.wrapup()`
   without waiting for summary acknowledgement; subsequent task cleanup cannot erase
-  the dispatched payload. SDK `3.12.0-next.159` snapshots the task IDs and response fields
+  the dispatched payload. SDK `3.13.0-next.5` snapshots the task IDs and response fields
   before awaiting its independent HTTP request. Failed sends are logged.
   If no summary entry exists, it sends an ignored response without creating an entry. It
   resolves to `submitted` or `response-failed`; disabled post-call summaries return
@@ -536,7 +536,7 @@ actions while the same interaction is active.
 
 The integration consumes `AISummary`, `AISummarySections`, `AISummaryResponse`,
 `AISummaryAction`, and `AISummaryFeedback` from `@webex/contact-center`.
-The store pins published SDK `3.12.0-next.159` from the `next` release track;
+The store pins published SDK `3.13.0-next.5` from the `next` release track;
 stable `3.12.0` lacks these public summary APIs. Only the store declares a direct
 `@webex/contact-center` dependency. The React sample consumes the store API and
 infers its station-logout response type from that API, without a separate SDK pin.
@@ -578,7 +578,16 @@ The store also marks system-code lookup pending until its current request settle
 does not echo an unresolved system-owned state. Evidence: `src/store.ts`,
 `src/storeEventsWrapper.ts`, and `tests/wellness.ts`.
 
-The store consumes the existing public Wellness Break symbols from `@webex/contact-center` 3.12.0-next.131.
+The store consumes the existing public Wellness Break symbols from `@webex/contact-center` 3.13.0-next.5.
 The registration session projection requires the companion SDK change and a later published package.
 It does not consume an AI Assistant RTD status event. See
 [`agent-wellness-break-intake.md`](../../../../ai-docs/features/agent-wellness-break-intake.md).
+
+## Browser voice readiness addendum (CAI-8629)
+
+The store type barrel re-exports the SDK-owned `VOICE_CONNECTION_EVENTS`,
+`VOICE_CONNECTION_STATUS`, and line/Mobius/snapshot types so widgets consume this contract
+without importing the SDK directly. `IContactCenter` includes `getVoiceConnectionState()`;
+widgets subscribe to the event and read this snapshot through `store.cc`. The installed
+SDK dependency is `3.13.0-next.5`. Evidence: `src/store.types.ts`, `package.json`, and the
+installed SDK declarations.

@@ -5,6 +5,7 @@ import {formatTime} from '../../utils';
 import {ERROR_TRIGGERING_IDLE_CODES} from '@webex/cc-store';
 import './user-state.scss';
 import {SelectNext, Text} from '@momentum-ui/react-collaboration';
+import {Button, Dialog} from '@momentum-design/components/dist/react';
 import {Item} from '@react-stately/collections';
 import {Icon, Tooltip} from '@momentum-design/components/dist/react';
 import {
@@ -18,6 +19,7 @@ import {
   buildDropdownItems,
 } from './user-state.utils';
 import {withMetrics} from '@webex/cc-ui-logging';
+import {VOICE_CONNECTION_STATUS, VoiceLineStatus} from '@webex/cc-store';
 
 const UserStateComponent: React.FunctionComponent<UserStateComponentsProps> = (props) => {
   const {
@@ -29,7 +31,23 @@ const UserStateComponent: React.FunctionComponent<UserStateComponentsProps> = (p
     currentState,
     customState,
     logger,
+    voiceConnectionState,
+    stateChangeError,
+    voiceConnectionLossDialogOpen,
+    onVoiceReconnect,
+    onVoiceConnectionLossDialogClose,
+    voiceReconnectError,
   } = props;
+  const isVoiceUnavailable = voiceConnectionState?.status === VOICE_CONNECTION_STATUS.UNAVAILABLE;
+  const isConnecting = voiceConnectionState?.lineStatus === VoiceLineStatus.CONNECTING;
+  const isReconnecting = voiceConnectionState?.lineStatus === VoiceLineStatus.RECONNECTING;
+  const voiceWarning = isVoiceUnavailable
+    ? isConnecting
+      ? 'Browser calling is connecting. Agent state changes are disabled until voice is ready.'
+      : isReconnecting
+        ? 'Browser calling is reconnecting. Agent state changes are disabled until voice is ready.'
+        : 'Browser calling is unavailable. Agent state changes are disabled.'
+    : undefined;
 
   const previousSelectableState = useMemo(() => getPreviousSelectableState(idleCodes, logger), [idleCodes, logger]);
   const selectedKey = getSelectedKey(customState, currentState, idleCodes, logger);
@@ -42,6 +60,7 @@ const UserStateComponent: React.FunctionComponent<UserStateComponentsProps> = (p
         id="user-state-tooltip"
         label=""
         aria-label="user-state"
+        isDisabled={isVoiceUnavailable}
         direction="bottom"
         onSelectionChange={(key: string) => handleSelectionChange(key, currentState, setAgentStatus, logger)}
         showBorder
@@ -80,6 +99,47 @@ const UserStateComponent: React.FunctionComponent<UserStateComponentsProps> = (p
           );
         }}
       </SelectNext>
+
+      {voiceWarning && (
+        <div role="alert" aria-live="assertive" className="voice-connection-warning">
+          <Text tagName="small">{voiceWarning}</Text>
+        </div>
+      )}
+      {stateChangeError && (
+        <div role="alert" aria-live="assertive" className="state-change-error">
+          <Text tagName="small">{stateChangeError}</Text>
+        </div>
+      )}
+
+      {voiceConnectionLossDialogOpen && (
+        <Dialog
+          visible
+          size="small"
+          headerText="Desktop connection lost"
+          descriptionText="You're no longer connected to Desktop, and your availability state has changed to Idle. Check your internet connection, then try reconnecting."
+          closeButtonAriaLabel="Close browser calling recovery dialog"
+          onClose={onVoiceConnectionLossDialogClose}
+          data-testid="voice-connection-loss-dialog"
+        >
+          <div slot="dialog-body">
+            {voiceReconnectError && (
+              <div role="alert" aria-live="assertive" className="voice-reconnect-error">
+                <Text tagName="p">{voiceReconnectError}</Text>
+              </div>
+            )}
+            {!onVoiceReconnect && <Text tagName="p">Reconnect is managed by the host application.</Text>}
+          </div>
+          <Button
+            slot="footer-button-primary"
+            type="button"
+            disabled={!onVoiceReconnect}
+            onClick={() => void onVoiceReconnect?.()}
+            data-testid="voice-connection-reconnect"
+          >
+            Reconnect
+          </Button>
+        </Dialog>
+      )}
 
       <Tooltip
         data-testid="user-state-tooltip"

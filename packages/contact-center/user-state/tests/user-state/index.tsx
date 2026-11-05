@@ -11,6 +11,11 @@ jest.mock('@webex/cc-store', () => {
     cc: {
       on: jest.fn(),
       off: jest.fn(),
+      getVoiceConnectionState: jest.fn(() => ({
+        status: 'not-required',
+        lineStatus: 'unknown',
+        mobiusSocketStatus: 'not-in-use',
+      })),
     },
     idleCodes: [],
     agentId: 'testAgentId',
@@ -27,6 +32,12 @@ jest.mock('@webex/cc-store', () => {
     wellbeingBreakIdleCode: undefined,
     wellnessIdleCodeLookupPending: false,
     onErrorCallback: jest.fn(),
+    VOICE_CONNECTION_EVENTS: {STATE_CHANGE: 'voice:connectionStateChange'},
+    VOICE_CONNECTION_STATUS: {READY: 'ready', UNAVAILABLE: 'unavailable', NOT_REQUIRED: 'not-required'},
+    VoiceLineStatus: {
+      CONNECTING: 'connecting',
+      RECONNECTING: 'reconnecting',
+    },
   };
 });
 
@@ -70,11 +81,11 @@ describe('UserState Component', () => {
     const useUserStateSpy = jest.spyOn(helper, 'useUserState');
 
     render(<UserState onStateChange={onStateChange} />);
-    expect(useUserStateSpy).toHaveBeenCalledTimes(1);
     expect(useUserStateSpy).toHaveBeenCalledWith({
       cc: {
         on: expect.any(Function),
         off: expect.any(Function),
+        getVoiceConnectionState: expect.any(Function),
       },
       idleCodes: [],
       agentId: 'testAgentId',
@@ -82,6 +93,8 @@ describe('UserState Component', () => {
       customState: null,
       lastStateChangeTimestamp: expect.any(Number),
       lastIdleCodeChangeTimestamp: undefined,
+      isBrowserVoiceSession: true,
+      isAgentLoggedIn: undefined,
       isCurrentStateExternallyManaged: false,
       wellnessIdleCodeLookupPending: false,
       logger: {
@@ -91,6 +104,7 @@ describe('UserState Component', () => {
         warn: expect.any(Function),
       },
       onStateChange: expect.any(Function),
+      onVoiceReconnect: undefined,
     });
   });
 

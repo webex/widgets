@@ -6,6 +6,7 @@ import {IUserState} from '../../../src/components/UserState/user-state.types';
 import UserStateComponent from '../../../src/components/UserState/user-state';
 import * as userStateUtils from '../../../src/components/UserState/user-state.utils';
 import {mockCC} from '@webex/test-fixtures';
+import {VOICE_CONNECTION_STATUS, VoiceLineStatus, VoiceMobiusSocketStatus} from '@webex/cc-store';
 
 const mockUIDProps = (container) => {
   container
@@ -51,6 +52,11 @@ describe('UserState Component Snapshots', () => {
     customState: null,
     onStateChange: mockOnStateChange,
     logger: mockLogger,
+    voiceConnectionState: {
+      status: VOICE_CONNECTION_STATUS.NOT_REQUIRED,
+      lineStatus: VoiceLineStatus.UNKNOWN,
+      mobiusSocketStatus: VoiceMobiusSocketStatus.NOT_IN_USE,
+    },
   };
 
   // Mock all utility functions

@@ -64,11 +64,12 @@ tests/
 ## Public Surface
 | Contract ID | Type | Surface | Purpose | Compatibility / deprecation | Schema / detail link | Root index |
 |---|---|---|---|---|---|---|
-| `cc-widgets.UserState` | SDK (React export) | `UserState` React component, prop `onStateChange?: (state: IdleCode \| ICustomState) => void` | Render the agent-state widget in a React app and observe state changes | stable semver; adding optional props = minor, removing/renaming `onStateChange` = major | `packages/contact-center/user-state/src/index.ts`, props in `src/user-state.types.ts` | `../../../../ai-docs/CONTRACTS.md` |
-| `cc-widgets.UserState` (custom element) | event | custom element `widget-cc-user-state` (registered in `cc-widgets`); `onStateChange` exposed as an attribute/event by r2wc | Mount the widget as a Web Component in a non-React host | stable semver; tag name is part of the contract | `packages/contact-center/cc-widgets/src/wc.ts` (`{name: 'widget-cc-user-state', component: WebUserState}`) | `../../../../ai-docs/CONTRACTS.md` |
+| `cc-widgets.UserState` | SDK (React export) | `UserState` React component; props `onStateChange?: (state: IdleCode \| ICustomState) => void`, `onVoiceReconnect?: () => void \| Promise<void>` | Render agent state, recover from sustained browser voice loss, and delegate retry to the host | additive optional callback | `packages/contact-center/user-state/src/index.ts`, props in `src/user-state.types.ts` | `../../../../ai-docs/CONTRACTS.md` |
+| `cc-widgets.UserState` (custom element) | event | custom element `widget-cc-user-state`; `onStateChange` and `onVoiceReconnect` exposed as function props by r2wc | Mount the widget as a Web Component in a non-React host | additive function prop; tag name remains stable | `packages/contact-center/cc-widgets/src/wc.ts` (`WebUserState`) | `../../../../ai-docs/CONTRACTS.md` |
 
 Compatibility notes:
 - `onStateChange` is invoked with an `IdleCode` (the matching idle code for `currentState`) or an `ICustomState` (when the store holds a `customState` with a `developerName`). Changing which object is passed is a breaking change for consumers.
+- `onVoiceReconnect` is optional because the installed SDK exposes no public browser voice retry method; the host owns the retry implementation.
 - The custom-element tag `widget-cc-user-state` is registered by `cc-widgets`, not this package; renaming it is a breaking change owned there.
 
 ## Requires (dependencies)
@@ -94,9 +95,10 @@ Compatibility notes:
 | `USER-STATE-R-010` | Render errors are contained by an `ErrorBoundary` that renders an empty fragment and calls `store.onErrorCallback('UserState', error)`. | A widget crash must not take down the host desktop; host gets a single error hook. | `src/user-state/index.tsx` (`ErrorBoundary`) | `tests/user-state/index.tsx` "should render empty fragment when ErrorBoundary catches an error" | none | PRESENT |
 | `USER-STATE-R-011` | Every hook side effect (worker init, message handling, both state effects, `setAgentStatus`, `updateAgentState`, cleanup) is wrapped in try/catch and logs a scoped `CC-Widgets: UserState: ...` error via the injected logger without throwing out of the effect. | Defensive logging keeps a single failing path from cascading; aids field diagnosis. | `src/helper.ts` (try/catch in each block) | `tests/helper.ts` "Error Handling" suite (callOnStateChange, worker init, onmessage, currentState/customState/timestamp effects, setAgentStatus, updateAgentState, cleanup) | none | PRESENT |
 | `USER-STATE-R-012` | `tests/user-state/index.tsx` "projects WellbeingBreak...", `tests/helper.ts` "does not echo externally managed wellness state transitions...", `cc-components/tests/components/UserState/user-state.tsx` "renders WellbeingBreak..." | none |
+| `USER-STATE-R-013` | A logged-in Browser session that transitions from `READY` to `UNAVAILABLE` and stays unavailable for 2 seconds sets the profile's default idle code through the store and shows a reconnect dialog. Readiness recovery closes the dialog. The retry button invokes optional host callback `onVoiceReconnect`; the dialog title, message, and action match Agent Desktop's English copy. | Mirrors Desktop's delayed recovery and user-facing connection-loss copy without reaching through the store to an SDK-private WebRTC service. | `src/helper.ts`, `src/user-state/index.tsx`, `cc-components/src/components/UserState/user-state.tsx`, `cc-widgets/src/wc.ts` | Not added in this change. | Host must supply `onVoiceReconnect` for a working retry; profile must include a default idle code. | IMPLEMENTED |
 
 ## Design Overview
-The widget is a near-pure adapter. `UserState` (`src/user-state/index.tsx`) wraps `UserStateInternal` in an `ErrorBoundary`; the internal component is an `observer` that destructures the store and forwards exactly the fields the hook needs, then spreads the hook's return plus `customState`/`logger` into `UserStateComponent`. No business logic lives in the widget file beyond that wiring and the error-boundary callback.
+The widget is an adapter. `UserState` (`src/user-state/index.tsx`) wraps `UserStateInternal` in an `ErrorBoundary`; the internal component is an `observer` that forwards store state and host callback props to `useUserState`, then renders `UserStateComponent`. The hook owns voice-loss timing and default-idle recovery, while the component owns the warning and reconnect dialog.
 
 All logic is in `useUserState` (`src/helper.ts`), structured as four effects plus two action functions:
 1. **Worker init effect (`[]`)** — builds the inline worker script into a Blob, starts both timers immediately, registers `onmessage` to push elapsed seconds into React state, and returns a cleanup that stops + terminates the worker.
@@ -327,6 +329,20 @@ and is sent after lookup completes, unless a newer SDK state replaces it. When t
 User State marks `WellbeingBreak` as externally managed before processing another change. This
 prevents an SDK-owned state from being echoed during refresh without losing a user selection.
 Evidence: `src/helper.ts`, `src/user-state/index.tsx`, `tests/helper.ts`.
+
+## Browser voice readiness addendum (CAI-8629)
+
+The hook subscribes to the SDK voice-state event, reads a fresh snapshot after subscribing,
+and removes the listener on unmount. It forwards voice state and generic state-change
+failures to the presentation component. Only `UNAVAILABLE` blocks selection; `NOT_REQUIRED`
+preserves non-browser/disabled-WebRTC operation. A logged-in Browser session that transitions
+from `READY` to `UNAVAILABLE` starts a two-second timer. If the SDK remains unavailable, the
+hook sets the profile's default idle code through the store and opens a recovery dialog. The
+dialog calls optional host callback `onVoiceReconnect`; the SDK's installed public types do not
+expose a WebRTC retry method. Voice readiness recovery closes the dialog. A rejected
+`setAgentState` reverts the visible state and reports a user-safe failure.
+Evidence: `src/helper.ts`, `src/user-state/index.tsx`,
+`cc-components/src/components/UserState/user-state.tsx`, and `cc-widgets/src/wc.ts`.
 
 ## Traceability
 - Repo architecture: `../../../../ai-docs/ARCHITECTURE.md` · Registry: `../../../../ai-docs/SPEC_INDEX.md` · Contracts: `../../../../ai-docs/CONTRACTS.md`
