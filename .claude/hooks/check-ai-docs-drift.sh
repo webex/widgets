@@ -7,9 +7,9 @@
 #   3. If command is NOT git commit -> exit 0 (allow immediately)
 #   4. Check if ANY staged files are under packages/contact-center/
 #   5. If none -> exit 0 (allow)
-#   6. Check for verification marker (created by /spec-drift-changed)
+#   6. Check for verification marker (created by /cypher:spec-drift-changed)
 #   7. If marker exists -> exit 0 (allow — marker stays until content changes)
-#   8. If no marker -> exit 2 (BLOCK, instruct to run /spec-drift-changed)
+#   8. If no marker -> exit 2 (BLOCK, instruct to run /cypher:spec-drift-changed)
 
 CC_PKG="packages/contact-center"
 
@@ -57,6 +57,6 @@ echo ""
 echo "Staged contact-center files:"
 echo "$STAGED_CC" | sed 's/^/  - /'
 echo ""
-echo "Run /spec-drift-changed to validate ai-docs against source code before committing."
+echo "Run /cypher:spec-drift-changed to validate ai-docs against source code before committing."
 echo "The command will check documentation accuracy and create a verification marker."
 exit 2  # Exit code 2 = blocking error in Claude Code hooks
