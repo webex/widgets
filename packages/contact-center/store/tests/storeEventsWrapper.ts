@@ -3003,6 +3003,53 @@ describe('storeEventsWrapper', () => {
       expect(setCurrentTaskSpy).toHaveBeenCalledTimes(1);
       expect(setCurrentTaskSpy).toHaveBeenCalledWith(mockTask);
     });
+
+    it('retains agent-selected Idle state when task list empties after wrap-up', () => {
+      jest.clearAllMocks();
+      const IDLE_AUX_CODE_ID = 'idle-aux-code-uuid-1234';
+      storeWrapper['store'].currentState = IDLE_AUX_CODE_ID;
+      storeWrapper['store'].currentTask = null;
+      storeWrapper['store'].cc.taskManager.getAllTasks = jest.fn().mockReturnValue({});
+      const setCurrentStateSpy = jest.spyOn(storeWrapper, 'setCurrentState');
+
+      storeWrapper.refreshTaskList();
+
+      expect(setCurrentStateSpy).not.toHaveBeenCalledWith('0');
+      expect(storeWrapper['store'].currentState).toBe(IDLE_AUX_CODE_ID);
+    });
+
+    it('still resets to Available when no Idle state was selected and task list empties', () => {
+      jest.clearAllMocks();
+      storeWrapper['store'].currentState = '0';
+      storeWrapper['store'].currentTask = null;
+      storeWrapper['store'].cc.taskManager.getAllTasks = jest.fn().mockReturnValue({});
+      const setCurrentTaskSpy = jest.spyOn(storeWrapper, 'setCurrentTask');
+      const setStateSpy = jest.spyOn(storeWrapper, 'setState');
+
+      storeWrapper.refreshTaskList();
+
+      expect(storeWrapper['store'].currentState).toBe('0');
+      expect(setCurrentTaskSpy).toHaveBeenCalledWith(null);
+      expect(setStateSpy).toHaveBeenCalledWith({reset: true});
+    });
+
+    it('promotes remaining task without altering agent state when tasks remain', () => {
+      jest.clearAllMocks();
+      const IDLE_AUX_CODE_ID = 'idle-aux-code-uuid-5678';
+      const remainingTask = {data: {interactionId: 'remaining-task-id', interaction: {state: 'connected'}}};
+      storeWrapper['store'].currentState = IDLE_AUX_CODE_ID;
+      storeWrapper['store'].currentTask = null;
+      storeWrapper['store'].cc.taskManager.getAllTasks = jest
+        .fn()
+        .mockReturnValue({'remaining-task-id': remainingTask});
+      const setCurrentTaskSpy = jest.spyOn(storeWrapper, 'setCurrentTask');
+      const setCurrentStateSpy = jest.spyOn(storeWrapper, 'setCurrentState');
+
+      storeWrapper.refreshTaskList();
+
+      expect(setCurrentTaskSpy).toHaveBeenCalledWith(remainingTask);
+      expect(setCurrentStateSpy).not.toHaveBeenCalledWith('0');
+    });
   });
 
   describe('owner-change hydration', () => {
