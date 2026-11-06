@@ -499,7 +499,7 @@ class StoreWrapper implements IStoreWrapper {
 
       this.store.wellnessAgentSessionId = nextSessionId;
       this.store.legacyAgentState = payload.subStatus || this.store.legacyAgentState;
-      this.store.legacyAuxCodeId = payload.auxCodeId?.trim() || this.store.legacyAuxCodeId || '0';
+      this.store.legacyAuxCodeId = payload.auxCodeId?.trim() || this.store.legacyAuxCodeId || DEFAULT_CODE;
     });
 
     void this.loadWellbeingBreakIdleCode();

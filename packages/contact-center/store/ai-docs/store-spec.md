@@ -578,6 +578,11 @@ The store also marks system-code lookup pending until its current request settle
 does not echo an unresolved system-owned state. Evidence: `src/store.ts`,
 `src/storeEventsWrapper.ts`, and `tests/wellness.ts`.
 
+When capturing a station session, retain the nonempty trimmed payload auxiliary code, then the
+stored `legacyAuxCodeId`, and finally the shared Available `DEFAULT_CODE` (`'0'`). This keeps the
+fallback consistent with login and state-change handling while preserving an existing wellness or Idle code.
+Evidence: `src/storeEventsWrapper.ts` (`captureWellnessSession`).
+
 The store consumes the existing public Wellness Break symbols from `@webex/contact-center` 3.12.0-next.131.
 The registration session projection requires the companion SDK change and a later published package.
 It does not consume an AI Assistant RTD status event. See
