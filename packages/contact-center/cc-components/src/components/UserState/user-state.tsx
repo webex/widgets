@@ -56,49 +56,76 @@ const UserStateComponent: React.FunctionComponent<UserStateComponentsProps> = (p
 
   return (
     <div className="user-state-container" data-testid="user-state-container">
-      <SelectNext
-        id="user-state-tooltip"
-        label=""
-        aria-label="user-state"
-        isDisabled={isVoiceUnavailable}
-        direction="bottom"
-        onSelectionChange={(key: string) => handleSelectionChange(key, currentState, setAgentStatus, logger)}
-        showBorder
-        selectedKey={selectedKey}
-        items={sortedItems}
-        className={`state-select ${getDropdownClass(customState, currentState, idleCodes, logger)}`}
-        data-testid="state-select"
-      >
-        {(item) => {
-          const isRonaOrEngaged = [...Object.values(ERROR_TRIGGERING_IDLE_CODES), AgentUserState.Engaged].includes(
-            idleCodes.find((code) => code.id === currentState)?.name || ''
-          );
-          const shouldHighlight = currentState === item.id || (isRonaOrEngaged && item.id === previousSelectableState);
+      <div className="user-state-select-wrapper">
+        <SelectNext
+          id="user-state-tooltip"
+          label=""
+          aria-label="user-state"
+          isDisabled={isVoiceUnavailable}
+          direction="bottom"
+          onSelectionChange={(key: string) => handleSelectionChange(key, currentState, setAgentStatus, logger)}
+          showBorder
+          selectedKey={selectedKey}
+          items={sortedItems}
+          className={`state-select ${getDropdownClass(customState, currentState, idleCodes, logger)}`}
+          data-testid="state-select"
+        >
+          {(item) => {
+            const isRonaOrEngaged = [...Object.values(ERROR_TRIGGERING_IDLE_CODES), AgentUserState.Engaged].includes(
+              idleCodes.find((code) => code.id === currentState)?.name || ''
+            );
+            const shouldHighlight =
+              currentState === item.id || (isRonaOrEngaged && item.id === previousSelectableState);
 
-          return (
-            <Item key={item.id} textValue={item.name} data-testid={`state-item-${item.name}`}>
-              <div
-                className="item-container"
-                data-testid={`item-container ${shouldHighlight ? `selected ${getIconStyle(item, logger).class}` : ''}`}
-              >
-                <Icon
-                  name={getIconStyle(item, logger).iconName}
-                  title=""
-                  className={`state-icon ${getIconStyle(item, logger).class}`}
-                  data-testid="state-icon"
-                />
-                <Text
-                  className={`state-name ${getIconStyle(item, logger).class}`}
-                  tagName={'small'}
-                  data-testid="state-name"
+            return (
+              <Item key={item.id} textValue={item.name} data-testid={`state-item-${item.name}`}>
+                <div
+                  className="item-container"
+                  data-testid={`item-container ${shouldHighlight ? `selected ${getIconStyle(item, logger).class}` : ''}`}
                 >
-                  {item.name}
-                </Text>
-              </div>
-            </Item>
-          );
-        }}
-      </SelectNext>
+                  <Icon
+                    name={getIconStyle(item, logger).iconName}
+                    title=""
+                    className={`state-icon ${getIconStyle(item, logger).class}`}
+                    data-testid="state-icon"
+                  />
+                  <Text
+                    className={`state-name ${getIconStyle(item, logger).class}`}
+                    tagName={'small'}
+                    data-testid="state-name"
+                  >
+                    {item.name}
+                  </Text>
+                </div>
+              </Item>
+            );
+          }}
+        </SelectNext>
+
+        <Tooltip
+          data-testid="user-state-tooltip"
+          placement="bottom"
+          color="contrast"
+          delay="0, 0"
+          className="tooltip"
+          triggerID="user-state-tooltip"
+        >
+          <Text tagName="small" className="tooltip-text">
+            {getTooltipText(customState, currentState, idleCodes, logger)}
+          </Text>
+        </Tooltip>
+
+        {!customState && (
+          <span
+            className={`elapsedTime ${isSettingAgentStatus ? 'elapsedTime-disabled' : ''}`}
+            data-testid="elapsed-time"
+          >
+            {lastIdleStateChangeElapsedTime >= 0 ? formatTime(lastIdleStateChangeElapsedTime) + ' / ' : ''}
+            {formatTime(elapsedTime)}
+          </span>
+        )}
+        <Icon className="select-arrow-icon" name="arrow-down-bold" title="" data-testid="select-arrow-icon" />
+      </div>
 
       {voiceWarning && (
         <div role="alert" aria-live="assertive" className="voice-connection-warning">
@@ -140,30 +167,6 @@ const UserStateComponent: React.FunctionComponent<UserStateComponentsProps> = (p
           </Button>
         </Dialog>
       )}
-
-      <Tooltip
-        data-testid="user-state-tooltip"
-        placement="bottom"
-        color="contrast"
-        delay="0, 0"
-        className="tooltip"
-        triggerID="user-state-tooltip"
-      >
-        <Text tagName="small" className="tooltip-text">
-          {getTooltipText(customState, currentState, idleCodes, logger)}
-        </Text>
-      </Tooltip>
-
-      {!customState && (
-        <span
-          className={`elapsedTime ${isSettingAgentStatus ? 'elapsedTime-disabled' : ''}`}
-          data-testid="elapsed-time"
-        >
-          {lastIdleStateChangeElapsedTime >= 0 ? formatTime(lastIdleStateChangeElapsedTime) + ' / ' : ''}
-          {formatTime(elapsedTime)}
-        </span>
-      )}
-      <Icon className="select-arrow-icon" name="arrow-down-bold" title="" data-testid="select-arrow-icon" />
     </div>
   );
 };

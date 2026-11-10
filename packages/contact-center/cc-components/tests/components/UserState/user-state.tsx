@@ -142,6 +142,37 @@ describe('UserStateComponent', () => {
       expect(screen.getByTestId('state-select')).toHaveAttribute('disabled');
     });
 
+    it('anchors select overlays inside user-state-select-wrapper independently of alert messages', async () => {
+      let screen;
+      await act(async () => {
+        screen = render(
+          <UserStateComponent
+            {...defaultProps}
+            stateChangeError="Unable to update agent state."
+            voiceConnectionState={{
+              status: VOICE_CONNECTION_STATUS.UNAVAILABLE,
+              lineStatus: VoiceLineStatus.ERROR,
+              mobiusSocketStatus: VoiceMobiusSocketStatus.DISCONNECTED,
+            }}
+          />
+        );
+      });
+
+      const container = screen.getByTestId('user-state-container');
+      const selectWrapper = container.querySelector('.user-state-select-wrapper');
+      expect(selectWrapper).toBeInTheDocument();
+      expect(selectWrapper).toContainElement(screen.getByTestId('state-select'));
+      expect(selectWrapper).toContainElement(screen.getByTestId('elapsed-time'));
+      expect(selectWrapper).toContainElement(screen.getByTestId('select-arrow-icon'));
+
+      const alerts = screen.getAllByRole('alert');
+      expect(alerts).toHaveLength(2);
+      alerts.forEach((alert) => {
+        expect(container).toContainElement(alert);
+        expect(selectWrapper).not.toContainElement(alert);
+      });
+    });
+
     it('keeps state selection enabled when browser voice is not required', async () => {
       let screen;
       await act(async () => {

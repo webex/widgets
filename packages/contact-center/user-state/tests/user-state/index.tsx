@@ -37,6 +37,10 @@ jest.mock('@webex/cc-store', () => {
     VoiceLineStatus: {
       CONNECTING: 'connecting',
       RECONNECTING: 'reconnecting',
+      UNKNOWN: 'unknown',
+    },
+    VoiceMobiusSocketStatus: {
+      NOT_IN_USE: 'not-in-use',
     },
   };
 });

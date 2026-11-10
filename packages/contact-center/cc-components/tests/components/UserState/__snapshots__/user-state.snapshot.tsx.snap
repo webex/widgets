@@ -6,144 +6,148 @@ exports[`UserState Component Snapshots Interactions should call handleSelectionC
   data-testid="user-state-container"
 >
   <div
-    aria-describedby="mock-aria-describedby"
-    class="state-select idle md-select-wrapper"
-    id="user-state-tooltip"
-    style="--local-width: 100%;"
+    class="user-state-select-wrapper"
   >
     <div
-      aria-hidden="true"
-      style="border: 0px; clip-path: inset(50%); height: 1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; width: 1px; white-space: nowrap;"
-    >
-      <input
-        style="font-size: 16px;"
-        tabindex="-1"
-        type="text"
-      />
-      <label>
-        <select
-          size="3"
-          tabindex="-1"
-        >
-          <option />
-          <option
-            value="0"
-          >
-            Available
-          </option>
-          <option
-            value="1"
-          >
-            Break
-          </option>
-          <option
-            value="2"
-          >
-            Training
-          </option>
-        </select>
-      </label>
-    </div>
-    <button
-      aria-controls="user-state-tooltip"
-      aria-expanded="false"
-      aria-haspopup="listbox"
-      aria-label="user-state"
-      aria-labelledby="user-state-tooltip react-aria-:rt:"
-      class="md-select-dropdown-input md-select-selected"
-      data-testid="state-select"
+      aria-describedby="mock-aria-describedby"
+      class="state-select idle md-select-wrapper"
       id="user-state-tooltip"
-      role="combobox"
-      type="button"
+      style="--local-width: 100%;"
     >
-      <span
-        class="md-select-selected-item-wrapper"
-        id="react-aria-:rt:"
-        title="Break"
-      >
-        <div
-          class="item-container"
-          data-testid="item-container selected idle"
-        >
-          <mdc-icon
-            class="state-icon idle"
-            data-testid="state-icon"
-            name="recents-presence-filled"
-            title=""
-          />
-          <mdc-text
-            class="md-text-wrapper state-name idle"
-            data-testid="state-name"
-            tagname="small"
-            type="body-large-regular"
-          >
-            Break
-          </mdc-text>
-        </div>
-      </span>
-      <span
+      <div
         aria-hidden="true"
-        class="md-select-icon-wrapper"
+        style="border: 0px; clip-path: inset(50%); height: 1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; width: 1px; white-space: nowrap;"
       >
-        <div
-          class="md-icon-wrapper"
+        <input
+          style="font-size: 16px;"
+          tabindex="-1"
+          type="text"
+        />
+        <label>
+          <select
+            size="3"
+            tabindex="-1"
+          >
+            <option />
+            <option
+              value="0"
+            >
+              Available
+            </option>
+            <option
+              value="1"
+            >
+              Break
+            </option>
+            <option
+              value="2"
+            >
+              Training
+            </option>
+          </select>
+        </label>
+      </div>
+      <button
+        aria-controls="user-state-tooltip"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        aria-label="user-state"
+        aria-labelledby="user-state-tooltip react-aria-:rt:"
+        class="md-select-dropdown-input md-select-selected"
+        data-testid="state-select"
+        id="user-state-tooltip"
+        role="combobox"
+        type="button"
+      >
+        <span
+          class="md-select-selected-item-wrapper"
+          id="react-aria-:rt:"
+          title="Break"
         >
           <div
-            class="md-icon-not-found"
-            data-autoscale="false"
-            data-scale="16"
+            class="item-container"
+            data-testid="item-container selected idle"
           >
-            ⃞
+            <mdc-icon
+              class="state-icon idle"
+              data-testid="state-icon"
+              name="recents-presence-filled"
+              title=""
+            />
+            <mdc-text
+              class="md-text-wrapper state-name idle"
+              data-testid="state-name"
+              tagname="small"
+              type="body-large-regular"
+            >
+              Break
+            </mdc-text>
           </div>
-        </div>
-      </span>
-    </button>
-  </div>
-  <mdc-tooltip
-    boundary="clippingAncestors"
-    boundary-root="viewport"
-    class="tooltip"
-    color="contrast"
-    data-testid="user-state-tooltip"
-    delay="0, 0"
-    disable-aria-expanded=""
-    hide-on-blur=""
-    hide-on-escape=""
-    id="mock-tooltip-id"
-    is-backdrop-invisible=""
-    offset="4"
-    placement="bottom"
-    role="tooltip"
-    should-focus-trap-wrap=""
-    stack-group-name=""
-    strategy="absolute"
-    style="z-index: 1000;"
-    tooltip-type="description"
-    trigger="mouseenter focusin"
-    triggerid="user-state-tooltip"
-    z-index="1000"
-  >
-    <mdc-text
-      class="md-text-wrapper tooltip-text"
-      tagname="small"
-      type="body-large-regular"
+        </span>
+        <span
+          aria-hidden="true"
+          class="md-select-icon-wrapper"
+        >
+          <div
+            class="md-icon-wrapper"
+          >
+            <div
+              class="md-icon-not-found"
+              data-autoscale="false"
+              data-scale="16"
+            >
+              ⃞
+            </div>
+          </div>
+        </span>
+      </button>
+    </div>
+    <mdc-tooltip
+      boundary="clippingAncestors"
+      boundary-root="viewport"
+      class="tooltip"
+      color="contrast"
+      data-testid="user-state-tooltip"
+      delay="0, 0"
+      disable-aria-expanded=""
+      hide-on-blur=""
+      hide-on-escape=""
+      id="mock-tooltip-id"
+      is-backdrop-invisible=""
+      offset="4"
+      placement="bottom"
+      role="tooltip"
+      should-focus-trap-wrap=""
+      stack-group-name=""
+      strategy="absolute"
+      style="z-index: 1000;"
+      tooltip-type="description"
+      trigger="mouseenter focusin"
+      triggerid="user-state-tooltip"
+      z-index="1000"
     >
-      Availability State
-    </mdc-text>
-  </mdc-tooltip>
-  <span
-    class="elapsedTime "
-    data-testid="elapsed-time"
-  >
-    30:00 / 
-    01:01:01
-  </span>
-  <mdc-icon
-    class="select-arrow-icon"
-    data-testid="select-arrow-icon"
-    name="arrow-down-bold"
-    title=""
-  />
+      <mdc-text
+        class="md-text-wrapper tooltip-text"
+        tagname="small"
+        type="body-large-regular"
+      >
+        Availability State
+      </mdc-text>
+    </mdc-tooltip>
+    <span
+      class="elapsedTime "
+      data-testid="elapsed-time"
+    >
+      30:00 / 
+      01:01:01
+    </span>
+    <mdc-icon
+      class="select-arrow-icon"
+      data-testid="select-arrow-icon"
+      name="arrow-down-bold"
+      title=""
+    />
+  </div>
 </div>
 `;
 
@@ -153,137 +157,141 @@ exports[`UserState Component Snapshots Interactions should handle custom state r
   data-testid="user-state-container"
 >
   <div
-    aria-describedby="mock-aria-describedby"
-    class="state-select idle md-select-wrapper"
-    id="user-state-tooltip"
-    style="--local-width: 100%;"
+    class="user-state-select-wrapper"
   >
     <div
-      aria-hidden="true"
-      style="border: 0px; clip-path: inset(50%); height: 1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; width: 1px; white-space: nowrap;"
-    >
-      <input
-        style="font-size: 16px;"
-        tabindex="-1"
-        type="text"
-      />
-      <label>
-        <select
-          size="3"
-          tabindex="-1"
-        >
-          <option />
-          <option
-            value="0"
-          >
-            Available
-          </option>
-          <option
-            value="1"
-          >
-            Break
-          </option>
-          <option
-            value="2"
-          >
-            Training
-          </option>
-        </select>
-      </label>
-    </div>
-    <button
-      aria-controls="user-state-tooltip"
-      aria-expanded="false"
-      aria-haspopup="listbox"
-      aria-label="user-state"
-      aria-labelledby="user-state-tooltip react-aria-:r13:"
-      class="md-select-dropdown-input md-select-selected"
-      data-testid="state-select"
+      aria-describedby="mock-aria-describedby"
+      class="state-select idle md-select-wrapper"
       id="user-state-tooltip"
-      role="combobox"
-      type="button"
+      style="--local-width: 100%;"
     >
-      <span
-        class="md-select-selected-item-wrapper"
-        id="react-aria-:r13:"
-        title="Break"
-      >
-        <div
-          class="item-container"
-          data-testid="item-container selected idle"
-        >
-          <mdc-icon
-            class="state-icon idle"
-            data-testid="state-icon"
-            name="recents-presence-filled"
-            title=""
-          />
-          <mdc-text
-            class="md-text-wrapper state-name idle"
-            data-testid="state-name"
-            tagname="small"
-            type="body-large-regular"
-          >
-            Break
-          </mdc-text>
-        </div>
-      </span>
-      <span
+      <div
         aria-hidden="true"
-        class="md-select-icon-wrapper"
+        style="border: 0px; clip-path: inset(50%); height: 1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; width: 1px; white-space: nowrap;"
       >
-        <div
-          class="md-icon-wrapper"
+        <input
+          style="font-size: 16px;"
+          tabindex="-1"
+          type="text"
+        />
+        <label>
+          <select
+            size="3"
+            tabindex="-1"
+          >
+            <option />
+            <option
+              value="0"
+            >
+              Available
+            </option>
+            <option
+              value="1"
+            >
+              Break
+            </option>
+            <option
+              value="2"
+            >
+              Training
+            </option>
+          </select>
+        </label>
+      </div>
+      <button
+        aria-controls="user-state-tooltip"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        aria-label="user-state"
+        aria-labelledby="user-state-tooltip react-aria-:r13:"
+        class="md-select-dropdown-input md-select-selected"
+        data-testid="state-select"
+        id="user-state-tooltip"
+        role="combobox"
+        type="button"
+      >
+        <span
+          class="md-select-selected-item-wrapper"
+          id="react-aria-:r13:"
+          title="Break"
         >
           <div
-            class="md-icon-not-found"
-            data-autoscale="false"
-            data-scale="16"
+            class="item-container"
+            data-testid="item-container selected idle"
           >
-            ⃞
+            <mdc-icon
+              class="state-icon idle"
+              data-testid="state-icon"
+              name="recents-presence-filled"
+              title=""
+            />
+            <mdc-text
+              class="md-text-wrapper state-name idle"
+              data-testid="state-name"
+              tagname="small"
+              type="body-large-regular"
+            >
+              Break
+            </mdc-text>
           </div>
-        </div>
-      </span>
-    </button>
-  </div>
-  <mdc-tooltip
-    boundary="clippingAncestors"
-    boundary-root="viewport"
-    class="tooltip"
-    color="contrast"
-    data-testid="user-state-tooltip"
-    delay="0, 0"
-    disable-aria-expanded=""
-    hide-on-blur=""
-    hide-on-escape=""
-    id="mock-tooltip-id"
-    is-backdrop-invisible=""
-    offset="4"
-    placement="bottom"
-    role="tooltip"
-    should-focus-trap-wrap=""
-    stack-group-name=""
-    strategy="absolute"
-    style="z-index: 1000;"
-    tooltip-type="description"
-    trigger="mouseenter focusin"
-    triggerid="user-state-tooltip"
-    z-index="1000"
-  >
-    <mdc-text
-      class="md-text-wrapper tooltip-text"
-      tagname="small"
-      type="body-large-regular"
+        </span>
+        <span
+          aria-hidden="true"
+          class="md-select-icon-wrapper"
+        >
+          <div
+            class="md-icon-wrapper"
+          >
+            <div
+              class="md-icon-not-found"
+              data-autoscale="false"
+              data-scale="16"
+            >
+              ⃞
+            </div>
+          </div>
+        </span>
+      </button>
+    </div>
+    <mdc-tooltip
+      boundary="clippingAncestors"
+      boundary-root="viewport"
+      class="tooltip"
+      color="contrast"
+      data-testid="user-state-tooltip"
+      delay="0, 0"
+      disable-aria-expanded=""
+      hide-on-blur=""
+      hide-on-escape=""
+      id="mock-tooltip-id"
+      is-backdrop-invisible=""
+      offset="4"
+      placement="bottom"
+      role="tooltip"
+      should-focus-trap-wrap=""
+      stack-group-name=""
+      strategy="absolute"
+      style="z-index: 1000;"
+      tooltip-type="description"
+      trigger="mouseenter focusin"
+      triggerid="user-state-tooltip"
+      z-index="1000"
     >
-      Availability State
-    </mdc-text>
-  </mdc-tooltip>
-  <mdc-icon
-    class="select-arrow-icon"
-    data-testid="select-arrow-icon"
-    name="arrow-down-bold"
-    title=""
-  />
+      <mdc-text
+        class="md-text-wrapper tooltip-text"
+        tagname="small"
+        type="body-large-regular"
+      >
+        Availability State
+      </mdc-text>
+    </mdc-tooltip>
+    <mdc-icon
+      class="select-arrow-icon"
+      data-testid="select-arrow-icon"
+      name="arrow-down-bold"
+      title=""
+    />
+  </div>
 </div>
 `;
 
@@ -293,137 +301,141 @@ exports[`UserState Component Snapshots Rendering - Tests for UI elements and vis
   data-testid="user-state-container"
 >
   <div
-    aria-describedby="mock-aria-describedby"
-    class="state-select idle md-select-wrapper"
-    id="user-state-tooltip"
-    style="--local-width: 100%;"
+    class="user-state-select-wrapper"
   >
     <div
-      aria-hidden="true"
-      style="border: 0px; clip-path: inset(50%); height: 1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; width: 1px; white-space: nowrap;"
-    >
-      <input
-        style="font-size: 16px;"
-        tabindex="-1"
-        type="text"
-      />
-      <label>
-        <select
-          size="3"
-          tabindex="-1"
-        >
-          <option />
-          <option
-            value="0"
-          >
-            Available
-          </option>
-          <option
-            value="1"
-          >
-            Break
-          </option>
-          <option
-            value="2"
-          >
-            Training
-          </option>
-        </select>
-      </label>
-    </div>
-    <button
-      aria-controls="user-state-tooltip"
-      aria-expanded="false"
-      aria-haspopup="listbox"
-      aria-label="user-state"
-      aria-labelledby="user-state-tooltip react-aria-:rh:"
-      class="md-select-dropdown-input md-select-selected"
-      data-testid="state-select"
+      aria-describedby="mock-aria-describedby"
+      class="state-select idle md-select-wrapper"
       id="user-state-tooltip"
-      role="combobox"
-      type="button"
+      style="--local-width: 100%;"
     >
-      <span
-        class="md-select-selected-item-wrapper"
-        id="react-aria-:rh:"
-        title="Break"
-      >
-        <div
-          class="item-container"
-          data-testid="item-container selected idle"
-        >
-          <mdc-icon
-            class="state-icon idle"
-            data-testid="state-icon"
-            name="recents-presence-filled"
-            title=""
-          />
-          <mdc-text
-            class="md-text-wrapper state-name idle"
-            data-testid="state-name"
-            tagname="small"
-            type="body-large-regular"
-          >
-            Break
-          </mdc-text>
-        </div>
-      </span>
-      <span
+      <div
         aria-hidden="true"
-        class="md-select-icon-wrapper"
+        style="border: 0px; clip-path: inset(50%); height: 1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; width: 1px; white-space: nowrap;"
       >
-        <div
-          class="md-icon-wrapper"
+        <input
+          style="font-size: 16px;"
+          tabindex="-1"
+          type="text"
+        />
+        <label>
+          <select
+            size="3"
+            tabindex="-1"
+          >
+            <option />
+            <option
+              value="0"
+            >
+              Available
+            </option>
+            <option
+              value="1"
+            >
+              Break
+            </option>
+            <option
+              value="2"
+            >
+              Training
+            </option>
+          </select>
+        </label>
+      </div>
+      <button
+        aria-controls="user-state-tooltip"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        aria-label="user-state"
+        aria-labelledby="user-state-tooltip react-aria-:rh:"
+        class="md-select-dropdown-input md-select-selected"
+        data-testid="state-select"
+        id="user-state-tooltip"
+        role="combobox"
+        type="button"
+      >
+        <span
+          class="md-select-selected-item-wrapper"
+          id="react-aria-:rh:"
+          title="Break"
         >
           <div
-            class="md-icon-not-found"
-            data-autoscale="false"
-            data-scale="16"
+            class="item-container"
+            data-testid="item-container selected idle"
           >
-            ⃞
+            <mdc-icon
+              class="state-icon idle"
+              data-testid="state-icon"
+              name="recents-presence-filled"
+              title=""
+            />
+            <mdc-text
+              class="md-text-wrapper state-name idle"
+              data-testid="state-name"
+              tagname="small"
+              type="body-large-regular"
+            >
+              Break
+            </mdc-text>
           </div>
-        </div>
-      </span>
-    </button>
-  </div>
-  <mdc-tooltip
-    boundary="clippingAncestors"
-    boundary-root="viewport"
-    class="tooltip"
-    color="contrast"
-    data-testid="user-state-tooltip"
-    delay="0, 0"
-    disable-aria-expanded=""
-    hide-on-blur=""
-    hide-on-escape=""
-    id="mock-tooltip-id"
-    is-backdrop-invisible=""
-    offset="4"
-    placement="bottom"
-    role="tooltip"
-    should-focus-trap-wrap=""
-    stack-group-name=""
-    strategy="absolute"
-    style="z-index: 1000;"
-    tooltip-type="description"
-    trigger="mouseenter focusin"
-    triggerid="user-state-tooltip"
-    z-index="1000"
-  >
-    <mdc-text
-      class="md-text-wrapper tooltip-text"
-      tagname="small"
-      type="body-large-regular"
+        </span>
+        <span
+          aria-hidden="true"
+          class="md-select-icon-wrapper"
+        >
+          <div
+            class="md-icon-wrapper"
+          >
+            <div
+              class="md-icon-not-found"
+              data-autoscale="false"
+              data-scale="16"
+            >
+              ⃞
+            </div>
+          </div>
+        </span>
+      </button>
+    </div>
+    <mdc-tooltip
+      boundary="clippingAncestors"
+      boundary-root="viewport"
+      class="tooltip"
+      color="contrast"
+      data-testid="user-state-tooltip"
+      delay="0, 0"
+      disable-aria-expanded=""
+      hide-on-blur=""
+      hide-on-escape=""
+      id="mock-tooltip-id"
+      is-backdrop-invisible=""
+      offset="4"
+      placement="bottom"
+      role="tooltip"
+      should-focus-trap-wrap=""
+      stack-group-name=""
+      strategy="absolute"
+      style="z-index: 1000;"
+      tooltip-type="description"
+      trigger="mouseenter focusin"
+      triggerid="user-state-tooltip"
+      z-index="1000"
     >
-      Availability State
-    </mdc-text>
-  </mdc-tooltip>
-  <mdc-icon
-    class="select-arrow-icon"
-    data-testid="select-arrow-icon"
-    name="arrow-down-bold"
-    title=""
-  />
+      <mdc-text
+        class="md-text-wrapper tooltip-text"
+        tagname="small"
+        type="body-large-regular"
+      >
+        Availability State
+      </mdc-text>
+    </mdc-tooltip>
+    <mdc-icon
+      class="select-arrow-icon"
+      data-testid="select-arrow-icon"
+      name="arrow-down-bold"
+      title=""
+    />
+  </div>
 </div>
 `;
 
@@ -433,144 +445,148 @@ exports[`UserState Component Snapshots Rendering - Tests for UI elements and vis
   data-testid="user-state-container"
 >
   <div
-    aria-describedby="mock-aria-describedby"
-    class="state-select idle md-select-wrapper"
-    id="user-state-tooltip"
-    style="--local-width: 100%;"
+    class="user-state-select-wrapper"
   >
     <div
-      aria-hidden="true"
-      style="border: 0px; clip-path: inset(50%); height: 1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; width: 1px; white-space: nowrap;"
-    >
-      <input
-        style="font-size: 16px;"
-        tabindex="-1"
-        type="text"
-      />
-      <label>
-        <select
-          size="3"
-          tabindex="-1"
-        >
-          <option />
-          <option
-            value="0"
-          >
-            Available
-          </option>
-          <option
-            value="1"
-          >
-            Break
-          </option>
-          <option
-            value="2"
-          >
-            Training
-          </option>
-        </select>
-      </label>
-    </div>
-    <button
-      aria-controls="user-state-tooltip"
-      aria-expanded="false"
-      aria-haspopup="listbox"
-      aria-label="user-state"
-      aria-labelledby="user-state-tooltip react-aria-:rn:"
-      class="md-select-dropdown-input md-select-selected"
-      data-testid="state-select"
+      aria-describedby="mock-aria-describedby"
+      class="state-select idle md-select-wrapper"
       id="user-state-tooltip"
-      role="combobox"
-      type="button"
+      style="--local-width: 100%;"
     >
-      <span
-        class="md-select-selected-item-wrapper"
-        id="react-aria-:rn:"
-        title="Break"
-      >
-        <div
-          class="item-container"
-          data-testid="item-container selected idle"
-        >
-          <mdc-icon
-            class="state-icon idle"
-            data-testid="state-icon"
-            name="recents-presence-filled"
-            title=""
-          />
-          <mdc-text
-            class="md-text-wrapper state-name idle"
-            data-testid="state-name"
-            tagname="small"
-            type="body-large-regular"
-          >
-            Break
-          </mdc-text>
-        </div>
-      </span>
-      <span
+      <div
         aria-hidden="true"
-        class="md-select-icon-wrapper"
+        style="border: 0px; clip-path: inset(50%); height: 1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; width: 1px; white-space: nowrap;"
       >
-        <div
-          class="md-icon-wrapper"
+        <input
+          style="font-size: 16px;"
+          tabindex="-1"
+          type="text"
+        />
+        <label>
+          <select
+            size="3"
+            tabindex="-1"
+          >
+            <option />
+            <option
+              value="0"
+            >
+              Available
+            </option>
+            <option
+              value="1"
+            >
+              Break
+            </option>
+            <option
+              value="2"
+            >
+              Training
+            </option>
+          </select>
+        </label>
+      </div>
+      <button
+        aria-controls="user-state-tooltip"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        aria-label="user-state"
+        aria-labelledby="user-state-tooltip react-aria-:rn:"
+        class="md-select-dropdown-input md-select-selected"
+        data-testid="state-select"
+        id="user-state-tooltip"
+        role="combobox"
+        type="button"
+      >
+        <span
+          class="md-select-selected-item-wrapper"
+          id="react-aria-:rn:"
+          title="Break"
         >
           <div
-            class="md-icon-not-found"
-            data-autoscale="false"
-            data-scale="16"
+            class="item-container"
+            data-testid="item-container selected idle"
           >
-            ⃞
+            <mdc-icon
+              class="state-icon idle"
+              data-testid="state-icon"
+              name="recents-presence-filled"
+              title=""
+            />
+            <mdc-text
+              class="md-text-wrapper state-name idle"
+              data-testid="state-name"
+              tagname="small"
+              type="body-large-regular"
+            >
+              Break
+            </mdc-text>
           </div>
-        </div>
-      </span>
-    </button>
-  </div>
-  <mdc-tooltip
-    boundary="clippingAncestors"
-    boundary-root="viewport"
-    class="tooltip"
-    color="contrast"
-    data-testid="user-state-tooltip"
-    delay="0, 0"
-    disable-aria-expanded=""
-    hide-on-blur=""
-    hide-on-escape=""
-    id="mock-tooltip-id"
-    is-backdrop-invisible=""
-    offset="4"
-    placement="bottom"
-    role="tooltip"
-    should-focus-trap-wrap=""
-    stack-group-name=""
-    strategy="absolute"
-    style="z-index: 1000;"
-    tooltip-type="description"
-    trigger="mouseenter focusin"
-    triggerid="user-state-tooltip"
-    z-index="1000"
-  >
-    <mdc-text
-      class="md-text-wrapper tooltip-text"
-      tagname="small"
-      type="body-large-regular"
+        </span>
+        <span
+          aria-hidden="true"
+          class="md-select-icon-wrapper"
+        >
+          <div
+            class="md-icon-wrapper"
+          >
+            <div
+              class="md-icon-not-found"
+              data-autoscale="false"
+              data-scale="16"
+            >
+              ⃞
+            </div>
+          </div>
+        </span>
+      </button>
+    </div>
+    <mdc-tooltip
+      boundary="clippingAncestors"
+      boundary-root="viewport"
+      class="tooltip"
+      color="contrast"
+      data-testid="user-state-tooltip"
+      delay="0, 0"
+      disable-aria-expanded=""
+      hide-on-blur=""
+      hide-on-escape=""
+      id="mock-tooltip-id"
+      is-backdrop-invisible=""
+      offset="4"
+      placement="bottom"
+      role="tooltip"
+      should-focus-trap-wrap=""
+      stack-group-name=""
+      strategy="absolute"
+      style="z-index: 1000;"
+      tooltip-type="description"
+      trigger="mouseenter focusin"
+      triggerid="user-state-tooltip"
+      z-index="1000"
     >
-      Availability State
-    </mdc-text>
-  </mdc-tooltip>
-  <span
-    class="elapsedTime elapsedTime-disabled"
-    data-testid="elapsed-time"
-  >
-    30:00 / 
-    01:01:01
-  </span>
-  <mdc-icon
-    class="select-arrow-icon"
-    data-testid="select-arrow-icon"
-    name="arrow-down-bold"
-    title=""
-  />
+      <mdc-text
+        class="md-text-wrapper tooltip-text"
+        tagname="small"
+        type="body-large-regular"
+      >
+        Availability State
+      </mdc-text>
+    </mdc-tooltip>
+    <span
+      class="elapsedTime elapsedTime-disabled"
+      data-testid="elapsed-time"
+    >
+      30:00 / 
+      01:01:01
+    </span>
+    <mdc-icon
+      class="select-arrow-icon"
+      data-testid="select-arrow-icon"
+      name="arrow-down-bold"
+      title=""
+    />
+  </div>
 </div>
 `;
 
@@ -580,143 +596,147 @@ exports[`UserState Component Snapshots Rendering - Tests for UI elements and vis
   data-testid="user-state-container"
 >
   <div
-    aria-describedby="mock-aria-describedby"
-    class="state-select idle md-select-wrapper"
-    id="user-state-tooltip"
-    style="--local-width: 100%;"
+    class="user-state-select-wrapper"
   >
     <div
-      aria-hidden="true"
-      style="border: 0px; clip-path: inset(50%); height: 1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; width: 1px; white-space: nowrap;"
-    >
-      <input
-        style="font-size: 16px;"
-        tabindex="-1"
-        type="text"
-      />
-      <label>
-        <select
-          size="3"
-          tabindex="-1"
-        >
-          <option />
-          <option
-            value="0"
-          >
-            Available
-          </option>
-          <option
-            value="1"
-          >
-            Break
-          </option>
-          <option
-            value="2"
-          >
-            Training
-          </option>
-        </select>
-      </label>
-    </div>
-    <button
-      aria-controls="user-state-tooltip"
-      aria-expanded="false"
-      aria-haspopup="listbox"
-      aria-label="user-state"
-      aria-labelledby="user-state-tooltip react-aria-:rb:"
-      class="md-select-dropdown-input md-select-selected"
-      data-testid="state-select"
+      aria-describedby="mock-aria-describedby"
+      class="state-select idle md-select-wrapper"
       id="user-state-tooltip"
-      role="combobox"
-      type="button"
+      style="--local-width: 100%;"
     >
-      <span
-        class="md-select-selected-item-wrapper"
-        id="react-aria-:rb:"
-        title="Break"
-      >
-        <div
-          class="item-container"
-          data-testid="item-container selected idle"
-        >
-          <mdc-icon
-            class="state-icon idle"
-            data-testid="state-icon"
-            name="recents-presence-filled"
-            title=""
-          />
-          <mdc-text
-            class="md-text-wrapper state-name idle"
-            data-testid="state-name"
-            tagname="small"
-            type="body-large-regular"
-          >
-            Break
-          </mdc-text>
-        </div>
-      </span>
-      <span
+      <div
         aria-hidden="true"
-        class="md-select-icon-wrapper"
+        style="border: 0px; clip-path: inset(50%); height: 1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; width: 1px; white-space: nowrap;"
       >
-        <div
-          class="md-icon-wrapper"
+        <input
+          style="font-size: 16px;"
+          tabindex="-1"
+          type="text"
+        />
+        <label>
+          <select
+            size="3"
+            tabindex="-1"
+          >
+            <option />
+            <option
+              value="0"
+            >
+              Available
+            </option>
+            <option
+              value="1"
+            >
+              Break
+            </option>
+            <option
+              value="2"
+            >
+              Training
+            </option>
+          </select>
+        </label>
+      </div>
+      <button
+        aria-controls="user-state-tooltip"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        aria-label="user-state"
+        aria-labelledby="user-state-tooltip react-aria-:rb:"
+        class="md-select-dropdown-input md-select-selected"
+        data-testid="state-select"
+        id="user-state-tooltip"
+        role="combobox"
+        type="button"
+      >
+        <span
+          class="md-select-selected-item-wrapper"
+          id="react-aria-:rb:"
+          title="Break"
         >
           <div
-            class="md-icon-not-found"
-            data-autoscale="false"
-            data-scale="16"
+            class="item-container"
+            data-testid="item-container selected idle"
           >
-            ⃞
+            <mdc-icon
+              class="state-icon idle"
+              data-testid="state-icon"
+              name="recents-presence-filled"
+              title=""
+            />
+            <mdc-text
+              class="md-text-wrapper state-name idle"
+              data-testid="state-name"
+              tagname="small"
+              type="body-large-regular"
+            >
+              Break
+            </mdc-text>
           </div>
-        </div>
-      </span>
-    </button>
-  </div>
-  <mdc-tooltip
-    boundary="clippingAncestors"
-    boundary-root="viewport"
-    class="tooltip"
-    color="contrast"
-    data-testid="user-state-tooltip"
-    delay="0, 0"
-    disable-aria-expanded=""
-    hide-on-blur=""
-    hide-on-escape=""
-    id="mock-tooltip-id"
-    is-backdrop-invisible=""
-    offset="4"
-    placement="bottom"
-    role="tooltip"
-    should-focus-trap-wrap=""
-    stack-group-name=""
-    strategy="absolute"
-    style="z-index: 1000;"
-    tooltip-type="description"
-    trigger="mouseenter focusin"
-    triggerid="user-state-tooltip"
-    z-index="1000"
-  >
-    <mdc-text
-      class="md-text-wrapper tooltip-text"
-      tagname="small"
-      type="body-large-regular"
+        </span>
+        <span
+          aria-hidden="true"
+          class="md-select-icon-wrapper"
+        >
+          <div
+            class="md-icon-wrapper"
+          >
+            <div
+              class="md-icon-not-found"
+              data-autoscale="false"
+              data-scale="16"
+            >
+              ⃞
+            </div>
+          </div>
+        </span>
+      </button>
+    </div>
+    <mdc-tooltip
+      boundary="clippingAncestors"
+      boundary-root="viewport"
+      class="tooltip"
+      color="contrast"
+      data-testid="user-state-tooltip"
+      delay="0, 0"
+      disable-aria-expanded=""
+      hide-on-blur=""
+      hide-on-escape=""
+      id="mock-tooltip-id"
+      is-backdrop-invisible=""
+      offset="4"
+      placement="bottom"
+      role="tooltip"
+      should-focus-trap-wrap=""
+      stack-group-name=""
+      strategy="absolute"
+      style="z-index: 1000;"
+      tooltip-type="description"
+      trigger="mouseenter focusin"
+      triggerid="user-state-tooltip"
+      z-index="1000"
     >
-      Availability State
-    </mdc-text>
-  </mdc-tooltip>
-  <span
-    class="elapsedTime "
-    data-testid="elapsed-time"
-  >
-    01:01:01
-  </span>
-  <mdc-icon
-    class="select-arrow-icon"
-    data-testid="select-arrow-icon"
-    name="arrow-down-bold"
-    title=""
-  />
+      <mdc-text
+        class="md-text-wrapper tooltip-text"
+        tagname="small"
+        type="body-large-regular"
+      >
+        Availability State
+      </mdc-text>
+    </mdc-tooltip>
+    <span
+      class="elapsedTime "
+      data-testid="elapsed-time"
+    >
+      01:01:01
+    </span>
+    <mdc-icon
+      class="select-arrow-icon"
+      data-testid="select-arrow-icon"
+      name="arrow-down-bold"
+      title=""
+    />
+  </div>
 </div>
 `;
 
@@ -726,144 +746,148 @@ exports[`UserState Component Snapshots Rendering - Tests for UI elements and vis
   data-testid="user-state-container"
 >
   <div
-    aria-describedby="mock-aria-describedby"
-    class="state-select idle md-select-wrapper"
-    id="user-state-tooltip"
-    style="--local-width: 100%;"
+    class="user-state-select-wrapper"
   >
     <div
-      aria-hidden="true"
-      style="border: 0px; clip-path: inset(50%); height: 1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; width: 1px; white-space: nowrap;"
-    >
-      <input
-        style="font-size: 16px;"
-        tabindex="-1"
-        type="text"
-      />
-      <label>
-        <select
-          size="3"
-          tabindex="-1"
-        >
-          <option />
-          <option
-            value="0"
-          >
-            Available
-          </option>
-          <option
-            value="1"
-          >
-            Break
-          </option>
-          <option
-            value="2"
-          >
-            Training
-          </option>
-        </select>
-      </label>
-    </div>
-    <button
-      aria-controls="user-state-tooltip"
-      aria-expanded="false"
-      aria-haspopup="listbox"
-      aria-label="user-state"
-      aria-labelledby="user-state-tooltip react-aria-:r5:"
-      class="md-select-dropdown-input md-select-selected"
-      data-testid="state-select"
+      aria-describedby="mock-aria-describedby"
+      class="state-select idle md-select-wrapper"
       id="user-state-tooltip"
-      role="combobox"
-      type="button"
+      style="--local-width: 100%;"
     >
-      <span
-        class="md-select-selected-item-wrapper"
-        id="react-aria-:r5:"
-        title="Break"
-      >
-        <div
-          class="item-container"
-          data-testid="item-container selected idle"
-        >
-          <mdc-icon
-            class="state-icon idle"
-            data-testid="state-icon"
-            name="recents-presence-filled"
-            title=""
-          />
-          <mdc-text
-            class="md-text-wrapper state-name idle"
-            data-testid="state-name"
-            tagname="small"
-            type="body-large-regular"
-          >
-            Break
-          </mdc-text>
-        </div>
-      </span>
-      <span
+      <div
         aria-hidden="true"
-        class="md-select-icon-wrapper"
+        style="border: 0px; clip-path: inset(50%); height: 1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; width: 1px; white-space: nowrap;"
       >
-        <div
-          class="md-icon-wrapper"
+        <input
+          style="font-size: 16px;"
+          tabindex="-1"
+          type="text"
+        />
+        <label>
+          <select
+            size="3"
+            tabindex="-1"
+          >
+            <option />
+            <option
+              value="0"
+            >
+              Available
+            </option>
+            <option
+              value="1"
+            >
+              Break
+            </option>
+            <option
+              value="2"
+            >
+              Training
+            </option>
+          </select>
+        </label>
+      </div>
+      <button
+        aria-controls="user-state-tooltip"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        aria-label="user-state"
+        aria-labelledby="user-state-tooltip react-aria-:r5:"
+        class="md-select-dropdown-input md-select-selected"
+        data-testid="state-select"
+        id="user-state-tooltip"
+        role="combobox"
+        type="button"
+      >
+        <span
+          class="md-select-selected-item-wrapper"
+          id="react-aria-:r5:"
+          title="Break"
         >
           <div
-            class="md-icon-not-found"
-            data-autoscale="false"
-            data-scale="16"
+            class="item-container"
+            data-testid="item-container selected idle"
           >
-            ⃞
+            <mdc-icon
+              class="state-icon idle"
+              data-testid="state-icon"
+              name="recents-presence-filled"
+              title=""
+            />
+            <mdc-text
+              class="md-text-wrapper state-name idle"
+              data-testid="state-name"
+              tagname="small"
+              type="body-large-regular"
+            >
+              Break
+            </mdc-text>
           </div>
-        </div>
-      </span>
-    </button>
-  </div>
-  <mdc-tooltip
-    boundary="clippingAncestors"
-    boundary-root="viewport"
-    class="tooltip"
-    color="contrast"
-    data-testid="user-state-tooltip"
-    delay="0, 0"
-    disable-aria-expanded=""
-    hide-on-blur=""
-    hide-on-escape=""
-    id="mock-tooltip-id"
-    is-backdrop-invisible=""
-    offset="4"
-    placement="bottom"
-    role="tooltip"
-    should-focus-trap-wrap=""
-    stack-group-name=""
-    strategy="absolute"
-    style="z-index: 1000;"
-    tooltip-type="description"
-    trigger="mouseenter focusin"
-    triggerid="user-state-tooltip"
-    z-index="1000"
-  >
-    <mdc-text
-      class="md-text-wrapper tooltip-text"
-      tagname="small"
-      type="body-large-regular"
+        </span>
+        <span
+          aria-hidden="true"
+          class="md-select-icon-wrapper"
+        >
+          <div
+            class="md-icon-wrapper"
+          >
+            <div
+              class="md-icon-not-found"
+              data-autoscale="false"
+              data-scale="16"
+            >
+              ⃞
+            </div>
+          </div>
+        </span>
+      </button>
+    </div>
+    <mdc-tooltip
+      boundary="clippingAncestors"
+      boundary-root="viewport"
+      class="tooltip"
+      color="contrast"
+      data-testid="user-state-tooltip"
+      delay="0, 0"
+      disable-aria-expanded=""
+      hide-on-blur=""
+      hide-on-escape=""
+      id="mock-tooltip-id"
+      is-backdrop-invisible=""
+      offset="4"
+      placement="bottom"
+      role="tooltip"
+      should-focus-trap-wrap=""
+      stack-group-name=""
+      strategy="absolute"
+      style="z-index: 1000;"
+      tooltip-type="description"
+      trigger="mouseenter focusin"
+      triggerid="user-state-tooltip"
+      z-index="1000"
     >
-      Availability State
-    </mdc-text>
-  </mdc-tooltip>
-  <span
-    class="elapsedTime "
-    data-testid="elapsed-time"
-  >
-    30:00 / 
-    01:01:01
-  </span>
-  <mdc-icon
-    class="select-arrow-icon"
-    data-testid="select-arrow-icon"
-    name="arrow-down-bold"
-    title=""
-  />
+      <mdc-text
+        class="md-text-wrapper tooltip-text"
+        tagname="small"
+        type="body-large-regular"
+      >
+        Availability State
+      </mdc-text>
+    </mdc-tooltip>
+    <span
+      class="elapsedTime "
+      data-testid="elapsed-time"
+    >
+      30:00 / 
+      01:01:01
+    </span>
+    <mdc-icon
+      class="select-arrow-icon"
+      data-testid="select-arrow-icon"
+      name="arrow-down-bold"
+      title=""
+    />
+  </div>
 </div>
 `;
 
@@ -873,144 +897,148 @@ exports[`UserState Component Snapshots State Management should handle RONA and E
   data-testid="user-state-container"
 >
   <div
-    aria-describedby="mock-aria-describedby"
-    class="state-select idle md-select-wrapper"
-    id="user-state-tooltip"
-    style="--local-width: 100%;"
+    class="user-state-select-wrapper"
   >
     <div
-      aria-hidden="true"
-      style="border: 0px; clip-path: inset(50%); height: 1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; width: 1px; white-space: nowrap;"
-    >
-      <input
-        style="font-size: 16px;"
-        tabindex="-1"
-        type="text"
-      />
-      <label>
-        <select
-          size="3"
-          tabindex="-1"
-        >
-          <option />
-          <option
-            value="0"
-          >
-            Available
-          </option>
-          <option
-            value="1"
-          >
-            Break
-          </option>
-          <option
-            value="2"
-          >
-            Training
-          </option>
-        </select>
-      </label>
-    </div>
-    <button
-      aria-controls="user-state-tooltip"
-      aria-expanded="false"
-      aria-haspopup="listbox"
-      aria-label="user-state"
-      aria-labelledby="user-state-tooltip react-aria-:r1f:"
-      class="md-select-dropdown-input md-select-selected"
-      data-testid="state-select"
+      aria-describedby="mock-aria-describedby"
+      class="state-select idle md-select-wrapper"
       id="user-state-tooltip"
-      role="combobox"
-      type="button"
+      style="--local-width: 100%;"
     >
-      <span
-        class="md-select-selected-item-wrapper"
-        id="react-aria-:r1f:"
-        title="Break"
-      >
-        <div
-          class="item-container"
-          data-testid="item-container selected idle"
-        >
-          <mdc-icon
-            class="state-icon idle"
-            data-testid="state-icon"
-            name="recents-presence-filled"
-            title=""
-          />
-          <mdc-text
-            class="md-text-wrapper state-name idle"
-            data-testid="state-name"
-            tagname="small"
-            type="body-large-regular"
-          >
-            Break
-          </mdc-text>
-        </div>
-      </span>
-      <span
+      <div
         aria-hidden="true"
-        class="md-select-icon-wrapper"
+        style="border: 0px; clip-path: inset(50%); height: 1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; width: 1px; white-space: nowrap;"
       >
-        <div
-          class="md-icon-wrapper"
+        <input
+          style="font-size: 16px;"
+          tabindex="-1"
+          type="text"
+        />
+        <label>
+          <select
+            size="3"
+            tabindex="-1"
+          >
+            <option />
+            <option
+              value="0"
+            >
+              Available
+            </option>
+            <option
+              value="1"
+            >
+              Break
+            </option>
+            <option
+              value="2"
+            >
+              Training
+            </option>
+          </select>
+        </label>
+      </div>
+      <button
+        aria-controls="user-state-tooltip"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        aria-label="user-state"
+        aria-labelledby="user-state-tooltip react-aria-:r1f:"
+        class="md-select-dropdown-input md-select-selected"
+        data-testid="state-select"
+        id="user-state-tooltip"
+        role="combobox"
+        type="button"
+      >
+        <span
+          class="md-select-selected-item-wrapper"
+          id="react-aria-:r1f:"
+          title="Break"
         >
           <div
-            class="md-icon-not-found"
-            data-autoscale="false"
-            data-scale="16"
+            class="item-container"
+            data-testid="item-container selected idle"
           >
-            ⃞
+            <mdc-icon
+              class="state-icon idle"
+              data-testid="state-icon"
+              name="recents-presence-filled"
+              title=""
+            />
+            <mdc-text
+              class="md-text-wrapper state-name idle"
+              data-testid="state-name"
+              tagname="small"
+              type="body-large-regular"
+            >
+              Break
+            </mdc-text>
           </div>
-        </div>
-      </span>
-    </button>
-  </div>
-  <mdc-tooltip
-    boundary="clippingAncestors"
-    boundary-root="viewport"
-    class="tooltip"
-    color="contrast"
-    data-testid="user-state-tooltip"
-    delay="0, 0"
-    disable-aria-expanded=""
-    hide-on-blur=""
-    hide-on-escape=""
-    id="mock-tooltip-id"
-    is-backdrop-invisible=""
-    offset="4"
-    placement="bottom"
-    role="tooltip"
-    should-focus-trap-wrap=""
-    stack-group-name=""
-    strategy="absolute"
-    style="z-index: 1000;"
-    tooltip-type="description"
-    trigger="mouseenter focusin"
-    triggerid="user-state-tooltip"
-    z-index="1000"
-  >
-    <mdc-text
-      class="md-text-wrapper tooltip-text"
-      tagname="small"
-      type="body-large-regular"
+        </span>
+        <span
+          aria-hidden="true"
+          class="md-select-icon-wrapper"
+        >
+          <div
+            class="md-icon-wrapper"
+          >
+            <div
+              class="md-icon-not-found"
+              data-autoscale="false"
+              data-scale="16"
+            >
+              ⃞
+            </div>
+          </div>
+        </span>
+      </button>
+    </div>
+    <mdc-tooltip
+      boundary="clippingAncestors"
+      boundary-root="viewport"
+      class="tooltip"
+      color="contrast"
+      data-testid="user-state-tooltip"
+      delay="0, 0"
+      disable-aria-expanded=""
+      hide-on-blur=""
+      hide-on-escape=""
+      id="mock-tooltip-id"
+      is-backdrop-invisible=""
+      offset="4"
+      placement="bottom"
+      role="tooltip"
+      should-focus-trap-wrap=""
+      stack-group-name=""
+      strategy="absolute"
+      style="z-index: 1000;"
+      tooltip-type="description"
+      trigger="mouseenter focusin"
+      triggerid="user-state-tooltip"
+      z-index="1000"
     >
-      Availability State
-    </mdc-text>
-  </mdc-tooltip>
-  <span
-    class="elapsedTime "
-    data-testid="elapsed-time"
-  >
-    30:00 / 
-    01:01:01
-  </span>
-  <mdc-icon
-    class="select-arrow-icon"
-    data-testid="select-arrow-icon"
-    name="arrow-down-bold"
-    title=""
-  />
+      <mdc-text
+        class="md-text-wrapper tooltip-text"
+        tagname="small"
+        type="body-large-regular"
+      >
+        Availability State
+      </mdc-text>
+    </mdc-tooltip>
+    <span
+      class="elapsedTime "
+      data-testid="elapsed-time"
+    >
+      30:00 / 
+      01:01:01
+    </span>
+    <mdc-icon
+      class="select-arrow-icon"
+      data-testid="select-arrow-icon"
+      name="arrow-down-bold"
+      title=""
+    />
+  </div>
 </div>
 `;
 
@@ -1020,144 +1048,148 @@ exports[`UserState Component Snapshots State Management should handle RONA and E
   data-testid="user-state-container"
 >
   <div
-    aria-describedby="mock-aria-describedby"
-    class="state-select idle md-select-wrapper"
-    id="user-state-tooltip"
-    style="--local-width: 100%;"
+    class="user-state-select-wrapper"
   >
     <div
-      aria-hidden="true"
-      style="border: 0px; clip-path: inset(50%); height: 1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; width: 1px; white-space: nowrap;"
-    >
-      <input
-        style="font-size: 16px;"
-        tabindex="-1"
-        type="text"
-      />
-      <label>
-        <select
-          size="3"
-          tabindex="-1"
-        >
-          <option />
-          <option
-            value="0"
-          >
-            Available
-          </option>
-          <option
-            value="1"
-          >
-            Break
-          </option>
-          <option
-            value="2"
-          >
-            Training
-          </option>
-        </select>
-      </label>
-    </div>
-    <button
-      aria-controls="user-state-tooltip"
-      aria-expanded="false"
-      aria-haspopup="listbox"
-      aria-label="user-state"
-      aria-labelledby="user-state-tooltip react-aria-:r1f:"
-      class="md-select-dropdown-input md-select-selected"
-      data-testid="state-select"
+      aria-describedby="mock-aria-describedby"
+      class="state-select idle md-select-wrapper"
       id="user-state-tooltip"
-      role="combobox"
-      type="button"
+      style="--local-width: 100%;"
     >
-      <span
-        class="md-select-selected-item-wrapper"
-        id="react-aria-:r1f:"
-        title="Break"
-      >
-        <div
-          class="item-container"
-          data-testid="item-container "
-        >
-          <mdc-icon
-            class="state-icon idle"
-            data-testid="state-icon"
-            name="recents-presence-filled"
-            title=""
-          />
-          <mdc-text
-            class="md-text-wrapper state-name idle"
-            data-testid="state-name"
-            tagname="small"
-            type="body-large-regular"
-          >
-            Break
-          </mdc-text>
-        </div>
-      </span>
-      <span
+      <div
         aria-hidden="true"
-        class="md-select-icon-wrapper"
+        style="border: 0px; clip-path: inset(50%); height: 1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; width: 1px; white-space: nowrap;"
       >
-        <div
-          class="md-icon-wrapper"
+        <input
+          style="font-size: 16px;"
+          tabindex="-1"
+          type="text"
+        />
+        <label>
+          <select
+            size="3"
+            tabindex="-1"
+          >
+            <option />
+            <option
+              value="0"
+            >
+              Available
+            </option>
+            <option
+              value="1"
+            >
+              Break
+            </option>
+            <option
+              value="2"
+            >
+              Training
+            </option>
+          </select>
+        </label>
+      </div>
+      <button
+        aria-controls="user-state-tooltip"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        aria-label="user-state"
+        aria-labelledby="user-state-tooltip react-aria-:r1f:"
+        class="md-select-dropdown-input md-select-selected"
+        data-testid="state-select"
+        id="user-state-tooltip"
+        role="combobox"
+        type="button"
+      >
+        <span
+          class="md-select-selected-item-wrapper"
+          id="react-aria-:r1f:"
+          title="Break"
         >
           <div
-            class="md-icon-not-found"
-            data-autoscale="false"
-            data-scale="16"
+            class="item-container"
+            data-testid="item-container "
           >
-            ⃞
+            <mdc-icon
+              class="state-icon idle"
+              data-testid="state-icon"
+              name="recents-presence-filled"
+              title=""
+            />
+            <mdc-text
+              class="md-text-wrapper state-name idle"
+              data-testid="state-name"
+              tagname="small"
+              type="body-large-regular"
+            >
+              Break
+            </mdc-text>
           </div>
-        </div>
-      </span>
-    </button>
-  </div>
-  <mdc-tooltip
-    boundary="clippingAncestors"
-    boundary-root="viewport"
-    class="tooltip"
-    color="contrast"
-    data-testid="user-state-tooltip"
-    delay="0, 0"
-    disable-aria-expanded=""
-    hide-on-blur=""
-    hide-on-escape=""
-    id="mock-tooltip-id"
-    is-backdrop-invisible=""
-    offset="4"
-    placement="bottom"
-    role="tooltip"
-    should-focus-trap-wrap=""
-    stack-group-name=""
-    strategy="absolute"
-    style="z-index: 1000;"
-    tooltip-type="description"
-    trigger="mouseenter focusin"
-    triggerid="user-state-tooltip"
-    z-index="1000"
-  >
-    <mdc-text
-      class="md-text-wrapper tooltip-text"
-      tagname="small"
-      type="body-large-regular"
+        </span>
+        <span
+          aria-hidden="true"
+          class="md-select-icon-wrapper"
+        >
+          <div
+            class="md-icon-wrapper"
+          >
+            <div
+              class="md-icon-not-found"
+              data-autoscale="false"
+              data-scale="16"
+            >
+              ⃞
+            </div>
+          </div>
+        </span>
+      </button>
+    </div>
+    <mdc-tooltip
+      boundary="clippingAncestors"
+      boundary-root="viewport"
+      class="tooltip"
+      color="contrast"
+      data-testid="user-state-tooltip"
+      delay="0, 0"
+      disable-aria-expanded=""
+      hide-on-blur=""
+      hide-on-escape=""
+      id="mock-tooltip-id"
+      is-backdrop-invisible=""
+      offset="4"
+      placement="bottom"
+      role="tooltip"
+      should-focus-trap-wrap=""
+      stack-group-name=""
+      strategy="absolute"
+      style="z-index: 1000;"
+      tooltip-type="description"
+      trigger="mouseenter focusin"
+      triggerid="user-state-tooltip"
+      z-index="1000"
     >
-      Availability State
-    </mdc-text>
-  </mdc-tooltip>
-  <span
-    class="elapsedTime "
-    data-testid="elapsed-time"
-  >
-    30:00 / 
-    01:01:01
-  </span>
-  <mdc-icon
-    class="select-arrow-icon"
-    data-testid="select-arrow-icon"
-    name="arrow-down-bold"
-    title=""
-  />
+      <mdc-text
+        class="md-text-wrapper tooltip-text"
+        tagname="small"
+        type="body-large-regular"
+      >
+        Availability State
+      </mdc-text>
+    </mdc-tooltip>
+    <span
+      class="elapsedTime "
+      data-testid="elapsed-time"
+    >
+      30:00 / 
+      01:01:01
+    </span>
+    <mdc-icon
+      class="select-arrow-icon"
+      data-testid="select-arrow-icon"
+      name="arrow-down-bold"
+      title=""
+    />
+  </div>
 </div>
 `;
 
@@ -1167,144 +1199,148 @@ exports[`UserState Component Snapshots State Management should handle currentSta
   data-testid="user-state-container"
 >
   <div
-    aria-describedby="mock-aria-describedby"
-    class="state-select idle md-select-wrapper"
-    id="user-state-tooltip"
-    style="--local-width: 100%;"
+    class="user-state-select-wrapper"
   >
     <div
-      aria-hidden="true"
-      style="border: 0px; clip-path: inset(50%); height: 1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; width: 1px; white-space: nowrap;"
-    >
-      <input
-        style="font-size: 16px;"
-        tabindex="-1"
-        type="text"
-      />
-      <label>
-        <select
-          size="3"
-          tabindex="-1"
-        >
-          <option />
-          <option
-            value="0"
-          >
-            Available
-          </option>
-          <option
-            value="1"
-          >
-            Break
-          </option>
-          <option
-            value="2"
-          >
-            Training
-          </option>
-        </select>
-      </label>
-    </div>
-    <button
-      aria-controls="user-state-tooltip"
-      aria-expanded="false"
-      aria-haspopup="listbox"
-      aria-label="user-state"
-      aria-labelledby="user-state-tooltip react-aria-:r1r:"
-      class="md-select-dropdown-input md-select-selected"
-      data-testid="state-select"
+      aria-describedby="mock-aria-describedby"
+      class="state-select idle md-select-wrapper"
       id="user-state-tooltip"
-      role="combobox"
-      type="button"
+      style="--local-width: 100%;"
     >
-      <span
-        class="md-select-selected-item-wrapper"
-        id="react-aria-:r1r:"
-        title="Break"
-      >
-        <div
-          class="item-container"
-          data-testid="item-container "
-        >
-          <mdc-icon
-            class="state-icon idle"
-            data-testid="state-icon"
-            name="recents-presence-filled"
-            title=""
-          />
-          <mdc-text
-            class="md-text-wrapper state-name idle"
-            data-testid="state-name"
-            tagname="small"
-            type="body-large-regular"
-          >
-            Break
-          </mdc-text>
-        </div>
-      </span>
-      <span
+      <div
         aria-hidden="true"
-        class="md-select-icon-wrapper"
+        style="border: 0px; clip-path: inset(50%); height: 1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; width: 1px; white-space: nowrap;"
       >
-        <div
-          class="md-icon-wrapper"
+        <input
+          style="font-size: 16px;"
+          tabindex="-1"
+          type="text"
+        />
+        <label>
+          <select
+            size="3"
+            tabindex="-1"
+          >
+            <option />
+            <option
+              value="0"
+            >
+              Available
+            </option>
+            <option
+              value="1"
+            >
+              Break
+            </option>
+            <option
+              value="2"
+            >
+              Training
+            </option>
+          </select>
+        </label>
+      </div>
+      <button
+        aria-controls="user-state-tooltip"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        aria-label="user-state"
+        aria-labelledby="user-state-tooltip react-aria-:r1r:"
+        class="md-select-dropdown-input md-select-selected"
+        data-testid="state-select"
+        id="user-state-tooltip"
+        role="combobox"
+        type="button"
+      >
+        <span
+          class="md-select-selected-item-wrapper"
+          id="react-aria-:r1r:"
+          title="Break"
         >
           <div
-            class="md-icon-not-found"
-            data-autoscale="false"
-            data-scale="16"
+            class="item-container"
+            data-testid="item-container "
           >
-            ⃞
+            <mdc-icon
+              class="state-icon idle"
+              data-testid="state-icon"
+              name="recents-presence-filled"
+              title=""
+            />
+            <mdc-text
+              class="md-text-wrapper state-name idle"
+              data-testid="state-name"
+              tagname="small"
+              type="body-large-regular"
+            >
+              Break
+            </mdc-text>
           </div>
-        </div>
-      </span>
-    </button>
-  </div>
-  <mdc-tooltip
-    boundary="clippingAncestors"
-    boundary-root="viewport"
-    class="tooltip"
-    color="contrast"
-    data-testid="user-state-tooltip"
-    delay="0, 0"
-    disable-aria-expanded=""
-    hide-on-blur=""
-    hide-on-escape=""
-    id="mock-tooltip-id"
-    is-backdrop-invisible=""
-    offset="4"
-    placement="bottom"
-    role="tooltip"
-    should-focus-trap-wrap=""
-    stack-group-name=""
-    strategy="absolute"
-    style="z-index: 1000;"
-    tooltip-type="description"
-    trigger="mouseenter focusin"
-    triggerid="user-state-tooltip"
-    z-index="1000"
-  >
-    <mdc-text
-      class="md-text-wrapper tooltip-text"
-      tagname="small"
-      type="body-large-regular"
+        </span>
+        <span
+          aria-hidden="true"
+          class="md-select-icon-wrapper"
+        >
+          <div
+            class="md-icon-wrapper"
+          >
+            <div
+              class="md-icon-not-found"
+              data-autoscale="false"
+              data-scale="16"
+            >
+              ⃞
+            </div>
+          </div>
+        </span>
+      </button>
+    </div>
+    <mdc-tooltip
+      boundary="clippingAncestors"
+      boundary-root="viewport"
+      class="tooltip"
+      color="contrast"
+      data-testid="user-state-tooltip"
+      delay="0, 0"
+      disable-aria-expanded=""
+      hide-on-blur=""
+      hide-on-escape=""
+      id="mock-tooltip-id"
+      is-backdrop-invisible=""
+      offset="4"
+      placement="bottom"
+      role="tooltip"
+      should-focus-trap-wrap=""
+      stack-group-name=""
+      strategy="absolute"
+      style="z-index: 1000;"
+      tooltip-type="description"
+      trigger="mouseenter focusin"
+      triggerid="user-state-tooltip"
+      z-index="1000"
     >
-      Availability State
-    </mdc-text>
-  </mdc-tooltip>
-  <span
-    class="elapsedTime "
-    data-testid="elapsed-time"
-  >
-    30:00 / 
-    01:01:01
-  </span>
-  <mdc-icon
-    class="select-arrow-icon"
-    data-testid="select-arrow-icon"
-    name="arrow-down-bold"
-    title=""
-  />
+      <mdc-text
+        class="md-text-wrapper tooltip-text"
+        tagname="small"
+        type="body-large-regular"
+      >
+        Availability State
+      </mdc-text>
+    </mdc-tooltip>
+    <span
+      class="elapsedTime "
+      data-testid="elapsed-time"
+    >
+      30:00 / 
+      01:01:01
+    </span>
+    <mdc-icon
+      class="select-arrow-icon"
+      data-testid="select-arrow-icon"
+      name="arrow-down-bold"
+      title=""
+    />
+  </div>
 </div>
 `;
 
@@ -1314,144 +1350,148 @@ exports[`UserState Component Snapshots State Management should handle elapsed ti
   data-testid="user-state-container"
 >
   <div
-    aria-describedby="mock-aria-describedby"
-    class="state-select idle md-select-wrapper"
-    id="user-state-tooltip"
-    style="--local-width: 100%;"
+    class="user-state-select-wrapper"
   >
     <div
-      aria-hidden="true"
-      style="border: 0px; clip-path: inset(50%); height: 1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; width: 1px; white-space: nowrap;"
-    >
-      <input
-        style="font-size: 16px;"
-        tabindex="-1"
-        type="text"
-      />
-      <label>
-        <select
-          size="3"
-          tabindex="-1"
-        >
-          <option />
-          <option
-            value="0"
-          >
-            Available
-          </option>
-          <option
-            value="1"
-          >
-            Break
-          </option>
-          <option
-            value="2"
-          >
-            Training
-          </option>
-        </select>
-      </label>
-    </div>
-    <button
-      aria-controls="user-state-tooltip"
-      aria-expanded="false"
-      aria-haspopup="listbox"
-      aria-label="user-state"
-      aria-labelledby="user-state-tooltip react-aria-:r1l:"
-      class="md-select-dropdown-input md-select-selected"
-      data-testid="state-select"
+      aria-describedby="mock-aria-describedby"
+      class="state-select idle md-select-wrapper"
       id="user-state-tooltip"
-      role="combobox"
-      type="button"
+      style="--local-width: 100%;"
     >
-      <span
-        class="md-select-selected-item-wrapper"
-        id="react-aria-:r1l:"
-        title="Break"
-      >
-        <div
-          class="item-container"
-          data-testid="item-container selected idle"
-        >
-          <mdc-icon
-            class="state-icon idle"
-            data-testid="state-icon"
-            name="recents-presence-filled"
-            title=""
-          />
-          <mdc-text
-            class="md-text-wrapper state-name idle"
-            data-testid="state-name"
-            tagname="small"
-            type="body-large-regular"
-          >
-            Break
-          </mdc-text>
-        </div>
-      </span>
-      <span
+      <div
         aria-hidden="true"
-        class="md-select-icon-wrapper"
+        style="border: 0px; clip-path: inset(50%); height: 1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; width: 1px; white-space: nowrap;"
       >
-        <div
-          class="md-icon-wrapper"
+        <input
+          style="font-size: 16px;"
+          tabindex="-1"
+          type="text"
+        />
+        <label>
+          <select
+            size="3"
+            tabindex="-1"
+          >
+            <option />
+            <option
+              value="0"
+            >
+              Available
+            </option>
+            <option
+              value="1"
+            >
+              Break
+            </option>
+            <option
+              value="2"
+            >
+              Training
+            </option>
+          </select>
+        </label>
+      </div>
+      <button
+        aria-controls="user-state-tooltip"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        aria-label="user-state"
+        aria-labelledby="user-state-tooltip react-aria-:r1l:"
+        class="md-select-dropdown-input md-select-selected"
+        data-testid="state-select"
+        id="user-state-tooltip"
+        role="combobox"
+        type="button"
+      >
+        <span
+          class="md-select-selected-item-wrapper"
+          id="react-aria-:r1l:"
+          title="Break"
         >
           <div
-            class="md-icon-not-found"
-            data-autoscale="false"
-            data-scale="16"
+            class="item-container"
+            data-testid="item-container selected idle"
           >
-            ⃞
+            <mdc-icon
+              class="state-icon idle"
+              data-testid="state-icon"
+              name="recents-presence-filled"
+              title=""
+            />
+            <mdc-text
+              class="md-text-wrapper state-name idle"
+              data-testid="state-name"
+              tagname="small"
+              type="body-large-regular"
+            >
+              Break
+            </mdc-text>
           </div>
-        </div>
-      </span>
-    </button>
-  </div>
-  <mdc-tooltip
-    boundary="clippingAncestors"
-    boundary-root="viewport"
-    class="tooltip"
-    color="contrast"
-    data-testid="user-state-tooltip"
-    delay="0, 0"
-    disable-aria-expanded=""
-    hide-on-blur=""
-    hide-on-escape=""
-    id="mock-tooltip-id"
-    is-backdrop-invisible=""
-    offset="4"
-    placement="bottom"
-    role="tooltip"
-    should-focus-trap-wrap=""
-    stack-group-name=""
-    strategy="absolute"
-    style="z-index: 1000;"
-    tooltip-type="description"
-    trigger="mouseenter focusin"
-    triggerid="user-state-tooltip"
-    z-index="1000"
-  >
-    <mdc-text
-      class="md-text-wrapper tooltip-text"
-      tagname="small"
-      type="body-large-regular"
+        </span>
+        <span
+          aria-hidden="true"
+          class="md-select-icon-wrapper"
+        >
+          <div
+            class="md-icon-wrapper"
+          >
+            <div
+              class="md-icon-not-found"
+              data-autoscale="false"
+              data-scale="16"
+            >
+              ⃞
+            </div>
+          </div>
+        </span>
+      </button>
+    </div>
+    <mdc-tooltip
+      boundary="clippingAncestors"
+      boundary-root="viewport"
+      class="tooltip"
+      color="contrast"
+      data-testid="user-state-tooltip"
+      delay="0, 0"
+      disable-aria-expanded=""
+      hide-on-blur=""
+      hide-on-escape=""
+      id="mock-tooltip-id"
+      is-backdrop-invisible=""
+      offset="4"
+      placement="bottom"
+      role="tooltip"
+      should-focus-trap-wrap=""
+      stack-group-name=""
+      strategy="absolute"
+      style="z-index: 1000;"
+      tooltip-type="description"
+      trigger="mouseenter focusin"
+      triggerid="user-state-tooltip"
+      z-index="1000"
     >
-      Availability State
-    </mdc-text>
-  </mdc-tooltip>
-  <span
-    class="elapsedTime "
-    data-testid="elapsed-time"
-  >
-    30:00 / 
-    02:05
-  </span>
-  <mdc-icon
-    class="select-arrow-icon"
-    data-testid="select-arrow-icon"
-    name="arrow-down-bold"
-    title=""
-  />
+      <mdc-text
+        class="md-text-wrapper tooltip-text"
+        tagname="small"
+        type="body-large-regular"
+      >
+        Availability State
+      </mdc-text>
+    </mdc-tooltip>
+    <span
+      class="elapsedTime "
+      data-testid="elapsed-time"
+    >
+      30:00 / 
+      02:05
+    </span>
+    <mdc-icon
+      class="select-arrow-icon"
+      data-testid="select-arrow-icon"
+      name="arrow-down-bold"
+      title=""
+    />
+  </div>
 </div>
 `;
 
@@ -1461,144 +1501,148 @@ exports[`UserState Component Snapshots State Management should handle elapsed ti
   data-testid="user-state-container"
 >
   <div
-    aria-describedby="mock-aria-describedby"
-    class="state-select idle md-select-wrapper"
-    id="user-state-tooltip"
-    style="--local-width: 100%;"
+    class="user-state-select-wrapper"
   >
     <div
-      aria-hidden="true"
-      style="border: 0px; clip-path: inset(50%); height: 1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; width: 1px; white-space: nowrap;"
-    >
-      <input
-        style="font-size: 16px;"
-        tabindex="-1"
-        type="text"
-      />
-      <label>
-        <select
-          size="3"
-          tabindex="-1"
-        >
-          <option />
-          <option
-            value="0"
-          >
-            Available
-          </option>
-          <option
-            value="1"
-          >
-            Break
-          </option>
-          <option
-            value="2"
-          >
-            Training
-          </option>
-        </select>
-      </label>
-    </div>
-    <button
-      aria-controls="user-state-tooltip"
-      aria-expanded="false"
-      aria-haspopup="listbox"
-      aria-label="user-state"
-      aria-labelledby="user-state-tooltip react-aria-:r1l:"
-      class="md-select-dropdown-input md-select-selected"
-      data-testid="state-select"
+      aria-describedby="mock-aria-describedby"
+      class="state-select idle md-select-wrapper"
       id="user-state-tooltip"
-      role="combobox"
-      type="button"
+      style="--local-width: 100%;"
     >
-      <span
-        class="md-select-selected-item-wrapper"
-        id="react-aria-:r1l:"
-        title="Break"
-      >
-        <div
-          class="item-container"
-          data-testid="item-container selected idle"
-        >
-          <mdc-icon
-            class="state-icon idle"
-            data-testid="state-icon"
-            name="recents-presence-filled"
-            title=""
-          />
-          <mdc-text
-            class="md-text-wrapper state-name idle"
-            data-testid="state-name"
-            tagname="small"
-            type="body-large-regular"
-          >
-            Break
-          </mdc-text>
-        </div>
-      </span>
-      <span
+      <div
         aria-hidden="true"
-        class="md-select-icon-wrapper"
+        style="border: 0px; clip-path: inset(50%); height: 1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; width: 1px; white-space: nowrap;"
       >
-        <div
-          class="md-icon-wrapper"
+        <input
+          style="font-size: 16px;"
+          tabindex="-1"
+          type="text"
+        />
+        <label>
+          <select
+            size="3"
+            tabindex="-1"
+          >
+            <option />
+            <option
+              value="0"
+            >
+              Available
+            </option>
+            <option
+              value="1"
+            >
+              Break
+            </option>
+            <option
+              value="2"
+            >
+              Training
+            </option>
+          </select>
+        </label>
+      </div>
+      <button
+        aria-controls="user-state-tooltip"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        aria-label="user-state"
+        aria-labelledby="user-state-tooltip react-aria-:r1l:"
+        class="md-select-dropdown-input md-select-selected"
+        data-testid="state-select"
+        id="user-state-tooltip"
+        role="combobox"
+        type="button"
+      >
+        <span
+          class="md-select-selected-item-wrapper"
+          id="react-aria-:r1l:"
+          title="Break"
         >
           <div
-            class="md-icon-not-found"
-            data-autoscale="false"
-            data-scale="16"
+            class="item-container"
+            data-testid="item-container selected idle"
           >
-            ⃞
+            <mdc-icon
+              class="state-icon idle"
+              data-testid="state-icon"
+              name="recents-presence-filled"
+              title=""
+            />
+            <mdc-text
+              class="md-text-wrapper state-name idle"
+              data-testid="state-name"
+              tagname="small"
+              type="body-large-regular"
+            >
+              Break
+            </mdc-text>
           </div>
-        </div>
-      </span>
-    </button>
-  </div>
-  <mdc-tooltip
-    boundary="clippingAncestors"
-    boundary-root="viewport"
-    class="tooltip"
-    color="contrast"
-    data-testid="user-state-tooltip"
-    delay="0, 0"
-    disable-aria-expanded=""
-    hide-on-blur=""
-    hide-on-escape=""
-    id="mock-tooltip-id"
-    is-backdrop-invisible=""
-    offset="4"
-    placement="bottom"
-    role="tooltip"
-    should-focus-trap-wrap=""
-    stack-group-name=""
-    strategy="absolute"
-    style="z-index: 1000;"
-    tooltip-type="description"
-    trigger="mouseenter focusin"
-    triggerid="user-state-tooltip"
-    z-index="1000"
-  >
-    <mdc-text
-      class="md-text-wrapper tooltip-text"
-      tagname="small"
-      type="body-large-regular"
+        </span>
+        <span
+          aria-hidden="true"
+          class="md-select-icon-wrapper"
+        >
+          <div
+            class="md-icon-wrapper"
+          >
+            <div
+              class="md-icon-not-found"
+              data-autoscale="false"
+              data-scale="16"
+            >
+              ⃞
+            </div>
+          </div>
+        </span>
+      </button>
+    </div>
+    <mdc-tooltip
+      boundary="clippingAncestors"
+      boundary-root="viewport"
+      class="tooltip"
+      color="contrast"
+      data-testid="user-state-tooltip"
+      delay="0, 0"
+      disable-aria-expanded=""
+      hide-on-blur=""
+      hide-on-escape=""
+      id="mock-tooltip-id"
+      is-backdrop-invisible=""
+      offset="4"
+      placement="bottom"
+      role="tooltip"
+      should-focus-trap-wrap=""
+      stack-group-name=""
+      strategy="absolute"
+      style="z-index: 1000;"
+      tooltip-type="description"
+      trigger="mouseenter focusin"
+      triggerid="user-state-tooltip"
+      z-index="1000"
     >
-      Availability State
-    </mdc-text>
-  </mdc-tooltip>
-  <span
-    class="elapsedTime "
-    data-testid="elapsed-time"
-  >
-    05:00 / 
-    01:02:05
-  </span>
-  <mdc-icon
-    class="select-arrow-icon"
-    data-testid="select-arrow-icon"
-    name="arrow-down-bold"
-    title=""
-  />
+      <mdc-text
+        class="md-text-wrapper tooltip-text"
+        tagname="small"
+        type="body-large-regular"
+      >
+        Availability State
+      </mdc-text>
+    </mdc-tooltip>
+    <span
+      class="elapsedTime "
+      data-testid="elapsed-time"
+    >
+      05:00 / 
+      01:02:05
+    </span>
+    <mdc-icon
+      class="select-arrow-icon"
+      data-testid="select-arrow-icon"
+      name="arrow-down-bold"
+      title=""
+    />
+  </div>
 </div>
 `;
 
@@ -1608,136 +1652,140 @@ exports[`UserState Component Snapshots State Management should update when custo
   data-testid="user-state-container"
 >
   <div
-    aria-describedby="mock-aria-describedby"
-    class="state-select idle md-select-wrapper"
-    id="user-state-tooltip"
-    style="--local-width: 100%;"
+    class="user-state-select-wrapper"
   >
     <div
-      aria-hidden="true"
-      style="border: 0px; clip-path: inset(50%); height: 1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; width: 1px; white-space: nowrap;"
-    >
-      <input
-        style="font-size: 16px;"
-        tabindex="-1"
-        type="text"
-      />
-      <label>
-        <select
-          size="3"
-          tabindex="-1"
-        >
-          <option />
-          <option
-            value="0"
-          >
-            Available
-          </option>
-          <option
-            value="1"
-          >
-            Break
-          </option>
-          <option
-            value="2"
-          >
-            Training
-          </option>
-        </select>
-      </label>
-    </div>
-    <button
-      aria-controls="user-state-tooltip"
-      aria-expanded="false"
-      aria-haspopup="listbox"
-      aria-label="user-state"
-      aria-labelledby="user-state-tooltip react-aria-:r19:"
-      class="md-select-dropdown-input md-select-selected"
-      data-testid="state-select"
+      aria-describedby="mock-aria-describedby"
+      class="state-select idle md-select-wrapper"
       id="user-state-tooltip"
-      role="combobox"
-      type="button"
+      style="--local-width: 100%;"
     >
-      <span
-        class="md-select-selected-item-wrapper"
-        id="react-aria-:r19:"
-        title="Break"
-      >
-        <div
-          class="item-container"
-          data-testid="item-container selected idle"
-        >
-          <mdc-icon
-            class="state-icon idle"
-            data-testid="state-icon"
-            name="recents-presence-filled"
-            title=""
-          />
-          <mdc-text
-            class="md-text-wrapper state-name idle"
-            data-testid="state-name"
-            tagname="small"
-            type="body-large-regular"
-          >
-            Break
-          </mdc-text>
-        </div>
-      </span>
-      <span
+      <div
         aria-hidden="true"
-        class="md-select-icon-wrapper"
+        style="border: 0px; clip-path: inset(50%); height: 1px; margin: -1px; overflow: hidden; padding: 0px; position: absolute; width: 1px; white-space: nowrap;"
       >
-        <div
-          class="md-icon-wrapper"
+        <input
+          style="font-size: 16px;"
+          tabindex="-1"
+          type="text"
+        />
+        <label>
+          <select
+            size="3"
+            tabindex="-1"
+          >
+            <option />
+            <option
+              value="0"
+            >
+              Available
+            </option>
+            <option
+              value="1"
+            >
+              Break
+            </option>
+            <option
+              value="2"
+            >
+              Training
+            </option>
+          </select>
+        </label>
+      </div>
+      <button
+        aria-controls="user-state-tooltip"
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        aria-label="user-state"
+        aria-labelledby="user-state-tooltip react-aria-:r19:"
+        class="md-select-dropdown-input md-select-selected"
+        data-testid="state-select"
+        id="user-state-tooltip"
+        role="combobox"
+        type="button"
+      >
+        <span
+          class="md-select-selected-item-wrapper"
+          id="react-aria-:r19:"
+          title="Break"
         >
           <div
-            class="md-icon-not-found"
-            data-autoscale="false"
-            data-scale="16"
+            class="item-container"
+            data-testid="item-container selected idle"
           >
-            ⃞
+            <mdc-icon
+              class="state-icon idle"
+              data-testid="state-icon"
+              name="recents-presence-filled"
+              title=""
+            />
+            <mdc-text
+              class="md-text-wrapper state-name idle"
+              data-testid="state-name"
+              tagname="small"
+              type="body-large-regular"
+            >
+              Break
+            </mdc-text>
           </div>
-        </div>
-      </span>
-    </button>
-  </div>
-  <mdc-tooltip
-    boundary="clippingAncestors"
-    boundary-root="viewport"
-    class="tooltip"
-    color="contrast"
-    data-testid="user-state-tooltip"
-    delay="0, 0"
-    disable-aria-expanded=""
-    hide-on-blur=""
-    hide-on-escape=""
-    id="mock-tooltip-id"
-    is-backdrop-invisible=""
-    offset="4"
-    placement="bottom"
-    role="tooltip"
-    should-focus-trap-wrap=""
-    stack-group-name=""
-    strategy="absolute"
-    style="z-index: 1000;"
-    tooltip-type="description"
-    trigger="mouseenter focusin"
-    triggerid="user-state-tooltip"
-    z-index="1000"
-  >
-    <mdc-text
-      class="md-text-wrapper tooltip-text"
-      tagname="small"
-      type="body-large-regular"
+        </span>
+        <span
+          aria-hidden="true"
+          class="md-select-icon-wrapper"
+        >
+          <div
+            class="md-icon-wrapper"
+          >
+            <div
+              class="md-icon-not-found"
+              data-autoscale="false"
+              data-scale="16"
+            >
+              ⃞
+            </div>
+          </div>
+        </span>
+      </button>
+    </div>
+    <mdc-tooltip
+      boundary="clippingAncestors"
+      boundary-root="viewport"
+      class="tooltip"
+      color="contrast"
+      data-testid="user-state-tooltip"
+      delay="0, 0"
+      disable-aria-expanded=""
+      hide-on-blur=""
+      hide-on-escape=""
+      id="mock-tooltip-id"
+      is-backdrop-invisible=""
+      offset="4"
+      placement="bottom"
+      role="tooltip"
+      should-focus-trap-wrap=""
+      stack-group-name=""
+      strategy="absolute"
+      style="z-index: 1000;"
+      tooltip-type="description"
+      trigger="mouseenter focusin"
+      triggerid="user-state-tooltip"
+      z-index="1000"
     >
-      Availability State
-    </mdc-text>
-  </mdc-tooltip>
-  <mdc-icon
-    class="select-arrow-icon"
-    data-testid="select-arrow-icon"
-    name="arrow-down-bold"
-    title=""
-  />
+      <mdc-text
+        class="md-text-wrapper tooltip-text"
+        tagname="small"
+        type="body-large-regular"
+      >
+        Availability State
+      </mdc-text>
+    </mdc-tooltip>
+    <mdc-icon
+      class="select-arrow-icon"
+      data-testid="select-arrow-icon"
+      name="arrow-down-bold"
+      title=""
+    />
+  </div>
 </div>
 `;
