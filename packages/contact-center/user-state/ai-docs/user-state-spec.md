@@ -69,7 +69,7 @@ tests/
 
 Compatibility notes:
 - `onStateChange` is invoked with an `IdleCode` (the matching idle code for `currentState`) or an `ICustomState` (when the store holds a `customState` with a `developerName`). Changing which object is passed is a breaking change for consumers.
-- `onVoiceReconnect` is optional because the installed SDK exposes no public browser voice retry method; the host owns the retry implementation.
+- `onVoiceReconnect` is optional because the installed SDK exposes no public browser voice retry method; host applications that support calling retry wire this callback to their calling registration lifecycle (e.g. `registerWebCalling`). When omitted, the recovery dialog displays guidance that reconnect is managed by the host and disables the retry action.
 - The custom-element tag `widget-cc-user-state` is registered by `cc-widgets`, not this package; renaming it is a breaking change owned there.
 
 ## Requires (dependencies)
@@ -336,11 +336,14 @@ The hook subscribes to the SDK voice-state event, reads a fresh snapshot after s
 and removes the listener on unmount. It forwards voice state and generic state-change
 failures to the presentation component. Only `UNAVAILABLE` blocks selection; `NOT_REQUIRED`
 preserves non-browser/disabled-WebRTC operation. A logged-in Browser session that transitions
-from `READY` to `UNAVAILABLE` starts a two-second timer. If the SDK remains unavailable, the
-hook sets the profile's default idle code through the store and opens a recovery dialog. The
-dialog calls optional host callback `onVoiceReconnect`; the SDK's installed public types do not
-expose a WebRTC retry method. Voice readiness recovery closes the dialog. A rejected
-`setAgentState` reverts the visible state and reports a user-safe failure.
+from `READY` to `UNAVAILABLE` starts a two-second timer. If the SDK remains unavailable and a
+default idle code exists on the profile, the hook requests the default idle code via `setAgentStatus`
+and opens the recovery dialog once the state update succeeds (or immediately if already in default idle).
+If no default idle code exists, the accessible warning banner is displayed without falsely asserting
+an Idle transition. The dialog calls optional host callback `onVoiceReconnect` (wired by hosts to
+their calling registration retry); when omitted, the dialog informs the user that reconnect is managed
+by the host. Voice readiness recovery closes the dialog. A rejected `setAgentState` reverts the visible
+state, suppresses/closes the dialog, and reports a user-safe failure.
 Evidence: `src/helper.ts`, `src/user-state/index.tsx`,
 `cc-components/src/components/UserState/user-state.tsx`, and `cc-widgets/src/wc.ts`.
 

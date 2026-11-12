@@ -128,7 +128,7 @@ export const useUserState = ({
         if (defaultIdleCode && currentStateRef.current !== defaultIdleCode.id) {
           pendingVoiceLossDialogRef.current = true;
           setAgentStatus(defaultIdleCode.id);
-        } else {
+        } else if (defaultIdleCode && currentStateRef.current === defaultIdleCode.id) {
           setVoiceConnectionLossDialogOpen(true);
         }
       } catch (error) {
