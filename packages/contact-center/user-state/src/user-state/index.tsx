@@ -24,10 +24,13 @@ const UserStateInternal: React.FunctionComponent<IUserStateProps> = observer(({o
     wellnessIdleCodeLookupPending,
   } = store;
   const isWellnessBreakState = Boolean(wellbeingBreakIdleCode && currentState === wellbeingBreakIdleCode.id);
-  const displayedIdleCodes =
-    isWellnessBreakState && wellbeingBreakIdleCode && !idleCodes.some(({id}) => id === wellbeingBreakIdleCode.id)
-      ? [...idleCodes, wellbeingBreakIdleCode]
-      : idleCodes;
+  const displayedIdleCodes = React.useMemo(
+    () =>
+      isWellnessBreakState && wellbeingBreakIdleCode && !idleCodes.some(({id}) => id === wellbeingBreakIdleCode.id)
+        ? [...idleCodes, wellbeingBreakIdleCode]
+        : idleCodes,
+    [isWellnessBreakState, wellbeingBreakIdleCode, idleCodes]
+  );
   const props: UserStateComponentsProps = {
     ...useUserState({
       idleCodes: displayedIdleCodes,

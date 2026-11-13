@@ -393,7 +393,136 @@ describe('useUserState Hook', () => {
     expect(result.current.voiceConnectionLossDialogOpen).toBe(true);
   });
 
-  it('does not open dialog when forced Idle state update fails and displays stateChangeError', async () => {
+  it('reads live wellness-lookup flag when lookup starts during the loss timeout window', async () => {
+    const idleCodesWithDefault = [
+      {id: '1', name: 'Break', isSystem: false, isDefault: true},
+      {id: '2', name: 'Available', isSystem: false, isDefault: false},
+    ];
+    const readyState = {
+      status: VOICE_CONNECTION_STATUS.READY,
+      lineStatus: VoiceLineStatus.REGISTERED,
+      mobiusSocketStatus: VoiceMobiusSocketStatus.CONNECTED,
+    };
+    const unavailableState = {
+      status: VOICE_CONNECTION_STATUS.UNAVAILABLE,
+      lineStatus: VoiceLineStatus.ERROR,
+      mobiusSocketStatus: VoiceMobiusSocketStatus.DISCONNECTED,
+    };
+    jest.spyOn(mockCC, 'getVoiceConnectionState').mockReturnValue(readyState);
+    ccSetAgentStateSpy.mockResolvedValueOnce({data: {lastStateChangeTimestamp: 100, lastIdleCodeChangeTimestamp: 100}});
+
+    const {result, rerender} = renderHook(
+      ({currentState, wellnessLookupPending}: {currentState: string; wellnessLookupPending: boolean}) =>
+        useUserState({
+          idleCodes: idleCodesWithDefault,
+          agentId,
+          cc: mockCC,
+          currentState,
+          customState: null,
+          logger,
+          onStateChange,
+          isBrowserVoiceSession: true,
+          isAgentLoggedIn: true,
+          wellnessIdleCodeLookupPending: wellnessLookupPending,
+        }),
+      {initialProps: {currentState: '2', wellnessLookupPending: false}}
+    );
+
+    const listener = ccOnSpy.mock.calls.find(([eventName]) => eventName === VOICE_CONNECTION_EVENTS.STATE_CHANGE)?.[1];
+    jest.spyOn(mockCC, 'getVoiceConnectionState').mockReturnValue(unavailableState);
+    act(() => listener?.(unavailableState));
+
+    await act(async () => {
+      jest.advanceTimersByTime(1000);
+      rerender({currentState: '2', wellnessLookupPending: true});
+    });
+
+    await act(async () => {
+      jest.advanceTimersByTime(1000);
+    });
+
+    expect(store.setCurrentState).toHaveBeenCalledWith('1');
+
+    await act(async () => {
+      rerender({currentState: '1', wellnessLookupPending: true});
+    });
+
+    expect(ccSetAgentStateSpy).not.toHaveBeenCalled();
+
+    await act(async () => {
+      rerender({currentState: '1', wellnessLookupPending: false});
+    });
+
+    expect(ccSetAgentStateSpy).toHaveBeenCalledWith({
+      state: 'Idle',
+      auxCodeId: '1',
+      agentId,
+      lastStateChangeReason: 'Break',
+    });
+    expect(result.current.voiceConnectionLossDialogOpen).toBe(true);
+  });
+
+  it('persists forced Idle transition out of WellbeingBreak rather than swallowing as SDK restore', async () => {
+    const wellnessBreakCode = {id: '99', name: 'WellbeingBreak', isSystem: true, isDefault: false};
+    const idleCodesWithWellness = [
+      {id: '1', name: 'Break', isSystem: false, isDefault: true},
+      {id: '2', name: 'Available', isSystem: false, isDefault: false},
+      wellnessBreakCode,
+    ];
+    const readyState = {
+      status: VOICE_CONNECTION_STATUS.READY,
+      lineStatus: VoiceLineStatus.REGISTERED,
+      mobiusSocketStatus: VoiceMobiusSocketStatus.CONNECTED,
+    };
+    const unavailableState = {
+      status: VOICE_CONNECTION_STATUS.UNAVAILABLE,
+      lineStatus: VoiceLineStatus.ERROR,
+      mobiusSocketStatus: VoiceMobiusSocketStatus.DISCONNECTED,
+    };
+    jest.spyOn(mockCC, 'getVoiceConnectionState').mockReturnValue(readyState);
+    ccSetAgentStateSpy.mockResolvedValueOnce({data: {lastStateChangeTimestamp: 100, lastIdleCodeChangeTimestamp: 100}});
+
+    const {result, rerender} = renderHook(
+      ({currentState, isExternallyManaged}: {currentState: string; isExternallyManaged: boolean}) =>
+        useUserState({
+          idleCodes: idleCodesWithWellness,
+          agentId,
+          cc: mockCC,
+          currentState,
+          customState: null,
+          logger,
+          onStateChange,
+          isBrowserVoiceSession: true,
+          isAgentLoggedIn: true,
+          isCurrentStateExternallyManaged: isExternallyManaged,
+        }),
+      {initialProps: {currentState: '99', isExternallyManaged: true}}
+    );
+
+    const listener = ccOnSpy.mock.calls.find(([eventName]) => eventName === VOICE_CONNECTION_EVENTS.STATE_CHANGE)?.[1];
+    jest.spyOn(mockCC, 'getVoiceConnectionState').mockReturnValue(unavailableState);
+    act(() => listener?.(unavailableState));
+
+    await act(async () => {
+      jest.advanceTimersByTime(2000);
+    });
+
+    expect(store.setCurrentState).toHaveBeenCalledWith('1');
+
+    await act(async () => {
+      rerender({currentState: '1', isExternallyManaged: false});
+    });
+
+    expect(ccSetAgentStateSpy).toHaveBeenCalledWith({
+      state: 'Idle',
+      auxCodeId: '1',
+      agentId,
+      lastStateChangeReason: 'Break',
+    });
+    expect(result.current.voiceConnectionLossDialogOpen).toBe(true);
+  });
+
+  it('keeps reconnect dialog accessible when forced Idle state update fails and displays stateChangeError without looping', async () => {
     const idleCodesWithDefault = [
       {id: '1', name: 'Break', isSystem: false, isDefault: true},
       {id: '2', name: 'Available', isSystem: false, isDefault: false},
@@ -441,10 +570,16 @@ describe('useUserState Hook', () => {
       rerender({currentState: '1'});
     });
 
-    expect(ccSetAgentStateSpy).toHaveBeenCalled();
-    expect(result.current.voiceConnectionLossDialogOpen).toBe(false);
+    expect(ccSetAgentStateSpy).toHaveBeenCalledTimes(1);
+    expect(result.current.voiceConnectionLossDialogOpen).toBe(true);
     expect(result.current.stateChangeError).toBe('Unable to update agent state.');
     expect(store.setCurrentState).toHaveBeenCalledWith('2');
+
+    await act(async () => {
+      rerender({currentState: '2'});
+    });
+
+    expect(ccSetAgentStateSpy).toHaveBeenCalledTimes(1);
   });
 
   it('opens dialog immediately when agent was already in default idle state on voice loss', async () => {

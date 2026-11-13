@@ -57,6 +57,7 @@ export const useUserState = ({
   const pendingUserSelectionRef = useRef<string>();
   const forcedVoiceLossIdleCodeRef = useRef<string | null>(null);
   const hasVoiceLossTimeoutElapsedRef = useRef<boolean>(false);
+  const hasForcedIdleAttemptedRef = useRef<boolean>(false);
   const previousVoiceStatusRef = useRef(voiceConnectionState.status);
   const currentStateRef = useRef(currentState);
   currentStateRef.current = currentState;
@@ -66,6 +67,10 @@ export const useUserState = ({
   isAgentLoggedInRef.current = isAgentLoggedIn;
   const isBrowserVoiceSessionRef = useRef(isBrowserVoiceSession);
   isBrowserVoiceSessionRef.current = isBrowserVoiceSession;
+  const idleCodesRef = useRef(idleCodes);
+  idleCodesRef.current = idleCodes;
+  const wellnessIdleCodeLookupPendingRef = useRef(wellnessIdleCodeLookupPending);
+  wellnessIdleCodeLookupPendingRef.current = wellnessIdleCodeLookupPending;
 
   useEffect(() => {
     if (!cc || typeof cc.on !== 'function') {
@@ -104,23 +109,10 @@ export const useUserState = ({
       !isBrowserVoiceSession
     ) {
       hasVoiceLossTimeoutElapsedRef.current = false;
+      hasForcedIdleAttemptedRef.current = false;
       forcedVoiceLossIdleCodeRef.current = null;
       setVoiceConnectionLossDialogOpen(false);
       setVoiceReconnectError(undefined);
-    }
-
-    if (
-      hasVoiceLossTimeoutElapsedRef.current &&
-      voiceConnectionState.status === VOICE_CONNECTION_STATUS.UNAVAILABLE &&
-      isAgentLoggedIn &&
-      isBrowserVoiceSession
-    ) {
-      const defaultIdleCode = idleCodes.find((idleCode) => idleCode.isDefault);
-      if (defaultIdleCode && currentStateRef.current !== defaultIdleCode.id) {
-        forcedVoiceLossIdleCodeRef.current = defaultIdleCode.id;
-        setAgentStatus(defaultIdleCode.id);
-      }
-      return;
     }
 
     if (
@@ -141,8 +133,9 @@ export const useUserState = ({
         }
 
         hasVoiceLossTimeoutElapsedRef.current = true;
-        const defaultIdleCode = idleCodes.find((idleCode) => idleCode.isDefault);
+        const defaultIdleCode = idleCodesRef.current.find((idleCode) => idleCode.isDefault);
         if (defaultIdleCode && currentStateRef.current !== defaultIdleCode.id) {
+          hasForcedIdleAttemptedRef.current = true;
           forcedVoiceLossIdleCodeRef.current = defaultIdleCode.id;
           setAgentStatus(defaultIdleCode.id);
         } else {
@@ -158,7 +151,25 @@ export const useUserState = ({
     }, VOICE_CONNECTION_LOSS_TIMEOUT_MS);
 
     return () => clearTimeout(timeoutId);
-  }, [voiceConnectionState.status, isAgentLoggedIn, isBrowserVoiceSession, cc, idleCodes]);
+  }, [voiceConnectionState.status, isAgentLoggedIn, isBrowserVoiceSession, cc]);
+
+  // Handle default idle code arriving after the voice-loss timeout has elapsed
+  useEffect(() => {
+    if (
+      hasVoiceLossTimeoutElapsedRef.current &&
+      !hasForcedIdleAttemptedRef.current &&
+      voiceConnectionState.status === VOICE_CONNECTION_STATUS.UNAVAILABLE &&
+      isAgentLoggedIn &&
+      isBrowserVoiceSession
+    ) {
+      const defaultIdleCode = idleCodes.find((idleCode) => idleCode.isDefault);
+      if (defaultIdleCode && currentStateRef.current !== defaultIdleCode.id) {
+        hasForcedIdleAttemptedRef.current = true;
+        forcedVoiceLossIdleCodeRef.current = defaultIdleCode.id;
+        setAgentStatus(defaultIdleCode.id);
+      }
+    }
+  }, [idleCodes, voiceConnectionState.status, isAgentLoggedIn, isBrowserVoiceSession]);
 
   const handleVoiceReconnect = async () => {
     setVoiceReconnectError(undefined);
@@ -336,8 +347,10 @@ export const useUserState = ({
 
         // Wellness state is changed by the AI Assistant lifecycle. Reflect its
         // SDK event (and the following restore event) without echoing either
-        // transition back through setAgentState.
-        if (isCurrentStateExternallyManaged || externallyManagedStateRef.current) {
+        // transition back through setAgentState. Forced voice-loss transitions
+        // are explicitly persisted rather than treated as an SDK restoration.
+        const isForcedVoiceLossTransition = forcedVoiceLossIdleCodeRef.current === currentState;
+        if (!isForcedVoiceLossTransition && (isCurrentStateExternallyManaged || externallyManagedStateRef.current)) {
           prevStateRef.current = currentState;
           externallyManagedStateRef.current = isCurrentStateExternallyManaged;
           callOnStateChange();
@@ -369,7 +382,13 @@ export const useUserState = ({
           .catch((error) => {
             if (forcedVoiceLossIdleCodeRef.current === currentState) {
               forcedVoiceLossIdleCodeRef.current = null;
-              setVoiceConnectionLossDialogOpen(false);
+              if (
+                voiceConnectionStateRef.current?.status === VOICE_CONNECTION_STATUS.UNAVAILABLE &&
+                isAgentLoggedInRef.current &&
+                isBrowserVoiceSessionRef.current
+              ) {
+                setVoiceConnectionLossDialogOpen(true);
+              }
             }
             logger.error(`Failed to update state: ${error.toString()}`, {
               module: 'useUserState',
@@ -427,7 +446,7 @@ export const useUserState = ({
         module: 'useUserState',
         method: 'setAgentStatus',
       });
-      if (wellnessIdleCodeLookupPending) pendingUserSelectionRef.current = selectedCode;
+      if (wellnessIdleCodeLookupPendingRef.current) pendingUserSelectionRef.current = selectedCode;
       store.setCurrentState(selectedCode);
     } catch (error) {
       forcedVoiceLossIdleCodeRef.current = null;
