@@ -173,6 +173,34 @@ describe('UserStateComponent', () => {
       });
     });
 
+    it('renders Idle recovery dialog copy when agent state is in Idle', async () => {
+      let screen;
+      await act(async () => {
+        screen = render(<UserStateComponent {...defaultProps} currentState="1" voiceConnectionLossDialogOpen={true} />);
+      });
+
+      const dialog = screen.getByTestId('voice-connection-loss-dialog');
+      expect(dialog).toBeInTheDocument();
+      expect(dialog).toHaveAttribute(
+        'description-text',
+        "You're no longer connected to Desktop, and your availability state has changed to Idle. Check your internet connection, then try reconnecting."
+      );
+    });
+
+    it('renders non-Idle recovery dialog copy when agent state is still Available', async () => {
+      let screen;
+      await act(async () => {
+        screen = render(<UserStateComponent {...defaultProps} currentState="0" voiceConnectionLossDialogOpen={true} />);
+      });
+
+      const dialog = screen.getByTestId('voice-connection-loss-dialog');
+      expect(dialog).toBeInTheDocument();
+      expect(dialog).toHaveAttribute(
+        'description-text',
+        "You're no longer connected to Desktop. Check your internet connection, then try reconnecting."
+      );
+    });
+
     it('keeps state selection enabled when browser voice is not required', async () => {
       let screen;
       await act(async () => {

@@ -53,6 +53,11 @@ const UserStateComponent: React.FunctionComponent<UserStateComponentsProps> = (p
   const selectedKey = getSelectedKey(customState, currentState, idleCodes, logger);
   const items = buildDropdownItems(customState, idleCodes, currentState, logger);
   const sortedItems = sortDropdownItems(items, logger);
+  const currentIdleCode = idleCodes.find((code) => code.id === currentState);
+  const isAgentInIdle = currentIdleCode ? currentIdleCode.name !== 'Available' : false;
+  const dialogDescription = isAgentInIdle
+    ? "You're no longer connected to Desktop, and your availability state has changed to Idle. Check your internet connection, then try reconnecting."
+    : "You're no longer connected to Desktop. Check your internet connection, then try reconnecting.";
 
   return (
     <div className="user-state-container" data-testid="user-state-container">
@@ -143,7 +148,7 @@ const UserStateComponent: React.FunctionComponent<UserStateComponentsProps> = (p
           visible
           size="small"
           headerText="Desktop connection lost"
-          descriptionText="You're no longer connected to Desktop, and your availability state has changed to Idle. Check your internet connection, then try reconnecting."
+          descriptionText={dialogDescription}
           closeButtonAriaLabel="Close browser calling recovery dialog"
           onClose={onVoiceConnectionLossDialogClose}
           data-testid="voice-connection-loss-dialog"

@@ -580,19 +580,6 @@ function App() {
     }
   };
 
-  const onVoiceReconnect = async () => {
-    console.info('Host application onVoiceReconnect callback invoked. Retrying browser calling registration...');
-    try {
-      const cc = store.cc as unknown as {registerWebCalling?: () => Promise<void>};
-      if (typeof cc?.registerWebCalling === 'function') {
-        await cc.registerWebCalling();
-      }
-    } catch (error) {
-      console.error('Failed to reconnect browser calling:', error);
-      throw error;
-    }
-  };
-
   const stationLogout = () => {
     store.cc
       .stationLogout({logoutReason: 'User requested logout'})
@@ -1143,7 +1130,7 @@ function App() {
                         <section className="section-box">
                           <fieldset className="fieldset">
                             <legend className="legend-box">User State</legend>
-                            <UserState onStateChange={onStateChange} onVoiceReconnect={onVoiceReconnect} />
+                            <UserState onStateChange={onStateChange} />
                             <div className="voice-readiness-preview" data-testid="samples:voice-readiness-preview">
                               <h4>Browser voice readiness preview</h4>
                               <p>
