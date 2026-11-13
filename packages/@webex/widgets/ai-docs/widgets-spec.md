@@ -142,6 +142,10 @@ Compatibility notes:
 - `@webex/component-adapter-interfaces` `^1.30.5` — meeting-state enum (`MeetingState`) and adapter
   interfaces used by the adapter/components layers.
 - Peer: `react` / `react-dom` `18.3.1`, `prop-types` `^15.7.2` — host must provide these.
+- The root manifest requires `node-forge` `^1.4.3` through its `resolutions` policy.
+  The lockfile resolves `1.4.3` for the SDK's `node-jose` and the development server's
+  `selfsigned` dependencies. Host applications resolve the external `webex` dependency
+  with their own lockfile.
 - Build globals: `__appVersion__` (defined by webpack/jest) is read in the SDK config.
 - Versions are authoritative in `packages/@webex/widgets/package.json` — do not hardcode them elsewhere.
 
