@@ -48,7 +48,8 @@
   },
   "resolutions": {
     "@momentum-design/components": "0.133.23",
-    "@momentum-design/icons": "0.17.0"
+    "@momentum-design/icons": "0.17.0",
+    "node-forge": "^1.4.3"
   },
   "scripts": {
     "clean": "yarn workspaces foreach --all --topological --parallel run clean && rm -rf node_modules",
