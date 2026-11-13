@@ -249,6 +249,11 @@ fixtures belong to the SDK repository.
 
 Consumers: the AI summary and lifecycle selector cases in `store/tests/storeEventsWrapper.ts`.
 
+## Browser voice readiness fixtures (CAI-8629)
+
+`mockCC.getVoiceConnectionState()` defaults to a typed `NOT_REQUIRED` snapshot. Consumer
+tests can override it with `READY` or `UNAVAILABLE` snapshots. Evidence: `src/fixtures.ts`.
+
 ## Traceability
 - Repo architecture: [`ARCHITECTURE.md`](../../../../ai-docs/ARCHITECTURE.md) · Registry: [`SPEC_INDEX.md`](../../../../ai-docs/SPEC_INDEX.md)
 - Coverage state & contracts baseline: `.sdd/manifest.json`

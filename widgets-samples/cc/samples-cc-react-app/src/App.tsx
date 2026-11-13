@@ -10,8 +10,15 @@ import {
   OutdialCall,
   RealTimeTranscript,
 } from '@webex/cc-widgets';
+import {UserStateComponent} from '@webex/cc-components';
 import {AIAssistant, type WellnessBreakOverlayTarget} from '@webex/cc-ai-assistant';
-import {ERROR_TRIGGERING_IDLE_CODES} from '@webex/cc-store';
+import {
+  ERROR_TRIGGERING_IDLE_CODES,
+  VOICE_CONNECTION_STATUS,
+  VoiceLineStatus,
+  VoiceMobiusSocketStatus,
+  type VoiceConnectionState,
+} from '@webex/cc-store';
 import Webex from 'webex';
 import {
   ThemeProvider,
@@ -41,6 +48,38 @@ const defaultWidgets = {
   aiAssistant: false,
 };
 
+const voiceReadinessScenarios = {
+  ready: {
+    status: VOICE_CONNECTION_STATUS.READY,
+    lineStatus: VoiceLineStatus.REGISTERED,
+    mobiusSocketStatus: VoiceMobiusSocketStatus.CONNECTED,
+  },
+  connecting: {
+    status: VOICE_CONNECTION_STATUS.UNAVAILABLE,
+    lineStatus: VoiceLineStatus.CONNECTING,
+    mobiusSocketStatus: VoiceMobiusSocketStatus.UNKNOWN,
+  },
+  reconnecting: {
+    status: VOICE_CONNECTION_STATUS.UNAVAILABLE,
+    lineStatus: VoiceLineStatus.RECONNECTING,
+    mobiusSocketStatus: VoiceMobiusSocketStatus.DISCONNECTED,
+  },
+  unavailable: {
+    status: VOICE_CONNECTION_STATUS.UNAVAILABLE,
+    lineStatus: VoiceLineStatus.ERROR,
+    mobiusSocketStatus: VoiceMobiusSocketStatus.DISCONNECTED,
+    reason: 'Sample preview: browser voice unavailable',
+    retryable: true,
+  },
+  notRequired: {
+    status: VOICE_CONNECTION_STATUS.NOT_REQUIRED,
+    lineStatus: VoiceLineStatus.UNKNOWN,
+    mobiusSocketStatus: VoiceMobiusSocketStatus.NOT_IN_USE,
+  },
+} satisfies Record<string, VoiceConnectionState>;
+
+type VoiceReadinessScenario = keyof typeof voiceReadinessScenarios;
+
 type WellnessBreakOverlayMode = 'viewport' | 'assistant' | 'custom';
 
 const wellnessBreakOverlayDescriptions: Record<WellnessBreakOverlayMode, string> = {
@@ -68,6 +107,10 @@ function App() {
   const [showRejectedPopup, setShowRejectedPopup] = useState(false);
   const [rejectedReason, setRejectedReason] = useState('');
   const [selectedState, setSelectedState] = useState('');
+  const [voiceReadinessScenario, setVoiceReadinessScenario] = useState<VoiceReadinessScenario>('ready');
+  const [voicePreviewDialogOpen, setVoicePreviewDialogOpen] = useState(false);
+  const [voiceLossSimulationPending, setVoiceLossSimulationPending] = useState(false);
+  const [voicePreviewCurrentState, setVoicePreviewCurrentState] = useState<string>();
   const [showOutdialFailedModal, setShowOutdialFailedModal] = useState(false);
   const [outdialFailedReason, setOutdialFailedReason] = useState('');
   const [isAddressBookEnabled, setIsAddressBookEnabled] = useState(true);
@@ -77,6 +120,19 @@ function App() {
   const [loginType, setLoginType] = useState('token');
   const [showAgentProfile, setShowAgentProfile] = useState(false);
   const [doStationLogout, setDoStationLogout] = useState(true);
+
+  useEffect(() => {
+    if (!voiceLossSimulationPending) return undefined;
+
+    const timeoutId = window.setTimeout(() => {
+      const defaultIdleCode = store.idleCodes.find((idleCode) => idleCode.isDefault);
+      if (defaultIdleCode) setVoicePreviewCurrentState(defaultIdleCode.id);
+      setVoicePreviewDialogOpen(true);
+      setVoiceLossSimulationPending(false);
+    }, 2000);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [voiceLossSimulationPending]);
 
   const [collapsedTasks, setCollapsedTasks] = React.useState([]);
   const [showLoader, setShowLoader] = useState(false);
@@ -1075,6 +1131,67 @@ function App() {
                           <fieldset className="fieldset">
                             <legend className="legend-box">User State</legend>
                             <UserState onStateChange={onStateChange} />
+                            <div className="voice-readiness-preview" data-testid="samples:voice-readiness-preview">
+                              <h4>Browser voice readiness preview</h4>
+                              <p>
+                                Preview only. This does not change the SDK connection or agent state. Select a state for
+                                its UI, or simulate a two-second voice loss to preview the default-idle transition and
+                                recovery dialog.
+                              </p>
+                              <Select
+                                label="Simulated browser voice state"
+                                value={voiceReadinessScenario}
+                                onChange={(e: CustomEvent) => {
+                                  const scenario = e.detail.value as VoiceReadinessScenario;
+                                  if (scenario in voiceReadinessScenarios) {
+                                    setVoiceReadinessScenario(scenario);
+                                    setVoicePreviewCurrentState(undefined);
+                                    setVoicePreviewDialogOpen(scenario === 'unavailable');
+                                    setVoiceLossSimulationPending(false);
+                                  }
+                                }}
+                              >
+                                <Option value="ready" label="Ready">Ready</Option>
+                                <Option value="connecting" label="Connecting">Connecting</Option>
+                                <Option value="reconnecting" label="Reconnecting">Reconnecting</Option>
+                                <Option value="unavailable" label="Unavailable">Unavailable</Option>
+                                <Option value="notRequired" label="Not required">Not required</Option>
+                              </Select>
+                              <Button
+                                size={32}
+                                variant="primary"
+                                type="button"
+                                disabled={voiceLossSimulationPending}
+                                onClick={() => {
+                                  setVoiceReadinessScenario('unavailable');
+                                  setVoicePreviewCurrentState(undefined);
+                                  setVoicePreviewDialogOpen(false);
+                                  setVoiceLossSimulationPending(true);
+                                }}
+                                data-testid="samples:simulate-voice-loss"
+                              >
+                                Simulate voice loss (2 seconds)
+                              </Button>
+                              <UserStateComponent
+                                idleCodes={store.idleCodes}
+                                setAgentStatus={() => {
+                                  console.info('Sample voice readiness preview: agent state change is not sent.');
+                                }}
+                                isSettingAgentStatus={false}
+                                elapsedTime={0}
+                                lastIdleStateChangeElapsedTime={0}
+                                currentState={voicePreviewCurrentState ?? store.currentState}
+                                customState={store.customState}
+                                voiceConnectionState={voiceReadinessScenarios[voiceReadinessScenario]}
+                                voiceConnectionLossDialogOpen={voicePreviewDialogOpen}
+                                onVoiceReconnect={() => {
+                                  setVoiceReadinessScenario('ready');
+                                  setVoicePreviewDialogOpen(false);
+                                }}
+                                onVoiceConnectionLossDialogClose={() => setVoicePreviewDialogOpen(false)}
+                                logger={store.logger}
+                              />
+                            </div>
                           </fieldset>
                         </section>
                       </div>

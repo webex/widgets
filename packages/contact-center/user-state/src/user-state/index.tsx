@@ -6,10 +6,13 @@ import {ErrorBoundary} from 'react-error-boundary';
 import {useUserState} from '../helper';
 import {UserStateComponent, UserStateComponentsProps} from '@webex/cc-components';
 import {IUserStateProps} from '../user-state.types';
+import {DEVICE_TYPE_BROWSER} from '@webex/cc-store';
 
-const UserStateInternal: React.FunctionComponent<IUserStateProps> = observer(({onStateChange}) => {
+const UserStateInternal: React.FunctionComponent<IUserStateProps> = observer(({onStateChange, onVoiceReconnect}) => {
   const {
     cc,
+    deviceType,
+    isAgentLoggedIn,
     idleCodes,
     agentId,
     currentState,
@@ -21,10 +24,13 @@ const UserStateInternal: React.FunctionComponent<IUserStateProps> = observer(({o
     wellnessIdleCodeLookupPending,
   } = store;
   const isWellnessBreakState = Boolean(wellbeingBreakIdleCode && currentState === wellbeingBreakIdleCode.id);
-  const displayedIdleCodes =
-    isWellnessBreakState && wellbeingBreakIdleCode && !idleCodes.some(({id}) => id === wellbeingBreakIdleCode.id)
-      ? [...idleCodes, wellbeingBreakIdleCode]
-      : idleCodes;
+  const displayedIdleCodes = React.useMemo(
+    () =>
+      isWellnessBreakState && wellbeingBreakIdleCode && !idleCodes.some(({id}) => id === wellbeingBreakIdleCode.id)
+        ? [...idleCodes, wellbeingBreakIdleCode]
+        : idleCodes,
+    [isWellnessBreakState, wellbeingBreakIdleCode, idleCodes]
+  );
   const props: UserStateComponentsProps = {
     ...useUserState({
       idleCodes: displayedIdleCodes,
@@ -35,9 +41,12 @@ const UserStateInternal: React.FunctionComponent<IUserStateProps> = observer(({o
       lastStateChangeTimestamp,
       logger,
       onStateChange,
+      onVoiceReconnect,
       lastIdleCodeChangeTimestamp,
       isCurrentStateExternallyManaged: isWellnessBreakState,
       wellnessIdleCodeLookupPending,
+      isBrowserVoiceSession: deviceType === DEVICE_TYPE_BROWSER,
+      isAgentLoggedIn,
     }),
     customState,
     logger,

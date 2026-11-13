@@ -1,9 +1,25 @@
 .user-state-container {
-  position: relative;
   width: 100%; /* Ensure the select trigger takes the full width of its parent */
   display: flex;
+  flex-direction: column;
+}
+
+.user-state-select-wrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
   align-items: center;
-  justify-content: space-between; /* Space out the elements within the select trigger */
+  justify-content: space-between;
+}
+
+.voice-connection-warning,
+.state-change-error {
+  margin-top: 0.25rem;
+  color: var(--mds-color-theme-text-warning-normal);
+}
+
+.state-change-error {
+  color: var(--mds-color-theme-text-error-normal);
 }
 
 .select-trigger .md-select {

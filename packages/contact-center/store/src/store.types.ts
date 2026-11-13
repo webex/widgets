@@ -30,6 +30,11 @@ import {
   WellnessBreakUserAction,
   WellnessBreakEvent,
   RespondToWellnessBreakParams,
+  VOICE_CONNECTION_EVENTS,
+  VOICE_CONNECTION_STATUS,
+  VoiceLineStatus,
+  VoiceMobiusSocketStatus,
+  VoiceConnectionState,
 } from '@webex/contact-center';
 import type {
   AISummary,
@@ -71,6 +76,7 @@ interface IContactCenter {
   stationLogout(data: Logout): Promise<StationLogoutResponse>;
   LoggerProxy: ILogger;
   register(): Promise<Profile>;
+  getVoiceConnectionState(): VoiceConnectionState;
   taskManager: {
     getAllTasks: () => Record<string, ITask>;
   };
@@ -560,6 +566,7 @@ export type {
   WellnessBreakUserAction,
   WellnessBreakEvent,
   RespondToWellnessBreakParams,
+  VoiceConnectionState,
   WellnessBreakPhase,
   WellnessBreakErrorCode,
   WellnessBreakError,
@@ -592,6 +599,10 @@ export {
   getDefaultUIControls,
   WELLNESS_BREAK_NOTIFICATION_ACTIONS,
   WELLNESS_BREAK_USER_ACTIONS,
+  VOICE_CONNECTION_EVENTS,
+  VOICE_CONNECTION_STATUS,
+  VoiceLineStatus,
+  VoiceMobiusSocketStatus,
 };
 
 // ConsultStatus enum removed — use task.data.consultStatus from SDK instead
