@@ -108,6 +108,13 @@ export const useUserState = ({
       !isAgentLoggedIn ||
       !isBrowserVoiceSession
     ) {
+      if (
+        forcedVoiceLossIdleCodeRef.current !== null &&
+        pendingUserSelectionRef.current === forcedVoiceLossIdleCodeRef.current
+      ) {
+        pendingUserSelectionRef.current = undefined;
+        store.setCurrentState(prevStateRef.current);
+      }
       hasVoiceLossTimeoutElapsedRef.current = false;
       hasForcedIdleAttemptedRef.current = false;
       forcedVoiceLossIdleCodeRef.current = null;
@@ -331,7 +338,8 @@ export const useUserState = ({
       if (!wellnessIdleCodeLookupPending && pendingUserSelectionRef.current !== currentState) {
         pendingUserSelectionRef.current = undefined;
       }
-      if (prevStateRef.current !== currentState) {
+      const isForcedVoiceLoss = forcedVoiceLossIdleCodeRef.current === currentState;
+      if (prevStateRef.current !== currentState || isForcedVoiceLoss) {
         if (wellnessIdleCodeLookupPending) {
           if (pendingUserSelectionRef.current !== currentState) {
             pendingUserSelectionRef.current = undefined;
@@ -349,7 +357,7 @@ export const useUserState = ({
         // SDK event (and the following restore event) without echoing either
         // transition back through setAgentState. Forced voice-loss transitions
         // are explicitly persisted rather than treated as an SDK restoration.
-        const isForcedVoiceLossTransition = forcedVoiceLossIdleCodeRef.current === currentState;
+        const isForcedVoiceLossTransition = isForcedVoiceLoss;
         if (!isForcedVoiceLossTransition && (isCurrentStateExternallyManaged || externallyManagedStateRef.current)) {
           prevStateRef.current = currentState;
           externallyManagedStateRef.current = isCurrentStateExternallyManaged;

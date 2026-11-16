@@ -108,6 +108,7 @@ function App() {
   const [rejectedReason, setRejectedReason] = useState('');
   const [selectedState, setSelectedState] = useState('');
   const [voiceReadinessScenario, setVoiceReadinessScenario] = useState<VoiceReadinessScenario>('ready');
+  const [showVoiceReadinessPreview, setShowVoiceReadinessPreview] = useState(false);
   const [voicePreviewDialogOpen, setVoicePreviewDialogOpen] = useState(false);
   const [voiceLossSimulationPending, setVoiceLossSimulationPending] = useState(false);
   const [voicePreviewCurrentState, setVoicePreviewCurrentState] = useState<string>();
@@ -1132,65 +1133,75 @@ function App() {
                             <legend className="legend-box">User State</legend>
                             <UserState onStateChange={onStateChange} />
                             <div className="voice-readiness-preview" data-testid="samples:voice-readiness-preview">
-                              <h4>Browser voice readiness preview</h4>
-                              <p>
-                                Preview only. This does not change the SDK connection or agent state. Select a state for
-                                its UI, or simulate a two-second voice loss to preview the default-idle transition and
-                                recovery dialog.
-                              </p>
-                              <Select
-                                label="Simulated browser voice state"
-                                value={voiceReadinessScenario}
-                                onChange={(e: CustomEvent) => {
-                                  const scenario = e.detail.value as VoiceReadinessScenario;
-                                  if (scenario in voiceReadinessScenarios) {
-                                    setVoiceReadinessScenario(scenario);
-                                    setVoicePreviewCurrentState(undefined);
-                                    setVoicePreviewDialogOpen(scenario === 'unavailable');
-                                    setVoiceLossSimulationPending(false);
-                                  }
-                                }}
-                              >
-                                <Option value="ready" label="Ready">Ready</Option>
-                                <Option value="connecting" label="Connecting">Connecting</Option>
-                                <Option value="reconnecting" label="Reconnecting">Reconnecting</Option>
-                                <Option value="unavailable" label="Unavailable">Unavailable</Option>
-                                <Option value="notRequired" label="Not required">Not required</Option>
-                              </Select>
-                              <Button
-                                size={32}
-                                variant="primary"
-                                type="button"
-                                disabled={voiceLossSimulationPending}
-                                onClick={() => {
-                                  setVoiceReadinessScenario('unavailable');
-                                  setVoicePreviewCurrentState(undefined);
-                                  setVoicePreviewDialogOpen(false);
-                                  setVoiceLossSimulationPending(true);
-                                }}
-                                data-testid="samples:simulate-voice-loss"
-                              >
-                                Simulate voice loss (2 seconds)
-                              </Button>
-                              <UserStateComponent
-                                idleCodes={store.idleCodes}
-                                setAgentStatus={() => {
-                                  console.info('Sample voice readiness preview: agent state change is not sent.');
-                                }}
-                                isSettingAgentStatus={false}
-                                elapsedTime={0}
-                                lastIdleStateChangeElapsedTime={0}
-                                currentState={voicePreviewCurrentState ?? store.currentState}
-                                customState={store.customState}
-                                voiceConnectionState={voiceReadinessScenarios[voiceReadinessScenario]}
-                                voiceConnectionLossDialogOpen={voicePreviewDialogOpen}
-                                onVoiceReconnect={() => {
-                                  setVoiceReadinessScenario('ready');
-                                  setVoicePreviewDialogOpen(false);
-                                }}
-                                onVoiceConnectionLossDialogClose={() => setVoicePreviewDialogOpen(false)}
-                                logger={store.logger}
+                              <Checkbox
+                                label="Show simulated voice readiness preview"
+                                checked={showVoiceReadinessPreview}
+                                onChange={(e) => setShowVoiceReadinessPreview(Boolean(e?.target?.checked))}
+                                data-testid="samples:toggle-voice-readiness-preview"
                               />
+                              {showVoiceReadinessPreview && (
+                                <>
+                                  <h4>Browser voice readiness preview</h4>
+                                  <p>
+                                    Preview only. This does not change the SDK connection or agent state. Select a state for
+                                    its UI, or simulate a two-second voice loss to preview the default-idle transition and
+                                    recovery dialog.
+                                  </p>
+                                  <Select
+                                    label="Simulated browser voice state"
+                                    value={voiceReadinessScenario}
+                                    onChange={(e: CustomEvent) => {
+                                      const scenario = e.detail.value as VoiceReadinessScenario;
+                                      if (scenario in voiceReadinessScenarios) {
+                                        setVoiceReadinessScenario(scenario);
+                                        setVoicePreviewCurrentState(undefined);
+                                        setVoicePreviewDialogOpen(scenario === 'unavailable');
+                                        setVoiceLossSimulationPending(false);
+                                      }
+                                    }}
+                                  >
+                                    <Option value="ready" label="Ready">Ready</Option>
+                                    <Option value="connecting" label="Connecting">Connecting</Option>
+                                    <Option value="reconnecting" label="Reconnecting">Reconnecting</Option>
+                                    <Option value="unavailable" label="Unavailable">Unavailable</Option>
+                                    <Option value="notRequired" label="Not required">Not required</Option>
+                                  </Select>
+                                  <Button
+                                    size={32}
+                                    variant="primary"
+                                    type="button"
+                                    disabled={voiceLossSimulationPending}
+                                    onClick={() => {
+                                      setVoiceReadinessScenario('unavailable');
+                                      setVoicePreviewCurrentState(undefined);
+                                      setVoicePreviewDialogOpen(false);
+                                      setVoiceLossSimulationPending(true);
+                                    }}
+                                    data-testid="samples:simulate-voice-loss"
+                                  >
+                                    Simulate voice loss (2 seconds)
+                                  </Button>
+                                  <UserStateComponent
+                                    idleCodes={store.idleCodes}
+                                    setAgentStatus={() => {
+                                      console.info('Sample voice readiness preview: agent state change is not sent.');
+                                    }}
+                                    isSettingAgentStatus={false}
+                                    elapsedTime={0}
+                                    lastIdleStateChangeElapsedTime={0}
+                                    currentState={voicePreviewCurrentState ?? store.currentState}
+                                    customState={store.customState}
+                                    voiceConnectionState={voiceReadinessScenarios[voiceReadinessScenario]}
+                                    voiceConnectionLossDialogOpen={voicePreviewDialogOpen}
+                                    onVoiceReconnect={() => {
+                                      setVoiceReadinessScenario('ready');
+                                      setVoicePreviewDialogOpen(false);
+                                    }}
+                                    onVoiceConnectionLossDialogClose={() => setVoicePreviewDialogOpen(false)}
+                                    logger={store.logger}
+                                  />
+                                </>
+                              )}
                             </div>
                           </fieldset>
                         </section>

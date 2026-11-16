@@ -139,8 +139,10 @@ Compatibility notes:
   `new WebexSDKAdapter(webex)` (`WebexMeetings.jsx:277`).
 - `@webex/components` `1.277.1` (pinned) — supplies `WebexMeeting`, `WebexMediaAccess`, and the
   `withAdapter`/`withMeeting` HOCs (`WebexMeetings.jsx:4`) plus the `webex-components.css`.
-- `@webex/component-adapter-interfaces` `^1.30.5` — meeting-state enum (`MeetingState`) and adapter
+- `@webex/component-adapter-interfaces` `^1.30.22` — meeting-state enum (`MeetingState`) and adapter
   interfaces used by the adapter/components layers.
+  Version 1.30.22 removes unused build tools and keeps Jest tools in `devDependencies`,
+  removing the `timespan` and `inflight` production dependency paths from this package.
 - Peer: `react` / `react-dom` `18.3.1`, `prop-types` `^15.7.2` — host must provide these.
 - The root manifest requires `node-forge` `^1.4.3` through its `resolutions` policy.
   The lockfile resolves `1.4.3` for the SDK's `node-jose` and the development server's
