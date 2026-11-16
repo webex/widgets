@@ -39,7 +39,7 @@
     "dist"
   ],
   "dependencies": {
-    "@webex/component-adapter-interfaces": "^1.30.5",
+    "@webex/component-adapter-interfaces": "^1.30.22",
     "@webex/components": "1.277.1",
     "@webex/sdk-component-adapter": "1.113.3",
     "webex": "2.60.4"
