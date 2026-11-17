@@ -109,7 +109,18 @@ describe('existing release tooling after consumer checks', () => {
     const cache = publish.steps.find((step) => step.name === 'Restore Distributables Cache');
     expect(cache.with).toMatchObject({path: '**/dist', key: 'dist-${{ env.rid }}', 'fail-on-cache-miss': true});
     expect(publish.steps.some((step) => /build:prod|package-tools (sync|increment)/.test(step.run || ''))).toBe(false);
-    const step = publish.steps.find((item) => item.name === 'Deploy Packages');
-    expect(step.env.YARN_NPM_AUTH_TOKEN).toBe('${{ secrets.NPM_TOKEN }}');
+  });
+
+  it('limits OIDC permission to publishing and makes the npm publish token unavailable', () => {
+    expect(publish.permissions).toEqual({contents: 'read', 'id-token': 'write'});
+    const oidcJobs = Object.entries(deploy.jobs)
+      .filter(([, job]) => job.permissions?.['id-token'] === 'write')
+      .map(([name]) => name);
+    expect(oidcJobs).toEqual(['publish-npm']);
+    expect(JSON.stringify(deploy)).not.toMatch(/secrets\.NPM_TOKEN/);
+    const names = publish.steps.map((step) => step.name);
+    const npm = publish.steps.find((step) => /npm install .*npm@11\.21\.0/.test(step.run || ''));
+    expect(npm).toBeDefined();
+    expect(names.indexOf(npm.name)).toBeLessThan(names.indexOf('Deploy Packages'));
   });
 });

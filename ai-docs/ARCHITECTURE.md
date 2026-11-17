@@ -123,13 +123,16 @@ store        ──> (no internal CC deps) ──> @webex/contact-center SDK
 ```
 - **Visibility:** `cc-widgets` is the public aggregator (consumers import widgets/store from it);
   `store`, `cc-components`, `ui-logging` are shared internals.
-- **Version-sync rule:** workspace-internal deps are pinned across the monorepo; releases via
-  semantic-release (`release:widgets`).
+- **Version-sync rule:** `Deploy CD` uses `package-tools` to synchronize and increment package versions
+  before packing. See [`RELEASING.md`](RELEASING.md).
 - **Different-kind package:** `packages/@webex/widgets` is the legacy **meetings** widget family — it does
   not participate in the CC dependency flow or share the CC store.
 
 ## Release & Versioning
-- Published as `@webex/*` packages; release driven by `semantic-release` (`yarn release:widgets`).
+- Published as `@webex/*` packages by `Deploy CD` on pushes to `next`. The workflow checks packed
+  Contact Center consumers before npm publishes through OIDC. Each workspace keeps `deploy:npm`;
+  Yarn packs the archives and the npm CLI publishes them. See [`RELEASING.md`](RELEASING.md) for
+  trusted-publisher setup, release validation, and recovery.
 - Public surfaces (exports, custom-element tag names, events) follow semver; breaking changes need a major
   bump and a consumer transition note. See `CONTRACTS.md` for the compatibility policy.
 

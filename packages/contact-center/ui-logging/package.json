@@ -1,5 +1,10 @@
 {
   "name": "@webex/cc-ui-logging",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/webex/widgets.git",
+    "directory": "packages/contact-center/ui-logging"
+  },
   "version": "1.28.0-ccwidgets.126",
   "description": "UI metrics tracking for Webex widgets",
   "license": "Cisco's General Terms (https://www.cisco.com/site/us/en/about/legal/contract-experience/index.html)",
@@ -18,7 +23,7 @@
     "clean:dist": "rm -rf dist",
     "test:unit": "NODE_ENV=test jest --coverage",
     "test:styles": "echo 'No styles to test'",
-    "deploy:npm": "yarn npm publish"
+    "deploy:npm": "node ../../../tooling/release/publish.cjs"
   },
   "dependencies": {
     "@webex/cc-store": "workspace:*"

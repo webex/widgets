@@ -202,6 +202,7 @@ jobs:
     timeout-minutes: 15
     permissions:
       contents: read
+      id-token: write
     outputs:
       published: ${{ needs.prepare-release.outputs.has_changes }}
       package_versions: ${{ needs.prepare-release.outputs.package_versions }}
@@ -214,6 +215,9 @@ jobs:
           node-version-file: .nvmrc
           registry-url: https://registry.npmjs.org
           cache: yarn
+      - name: Install npm for Trusted Publishing
+        if: needs.prepare-release.outputs.has_changes == 'true'
+        run: npm install --global npm@11.21.0 --ignore-scripts
       - name: Restore Dependencies Cache
         if: needs.prepare-release.outputs.has_changes == 'true'
         uses: actions/cache/restore@v5
@@ -246,7 +250,6 @@ jobs:
         if: needs.prepare-release.outputs.has_changes == 'true'
         env:
           PACKAGES: ${{ needs.analyze-changes.outputs.yarn-recursive }}
-          YARN_NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: yarn workspaces foreach -W --from "$PACKAGES" --verbose run deploy:npm --access public --tag "$GITHUB_REF_NAME"
 
   publish-documentation:

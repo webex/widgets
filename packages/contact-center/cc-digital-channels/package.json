@@ -2,6 +2,11 @@
   "name": "@webex/cc-digital-channels",
   "description": "Webex Contact Center Widgets: Digital Channels",
   "license": "Cisco's General Terms (https://www.cisco.com/site/us/en/about/legal/contract-experience/index.html)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/webex/widgets.git",
+    "directory": "packages/contact-center/cc-digital-channels"
+  },
   "version": "1.28.0-ccwidgets.126",
   "main": "dist/index.js",
   "types": "dist/types/index.d.ts",
@@ -20,7 +25,7 @@
     "build:watch": "webpack --watch",
     "test:unit": "NODE_ENV=test jest --coverage",
     "test:styles": "eslint",
-    "deploy:npm": "yarn npm publish"
+    "deploy:npm": "node ../../../tooling/release/publish.cjs"
   },
   "dependencies": {
     "@webex/cc-store": "workspace:*",
