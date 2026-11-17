@@ -1,4 +1,5 @@
 import UserStateComponent from './components/UserState/user-state';
+import GranularAgentStateComponent from './components/GranularAgentState/granular-agent-state';
 import StationLoginComponent from './components/StationLogin/station-login';
 import CallControlComponent from './components/task/CallControl/call-control';
 import CallControlCADComponent from './components/task/CallControlCAD/call-control-cad';
@@ -21,6 +22,7 @@ import WxAppOfferActionError from './components/task/WxAppOfferActionError/wxapp
 
 export {
   UserStateComponent,
+  GranularAgentStateComponent,
   StationLoginComponent,
   CallControlComponent,
   CallControlCADComponent,
@@ -45,6 +47,16 @@ export * from './components/StationLogin/constants';
 export * from './components/StationLogin/E911Modal/e911-modal.types';
 export * from './components/StationLogin/station-login.types';
 export * from './components/UserState/user-state.types';
+export * from './components/GranularAgentState/granular-agent-state.types';
+// Only the helpers the granular-agent-state package consumes are exported; the rest stay
+// internal to the GranularAgentState component (matches the UserState export surface).
+export {
+  getSelectableChannelTypes,
+  buildChannelStates,
+  getChannelsToChange,
+  getLastSetIdleCode,
+} from './components/GranularAgentState/granular-agent-state.utils';
+export {AVAILABLE_AUX_CODE_ID} from './components/GranularAgentState/constant';
 export * from './components/task/task.types';
 export * from './components/task/CampaignErrorDialog/campaign-error-dialog.types';
 export * from './components/task/CampaignCountdown/campaign-countdown.types';

@@ -14,7 +14,8 @@
 | `cc-widgets/` | r2wc Web Component wrappers (aggregator) | DRAFT | `packages/contact-center/cc-widgets/ai-docs/cc-widgets-spec.md` |
 | `cc-digital-channels/` | Digital channels (chat/email/social) widget | DRAFT | `packages/contact-center/cc-digital-channels/ai-docs/cc-digital-channels-spec.md` |
 | `station-login/` | Agent login: team + device selection | DRAFT | `packages/contact-center/station-login/ai-docs/station-login-spec.md` |
-| `user-state/` | Agent state: state, idle codes, timer | DRAFT | `packages/contact-center/user-state/ai-docs/user-state-spec.md` |
+| `user-state/` | Agent state (V1): state, idle codes, timer | DRAFT | `packages/contact-center/user-state/ai-docs/user-state-spec.md` |
+| `granular-agent-state/` | Granular per-channel agent state (V2, WXCC-15791); separate from `user-state/`. React sample is a follow-up. | Implemented on feature branch | `packages/contact-center/granular-agent-state/ai-docs/granular-agent-state-spec.md` |
 | `task/` | Task widget bundle: CallControl, IncomingTask, OutdialCall, TaskList, CallControlCAD | DRAFT | `packages/contact-center/task/ai-docs/task-spec.md` |
 | `ai-assistant/` | AI Assistant widget: chrome, Real-time Assist, and Agent Wellness Break orchestration | DRAFT | `packages/contact-center/ai-assistant/ai-docs/ai-assistant-spec.md` |
 | `ui-logging/` | Metrics/telemetry: `withMetrics`, `metricsLogger` | DRAFT | `packages/contact-center/ui-logging/ai-docs/ui-logging-spec.md` |

@@ -328,6 +328,9 @@ User State marks `WellbeingBreak` as externally managed before processing anothe
 prevents an SDK-owned state from being echoed during refresh without losing a user selection.
 Evidence: `src/helper.ts`, `src/user-state/index.tsx`, `tests/helper.ts`.
 
+## Relationship to Granular Agent State V2 (WXCC-15791)
+> This V1 `user-state` widget is **unchanged** by WXCC-15791. The V2 per-channel experience ships as a separate `@webex/cc-granular-agent-state` package ([`granular-agent-state-spec.md`](../../granular-agent-state/ai-docs/granular-agent-state-spec.md)). The host mounts exactly one: `store.isGranularAgentStateActive ? <GranularAgentState/> : <UserState/>`. `UserState` is not V2-aware and must not be mounted alongside the V2 widget in a V2 session.
+
 ## Traceability
 - Repo architecture: `../../../../ai-docs/ARCHITECTURE.md` · Registry: `../../../../ai-docs/SPEC_INDEX.md` · Contracts: `../../../../ai-docs/CONTRACTS.md`
 - Coverage state & contracts baseline: `.sdd/manifest.json`

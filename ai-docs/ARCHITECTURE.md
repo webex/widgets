@@ -27,7 +27,8 @@ SDK at runtime — so there is no datastore, schema, or migration discipline to 
 | `cc-widgets/` | React widget aggregate, including AI Assistant, and r2wc Web Component wrappers | `packages/contact-center/cc-widgets/ai-docs/cc-widgets-spec.md` |
 | `ai-assistant/` | AI Assistant observer/orchestrator for Real-time Assist and Agent Wellness Break | `packages/contact-center/ai-assistant/ai-docs/ai-assistant-spec.md` |
 | `station-login/` | Agent login widget (team + device selection) | `packages/contact-center/station-login/ai-docs/station-login-spec.md` |
-| `user-state/` | Agent state widget (state, idle codes, timer) | `packages/contact-center/user-state/ai-docs/user-state-spec.md` |
+| `user-state/` | Agent state widget (V1: agent-wide state, idle codes, timer) | `packages/contact-center/user-state/ai-docs/user-state-spec.md` |
+| `granular-agent-state/` | Per-channel agent state widget (V2, WXCC-15791); mounted when `store.isGranularAgentStateActive` is true | `packages/contact-center/granular-agent-state/ai-docs/granular-agent-state-spec.md` |
 | `task/` | Task widgets: CallControl, CallControlCAD, IncomingTask, OutdialCall, TaskList | `packages/contact-center/task/ai-docs/task-spec.md` |
 | `ui-logging/` | Metrics/telemetry (`withMetrics` HOC, `metricsLogger`) | `packages/contact-center/ui-logging/ai-docs/ui-logging-spec.md` |
 | `test-fixtures/` | Shared test mocks/helpers | `packages/contact-center/test-fixtures/ai-docs/test-fixtures-spec.md` |
@@ -37,7 +38,7 @@ SDK at runtime — so there is no datastore, schema, or migration discipline to 
 ```mermaid
 graph TD
   Host[Host app / Web Component] --> Widget
-  subgraph WidgetPackages[Widget packages: station-login, user-state, task, ai-assistant]
+  subgraph WidgetPackages[Widget packages: station-login, user-state, granular-agent-state, task, ai-assistant]
     Widget[Widget = observer HOC] --> Hook[Custom hook helper.ts]
   end
   Hook --> Comp[Presentational component cc-components]
@@ -113,10 +114,11 @@ For Consult/Transfer, `Task.uiControls.consultTransferDestinations` is the visib
   `widgets-samples/**/**`.
 - **Inter-package dependency graph** (from each package's `package.json`):
 ```
-cc-widgets ── wraps ──> station-login, user-state, task, ai-assistant (+ cc-digital-channels)
-station-login ─┐
-user-state    ─┼──> cc-components, cc-store
-task          ─┘
+cc-widgets ── wraps ──> station-login, user-state, granular-agent-state, task, ai-assistant (+ cc-digital-channels)
+station-login         ─┐
+user-state            ─┤
+granular-agent-state  ─┼──> cc-components, cc-store
+task                  ─┘
 cc-components ──> cc-store, cc-ui-logging
 ui-logging   ──> cc-store
 store        ──> (no internal CC deps) ──> @webex/contact-center SDK

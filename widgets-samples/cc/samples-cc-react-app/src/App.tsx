@@ -2,6 +2,7 @@ import React, {useState, useEffect} from 'react';
 import {
   StationLogin,
   UserState,
+  GranularAgentState,
   IncomingTask,
   TaskList,
   CallControl,
@@ -32,6 +33,7 @@ const defaultWidgets = {
   stationLogin: true,
   stationLoginProfile: false,
   userState: true,
+  granularAgentState: true,
   incomingTask: true,
   taskList: true,
   callControl: true,
@@ -166,6 +168,7 @@ function App() {
     },
     cc: {
       allowMultiLogin: isMultiLoginEnabled,
+      allowAutomatedRelogin: false,
       disableWebRTCRegistration,
       enableWxBetterTogether,
     },
@@ -515,10 +518,11 @@ function App() {
 
   const onStateChange = (status) => {
     console.log('onStateChange invoked', status);
-    //adding a log to be used for automation
-    console.log('onStateChange invoked with state name:', status?.name);
-    if (!status || !status.name) return;
-    if (!Object.values(ERROR_TRIGGERING_IDLE_CODES).includes(status.name)) {
+    // V1 UserState passes { name, ... }; V2 GranularAgentState passes { state, idleCode, ... }
+    const stateName = status?.name ?? status?.idleCode?.name ?? status?.state;
+    console.log('onStateChange invoked with state name:', stateName);
+    if (!status || !stateName) return;
+    if (!Object.values(ERROR_TRIGGERING_IDLE_CODES).includes(stateName)) {
       setShowRejectedPopup(false);
       setRejectedReason('');
     }
@@ -1069,7 +1073,19 @@ function App() {
                 )}
                 {(store.isAgentLoggedIn || isLoggedIn) && (
                   <>
-                    {selectedWidgets.userState && (
+                    {/* V2: per-channel agent state — GranularAgentStateGate renders null for V1 sessions */}
+                    {selectedWidgets.granularAgentState && (
+                      <div className="box">
+                        <section className="section-box">
+                          <fieldset className="fieldset">
+                            <legend className="legend-box">Granular Agent State (V2)</legend>
+                            <GranularAgentState onStateChange={onStateChange} />
+                          </fieldset>
+                        </section>
+                      </div>
+                    )}
+                    {/* V1: agent-wide state dropdown — hidden when V2 is active */}
+                    {selectedWidgets.userState && !store.isGranularAgentStateActive && (
                       <div className="box">
                         <section className="section-box">
                           <fieldset className="fieldset">

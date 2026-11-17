@@ -1,5 +1,6 @@
 import {StationLogin} from '@webex/cc-station-login';
 import {UserState} from '@webex/cc-user-state';
+import {GranularAgentState} from '@webex/cc-granular-agent-state';
 import {IncomingTask, TaskList, CallControl, CallControlCAD, OutdialCall, RealTimeTranscript} from '@webex/cc-task';
 import {DigitalChannels} from '@webex/cc-digital-channels';
 import {AIAssistant} from '@webex/cc-ai-assistant';
@@ -9,6 +10,7 @@ import '@momentum-ui/core/css/momentum-ui.min.css';
 export {
   StationLogin,
   UserState,
+  GranularAgentState,
   IncomingTask,
   CallControl,
   CallControlCAD,

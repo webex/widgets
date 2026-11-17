@@ -140,6 +140,9 @@ jest.mock('../src/store', () => ({
     showE911Modal: false,
     isEmergencyModalAlreadyDisplayed: false,
     realTimeAssist: {},
+    isGranularAgentStateActive: false,
+    channelStatesMap: {},
+    refreshAgentStateControl: jest.fn(),
     setShowMultipleLoginAlert: jest.fn(),
     setCurrentState: jest.fn(),
     setLastStateChangeTimestamp: jest.fn(),
@@ -5201,6 +5204,132 @@ describe('storeEventsWrapper', () => {
 
       expect(storeWrapper.offerActionErrors).toBe(beforePruneRef);
       expect(storeWrapper.offerActionErrors['active-id']).toBeDefined();
+    });
+  });
+
+  describe('V2 channel state event handlers', () => {
+    const options = {
+      webex: {
+        cc: mockCC,
+        logger: {
+          log: jest.fn(),
+          info: jest.fn(),
+          warn: jest.fn(),
+          trace: jest.fn(),
+          error: jest.fn(),
+        },
+      },
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    describe('handleChannelStateChange', () => {
+      it('should call store.refreshAgentStateControl()', () => {
+        storeWrapper.handleChannelStateChange();
+
+        expect(storeWrapper['store'].refreshAgentStateControl).toHaveBeenCalled();
+      });
+    });
+
+    describe('handleChannelStateChangeFailed', () => {
+      it('should log an error with the payload', () => {
+        const mockPayload = {error: 'channel state change failed', code: 500};
+
+        storeWrapper.handleChannelStateChangeFailed(mockPayload);
+
+        expect(storeWrapper['store'].logger.error).toHaveBeenCalledWith(
+          'CC-Widgets: agent channel state change failed',
+          {
+            module: 'storeEventsWrapper.ts',
+            method: 'handleChannelStateChangeFailed',
+            data: mockPayload,
+          }
+        );
+      });
+
+      it('should call store.refreshAgentStateControl()', () => {
+        const mockPayload = {error: 'channel state change failed'};
+
+        storeWrapper.handleChannelStateChangeFailed(mockPayload);
+
+        expect(storeWrapper['store'].refreshAgentStateControl).toHaveBeenCalled();
+      });
+    });
+
+    describe('event listener registration in setupIncomingTaskHandler', () => {
+      it('should register AGENT_CHANNEL_STATE_CHANGE handler', async () => {
+        const cc = storeWrapper['store'].cc;
+        const onSpy = jest.spyOn(storeWrapper['cc'], 'on');
+        storeWrapper['store'].init = jest.fn().mockImplementation((_options, setupIncomingTaskHandler) => {
+          setupIncomingTaskHandler(cc);
+          return Promise.resolve();
+        });
+
+        await storeWrapper.init(options);
+
+        // Trigger a bootstrap event so addEventListeners is called
+        const reloginCb = onSpy.mock.calls.find((call) => call[0] === CC_EVENTS.AGENT_RELOGIN_SUCCESS)?.[1];
+        act(() => {
+          reloginCb?.({});
+        });
+
+        expect(onSpy).toHaveBeenCalledWith(CC_EVENTS.AGENT_CHANNEL_STATE_CHANGE, storeWrapper.handleChannelStateChange);
+      });
+
+      it('should register AGENT_CHANNEL_STATE_CHANGE_FAILED handler', async () => {
+        const cc = storeWrapper['store'].cc;
+        const onSpy = jest.spyOn(storeWrapper['cc'], 'on');
+        storeWrapper['store'].init = jest.fn().mockImplementation((_options, setupIncomingTaskHandler) => {
+          setupIncomingTaskHandler(cc);
+          return Promise.resolve();
+        });
+
+        await storeWrapper.init(options);
+
+        // Trigger a bootstrap event so addEventListeners is called
+        const reloginCb = onSpy.mock.calls.find((call) => call[0] === CC_EVENTS.AGENT_RELOGIN_SUCCESS)?.[1];
+        act(() => {
+          reloginCb?.({});
+        });
+
+        expect(onSpy).toHaveBeenCalledWith(
+          CC_EVENTS.AGENT_CHANNEL_STATE_CHANGE_FAILED,
+          storeWrapper.handleChannelStateChangeFailed
+        );
+      });
+
+      it('should register AGENT_CHANNEL_RELOGIN_SUCCESS handler', async () => {
+        const cc = storeWrapper['store'].cc;
+        const onSpy = jest.spyOn(storeWrapper['cc'], 'on');
+        storeWrapper['store'].init = jest.fn().mockImplementation((_options, setupIncomingTaskHandler) => {
+          setupIncomingTaskHandler(cc);
+          return Promise.resolve();
+        });
+
+        await storeWrapper.init(options);
+
+        expect(onSpy).toHaveBeenCalledWith(CC_EVENTS.AGENT_CHANNEL_RELOGIN_SUCCESS, expect.any(Function));
+      });
+    });
+
+    describe('cleanUpStore resets V2 channel state', () => {
+      it('should reset isGranularAgentStateActive to false', () => {
+        storeWrapper['store'].isGranularAgentStateActive = true;
+
+        storeWrapper.cleanUpStore();
+
+        expect(storeWrapper['store'].isGranularAgentStateActive).toBe(false);
+      });
+
+      it('should reset channelStatesMap to {}', () => {
+        storeWrapper['store'].channelStatesMap = {telephony: 'Available', chat: 'Idle'};
+
+        storeWrapper.cleanUpStore();
+
+        expect(storeWrapper['store'].channelStatesMap).toEqual({});
+      });
     });
   });
 });

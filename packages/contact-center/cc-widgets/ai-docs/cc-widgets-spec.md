@@ -32,7 +32,7 @@ as approved unknowns only when the human explicitly defers or does not know.
 `cc-widgets` is the aggregator and distribution surface for the Webex Contact Center widget suite. It
 owns no widget UI or business logic of its own; instead it re-exports the React components produced by
 the individual widget packages (`@webex/cc-station-login`, `@webex/cc-user-state`,
-`@webex/cc-task`, `@webex/cc-digital-channels`, `@webex/cc-ai-assistant`) plus the shared MobX `store`.
+`@webex/cc-granular-agent-state`, `@webex/cc-task`, `@webex/cc-digital-channels`, `@webex/cc-ai-assistant`) plus the shared MobX `store`.
 Its Web Component entry registers AI Assistant through `@r2wc/react-to-web-component` (r2wc).
 
 The package has exactly two source files. `src/index.ts` is the React entry point (`main` /
@@ -81,7 +81,8 @@ boundary (see `src/wc.ts`).
 | Contract ID | Type | Surface | Purpose | Compatibility / deprecation | Schema / detail link | Root index |
 |---|---|---|---|---|---|---|
 | `cc-widgets.StationLogin` | SDK | React export `StationLogin`; tag `widget-cc-station-login` (props `onLogin`, `onLogout`) | Agent station login UI | stable; removing/renaming export or tag = major | `src/index.ts`, `src/wc.ts` | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
-| `cc-widgets.UserState` | SDK | React export `UserState`; tag `widget-cc-user-state` (prop `onStateChange`) | Agent state management UI | stable; export/tag change = major | `src/index.ts`, `src/wc.ts` | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
+| `cc-widgets.UserState` | SDK | React export `UserState`; tag `widget-cc-user-state` (prop `onStateChange`) | Agent state management UI (V1 agent-wide) | stable; export/tag change = major | `src/index.ts`, `src/wc.ts` | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
+| `cc-widgets.GranularAgentState` | SDK | React export `GranularAgentState`; tag `widget-cc-granular-agent-state` (prop `onStateChange:function`) | Per-channel agent state management UI (V2, WXCC-15791); mounted when `store.isGranularAgentStateActive` is true | stable; export/tag change = major | `src/index.ts`, `src/wc.ts` | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
 | `cc-widgets.IncomingTask` | SDK | React export `IncomingTask`; tag `widget-cc-incoming-task` (props `incomingTask:json`, `onAccepted`, `onRejected`) | Incoming task notification UI | stable; export/tag change = major | `src/index.ts`, `src/wc.ts` | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
 | `cc-widgets.CallControl` | SDK | React export `CallControl`; tag `widget-cc-call-control` (props `onHoldResume`, `onEnd`, `onWrapUp`, `onRecordingToggle`) | Active-call control buttons | stable; export/tag change = major | `src/index.ts`, `src/wc.ts` | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
 | `cc-widgets.CallControlCAD` | SDK | React export `CallControlCAD`; tag `widget-cc-call-control-cad` (props `onHoldResume`, `onEnd`, `onWrapUp`, `onRecordingToggle`); participant Drop is inherited from the task widget | CAD-enabled call control with owner-aware conference participant removal | stable; no new property or attribute | `src/index.ts`, `src/wc.ts`; [`participant-drop-intake.md`](../../../../ai-docs/features/participant-drop-intake.md) | [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md) |
@@ -100,7 +101,7 @@ Compatibility notes:
 
 ## Requires (dependencies)
 - Internal widget packages (workspace `*`): `@webex/cc-station-login`, `@webex/cc-user-state`,
-  `@webex/cc-task` (provides `IncomingTask`, `TaskList`, `CallControl`, `CallControlCAD`, `OutdialCall`,
+  `@webex/cc-granular-agent-state`, `@webex/cc-task` (provides `IncomingTask`, `TaskList`, `CallControl`, `CallControlCAD`, `OutdialCall`,
   `RealTimeTranscript`), `@webex/cc-digital-channels`, and `@webex/cc-ai-assistant` for React export and WC registration. Source: `package.json` dependencies, `src/index.ts`,
   `src/wc.ts`.
 - `@webex/cc-store` (workspace `*`) — the shared MobX singleton re-exported to consumers.
@@ -113,7 +114,7 @@ Compatibility notes:
 ## Requirements
 | ID | WHAT | WHY | Source Evidence | Test / Example Evidence | Assumptions / Gaps | Confidence |
 |---|---|---|---|---|---|---|
-| `cc-widgets-R-001` | Re-export `StationLogin`, `UserState`, `IncomingTask`, `CallControl`, `CallControlCAD`, `TaskList`, `OutdialCall`, `RealTimeTranscript`, `DigitalChannels`, `AIAssistant`, and `store` from the package root. | Preserve the established React import path for existing hosts. | `packages/contact-center/cc-widgets/src/index.ts` | Production build and entry inspection | The aggregate loads AI Assistant from its package; wellness media stays in separate files. | PRESENT |
+| `cc-widgets-R-001` | Re-export `StationLogin`, `UserState`, `GranularAgentState`, `IncomingTask`, `CallControl`, `CallControlCAD`, `TaskList`, `OutdialCall`, `RealTimeTranscript`, `DigitalChannels`, `AIAssistant`, and `store` from the package root. | Preserve the established React import path for existing hosts. | `packages/contact-center/cc-widgets/src/index.ts` | Production build and entry inspection | The aggregate loads AI Assistant from its package; wellness media stays in separate files. | PRESENT |
 | `cc-widgets-R-002` | Register all `widget-cc-*` custom elements, including `widget-cc-ai-assistant`, when `./wc` is loaded. | Preserve the existing WC host import and tag registration. | `packages/contact-center/cc-widgets/src/wc.ts` | Web Component sample; build verification | No unit test verifies registration. | WEAK |
 | `cc-widgets-R-003` | Guard each `customElements.define` with `customElements.get(name)` so re-importing the WC bundle does not throw a duplicate-definition error. | Importing the bundle more than once (multiple micro-frontends/scripts) must be idempotent. | `packages/contact-center/cc-widgets/src/wc.ts` | None found | No regression test for double-import. | WEAK |
 | `cc-widgets-R-004` | Map complex/callback props across the WC boundary with explicit r2wc prop types: `function` callbacks, `json` for object props (`incomingTask`, `liveTranscriptEntries`), `boolean` (`hasCampaignPreviewEnabled`), and `string` (`className`). | HTML attributes are strings only; functions and objects must be set as element properties with the right r2wc coercion or the widget won't receive them. | `packages/contact-center/cc-widgets/src/wc.ts` | None found | Prop maps are the WC public contract; no test asserts the type map. | WEAK |
@@ -330,7 +331,7 @@ potentially breaking change for hosts.
 
 ## Host Integration & Theming
 This module is the host-mount surface for the widget suite.
-- **Custom-element tags:** `widget-cc-user-state`, `widget-cc-station-login`, `widget-cc-incoming-task`,
+- **Custom-element tags:** `widget-cc-user-state`, `widget-cc-granular-agent-state`, `widget-cc-station-login`, `widget-cc-incoming-task`,
   `widget-cc-task-list`, `widget-cc-call-control`, `widget-cc-call-control-cad`, `widget-cc-outdial-call`,
   `widget-cc-realtime-transcript`, `widget-cc-digital-channels`, `widget-cc-ai-assistant` (`src/wc.ts`).
 - **Mount contract (WC mode):** load `@webex/cc-widgets/wc` (registers all widget elements at import time),
@@ -366,6 +367,13 @@ tested by the upstream widget packages, not here.
 | `cc-widgets-R-005` (Momentum CSS imported) | None found | No test for the CSS side-effect import. |
 | `cc-widgets-R-006` (React/ReactDOM peers) | None found | Enforced by package manager only; no automated check here. |
 | `cc-widgets-R-007` (CallControlCAD inherits Drop without a new WC surface) | Covered by upstream task/component tests | No package-local test; the wrapper and prop map are unchanged. |
+
+## WXCC-15791 — Granular Agent State V2 registration (feature branch)
+> Implemented on `feature/WXCC-15791-Support-Granular-Agent-State`; additive. Feature docs: [`../../../../ai-docs/features/WXCC-15791-user-granular-agent-state/spec/feature-spec.md`](../../../../ai-docs/features/WXCC-15791-user-granular-agent-state/spec/feature-spec.md).
+
+| ID | WHAT | Source | Test |
+|---|---|---|---|
+| `cc-widgets-R-010` | Register the Web Component `widget-cc-granular-agent-state` via `r2wc(GranularAgentState, {props:{onStateChange:'function'}})` and re-export `GranularAgentState` from `src/index.ts`; add the `@webex/cc-granular-agent-state` dependency. The V1 `widget-cc-user-state`/`UserState` registration is unchanged. | `src/wc.ts`, `src/index.ts`, `package.json` | build verification |
 
 ## Traceability
 - Repo architecture: [`ARCHITECTURE.md`](../../../../ai-docs/ARCHITECTURE.md) · Registry: [`SPEC_INDEX.md`](../../../../ai-docs/SPEC_INDEX.md) · Contracts: [`CONTRACTS.md`](../../../../ai-docs/CONTRACTS.md)
