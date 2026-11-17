@@ -22,7 +22,7 @@ into host applications.
 
 ## Tech Stack
 - TypeScript, React 18, MobX, Web Components via `@r2wc/react-to-web-component`.
-- Yarn 4.5.1 (PnP, workspaces); Webpack + Babel build.
+- Yarn 4.10.3 (PnP, workspaces); Webpack + Babel build.
 - Jest + React Testing Library (unit); Playwright (E2E). Momentum UI design system.
 
 ## Architecture

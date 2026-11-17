@@ -37,7 +37,7 @@
     "build:watch": "webpack --watch",
     "test:unit": "NODE_ENV=test jest --coverage",
     "test:styles": "eslint",
-    "deploy:npm": "node ../../../tooling/release/publish.cjs"
+    "deploy:npm": "yarn npm publish"
   },
   "dependencies": {
     "@r2wc/react-to-web-component": "2.0.3",

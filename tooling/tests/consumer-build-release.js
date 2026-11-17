@@ -92,6 +92,7 @@ describe('existing release tooling after consumer checks', () => {
       'public',
       '--tag',
       'next',
+      '--provenance',
     ]);
     expect(() => run(step.run, {...env, DEPLOY_EXIT: '7'})).toThrow();
   });
@@ -118,9 +119,10 @@ describe('existing release tooling after consumer checks', () => {
       .map(([name]) => name);
     expect(oidcJobs).toEqual(['publish-npm']);
     expect(JSON.stringify(deploy)).not.toMatch(/secrets\.NPM_TOKEN/);
-    const names = publish.steps.map((step) => step.name);
-    const npm = publish.steps.find((step) => /npm install .*npm@11\.21\.0/.test(step.run || ''));
-    expect(npm).toBeDefined();
-    expect(names.indexOf(npm.name)).toBeLessThan(names.indexOf('Deploy Packages'));
+    expect(publish.steps.some((step) => /npm install/.test(step.run || ''))).toBe(false);
+    const root = path.resolve(__dirname, '../..');
+    expect(JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8')).packageManager).toBe('yarn@4.10.3');
+    const config = YAML.parse(fs.readFileSync(path.join(root, '.yarnrc.yml'), 'utf8'));
+    expect(config.yarnPath).toBe('.yarn/releases/yarn-4.10.3.cjs');
   });
 });

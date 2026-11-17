@@ -23,7 +23,7 @@
     "clean:dist": "rm -rf dist",
     "test:unit": "NODE_ENV=test jest --coverage",
     "test:styles": "echo 'No styles to test'",
-    "deploy:npm": "node ../../../tooling/release/publish.cjs"
+    "deploy:npm": "yarn npm publish"
   },
   "dependencies": {
     "@webex/cc-store": "workspace:*"

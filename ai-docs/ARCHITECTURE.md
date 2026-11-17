@@ -109,8 +109,8 @@ For Consult/Transfer, `Task.uiControls.consultTransferDestinations` is the visib
 | Widget / component | `ui-logging` (`withMetrics`) | call | Emit mount/unmount/error telemetry |
 
 ## Package Map & Inter-Package Dependencies
-- **Workspace tooling:** Yarn 4.5.1 (PnP). Workspace globs: `packages/**/*`, `packages/contact-center/*`,
-  `widgets-samples/**/**`.
+- **Workspace tooling:** Yarn 4.10.3 with the `node-modules` linker. Workspace globs:
+  `packages/**/*`, `packages/contact-center/*`, `widgets-samples/**/**`.
 - **Inter-package dependency graph** (from each package's `package.json`):
 ```
 cc-widgets ── wraps ──> station-login, user-state, task, ai-assistant (+ cc-digital-channels)
@@ -130,9 +130,9 @@ store        ──> (no internal CC deps) ──> @webex/contact-center SDK
 
 ## Release & Versioning
 - Published as `@webex/*` packages by `Deploy CD` on pushes to `next`. The workflow checks packed
-  Contact Center consumers before npm publishes through OIDC. Each workspace keeps `deploy:npm`;
-  Yarn packs the archives and the npm CLI publishes them. See [`RELEASING.md`](RELEASING.md) for
-  trusted-publisher setup, release validation, and recovery.
+  Contact Center consumers before Yarn publishes through OIDC. Each workspace keeps
+  `deploy:npm: yarn npm publish`; Yarn packs and publishes the restored workspace. See
+  [`RELEASING.md`](RELEASING.md) for trusted-publisher setup, release validation, and recovery.
 - Public surfaces (exports, custom-element tag names, events) follow semver; breaking changes need a major
   bump and a consumer transition note. See `CONTRACTS.md` for the compatibility policy.
 
