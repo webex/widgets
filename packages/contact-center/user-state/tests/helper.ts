@@ -751,6 +751,79 @@ describe('useUserState Hook', () => {
     expect(result.current.voiceConnectionLossDialogOpen).toBe(false);
   });
 
+  it('cancels deferred forced Idle persistence when voice recovery and wellness lookup completion are batched', async () => {
+    const idleCodesWithDefault = [
+      {id: '1', name: 'Break', isSystem: false, isDefault: true},
+      {id: '2', name: 'Available', isSystem: false, isDefault: false},
+    ];
+    const readyState = {
+      status: VOICE_CONNECTION_STATUS.READY,
+      lineStatus: VoiceLineStatus.REGISTERED,
+      mobiusSocketStatus: VoiceMobiusSocketStatus.CONNECTED,
+    };
+    const unavailableState = {
+      status: VOICE_CONNECTION_STATUS.UNAVAILABLE,
+      lineStatus: VoiceLineStatus.ERROR,
+      mobiusSocketStatus: VoiceMobiusSocketStatus.DISCONNECTED,
+    };
+    jest.spyOn(mockCC, 'getVoiceConnectionState').mockReturnValue(readyState);
+
+    const {rerender} = renderHook(
+      ({currentState, wellnessLookupPending}: {currentState: string; wellnessLookupPending: boolean}) =>
+        useUserState({
+          idleCodes: idleCodesWithDefault,
+          agentId,
+          cc: mockCC,
+          currentState,
+          customState: null,
+          logger,
+          onStateChange,
+          isBrowserVoiceSession: true,
+          isAgentLoggedIn: true,
+          wellnessIdleCodeLookupPending: wellnessLookupPending,
+        }),
+      {initialProps: {currentState: '2', wellnessLookupPending: true}}
+    );
+
+    const listener = ccOnSpy.mock.calls.find(([eventName]) => eventName === VOICE_CONNECTION_EVENTS.STATE_CHANGE)?.[1];
+    jest.spyOn(mockCC, 'getVoiceConnectionState').mockReturnValue(unavailableState);
+    act(() => listener?.(unavailableState));
+
+    // Voice-loss timeout elapses while wellness lookup is still pending: the forced
+    // Idle transition is requested but deferred (pendingUserSelectionRef tracks it).
+    await act(async () => {
+      jest.advanceTimersByTime(2000);
+    });
+
+    expect(store.setCurrentState).toHaveBeenCalledWith('1');
+
+    await act(async () => {
+      rerender({currentState: '1', wellnessLookupPending: true});
+    });
+
+    expect(ccSetAgentStateSpy).not.toHaveBeenCalled();
+
+    // Voice recovers and wellness lookup completes in the same batched update. The
+    // deferred forced-Idle transition must be canceled and must NOT be persisted,
+    // even though this render still observes the stale forced-Idle currentState.
+    jest.spyOn(mockCC, 'getVoiceConnectionState').mockReturnValue(readyState);
+    await act(async () => {
+      listener?.(readyState);
+      rerender({currentState: '1', wellnessLookupPending: false});
+    });
+
+    expect(ccSetAgentStateSpy).not.toHaveBeenCalled();
+    expect(store.setCurrentState).toHaveBeenCalledWith('2');
+
+    // Once the canceled rollback's store update to Available actually lands, no
+    // redundant compensating request should be sent either.
+    await act(async () => {
+      rerender({currentState: '2', wellnessLookupPending: false});
+    });
+
+    expect(ccSetAgentStateSpy).not.toHaveBeenCalled();
+  });
+
   it('should increment elapsedTime every second', async () => {
     const {result} = renderHook(() =>
       useUserState({

@@ -56,6 +56,7 @@ export const useUserState = ({
   const externallyManagedStateRef = useRef(isCurrentStateExternallyManaged);
   const pendingUserSelectionRef = useRef<string>();
   const forcedVoiceLossIdleCodeRef = useRef<string | null>(null);
+  const canceledForcedIdleCodeRef = useRef<string | null>(null);
   const hasVoiceLossTimeoutElapsedRef = useRef<boolean>(false);
   const hasForcedIdleAttemptedRef = useRef<boolean>(false);
   const previousVoiceStatusRef = useRef(voiceConnectionState.status);
@@ -112,6 +113,7 @@ export const useUserState = ({
         forcedVoiceLossIdleCodeRef.current !== null &&
         pendingUserSelectionRef.current === forcedVoiceLossIdleCodeRef.current
       ) {
+        canceledForcedIdleCodeRef.current = forcedVoiceLossIdleCodeRef.current;
         pendingUserSelectionRef.current = undefined;
         store.setCurrentState(prevStateRef.current);
       }
@@ -338,6 +340,15 @@ export const useUserState = ({
       if (!wellnessIdleCodeLookupPending && pendingUserSelectionRef.current !== currentState) {
         pendingUserSelectionRef.current = undefined;
       }
+
+      // A forced voice-loss transition that was canceled by voice recovery (see the
+      // rollback above) must not be persisted even if this effect observes the
+      // stale forced-Idle currentState before the rollback's render lands.
+      if (canceledForcedIdleCodeRef.current === currentState) {
+        canceledForcedIdleCodeRef.current = null;
+        return;
+      }
+
       const isForcedVoiceLoss = forcedVoiceLossIdleCodeRef.current === currentState;
       if (prevStateRef.current !== currentState || isForcedVoiceLoss) {
         if (wellnessIdleCodeLookupPending) {
