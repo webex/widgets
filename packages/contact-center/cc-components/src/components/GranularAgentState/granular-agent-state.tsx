@@ -63,10 +63,13 @@ const GranularAgentStateComponent: React.FunctionComponent<GranularAgentStateCom
     try {
       action();
     } catch (error) {
-      logger?.error(`CC-Widgets: GranularAgentState: Error in ${method} - ${error instanceof Error ? error.message : String(error)}`, {
-        module: 'cc-components#granular-agent-state.tsx',
-        method,
-      });
+      logger?.error(
+        `CC-Widgets: GranularAgentState: Error in ${method} - ${error instanceof Error ? error.message : String(error)}`,
+        {
+          module: 'cc-components#granular-agent-state.tsx',
+          method,
+        }
+      );
     }
     close();
   };
@@ -111,7 +114,12 @@ const GranularAgentStateComponent: React.FunctionComponent<GranularAgentStateCom
       {isHovered && !isOpen && <ChannelStatePreview channels={channels} />}
 
       {isOpen && (
-        <div className="granular-state-panel" role="dialog" aria-label={granularAgentStateLabels.stateSelector} data-testid="granular-state-panel">
+        <div
+          className="granular-state-panel"
+          role="dialog"
+          aria-label={granularAgentStateLabels.stateSelector}
+          data-testid="granular-state-panel"
+        >
           {view === 'menu' ? (
             <GranularStateMenu
               idleCodes={idleCodes}
@@ -147,7 +155,10 @@ const GranularAgentStateComponent: React.FunctionComponent<GranularAgentStateCom
                     );
                   });
               }}
-              onCancel={() => { setApplyError(null); setView('menu'); }}
+              onCancel={() => {
+                setApplyError(null);
+                setView('menu');
+              }}
             />
           )}
         </div>

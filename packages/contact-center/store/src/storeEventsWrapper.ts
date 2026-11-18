@@ -2399,25 +2399,23 @@ class StoreWrapper implements IStoreWrapper {
       });
     };
 
-    [
-      CC_EVENTS.AGENT_DN_REGISTERED,
-      CC_EVENTS.AGENT_RELOGIN_SUCCESS,
-      CC_EVENTS.AGENT_CHANNEL_RELOGIN_SUCCESS,
-    ].forEach((event) => {
-      ccSDK.on(`${event}`, (payload) => {
-        this.store.logger.info(`CC-Widgets: setupIncomingTaskHandler(): event '${event}' received`, {
-          module: 'storeEventsWrapper.ts',
-          method: 'setupIncomingTaskHandler',
+    [CC_EVENTS.AGENT_DN_REGISTERED, CC_EVENTS.AGENT_RELOGIN_SUCCESS, CC_EVENTS.AGENT_CHANNEL_RELOGIN_SUCCESS].forEach(
+      (event) => {
+        ccSDK.on(`${event}`, (payload) => {
+          this.store.logger.info(`CC-Widgets: setupIncomingTaskHandler(): event '${event}' received`, {
+            module: 'storeEventsWrapper.ts',
+            method: 'setupIncomingTaskHandler',
+          });
+          if (event !== CC_EVENTS.AGENT_DN_REGISTERED) {
+            bootstrapSession(payload);
+          }
+          if (!listenersAdded) {
+            addEventListeners();
+            listenersAdded = true;
+          }
         });
-        if (event !== CC_EVENTS.AGENT_DN_REGISTERED) {
-          bootstrapSession(payload);
-        }
-        if (!listenersAdded) {
-          addEventListeners();
-          listenersAdded = true;
-        }
-      });
-    });
+      }
+    );
 
     // Registration-level listeners are deliberately independent of task listeners.
     // Keep these after the established registration order for backwards-compatible

@@ -31,7 +31,7 @@ Action:
 refreshAgentStateControl(): void; // reads cc.getAgentStateControl().active,
                                   // cc.getChannelStates()
 ```
-`store.types.ts` re-exports the SDK types `ChannelType`, `AgentChannelTypeStates`, `AgentStateControlStatus`, declares optional V2 getters on `IContactCenter`, and adds `CC_EVENTS.AGENT_CHANNEL_STATE_CHANGE` + `AGENT_CHANNEL_RELOGIN_SUCCESS`. The `StoreWrapper` (`storeEventsWrapper.ts`) exposes getters for the two observables and delegates `refreshAgentStateControl()`. Per-channel capacity is available via `channelStatesMap[channelType].totalChannelCount`.
+`store.types.ts` defines store-owned `ChannelType`, `AgentChannelTypeStates`, and `AgentStateControlStatus` shapes aligned with the companion SDK types, declares optional V2 getters on `IContactCenter`, and adds `CC_EVENTS.AGENT_CHANNEL_STATE_CHANGE` + `AGENT_CHANNEL_RELOGIN_SUCCESS`. The local type definitions keep the widgets workspace buildable against SDK releases predating V2; runtime access remains optional and guarded. The `StoreWrapper` (`storeEventsWrapper.ts`) exposes getters for the two observables and delegates `refreshAgentStateControl()`. Per-channel capacity is available via `channelStatesMap[channelType].totalChannelCount`.
 
 ## Behavior
 - `refreshAgentStateControl()` is a no-op when `cc.getAgentStateControl` is absent; otherwise it reads both SDK getters (`getAgentStateControl()` and `getChannelStates()`) and publishes them (falls back to `{}` when the optional getter is absent).

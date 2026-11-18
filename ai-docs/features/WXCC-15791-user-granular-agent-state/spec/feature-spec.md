@@ -54,11 +54,11 @@
 | W-R-3 | `ManageChannelAvailability` renders Back + header, an "All" row, and per-channel rows for configured channels (Voice, Chat, Email, Social; capacity > 0). | Visual per-channel control, desktop parity. | Rows match configured channels. | Implemented |
 | W-R-4 | Each channel row shows icon, name, "State : {displayState}", and a Momentum `Toggle` (ON only when `agentState === 'Available' && !pendingIdle`). RONA, Engaged, and WrapUp are OFF so the agent can set them Available. | A non-Idle state is not the same as Available. | Icon/name/label/toggle per row. | Implemented |
 | W-R-5 | "All" toggle sets every channel to one target locally; its checked state derives from the per-channel toggles. | Quick set-all, single source of truth. | "All" reflects individual toggles. | Implemented |
-| W-R-6 | Apply is disabled until a toggle differs (or a request is in flight); sends only changed channels — one Available request, then one Idle request using the last-set idle code. If Available fails, Idle is not sent and the panel stays open. If there is no idle code, the Idle request is skipped, an error is logged, and the panel stays open. | A failed Available request must not idle other channels. | Changed-only payload; Idle runs only after Available succeeds. | Implemented |
+| W-R-6 | Apply is disabled until a toggle differs (or a request is in flight); sends only changed channels — one Available request, then one Idle request using the last-set idle code. SDK updates merge into the view baseline without discarding channel choices not yet confirmed by the server. If Available fails, Idle is not sent and the panel stays open. If there is no idle code, the Idle request is skipped, an error is logged, and the panel stays open. | A failed or partial request must not erase the remaining channel choices. | Changed-only payload; Idle runs only after Available succeeds; unconfirmed choices remain editable after state updates. | Implemented |
 | W-R-7 | Cancel/Back discard local changes and return to the menu with no API calls. | Undo without side effects. | No calls on cancel. | Implemented |
 | W-R-8 | Widget renders only when `store.isGranularAgentStateActive`; otherwise `null` and the hook never runs. Host chooses `UserState` (V1) vs `GranularAgentState` (V2). | V1 agents see no change. | Renders null on V1. | Implemented |
 | W-R-9 | Registered as `widget-cc-granular-agent-state` via r2wc in `cc-widgets/src/wc.ts` (`onStateChange:'function'`) and re-exported from `cc-widgets/src/index.ts`. | WC + React consumption paths. | Element registered; React export present. | Implemented |
-| W-R-10 | React sample app renders `GranularAgentState` when `store.isGranularAgentStateActive`, else `UserState` (automatic, no toggle). | Working demo. | Sample shows V2 widget for V2 sessions. | Follow-up. Not in `widgets-samples` yet. |
+| W-R-10 | React sample app renders `GranularAgentState` when selected and `store.isGranularAgentStateActive`, else `UserState` when selected for V1. Restored `selectedWidgets` preferences are merged with current defaults so new widget options appear for existing sample users. | Working demo that remains compatible with saved user preferences. | Sample shows the selected state widget for the active SDK session version; older preferences do not hide both state controls. | Implemented |
 | W-R-11 | Header pill shows the primary channel avatar + "{displayState} - {elapsed}" + other channel avatars + chevron; hover shows `ChannelStatePreview` (per-channel avatar/state/hh:mm:ss timer); renders nothing with no primary channel. | At-a-glance aggregate + per-channel state. | Pill + preview per description. | Implemented |
 | W-R-12 | Clicking the pill opens `GranularStateMenu`: search; multi-channel block (Set Available all / Manage > / Set Idle all) + idle codes; single-channel plain Available + idle codes; closes on action/outside/Escape. | Desktop parity for primary affordances. | Menu behavior per description. | Implemented |
 
@@ -66,9 +66,9 @@
 - Store wires the V2 events and refreshes reactively; resets on logout (W-R-1).
 - Hook calls `cc.setAgentState({channelType[]})` and refreshes on success (W-R-2).
 - Manage view renders Back/header/All/per-channel rows with correct icon/name/label/toggle (W-R-3, W-R-4).
-- "All" derives from and drives individual toggles; Apply enabled only on diff, changed-only, Available-then-Idle (W-R-5, W-R-6).
+- All derives from and drives individual toggles; Apply enabled only on diff, changed-only, Available-then-Idle; unconfirmed selections survive SDK state updates (W-R-5, W-R-6).
 - Cancel/Back make no API calls (W-R-7).
-- Widget renders null on V1 sessions (W-R-8); custom element registered + React export (W-R-9). The React sample (W-R-10) is a follow-up.
+- Widget renders null on V1 sessions (W-R-8); custom element registered + React export (W-R-9); sample selections migrate across added defaults (W-R-10).
 - Pill/preview/menu behave per W-R-11/W-R-12.
 - All touched packages build; store/component/hook/widget unit suites green. V1 `user-state` suite unchanged.
 

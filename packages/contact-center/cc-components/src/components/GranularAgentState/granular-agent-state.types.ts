@@ -74,9 +74,7 @@ export interface IGranularAgentState {
    * Applies per-channel availability from the "Manage channel availability" view.
    * @param availability Map of channel type to desired availability.
    */
-  applyChannelAvailability: (
-    availability: Partial<Record<SelectableChannelType, boolean>>
-  ) => Promise<boolean>;
+  applyChannelAvailability: (availability: Partial<Record<SelectableChannelType, boolean>>) => Promise<boolean>;
 
   /**
    * Boolean indicating if a state change request is in flight.

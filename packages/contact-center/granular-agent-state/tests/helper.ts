@@ -46,6 +46,7 @@ describe('useGranularAgentState Hook', () => {
     workerMock = {postMessage: jest.fn(), terminate: jest.fn(), onmessage: null};
     global.Worker = jest.fn(() => workerMock);
     global.URL.createObjectURL = jest.fn(() => 'blob:mock');
+    global.URL.revokeObjectURL = jest.fn();
     cc = {setAgentState: jest.fn().mockResolvedValue({})};
   });
 

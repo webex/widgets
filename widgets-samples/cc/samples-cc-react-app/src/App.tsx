@@ -55,7 +55,16 @@ function App() {
   const [isSdkReady, setIsSdkReady] = useState(false);
   const [selectedWidgets, setSelectedWidgets] = useState(() => {
     const savedWidgets = window.localStorage.getItem('selectedWidgets');
-    return savedWidgets ? JSON.parse(savedWidgets) : defaultWidgets;
+    if (!savedWidgets) return defaultWidgets;
+
+    try {
+      const parsedWidgets = JSON.parse(savedWidgets);
+      return parsedWidgets && typeof parsedWidgets === 'object' && !Array.isArray(parsedWidgets)
+        ? {...defaultWidgets, ...parsedWidgets}
+        : defaultWidgets;
+    } catch {
+      return defaultWidgets;
+    }
   });
   // Initialize accessToken from local storage if available
   const [accessToken, setAccessToken] = useState('');

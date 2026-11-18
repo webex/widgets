@@ -1,3 +1,8 @@
+jest.mock('@webex/cc-store', () => ({
+  __esModule: true,
+  ERROR_TRIGGERING_IDLE_CODES: {RONA: 'RONA'},
+}));
+
 import {
   buildChannelStates,
   filterIdleCodes,

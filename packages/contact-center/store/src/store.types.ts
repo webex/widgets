@@ -30,9 +30,6 @@ import {
   WellnessBreakUserAction,
   WellnessBreakEvent,
   RespondToWellnessBreakParams,
-  ChannelType,
-  AgentChannelTypeStates,
-  AgentStateControlStatus,
 } from '@webex/contact-center';
 import type {
   AISummary,
@@ -62,6 +59,32 @@ import {
   UpdateDeviceTypeResponse,
 } from 'node_modules/@webex/contact-center/dist/types/types';
 
+// V2 SDK contract shapes are kept in the store package so widgets still build
+// against published SDK versions that predate the granular-state API. Keep
+// these aligned with the public types in @webex/contact-center.
+type ChannelType = 'telephony' | 'chat' | 'email' | 'social' | 'workItem' | 'customMessaging';
+
+type AgentChannelTypeStates = {
+  agentState: string;
+  pendingIdle: boolean;
+  auxCodeId?: string;
+  availableChannelCount: number;
+  totalChannelCount: number;
+  manuallyAssignedChannelCount?: number;
+  totalManuallyAssignedChannelCount?: number;
+  manuallyAssignedAvailableChannelCount?: number | null;
+  stateChangeReason: string;
+  stateChangeTimestamp: number;
+  lastIdleCodeChangeTimestamp?: number;
+};
+
+type AgentStateControlStatus = {
+  declared: boolean | undefined;
+  active: boolean | undefined;
+};
+
+type StoreStateChange = StateChange & {channelType?: ChannelType[]};
+
 //  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
 interface IContactCenter {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -86,7 +109,7 @@ interface IContactCenter {
     agentId: string;
     outdialANIId: string;
   };
-  setAgentState(data: StateChange): Promise<SetStateResponse>;
+  setAgentState(data: StoreStateChange): Promise<SetStateResponse>;
   /** V2: granular agent-state control status (posture/diagnostics). */
   getAgentStateControl?(): AgentStateControlStatus;
   /** V2: per-channel states; empty for V1 sessions. */

@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useState} from 'react';
+import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {Button, Icon, Text, Toggle} from '@momentum-design/components/dist/react';
 import {ManageChannelAvailabilityProps, SelectableChannelType} from './granular-agent-state.types';
 import {ALL_CHANNELS_ICON, CHANNEL_MANAGE_ICONS, granularAgentStateLabels} from './constant';
@@ -19,14 +19,21 @@ const ManageChannelAvailability: React.FunctionComponent<ManageChannelAvailabili
   const availabilityKey = channels.map((channel) => `${channel.channelType}:${channel.isAvailable}`).join('|');
   const initialAvailability = useMemo(() => toAvailability(channels), [availabilityKey]);
   const [availability, setAvailability] = useState<Availability>(initialAvailability);
+  const previousInitialAvailability = useRef(initialAvailability);
 
-  // Re-sync when the SDK reports new channel states while the view is open.
-  // Guard against no-op updates to avoid extra render cycles from the timer tick.
+  // Merge SDK updates into the draft without discarding choices that have not
+  // yet been confirmed. This matters when Apply sends Available then Idle.
   useEffect(() => {
+    const previous = previousInitialAvailability.current;
+    previousInitialAvailability.current = initialAvailability;
     setAvailability((prev) => {
-      const keys = Object.keys(initialAvailability) as SelectableChannelType[];
-      const unchanged = keys.length === Object.keys(prev).length && keys.every((k) => prev[k] === initialAvailability[k]);
-      return unchanged ? prev : initialAvailability;
+      const next = {...initialAvailability};
+      (Object.keys(initialAvailability) as SelectableChannelType[]).forEach((key) => {
+        if (prev[key] !== previous[key]) next[key] = prev[key];
+      });
+      const keys = Object.keys(next) as SelectableChannelType[];
+      const unchanged = keys.length === Object.keys(prev).length && keys.every((key) => prev[key] === next[key]);
+      return unchanged ? prev : next;
     });
   }, [initialAvailability]);
 
@@ -104,7 +111,13 @@ const ManageChannelAvailability: React.FunctionComponent<ManageChannelAvailabili
       </div>
 
       {applyError && (
-        <Text tagname="p" type="body-midsize-regular" className="manage-channel-availability-error" role="alert" data-testid="manage-channel-availability-error">
+        <Text
+          tagname="p"
+          type="body-midsize-regular"
+          className="manage-channel-availability-error"
+          role="alert"
+          data-testid="manage-channel-availability-error"
+        >
           {applyError}
         </Text>
       )}

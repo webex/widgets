@@ -1,6 +1,15 @@
 import React from 'react';
 import {render, fireEvent, screen, act} from '@testing-library/react';
 import '@testing-library/jest-dom';
+
+jest.mock('@webex/cc-store', () => ({
+  __esModule: true,
+  ERROR_TRIGGERING_IDLE_CODES: {RONA: 'RONA'},
+}));
+jest.mock('@webex/cc-ui-logging', () => ({
+  withMetrics: (component: React.ComponentType) => component,
+}));
+
 import GranularAgentStateComponent from '../../../src/components/GranularAgentState/granular-agent-state';
 import {
   ChannelStateInfo,
@@ -264,8 +273,50 @@ describe('GranularAgentStateComponent', () => {
         fireEvent.click(screen.getByTestId('manage-channel-availability-apply'));
       });
 
-      expect(screen.getByTestId('manage-channel-availability-error')).toHaveTextContent('Failed to apply changes. Please try again.');
+      expect(screen.getByTestId('manage-channel-availability-error')).toHaveTextContent(
+        'Failed to apply changes. Please try again.'
+      );
       expect(screen.getByTestId('granular-state-panel')).toBeInTheDocument();
+    });
+
+    it('should preserve unconfirmed channel choices when SDK state updates during a partial apply', async () => {
+      const initialChannels = [channels[0], channel({channelType: 'chat', label: 'Chat', isAvailable: false})];
+      const applyChannelAvailability = jest.fn().mockResolvedValue(false);
+      const {props, rerender} = renderComponent({
+        channels: initialChannels,
+        primaryChannel: initialChannels[0],
+        applyChannelAvailability,
+      });
+      openManage();
+
+      toggle('telephony');
+      toggle('chat');
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('manage-channel-availability-apply'));
+      });
+
+      expect(applyChannelAvailability).toHaveBeenCalledWith({telephony: false, chat: true});
+
+      const updatedChannels = [
+        channel({isAvailable: true}),
+        channel({channelType: 'chat', label: 'Chat', isAvailable: true}),
+      ];
+      await act(async () => {
+        rerender(
+          <GranularAgentStateComponent
+            {...props}
+            channels={updatedChannels}
+            primaryChannel={updatedChannels[0]}
+            applyChannelAvailability={applyChannelAvailability}
+          />
+        );
+      });
+
+      expect((screen.getByTestId('manage-channel-availability-toggle-telephony') as HTMLInputElement).checked).toBe(
+        false
+      );
+      expect((screen.getByTestId('manage-channel-availability-toggle-chat') as HTMLInputElement).checked).toBe(true);
+      expect(screen.getByTestId('manage-channel-availability-apply')).toBeEnabled();
     });
 
     it('should show an error banner when apply rejects', async () => {
@@ -278,7 +329,9 @@ describe('GranularAgentStateComponent', () => {
         fireEvent.click(screen.getByTestId('manage-channel-availability-apply'));
       });
 
-      expect(screen.getByTestId('manage-channel-availability-error')).toHaveTextContent('Failed to apply changes. Please try again.');
+      expect(screen.getByTestId('manage-channel-availability-error')).toHaveTextContent(
+        'Failed to apply changes. Please try again.'
+      );
       expect(screen.getByTestId('granular-state-panel')).toBeInTheDocument();
     });
 

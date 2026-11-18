@@ -22,13 +22,9 @@ const contactCenterSdkRoot = process.env.WEBEX_CONTACT_CENTER_SDK_PATH;
 const contactCenterSdkEntry = contactCenterSdkRoot
   ? path.resolve(contactCenterSdkRoot, 'packages/@webex/contact-center/dist/webex.js')
   : undefined;
-const webexSdkEntry = contactCenterSdkRoot ? path.resolve(contactCenterSdkRoot, 'packages/webex/dist/index.js') : undefined;
 
 if (contactCenterSdkEntry && !fs.existsSync(contactCenterSdkEntry)) {
   throw new Error(`WEBEX_CONTACT_CENTER_SDK_PATH does not contain ${contactCenterSdkEntry}`);
-}
-if (webexSdkEntry && !fs.existsSync(webexSdkEntry)) {
-  throw new Error(`WEBEX_CONTACT_CENTER_SDK_PATH does not contain ${webexSdkEntry}`);
 }
 
 module.exports = {

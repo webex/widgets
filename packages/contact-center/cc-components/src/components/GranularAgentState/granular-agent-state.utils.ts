@@ -16,9 +16,7 @@ type ChannelStatesMap = Partial<Record<ChannelType, AgentChannelTypeStates>>;
  * Channels the agent can act on, in display order. Only channels present in the
  * state map with capacity > 0 are selectable.
  */
-export const getSelectableChannelTypes = (
-  channelStatesMap: ChannelStatesMap
-): SelectableChannelType[] =>
+export const getSelectableChannelTypes = (channelStatesMap: ChannelStatesMap): SelectableChannelType[] =>
   CHANNEL_ORDER.filter((channelType) => {
     const state = channelStatesMap?.[channelType];
     return state && (state.totalChannelCount ?? 0) > 0;

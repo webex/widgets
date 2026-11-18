@@ -50,10 +50,13 @@ export const useGranularAgentState = ({
       };
       workerRef.current.postMessage({type: 'start'});
     } catch (error) {
-      logger?.error(`CC-Widgets: GranularAgentState: Error initializing worker - ${error instanceof Error ? error.message : String(error)}`, {
-        module: MODULE,
-        method: 'useEffect - initial',
-      });
+      logger?.error(
+        `CC-Widgets: GranularAgentState: Error initializing worker - ${error instanceof Error ? error.message : String(error)}`,
+        {
+          module: MODULE,
+          method: 'useEffect - initial',
+        }
+      );
     }
 
     return () => {
