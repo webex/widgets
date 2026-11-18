@@ -906,6 +906,89 @@ describe('useUserState Hook', () => {
     });
   });
 
+  it('re-asserts the deferred forced Idle target when an older SDK confirmation overwrites currentState before lookup completes', async () => {
+    const idleCodesWithDefault = [
+      {id: '1', name: 'Break', isSystem: false, isDefault: true},
+      {id: '2', name: 'Available', isSystem: false, isDefault: false},
+    ];
+    const readyState = {
+      status: VOICE_CONNECTION_STATUS.READY,
+      lineStatus: VoiceLineStatus.REGISTERED,
+      mobiusSocketStatus: VoiceMobiusSocketStatus.CONNECTED,
+    };
+    const unavailableState = {
+      status: VOICE_CONNECTION_STATUS.UNAVAILABLE,
+      lineStatus: VoiceLineStatus.ERROR,
+      mobiusSocketStatus: VoiceMobiusSocketStatus.DISCONNECTED,
+    };
+    jest.spyOn(mockCC, 'getVoiceConnectionState').mockReturnValue(readyState);
+    ccSetAgentStateSpy.mockResolvedValue({data: {lastStateChangeTimestamp: 100, lastIdleCodeChangeTimestamp: 100}});
+
+    const {rerender} = renderHook(
+      ({currentState, wellnessLookupPending}: {currentState: string; wellnessLookupPending: boolean}) =>
+        useUserState({
+          idleCodes: idleCodesWithDefault,
+          agentId,
+          cc: mockCC,
+          currentState,
+          customState: null,
+          logger,
+          onStateChange,
+          isBrowserVoiceSession: true,
+          isAgentLoggedIn: true,
+          wellnessIdleCodeLookupPending: wellnessLookupPending,
+        }),
+      {initialProps: {currentState: '2', wellnessLookupPending: true}}
+    );
+
+    const listener = ccOnSpy.mock.calls.find(([eventName]) => eventName === VOICE_CONNECTION_EVENTS.STATE_CHANGE)?.[1];
+    jest.spyOn(mockCC, 'getVoiceConnectionState').mockReturnValue(unavailableState);
+    act(() => listener?.(unavailableState));
+
+    // Voice-loss timeout elapses while wellness lookup is still pending: the forced
+    // Idle transition is requested but deferred.
+    await act(async () => {
+      jest.advanceTimersByTime(2000);
+    });
+
+    expect(store.setCurrentState).toHaveBeenCalledWith('1');
+
+    await act(async () => {
+      rerender({currentState: '1', wellnessLookupPending: true});
+    });
+
+    expect(ccSetAgentStateSpy).not.toHaveBeenCalled();
+
+    // An older in-flight SDK confirmation (e.g. StoreWrapper.handleStateChange for a
+    // request that started before voice loss) overwrites currentState back to
+    // Available while lookup is still pending. Voice remains unavailable throughout.
+    await act(async () => {
+      rerender({currentState: '2', wellnessLookupPending: true});
+    });
+
+    expect(ccSetAgentStateSpy).not.toHaveBeenCalled();
+
+    // Wellness lookup completes, but currentState no longer reflects the forced
+    // target. The deferred transition must be re-asserted rather than silently
+    // dropped while voice remains unavailable.
+    await act(async () => {
+      rerender({currentState: '2', wellnessLookupPending: false});
+    });
+
+    expect(store.setCurrentState).toHaveBeenCalledWith('1');
+
+    await act(async () => {
+      rerender({currentState: '1', wellnessLookupPending: false});
+    });
+
+    expect(ccSetAgentStateSpy).toHaveBeenCalledWith({
+      state: 'Idle',
+      auxCodeId: '1',
+      agentId,
+      lastStateChangeReason: 'Break',
+    });
+  });
+
   it('should increment elapsedTime every second', async () => {
     const {result} = renderHook(() =>
       useUserState({

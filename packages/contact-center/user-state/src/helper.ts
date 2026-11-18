@@ -430,6 +430,34 @@ export const useUserState = ({
     }
   }, [currentState, isCurrentStateExternallyManaged, wellnessIdleCodeLookupPending]);
 
+  // An older in-flight SDK confirmation can land after the forced voice-loss Idle
+  // transition was deferred behind a pending wellness-code lookup, overwriting
+  // currentState (via StoreWrapper.handleStateChange) with a value other than the
+  // still-outstanding forced target before lookup completes. When that happens the
+  // guards above no longer recognize the deferred selection once lookup finishes, so
+  // explicitly re-assert the forced target here, independent of what currentState
+  // currently reflects, as long as voice remains unavailable.
+  useEffect(() => {
+    if (
+      wellnessIdleCodeLookupPending ||
+      forcedVoiceLossIdleCodeRef.current === null ||
+      currentState === forcedVoiceLossIdleCodeRef.current ||
+      voiceConnectionState.status !== VOICE_CONNECTION_STATUS.UNAVAILABLE ||
+      !isAgentLoggedIn ||
+      !isBrowserVoiceSession
+    ) {
+      return;
+    }
+
+    setAgentStatus(forcedVoiceLossIdleCodeRef.current);
+  }, [
+    wellnessIdleCodeLookupPending,
+    currentState,
+    voiceConnectionState.status,
+    isAgentLoggedIn,
+    isBrowserVoiceSession,
+  ]);
+
   useEffect(() => {
     try {
       callOnStateChange();
