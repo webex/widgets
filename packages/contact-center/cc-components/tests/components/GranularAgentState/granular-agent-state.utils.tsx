@@ -20,6 +20,7 @@ const idleCodes = [
   {id: '10', name: 'Lunch Break', isSystem: false, isDefault: false},
   {id: '11', name: 'Meeting', isSystem: false, isDefault: true},
   {id: '12', name: 'RONA', isSystem: true, isDefault: false},
+  {id: '13', name: 'ENGAGED', isSystem: true, isDefault: false},
 ];
 
 const channelState = (overrides = {}) => ({
@@ -139,6 +140,15 @@ describe('granular-agent-state.utils', () => {
   describe('idle codes', () => {
     it('should exclude Available and platform-assigned codes', () => {
       expect(getSelectableIdleCodes(idleCodes).map((code) => code.id)).toEqual(['10', '11']);
+    });
+
+    it('should not select Engaged as a selectable or fallback idle code', () => {
+      const engagedIdleCode = idleCodes[4];
+      const firstSelectableIdleCode = {...idleCodes[1], isDefault: false};
+
+      expect(getSelectableIdleCodes([engagedIdleCode])).toEqual([]);
+      expect(getLastSetIdleCode({}, [engagedIdleCode, firstSelectableIdleCode])).toEqual(firstSelectableIdleCode);
+      expect(getLastSetIdleCode({}, [engagedIdleCode])).toBeUndefined();
     });
 
     it('should filter idle codes case-insensitively', () => {

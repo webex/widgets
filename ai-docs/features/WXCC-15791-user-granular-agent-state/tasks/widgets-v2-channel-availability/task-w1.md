@@ -1,8 +1,8 @@
 # Task — W1: cc-components GranularAgentState Components & Exports
 
-> **Navigation:** [AGENTS.md](../../../../AGENTS.md) → [SPEC_INDEX.md](../../../../SPEC_INDEX.md) → [ARCHITECTURE.md](../../../../ARCHITECTURE.md)
+> **Navigation:** [AGENTS.md](../../../../../AGENTS.md) → [SPEC_INDEX.md](../../../../../ai-docs/SPEC_INDEX.md) → [ARCHITECTURE.md](../../../../../ai-docs/ARCHITECTURE.md)
 
-> Start here → repo [`AGENTS.md`](../../../../AGENTS.md). Under [`epic.md`](./epic.md) ↔ plan [`implementation-plan-w1.md`](./implementation-plan-w1.md); implements [`../../design/feature-design.md`](../../design/feature-design.md).
+> Start here → repo [`AGENTS.md`](../../../../../AGENTS.md). Under [`epic.md`](./epic.md) ↔ plan [`implementation-plan-w1.md`](./implementation-plan-w1.md); implements [`../../design/feature-design.md`](../../design/feature-design.md).
 
 ## Metadata
 | Field | Value |
@@ -12,7 +12,7 @@
 | Task type | UI |
 | Target repo(s) / module(s) | `webex/webex-widgets` · `@webex/cc-components` |
 | Tracker key | WXCC-15791 |
-| State | merged |
+| State | implemented |
 | Generated from | `task` @ SDLC template library `0.2.0` |
 
 ## Source Mapping
@@ -37,12 +37,12 @@
 | W1 | — | — | 1 |
 
 ## Acceptance Criteria
-- [ ] GranularAgentState components render pill, preview, menu, and manage view.
-- [ ] Component + types + utils + `AVAILABLE_AUX_CODE_ID` exported from `cc-components/src/index.ts`.
-- [ ] V1 `UserState` components unchanged.
+- [x] GranularAgentState components render pill, preview, menu, and manage view.
+- [x] Component + types + utils + `AVAILABLE_AUX_CODE_ID` exported from `cc-components/src/index.ts`.
+- [x] V1 `UserState` components unchanged.
 
 ## Verifier Exit Criteria
-- [ ] `cc-components` builds; exports importable by the granular package.
+- [x] `cc-components` builds; exports importable by the granular package.
 
 ## Traceability
 | Requirement | Code symbol | Test |

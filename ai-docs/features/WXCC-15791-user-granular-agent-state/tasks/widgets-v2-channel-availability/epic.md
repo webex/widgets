@@ -1,8 +1,8 @@
 # Epic — Widgets V2 Granular Agent State
 
-> **Navigation:** [AGENTS.md](../../../../AGENTS.md) → [SPEC_INDEX.md](../../../../SPEC_INDEX.md) → [ARCHITECTURE.md](../../../../ARCHITECTURE.md)
+> **Navigation:** [AGENTS.md](../../../../../AGENTS.md) → [SPEC_INDEX.md](../../../../../ai-docs/SPEC_INDEX.md) → [ARCHITECTURE.md](../../../../../ai-docs/ARCHITECTURE.md)
 
-> Start here → repo [`AGENTS.md`](../../../../AGENTS.md) · router [`SPEC_INDEX.md`](../../../../SPEC_INDEX.md). Delivers [`../../design/feature-design.md`](../../design/feature-design.md); child tasks → [`task-w1.md`](./task-w1.md), [`task-w2.md`](./task-w2.md), [`task-w3.md`](./task-w3.md).
+> Start here → repo [`AGENTS.md`](../../../../../AGENTS.md) · router [`SPEC_INDEX.md`](../../../../../ai-docs/SPEC_INDEX.md). Delivers [`../../design/feature-design.md`](../../design/feature-design.md); child tasks → [`task-w1.md`](./task-w1.md), [`task-w2.md`](./task-w2.md), [`task-w3.md`](./task-w3.md).
 
 ## Metadata
 | Field | Value |
@@ -11,11 +11,11 @@
 | Parent feature | [`../../design/feature-design.md`](../../design/feature-design.md) (and [`../../spec/feature-spec.md`](../../spec/feature-spec.md)) |
 | Service group / capability | V2 per-channel agent-state widget |
 | Tracker / Epic key | WXCC-15791 |
-| Status | ready |
+| Status | implemented |
 | Generated from | `epic` @ SDLC template library `0.2.0` |
 
 ## Scope — the slice of the design this epic delivers
-A separate V2 widget mirroring the V1 `user-state` hierarchy: cc-components presentational layer, the `@webex/cc-granular-agent-state` package, the additive store V2 surface, and r2wc registration. The React sample is a follow-up. The V1 `user-state` widget is untouched. Lands as one PR.
+A separate V2 widget mirroring the V1 `user-state` hierarchy: cc-components presentational layer, the `@webex/cc-granular-agent-state` package, the additive store V2 surface, r2wc registration, and React sample integration. V1 `user-state` interactions remain intact; the SDK response timestamp read is guarded for response compatibility.
 
 ## Mapped Design Sections
 | Feature design section | What this epic delivers |
@@ -33,7 +33,7 @@ A separate V2 widget mirroring the V1 `user-state` hierarchy: cc-components pres
 ## Baseline vs This Epic
 | Capability | Already shipped (baseline) | Added by this epic |
 |---|---|---|
-| V1 `user-state` widget | yes (unchanged) | — |
+| V1 `user-state` UI flow | yes (preserved) | timestamp response guard only |
 | V2 per-channel widget + store surface | — | this epic |
 
 ## Child Tasks
@@ -56,5 +56,5 @@ A separate V2 widget mirroring the V1 `user-state` hierarchy: cc-components pres
 3. Enable `manageChannelAvailability` on agent profiles progressively.
 
 ## Exit Criteria
-- [ ] V2 widget registered + exported; store V2 surface wired; V1 `user-state` unchanged.
-- [ ] Build chain green; store + granular package unit suites green.
+- [x] V2 widget registered + exported; store V2 surface wired; V1 `user-state` interaction flow preserved.
+- [x] Build chain green; store + granular package unit suites green.

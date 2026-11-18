@@ -9,6 +9,7 @@ import {
   granularAgentStateLabels,
 } from './constant';
 import {ChannelStateInfo, GranularAgentStateValue, SelectableChannelType} from './granular-agent-state.types';
+import {AgentUserState} from '../UserState/user-state.types';
 
 type ChannelStatesMap = Partial<Record<ChannelType, AgentChannelTypeStates>>;
 
@@ -89,6 +90,7 @@ export const getSelectableIdleCodes = (idleCodes: IdleCode[]): IdleCode[] => {
     (code) =>
       code.id !== AVAILABLE_AUX_CODE_ID &&
       code.name !== AGENT_STATE_AVAILABLE &&
+      code.name !== AgentUserState.Engaged &&
       !nonSelectableNames.includes(code.name)
   );
 };

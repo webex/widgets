@@ -1,6 +1,6 @@
 # Test Strategy — WXCC-15791: Granular Agent State Control V2 (Widgets)
 
-> **Navigation:** [AGENTS.md](../../AGENTS.md) → [SPEC_INDEX.md](../../SPEC_INDEX.md) → [ARCHITECTURE.md](../../ARCHITECTURE.md)
+> **Navigation:** [AGENTS.md](../../../AGENTS.md) → [SPEC_INDEX.md](../../SPEC_INDEX.md) → [ARCHITECTURE.md](../../ARCHITECTURE.md)
 
 > Test plan for [`spec/feature-spec.md`](./spec/feature-spec.md) / [`design/feature-design.md`](./design/feature-design.md).
 
@@ -42,11 +42,11 @@ Deferred (follow-up): React sample app manual verification against a V2 tenant.
 ## Coverage Summary
 | Area | Status |
 |---|---|
-| store V2 surface | `store/tests/store.ts` 32 tests pass (incl. V2 surface tests for `refreshAgentStateControl` scenarios) |
+| store V2 surface | `store/tests/store.ts` covers defaults and `refreshAgentStateControl` scenarios |
 | store event wiring | `store/tests/storeEventsWrapper.ts` covers V2 event handlers (`handleChannelStateChange`, `handleChannelStateChangeFailed`, channel relogin registration) |
-| granular package | 13 tests pass (10 in `tests/helper.ts` + 3 in `tests/granular-agent-state/index.tsx`) |
+| granular package | Hook tests cover state changes, no-op requests, SDK rejection, and worker lifecycle; widget tests cover V1/V2 gating and error handling |
 | build chain | store/cc-components/granular-agent-state/cc-widgets build clean |
 
 ## Gaps / Risks
-- cc-components has a **pre-existing, environmental** suite failure (SDK `WELLNESS_BREAK_NOTIFICATION_ACTIONS` resolution under jest) unrelated to this feature; V2 component logic is validated by the granular package tests + build.
-- E2E and sample preference migration coverage are follow-ups.
+- The current PR checks pass the consumer build matrix. Manual end-to-end login and behavior against a V2 tenant have not been verified in this test strategy.
+- E2E automation and manual sample-app verification against a V2 tenant remain follow-ups; sample preference migration is implemented but has no dedicated automated test.

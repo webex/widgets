@@ -1,6 +1,6 @@
 # Contract — Granular Agent State Widget
 
-> **Navigation:** [AGENTS.md](../../../../AGENTS.md) → [SPEC_INDEX.md](../../../../SPEC_INDEX.md) → [ARCHITECTURE.md](../../../../ARCHITECTURE.md)
+> **Navigation:** [AGENTS.md](../../../../../AGENTS.md) → [SPEC_INDEX.md](../../../../SPEC_INDEX.md) → [ARCHITECTURE.md](../../../../ARCHITECTURE.md)
 
 > Interface contract for [`../feature-design.md`](../feature-design.md); product delta in [`../../spec/feature-spec.md`](../../spec/feature-spec.md).
 
@@ -10,7 +10,7 @@
 | Interface | `@webex/cc-granular-agent-state` + `widget-cc-granular-agent-state` + cc-components exports |
 | Direction | host → widget → store/components |
 | Change | ADDED (new package + exports) |
-| Semver | new package 1.0.0; cc-components/cc-widgets minor |
+| Semver | new package, cc-components and cc-widgets: `1.28.0-ccwidgets.126` |
 | Kind | observable |
 | Producer | Widget `granular-agent-state/index.tsx` (observer gate), `helper.ts` (`useGranularAgentState` hook) |
 | Consumer(s) | Host integrators (via `widget-cc-granular-agent-state` custom element or React `GranularAgentState` export) |
@@ -28,7 +28,7 @@ A new standalone V2 widget mirroring the V1 `user-state` hierarchy: presentation
 
 ## Behavior
 - The widget is a mobx-react-lite `observer` wrapped in `react-error-boundary`; it renders the component only when `store.isGranularAgentStateActive`, else `null` (hook never runs).
-- Apply sends only changed channels (one Available request, then one Idle request using the last-set idle code). Idle is not sent when Available fails. If no idle code exists, the request is skipped, an error is logged, and the panel stays open. `onStateChange` represents request acceptance; confirmed state arrives via store refresh on `agent:channelStateChange`.
+- Manage Apply sends only changed channels (one Available request, then one Idle request using the last-set idle code). If Available fails, Idle is not sent; if no idle code exists, the Idle request is skipped. Both cases show an error banner and keep the Manage view open. Set-all menu actions close the menu when initiated; request failures are logged by the hook. `onStateChange` represents request acceptance; confirmed state arrives via store refresh on `agent:channelStateChange`.
 - Component errors route to `store.onErrorCallback('GranularAgentState', error)`.
 
 ## Error / Failure Catalog
@@ -39,7 +39,7 @@ A new standalone V2 widget mirroring the V1 `user-state` hierarchy: presentation
 | Component render error | `ErrorBoundary` empty fallback + `onErrorCallback` |
 
 ## Backward Compatibility
-V1 `user-state` widget and `widget-cc-user-state` are untouched; the host selects V1 vs V2.
+V1 `user-state` interactions and `widget-cc-user-state` remain intact; response timestamp access is guarded for SDK response compatibility. The host selects V1 vs V2 from the SDK-backed store state.
 
 ## Validation
 `granular-agent-state/tests/*` (gate, hook) and `cc-components` component tests; cc-widgets build verifies r2wc registration types.

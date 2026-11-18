@@ -1,6 +1,6 @@
 # Implementation Plan — W3: Tests & Sample App
 
-> **Navigation:** [AGENTS.md](../../../../AGENTS.md) → [SPEC_INDEX.md](../../../../SPEC_INDEX.md) → [ARCHITECTURE.md](../../../../ARCHITECTURE.md)
+> **Navigation:** [AGENTS.md](../../../../../AGENTS.md) → [SPEC_INDEX.md](../../../../../ai-docs/SPEC_INDEX.md) → [ARCHITECTURE.md](../../../../../ai-docs/ARCHITECTURE.md)
 
 > Plan for [`task-w3.md`](./task-w3.md) under [`epic.md`](./epic.md).
 
@@ -24,10 +24,10 @@ Runs under existing Jest configs; build chain must stay green.
 Test-only + sample-only; no production impact.
 
 ## Implementation Caveats
-cc-components has a pre-existing, environmental suite failure (SDK `WELLNESS_BREAK_NOTIFICATION_ACTIONS` resolution under jest) that is out of scope; V2 component logic is covered by the granular package tests + build.
+The PR checks include passing consumer build jobs for esbuild, parcel, rollup, vite, and webpack. Manual login and behavior against a V2 tenant remain to be verified.
 
 ## Manual Validation
-`store/tests/store.ts` 19/19 and granular 12/12 pass; build chain clean.
+Store and granular package unit suites pass; the build chain is clean.
 
 ## AI Docs Impact
 Update [`../../test-strategy.md`](../../test-strategy.md) status.
@@ -39,7 +39,6 @@ Update [`../../test-strategy.md`](../../test-strategy.md) status.
 
 - No production log/metric changes (test-only task).
 - Verify store V2 surface tests exercise `refreshAgentStateControl()` warn-level logging on getter failure.
-- Sample app logs widget selection (`GranularAgentState` vs `UserState`) to the browser console for debugging.
 
 ## PR Split Strategy
 
@@ -49,5 +48,5 @@ Update [`../../test-strategy.md`](../../test-strategy.md) status.
 
 ## Documentation Updates
 
-- Update [`../../test-strategy.md`](../../test-strategy.md) status to reflect merged test results.
+- Update [`../../test-strategy.md`](../../test-strategy.md) with the available test and CI results.
 - Document sample app V2 widget rendering behavior in the sample app README if present.

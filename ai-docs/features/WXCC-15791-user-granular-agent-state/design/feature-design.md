@@ -1,6 +1,6 @@
 # Feature Design — WXCC-15791: Granular Agent State Control V2 (Widgets)
 
-> **Navigation:** [AGENTS.md](../../../AGENTS.md) → [SPEC_INDEX.md](../../../SPEC_INDEX.md) → [ARCHITECTURE.md](../../../ARCHITECTURE.md)
+> **Navigation:** [AGENTS.md](../../../../AGENTS.md) → [SPEC_INDEX.md](../../../SPEC_INDEX.md) → [ARCHITECTURE.md](../../../ARCHITECTURE.md)
 
 > Start here → repo [`AGENTS.md`](../../../../AGENTS.md) · router [`SPEC_INDEX.md`](../../../SPEC_INDEX.md). Implements [`../spec/feature-spec.md`](../spec/feature-spec.md); contracts [`contracts/`](./contracts/); tasks [`../tasks/widgets-v2-channel-availability/epic.md`](../tasks/widgets-v2-channel-availability/epic.md).
 
@@ -8,12 +8,12 @@
 | Field | Value |
 |---|---|
 | Feature key | WXCC-15791 |
-| Status | implementation-ready |
+| Status | implemented |
 | Change class | contract-affecting + ui |
 | Generated from | `feature-design` @ SDLC template library `0.2.0` |
 
 ## Executive Summary
-A new V2 widget is added as a standalone package that mirrors the existing V1 `user-state` widget hierarchy: a presentational layer in `@webex/cc-components` (`GranularAgentState/`), a container package `@webex/cc-granular-agent-state` (observer widget + `ErrorBoundary` gate + hook), and r2wc registration in `@webex/cc-widgets`. The MobX store gains a small additive V2 surface. The V1 `user-state` widget is untouched; the host renders V1 or V2 based on `store.isGranularAgentStateActive`.
+A V2 widget is implemented as a standalone package that mirrors the V1 `user-state` hierarchy: a presentational layer in `@webex/cc-components` (`GranularAgentState/`), a container package `@webex/cc-granular-agent-state` (observer widget + `ErrorBoundary` gate + hook), and r2wc registration in `@webex/cc-widgets`. The MobX store gains an additive V2 surface. V1 UI behavior remains intact; its response timestamp access now checks that the SDK response contains the expected field. The host/sample renders V1 or V2 based on `store.isGranularAgentStateActive`.
 
 ## Scenario → Design Map
 | Scenario (spec) | Design element |
@@ -35,12 +35,12 @@ Host → `@webex/cc-widgets` (web components / React) → widget packages → `@
 - **Registration** (`cc-widgets/`): `wc.ts` r2wc `widget-cc-granular-agent-state`, `index.ts` re-export, `package.json` dep.
 
 ## Object-Model Changes
-Store adds `isGranularAgentStateActive: boolean`, `channelStatesMap: Partial<Record<ChannelType, AgentChannelTypeStates>>`, and `refreshAgentStateControl(): void`; `store.types.ts` re-exports the SDK V2 types and declares optional V2 getters on `IContactCenter` + the new fields on `IStore`; `CC_EVENTS` gains `AGENT_CHANNEL_STATE_CHANGE`/`AGENT_CHANNEL_RELOGIN_SUCCESS`. Per-channel capacity is available via `channelStatesMap[channelType].totalChannelCount`.
+Store adds `isGranularAgentStateActive: boolean`, `channelStatesMap: Partial<Record<ChannelType, AgentChannelTypeStates>>`, and `refreshAgentStateControl(): void`; `store.types.ts` defines store-owned V2 compatibility shapes aligned with the SDK and declares optional V2 getters on `IContactCenter` plus the new fields on `IStore`; `CC_EVENTS` gains `AGENT_CHANNEL_STATE_CHANGE`/`AGENT_CHANNEL_RELOGIN_SUCCESS`. Per-channel capacity is available via `channelStatesMap[channelType].totalChannelCount`.
 
 ## Design Decisions & Rationale
 | Decision | Rationale |
 |---|---|
-| New package `@webex/cc-granular-agent-state`, V1 `user-state` untouched | Clean separation; V1 agents see zero change; independent versioning/testing |
+| New package `@webex/cc-granular-agent-state`, preserving V1 `user-state` interactions | Clean separation; V1 agents retain existing UI behavior; independent versioning/testing |
 | Follow the exact V1 widget hierarchy (components → package → r2wc) | Consistency and easy human review |
 | Hook calls `cc.setAgentState({channelType})` directly (no store `setAgentStateV2`) | Same pattern as `useUserState`; the SDK routes by session version |
 | Gate only on `store.isGranularAgentStateActive` | The SDK already pins the version; a second flag could disagree |
@@ -68,7 +68,7 @@ Pill + hover preview + state menu + manage view; only channels with capacity > 0
 ## HA & Failure-Condition Matrix
 | Condition | Handling |
 |---|---|
-| State change fails | Store logs `agent:channelStateChangeFailed`; no optimistic mutation |
+| State change fails | Store logs `agent:channelStateChangeFailed`; no optimistic mutation. Manage Apply shows an error banner and retains the draft; set-all menu actions log the request failure. |
 | Getter throws in refresh | Keep previous values; single-publish rule |
 | Component error | `ErrorBoundary` empty fallback + `store.onErrorCallback('GranularAgentState', err)` |
 | V1 session | Widget renders null |
@@ -87,7 +87,7 @@ See [`../test-strategy.md`](../test-strategy.md): store-surface unit tests, comp
 | W-R-3..7 | manage view + utils | ✅ |
 | W-R-8 | observer gate | ✅ |
 | W-R-9 | r2wc + export | ✅ |
-| W-R-10 | sample app | follow-up, not in this change |
+| W-R-10 | sample app | `App.tsx` integrates the V2 widget and preserves newly added selections when restoring saved preferences |
 | W-R-11/12 | pill/preview/menu | ✅ |
 
 ## References / Traceability
@@ -97,7 +97,7 @@ See [`../test-strategy.md`](../test-strategy.md): store-surface unit tests, comp
 ## Feature-Toggle Strategy
 
 Granular agent state is controlled by the `manageChannelAvailability` flag on the agent profile.
-- When `true` (or host-declared eligible), the SDK pins the session to V2 and uses per-channel endpoints.
+- When `true`, the SDK pins the session to V2 and uses per-channel endpoints; the host does not provide a separate eligibility flag.
 - When `false` or absent, the SDK falls back to V1 agent-wide state management.
 - The toggle is evaluated once at login and cannot change mid-session.
 - Widget rendering is gated by `store.isGranularAgentStateActive`.

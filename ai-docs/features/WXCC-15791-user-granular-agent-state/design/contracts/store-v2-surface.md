@@ -1,6 +1,6 @@
 # Contract — Store V2 Surface
 
-> **Navigation:** [AGENTS.md](../../../../AGENTS.md) → [SPEC_INDEX.md](../../../../SPEC_INDEX.md) → [ARCHITECTURE.md](../../../../ARCHITECTURE.md)
+> **Navigation:** [AGENTS.md](../../../../../AGENTS.md) → [SPEC_INDEX.md](../../../../SPEC_INDEX.md) → [ARCHITECTURE.md](../../../../ARCHITECTURE.md)
 
 > Interface contract for [`../feature-design.md`](../feature-design.md); product delta in [`../../spec/feature-spec.md`](../../spec/feature-spec.md).
 
@@ -42,7 +42,7 @@ refreshAgentStateControl(): void; // reads cc.getAgentStateControl().active,
 ## Error / Failure Catalog
 | Condition | Behavior |
 |---|---|
-| A getter throws | Keep previous values. All three fields are read before any assignment. |
+| A getter throws | Keep the previous observable values. The action reads the SDK active flag and channel-state map into locals before assigning either observable. |
 | `agent:channelStateChangeFailed` | Logged, then `refreshAgentStateControl()`. No optimistic write. |
 
 ## Backward Compatibility

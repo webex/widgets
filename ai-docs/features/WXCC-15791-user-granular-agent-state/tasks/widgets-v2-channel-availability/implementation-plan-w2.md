@@ -1,6 +1,6 @@
 # Implementation Plan — W2: Store V2 Surface, Package & Registration
 
-> **Navigation:** [AGENTS.md](../../../../AGENTS.md) → [SPEC_INDEX.md](../../../../SPEC_INDEX.md) → [ARCHITECTURE.md](../../../../ARCHITECTURE.md)
+> **Navigation:** [AGENTS.md](../../../../../AGENTS.md) → [SPEC_INDEX.md](../../../../../ai-docs/SPEC_INDEX.md) → [ARCHITECTURE.md](../../../../../ai-docs/ARCHITECTURE.md)
 
 > Plan for [`task-w2.md`](./task-w2.md) under [`epic.md`](./epic.md).
 
@@ -13,7 +13,7 @@ Add the additive store V2 surface, the `@webex/cc-granular-agent-state` package,
 
 ## Proposed Approach & Sequencing
 1. `store.ts`: add the two observables + `refreshAgentStateControl()` (reads `cc.getAgentStateControl().active`/`getChannelStates()`); call it in `registerCC`.
-2. `store.types.ts`: re-export SDK V2 types; add V2 getters to `IContactCenter`; add fields to `IStore`; add `CC_EVENTS` channel events.
+2. `store.types.ts`: define store-owned V2 compatibility types aligned with the SDK shapes; add V2 getters to `IContactCenter`; add fields to `IStore`; add `CC_EVENTS` channel events.
 3. `storeEventsWrapper.ts`: add getters + `handleChannelStateChange` (on `AGENT_CHANNEL_STATE_CHANGE`) + `handleChannelStateChangeFailed` (on `AGENT_CHANNEL_STATE_CHANGE_FAILED`); wire `agent:channelStateChange`/`agent:channelStateChangeFailed` on/off in `addEventListeners`/`removeEventListeners`; wire `agent:channelReloginSuccess` via `bootstrapSession` forEach loop; refresh on login/relogin; reset in `cleanUpStore`.
 4. `granular-agent-state` package: observer widget + ErrorBoundary gate + `useGranularAgentState` hook + types + index.
 5. `cc-widgets`: r2wc `widget-cc-granular-agent-state` in `wc.ts`, re-export in `index.ts`, add the package dependency.
@@ -22,7 +22,7 @@ Add the additive store V2 surface, the `@webex/cc-granular-agent-state` package,
 Store surface per [`../../design/contracts/store-v2-surface.md`](../../design/contracts/store-v2-surface.md); widget per [`granular-agent-state-widget.md`](../../design/contracts/granular-agent-state-widget.md).
 
 ## Backward-Compat / Rollback
-Additive; V1 surface + `user-state` widget unchanged. Rollback = remove the package + store V2 surface.
+Additive; V1 surface and `user-state` UI flow remain intact (the helper defensively checks the response timestamp field). Rollback = remove the package + store V2 surface.
 
 ## Build / CI / Deployment Impact
 `yarn install` links the new workspace dependency; build order store → cc-components → granular-agent-state → cc-widgets. Widgets build against the SDK V2 types (local dist until the SDK publishes).

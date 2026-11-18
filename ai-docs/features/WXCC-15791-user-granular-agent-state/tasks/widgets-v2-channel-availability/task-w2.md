@@ -1,8 +1,8 @@
 # Task — W2: Store V2 Surface, Widget Package & r2wc Registration
 
-> **Navigation:** [AGENTS.md](../../../../AGENTS.md) → [SPEC_INDEX.md](../../../../SPEC_INDEX.md) → [ARCHITECTURE.md](../../../../ARCHITECTURE.md)
+> **Navigation:** [AGENTS.md](../../../../../AGENTS.md) → [SPEC_INDEX.md](../../../../../ai-docs/SPEC_INDEX.md) → [ARCHITECTURE.md](../../../../../ai-docs/ARCHITECTURE.md)
 
-> Start here → repo [`AGENTS.md`](../../../../AGENTS.md). Under [`epic.md`](./epic.md) ↔ plan [`implementation-plan-w2.md`](./implementation-plan-w2.md); implements [`../../design/feature-design.md`](../../design/feature-design.md).
+> Start here → repo [`AGENTS.md`](../../../../../AGENTS.md). Under [`epic.md`](./epic.md) ↔ plan [`implementation-plan-w2.md`](./implementation-plan-w2.md); implements [`../../design/feature-design.md`](../../design/feature-design.md).
 
 ## Metadata
 | Field | Value |
@@ -12,7 +12,7 @@
 | Task type | UI |
 | Target repo(s) / module(s) | `webex/webex-widgets` · `@webex/cc-store`, `@webex/cc-granular-agent-state`, `@webex/cc-widgets` |
 | Tracker key | WXCC-15791 |
-| State | merged |
+| State | implemented |
 | Generated from | `task` @ SDLC template library `0.2.0` |
 
 ## Source Mapping
@@ -20,7 +20,7 @@
 
 ## Primary Code Touchpoints
 - `store/src/store.ts` — observables `isGranularAgentStateActive`/`channelStatesMap` + `refreshAgentStateControl()`; refresh in `registerCC`.
-- `store/src/store.types.ts` — re-export SDK V2 types; `IContactCenter` V2 getters; `IStore` fields; `CC_EVENTS` channel events.
+- `store/src/store.types.ts` — store-owned V2 compatibility types aligned with SDK shapes; `IContactCenter` V2 getters; `IStore` fields; `CC_EVENTS` channel events.
 - `store/src/storeEventsWrapper.ts` — getters, `handleChannelStateChange` (on `AGENT_CHANNEL_STATE_CHANGE`: refreshes state), `handleChannelStateChangeFailed` (on `AGENT_CHANNEL_STATE_CHANGE_FAILED`: logs error and refreshes state), event wiring (on/off in `addEventListeners`/`removeEventListeners`), `AGENT_CHANNEL_RELOGIN_SUCCESS` wired via `bootstrapSession` forEach loop (refreshes profile/team/state), reset in `cleanUpStore`.
 - `granular-agent-state/src/` — `granular-agent-state/index.tsx` (observer + ErrorBoundary gate), `helper.ts` (`useGranularAgentState`), `granular-agent-state.types.ts`, `index.ts`.
 - `cc-widgets/src/wc.ts` — `r2wc(GranularAgentState, {props:{onStateChange:'function'}})` + `widget-cc-granular-agent-state`; `cc-widgets/src/index.ts` export; `cc-widgets/package.json` dependency.
@@ -40,12 +40,12 @@
 | W2 | W1 | — | 2 |
 
 ## Acceptance Criteria
-- [ ] Store exposes the V2 observables + `refreshAgentStateControl()`; refreshes on lifecycle/events; resets on logout.
-- [ ] `@webex/cc-granular-agent-state` renders only when `store.isGranularAgentStateActive`.
-- [ ] `widget-cc-granular-agent-state` registered + React-exported; dependency added.
+- [x] Store exposes the V2 observables + `refreshAgentStateControl()`; refreshes on lifecycle/events; resets on logout.
+- [x] `@webex/cc-granular-agent-state` renders only when `store.isGranularAgentStateActive`.
+- [x] `widget-cc-granular-agent-state` registered + React-exported; dependency added.
 
 ## Verifier Exit Criteria
-- [ ] Build chain store → cc-components → granular-agent-state → cc-widgets compiles clean.
+- [x] Build chain store → cc-components → granular-agent-state → cc-widgets compiles clean.
 
 ## Traceability
 | Requirement | Code symbol | Test |

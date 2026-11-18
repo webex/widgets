@@ -1,8 +1,8 @@
 # Task — W3: Unit Tests & Sample App Integration
 
-> **Navigation:** [AGENTS.md](../../../../AGENTS.md) → [SPEC_INDEX.md](../../../../SPEC_INDEX.md) → [ARCHITECTURE.md](../../../../ARCHITECTURE.md)
+> **Navigation:** [AGENTS.md](../../../../../AGENTS.md) → [SPEC_INDEX.md](../../../../../ai-docs/SPEC_INDEX.md) → [ARCHITECTURE.md](../../../../../ai-docs/ARCHITECTURE.md)
 
-> Start here → repo [`AGENTS.md`](../../../../AGENTS.md). Under [`epic.md`](./epic.md) ↔ plan [`implementation-plan-w3.md`](./implementation-plan-w3.md); implements [`../../design/feature-design.md`](../../design/feature-design.md).
+> Start here → repo [`AGENTS.md`](../../../../../AGENTS.md). Under [`epic.md`](./epic.md) ↔ plan [`implementation-plan-w3.md`](./implementation-plan-w3.md); implements [`../../design/feature-design.md`](../../design/feature-design.md).
 
 ## Metadata
 | Field | Value |
@@ -12,7 +12,7 @@
 | Task type | validation |
 | Target repo(s) / module(s) | `webex/webex-widgets` · `store`, `granular-agent-state`, `cc-components`, `samples-cc-react-app` |
 | Tracker key | WXCC-15791 |
-| State | merged |
+| State | implemented |
 | Generated from | `task` @ SDLC template library `0.2.0` |
 
 ## Source Mapping
@@ -39,12 +39,12 @@
 | W3 | W1, W2 | — | 3 |
 
 ## Acceptance Criteria
-- [ ] Store surface + event tests pass; granular package tests pass.
-- [ ] Sample renders the V2 widget for V2 sessions, V1 otherwise.
-- [ ] Build chain green.
+- [x] Store surface + event tests pass; granular package tests pass.
+- [x] Sample renders the V2 widget for V2 sessions, V1 otherwise.
+- [x] Build chain green.
 
 ## Verifier Exit Criteria
-- [ ] `store/tests/store.ts` 19/19 and granular 12/12 pass; build chain clean. V1 `user-state` suite unchanged.
+- [x] Store and granular package suites pass; build chain clean. V1 `user-state` interaction flow remains intact.
 
 ## Traceability
 | Requirement | Code symbol | Test |
@@ -59,8 +59,7 @@
 ## Non-Goals
 
 - Modifying production store, component, or widget package code (owned by W1/W2).
-- Fixing pre-existing cc-components environmental test failures (SDK `WELLNESS_BREAK_NOTIFICATION_ACTIONS` resolution).
-- Automating E2E tests for the sample app; sample validation is manual.
+- Automating E2E tests for the sample app; V2 tenant validation is manual and remains outstanding.
 - Achieving 100% branch coverage; focus is on passing the per-package gates.
 - Testing SDK-layer V2 behavior (owned by SDK repo T3).
 

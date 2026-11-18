@@ -1,6 +1,6 @@
 # Feature Spec — WXCC-15791: Granular Agent State Control V2 (Widgets)
 
-> **Navigation:** [AGENTS.md](../../../AGENTS.md) → [SPEC_INDEX.md](../../../SPEC_INDEX.md) → [ARCHITECTURE.md](../../../ARCHITECTURE.md)
+> **Navigation:** [AGENTS.md](../../../../AGENTS.md) → [SPEC_INDEX.md](../../../SPEC_INDEX.md) → [ARCHITECTURE.md](../../../ARCHITECTURE.md)
 
 > Start here → repo [`AGENTS.md`](../../../../AGENTS.md) · router [`SPEC_INDEX.md`](../../../SPEC_INDEX.md) · architecture [`ARCHITECTURE.md`](../../../ARCHITECTURE.md). Then design [`feature-design.md`](../design/feature-design.md) → contracts [`design/contracts/`](../design/contracts/) → tests [`test-strategy.md`](../test-strategy.md) → tasks [`tasks/widgets-v2-channel-availability/epic.md`](../tasks/widgets-v2-channel-availability/epic.md).
 > **Cross-repo dependency:** consumes the SDK V2 surface in `webex-js-sdk/packages/@webex/contact-center/ai-docs/features/WXCC-15791-user-granular-agent-state/`; the SDK work must land/publish first.
@@ -10,14 +10,14 @@
 |---|---|
 | Feature / ticket key | WXCC-15791 |
 | Title | Granular Agent State Control V2 (Widgets) |
-| Status | implemented (feature branch) |
+| Status | implemented |
 | Change class | contract-affecting + ui |
 | created_by / approved_by / date | SDD intake / — / 2026-09-21 |
 | Generated from | `feature-spec` @ SDLC template library `0.2.0` |
 
 ## Problem & Goal (WHAT + WHY)
 **What:** Add a new `widget-cc-granular-agent-state` widget (separate package, same architectural hierarchy as the V1 `user-state` widget) that renders a per-channel agent-state selector — header pill, hover preview, state menu, and a "Manage channel availability" view — reading the SDK's V2 per-channel data through the MobX store.
-**Why:** Blended agents need to be Available on some channels (e.g. Chat) while Idle on others (e.g. Voice). The V1 `user-state` widget only sets one global state. A separate V2 widget delivers per-channel control while leaving the V1 widget completely unchanged; the SDK-pinned session version selects which one the host renders.
+**Why:** Blended agents need to be Available on some channels (e.g. Chat) while Idle on others (e.g. Voice). The V1 `user-state` widget only sets one global state. A separate V2 widget delivers per-channel control while preserving the V1 UI and interaction flow; the SDK-pinned session version selects which one the host renders. The V1 helper also guards access to response timestamp fields.
 
 ## Stakeholders & Open Questions
 | Stakeholder / role | Interest | Sign-off needed? |
@@ -35,13 +35,13 @@
 - **cc-components** `GranularAgentState/` presentational components (pill, avatar, preview, state menu, manage view) + types + utils, exported from `cc-components/src/index.ts`.
 - **New `@webex/cc-granular-agent-state` package**: observer widget + `ErrorBoundary` gate + `useGranularAgentState` hook + types.
 - **cc-widgets**: r2wc registration of `widget-cc-granular-agent-state` + React re-export + package dependency.
-- React sample app integration is a follow-up (W-R-10). It is not in this change.
+- React sample app integration, including selection persistence for the new widget, is in scope (W-R-10).
 - Unit tests for store additions, components, hook, and widget.
 
 **Out of scope:**
 - Any change to the V1 `user-state` widget behavior/appearance.
-- Per-channel idle-code selection UI, RONA/`pendingIdle` UX, WebRTC-disconnect handling.
-- i18n (English label constants), WC sample app, E2E Playwright (follow-ups).
+- Independent idle-code selection for each channel in the Manage view, RONA/`pendingIdle` UX, WebRTC-disconnect handling.
+- i18n (English label constants), WC sample app, E2E Playwright (follow-ups). The React sample app integration is included.
 - SDK/backend changes.
 
 **Open decisions:** none.
@@ -54,7 +54,7 @@
 | W-R-3 | `ManageChannelAvailability` renders Back + header, an "All" row, and per-channel rows for configured channels (Voice, Chat, Email, Social; capacity > 0). | Visual per-channel control, desktop parity. | Rows match configured channels. | Implemented |
 | W-R-4 | Each channel row shows icon, name, "State : {displayState}", and a Momentum `Toggle` (ON only when `agentState === 'Available' && !pendingIdle`). RONA, Engaged, and WrapUp are OFF so the agent can set them Available. | A non-Idle state is not the same as Available. | Icon/name/label/toggle per row. | Implemented |
 | W-R-5 | "All" toggle sets every channel to one target locally; its checked state derives from the per-channel toggles. | Quick set-all, single source of truth. | "All" reflects individual toggles. | Implemented |
-| W-R-6 | Apply is disabled until a toggle differs (or a request is in flight); sends only changed channels — one Available request, then one Idle request using the last-set idle code. SDK updates merge into the view baseline without discarding channel choices not yet confirmed by the server. If Available fails, Idle is not sent and the panel stays open. If there is no idle code, the Idle request is skipped, an error is logged, and the panel stays open. | A failed or partial request must not erase the remaining channel choices. | Changed-only payload; Idle runs only after Available succeeds; unconfirmed choices remain editable after state updates. | Implemented |
+| W-R-6 | Apply is disabled until a toggle differs (or a request is in flight); sends only changed channels — one Available request, then one Idle request using the last-set idle code. SDK updates merge into the view baseline without discarding channel choices not yet confirmed by the server. If Available fails, Idle is not sent; if there is no idle code, the Idle request is skipped. In either case the Manage view stays open and shows an error banner. | A failed or partial request must not erase the remaining channel choices. | Changed-only payload; Idle runs only after Available succeeds; unconfirmed choices remain editable after state updates. | Implemented |
 | W-R-7 | Cancel/Back discard local changes and return to the menu with no API calls. | Undo without side effects. | No calls on cancel. | Implemented |
 | W-R-8 | Widget renders only when `store.isGranularAgentStateActive`; otherwise `null` and the hook never runs. Host chooses `UserState` (V1) vs `GranularAgentState` (V2). | V1 agents see no change. | Renders null on V1. | Implemented |
 | W-R-9 | Registered as `widget-cc-granular-agent-state` via r2wc in `cc-widgets/src/wc.ts` (`onStateChange:'function'`) and re-exported from `cc-widgets/src/index.ts`. | WC + React consumption paths. | Element registered; React export present. | Implemented |
@@ -88,9 +88,9 @@
 
 ## Contracts Delta
 **Provides:** ADDED `widget-cc-granular-agent-state` custom element + `GranularAgentState` React export; ADDED (minimal cc-components surface) `GranularAgentStateComponent` + granular types + the four utils `getSelectableChannelTypes`/`buildChannelStates`/`getChannelsToChange`/`getLastSetIdleCode` + `AVAILABLE_AUX_CODE_ID`; ADDED store observables `isGranularAgentStateActive`/`channelStatesMap` + action `refreshAgentStateControl()`.
-**Requires:** SDK V2 events (`agent:channelStateChange`, `agent:channelReloginSuccess`, `agent:channelStateChangeFailed`), types (`ChannelType`, `AgentChannelTypeStates`, `AgentStateControlStatus`), and methods (`cc.getAgentStateControl/getChannelStates`, `cc.setAgentState({channelType?})`). Session gate: profile `manageChannelAvailability` OR host `isGranularAgentStateEnabled` → `getAgentStateControl().active`.
+**Requires:** SDK V2 events (`agent:channelStateChange`, `agent:channelReloginSuccess`, `agent:channelStateChangeFailed`), types (`ChannelType`, `AgentChannelTypeStates`, `AgentStateControlStatus`), and methods (`cc.getAgentStateControl/getChannelStates`, `cc.setAgentState({channelType?})`). The SDK uses the agent profile's `manageChannelAvailability` to select the session version; the widget reads `getAgentStateControl().active` through the store as its render gate. There is no separate host `isGranularAgentStateEnabled` option.
 
-Backward compatible: all additions are additive; V1 widget, existing store surface, and host contracts unchanged.
+Backward compatible: new widget/store surfaces are additive; V1 UI behavior and host contracts remain unchanged. The V1 response timestamp read is defensively guarded.
 
 ## Impacted Modules / Repos
 | Module / repo | Impact | Manifest coverage state |
@@ -119,10 +119,10 @@ Backward compatible: all additions are additive; V1 widget, existing store surfa
 | Channel change fails | Store logs; no optimistic state | W-R-1 |
 
 ## UI Flow & Design
-Pill → click → `GranularStateMenu` (search + set-all/manage/idle codes) → "Manage channel availability >" → per-channel toggles + Cancel/Apply. Only channels with capacity > 0 shown. Momentum Design tokens/rem. Reference: wxcc-desktop `GranularStateSelector*`. **Figma:** parity with desktop. Changes an existing flow? No — separate widget; V1 `user-state` untouched.
+Pill → click → `GranularStateMenu` (search + set-all/manage/idle codes) → "Manage channel availability >" → per-channel toggles + Cancel/Apply. Only channels with capacity > 0 shown. Momentum Design tokens/rem. Reference: wxcc-desktop `GranularStateSelector*`. **Figma:** parity with desktop. Changes an existing flow? No — separate widget; V1 UI flow remains intact.
 
 ## Public API & Semver Impact
-`@webex/cc-granular-agent-state` new (1.0.0); `@webex/cc-store`, `@webex/cc-components`, `@webex/cc-widgets` minor bumps (additive). No removals.
+`@webex/cc-granular-agent-state`, `@webex/cc-store`, `@webex/cc-components`, and `@webex/cc-widgets` are currently versioned `1.28.0-ccwidgets.126`. The change adds the granular package and additive surfaces; no existing public exports are removed.
 
 ## Cross-Package Impact
 Dependency/release order: SDK (publish first) → `cc-store` → `cc-components` → `cc-granular-agent-state` → `cc-widgets`.
@@ -146,8 +146,8 @@ Dependency/release order: SDK (publish first) → `cc-store` → `cc-components`
 |---|---|---|---|
 | 2026-09-21 | Created V2 widget spec (separate package) | developer | Capture |
 | 2026-11-16 | Lean rewrite to the feature-spec template; store V2 surface implemented (`isGranularAgentStateActive`/`channelStatesMap`/`refreshAgentStateControl`); collapsed review follow-ups; confirmed separate V2 widget with V1 unchanged | review follow-up | Match implementation, remove duplication |
-| 2026-11-16 | Docs refinement: flipped module spec from planned/draft to implemented; fixed widget contract export kind (named, not default); set status to implemented (feature branch) | review follow-up | Match docs to implemented reality |
-| 2026-11-16 | Final pre-commit pass: Available-only toggle, Idle skipped after a failed Available, channel-relogin bootstrap, sample marked follow-up | review follow-up | Docs match the code that will be committed |
+| 2026-11-16 | Docs refinement: flipped module spec from planned/draft to implemented; fixed widget contract export kind (named, not default); set status to implemented | review follow-up | Match docs to implemented reality |
+| 2026-11-18 | Review pass: corrected sample scope, profile-based session selection, Manage Apply error behavior, and selectable idle-code scope | review follow-up | Keep requirements aligned with implementation |
 
 ## References
 - Feature design: [`../design/feature-design.md`](../design/feature-design.md) · decomposition: [`../tasks/`](../tasks/)
