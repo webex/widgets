@@ -70,10 +70,64 @@ describe('Store', () => {
     expect(storeInstance.deviceType).toBe('');
     expect(storeInstance.taskList).toEqual({});
     expect(storeInstance.agentProfile).toEqual({});
+    expect(storeInstance.isGranularAgentStateActive).toBe(false);
+    expect(storeInstance.channelStatesMap).toEqual({});
 
     expect(makeAutoObservable).toHaveBeenCalledWith(storeInstance, {
       cc: expect.any(Function),
       aiSummaries: expect.any(Function),
+    });
+  });
+
+  describe('refreshAgentStateControl', () => {
+    it('is a no-op when the SDK does not expose getAgentStateControl', () => {
+      storeInstance.cc = {} as never;
+      storeInstance.isGranularAgentStateActive = true;
+
+      storeInstance.refreshAgentStateControl();
+
+      // Unchanged because the SDK surface is unavailable
+      expect(storeInstance.isGranularAgentStateActive).toBe(true);
+    });
+
+    it('reflects the SDK granular agent state surface when active', () => {
+      const channelStatesMap = {telephony: {state: 'Available'}};
+      storeInstance.cc = {
+        getAgentStateControl: jest.fn().mockReturnValue({active: true}),
+        getChannelStates: jest.fn().mockReturnValue(channelStatesMap),
+      } as never;
+
+      storeInstance.refreshAgentStateControl();
+
+      expect(storeInstance.isGranularAgentStateActive).toBe(true);
+      expect(storeInstance.channelStatesMap).toEqual(channelStatesMap);
+    });
+
+    it('keeps the previous values when a getter throws', () => {
+      storeInstance.isGranularAgentStateActive = false;
+      storeInstance.channelStatesMap = {telephony: {agentState: 'Idle'}} as never;
+      storeInstance.cc = {
+        getAgentStateControl: jest.fn().mockReturnValue({active: true}),
+        getChannelStates: jest.fn(() => {
+          throw new Error('sdk down');
+        }),
+      } as never;
+
+      storeInstance.refreshAgentStateControl();
+
+      expect(storeInstance.isGranularAgentStateActive).toBe(false);
+      expect(storeInstance.channelStatesMap).toEqual({telephony: {agentState: 'Idle'}});
+    });
+
+    it('falls back to empty maps when the optional SDK getters are absent', () => {
+      storeInstance.cc = {
+        getAgentStateControl: jest.fn().mockReturnValue({active: false}),
+      } as never;
+
+      storeInstance.refreshAgentStateControl();
+
+      expect(storeInstance.isGranularAgentStateActive).toBe(false);
+      expect(storeInstance.channelStatesMap).toEqual({});
     });
   });
 

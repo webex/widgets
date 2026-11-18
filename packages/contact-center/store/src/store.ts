@@ -17,6 +17,8 @@ import {
   RealTimeAssistPayload,
   OfferActionErrorDisplay,
   WellnessBreakState,
+  ChannelType,
+  AgentChannelTypeStates,
 } from './store.types';
 
 import {getFeatureFlags} from './util';
@@ -77,6 +79,10 @@ class Store implements IStore {
   wellnessEventSequence = 0;
   legacyAgentState = '';
   legacyAuxCodeId = '';
+  /** True when the SDK pinned the session to granular (V2) agent state. Drives the V2 widget. */
+  isGranularAgentStateActive = false;
+  /** Per-channel states from the SDK (`cc.getChannelStates()`); empty for V1 sessions. */
+  channelStatesMap: Partial<Record<ChannelType, AgentChannelTypeStates>> = {};
   private wellnessIdleCodeRequestGeneration = 0;
 
   constructor() {
@@ -163,6 +169,7 @@ class Store implements IStore {
         this.agentProfile.isTimeoutDesktopInactivityEnabled = response.isTimeoutDesktopInactivityEnabled;
         this.agentProfile.timeoutDesktopInactivityMins = response.timeoutDesktopInactivityMins;
         this.dataCenter = (response as {environment?: string}).environment || '';
+        this.refreshAgentStateControl();
         if (!this.isWellnessBreakEnabled) {
           const hasStateOwnedWellnessLifecycle = [
             'changing-to-break',
@@ -253,6 +260,25 @@ class Store implements IStore {
       this.logger?.error('CC-Widgets: WellbeingBreak system code is unavailable', {
         module: 'cc-store#store.ts',
         method: 'loadWellbeingBreakIdleCode',
+      });
+    }
+  }
+
+  /**
+   * Refreshes the granular (V2) agent-state posture and per-channel maps from the SDK.
+   * Safe no-op for V1 sessions (the SDK getters return empty maps / inactive status).
+   */
+  refreshAgentStateControl(): void {
+    if (!this.cc?.getAgentStateControl) return;
+    try {
+      const active = Boolean(this.cc.getAgentStateControl().active);
+      const channelStatesMap = this.cc.getChannelStates?.() ?? {};
+      this.isGranularAgentStateActive = active;
+      this.channelStatesMap = channelStatesMap;
+    } catch (error) {
+      this.logger?.error(`CC-Widgets: refreshAgentStateControl failed - ${error}`, {
+        module: 'cc-store#store.ts',
+        method: 'refreshAgentStateControl',
       });
     }
   }

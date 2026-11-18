@@ -701,3 +701,13 @@ The modal accepts a renderer loader from `@webex/cc-ai-assistant`. This package 
 import or declare a dependency on `lottie-web` and does not ship the wellness MP3. Momentum
 may still emit its own dynamic icon chunks. Evidence: `package.json`,
 `src/components/AIAssistant/WellnessBreak/wellness-break-modal.tsx`.
+
+## WXCC-15791 — Granular Agent State V2 components (feature branch)
+> Implemented on `feature/WXCC-15791-Support-Granular-Agent-State`; additive, `UserState` unchanged. Feature docs: [`../../../../ai-docs/features/WXCC-15791-user-granular-agent-state/spec/feature-spec.md`](../../../../ai-docs/features/WXCC-15791-user-granular-agent-state/spec/feature-spec.md).
+
+| ID | WHAT | Source | Test |
+|---|---|---|---|
+| `CC-COMPONENTS-R-040` | Props-only `GranularAgentState/` components — pill (`granular-agent-state.tsx`, `withMetrics` + shared `formatTime`), `channel-avatar`, `channel-state-preview` (`formatDuration` hh:mm:ss), `granular-state-menu`, `manage-channel-availability` — mirror the `UserState` presentational pattern; no store/SDK access. Idle-code selection and automatic fallback exclude Available, error-triggering system codes (for example RONA), and the platform ENGAGED code. | `src/components/GranularAgentState/` | `tests/components/GranularAgentState/granular-agent-state.utils.tsx` (selectable/fallback idle codes); other cc-components GranularAgentState tests |
+| `CC-COMPONENTS-R-041` | Export only the minimal surface the `@webex/cc-granular-agent-state` package consumes from `src/index.ts`: `GranularAgentStateComponent`, the granular types, the utils `getSelectableChannelTypes`/`buildChannelStates`/`getChannelsToChange`/`getLastSetIdleCode`, and `AVAILABLE_AUX_CODE_ID`. Other channel helpers/constants stay internal to the component (matches the `UserState` export surface). | `src/index.ts` | build + granular package import |
+
+`formatDuration` is retained (always hh:mm:ss) because it is not equivalent to the shared `formatTime` used by `UserState`.

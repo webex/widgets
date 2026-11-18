@@ -15,7 +15,7 @@ jest.mock('../consumer-builds/config.cjs', () => ({
 }));
 
 describe('consumer build runner', () => {
-  const candidates = Array.from({length: 9}, (_, index) => ({
+  const candidates = Array.from({length: 10}, (_, index) => ({
     name: `@webex/cc-package-${index}`,
     file: `package-${index}.tgz`,
     version: '1.0.0-next.1',
@@ -73,7 +73,7 @@ describe('consumer build runner', () => {
 
   it('rejects incomplete package sets', async () => {
     readCandidates.mockReturnValue(candidates.slice(1));
-    await expect(run('vite')).rejects.toThrow('all nine');
+    await expect(run('vite')).rejects.toThrow('all ten');
     expect(execFileSync).not.toHaveBeenCalled();
     expect(fs.closeSync).toHaveBeenCalledWith(10);
   });

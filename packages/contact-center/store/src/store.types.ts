@@ -59,6 +59,32 @@ import {
   UpdateDeviceTypeResponse,
 } from 'node_modules/@webex/contact-center/dist/types/types';
 
+// V2 SDK contract shapes are kept in the store package so widgets still build
+// against published SDK versions that predate the granular-state API. Keep
+// these aligned with the public types in @webex/contact-center.
+type ChannelType = 'telephony' | 'chat' | 'email' | 'social' | 'workItem' | 'customMessaging';
+
+type AgentChannelTypeStates = {
+  agentState: string;
+  pendingIdle: boolean;
+  auxCodeId?: string;
+  availableChannelCount: number;
+  totalChannelCount: number;
+  manuallyAssignedChannelCount?: number;
+  totalManuallyAssignedChannelCount?: number;
+  manuallyAssignedAvailableChannelCount?: number | null;
+  stateChangeReason: string;
+  stateChangeTimestamp: number;
+  lastIdleCodeChangeTimestamp?: number;
+};
+
+type AgentStateControlStatus = {
+  declared: boolean | undefined;
+  active: boolean | undefined;
+};
+
+type StoreStateChange = StateChange & {channelType?: ChannelType[]};
+
 //  To be fixed in SDK - https://jira-eng-sjc12.cisco.com/jira/browse/CAI-6762
 interface IContactCenter {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -83,7 +109,11 @@ interface IContactCenter {
     agentId: string;
     outdialANIId: string;
   };
-  setAgentState(data: StateChange): Promise<SetStateResponse>;
+  setAgentState(data: StoreStateChange): Promise<SetStateResponse>;
+  /** V2: granular agent-state control status (posture/diagnostics). */
+  getAgentStateControl?(): AgentStateControlStatus;
+  /** V2: per-channel states; empty for V1 sessions. */
+  getChannelStates?(): Partial<Record<ChannelType, AgentChannelTypeStates>>;
   /** Returns the system-owned `WellbeingBreak` idle code for the active registration. */
   getWellbeingBreakIdleCode(): Promise<IdleCode>;
   getOutdialAniEntries(params: OutdialAniParams): Promise<OutdialAniEntriesResponse>;
@@ -336,10 +366,16 @@ interface IStore {
   wellnessEventSequence: number;
   legacyAgentState: string;
   legacyAuxCodeId: string;
+  /** V2: true when the SDK pinned the session to granular agent state. */
+  isGranularAgentStateActive: boolean;
+  /** V2: per-channel states from the SDK; empty for V1 sessions. */
+  channelStatesMap: Partial<Record<ChannelType, AgentChannelTypeStates>>;
 
   init(params: InitParams, callback: (ccSDK: IContactCenter) => void): Promise<void>;
   registerCC(webex?: WithWebex['webex']): Promise<void>;
   loadWellbeingBreakIdleCode(): Promise<void>;
+  /** V2: refresh granular agent-state posture and channel maps from the SDK. */
+  refreshAgentStateControl(): void;
 }
 
 interface IStoreWrapper extends IStore {
@@ -431,6 +467,9 @@ enum CC_EVENTS {
   AGENT_STATION_LOGIN_SUCCESS = 'agent:stationLoginSuccess',
   AGENT_MULTI_LOGIN = 'agent:multiLogin',
   AGENT_STATE_CHANGE = 'agent:stateChange',
+  AGENT_CHANNEL_STATE_CHANGE = 'agent:channelStateChange',
+  AGENT_CHANNEL_STATE_CHANGE_FAILED = 'agent:channelStateChangeFailed',
+  AGENT_CHANNEL_RELOGIN_SUCCESS = 'agent:channelReloginSuccess',
   AGENT_RELOGIN_SUCCESS = 'agent:reloginSuccess',
   AGENT_OFFER_CONSULT = 'AgentOfferConsult',
   REAL_TIME_TRANSCRIPTION = 'REAL_TIME_TRANSCRIPTION',
@@ -571,6 +610,9 @@ export type {
   AISummaryFeedback,
   AISummaryResponse,
   AISummarySections,
+  ChannelType,
+  AgentChannelTypeStates,
+  AgentStateControlStatus,
 };
 
 export {

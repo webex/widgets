@@ -38,6 +38,7 @@ Feature flags are not owned or defaulted by this repo — they are read from the
 | `webRtcEnabled` | WebRTC (browser) device option | SDK-provided | Webex CC back end | SDK stops emitting it |
 | `isRecordingManagementEnabled` | Recording toggle in CallControl | SDK-provided | Webex CC back end | SDK stops emitting it |
 | `allowConsultToQueue` | Consult-to-queue option | SDK-provided | Webex CC back end | SDK stops emitting it |
+| `manageChannelAvailability` | V2 granular agent state: when `true` the SDK pins a V2 (per-channel) session and the store sets `isGranularAgentStateActive`, mounting `GranularAgentState` instead of `UserState` | SDK-provided (per-agent profile) | Webex CC back end | SDK stops emitting it on `Profile` |
 
 ## Compliance / Certifications
 - FedRAMP: PR template (`.github/PULL_REQUEST_TEMPLATE.md`) compliance is mandatory and must not be regressed (COMPLETES, Change Type, test scenarios, GAI Policy, Checklist sections).

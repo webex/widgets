@@ -286,7 +286,7 @@ export const useUserState = ({
             module: 'useUserState',
             method: 'updateAgentState',
           });
-          if ('data' in response) {
+          if ('data' in response && 'lastStateChangeTimestamp' in response.data) {
             store.setLastStateChangeTimestamp(response.data.lastStateChangeTimestamp);
             store.setLastIdleCodeChangeTimestamp(response.data.lastIdleCodeChangeTimestamp);
           }

@@ -16,6 +16,7 @@ const PKG_SRC = [
   'packages/contact-center/cc-components/src',
   'packages/contact-center/ui-logging/src',
   'packages/contact-center/cc-digital-channels/src',
+  'packages/contact-center/granular-agent-state/src',
 ].map((p) => resolveMonorepoRoot(p));
 const contactCenterSdkRoot = process.env.WEBEX_CONTACT_CENTER_SDK_PATH;
 const contactCenterSdkEntry = contactCenterSdkRoot
@@ -61,6 +62,7 @@ module.exports = {
       '@webex/cc-components': path.resolve(__dirname, '../../../packages/contact-center/cc-components/src'),
       '@webex/cc-ui-logging': path.resolve(__dirname, '../../../packages/contact-center/ui-logging/src'),
       '@webex/cc-digital-channels': path.resolve(__dirname, '../../../packages/contact-center/cc-digital-channels/src'),
+      '@webex/cc-granular-agent-state': path.resolve(__dirname, '../../../packages/contact-center/granular-agent-state/src'),
       ...(contactCenterSdkEntry ? {'@webex/contact-center$': contactCenterSdkEntry} : {}),
       // Ensure single React instance across all packages
       react: resolveMonorepoRoot('node_modules/react'),

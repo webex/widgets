@@ -1,12 +1,19 @@
 import r2wc from '@r2wc/react-to-web-component';
 import {StationLogin} from '@webex/cc-station-login';
 import {UserState} from '@webex/cc-user-state';
+import {GranularAgentState} from '@webex/cc-granular-agent-state';
 import store from '@webex/cc-store';
 import {TaskList, IncomingTask, CallControl, CallControlCAD, OutdialCall, RealTimeTranscript} from '@webex/cc-task';
 import {DigitalChannels} from '@webex/cc-digital-channels';
 import {AIAssistant} from '@webex/cc-ai-assistant';
 
 const WebUserState = r2wc(UserState, {
+  props: {
+    onStateChange: 'function',
+  },
+});
+
+const WebGranularAgentState = r2wc(GranularAgentState, {
   props: {
     onStateChange: 'function',
   },
@@ -89,6 +96,7 @@ const WebAIAssistant = r2wc(AIAssistant, {
 // and the web-component to the components object
 const components = [
   {name: 'widget-cc-user-state', component: WebUserState},
+  {name: 'widget-cc-granular-agent-state', component: WebGranularAgentState},
   {name: 'widget-cc-station-login', component: WebStationLogin},
   {name: 'widget-cc-incoming-task', component: WebIncomingTask},
   {name: 'widget-cc-task-list', component: WebTaskList},

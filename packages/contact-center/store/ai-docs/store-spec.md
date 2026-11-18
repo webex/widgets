@@ -587,3 +587,14 @@ The store consumes the existing public Wellness Break symbols from `@webex/conta
 The registration session projection requires the companion SDK change and a later published package.
 It does not consume an AI Assistant RTD status event. See
 [`agent-wellness-break-intake.md`](../../../../ai-docs/features/agent-wellness-break-intake.md).
+
+## WXCC-15791 — Granular Agent State V2 (feature branch)
+> Implemented on `feature/WXCC-15791-Support-Granular-Agent-State`; additive, V1 surface unchanged. Feature docs: [`../../../../ai-docs/features/WXCC-15791-user-granular-agent-state/spec/feature-spec.md`](../../../../ai-docs/features/WXCC-15791-user-granular-agent-state/spec/feature-spec.md); contract: [`../../../../ai-docs/features/WXCC-15791-user-granular-agent-state/design/contracts/store-v2-surface.md`](../../../../ai-docs/features/WXCC-15791-user-granular-agent-state/design/contracts/store-v2-surface.md).
+
+| ID | WHAT | Source | Test |
+|---|---|---|---|
+| `STORE-R-040` | Expose MobX observables `isGranularAgentStateActive: boolean` (default `false`) and `channelStatesMap` (default `{}`) for the V2 granular widget. Per-channel capacity is available via `channelStatesMap[channelType].totalChannelCount`. | `src/store.ts`, `src/store.types.ts` | `tests/store.ts` (defaults) |
+| `STORE-R-041` | `refreshAgentStateControl()` reads `cc.getAgentStateControl().active` and `cc.getChannelStates()` into the observables; no-op when `cc.getAgentStateControl` is absent; falls back to `{}` when optional getters are missing. | `src/store.ts` | `tests/store.ts` (`refreshAgentStateControl` no-op / populate / fallback) |
+| `STORE-R-042` | `agent:channelReloginSuccess` bootstraps profile, team, and `refreshAgentStateControl`, then attaches listeners once. `agent:channelStateChange` and `agent:channelStateChangeFailed` refresh (failure is logged). Logout resets the observables. | `src/storeEventsWrapper.ts` | `tests/storeEventsWrapper.ts` covers channel-state handlers and event registration; `tests/store.ts` covers refresh and reset. |
+
+`store.types.ts` defines the `ChannelType`, `AgentChannelTypeStates`, and `AgentStateControlStatus` shapes in the store package, aligned with the companion SDK V2 types. This keeps the widgets workspace buildable against the currently published SDK while the V2 API is pending publication; V2 getters remain optional on the store's SDK interface and are checked before use.

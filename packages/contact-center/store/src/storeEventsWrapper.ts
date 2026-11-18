@@ -316,6 +316,31 @@ class StoreWrapper implements IStoreWrapper {
     return this.store.legacyAuxCodeId;
   }
 
+  get isGranularAgentStateActive() {
+    return this.store.isGranularAgentStateActive;
+  }
+
+  get channelStatesMap() {
+    return this.store.channelStatesMap;
+  }
+
+  refreshAgentStateControl = (): void => {
+    this.store.refreshAgentStateControl();
+  };
+
+  handleChannelStateChange = (): void => {
+    this.store.refreshAgentStateControl();
+  };
+
+  handleChannelStateChangeFailed = (payload: unknown): void => {
+    this.store.logger.error('CC-Widgets: agent channel state change failed', {
+      module: 'storeEventsWrapper.ts',
+      method: 'handleChannelStateChangeFailed',
+      data: payload,
+    });
+    this.store.refreshAgentStateControl();
+  };
+
   setDataCenter = (value: string): void => {
     this.store.dataCenter = value;
   };
@@ -2279,6 +2304,8 @@ class StoreWrapper implements IStoreWrapper {
       this.setIsEmergencyModalAlreadyDisplayed(false);
       this.store.realTimeAssist = {};
       this.realTimeAssistListeners = {};
+      this.store.isGranularAgentStateActive = false;
+      this.store.channelStatesMap = {};
       this.resetWellnessSession();
 
       Object.values(this.aiSummaryTaskListeners).forEach(({task, summaryListener, enablementListener}) => {
@@ -2316,6 +2343,8 @@ class StoreWrapper implements IStoreWrapper {
       ccSDK.on(TASK_EVENTS.TASK_CAMPAIGN_PREVIEW_RESERVATION, this.handleIncomingCampaignPreview);
       ccSDK.on(TASK_EVENTS.TASK_MERGED, this.handleTaskMerged);
       ccSDK.on(CC_EVENTS.AGENT_MULTI_LOGIN, this.handleMultiLoginCloseSession);
+      ccSDK.on(CC_EVENTS.AGENT_CHANNEL_STATE_CHANGE, this.handleChannelStateChange);
+      ccSDK.on(CC_EVENTS.AGENT_CHANNEL_STATE_CHANGE_FAILED, this.handleChannelStateChangeFailed);
       ccSDK.on(CC_EVENTS.AGENT_LOGOUT_SUCCESS, handleLogOut);
     };
 
@@ -2331,6 +2360,8 @@ class StoreWrapper implements IStoreWrapper {
       ccSDK.off(TASK_EVENTS.TASK_CAMPAIGN_PREVIEW_RESERVATION, this.handleIncomingCampaignPreview);
       ccSDK.off(TASK_EVENTS.TASK_MERGED, this.handleTaskMerged);
       ccSDK.off(CC_EVENTS.AGENT_MULTI_LOGIN, this.handleMultiLoginCloseSession);
+      ccSDK.off(CC_EVENTS.AGENT_CHANNEL_STATE_CHANGE, this.handleChannelStateChange);
+      ccSDK.off(CC_EVENTS.AGENT_CHANNEL_STATE_CHANGE_FAILED, this.handleChannelStateChangeFailed);
       ccSDK.off(CC_EVENTS.AGENT_LOGOUT_SUCCESS, handleLogOut);
     };
 
@@ -2354,29 +2385,37 @@ class StoreWrapper implements IStoreWrapper {
         this.setTeamId(payload.teamId);
       });
       this.captureWellnessSession(payload as AgentLoginProfile);
+      this.store.refreshAgentStateControl();
     };
 
     ccSDK.on(CC_EVENTS.AGENT_STATION_LOGIN_SUCCESS, handleLogin);
 
-    [CC_EVENTS.AGENT_DN_REGISTERED, CC_EVENTS.AGENT_RELOGIN_SUCCESS].forEach((event) => {
-      ccSDK.on(`${event}`, (payload) => {
-        this.store.logger.info(`CC-Widgets: setupIncomingTaskHandler(): event '${event}' received`, {
-          module: 'storeEventsWrapper.ts',
-          method: 'setupIncomingTaskHandler',
-        });
-        runInAction(() => {
-          if (event === CC_EVENTS.AGENT_RELOGIN_SUCCESS) {
-            this.setAgentProfile(payload);
-            this.setTeamId(payload.teamId);
-            this.captureWellnessSession(payload);
+    const bootstrapSession = (payload) => {
+      runInAction(() => {
+        this.setAgentProfile(payload);
+        this.setTeamId(payload.teamId);
+        this.captureWellnessSession(payload);
+        this.store.refreshAgentStateControl();
+      });
+    };
+
+    [CC_EVENTS.AGENT_DN_REGISTERED, CC_EVENTS.AGENT_RELOGIN_SUCCESS, CC_EVENTS.AGENT_CHANNEL_RELOGIN_SUCCESS].forEach(
+      (event) => {
+        ccSDK.on(`${event}`, (payload) => {
+          this.store.logger.info(`CC-Widgets: setupIncomingTaskHandler(): event '${event}' received`, {
+            module: 'storeEventsWrapper.ts',
+            method: 'setupIncomingTaskHandler',
+          });
+          if (event !== CC_EVENTS.AGENT_DN_REGISTERED) {
+            bootstrapSession(payload);
+          }
+          if (!listenersAdded) {
+            addEventListeners();
+            listenersAdded = true;
           }
         });
-        if (!listenersAdded) {
-          addEventListeners();
-          listenersAdded = true;
-        }
-      });
-    });
+      }
+    );
 
     // Registration-level listeners are deliberately independent of task listeners.
     // Keep these after the established registration order for backwards-compatible
