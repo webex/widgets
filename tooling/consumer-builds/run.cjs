@@ -25,7 +25,7 @@ async function run(bundler, candidateDirectory = CANDIDATES) {
   try {
     const manifest = readCandidates(candidateDirectory);
     const candidates = manifest.filter((entry) => entry.name.startsWith('@webex/cc-'));
-    if (candidates.length !== 9) throw new Error('Expected all nine Contact Center package archives.');
+    if (candidates.length !== 10) throw new Error('Expected all ten Contact Center package archives.');
     fs.mkdirSync(directory, {recursive: true});
     fs.cpSync(path.join(__dirname, 'fixture'), directory, {recursive: true});
     const execute = (command, args) =>

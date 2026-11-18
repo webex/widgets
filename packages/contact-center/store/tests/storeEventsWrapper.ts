@@ -5324,7 +5324,19 @@ describe('storeEventsWrapper', () => {
       });
 
       it('should reset channelStatesMap to {}', () => {
-        storeWrapper['store'].channelStatesMap = {telephony: 'Available', chat: 'Idle'};
+        const makeChannelState = (agentState: string) => ({
+          agentState,
+          pendingIdle: false,
+          availableChannelCount: 1,
+          totalChannelCount: 1,
+          stateChangeReason: '',
+          stateChangeTimestamp: 0,
+        });
+
+        storeWrapper['store'].channelStatesMap = {
+          telephony: makeChannelState('Available'),
+          chat: makeChannelState('Idle'),
+        };
 
         storeWrapper.cleanUpStore();
 
