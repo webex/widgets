@@ -343,10 +343,17 @@ export const useUserState = ({
 
       // A forced voice-loss transition that was canceled by voice recovery (see the
       // rollback above) must not be persisted even if this effect observes the
-      // stale forced-Idle currentState before the rollback's render lands.
-      if (canceledForcedIdleCodeRef.current === currentState) {
+      // stale forced-Idle currentState before the rollback's render lands. If this
+      // effect runs and currentState no longer matches the canceled target (e.g. the
+      // forced value never completed a render before voice recovered and the store
+      // stayed on the prior confirmed state), the token is stale — clear it immediately
+      // so it cannot later intercept a legitimate, unrelated transition to that same code.
+      if (canceledForcedIdleCodeRef.current !== null) {
+        const isCanceledTransition = canceledForcedIdleCodeRef.current === currentState;
         canceledForcedIdleCodeRef.current = null;
-        return;
+        if (isCanceledTransition) {
+          return;
+        }
       }
 
       const isForcedVoiceLoss = forcedVoiceLossIdleCodeRef.current === currentState;

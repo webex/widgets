@@ -343,7 +343,8 @@ If no default idle code exists, the accessible warning banner is displayed witho
 an Idle transition. The dialog calls optional host callback `onVoiceReconnect` (wired by hosts to
 their calling registration retry); when omitted, the dialog informs the user that reconnect is managed
 by the host. Voice readiness recovery closes the dialog. A rejected `setAgentState` reverts the visible
-state, suppresses/closes the dialog, and reports a user-safe failure.
+state, keeps the recovery dialog open with neutral (non-Idle) copy so the host-provided
+`onVoiceReconnect` action remains reachable, and reports a user-safe inline failure via `stateChangeError`.
 Evidence: `src/helper.ts`, `src/user-state/index.tsx`,
 `cc-components/src/components/UserState/user-state.tsx`, and `cc-widgets/src/wc.ts`.
 
