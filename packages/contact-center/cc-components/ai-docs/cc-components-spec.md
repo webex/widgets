@@ -701,3 +701,18 @@ The modal accepts a renderer loader from `@webex/cc-ai-assistant`. This package 
 import or declare a dependency on `lottie-web` and does not ship the wellness MP3. Momentum
 may still emit its own dynamic icon chunks. Evidence: `package.json`,
 `src/components/AIAssistant/WellnessBreak/wellness-break-modal.tsx`.
+
+## User State browser voice availability (CAI-8629)
+
+`UserStateComponent` accepts an optional SDK voice snapshot as a prop; without it, the
+existing enabled behavior is preserved. `UNAVAILABLE` disables the
+selector and presents an accessible connecting, reconnecting, or unavailable warning;
+`NOT_REQUIRED` leaves selection enabled for extension and disabled-WebRTC flows. A rejected
+state update can display generic accessible failure copy without exposing SDK error details.
+When the User State hook reports sustained voice loss, the component shows a recovery dialog
+with the Agent Desktop English title (`Desktop connection lost`), message (`You're no longer
+connected to Desktop, and your availability state has changed to Idle. Check your internet
+connection, then try reconnecting.`), and `Reconnect` action. Retry is delegated through the
+optional host callback; reconnect failures use safe generic copy. Evidence:
+`src/components/UserState/user-state.tsx`, `user-state.types.ts`, and
+`tests/components/UserState/user-state.tsx`.

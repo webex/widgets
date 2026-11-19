@@ -8,6 +8,7 @@ import type {
   AddressBookEntriesResponse,
   ContactServiceQueuesResponse,
 } from '@webex/contact-center';
+import type {VoiceConnectionState} from '@webex/contact-center';
 import type {IContactCenter, ITask} from '@webex/cc-store';
 
 const mockProfile: Profile = {
@@ -623,6 +624,11 @@ const mockQueuesResponse: ContactServiceQueuesResponse = {
 const mockCC: IContactCenter = {
   on: jest.fn(),
   off: jest.fn(),
+  getVoiceConnectionState: jest.fn().mockReturnValue({
+    status: 'not-required' as VoiceConnectionState['status'],
+    lineStatus: 'unknown' as VoiceConnectionState['lineStatus'],
+    mobiusSocketStatus: 'not-in-use' as VoiceConnectionState['mobiusSocketStatus'],
+  } satisfies VoiceConnectionState),
   updateAgentProfile: jest.fn(),
   stationLogin: jest.fn(),
   deregister: jest.fn(),
