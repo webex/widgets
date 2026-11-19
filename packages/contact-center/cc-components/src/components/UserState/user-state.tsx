@@ -20,6 +20,7 @@ import {
 } from './user-state.utils';
 import {withMetrics} from '@webex/cc-ui-logging';
 import {VOICE_CONNECTION_STATUS, VoiceLineStatus} from '@webex/cc-store';
+import {userStateLabels} from './constant';
 
 const UserStateComponent: React.FunctionComponent<UserStateComponentsProps> = (props) => {
   const {
@@ -43,10 +44,10 @@ const UserStateComponent: React.FunctionComponent<UserStateComponentsProps> = (p
   const isReconnecting = voiceConnectionState?.lineStatus === VoiceLineStatus.RECONNECTING;
   const voiceWarning = isVoiceUnavailable
     ? isConnecting
-      ? 'Browser calling is connecting. Agent state changes are disabled until voice is ready.'
+      ? userStateLabels.voiceConnectingWarning
       : isReconnecting
-        ? 'Browser calling is reconnecting. Agent state changes are disabled until voice is ready.'
-        : 'Browser calling is unavailable. Agent state changes are disabled.'
+        ? userStateLabels.voiceReconnectingWarning
+        : userStateLabels.voiceUnavailableWarning
     : undefined;
 
   const previousSelectableState = useMemo(() => getPreviousSelectableState(idleCodes, logger), [idleCodes, logger]);
@@ -56,8 +57,8 @@ const UserStateComponent: React.FunctionComponent<UserStateComponentsProps> = (p
   const currentIdleCode = idleCodes.find((code) => code.id === currentState);
   const isAgentInIdle = currentIdleCode ? currentIdleCode.name !== 'Available' : false;
   const dialogDescription = isAgentInIdle
-    ? "You're no longer connected to Desktop, and your availability state has changed to Idle. Check your internet connection, then try reconnecting."
-    : "You're no longer connected to Desktop. Check your internet connection, then try reconnecting.";
+    ? userStateLabels.voiceLossDialogIdleDescription
+    : userStateLabels.voiceLossDialogAvailableDescription;
 
   return (
     <div className="user-state-container" data-testid="user-state-container">
@@ -147,9 +148,9 @@ const UserStateComponent: React.FunctionComponent<UserStateComponentsProps> = (p
         <Dialog
           visible
           size="small"
-          headerText="Desktop connection lost"
+          headerText={userStateLabels.voiceLossDialogHeader}
           descriptionText={dialogDescription}
-          closeButtonAriaLabel="Close browser calling recovery dialog"
+          closeButtonAriaLabel={userStateLabels.voiceLossDialogCloseAriaLabel}
           onClose={onVoiceConnectionLossDialogClose}
           data-testid="voice-connection-loss-dialog"
         >
@@ -159,7 +160,7 @@ const UserStateComponent: React.FunctionComponent<UserStateComponentsProps> = (p
                 <Text tagName="p">{voiceReconnectError}</Text>
               </div>
             )}
-            {!onVoiceReconnect && <Text tagName="p">Reconnect is managed by the host application.</Text>}
+            {!onVoiceReconnect && <Text tagName="p">{userStateLabels.voiceReconnectManagedByHost}</Text>}
           </div>
           <Button
             slot="footer-button-primary"
@@ -168,7 +169,7 @@ const UserStateComponent: React.FunctionComponent<UserStateComponentsProps> = (p
             onClick={() => void onVoiceReconnect?.()}
             data-testid="voice-connection-reconnect"
           >
-            Reconnect
+            {userStateLabels.voiceReconnectButtonLabel}
           </Button>
         </Dialog>
       )}
