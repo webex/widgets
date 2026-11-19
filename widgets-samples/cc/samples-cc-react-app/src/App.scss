@@ -52,6 +52,21 @@ iframe {
   margin-bottom: 20px;
 }
 
+.voice-readiness-preview {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px dashed rgba(128, 128, 128, 0.6);
+  border-radius: 0.5rem;
+
+  h4 {
+    margin: 0 0 0.5rem;
+  }
+
+  p {
+    margin: 0 0 0.75rem;
+  }
+}
+
 .call-control-outer,
 .call-control-consult-outer {
   padding: 20px;

@@ -583,7 +583,16 @@ stored `legacyAuxCodeId`, and finally the shared Available `DEFAULT_CODE` (`'0'`
 fallback consistent with login and state-change handling while preserving an existing wellness or Idle code.
 Evidence: `src/storeEventsWrapper.ts` (`captureWellnessSession`).
 
-The store consumes the existing public Wellness Break symbols from `@webex/contact-center` 3.12.0-next.131.
+The store consumes the existing public Wellness Break symbols from `@webex/contact-center` 3.13.0-next.5.
 The registration session projection requires the companion SDK change and a later published package.
 It does not consume an AI Assistant RTD status event. See
 [`agent-wellness-break-intake.md`](../../../../ai-docs/features/agent-wellness-break-intake.md).
+
+## Browser voice readiness addendum (CAI-8629)
+
+The store type barrel re-exports the SDK-owned `VOICE_CONNECTION_EVENTS`,
+`VOICE_CONNECTION_STATUS`, and line/Mobius/snapshot types so widgets consume this contract
+without importing the SDK directly. `IContactCenter` includes `getVoiceConnectionState()`;
+widgets subscribe to the event and read this snapshot through `store.cc`. The installed
+SDK dependency is `3.13.0-next.5`. Evidence: `src/store.types.ts`, `package.json`, and the
+installed SDK declarations.
