@@ -52,6 +52,8 @@ TypeScript 5.6.3, MobX 6.13.5 (`makeAutoObservable`, `observable.ref`, `runInAct
 
 ## Folder / Package Structure
 
+See the [npm release guide](../../../../ai-docs/RELEASING.md) for store release and verification steps.
+
 ```
 packages/contact-center/store/src/
 ├── index.ts                 # Barrel: default StoreWrapper instance + re-export of types & task-utils
