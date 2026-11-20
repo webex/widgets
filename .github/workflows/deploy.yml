@@ -202,6 +202,7 @@ jobs:
     timeout-minutes: 15
     permissions:
       contents: read
+      id-token: write
     outputs:
       published: ${{ needs.prepare-release.outputs.has_changes }}
       package_versions: ${{ needs.prepare-release.outputs.package_versions }}
@@ -246,8 +247,7 @@ jobs:
         if: needs.prepare-release.outputs.has_changes == 'true'
         env:
           PACKAGES: ${{ needs.analyze-changes.outputs.yarn-recursive }}
-          YARN_NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: yarn workspaces foreach -W --from "$PACKAGES" --verbose run deploy:npm --access public --tag "$GITHUB_REF_NAME"
+        run: yarn workspaces foreach -W --from "$PACKAGES" --verbose run deploy:npm --access public --tag "$GITHUB_REF_NAME" --provenance
 
   publish-documentation:
     name: Publish - Documentation

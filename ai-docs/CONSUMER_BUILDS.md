@@ -52,11 +52,14 @@ does not require changes to the tooling tests.
 5. The existing `yarn workspaces foreach ... run deploy:npm` command publishes the changed workspaces
    with the branch dist tag. Each workspace keeps its own `deploy:npm` script, including the exclusion
    for `@webex/test-fixtures`. The publish job does not repeat version selection or rebuild packages.
-   Yarn packs the restored workspaces during publishing. The existing version outputs, documentation,
-   tags, and release comments remain available.
+   Each published workspace runs `yarn npm publish` with the pinned Yarn `4.10.3`. Yarn packs the
+   restored workspace and uses native OIDC authentication with release provenance. The existing
+   version outputs, documentation, tags, and release comments remain available.
 
 The release preparation and consumer jobs have read access and no publishing secrets.
-Only the deploy step receives `NPM_TOKEN`, through `YARN_NPM_AUTH_TOKEN`. The reusable workflow does not inherit secrets.
+Only `publish-npm` has `id-token: write` for npm trusted publishing. It does not receive a long-lived
+npm publish token. The reusable consumer workflow does not inherit secrets. See
+[`RELEASING.md`](RELEASING.md) for owner setup and first-release validation.
 PR checks use the PR merge commit and read access. They do not use `pull_request_target`.
 The `@webex/test-fixtures` package is never published.
 

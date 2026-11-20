@@ -2,6 +2,11 @@
   "name": "@webex/cc-components",
   "description": "Webex Contact Center UI Components Library for your custom contact center solutions",
   "license": "Cisco's General Terms (https://www.cisco.com/site/us/en/about/legal/contract-experience/index.html)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/webex/widgets.git",
+    "directory": "packages/contact-center/cc-components"
+  },
   "version": "1.28.0-ccwidgets.126",
   "main": "dist/index.js",
   "types": "dist/types/index.d.ts",
