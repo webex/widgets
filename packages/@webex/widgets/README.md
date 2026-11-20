@@ -100,7 +100,7 @@ export default function App() {
 
 Available widgets from this package are:
 
-- [Webex Meetings widget](https://github.com/webex/widgets/tree/master/src/widgets/WebexMeetings#webex-meetings-widget)
+- [Webex Meetings widget](https://github.com/webex/widgets/tree/next/packages/@webex/widgets/src/widgets/WebexMeetings#webex-meetings-widget)
 
 ## FedRAMP Environment
 
