@@ -114,12 +114,17 @@ describe('CallControlDtmfKeypad', () => {
     const keypad = await screen.findByTestId('call-control-keypad-keys');
     fireEvent.click(within(keypad).getByText('1', {selector: '.call-control-dtmf-key-digit'}));
 
-    expect(await screen.findByTestId('call-control-keypad-spinner')).toBeInTheDocument();
+    const spinner = await screen.findByTestId('call-control-keypad-spinner');
+    const input = await screen.findByTestId('call-control-keypad-input');
+    const spinnerSlot = spinner.parentElement;
+    expect(spinnerSlot).toHaveAttribute('slot', 'trailing-button');
+    expect(input).toContainElement(spinnerSlot);
 
     resolvePress?.();
     await waitFor(() => {
       expect(screen.queryByTestId('call-control-keypad-spinner')).not.toBeInTheDocument();
     });
+    expect(input).toContainElement(spinnerSlot);
   });
 
   it('serializes rapid digit presses through the transmission queue', async () => {

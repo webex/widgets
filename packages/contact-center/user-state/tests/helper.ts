@@ -3,6 +3,13 @@ import {renderHook, act, waitFor} from '@testing-library/react';
 import {useUserState} from '../src/helper';
 import store from '@webex/cc-store';
 import {mockCC} from '@webex/test-fixtures';
+import {
+  VOICE_CONNECTION_EVENTS,
+  VOICE_CONNECTION_STATUS,
+  VoiceLineStatus,
+  VoiceMobiusSocketStatus,
+} from '@webex/cc-store';
+import type {IContactCenter} from '@webex/cc-store';
 
 describe('useUserState Hook', () => {
   const idleCodes = [
@@ -97,6 +104,11 @@ describe('useUserState Hook', () => {
 
   beforeEach(() => {
     jest.useFakeTimers();
+    jest.spyOn(mockCC, 'getVoiceConnectionState').mockReturnValue({
+      status: VOICE_CONNECTION_STATUS.NOT_REQUIRED,
+      lineStatus: VoiceLineStatus.UNKNOWN,
+      mobiusSocketStatus: VoiceMobiusSocketStatus.NOT_IN_USE,
+    });
     ccSetAgentStateSpy.mockReset();
     ccOnSpy.mockReset();
     ccOffSpy.mockReset();
@@ -165,6 +177,816 @@ describe('useUserState Hook', () => {
     expect(workerMock.postMessage).toHaveBeenCalledWith({type: 'stop'});
     expect(workerMock.postMessage).toHaveBeenCalledWith({type: 'stopIdleCode'});
     expect(workerMock.terminate).toHaveBeenCalled();
+    expect(ccOffSpy).toHaveBeenCalledWith(VOICE_CONNECTION_EVENTS.STATE_CHANGE, ccOnSpy.mock.calls[0][1]);
+  });
+
+  it('uses the voice snapshot on mount and follows SDK connection events', () => {
+    const readyState = {
+      status: VOICE_CONNECTION_STATUS.READY,
+      lineStatus: VoiceLineStatus.REGISTERED,
+      mobiusSocketStatus: VoiceMobiusSocketStatus.CONNECTED,
+    };
+    const unavailableState = {
+      status: VOICE_CONNECTION_STATUS.UNAVAILABLE,
+      lineStatus: VoiceLineStatus.RECONNECTING,
+      mobiusSocketStatus: VoiceMobiusSocketStatus.DISCONNECTED,
+    };
+    jest.spyOn(mockCC, 'getVoiceConnectionState').mockReturnValue(readyState);
+    const {result} = renderHook(() =>
+      useUserState({
+        idleCodes,
+        agentId,
+        cc: mockCC,
+        currentState: '0',
+        customState: null,
+        logger,
+        onStateChange,
+      })
+    );
+
+    expect(result.current.voiceConnectionState).toEqual(readyState);
+    const listener = ccOnSpy.mock.calls.find(([eventName]) => eventName === VOICE_CONNECTION_EVENTS.STATE_CHANGE)?.[1];
+    expect(listener).toBeDefined();
+    act(() => listener?.(unavailableState));
+    expect(result.current.voiceConnectionState).toEqual(unavailableState);
+    act(() => listener?.(readyState));
+    expect(result.current.voiceConnectionState).toEqual(readyState);
+  });
+
+  it('uses an unavailable snapshot when mounted after voice initialization failed', () => {
+    const unavailableState = {
+      status: VOICE_CONNECTION_STATUS.UNAVAILABLE,
+      lineStatus: VoiceLineStatus.ERROR,
+      mobiusSocketStatus: VoiceMobiusSocketStatus.DISCONNECTED,
+    };
+    jest.spyOn(mockCC, 'getVoiceConnectionState').mockReturnValue(unavailableState);
+    const {result} = renderHook(() =>
+      useUserState({
+        idleCodes,
+        agentId,
+        cc: mockCC,
+        currentState: '0',
+        customState: null,
+        logger,
+        onStateChange,
+      })
+    );
+
+    expect(result.current.voiceConnectionState).toEqual(unavailableState);
+  });
+
+  it('initializes with a safe default snapshot when cc is undefined and connects when cc becomes available', () => {
+    const readyState = {
+      status: VOICE_CONNECTION_STATUS.READY,
+      lineStatus: VoiceLineStatus.REGISTERED,
+      mobiusSocketStatus: VoiceMobiusSocketStatus.CONNECTED,
+    };
+    jest.spyOn(mockCC, 'getVoiceConnectionState').mockReturnValue(readyState);
+
+    const {result, rerender} = renderHook(
+      ({ccInstance}: {ccInstance?: IContactCenter}) =>
+        useUserState({
+          idleCodes,
+          agentId,
+          cc: ccInstance,
+          currentState: '0',
+          customState: null,
+          logger,
+          onStateChange,
+        }),
+      {initialProps: {ccInstance: undefined}}
+    );
+
+    expect(result.current.voiceConnectionState).toEqual({
+      status: VOICE_CONNECTION_STATUS.NOT_REQUIRED,
+      lineStatus: VoiceLineStatus.UNKNOWN,
+      mobiusSocketStatus: VoiceMobiusSocketStatus.NOT_IN_USE,
+    });
+    expect(ccOnSpy).not.toHaveBeenCalled();
+
+    rerender({ccInstance: mockCC});
+    expect(ccOnSpy).toHaveBeenCalledWith(VOICE_CONNECTION_EVENTS.STATE_CHANGE, expect.any(Function));
+    expect(result.current.voiceConnectionState).toEqual(readyState);
+  });
+
+  it('forces Idle and opens dialog after voice loss timeout when browser calling drops', async () => {
+    const idleCodesWithDefault = [
+      {id: '1', name: 'Break', isSystem: false, isDefault: true},
+      {id: '2', name: 'Available', isSystem: false, isDefault: false},
+    ];
+    const readyState = {
+      status: VOICE_CONNECTION_STATUS.READY,
+      lineStatus: VoiceLineStatus.REGISTERED,
+      mobiusSocketStatus: VoiceMobiusSocketStatus.CONNECTED,
+    };
+    const unavailableState = {
+      status: VOICE_CONNECTION_STATUS.UNAVAILABLE,
+      lineStatus: VoiceLineStatus.ERROR,
+      mobiusSocketStatus: VoiceMobiusSocketStatus.DISCONNECTED,
+    };
+    jest.spyOn(mockCC, 'getVoiceConnectionState').mockReturnValue(readyState);
+    ccSetAgentStateSpy.mockResolvedValueOnce({data: {lastStateChangeTimestamp: 100, lastIdleCodeChangeTimestamp: 100}});
+
+    const {result, rerender} = renderHook(
+      ({currentState}: {currentState: string}) =>
+        useUserState({
+          idleCodes: idleCodesWithDefault,
+          agentId,
+          cc: mockCC,
+          currentState,
+          customState: null,
+          logger,
+          onStateChange,
+          isBrowserVoiceSession: true,
+          isAgentLoggedIn: true,
+        }),
+      {initialProps: {currentState: '2'}}
+    );
+
+    const listener = ccOnSpy.mock.calls.find(([eventName]) => eventName === VOICE_CONNECTION_EVENTS.STATE_CHANGE)?.[1];
+    jest.spyOn(mockCC, 'getVoiceConnectionState').mockReturnValue(unavailableState);
+    act(() => listener?.(unavailableState));
+
+    expect(result.current.voiceConnectionLossDialogOpen).toBe(false);
+
+    await act(async () => {
+      jest.advanceTimersByTime(2000);
+    });
+
+    expect(store.setCurrentState).toHaveBeenCalledWith('1');
+
+    await act(async () => {
+      rerender({currentState: '1'});
+    });
+
+    expect(ccSetAgentStateSpy).toHaveBeenCalledWith({
+      state: 'Idle',
+      auxCodeId: '1',
+      agentId,
+      lastStateChangeReason: 'Break',
+    });
+    expect(result.current.voiceConnectionLossDialogOpen).toBe(true);
+  });
+
+  it('preserves forced Idle during wellness-code lookup and persists once lookup finishes', async () => {
+    const idleCodesWithDefault = [
+      {id: '1', name: 'Break', isSystem: false, isDefault: true},
+      {id: '2', name: 'Available', isSystem: false, isDefault: false},
+    ];
+    const readyState = {
+      status: VOICE_CONNECTION_STATUS.READY,
+      lineStatus: VoiceLineStatus.REGISTERED,
+      mobiusSocketStatus: VoiceMobiusSocketStatus.CONNECTED,
+    };
+    const unavailableState = {
+      status: VOICE_CONNECTION_STATUS.UNAVAILABLE,
+      lineStatus: VoiceLineStatus.ERROR,
+      mobiusSocketStatus: VoiceMobiusSocketStatus.DISCONNECTED,
+    };
+    jest.spyOn(mockCC, 'getVoiceConnectionState').mockReturnValue(readyState);
+    ccSetAgentStateSpy.mockResolvedValueOnce({data: {lastStateChangeTimestamp: 100, lastIdleCodeChangeTimestamp: 100}});
+
+    const {result, rerender} = renderHook(
+      ({currentState, wellnessLookupPending}: {currentState: string; wellnessLookupPending: boolean}) =>
+        useUserState({
+          idleCodes: idleCodesWithDefault,
+          agentId,
+          cc: mockCC,
+          currentState,
+          customState: null,
+          logger,
+          onStateChange,
+          isBrowserVoiceSession: true,
+          isAgentLoggedIn: true,
+          wellnessIdleCodeLookupPending: wellnessLookupPending,
+        }),
+      {initialProps: {currentState: '2', wellnessLookupPending: true}}
+    );
+
+    const listener = ccOnSpy.mock.calls.find(([eventName]) => eventName === VOICE_CONNECTION_EVENTS.STATE_CHANGE)?.[1];
+    jest.spyOn(mockCC, 'getVoiceConnectionState').mockReturnValue(unavailableState);
+    act(() => listener?.(unavailableState));
+
+    await act(async () => {
+      jest.advanceTimersByTime(2000);
+    });
+
+    expect(store.setCurrentState).toHaveBeenCalledWith('1');
+
+    await act(async () => {
+      rerender({currentState: '1', wellnessLookupPending: true});
+    });
+
+    expect(ccSetAgentStateSpy).not.toHaveBeenCalled();
+    expect(result.current.voiceConnectionLossDialogOpen).toBe(false);
+
+    await act(async () => {
+      rerender({currentState: '1', wellnessLookupPending: false});
+    });
+
+    expect(ccSetAgentStateSpy).toHaveBeenCalledWith({
+      state: 'Idle',
+      auxCodeId: '1',
+      agentId,
+      lastStateChangeReason: 'Break',
+    });
+    expect(result.current.voiceConnectionLossDialogOpen).toBe(true);
+  });
+
+  it('reads live wellness-lookup flag when lookup starts during the loss timeout window', async () => {
+    const idleCodesWithDefault = [
+      {id: '1', name: 'Break', isSystem: false, isDefault: true},
+      {id: '2', name: 'Available', isSystem: false, isDefault: false},
+    ];
+    const readyState = {
+      status: VOICE_CONNECTION_STATUS.READY,
+      lineStatus: VoiceLineStatus.REGISTERED,
+      mobiusSocketStatus: VoiceMobiusSocketStatus.CONNECTED,
+    };
+    const unavailableState = {
+      status: VOICE_CONNECTION_STATUS.UNAVAILABLE,
+      lineStatus: VoiceLineStatus.ERROR,
+      mobiusSocketStatus: VoiceMobiusSocketStatus.DISCONNECTED,
+    };
+    jest.spyOn(mockCC, 'getVoiceConnectionState').mockReturnValue(readyState);
+    ccSetAgentStateSpy.mockResolvedValueOnce({data: {lastStateChangeTimestamp: 100, lastIdleCodeChangeTimestamp: 100}});
+
+    const {result, rerender} = renderHook(
+      ({currentState, wellnessLookupPending}: {currentState: string; wellnessLookupPending: boolean}) =>
+        useUserState({
+          idleCodes: idleCodesWithDefault,
+          agentId,
+          cc: mockCC,
+          currentState,
+          customState: null,
+          logger,
+          onStateChange,
+          isBrowserVoiceSession: true,
+          isAgentLoggedIn: true,
+          wellnessIdleCodeLookupPending: wellnessLookupPending,
+        }),
+      {initialProps: {currentState: '2', wellnessLookupPending: false}}
+    );
+
+    const listener = ccOnSpy.mock.calls.find(([eventName]) => eventName === VOICE_CONNECTION_EVENTS.STATE_CHANGE)?.[1];
+    jest.spyOn(mockCC, 'getVoiceConnectionState').mockReturnValue(unavailableState);
+    act(() => listener?.(unavailableState));
+
+    await act(async () => {
+      jest.advanceTimersByTime(1000);
+      rerender({currentState: '2', wellnessLookupPending: true});
+    });
+
+    await act(async () => {
+      jest.advanceTimersByTime(1000);
+    });
+
+    expect(store.setCurrentState).toHaveBeenCalledWith('1');
+
+    await act(async () => {
+      rerender({currentState: '1', wellnessLookupPending: true});
+    });
+
+    expect(ccSetAgentStateSpy).not.toHaveBeenCalled();
+
+    await act(async () => {
+      rerender({currentState: '1', wellnessLookupPending: false});
+    });
+
+    expect(ccSetAgentStateSpy).toHaveBeenCalledWith({
+      state: 'Idle',
+      auxCodeId: '1',
+      agentId,
+      lastStateChangeReason: 'Break',
+    });
+    expect(result.current.voiceConnectionLossDialogOpen).toBe(true);
+  });
+
+  it('persists forced Idle transition out of WellbeingBreak rather than swallowing as SDK restore', async () => {
+    const wellnessBreakCode = {id: '99', name: 'WellbeingBreak', isSystem: true, isDefault: false};
+    const idleCodesWithWellness = [
+      {id: '1', name: 'Break', isSystem: false, isDefault: true},
+      {id: '2', name: 'Available', isSystem: false, isDefault: false},
+      wellnessBreakCode,
+    ];
+    const readyState = {
+      status: VOICE_CONNECTION_STATUS.READY,
+      lineStatus: VoiceLineStatus.REGISTERED,
+      mobiusSocketStatus: VoiceMobiusSocketStatus.CONNECTED,
+    };
+    const unavailableState = {
+      status: VOICE_CONNECTION_STATUS.UNAVAILABLE,
+      lineStatus: VoiceLineStatus.ERROR,
+      mobiusSocketStatus: VoiceMobiusSocketStatus.DISCONNECTED,
+    };
+    jest.spyOn(mockCC, 'getVoiceConnectionState').mockReturnValue(readyState);
+    ccSetAgentStateSpy.mockResolvedValueOnce({data: {lastStateChangeTimestamp: 100, lastIdleCodeChangeTimestamp: 100}});
+
+    const {result, rerender} = renderHook(
+      ({currentState, isExternallyManaged}: {currentState: string; isExternallyManaged: boolean}) =>
+        useUserState({
+          idleCodes: idleCodesWithWellness,
+          agentId,
+          cc: mockCC,
+          currentState,
+          customState: null,
+          logger,
+          onStateChange,
+          isBrowserVoiceSession: true,
+          isAgentLoggedIn: true,
+          isCurrentStateExternallyManaged: isExternallyManaged,
+        }),
+      {initialProps: {currentState: '99', isExternallyManaged: true}}
+    );
+
+    const listener = ccOnSpy.mock.calls.find(([eventName]) => eventName === VOICE_CONNECTION_EVENTS.STATE_CHANGE)?.[1];
+    jest.spyOn(mockCC, 'getVoiceConnectionState').mockReturnValue(unavailableState);
+    act(() => listener?.(unavailableState));
+
+    await act(async () => {
+      jest.advanceTimersByTime(2000);
+    });
+
+    expect(store.setCurrentState).toHaveBeenCalledWith('1');
+
+    await act(async () => {
+      rerender({currentState: '1', isExternallyManaged: false});
+    });
+
+    expect(ccSetAgentStateSpy).toHaveBeenCalledWith({
+      state: 'Idle',
+      auxCodeId: '1',
+      agentId,
+      lastStateChangeReason: 'Break',
+    });
+    expect(result.current.voiceConnectionLossDialogOpen).toBe(true);
+  });
+
+  it('keeps reconnect dialog accessible when forced Idle state update fails and displays stateChangeError without looping', async () => {
+    const idleCodesWithDefault = [
+      {id: '1', name: 'Break', isSystem: false, isDefault: true},
+      {id: '2', name: 'Available', isSystem: false, isDefault: false},
+    ];
+    const readyState = {
+      status: VOICE_CONNECTION_STATUS.READY,
+      lineStatus: VoiceLineStatus.REGISTERED,
+      mobiusSocketStatus: VoiceMobiusSocketStatus.CONNECTED,
+    };
+    const unavailableState = {
+      status: VOICE_CONNECTION_STATUS.UNAVAILABLE,
+      lineStatus: VoiceLineStatus.ERROR,
+      mobiusSocketStatus: VoiceMobiusSocketStatus.DISCONNECTED,
+    };
+    jest.spyOn(mockCC, 'getVoiceConnectionState').mockReturnValue(readyState);
+    ccSetAgentStateSpy.mockRejectedValueOnce(new Error('Backend rejected state change'));
+
+    const {result, rerender} = renderHook(
+      ({currentState}: {currentState: string}) =>
+        useUserState({
+          idleCodes: idleCodesWithDefault,
+          agentId,
+          cc: mockCC,
+          currentState,
+          customState: null,
+          logger,
+          onStateChange,
+          isBrowserVoiceSession: true,
+          isAgentLoggedIn: true,
+        }),
+      {initialProps: {currentState: '2'}}
+    );
+
+    const listener = ccOnSpy.mock.calls.find(([eventName]) => eventName === VOICE_CONNECTION_EVENTS.STATE_CHANGE)?.[1];
+    jest.spyOn(mockCC, 'getVoiceConnectionState').mockReturnValue(unavailableState);
+    act(() => listener?.(unavailableState));
+
+    await act(async () => {
+      jest.advanceTimersByTime(2000);
+    });
+
+    expect(store.setCurrentState).toHaveBeenCalledWith('1');
+
+    await act(async () => {
+      rerender({currentState: '1'});
+    });
+
+    expect(ccSetAgentStateSpy).toHaveBeenCalledTimes(1);
+    expect(result.current.voiceConnectionLossDialogOpen).toBe(true);
+    expect(result.current.stateChangeError).toBe('Unable to update agent state.');
+    expect(store.setCurrentState).toHaveBeenCalledWith('2');
+
+    await act(async () => {
+      rerender({currentState: '2'});
+    });
+
+    expect(ccSetAgentStateSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('opens dialog immediately when agent was already in default idle state on voice loss', async () => {
+    const idleCodesWithDefault = [
+      {id: '1', name: 'Break', isSystem: false, isDefault: true},
+      {id: '2', name: 'Available', isSystem: false, isDefault: false},
+    ];
+    const readyState = {
+      status: VOICE_CONNECTION_STATUS.READY,
+      lineStatus: VoiceLineStatus.REGISTERED,
+      mobiusSocketStatus: VoiceMobiusSocketStatus.CONNECTED,
+    };
+    const unavailableState = {
+      status: VOICE_CONNECTION_STATUS.UNAVAILABLE,
+      lineStatus: VoiceLineStatus.ERROR,
+      mobiusSocketStatus: VoiceMobiusSocketStatus.DISCONNECTED,
+    };
+    jest.spyOn(mockCC, 'getVoiceConnectionState').mockReturnValue(readyState);
+
+    const {result} = renderHook(() =>
+      useUserState({
+        idleCodes: idleCodesWithDefault,
+        agentId,
+        cc: mockCC,
+        currentState: '1',
+        customState: null,
+        logger,
+        onStateChange,
+        isBrowserVoiceSession: true,
+        isAgentLoggedIn: true,
+      })
+    );
+
+    const listener = ccOnSpy.mock.calls.find(([eventName]) => eventName === VOICE_CONNECTION_EVENTS.STATE_CHANGE)?.[1];
+    jest.spyOn(mockCC, 'getVoiceConnectionState').mockReturnValue(unavailableState);
+    act(() => listener?.(unavailableState));
+
+    await act(async () => {
+      jest.advanceTimersByTime(2000);
+    });
+
+    expect(ccSetAgentStateSpy).not.toHaveBeenCalled();
+    expect(result.current.voiceConnectionLossDialogOpen).toBe(true);
+  });
+
+  it('opens recovery dialog without state change when no default idle code exists, and transitions once default code arrives', async () => {
+    const idleCodesWithoutDefault = [
+      {id: '1', name: 'Break', isSystem: false, isDefault: false},
+      {id: '2', name: 'Available', isSystem: false, isDefault: false},
+    ];
+    const idleCodesWithDefault = [
+      {id: '1', name: 'Break', isSystem: false, isDefault: true},
+      {id: '2', name: 'Available', isSystem: false, isDefault: false},
+    ];
+    const readyState = {
+      status: VOICE_CONNECTION_STATUS.READY,
+      lineStatus: VoiceLineStatus.REGISTERED,
+      mobiusSocketStatus: VoiceMobiusSocketStatus.CONNECTED,
+    };
+    const unavailableState = {
+      status: VOICE_CONNECTION_STATUS.UNAVAILABLE,
+      lineStatus: VoiceLineStatus.ERROR,
+      mobiusSocketStatus: VoiceMobiusSocketStatus.DISCONNECTED,
+    };
+    jest.spyOn(mockCC, 'getVoiceConnectionState').mockReturnValue(readyState);
+    ccSetAgentStateSpy.mockResolvedValueOnce({data: {lastStateChangeTimestamp: 100, lastIdleCodeChangeTimestamp: 100}});
+
+    const {result, rerender} = renderHook(
+      ({codes}: {codes: typeof idleCodesWithoutDefault}) =>
+        useUserState({
+          idleCodes: codes,
+          agentId,
+          cc: mockCC,
+          currentState: '2',
+          customState: null,
+          logger,
+          onStateChange,
+          isBrowserVoiceSession: true,
+          isAgentLoggedIn: true,
+        }),
+      {initialProps: {codes: idleCodesWithoutDefault}}
+    );
+
+    const listener = ccOnSpy.mock.calls.find(([eventName]) => eventName === VOICE_CONNECTION_EVENTS.STATE_CHANGE)?.[1];
+    jest.spyOn(mockCC, 'getVoiceConnectionState').mockReturnValue(unavailableState);
+    act(() => listener?.(unavailableState));
+
+    await act(async () => {
+      jest.advanceTimersByTime(2000);
+    });
+
+    expect(store.setCurrentState).not.toHaveBeenCalled();
+    expect(ccSetAgentStateSpy).not.toHaveBeenCalled();
+    expect(result.current.voiceConnectionLossDialogOpen).toBe(true);
+
+    await act(async () => {
+      rerender({codes: idleCodesWithDefault});
+    });
+
+    expect(store.setCurrentState).toHaveBeenCalledWith('1');
+  });
+
+  it('does not open dialog when an older concurrent state update resolves before forced Idle settles', async () => {
+    const idleCodesWithDefault = [
+      {id: '1', name: 'Break', isSystem: false, isDefault: true},
+      {id: '2', name: 'Available', isSystem: false, isDefault: false},
+      {id: '3', name: 'Meeting', isSystem: false, isDefault: false},
+    ];
+    const readyState = {
+      status: VOICE_CONNECTION_STATUS.READY,
+      lineStatus: VoiceLineStatus.REGISTERED,
+      mobiusSocketStatus: VoiceMobiusSocketStatus.CONNECTED,
+    };
+    const unavailableState = {
+      status: VOICE_CONNECTION_STATUS.UNAVAILABLE,
+      lineStatus: VoiceLineStatus.ERROR,
+      mobiusSocketStatus: VoiceMobiusSocketStatus.DISCONNECTED,
+    };
+    jest.spyOn(mockCC, 'getVoiceConnectionState').mockReturnValue(readyState);
+
+    let resolveFirstUpdate: (value: unknown) => void;
+    const firstUpdatePromise = new Promise((resolve) => {
+      resolveFirstUpdate = resolve;
+    });
+    ccSetAgentStateSpy.mockReturnValueOnce(firstUpdatePromise);
+
+    const {result, rerender} = renderHook(
+      ({currentState}: {currentState: string}) =>
+        useUserState({
+          idleCodes: idleCodesWithDefault,
+          agentId,
+          cc: mockCC,
+          currentState,
+          customState: null,
+          logger,
+          onStateChange,
+          isBrowserVoiceSession: true,
+          isAgentLoggedIn: true,
+        }),
+      {initialProps: {currentState: '2'}}
+    );
+
+    act(() => {
+      result.current.setAgentStatus('3');
+    });
+    rerender({currentState: '3'});
+
+    expect(ccSetAgentStateSpy).toHaveBeenCalledWith({
+      state: 'Idle',
+      auxCodeId: '3',
+      agentId,
+      lastStateChangeReason: 'Meeting',
+    });
+
+    const listener = ccOnSpy.mock.calls.find(([eventName]) => eventName === VOICE_CONNECTION_EVENTS.STATE_CHANGE)?.[1];
+    jest.spyOn(mockCC, 'getVoiceConnectionState').mockReturnValue(unavailableState);
+    act(() => listener?.(unavailableState));
+
+    await act(async () => {
+      jest.advanceTimersByTime(2000);
+    });
+
+    expect(store.setCurrentState).toHaveBeenCalledWith('1');
+
+    await act(async () => {
+      resolveFirstUpdate!({data: {lastStateChangeTimestamp: 100, lastIdleCodeChangeTimestamp: 100}});
+    });
+
+    expect(result.current.voiceConnectionLossDialogOpen).toBe(false);
+  });
+
+  it('cancels deferred forced Idle persistence when voice recovery and wellness lookup completion are batched', async () => {
+    const idleCodesWithDefault = [
+      {id: '1', name: 'Break', isSystem: false, isDefault: true},
+      {id: '2', name: 'Available', isSystem: false, isDefault: false},
+    ];
+    const readyState = {
+      status: VOICE_CONNECTION_STATUS.READY,
+      lineStatus: VoiceLineStatus.REGISTERED,
+      mobiusSocketStatus: VoiceMobiusSocketStatus.CONNECTED,
+    };
+    const unavailableState = {
+      status: VOICE_CONNECTION_STATUS.UNAVAILABLE,
+      lineStatus: VoiceLineStatus.ERROR,
+      mobiusSocketStatus: VoiceMobiusSocketStatus.DISCONNECTED,
+    };
+    jest.spyOn(mockCC, 'getVoiceConnectionState').mockReturnValue(readyState);
+
+    const {rerender} = renderHook(
+      ({currentState, wellnessLookupPending}: {currentState: string; wellnessLookupPending: boolean}) =>
+        useUserState({
+          idleCodes: idleCodesWithDefault,
+          agentId,
+          cc: mockCC,
+          currentState,
+          customState: null,
+          logger,
+          onStateChange,
+          isBrowserVoiceSession: true,
+          isAgentLoggedIn: true,
+          wellnessIdleCodeLookupPending: wellnessLookupPending,
+        }),
+      {initialProps: {currentState: '2', wellnessLookupPending: true}}
+    );
+
+    const listener = ccOnSpy.mock.calls.find(([eventName]) => eventName === VOICE_CONNECTION_EVENTS.STATE_CHANGE)?.[1];
+    jest.spyOn(mockCC, 'getVoiceConnectionState').mockReturnValue(unavailableState);
+    act(() => listener?.(unavailableState));
+
+    // Voice-loss timeout elapses while wellness lookup is still pending: the forced
+    // Idle transition is requested but deferred (pendingUserSelectionRef tracks it).
+    await act(async () => {
+      jest.advanceTimersByTime(2000);
+    });
+
+    expect(store.setCurrentState).toHaveBeenCalledWith('1');
+
+    await act(async () => {
+      rerender({currentState: '1', wellnessLookupPending: true});
+    });
+
+    expect(ccSetAgentStateSpy).not.toHaveBeenCalled();
+
+    // Voice recovers and wellness lookup completes in the same batched update. The
+    // deferred forced-Idle transition must be canceled and must NOT be persisted,
+    // even though this render still observes the stale forced-Idle currentState.
+    jest.spyOn(mockCC, 'getVoiceConnectionState').mockReturnValue(readyState);
+    await act(async () => {
+      listener?.(readyState);
+      rerender({currentState: '1', wellnessLookupPending: false});
+    });
+
+    expect(ccSetAgentStateSpy).not.toHaveBeenCalled();
+    expect(store.setCurrentState).toHaveBeenCalledWith('2');
+
+    // Once the canceled rollback's store update to Available actually lands, no
+    // redundant compensating request should be sent either.
+    await act(async () => {
+      rerender({currentState: '2', wellnessLookupPending: false});
+    });
+
+    expect(ccSetAgentStateSpy).not.toHaveBeenCalled();
+  });
+
+  it('clears a stale cancellation token so a later legitimate selection of the same idle code is still persisted', async () => {
+    const idleCodesWithDefault = [
+      {id: '1', name: 'Break', isSystem: false, isDefault: true},
+      {id: '2', name: 'Available', isSystem: false, isDefault: false},
+    ];
+    const readyState = {
+      status: VOICE_CONNECTION_STATUS.READY,
+      lineStatus: VoiceLineStatus.REGISTERED,
+      mobiusSocketStatus: VoiceMobiusSocketStatus.CONNECTED,
+    };
+    const unavailableState = {
+      status: VOICE_CONNECTION_STATUS.UNAVAILABLE,
+      lineStatus: VoiceLineStatus.ERROR,
+      mobiusSocketStatus: VoiceMobiusSocketStatus.DISCONNECTED,
+    };
+    jest.spyOn(mockCC, 'getVoiceConnectionState').mockReturnValue(readyState);
+    ccSetAgentStateSpy.mockResolvedValueOnce({data: {lastStateChangeTimestamp: 100, lastIdleCodeChangeTimestamp: 100}});
+
+    const {result, rerender} = renderHook(
+      ({currentState, wellnessLookupPending}: {currentState: string; wellnessLookupPending: boolean}) =>
+        useUserState({
+          idleCodes: idleCodesWithDefault,
+          agentId,
+          cc: mockCC,
+          currentState,
+          customState: null,
+          logger,
+          onStateChange,
+          isBrowserVoiceSession: true,
+          isAgentLoggedIn: true,
+          wellnessIdleCodeLookupPending: wellnessLookupPending,
+        }),
+      {initialProps: {currentState: '2', wellnessLookupPending: true}}
+    );
+
+    const listener = ccOnSpy.mock.calls.find(([eventName]) => eventName === VOICE_CONNECTION_EVENTS.STATE_CHANGE)?.[1];
+    jest.spyOn(mockCC, 'getVoiceConnectionState').mockReturnValue(unavailableState);
+    act(() => listener?.(unavailableState));
+
+    // Voice-loss timeout elapses while wellness lookup is still pending: the forced
+    // Idle transition is requested but deferred — the render observing currentState
+    // as the forced Idle code never completes before voice recovers below.
+    await act(async () => {
+      jest.advanceTimersByTime(2000);
+    });
+
+    expect(store.setCurrentState).toHaveBeenCalledWith('1');
+
+    // Voice recovers while lookup is still pending and currentState is still
+    // Available (the forced render never landed). The rollback sets the
+    // cancellation token, but this render's currentState does not match it.
+    jest.spyOn(mockCC, 'getVoiceConnectionState').mockReturnValue(readyState);
+    act(() => listener?.(readyState));
+
+    expect(ccSetAgentStateSpy).not.toHaveBeenCalled();
+
+    // Wellness lookup now completes with currentState still Available: the stale
+    // cancellation token must be cleared here even though it does not match.
+    await act(async () => {
+      rerender({currentState: '2', wellnessLookupPending: false});
+    });
+
+    expect(ccSetAgentStateSpy).not.toHaveBeenCalled();
+
+    // The agent now explicitly selects the same idle code that was earlier
+    // canceled. This legitimate, unrelated transition must be persisted — not
+    // silently swallowed by a leftover cancellation token.
+    act(() => {
+      result.current.setAgentStatus('1');
+    });
+    await act(async () => {
+      rerender({currentState: '1', wellnessLookupPending: false});
+    });
+
+    expect(ccSetAgentStateSpy).toHaveBeenCalledWith({
+      state: 'Idle',
+      auxCodeId: '1',
+      agentId,
+      lastStateChangeReason: 'Break',
+    });
+  });
+
+  it('re-asserts the deferred forced Idle target when an older SDK confirmation overwrites currentState before lookup completes', async () => {
+    const idleCodesWithDefault = [
+      {id: '1', name: 'Break', isSystem: false, isDefault: true},
+      {id: '2', name: 'Available', isSystem: false, isDefault: false},
+    ];
+    const readyState = {
+      status: VOICE_CONNECTION_STATUS.READY,
+      lineStatus: VoiceLineStatus.REGISTERED,
+      mobiusSocketStatus: VoiceMobiusSocketStatus.CONNECTED,
+    };
+    const unavailableState = {
+      status: VOICE_CONNECTION_STATUS.UNAVAILABLE,
+      lineStatus: VoiceLineStatus.ERROR,
+      mobiusSocketStatus: VoiceMobiusSocketStatus.DISCONNECTED,
+    };
+    jest.spyOn(mockCC, 'getVoiceConnectionState').mockReturnValue(readyState);
+    ccSetAgentStateSpy.mockResolvedValue({data: {lastStateChangeTimestamp: 100, lastIdleCodeChangeTimestamp: 100}});
+
+    const {rerender} = renderHook(
+      ({currentState, wellnessLookupPending}: {currentState: string; wellnessLookupPending: boolean}) =>
+        useUserState({
+          idleCodes: idleCodesWithDefault,
+          agentId,
+          cc: mockCC,
+          currentState,
+          customState: null,
+          logger,
+          onStateChange,
+          isBrowserVoiceSession: true,
+          isAgentLoggedIn: true,
+          wellnessIdleCodeLookupPending: wellnessLookupPending,
+        }),
+      {initialProps: {currentState: '2', wellnessLookupPending: true}}
+    );
+
+    const listener = ccOnSpy.mock.calls.find(([eventName]) => eventName === VOICE_CONNECTION_EVENTS.STATE_CHANGE)?.[1];
+    jest.spyOn(mockCC, 'getVoiceConnectionState').mockReturnValue(unavailableState);
+    act(() => listener?.(unavailableState));
+
+    // Voice-loss timeout elapses while wellness lookup is still pending: the forced
+    // Idle transition is requested but deferred.
+    await act(async () => {
+      jest.advanceTimersByTime(2000);
+    });
+
+    expect(store.setCurrentState).toHaveBeenCalledWith('1');
+
+    await act(async () => {
+      rerender({currentState: '1', wellnessLookupPending: true});
+    });
+
+    expect(ccSetAgentStateSpy).not.toHaveBeenCalled();
+
+    // An older in-flight SDK confirmation (e.g. StoreWrapper.handleStateChange for a
+    // request that started before voice loss) overwrites currentState back to
+    // Available while lookup is still pending. Voice remains unavailable throughout.
+    await act(async () => {
+      rerender({currentState: '2', wellnessLookupPending: true});
+    });
+
+    expect(ccSetAgentStateSpy).not.toHaveBeenCalled();
+
+    // Wellness lookup completes, but currentState no longer reflects the forced
+    // target. The deferred transition must be re-asserted rather than silently
+    // dropped while voice remains unavailable.
+    await act(async () => {
+      rerender({currentState: '2', wellnessLookupPending: false});
+    });
+
+    expect(store.setCurrentState).toHaveBeenCalledWith('1');
+
+    await act(async () => {
+      rerender({currentState: '1', wellnessLookupPending: false});
+    });
+
+    expect(ccSetAgentStateSpy).toHaveBeenCalledWith({
+      state: 'Idle',
+      auxCodeId: '1',
+      agentId,
+      lastStateChangeReason: 'Break',
+    });
   });
 
   it('should increment elapsedTime every second', async () => {
@@ -429,7 +1251,7 @@ describe('useUserState Hook', () => {
 
   it('should handle errors from setAgentState and revert state', async () => {
     ccSetAgentStateSpy.mockRejectedValueOnce(new Error('Error setting agent status'));
-    const {rerender} = renderHook(
+    const {rerender, result} = renderHook(
       ({currentState}) =>
         useUserState({
           idleCodes,
@@ -456,6 +1278,8 @@ describe('useUserState Hook', () => {
         method: 'updateAgentState',
       });
     });
+    expect(store.setCurrentState).toHaveBeenCalledWith('0');
+    expect(result.current.stateChangeError).toBe('Unable to update agent state.');
   });
 
   it('should handle stopIdleCodeTimer event and set lastIdleStateChangeElapsedTime to -1', () => {

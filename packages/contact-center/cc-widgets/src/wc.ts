@@ -9,6 +9,7 @@ import {AIAssistant} from '@webex/cc-ai-assistant';
 const WebUserState = r2wc(UserState, {
   props: {
     onStateChange: 'function',
+    onVoiceReconnect: 'function',
   },
 });
 

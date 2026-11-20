@@ -297,6 +297,7 @@ These are UI components; the non-happy-path states are part of the contract.
 - **StationLogin:** login screen vs. profile mode; device-type select drives dial-number input visibility; Desktop option hidden when `hideDesktopLogin`; multiple-login alert when `showMultipleLoginAlert`; error states from `loginFailure`/`saveError`; Save/Continue disabled until valid. (`src/components/StationLogin/station-login.tsx`)
 - **UserState:** dropdown of idle/custom states with current state highlighted; `isSettingAgentStatus` shows a busy/disabled state; error-triggering idle codes styled distinctly; state timer renders via `formatTime`. (`src/components/UserState/user-state.tsx`)
 - **CallControl / CallControlCAD:** button visibility/enablement driven by `controlVisibility`; consult/transfer popover with Agents/Queues/Dial Number/Entry Point tabs (empty-state when no results, loading spinner while fetching); auto-wrapup countdown bar; wrapup requires reason selection before submit. (`src/components/task/CallControl/`, `src/components/task/CallControlCAD/`)
+- **CallControl DTMF keypad:** circular digit buttons and a reserved spinner slot inside the input keep the input, keypad, and popover width stable while tones are being sent. (`src/components/task/CallControl/call-control-dtmf-keypad.tsx`, `src/components/task/CallControl/call-control.styles.scss`)
 - **IncomingTask / TaskList:** hidden (renders `<></>`) when no incoming task / empty list; per-media-type icon and label; campaign preview rows swap UI. (`src/components/task/IncomingTask/`, `src/components/task/TaskList/`)
 - **OutdialCall:** dialpad / contacts tabs; invalid-number state disables dial; address-book loading spinner and infinite scroll; disabled while a telephony task is active. (`src/components/task/OutdialCall/outdial-call.tsx`)
 - **RealTimeTranscript:** empty-state message ("No live transcript available.") when no entries; entries sorted chronologically; event vs. message rendering. (`src/components/task/RealTimeTranscript/real-time-transcript.tsx`)
@@ -701,3 +702,18 @@ The modal accepts a renderer loader from `@webex/cc-ai-assistant`. This package 
 import or declare a dependency on `lottie-web` and does not ship the wellness MP3. Momentum
 may still emit its own dynamic icon chunks. Evidence: `package.json`,
 `src/components/AIAssistant/WellnessBreak/wellness-break-modal.tsx`.
+
+## User State browser voice availability (CAI-8629)
+
+`UserStateComponent` accepts an optional SDK voice snapshot as a prop; without it, the
+existing enabled behavior is preserved. `UNAVAILABLE` disables the
+selector and presents an accessible connecting, reconnecting, or unavailable warning;
+`NOT_REQUIRED` leaves selection enabled for extension and disabled-WebRTC flows. A rejected
+state update can display generic accessible failure copy without exposing SDK error details.
+When the User State hook reports sustained voice loss, the component shows a recovery dialog
+with the Agent Desktop English title (`Desktop connection lost`), message (`You're no longer
+connected to Desktop, and your availability state has changed to Idle. Check your internet
+connection, then try reconnecting.`), and `Reconnect` action. Retry is delegated through the
+optional host callback; reconnect failures use safe generic copy. Evidence:
+`src/components/UserState/user-state.tsx`, `user-state.types.ts`, and
+`tests/components/UserState/user-state.tsx`.

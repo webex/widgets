@@ -31,7 +31,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  min-width: 12rem;
+  width: 12rem;
 }
 
 .call-control-dtmf-input-wrapper {
@@ -43,10 +43,19 @@
 
 .call-control-dtmf-input {
   flex: 1;
+  min-width: 0;
+
+  &::part(input-section) {
+    min-width: 0;
+  }
 }
 
-.call-control-dtmf-spinner {
-  flex-shrink: 0;
+.call-control-dtmf-spinner-slot {
+  display: flex;
+  align-items: center;
+  flex: 0 0 1.5rem;
+  width: 1.5rem;
+  height: 1.5rem;
 }
 
 .call-control-dtmf-keys {
@@ -56,12 +65,17 @@
   list-style: none;
   padding: 0.5rem;
   margin: 0;
+
+  li {
+    display: flex;
+    justify-content: center;
+  }
 }
 
 .call-control-dtmf-key {
-  width: 100%;
-  aspect-ratio: 1;
-  min-height: 2.75rem;
+  width: 3rem;
+  height: 3rem;
+  box-sizing: border-box;
   border-radius: 50%;
   padding: 0.25rem;
 }
