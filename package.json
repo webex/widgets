@@ -9,7 +9,7 @@
     "packages/contact-center/*",
     "widgets-samples/**/**"
   ],
-  "packageManager": "yarn@4.5.1",
+  "packageManager": "yarn@4.10.3",
   "devDependencies": {
     "@babel/plugin-transform-runtime": "^7.29.0",
     "@babel/preset-typescript": "7.25.9",

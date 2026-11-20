@@ -92,6 +92,7 @@ describe('existing release tooling after consumer checks', () => {
       'public',
       '--tag',
       'next',
+      '--provenance',
     ]);
     expect(() => run(step.run, {...env, DEPLOY_EXIT: '7'})).toThrow();
   });
@@ -109,7 +110,19 @@ describe('existing release tooling after consumer checks', () => {
     const cache = publish.steps.find((step) => step.name === 'Restore Distributables Cache');
     expect(cache.with).toMatchObject({path: '**/dist', key: 'dist-${{ env.rid }}', 'fail-on-cache-miss': true});
     expect(publish.steps.some((step) => /build:prod|package-tools (sync|increment)/.test(step.run || ''))).toBe(false);
-    const step = publish.steps.find((item) => item.name === 'Deploy Packages');
-    expect(step.env.YARN_NPM_AUTH_TOKEN).toBe('${{ secrets.NPM_TOKEN }}');
+  });
+
+  it('limits OIDC permission to publishing and makes the npm publish token unavailable', () => {
+    expect(publish.permissions).toEqual({contents: 'read', 'id-token': 'write'});
+    const oidcJobs = Object.entries(deploy.jobs)
+      .filter(([, job]) => job.permissions?.['id-token'] === 'write')
+      .map(([name]) => name);
+    expect(oidcJobs).toEqual(['publish-npm']);
+    expect(JSON.stringify(deploy)).not.toMatch(/secrets\.NPM_TOKEN/);
+    expect(publish.steps.some((step) => /npm install/.test(step.run || ''))).toBe(false);
+    const root = path.resolve(__dirname, '../..');
+    expect(JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8')).packageManager).toBe('yarn@4.10.3');
+    const config = YAML.parse(fs.readFileSync(path.join(root, '.yarnrc.yml'), 'utf8'));
+    expect(config.yarnPath).toBe('.yarn/releases/yarn-4.10.3.cjs');
   });
 });
