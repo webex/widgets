@@ -1,3 +1,7 @@
+---
+description: Full SDD ai-docs validation against source code via parallel agents across 7 drift categories
+---
+
 # Spec Drift Detection — Full Scan
 
 Run a comprehensive validation of all SDD ai-docs against actual source code. Deploys a parallel agent team to catch documentation drift across 7 categories.

@@ -1,3 +1,8 @@
+---
+description: Stage 2 of bug-fix pipeline - root-cause prioritized bugs and propose fixes (read-only)
+argument-hint: "[TICKET-ID...]"
+---
+
 # Triage Command
 
 ## Description
@@ -60,7 +65,7 @@ Agent({
   subagent_type: "general-purpose",
   model: "sonnet",
   description: "Triage ticket {TICKET_ID}",
-  prompt: `You are a triager agent. Follow the instructions in .claude/agents/triager.md.
+  prompt: `You are a triager agent. Follow the instructions in .claude/agents/cypher/triager.md.
 
 TICKET_ID: {TICKET_ID}
 REPO_ROOT: {absolute path to main repo}
@@ -79,7 +84,7 @@ Description:
 Comments:
 {all comments, including Scrubber's classification}
 
-Read .claude/agents/triager.md for your full workflow. Analyze this bug, identify the root cause, and return a fix suggestion as JSON.`,
+Read .claude/agents/cypher/triager.md for your full workflow. Analyze this bug, identify the root cause, and return a fix suggestion as JSON.`,
   run_in_background: true
 })
 ```

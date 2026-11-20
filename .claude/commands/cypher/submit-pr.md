@@ -1,3 +1,8 @@
+---
+description: Commit, push, and create a draft PR for a ticket fixed in a worktree (no subagents)
+argument-hint: "<TICKET-ID>"
+---
+
 # Submit PR Command
 
 ## Description

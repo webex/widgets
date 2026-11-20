@@ -1,3 +1,7 @@
+---
+description: List, inspect, and remove worktrees created by /fix-tickets in /tmp/claude-widgets/
+---
+
 # Cleanup Worktrees Command
 
 ## Description
