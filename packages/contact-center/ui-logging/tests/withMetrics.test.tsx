@@ -102,4 +102,89 @@ describe('withMetrics HOC', () => {
     rerender(<WrappedSpy name="different" />);
     expect(renderSpy).toHaveBeenCalledTimes(2);
   });
+
+  describe('PROPS_UPDATED event', () => {
+    it('should log PROPS_UPDATED when watched props change', () => {
+      const mockTime = 1234567890;
+      jest.setSystemTime(mockTime);
+
+      const WrappedWithWatch = withMetrics<TestComponentProps>(TestComponent, 'TestWidget', ['name']);
+
+      const {rerender} = render(<WrappedWithWatch name="initial" />);
+      logMetricsSpy.mockClear();
+
+      rerender(<WrappedWithWatch name="updated" />);
+
+      expect(logMetricsSpy).toHaveBeenCalledWith({
+        widgetName: 'TestWidget',
+        event: 'PROPS_UPDATED',
+        props: {name: 'updated'},
+        timestamp: mockTime,
+      });
+    });
+
+    it('should not log PROPS_UPDATED when only unwatched props change', () => {
+      const mockTime = 1234567890;
+      jest.setSystemTime(mockTime);
+
+      const WrappedWithWatch = withMetrics<TestComponentProps>(TestComponent, 'TestWidget', ['name']);
+
+      const {rerender} = render(<WrappedWithWatch name="test" otherProp="a" />);
+      logMetricsSpy.mockClear();
+
+      rerender(<WrappedWithWatch name="test" otherProp="b" />);
+
+      expect(logMetricsSpy).not.toHaveBeenCalledWith(
+        expect.objectContaining({event: 'PROPS_UPDATED'})
+      );
+    });
+
+    it('should not log PROPS_UPDATED when no propsToWatch is provided', () => {
+      const mockTime = 1234567890;
+      jest.setSystemTime(mockTime);
+
+      const WrappedNoWatch = withMetrics<TestComponentProps>(TestComponent, 'TestWidget');
+
+      const {rerender} = render(<WrappedNoWatch name="test" />);
+      logMetricsSpy.mockClear();
+
+      rerender(<WrappedNoWatch name="different" />);
+
+      expect(logMetricsSpy).not.toHaveBeenCalledWith(
+        expect.objectContaining({event: 'PROPS_UPDATED'})
+      );
+    });
+
+    it('should not log PROPS_UPDATED on initial render', () => {
+      const mockTime = 1234567890;
+      jest.setSystemTime(mockTime);
+
+      const WrappedWithWatch = withMetrics<TestComponentProps>(TestComponent, 'TestWidget', ['name']);
+
+      render(<WrappedWithWatch name="initial" />);
+
+      expect(logMetricsSpy).not.toHaveBeenCalledWith(
+        expect.objectContaining({event: 'PROPS_UPDATED'})
+      );
+    });
+
+    it('should only include watched props in the log payload', () => {
+      const mockTime = 1234567890;
+      jest.setSystemTime(mockTime);
+
+      const WrappedWithWatch = withMetrics<TestComponentProps>(TestComponent, 'TestWidget', ['name']);
+
+      const {rerender} = render(<WrappedWithWatch name="initial" otherProp="secret" />);
+      logMetricsSpy.mockClear();
+
+      rerender(<WrappedWithWatch name="updated" otherProp="secret" />);
+
+      const propsUpdatedCall = logMetricsSpy.mock.calls.find(
+        (call) => call[0].event === 'PROPS_UPDATED'
+      );
+      expect(propsUpdatedCall).toBeDefined();
+      expect(propsUpdatedCall[0].props).toEqual({name: 'updated'});
+      expect(propsUpdatedCall[0].props).not.toHaveProperty('otherProp');
+    });
+  });
 });
