@@ -89,10 +89,11 @@ const CallControlDtmfKeypad: React.FunctionComponent<CallControlDtmfKeypadProps>
           onKeyDown={handleKeyDown}
           aria-label={DTMF_KEYPAD_PLACEHOLDER}
           disabled={disabled}
-        />
-        {pendingCount > 0 && (
-          <Spinner className="call-control-dtmf-spinner" size="small" data-testid="call-control-keypad-spinner" />
-        )}
+        >
+          <div slot="trailing-button" className="call-control-dtmf-spinner-slot">
+            {pendingCount > 0 && <Spinner size="small" data-testid="call-control-keypad-spinner" />}
+          </div>
+        </Input>
       </div>
       <ul className="call-control-dtmf-keys" data-testid="call-control-keypad-keys">
         {DIALPAD_BUTTONS.map(({val, label}) => (
