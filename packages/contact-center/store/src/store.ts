@@ -94,11 +94,9 @@ class Store implements IStore {
 
   public static getInstance(): Store {
     if (!Store.instance) {
-      console.log('Creating new store instance');
       Store.instance = new Store();
     }
 
-    console.log('Returning store instance');
     return Store.instance;
   }
 

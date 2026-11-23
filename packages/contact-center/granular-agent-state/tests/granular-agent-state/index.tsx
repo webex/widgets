@@ -42,6 +42,7 @@ describe('GranularAgentState Widget', () => {
       onmessage: null,
     })) as unknown as typeof Worker;
     global.URL.createObjectURL = jest.fn(() => 'blob:mock');
+    global.URL.revokeObjectURL = jest.fn();
     if (typeof window.HTMLElement.prototype.attachInternals !== 'function') {
       window.HTMLElement.prototype.attachInternals = jest.fn();
     }

@@ -368,8 +368,8 @@ tested by the upstream widget packages, not here.
 | `cc-widgets-R-006` (React/ReactDOM peers) | None found | Enforced by package manager only; no automated check here. |
 | `cc-widgets-R-007` (CallControlCAD inherits Drop without a new WC surface) | Covered by upstream task/component tests | No package-local test; the wrapper and prop map are unchanged. |
 
-## WXCC-15791 — Granular Agent State V2 registration (feature branch)
-> Implemented on `feature/WXCC-15791-Support-Granular-Agent-State`; additive. Feature docs: [`../../../../ai-docs/features/WXCC-15791-user-granular-agent-state/spec/feature-spec.md`](../../../../ai-docs/features/WXCC-15791-user-granular-agent-state/spec/feature-spec.md).
+## WXCC-15791 — Granular Agent State V2 registration
+> Implemented; additive. Feature docs: [`../../../../ai-docs/features/WXCC-15791-user-granular-agent-state/spec/feature-spec.md`](../../../../ai-docs/features/WXCC-15791-user-granular-agent-state/spec/feature-spec.md).
 
 | ID | WHAT | Source | Test |
 |---|---|---|---|

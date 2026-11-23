@@ -37,9 +37,10 @@ does not require changes to the tooling tests.
 ## Release sequence
 
 1. `Deploy CD` finds the changed packages, synchronizes and increments versions, and builds production packages.
-2. `prepare-release` packs all nine Contact Center packages. A manifest records each package name,
-   version, and archive SHA-256. The candidate artifact also contains a Git patch of the package
-   manifests changed by `package-tools`. The existing distributable cache holds the production build.
+2. `prepare-release` packs all ten Contact Center packages, including `@webex/cc-granular-agent-state`.
+   A manifest records each package name, version, and archive SHA-256. The candidate artifact also
+   contains a Git patch of the package manifests changed by `package-tools`. The existing
+   distributable cache holds the production build.
 3. The consumer workflow installs those archives into a separate fixture for each enabled bundler.
    It checks archive hashes and package versions, builds the consumer, and checks browser startup.
    Each bundler runs in a separate job. A failure does not cancel the other bundler jobs.
@@ -79,7 +80,7 @@ yarn workspace webex-widgets test:tooling --runInBand tooling/tests/consumer-bui
 ```
 
 To check other candidate archives, pass their directory as the second argument to `test:consumer-builds`.
-It must contain `manifest.json` and all nine Contact Center archives. The runner creates its installs,
+It must contain `manifest.json` and all ten Contact Center archives. The runner creates its installs,
 builds, logs, and results under `.generated/consumer-builds/`. GitHub Actions saves build logs and
 package hashes as `consumer-report-<bundler>` artifacts, including when a check fails.
 

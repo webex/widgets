@@ -588,8 +588,8 @@ The registration session projection requires the companion SDK change and a late
 It does not consume an AI Assistant RTD status event. See
 [`agent-wellness-break-intake.md`](../../../../ai-docs/features/agent-wellness-break-intake.md).
 
-## WXCC-15791 — Granular Agent State V2 (feature branch)
-> Implemented on `feature/WXCC-15791-Support-Granular-Agent-State`; additive, V1 surface unchanged. Feature docs: [`../../../../ai-docs/features/WXCC-15791-user-granular-agent-state/spec/feature-spec.md`](../../../../ai-docs/features/WXCC-15791-user-granular-agent-state/spec/feature-spec.md); contract: [`../../../../ai-docs/features/WXCC-15791-user-granular-agent-state/design/contracts/store-v2-surface.md`](../../../../ai-docs/features/WXCC-15791-user-granular-agent-state/design/contracts/store-v2-surface.md).
+## WXCC-15791 — Granular Agent State V2
+> Implemented; additive, V1 store surface unchanged. Feature docs: [`../../../../ai-docs/features/WXCC-15791-user-granular-agent-state/spec/feature-spec.md`](../../../../ai-docs/features/WXCC-15791-user-granular-agent-state/spec/feature-spec.md); contract: [`../../../../ai-docs/features/WXCC-15791-user-granular-agent-state/design/contracts/store-v2-surface.md`](../../../../ai-docs/features/WXCC-15791-user-granular-agent-state/design/contracts/store-v2-surface.md).
 
 | ID | WHAT | Source | Test |
 |---|---|---|---|

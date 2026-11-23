@@ -195,6 +195,7 @@ Hook-local React state (`src/helper.ts`): `isSettingAgentState: boolean` (true f
 | Condition | Signal (error/code/result) | Caller recovery |
 |---|---|---|
 | `cc.setAgentState` rejects | `logger.error("CC-Widgets: GranularAgentState: Error setting agent state - <err>")`; `onStateChange` not called; busy flag reset; a following Idle request is not sent and the panel stays open | Store state unchanged; agent retries. The store logs `agent:channelStateChangeFailed` and refreshes. |
+| Host `onStateChange` callback throws after SDK success | Callback error is logged separately; the state request remains successful and is not reported as an SDK failure | The server-confirmed state remains in the store; host fixes its callback. |
 | No channels need changing | info log `channels already <state>, skipping request`; no SDK call | None |
 | Manage view switches a channel off but no selectable idle code exists | `logger.error('... no idle code available to switch channels off')`; Idle request skipped | Configure idle codes |
 | Worker cannot be created | `logger.error('... Error initializing worker')` | Timers stay at initial values; no crash |
@@ -226,7 +227,7 @@ Tests ship with the package and pass. `tests/helper.ts` uses `renderHook` with a
 | `GRANULAR-AGENT-STATE-R-003` | `tests/granular-agent-state/index.tsx` (onErrorCallback) | none |
 | `GRANULAR-AGENT-STATE-R-004` | `tests/helper.ts` (worker start/terminate, tick) | worker-init failure branch |
 | `GRANULAR-AGENT-STATE-R-005` | `tests/helper.ts` (primary channel) | none |
-| `GRANULAR-AGENT-STATE-R-006` | `tests/helper.ts` (success notify, skip, reject) | none |
+| `GRANULAR-AGENT-STATE-R-006` | `tests/helper.ts` (success notify, skip, reject) | Callback-throw isolation is not unit-tested |
 | `GRANULAR-AGENT-STATE-R-007` | `tests/helper.ts` (set available / idle) | none |
 | `GRANULAR-AGENT-STATE-R-008` | `tests/helper.ts` (apply with last / default idle code) | no-idle-code branch |
 

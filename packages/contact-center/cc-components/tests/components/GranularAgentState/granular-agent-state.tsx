@@ -84,6 +84,26 @@ describe('GranularAgentStateComponent', () => {
     expect(secondary.querySelector('[data-testid="granular-channel-avatar-telephony"]')).not.toBeInTheDocument();
   });
 
+  it('should show only the avatars when the label does not fit and the label again once it fits', () => {
+    const scrollWidth = jest.spyOn(window.HTMLElement.prototype, 'scrollWidth', 'get').mockReturnValue(160);
+    const clientWidth = jest.spyOn(window.HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(160);
+    const {props, rerender} = renderComponent();
+    const pill = screen.getByTestId('granular-state-pill');
+    expect(pill).not.toHaveClass('compact');
+
+    clientWidth.mockReturnValue(80);
+    rerender(<GranularAgentStateComponent {...props} />);
+    expect(pill).toHaveClass('compact');
+    expect(pill).toHaveTextContent('Available - 05:08');
+
+    clientWidth.mockReturnValue(160);
+    rerender(<GranularAgentStateComponent {...props} />);
+    expect(pill).not.toHaveClass('compact');
+
+    scrollWidth.mockRestore();
+    clientWidth.mockRestore();
+  });
+
   it('should not render secondary avatars for a single channel agent', () => {
     renderComponent({channels: [channels[0]]});
     expect(screen.queryByTestId('granular-state-pill-channels')).not.toBeInTheDocument();
@@ -183,6 +203,20 @@ describe('GranularAgentStateComponent', () => {
     openMenu();
     fireEvent.mouseDown(document.body);
     expect(screen.queryByTestId('granular-state-panel')).not.toBeInTheDocument();
+  });
+
+  it('should close the manage panel on an outside press even when the target stops propagation', () => {
+    renderComponent();
+    const outside = document.createElement('div');
+    outside.addEventListener('mousedown', (event) => event.stopPropagation());
+    document.body.appendChild(outside);
+    openMenu();
+    fireEvent.click(screen.getByTestId('granular-state-manage-channels'));
+    fireEvent.mouseDown(outside);
+    expect(screen.queryByTestId('granular-state-panel')).not.toBeInTheDocument();
+    openMenu();
+    expect(screen.getByTestId('granular-state-menu')).toBeInTheDocument();
+    outside.remove();
   });
 
   describe('Manage channel availability', () => {

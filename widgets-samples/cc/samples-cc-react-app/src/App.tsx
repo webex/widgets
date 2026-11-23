@@ -177,7 +177,6 @@ function App() {
     },
     cc: {
       allowMultiLogin: isMultiLoginEnabled,
-      allowAutomatedRelogin: false,
       disableWebRTCRegistration,
       enableWxBetterTogether,
     },

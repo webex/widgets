@@ -105,7 +105,14 @@ export const useGranularAgentState = ({
           method: 'requestStateChange',
         });
         store.refreshAgentStateControl();
-        onStateChange?.({state, auxCodeId, channelTypes, idleCode});
+        try {
+          onStateChange?.({state, auxCodeId, channelTypes, idleCode});
+        } catch (callbackError) {
+          logger.error(`CC-Widgets: GranularAgentState: Error in onStateChange callback - ${callbackError}`, {
+            module: MODULE,
+            method: 'requestStateChange',
+          });
+        }
         return true;
       })
       .catch((error) => {

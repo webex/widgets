@@ -49,12 +49,24 @@
     outline-offset: 1px;
   }
 
+  // Only the label shrinks; fitPillLabel() switches to the avatars-only pill once it would be cut off.
+  .granular-state-pill-label {
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  &.compact .granular-state-pill-label {
+    display: none;
+  }
+
   .granular-state-pill-time {
     font-variant-numeric: tabular-nums;
   }
 
   .granular-state-pill-channels {
     display: inline-flex;
+    flex-shrink: 0;
     align-items: center;
     gap: 0.25rem;
   }
@@ -69,6 +81,7 @@
 
   .granular-state-pill-chevron {
     --mdc-icon-size: 1rem;
+    flex-shrink: 0;
     margin-left: 0.25rem;
   }
 }

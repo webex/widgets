@@ -702,8 +702,8 @@ import or declare a dependency on `lottie-web` and does not ship the wellness MP
 may still emit its own dynamic icon chunks. Evidence: `package.json`,
 `src/components/AIAssistant/WellnessBreak/wellness-break-modal.tsx`.
 
-## WXCC-15791 — Granular Agent State V2 components (feature branch)
-> Implemented on `feature/WXCC-15791-Support-Granular-Agent-State`; additive, `UserState` unchanged. Feature docs: [`../../../../ai-docs/features/WXCC-15791-user-granular-agent-state/spec/feature-spec.md`](../../../../ai-docs/features/WXCC-15791-user-granular-agent-state/spec/feature-spec.md).
+## WXCC-15791 — Granular Agent State V2 components
+> Implemented; additive, `UserState` unchanged. Feature docs: [`../../../../ai-docs/features/WXCC-15791-user-granular-agent-state/spec/feature-spec.md`](../../../../ai-docs/features/WXCC-15791-user-granular-agent-state/spec/feature-spec.md).
 
 | ID | WHAT | Source | Test |
 |---|---|---|---|

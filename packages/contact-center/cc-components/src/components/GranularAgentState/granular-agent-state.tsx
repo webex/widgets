@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useLayoutEffect, useRef, useState} from 'react';
 import {Icon, Text} from '@momentum-design/components/dist/react';
 import {withMetrics} from '@webex/cc-ui-logging';
 import {formatTime} from '../../utils';
@@ -14,6 +14,19 @@ import './granular-agent-state.scss';
 type PanelView = 'menu' | 'manage';
 type ApplyError = string | null;
 
+const PILL_COMPACT_CLASS = 'compact';
+
+/**
+ * Shows only the avatars when the state label would be cut off. The class is toggled on the DOM
+ * node (not via state) so the label can be measured at full size before the browser paints.
+ */
+const fitPillLabel = (pill: HTMLButtonElement | null) => {
+  const label = pill?.querySelector<HTMLElement>('.granular-state-pill-label');
+  if (!pill || !label) return;
+  pill.classList.remove(PILL_COMPACT_CLASS);
+  if (label.scrollWidth > label.clientWidth) pill.classList.add(PILL_COMPACT_CLASS);
+};
+
 const GranularAgentStateComponent: React.FunctionComponent<GranularAgentStateComponentProps> = (props) => {
   const {
     idleCodes,
@@ -27,6 +40,7 @@ const GranularAgentStateComponent: React.FunctionComponent<GranularAgentStateCom
   } = props;
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const pillRef = useRef<HTMLButtonElement>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [view, setView] = useState<PanelView>('menu');
@@ -49,13 +63,28 @@ const GranularAgentStateComponent: React.FunctionComponent<GranularAgentStateCom
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') close();
     };
-    document.addEventListener('mousedown', handlePointerDown);
+    // Capture phase: React handlers that stop propagation would otherwise keep the menu open.
+    document.addEventListener('mousedown', handlePointerDown, true);
     document.addEventListener('keydown', handleKeyDown);
     return () => {
-      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('mousedown', handlePointerDown, true);
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, [isOpen]);
+
+  useLayoutEffect(() => {
+    fitPillLabel(pillRef.current);
+  });
+
+  // The container shrinks to its content, so the parent is observed to notice when space frees up.
+  const hasPrimaryChannel = Boolean(primaryChannel);
+  useEffect(() => {
+    const parent = containerRef.current?.parentElement;
+    if (!parent || typeof ResizeObserver === 'undefined') return undefined;
+    const observer = new ResizeObserver(() => fitPillLabel(pillRef.current));
+    observer.observe(parent);
+    return () => observer.disconnect();
+  }, [hasPrimaryChannel]);
 
   // Guards only against synchronous throws in the callback wiring;
   // async errors from the SDK are handled inside the hook's requestStateChange.
@@ -85,6 +114,7 @@ const GranularAgentStateComponent: React.FunctionComponent<GranularAgentStateCom
       onMouseLeave={() => setIsHovered(false)}
     >
       <button
+        ref={pillRef}
         type="button"
         className={`granular-state-pill ${getPresenceType(primaryChannel.agentState, primaryChannel.pendingIdle)} ${isOpen ? 'open' : ''}`}
         aria-label={granularAgentStateLabels.stateSelector}
